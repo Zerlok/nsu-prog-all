@@ -4,8 +4,8 @@ int check_fibo(int n) {
 	if (n < 1) {
 		printf ("%d < 1\n", n);
 	}
-	if (n > 47) {
-		n = 47;
+	if (n > 93) {
+		n = 93;
 		printf("Can print only first %d fibo\n", n);
 	}
 	if (n > 0) {
@@ -20,10 +20,10 @@ int check_fibo(int n) {
 }
 
 void print_fibo(int n) {
-	int a = 0, b = 1, x = a + b;
+	long a = 0, b = 1, x = a + b;
 	n = check_fibo(n);
 	while (n > 0) {
-		printf("%d\n", x);
+		printf("%ld\n", x);
 		a = b;
 		b = x;
 		x = a + b;
