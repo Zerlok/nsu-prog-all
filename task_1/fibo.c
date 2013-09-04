@@ -15,15 +15,15 @@ int check_fibo(int n) {
 	} else return 0;
 }
 
-
-
 void print_fibo(int n) {
 	int a = 0, b = 1, x = a + b;
 	if (check_fibo(n)) {
+		n -= 2;
 		while (n > 0) {
-			printf("%d\n", a + b);
+			printf("%d\n", x);
 			a = b;
-			b += a - b;
+			b = x;
+			x = a + b;
 			n--;
 		}
 	}
