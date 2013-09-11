@@ -1,6 +1,6 @@
 #include "mod.h"
 
-int to_list_from_str(char num[LIMIT]) { //Returns list of digits from string
+int to_list_from_str(int *num) { //Returns list of digits from string
 	int i = 0;
 	int len = strlen(num);
 	int n;
@@ -16,7 +16,7 @@ int to_list_from_str(char num[LIMIT]) { //Returns list of digits from string
 		printf("%d - %d\n", i, lst[i]);
 		i++;
 	}
-	return &lst;
+	return lst;
 }
 
 int check_notation(int num[LIMIT], int cur_notation) {
