@@ -20,10 +20,12 @@ int check_fibo(int n) {
 }
 
 void print_fibo(int n) {
-	long a = 0, b = 1, x = a + b;
+	unsigned long long int a = 0, b = 1, x = a + b;
 	n = check_fibo(n);
+	
+	printf("%d\n", n);
 	while (n > 0) {
-		printf("%ld\n", x);
+		printf("%llu\n", x);
 		a = b;
 		b = x;
 		x = a + b;
