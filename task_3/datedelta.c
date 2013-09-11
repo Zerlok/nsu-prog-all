@@ -10,6 +10,7 @@ int is_leap_year(int year) {
 int is_valid_date(int d, int m, int y) {
 	int months[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31}; //List of month's days
 	int max_day = months[m - 1]; //Max days in current month
+	
 	if (m == 2 && is_leap_year(y)) {
 		max_day += 1;
 	}
@@ -29,6 +30,7 @@ int months_to_days(int month, int year) {
 	int months[] = {0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30}; //List of month's days (except december)
 	int days = 0;
 	month--; //Except current month
+
 	while (months[month]) {		
 		days += months[month];
 		if (month == 2 && is_leap_year(year)) {

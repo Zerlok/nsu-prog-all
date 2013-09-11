@@ -1,15 +1,16 @@
 #include "mod.h"
 
-int to_list_from_str(char num[LIMIT]) {
+int to_list_from_str(char num[LIMIT]) { //Returns list of digits from string
 	int i = 0;
 	int len = strlen(num);
 	int n;
 	int lst[len];
+	
 	while (i < len) {
-		n = (int)toupper(num[i]);
-		if (n > 64 && n < 91) {
+		n = toupper(num[i]);
+		if (n >= 'A' && n <= 'Z') {
 			lst[i] = n - 55;
-		} else if (n > 47 && n < 58) {
+		} else if (n >= '0' && n <= '9') {
 			lst[i] = n - 48;
 		}
 		printf("%d - %d\n", i, lst[i]);
@@ -24,11 +25,13 @@ int check_notation(int num[LIMIT], int cur_notation) {
 
 int to_notation_from_ten(char num[LIMIT], int notation) {
 	int new_num = 0;
+	
 	return new_num;
 }
 
 int to_ten_from_notation(char num[LIMIT], int notation) {
 	int ten_num = 0;
+	
 	return ten_num;
 }
 
