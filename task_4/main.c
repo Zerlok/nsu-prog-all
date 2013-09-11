@@ -2,7 +2,7 @@
 
 int main() {
 	int cur_notation, new_notation = 0;
-	int * lst[10];
+	int *lst;
 	int i;
 	char numbers[LIMIT];
 	scanf("%s %d %d", &numbers, &cur_notation, &new_notation);

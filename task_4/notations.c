@@ -1,10 +1,10 @@
 #include "mod.h"
 
-int * to_list_from_str(char num[LIMIT]) {
+int to_list_from_str(char num[LIMIT]) {
 	int i = 0;
 	int len = strlen(num);
 	int n;
-	int *lst[len];
+	int lst[len];
 	while (i < len) {
 		n = (int)toupper(num[i]);
 		if (n > 64 && n < 91) {
@@ -15,7 +15,7 @@ int * to_list_from_str(char num[LIMIT]) {
 		printf("%d - %d\n", i, lst[i]);
 		i++;
 	}
-	return lst;
+	return &lst;
 }
 
 int check_notation(int num[LIMIT], int cur_notation) {
