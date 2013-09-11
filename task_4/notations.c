@@ -16,7 +16,8 @@ int to_list_from_str(char num[LIMIT]) { //Returns list of digits from string
 		printf("%d - %d\n", i, lst[i]);
 		i++;
 	}
-	return lst;
+	printf("%d %d\n", *lst, len);
+	return lst, len;
 }
 
 int check_notation(int num[LIMIT], int cur_notation) {
@@ -25,11 +26,13 @@ int check_notation(int num[LIMIT], int cur_notation) {
 
 int to_notation_from_ten(char num[LIMIT], int notation) {
 	int new_num = 0;
+	
 	return new_num;
 }
 
 int to_ten_from_notation(char num[LIMIT], int notation) {
 	int ten_num = 0;
+	
 	return ten_num;
 }
 
