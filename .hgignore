@@ -5,3 +5,4 @@ syntax: glob
 
 syntax: regexp
 ^(\w+/)+\w+$
+_samples/.*
