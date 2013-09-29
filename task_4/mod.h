@@ -11,11 +11,11 @@
 #define WORD_DIFF 55
 #define DIGIT_DIFF 48
 
-// Error Constants
+// Errors Constants
 
 #define ERR_UNKNOWN 0
-#define ERR_NOTATION 100
-#define ERR_SYMBOL 200
-#define ERR_DIGIT 300
+#define ERR_NOTATION -100
+#define ERR_SYMBOL -200
+#define ERR_DIGIT -300
 
 int get_number_in_new_notation(char *num, int cur_notation, int new_notation);
