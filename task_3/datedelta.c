@@ -14,7 +14,7 @@ int is_valid_date(int d, int m, int y) {
 	if (m == 2 && is_leap_year(y)) {
 		max_day += 1;
 	}
-	if (d > max_day || m > 12 || y > 9999 || d < 1 || m < 1 || y < 0) {
+	if (d > max_day || m > 12 || y > 9999 || d < 1 || m < 1 || y < 1) {
 		printf("Invalid date:\n%d/%d/%d\n", d, m, y);
 		return 0;
 	}
