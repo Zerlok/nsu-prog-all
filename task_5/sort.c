@@ -66,26 +66,44 @@ int *get_lst_from_argv(int len, int *argv) {
 	return lst;
 }
 
-int transpose(int *lst, int i) {
-	int j = i;
+void copy_lst(int *from_lst, int *to_lst) {
+	int i = 0;
+
+	while (from_lst[i] != NUM_END) {
+		to_lst[i] = from_lst[i];
+		i += 1;
+	}
+	to_lst[i] = NUM_END;
+}
+
+int transpose(int *lst, int j) {
+	int i = j;
+	int trans_lst[LIMIT];
 	// int len = get_len(lst);
 
-	while (i > 1 && lst[i] != NUM_END) {
+	copy_lst(lst, trans_lst);
+	while (i > 1 && trans_lst[i - 1] != NUM_END) {
+	// if (i > 1 && trans_lst[i - 1] != NUM_END) {
+		trans_lst[i - 1] += trans_lst[i - 2];
+		trans_lst[i - 2] = trans_lst[i - 1] - trans_lst[i - 2];
+		trans_lst[i - 1] = trans_lst[i - 1] - trans_lst[i - 2];
+		print_lst(trans_lst);
+		// if (trans_lst[j + 2] != NUM_END) {
+		transpose(lst, j + 1);
+		transpose(trans_lst, i + 1);
+		// }
+		i -= 1;
+		printf("i: %d | j: %d\n", i, j);
+	}
+	printf("----------\n");
 	// if (i > 1) {
-		// printf("Before:");
-		// print_lst(lst);
-		lst[i - 1] += lst[i - 2];
-		lst[i - 2] = lst[i - 1] - lst[i - 2];
-		lst[i - 1] = lst[i - 1] - lst[i - 2];
-		// printf("After:");
-		print_lst(lst);
-		i += 1;
-		// print_lst(lst);
-		// transpose(lst, i);
-	}
-	printf("%d %d\n", j, i);
-	if (j > 1) {
-		transpose(lst, j - 1);
-	}
+	// 	transpose(lst, i + 1);
+	// }
+	// printf("Was: ");
+	// print_lst(lst);
+	// printf("i: %d | j: %d\n", i, j);
+	// if (j > 1) {
+	// 	print_lst(trans_lst);
+	// }
 	return 0;
 }
