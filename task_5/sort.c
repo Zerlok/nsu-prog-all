@@ -76,14 +76,46 @@ void copy_lst(int *from_lst, int *to_lst) {
 	to_lst[i] = NUM_END;
 }
 
+int reverser(int *lst, int len) {
+	// int j, a, i = len;
+	int j, a, i = 0;
+
+	// while (i > 0) {
+	// 	// j = i + 1;
+	// 	j = len - 1;
+	// 	while (j >= 1) {
+	// 		a = lst[j - 1];
+	// 		lst[j - 1] = lst[j];
+	// 		lst[j] = a;
+	// 		print_lst(lst);
+	// 		j -= 1;
+	// 	}
+	// 	i -= 1;
+	// }
+	while (i < len) {
+		// j = i + 1;
+		j = 0;
+		while (j < len - 1) {
+			a = lst[j + 1];
+			lst[j + 1] = lst[j];
+			lst[j] = a;
+			print_lst(lst);
+			j += 1;
+		}
+		i += 1;
+	}
+}
+
 int transpose(int *lst, int j) {
-	int i = j;
+	int i = j - 1;
 	int trans_lst[LIMIT];
 	// int len = get_len(lst);
 
+	j -= 1;
 	copy_lst(lst, trans_lst);
-	while (i > 1 && trans_lst[i - 1] != NUM_END) {
-	// if (i > 1 && trans_lst[i - 1] != NUM_END) {
+	printf(" = %d\n", j);
+	// while (i > 1 && trans_lst[i - 1] != NUM_END) {
+	if (i > 1 && trans_lst[i - 1] != NUM_END) {
 		trans_lst[i - 1] += trans_lst[i - 2];
 		trans_lst[i - 2] = trans_lst[i - 1] - trans_lst[i - 2];
 		trans_lst[i - 1] = trans_lst[i - 1] - trans_lst[i - 2];
@@ -93,9 +125,9 @@ int transpose(int *lst, int j) {
 		transpose(trans_lst, i + 1);
 		// }
 		i -= 1;
-		printf("i: %d | j: %d\n", i, j);
+		// printf("i: %d | j: %d\n", i, j);
 	}
-	printf("----------\n");
+	// printf("----------\n");
 	// if (i > 1) {
 	// 	transpose(lst, i + 1);
 	// }
