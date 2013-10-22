@@ -6,4 +6,4 @@
 
 void print_help();
 
-int sort(int *lst);
+// int sort(int *lst);
