@@ -76,6 +76,33 @@ void copy_lst(int *from_lst, int *to_lst) {
 	to_lst[i] = NUM_END;
 }
 
+int prostos(int *lst) {
+	int j = 0;
+
+	while (lst[j] != NUM_END) {
+		transpose(lst, 0);
+		j += 1;
+	}
+}
+
+int retros(int *lst, int a) {
+	int i = 0, j = 0;
+	static int trans_lst[LIMIT];
+
+	copy_lst(lst, trans_lst);
+	while (lst[i] != NUM_END) {
+		j = 0;
+		while (lst[j] != NUM_END && j != i) {
+			print_lst(lst);
+			lst[i] = trans_lst[j];
+			lst[j] = trans_lst[i];
+			copy_lst(trans_lst, lst);
+			j += 1;
+		}
+		i += 1;
+	}
+}
+
 int transpose(int *lst, int i) {
 	int a, j = i + 1;
 	static int trans_lst[LIMIT];
@@ -84,6 +111,7 @@ int transpose(int *lst, int i) {
 	print_lst(lst);
 	// }
 	copy_lst(lst, trans_lst);
+	// if (lst[j] != NUM_END) {
 	while (lst[j] != NUM_END) {
 		// trans_lst[i] = lst[j];
 		// trans_lst[j] = lst[i];
@@ -98,7 +126,7 @@ int transpose(int *lst, int i) {
 		lst[j] = trans_lst[i];
 		lst[i] = trans_lst[j];
 		transpose(lst, i + 1);
-		transpose(lst, j);
+		// transpose(lst, j);
 
 		j += 1;
 	}
