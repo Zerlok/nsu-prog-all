@@ -76,12 +76,69 @@ void copy_lst(int *from_lst, int *to_lst) {
 	to_lst[i] = NUM_END;
 }
 
-int prostos(int *lst) {
-	int j = 0;
+int get_max_indx(int *lst, int i) {
+	int max = i;
 
-	while (lst[j] != NUM_END) {
-		transpose(lst, 0);
-		j += 1;
+	i += 1;
+	while (lst[i] != NUM_END) {
+		if (lst[i] > lst[max]) {
+			max = i;
+		}
+		i += 1;
+	}
+	return max;
+}
+
+int get_min_indx(int *lst, int i) {
+	int min = i;
+
+	i += 1;
+	while (lst[i] != NUM_END) {
+		if (lst[i] < lst[min]) {
+			min = i;
+		}
+		i += 1;
+	}
+	return min;
+}
+
+void sort(int *lst, int i) {
+	int min, max, k = i;
+
+	while (lst[k] != NUM_END) {
+		max = get_max_indx(lst, k);
+		if (k != max) {
+			lst[k] += lst[max];
+			lst[max] = lst[k] - lst[max];
+			lst[k] = lst[k] - lst[max];
+		}
+		// min = get_min_indx(lst, k);
+		// if (k != min) {
+		// 	lst[k] += lst[min];
+		// 	lst[min] = lst[k] - lst[min];
+		// 	lst[k] = lst[k] - lst[min];
+		// }
+		k += 1;
+	}
+}
+
+int prostos(int *lst, int len) {
+	int i = len - 1, j = 0;
+
+	while (i >= 0) {
+		if (lst[i] < lst[i + 1] && lst[i + 1] != NUM_END) {
+			// reverse()
+			lst[i] += lst[i + 1];
+			lst[i + 1] = lst[i] - lst[i + 1];
+			lst[i] = lst[i] - lst[i + 1];
+			print_lst(lst);
+			sort(lst, i + 1);
+			lst[i] += lst[i + 1];
+			lst[i + 1] = lst[i] - lst[i + 1];
+			lst[i] = lst[i] - lst[i + 1];
+			// i = len - 1;
+		}
+		i -= 1;
 	}
 }
 
