@@ -10,8 +10,8 @@ int main(int argc, char *argv[]) {
 		// lst = get_lst_from_argv(argc, argv);
 		len = atoi(argv[1]);
 		lst = range(len);
-		print_lst(lst);
-		prostos(lst, len);
+		// print_lst(lst);
+		prostos(lst, 0);
 		// transpose(lst, 0);
 		// retros(lst, 0);
 		// reverser(lst, len);

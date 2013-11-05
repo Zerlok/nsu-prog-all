@@ -90,7 +90,7 @@ int get_max_indx(int *lst, int i) {
 }
 
 int get_min_indx(int *lst, int i) {
-	int min = i;
+	int min = i, j = i;
 
 	i += 1;
 	while (lst[i] != NUM_END) {
@@ -106,23 +106,29 @@ void sort(int *lst, int i) {
 	int min, max, k = i;
 
 	while (lst[k] != NUM_END) {
-		max = get_max_indx(lst, k);
-		if (k != max) {
-			lst[k] += lst[max];
-			lst[max] = lst[k] - lst[max];
-			lst[k] = lst[k] - lst[max];
-		}
-		// min = get_min_indx(lst, k);
-		// if (k != min) {
-		// 	lst[k] += lst[min];
-		// 	lst[min] = lst[k] - lst[min];
-		// 	lst[k] = lst[k] - lst[min];
+		// max = get_max_indx(lst, k);
+		// if (k != max) {
+		// 	lst[k] += lst[max];
+		// 	lst[max] = lst[k] - lst[max];
+		// 	lst[k] = lst[k] - lst[max];
 		// }
+		min = get_min_indx(lst, k);
+		if (k != min) {
+			lst[k] += lst[min];
+			lst[min] = lst[k] - lst[min];
+			lst[k] = lst[k] - lst[min];
+		}
 		k += 1;
 	}
 }
 
-int prostos(int *lst, int len) {
+void swap(int *a, int *b) {
+	*a += *b;
+	*b = *a - *b;
+	*a = *a - *b;
+}
+
+int retros(int *lst, int len) {
 	int i = len - 1, j = 0;
 
 	while (i >= 0) {
@@ -133,30 +139,31 @@ int prostos(int *lst, int len) {
 			lst[i] = lst[i] - lst[i + 1];
 			print_lst(lst);
 			sort(lst, i + 1);
-			lst[i] += lst[i + 1];
-			lst[i + 1] = lst[i] - lst[i + 1];
-			lst[i] = lst[i] - lst[i + 1];
-			// i = len - 1;
 		}
 		i -= 1;
 	}
 }
 
-int retros(int *lst, int a) {
-	int i = 0, j = 0;
-	static int trans_lst[LIMIT];
+int prostos(int *lst, int a) {
+	int i = a;
 
-	copy_lst(lst, trans_lst);
-	while (lst[i] != NUM_END) {
-		j = 0;
-		while (lst[j] != NUM_END && j != i) {
-			print_lst(lst);
-			lst[i] = trans_lst[j];
-			lst[j] = trans_lst[i];
-			copy_lst(trans_lst, lst);
-			j += 1;
+	if (lst[i] == NUM_END) {
+		print_lst(lst);
+		// print_lst(lst);
+	} else {
+		while (lst[i] != NUM_END) {
+			// swap(&lst[a], &lst[i]);
+			// prostos(lst, i + 1);
+			// swap(&lst[a], &lst[i]);
+			lst[a] += lst[i];
+			lst[i] = lst[a] - lst[i];
+			lst[a] = lst[a] - lst[i];
+			prostos(lst, i + 1);
+			lst[a] += lst[i];
+			lst[i] = lst[a] - lst[i];
+			lst[a] = lst[a] - lst[i];
+			i += 1;
 		}
-		i += 1;
 	}
 }
 
