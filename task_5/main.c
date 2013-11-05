@@ -2,21 +2,18 @@
 
 int main(int argc, char *argv[]) {
 	int *lst;
-	int len = argc - 1;
+	int len;
 
-	if (argc == 1) {
+	if (argc != 2) {
 		print_help();
 	} else {
-		// lst = get_lst_from_argv(argc, argv);
 		len = atoi(argv[1]);
-		lst = range(len);
-		// print_lst(lst);
-		prostos(lst, 0);
-		// transpose(lst, 0);
-		// retros(lst, 0);
-		// reverser(lst, len);
-		// print_lst(lst, len);
-		// transpose(lst, len);
+		if (len > 0 && len < 50) {
+			lst = range(atoi(argv[1]));
+			transpose(lst, 0);
+		} else {
+			printf("%s\n", ERR_INPUT);
+		}
 	}
 	return 0;
 }
