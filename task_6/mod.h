@@ -6,4 +6,6 @@
 
 void print_help();
 
-// int sort(int *lst);
+void quick_sort(int *lst, int l, int r);
+
+// void sort(int *lst);

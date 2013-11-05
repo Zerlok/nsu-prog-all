@@ -1,21 +1,20 @@
 #include "mod.h"
 
 int main(int argc, char *argv[]) {
-	int *lst;
-	int len = argc - 1;
-
-	if (argc == 1) {
-		print_help();
+	int lst[LIMIT];
+	int i = 0, len = argc - 1;
+	
+	if (len > 0 && len < LIMIT) {
+		// Scan argv into array
+		while (i < len) {
+			lst[i] = atoi(argv[i+1]);
+			i += 1;
+		}
+		print_lst(lst, len);
+		quick_sort(lst, 0, len);
+		print_lst(lst, len);
 	} else {
-		// lst = get_lst_from_argv(argc, argv);
-		len = atoi(argv[1]);
-		lst = range(len);
-		prostos(lst);
-		// transpose(lst, 0);
-		// retros(lst, 0);
-		// reverser(lst, len);
-		// print_lst(lst, len);
-		// transpose(lst, len);
+		print_help();
 	}
 	return 0;
 }
