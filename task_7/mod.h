@@ -2,8 +2,7 @@
 #include <string.h>
 
 #define LIMIT 100
-#define NUM_END -1
+#define LIST_END NULL
+#define List struct list;
 
 void print_help();
-
-// int sort(int *lst);
