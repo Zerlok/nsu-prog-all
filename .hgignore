@@ -2,6 +2,8 @@ syntax: glob
 *.o
 *.orig
 *.gch
+*.sublime-project
+*.sublime-workspace
 
 syntax: regexp
 ^(\w+/)+\w+$
