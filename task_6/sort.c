@@ -2,6 +2,10 @@
 
 /*
 	Prints help.
+	Input:
+		None
+	Output:
+		None
 */
 void print_help() {
 	printf("Type array. Please, separate elements with space: A1 A2 A3 ... An\n");
@@ -46,26 +50,15 @@ void swap(int *a, int *b) {
 }
 
 /*
-	Gets array from argv and returns it's address.
+	Function makes sort of arrray.
 
 	Input:
-		char *argv - address of argv
-		int len - length of array
+		in *lst - address of array
+		int l - left fringe
+		int r - right fringe
 	Output:
-		int lst - address of array
+		None
 */
-int get_lst_from_argv(char *argv, int len) {
-	static int lst[LIMIT];
-	int i = 1;
-
-	while (i < len) {
-		printf("%d ", atoi(&argv[i]));
-		lst[i] = argv[i];
-		i += 1;
-	}
-	return lst;
-}
-
 void quick_sort(int *lst, int l, int r) {
 	int i = l, j = r, mid = (l + r) / 2;
 
@@ -83,6 +76,5 @@ void quick_sort(int *lst, int l, int r) {
 	}
 	if (i < r) {
 		quick_sort(lst, i, r);
-	}
-	
+	}	
 }

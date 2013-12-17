@@ -1,19 +1,15 @@
-#include "mod.h"
+#include "list.h"
 
 int main(int argc, char *argv[]) {
-	int i = 1;
-	char *input_str;
-	List *lst;
+	int i;
+	int array[10] = {12, 32, 434, 0, -12, 23, 34, 1, 12};
+	struct List *lst;
 
-	if (argc == 1) {
-		print_help();
-	} else {
-		// input_str = argv[2];
-		// if (input_str[0] == STR_LST_START) {
-		// 	while () {
-		// 		i += 1;
-		// 	}
-		lst = get_list();
+	lst = init_list();
+
+	for (i = 0; i < 10; i++) {
+		insert(&lst, array[i]);
 	}
+	print_list(lst);
 	return 0;
 }
