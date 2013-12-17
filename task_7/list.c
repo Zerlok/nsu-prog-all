@@ -62,15 +62,3 @@ int insert(struct List ** list, int value) {
 	last_list->next = lst;
 	return 0;
 }
-
-void deleteList(struct List ** list)
-{
-	// struct List * nxt_lst = *list;
-
-	// while (list)
-	// {
-	// 	nxt_lst = list->next;
-	// 	free(list);
-	// 	list = nxt_lst;
-	// }
-}

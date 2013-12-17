@@ -11,4 +11,3 @@ struct List
 struct List *init_list();
 void print_list(struct List * list);
 int insert(struct List ** list, int value);
-// void delete_list(struct List ** list);
