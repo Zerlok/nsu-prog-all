@@ -8,8 +8,12 @@
 		None
 */
 void print_help() {
-	printf("Type array. Please, separate elements with space: A1 A2 A3 ... An\n");
-	printf("All elements must be integer. n: 0 < n < %d\n", LIMIT);
+	printf("Returns sorted array from input list (file).\n");
+	printf("Elements of array must be separated by space.\n");
+	printf("Example: A1 A2 A3 ... An\n");
+	printf("Flags:\n");
+	printf("   -f - name of file, where array is wroten (input.txt)\n");
+	printf("   -l - list (array)\n");
 }
 
 /*
@@ -71,10 +75,10 @@ void quick_sort(int *lst, int l, int r) {
 			j -= 1;
 		}
 	}
+	if (i < r) {
+		quick_sort(lst, i, r);
+	}
 	if (l < j) {
 		quick_sort(lst, l, j);
 	}
-	if (i < r) {
-		quick_sort(lst, i, r);
-	}	
 }
