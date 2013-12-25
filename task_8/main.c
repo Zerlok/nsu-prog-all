@@ -13,5 +13,6 @@ int main(int argc, char *argv[]) {
 	} else {
 		print_help();
 	}
+	printf("\n");
 	return 0;
 }

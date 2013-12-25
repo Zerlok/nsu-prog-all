@@ -21,7 +21,7 @@ int main(int argc, char *argv[]) {
 						return 0;
 					} else {
 						while (fscanf(input, "%d ", &num) > 0) {
-							insert(lst, num);
+							insert(&lst, num);
 							i += 1;
 						}
 					}
@@ -38,7 +38,7 @@ int main(int argc, char *argv[]) {
 					while (i < argc) {
 						printf("i: %d; argc: %d; lst[%d] = argv[i]: '%s'\n", i, argc, i-2, argv[i]);
 						// printf("%s\n", argv[i]);
-						insert(lst, atoi(argv[i]));
+						insert(&lst, atoi(argv[i]));
 						i += 1;
 					}
 				}

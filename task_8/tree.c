@@ -1,7 +1,7 @@
 #include "mod.h"
 
 void print_help() {
-	printf("Help\n");
+	printf("Help me.\n");
 }
 
 struct Tree *insert(struct Tree *root, int val) {
@@ -25,8 +25,8 @@ struct Tree *insert(struct Tree *root, int val) {
 
 void print_tree(struct Tree *root) {
 	if (root) {
-		printf("%d\n", root->value);
 		print_tree(root->left);
+		printf("%d ", root->value);
 		print_tree(root->right);
 	}
 }

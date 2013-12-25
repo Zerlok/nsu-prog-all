@@ -36,12 +36,12 @@ void delete_list(struct List *list) {
 	}
 }
 
-int insert(struct List ** list, int value) {
+int insert(struct List **list, int value) {
 	struct List *last_list, *next_list = (*list);
 	struct List *lst = (struct List*) malloc(sizeof(struct List));
 	
-	if (list == NULL)
-		return 1;
+	// if (list == NULL)
+	// 	return 1;
 
 	lst->value = value;
 	lst->next = NULL;
@@ -69,6 +69,6 @@ int insert(struct List ** list, int value) {
 		last_list = next_list;
 		next_list = next_list->next;
 	}
-	last_list->next = lst;
+	// last_list->next = lst;
 	return 0;
 }

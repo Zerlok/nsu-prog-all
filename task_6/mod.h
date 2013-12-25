@@ -1,11 +1,7 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
-// #include <conio.h>
 #include <ctype.h>
-
-#define NUM_END -1
-#define LEN 100
-#define	LIMIT 100
 
 void print_help();
 
