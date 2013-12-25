@@ -1,8 +1,14 @@
 #include <stdio.h>
-#include <string.h>
+#include <stdlib.h>
 
-#define LIMIT 100
-#define LIST_END NULL
-#define List struct list;
+struct List
+{
+	struct List * next;
+	int value;
+};
 
-void print_help();
+struct List *init_list();
+
+void print_list(struct List * list);
+
+int insert(struct List ** list, int value);

@@ -7,8 +7,6 @@ struct Tree {
 	struct Tree *right;
 };
 
-struct Tree *stree(struct Tree *root, struct Tree *new_root, int val);
-
 struct Tree *insert(struct Tree *root, int val);
 
 void print_help();

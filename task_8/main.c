@@ -6,7 +6,6 @@ int main(int argc, char *argv[]) {
 
 	if (argc > 1) {
 		while (i < argc) {
-			// root = stree(root, root, atoi(argv[i]));
 			root = insert(root, atoi(argv[i]));
 			i += 1;
 		}

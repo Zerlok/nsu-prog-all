@@ -1,4 +1,4 @@
-#include "list.h"
+#include "mod.h"
 
 int main(int argc, char *argv[]) {
 	FILE *input = NULL;
@@ -29,9 +29,10 @@ int main(int argc, char *argv[]) {
 				}
 			} else if (!strcmp(argv[i], "-l")) {
 				i += 1;
-				printf("i: %d; argc: %d; argv[i]: '%s'\n", i, argc, argv[i]);
+				// printf("i: %d; argc: %d; argv[i]: '%s'\n", i, argc, argv[i]);
 				if (i >= argc) {
 					print_help();
+					delete_list(lst);
 					return 0;
 				} else {
 					while (i < argc) {

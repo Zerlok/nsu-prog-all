@@ -1,11 +1,11 @@
-#include "list.h"
+#include "mod.h"
 
 void print_help() {
 	printf("This is list module on C.\n");
-	printf("Input:\n");
-	printf("[a1,a2,a3,a4,...aN] a\n");
-	printf("Where [a1,...aN] - List\n");
-	printf("a - new element\n");
+	printf("Elements of list must be separated by space.\n");
+	printf("Example: A1 A2 A3 ... An\n");
+	printf("Flags:\n");
+	printf("   -l - list\n");
 }
 
 struct List *init_list() {
