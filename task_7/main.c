@@ -2,32 +2,32 @@
 
 int main(int argc, char *argv[]) {
 	FILE *input = NULL;
-	int i = 1, num;
-	struct List *lst;
-
-	lst = init_list();
+	int i = 0, num;
+	struct List *lst = init_list();
 
 	if (argc > 1) {
 		for (i = 1; i < argc; i++) {
 			if (!strcmp(argv[i], "-f")) {
-				if ((i + 1) >= argc) {
+				i += 1;
+				if (i >= argc) {
 					print_help();
+					delete_list(lst);
 					return 0;
 				} else {
-					input = fopen(argv[i + 1], "r");
+					input = fopen(argv[i], "r");
 
 					if(input == NULL) {
 						printf("ERROR: file '%s' does not exist!\n", argv[i + 1]);
 						return 0;
 					} else {
-						while (fscanf(input, "%d ", &num) != EOF) {
+						while (fscanf(input, "%d ", &num) > 0) {
 							insert(lst, num);
 							i += 1;
 						}
 					}
 					fclose(input);
 				}
-			} else if (argv[i][0] != "-") {
+			} else if (!strcmp(argv[i], "-l")) {
 				i += 1;
 				printf("i: %d; argc: %d; argv[i]: '%s'\n", i, argc, argv[i]);
 				if (i >= argc) {

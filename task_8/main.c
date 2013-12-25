@@ -1,21 +1,18 @@
 #include "mod.h"
 
 int main(int argc, char *argv[]) {
-	int *lst;
-	int len = argc - 1;
+	struct Tree *root = NULL;
+	int i = 1;
 
-	if (argc == 1) {
-		print_help();
+	if (argc > 1) {
+		while (i < argc) {
+			// root = stree(root, root, atoi(argv[i]));
+			root = insert(root, atoi(argv[i]));
+			i += 1;
+		}
+		print_tree(root);
 	} else {
-		// lst = get_lst_from_argv(argc, argv);
-		len = atoi(argv[1]);
-		lst = range(len);
-		prostos(lst);
-		// transpose(lst, 0);
-		// retros(lst, 0);
-		// reverser(lst, len);
-		// print_lst(lst, len);
-		// transpose(lst, len);
+		print_help();
 	}
 	return 0;
 }

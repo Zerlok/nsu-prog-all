@@ -1,9 +1,16 @@
 #include <stdio.h>
 #include <string.h>
 
-#define LIMIT 100
-#define NUM_END -1
+struct Tree {
+	int value;
+	struct Tree *left;
+	struct Tree *right;
+};
+
+struct Tree *stree(struct Tree *root, struct Tree *new_root, int val);
+
+struct Tree *insert(struct Tree *root, int val);
 
 void print_help();
 
-// int sort(int *lst);
+void print_tree(struct Tree *root);

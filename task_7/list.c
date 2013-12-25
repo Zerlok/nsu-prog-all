@@ -26,8 +26,18 @@ void print_list(struct List *list) {
 	printf("]\n");
 }
 
+void delete_list(struct List *list) {
+	struct List *lst = list, *nxt;
+
+	while (lst) {
+		nxt = lst->next;
+		free(lst);
+		lst = nxt;
+	}
+}
+
 int insert(struct List ** list, int value) {
-	struct List  *last_list, *next_list = (*list);
+	struct List *last_list, *next_list = (*list);
 	struct List *lst = (struct List*) malloc(sizeof(struct List));
 	
 	if (list == NULL)
