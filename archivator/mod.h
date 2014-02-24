@@ -1,3 +1,4 @@
+/* MODULES */
 #include <stdio.h>
 
 
@@ -14,8 +15,12 @@
 
 
 /* ERRORS */
-#define ERR_NO_ARG 100
+#define ERR_NO_TAG_ARG 100
 
 
 /* FUNCTION IMAGES */
 void print_doc();
+void print_err(int err_code);
+void print_tag(char tag[]);
+
+int read_tags(int argc, char *argv[]);
