@@ -6,6 +6,7 @@
 /* APPLICATION VARS */
 #define ARC_NAME "Trarchive"
 #define VERSION "0.01"
+#define DEBUG
 
 
 /* FILE VARS*/
@@ -40,5 +41,6 @@ void print_doc();
 void print_flag_help();
 void print_err(int err_code);
 void print_flag(char flag[]);
+void view_decor();
 
 int read_tags(int argc, char *argv[]);

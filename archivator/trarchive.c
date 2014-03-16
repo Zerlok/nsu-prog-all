@@ -1,6 +1,9 @@
 #include "mod.h"
 
 
+/* ---------- ACCESSORY FUNCTIONS ---------- */
+
+
 void print_doc()
 /*	Function shows documentation of archivator.	*/
 {
@@ -44,11 +47,17 @@ Input:
 			printf("It should be a %s type of archive!\n", ARC_FILE_TAG);
 			break;
 		default:
-			if err_code > ERR_CODE:
+		{
+			if (err_code > ERROR_CODE)
+			{
 				printf("Unknown error (code %d)\n", err_code);
-			else:
+			}
+			else
+			{
 				printf("No errors.\n");
+			}
 			break;
+		}
 	}
 }
 
@@ -62,6 +71,28 @@ Input:
 */
 {
 	printf("'%s'\n", flag);
+}
+
+
+void view_decor()
+/*
+Prints decorating symbols in output.
+*/
+{
+	printf("+++++++++++++++++++++++++\n");
+}
+
+
+void decorate(char str[])
+/*
+Prints char symbols in decorating view.
+*/
+{
+	view_decor()
+	printf("\n");
+	printf("'%s'\n", str);
+	printf("\n");
+	view_decor()
 }
 
 
@@ -159,8 +190,15 @@ Input:
 		{
 			if(arg_indx + 1 < argc)
 			{
-				// printf("Going count a test sum in '%s' archive\n", argv[arg_indx + 1]);
-				return TEST_CODE + arg_indx + 1;
+				if (!is_arch_file(argv[arg_indx + 1]))
+				{
+					// printf("Going count a test sum in '%s' archive\n", argv[arg_indx + 1]);
+					return TEST_CODE + arg_indx + 1;
+				}
+				else
+				{
+					return ERR_NOT_ARCH_FILE + arg_indx + 1;
+				}
 			}
 			else
 			{
@@ -170,6 +208,7 @@ Input:
 		else if (!strcmp(argv[arg_indx], FLAG_HELP))
 		{
 			printf("Going show a help\n");
+			return HELP_CODE;
 		}
 		else if (strstr(argv[arg_indx], "-"))
 		{
@@ -183,4 +222,30 @@ Input:
 		arg_indx++;
 	}
 	return 0;
+}
+
+
+/* ---------- ARCHIVE FUNCTIONS ---------- */
+
+
+void print_file()
+{
+	FILE *file;
+	char string[20];
+
+	file = fopen("_test/first.txt", "rb");
+
+	while fgets(string, sizeof(string), file)
+	{
+		printf("po\n");
+	}
+}
+
+
+int *get_symbols_table(char *seq)
+/*
+...
+*/
+{
+
 }
