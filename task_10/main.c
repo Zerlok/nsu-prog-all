@@ -1,105 +1,78 @@
-#include <stdio.h>
-#include <string.h>
-
-/* main.c */
-
-int *init_was_here()
-{
-	int i;
-	static int was_here[100];
-
-	for (i = 1; i<= 100; i++)
-	{
-		was_here[i] = 0;
-	}
-	return was_here;
-}
-
-int **init_matrix()
-{
-	int i, j;
-	static int matrix[100][100];
-
-	// int *lst = matrix;
-
-	for (i = 1; i <= 100; i++)
-	{
-		for (j = 1; j <= 100;  j++)
-		{
-			matrix[i][j] = 0;
-		}
-	}
-	// return lst;
-	return matrix;
-}
-
-void show_looped_vertices_depth(int v, int *was_here, int **matrix)
-{
-	int i;
-	
-	was_here[v] = 1;
-	for (i = 1; i <= 100; i++)
-	{
-		if (matrix[v][i] && !was_here[i])
-		{
-			show_looped_vertices_depth(i, was_here, matrix);
-		}
-	}
-	printf("%d", v);
-}
-
-void show_looped_vertices_width(int v)
-{
-	int i;
-	printf("Hello!\n");
-}
-
+#include "mod.h" 
 
 int main(int argc, char **argv)
 {
-	char FILE_NAME[255];
-	FILE *fp;
+	FILE *file;
+	char file_name[255];
 	int ch;
-	int i,j; // for matrix
-	int *was_here;
-	int **matrix_pointer;
+	int i,j;
 
-	was_here = init_was_here();
-	matrix_pointer = init_matrix();
+	/*	
+		Argv reading.
+	*/	
 
-	if (argc > 1 && strcmp("--help", argv[1])) 
+	if (argc == 1)
 	{
-		printf("HELP WILL BE HERE\n");
-	} 
-
-	// if (argc != 3 )
-	// {
-	// 	printf("Error");
-	// 	return 1;
-	// }
-
-	// strcpy(FILE_NAME, argv[1]);
-
-	if((fp = fopen(argv[1], "r")) == NULL)
+		print_help();
+		return 0;
+	}
+	
+	if (argc > 1)
 	{
-		printf("Error");
+		if (!(strcmp(argv[1], "--help")))
+			{
+				print_help();
+				return 0;
+			}
+	}
+
+	if (argc != 3 )
+	{
+		printf("Not enough arguments!\n");
+		print_help();
 		return 1;
 	}
 
+	strcpy(file_name, argv[1]);
+	
 	/*
-	 read from file and fill the matrix
+		File reading.
+	*/
+	
+	if((file = fopen(file_name, "r")) == NULL)
+	{
+		printf("Error while file opening!\n");
+		exit(1);
+	}
+
+	while((fscanf(file, "%d %d", &i, &j)) != EOF)
+	{
+		matrix[i][j] = matrix[j][i] = 1;
+	}
+	fclose(file);
+
+	/*
+		Walking functions.
 	*/
 
-	// while(ch = fgetc(fp) != EOF)
-	// {
-	// 	fscanf(fp, "%d %d\n", &i, &j);
-	// 	matrix_pointer[i][j] = 1;
-	// 	matrix_pointer[j][i] = 1;
-	// }
-
-	// show_looped_vertices_depth();
-
+	if (!strcmp(argv[2], "-d"))
+	{
+		show_looped_vertices_depth(1, was_here);
+	}
+	else if (!strcmp(argv[2], "-w"))
+	{
+		printf("Will show in width\n");
+		show_looped_width(was_here);
+	}
+	else if (!strcmp(argv[2], "--help"))
+	{
+		print_help();
+	}
+	else
+	{
+		printf("Unknown flag: '%s'\n", argv[2]);
+		print_help();
+	}
+	printf("\n");
 	return 0;
 }
-
-/* graph.c */
