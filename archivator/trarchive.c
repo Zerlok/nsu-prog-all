@@ -16,12 +16,12 @@ Input:
 }
 
 
-void print_func_name(char name[])
+void print_func_name(const char name[])
 {
 	printf("\n-----RUN----->\t'%s' function:\n", name);
 }
 
-void print_end_func(char name[])
+void print_end_func(const char name[])
 {
 	printf("\n<-----END-----\t'%s' function:\n", name);
 }
@@ -51,13 +51,13 @@ Prints char symbols in decorating view.
 void run_test()
 {
 	#ifdef DEBUG
-		print_func_name("run_test");
+		print_func_name(__func__);
 	#endif
 
-
+	print_file("_test/image.png");
 	
 	#ifdef DEBUG
-		print_end_func("run_test");
+		print_end_func(__func__);
 	#endif
 }
 
@@ -71,7 +71,7 @@ void print_doc()
 /*	Function shows documentation of archivator.	*/
 {
 	#ifdef DEBUG
-		print_func_name("print_doc");
+		print_func_name(__func__);
 	#endif
 	
 	printf("%s - %s\n", ARC_NAME, VERSION);
@@ -86,7 +86,7 @@ void print_doc()
 	printf("\t$ harc -l arch.trar (show the list of arch.trar's files)\n");
 	
 	#ifdef DEBUG
-		print_end_func("print_doc");
+		print_end_func(__func__);
 	#endif
 }
 
@@ -95,7 +95,7 @@ void print_flag_help()
 /*	Function shows help about flags.	*/
 {
 	#ifdef DEBUG
-		print_func_name("print_flag_help");
+		print_func_name(__func__);
 	#endif
 	
 	printf("You can use this flags:\n");
@@ -106,7 +106,7 @@ void print_flag_help()
 	printf("   %s\t-\tto show this help documentation.\n", FLAG_HELP);
 	
 	#ifdef DEBUG
-		print_end_func("print_flag_help");
+		print_end_func(__func__);
 	#endif
 }
 
@@ -120,7 +120,7 @@ Input:
 */
 {
 	#ifdef DEBUG
-		print_func_name("print_err");
+		print_func_name(__func__);
 	#endif
 
 	switch (err_code)
@@ -156,7 +156,7 @@ Input:
 	}
 
 	#ifdef DEBUG
-		print_end_func("print_err");
+		print_end_func(__func__);
 	#endif
 }
 
@@ -171,7 +171,7 @@ Input:
 */
 {
 	#ifdef DEBUG
-		print_func_name("is_arch_file");
+		print_func_name(__func__);
 	#endif
 	
 	if (!strstr(arg, ARC_FILE_TAG)) // If not archive file
@@ -180,7 +180,7 @@ Input:
 	}
 
 	#ifdef DEBUG
-		print_end_func("is_arch_file");
+		print_end_func(__func__);
 	#endif
 
 	return 0;
@@ -198,7 +198,7 @@ Input:
 */
 {
 	#ifdef DEBUG
-		print_func_name("read_flags");
+		print_func_name(__func__);
 	#endif
 
 	int str_indx, arg_indx = 1;
@@ -312,33 +312,42 @@ Input:
 void print_file(char *file_name)
 {
 	#ifdef DEBUG
-		print_func_name("print_file");
+		print_func_name(__func__);
 	#endif
 
 	FILE *file;
 	// char file_name[255];
-	char str[255];
+	unsigned char str[100];
+	int ch;
 
-	// file = fopen("_test/first.txt", "rb");
-
-	// while fgets(string, sizeof(string), file)
-	// {
-	// 	printf("po\n");
-	// }
-
-	if((file = fopen(file_name, "r")) == NULL)
+	if((file = fopen(file_name, "rb")) == NULL)
 	{
 		printf("Error while file opening!\n");
 		exit(1);
 	}
 
-	while((fscanf(file, "%s", str)) != EOF)
+	// while((fscanf(file, "%s", str)) != EOF)
+	// while (fgets(str, sizeof(str), file))
+	while (fread(str, sizeof(str), 1, file))
 	{
-		printf("%s\n", str);
+		if (feof())
+		printf("'%u'\n", str);
+	}
+	printf("\n");
+
+	
+	// for (ch = 1; ch < sizeof(str); ch++)
+	// {
+	// 	printf("%c", ((char *)str)[ch]);
+	// }
+
+	if (file)
+	{
+		fclose(file);
 	}
 
 	#ifdef DEBUG
-		print_end_func("print_file");
+		print_end_func(__func__);
 	#endif
 }
 
@@ -349,13 +358,13 @@ int *get_symbols_table(char *seq)
 */
 {
 	#ifdef DEBUG
-		print_func_name("get_symbols_table");
+		print_func_name(__func__);
 	#endif
 
 
 
 	#ifdef DEBUG
-		print_end_func("get_symbols_table");
+		print_end_func(__func__);
 	#endif
 
 	return NULL;
@@ -365,13 +374,13 @@ int *get_symbols_table(char *seq)
 int *get_bin_tree(int *symbols_table)
 {
 	#ifdef DEBUG
-		print_func_name("get_bin_tree");
+		print_func_name(__func__);
 	#endif
 
 
 
 	#ifdef DEBUG
-		print_end_func("get_bin_tree");
+		print_end_func(__func__);
 	#endif
 
 	return NULL;
@@ -381,7 +390,7 @@ int *get_bin_tree(int *symbols_table)
 char *encode_symbols(int *tree)
 {
 	#ifdef DEBUG
-		print_func_name("encode_symbols");
+		print_func_name(__func__);
 	#endif
 
 	// get_symbols_table(file);
@@ -390,7 +399,7 @@ char *encode_symbols(int *tree)
 	// ...
 
 	#ifdef DEBUG
-		print_end_func("encode_symbols");
+		print_end_func(__func__);
 	#endif
 
 	return NULL;
@@ -400,7 +409,7 @@ char *encode_symbols(int *tree)
 int *decode_symbols(char *symbols)
 {
 	#ifdef DEBUG
-		print_func_name("get_bin_tree");
+		print_func_name(__func__);
 	#endif
 
 	// read_bin_tree(archive); ???
@@ -408,7 +417,7 @@ int *decode_symbols(char *symbols)
 	// ...
 
 	#ifdef DEBUG
-		print_end_func("get_bin_tree");
+		print_end_func(__func__);
 	#endif
 
 	return NULL;

@@ -12,11 +12,11 @@
 #define DEBUG
 
 
-/* DEBUG */
 #ifdef DEBUG
+/* DEBUG */
 
 void print_flag(char flag[]);
-void print_func_name(char name[]);
+void print_func_name(const char name[]);
 void print_decor();
 void decorate(char str[]);
 void run_test();
@@ -67,3 +67,5 @@ void print_flag_help();
 void print_err(int err_code);
 
 int read_tags(int argc, char *argv[]);
+
+void print_file(char *file_name);
