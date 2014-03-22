@@ -317,7 +317,7 @@ void print_file(char *file_name)
 
 	FILE *file;
 	// char file_name[255];
-	unsigned char str[100];
+	char str[8];
 	int ch;
 
 	if((file = fopen(file_name, "rb")) == NULL)
@@ -330,10 +330,22 @@ void print_file(char *file_name)
 	// while (fgets(str, sizeof(str), file))
 	while (fread(str, sizeof(str), 1, file))
 	{
-		if (feof())
-		printf("'%u'\n", str);
+		for (ch=0; ch<sizeof(str); ch++) {
+			printf("%02x",(unsigned char) str[ch]);
+			if ((ch%2)) 
+				printf(" ");
+		}
+		printf("\n");
 	}
-	printf("\n");
+	// if( fread(str, sizeof(unsigned char), 1, file) == 1 )
+	// {
+	// 	fwrite(str, sizeof(unsigned char), 1, stdout);
+	// }
+	// else
+	// {
+	// 	printf("error\n");
+	// }
+	// printf("\n");
 
 	
 	// for (ch = 1; ch < sizeof(str); ch++)
