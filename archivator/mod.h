@@ -68,4 +68,4 @@ void print_err(int err_code);
 
 int read_tags(int argc, char *argv[]);
 
-void print_file(char *file_name);
+void print_bin_file(char *file_name);

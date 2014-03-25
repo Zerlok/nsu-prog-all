@@ -18,12 +18,12 @@ Input:
 
 void print_func_name(const char name[])
 {
-	printf("\n-----RUN----->\t'%s' function:\n", name);
+	printf("\n>-----RUN----->\t'%s' function:\n", name);
 }
 
 void print_end_func(const char name[])
 {
-	printf("\n<-----END-----\t'%s' function:\n", name);
+	printf("\n<-----END-----<\t'%s' function:\n", name);
 }
 
 void print_decor()
@@ -54,7 +54,7 @@ void run_test()
 		print_func_name(__func__);
 	#endif
 
-	print_file("_test/image.png");
+	print_bin_file("_test/image.png");
 	
 	#ifdef DEBUG
 		print_end_func(__func__);
@@ -165,7 +165,7 @@ int is_arch_file(char arg[])
 /*
 If file is an archive file returns 0.
 Otherwise returns 1.
-
+454e 44ae 4260 82
 Input:
 	arg - (*char) the name of file.
 */
@@ -309,16 +309,16 @@ Input:
 
 /* ---------- ARCHIVE FUNCTIONS ---------- */
 
-void print_file(char *file_name)
+void print_bin_file(char *file_name)
 {
 	#ifdef DEBUG
 		print_func_name(__func__);
 	#endif
 
-	FILE *file;
 	// char file_name[255];
-	char str[8];
-	int ch;
+	FILE *file;
+	char str;
+	int i = 1;
 
 	if((file = fopen(file_name, "rb")) == NULL)
 	{
@@ -326,38 +326,31 @@ void print_file(char *file_name)
 		exit(1);
 	}
 
-	// while((fscanf(file, "%s", str)) != EOF)
-	// while (fgets(str, sizeof(str), file))
-	while (fread(str, sizeof(str), 1, file))
+	#ifdef DEBUG
+		// printf("\n_____Begining of %s file content_____\n", file_name);
+	#endif
+
+	while (fread(&str, sizeof(str), 1, file))
 	{
-		for (ch=0; ch<sizeof(str); ch++) {
-			printf("%02x",(unsigned char) str[ch]);
-			if ((ch%2)) 
-				printf(" ");
+		// printf("%d\n", i);
+		printf("%02x", (unsigned char)str);
+		if (i % 2 == 0)
+		{
+			printf(" ");
 		}
-		printf("\n");
+		if (i % 16 == 0)
+		{
+			printf("\n");
+		}
+		i++;
 	}
-	// if( fread(str, sizeof(unsigned char), 1, file) == 1 )
-	// {
-	// 	fwrite(str, sizeof(unsigned char), 1, stdout);
-	// }
-	// else
-	// {
-	// 	printf("error\n");
-	// }
-	// printf("\n");
 
+	#ifdef DEBUG
+		// printf("\n_____Ending of %s file content_____\n", file_name);
+	#endif
 	
-	// for (ch = 1; ch < sizeof(str); ch++)
-	// {
-	// 	printf("%c", ((char *)str)[ch]);
-	// }
-
-	if (file)
-	{
-		fclose(file);
-	}
-
+	fclose(file);
+	
 	#ifdef DEBUG
 		print_end_func(__func__);
 	#endif
