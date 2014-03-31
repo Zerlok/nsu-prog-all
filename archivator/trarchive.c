@@ -41,20 +41,21 @@ Prints char symbols in decorating view.
 */
 {
 	print_decor();
-	printf("\n");
-	printf("%s", str);
-	printf("\n");
+	printf("+\n");
+	printf("+ %10s\n", str);
+	printf("+\n");
 	print_decor();
+	// printf("\n");
 }
 
 
-void run_test()
+void run_test(char *file_name)
 {
 	#ifdef DEBUG
 		print_func_name(__func__);
 	#endif
 
-	print_bin_file("_test/image.png");
+	print_bin_file(file_name);
 	
 	#ifdef DEBUG
 		print_end_func(__func__);
@@ -165,7 +166,6 @@ int is_arch_file(char arg[])
 /*
 If file is an archive file returns 0.
 Otherwise returns 1.
-454e 44ae 4260 82
 Input:
 	arg - (*char) the name of file.
 */
@@ -285,9 +285,10 @@ Input:
 		}
 
 		#ifdef DEBUG
+			/* FOR DEBUG ONLY! */
 			else if (!strcmp(argv[arg_indx], TESTMODE_FLAG))
 			{
-				return TESTMODE_CODE + arg_indx;
+				return TESTMODE_CODE + arg_indx + 1;
 			}
 		#endif
 
@@ -309,16 +310,46 @@ Input:
 
 /* ---------- ARCHIVE FUNCTIONS ---------- */
 
+int get_hash(unsigned char symbol)
+{
+
+	int hash;
+
+	if (!symbol)
+	{
+		// printf("sym: '%x'\n", symbol);
+		// printf("hsh: '%d'\n", 0);
+		return 0;
+	}
+
+	hash = (
+		abs(((int)symbol * 'A')
+		 + abs((symbol - 'a') * (symbol - 'z'))
+	 	 - 'Z'
+	 	)) % 10000;
+
+	if ((int)(hash / 1000) == 0)
+	{
+		hash += 1000 * ((int)symbol % 10);
+	}
+
+	// printf("sym: '%x'\n", symbol);
+	// printf("hsh: '%d'\n", hash);
+	return hash;
+}
+
+
 void print_bin_file(char *file_name)
 {
 	#ifdef DEBUG
 		print_func_name(__func__);
 	#endif
 
-	// char file_name[255];
 	FILE *file;
-	char str;
+	unsigned char str;
 	int i = 1;
+	struct List *lst = init_list();
+	
 
 	if((file = fopen(file_name, "rb")) == NULL)
 	{
@@ -326,29 +357,22 @@ void print_bin_file(char *file_name)
 		exit(1);
 	}
 
-	#ifdef DEBUG
-		// printf("\n_____Begining of %s file content_____\n", file_name);
-	#endif
-
+	int h;
+	printf("The content of '%s' file:\n", file_name);
 	while (fread(&str, sizeof(str), 1, file))
 	{
-		// printf("%d\n", i);
-		printf("%02x", (unsigned char)str);
-		if (i % 2 == 0)
-		{
-			printf(" ");
-		}
-		if (i % 16 == 0)
-		{
-			printf("\n");
-		}
+		// printf("%02x", str);
+		h = get_hash(str);
+		
+		printf("sym: '%x'\n", str);
+		printf("hsh: '%d'\n", h);
+
+		insert(&lst, get_hash(str), str);
+		if (!(i % 2)) printf(" ");
+		if (!(i % 16)) printf("\n");
 		i++;
 	}
 
-	#ifdef DEBUG
-		// printf("\n_____Ending of %s file content_____\n", file_name);
-	#endif
-	
 	fclose(file);
 	
 	#ifdef DEBUG

@@ -35,6 +35,9 @@ int main(int argc, char *argv[])
 			case TESTSUM_CODE:
 				// printf("Going count a test sum in '%s' archive\n", argv[arg_indx + 1]);
 				break;
+			case TESTMODE_CODE:
+				run_test(argv[indx]);
+				break;
 			case HELP_CODE:
 				// printf("Going show a help\n");
 				print_doc();
@@ -58,7 +61,7 @@ int main(int argc, char *argv[])
 	else
 	{
 		#ifdef DEBUG
-			run_test();
+			run_test("_test/image.png");
 		#else
 			print_doc();
 		#endif

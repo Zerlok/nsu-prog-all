@@ -51,7 +51,7 @@ int insert(struct List **list, int value) {
 		return 0;
 	}
 
-	if (lst->value < next_list->value) {
+	if (lst->value > next_list->value) {
 		lst->next = next_list;
 		(*list) = lst;
 		return 0;
@@ -61,7 +61,7 @@ int insert(struct List **list, int value) {
 	next_list = next_list->next;
 
 	while (next_list) {
-		if (lst->value < next_list->value) {
+		if (lst->value > next_list->value) {
 			last_list->next = lst;
 			lst->next = next_list;
 			return 0;
@@ -69,6 +69,6 @@ int insert(struct List **list, int value) {
 		last_list = next_list;
 		next_list = next_list->next;
 	}
-	// last_list->next = lst;
+	last_list->next = lst;
 	return 0;
 }
