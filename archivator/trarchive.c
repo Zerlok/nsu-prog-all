@@ -42,24 +42,75 @@ Prints char symbols in decorating view.
 {
 	print_decor();
 	printf("+\n");
-	printf("+ %10s\n", str);
+	printf("+ %12s\n", str);
 	printf("+\n");
 	print_decor();
 	// printf("\n");
 }
 
 
-void run_test(char *file_name)
+int run_test(char *file_name)
 {
 	#ifdef DEBUG
 		print_func_name(__func__);
 	#endif
 
-	print_bin_file(file_name);
+	// print_bin_file(file_name);
+
+	FILE *arch_file;
+	ARCHIVE archive;
+	char line[256];
+	int i = 0;
+
+	if ((arch_file = fopen(file_name, "r")) == NULL)
+	{
+		printf("Wrong file name '%s'\n", file_name);
+		exit(1);
+	}
+
+	while (fscanf(arch_file, "%s {\n", line) != EOF)
+	{
+		// printf("'%s'\n", line);
+		if (strcmp(line, FILES_TAG) == 0)
+		{
+			// archive.files = (char **)malloc(sizeof(char));
+			/* Malloc doesn't work!*/
+			
+			while ((fscanf(arch_file, "%s\n", line) != EOF)
+				&& (strcmp(line, "}") != 0))
+			{
+				// printf("archive.files[%d] = '%s';\n", i, line);
+				strcpy(archive.files[i], line);
+				i += 1;
+			}
+		}
+		else if (strcmp(line, VERSION_TAG) == 0)
+		{
+			fscanf(arch_file, "%s", archive.version);
+			if (strcmp(archive.version, ARC_VERSION) != 0)
+			{
+				printf("'%s'\n'%s'\n", archive.version, ARC_VERSION);
+				return ERR_UNSUPPORTED_VERSION;
+			}
+			fscanf(arch_file, "%s", archive.version);
+			// fscanf(arch_file, "%s", line);
+			// strcpy(archive.version[0], line);
+		}
+		else if (strcmp(line, TREE_TAG) == 0)
+		{
+			printf("Tree doesn't supported!\n");
+		}
+	}
 	
+	fclose(arch_file);
+	// printf("archive version: %s\n", archive.version);
+	// printf("archive has '%s' file\n", archive.files[0]);
+
 	#ifdef DEBUG
 		print_end_func(__func__);
 	#endif
+
+	return 0;
 }
 
 
@@ -75,7 +126,7 @@ void print_doc()
 		print_func_name(__func__);
 	#endif
 	
-	printf("%s - %s\n", ARC_NAME, VERSION);
+	printf("%s - %s\n", ARC_NAME, ARC_VERSION);
 	printf("You're reading a documentation about %s\n", ARC_NAME);
 	printf("Archive tag is %s\n", ARC_FILE_TAG);
 	printf("Using: $ harc <flag> <file> <archive>\n");
@@ -95,9 +146,9 @@ void print_doc()
 void print_flag_help()
 /*	Function shows help about flags.	*/
 {
-	#ifdef DEBUG
-		print_func_name(__func__);
-	#endif
+	// #ifdef DEBUG
+	// 	print_func_name(__func__);
+	// #endif
 	
 	printf("You can use this flags:\n");
 	printf("   %s\t\t-\tto add file to archive. \t\t Usage: %s <file> <archive>\n", FLAG_ADD, FLAG_ADD);
@@ -107,7 +158,8 @@ void print_flag_help()
 	printf("   %s\t-\tto show this help documentation.\n", FLAG_HELP);
 	
 	#ifdef DEBUG
-		print_end_func(__func__);
+		printf("   %s\t-\tto run test function (FOR DEBUG ONLY!!!).\n", TESTMODE_FLAG);
+		// print_end_func(__func__);
 	#endif
 }
 
@@ -175,6 +227,7 @@ Input:
 	#endif
 	
 	if (!strstr(arg, ARC_FILE_TAG)) // If not archive file
+		/* TODO: do not skip the '.trarlololo'. '.trar' only! */
 	{
 		return 1;
 	}
@@ -210,13 +263,13 @@ Input:
 			arg_indx++;
 			if(arg_indx + 1 < argc)
 			{
-				if (!is_arch_file(argv[arg_indx + 1]))
+				if (!is_arch_file(argv[arg_indx]))
 				{
 					return APPEND_CODE + arg_indx + 1;
 				}
 				else
 				{
-					return ERR_NOT_ARCH_FILE + arg_indx + 1;
+					return ERR_NOT_ARCH_FILE + arg_indx;
 				}
 			}
 			else
@@ -229,13 +282,13 @@ Input:
 			arg_indx++;
 			if(arg_indx + 1 < argc)
 			{
-				if (!is_arch_file(argv[arg_indx + 1]))
+				if (!is_arch_file(argv[arg_indx]))
 				{
 					return EXTRACT_CODE + arg_indx + 1;
 				}
 				else
 				{
-					return ERR_NOT_ARCH_FILE + arg_indx + 1;
+					return ERR_NOT_ARCH_FILE + arg_indx;
 				}
 			}
 			else
@@ -285,7 +338,9 @@ Input:
 		}
 
 		#ifdef DEBUG
-			/* FOR DEBUG ONLY! */
+			/* 
+			FOR DEBUG ONLY!
+			*/
 			else if (!strcmp(argv[arg_indx], TESTMODE_FLAG))
 			{
 				return TESTMODE_CODE + arg_indx + 1;
@@ -305,6 +360,94 @@ Input:
 		arg_indx++;
 	}
 	return ERR_NO_FLAGS + arg_indx;
+}
+
+
+int read_or_create_an_archive(char *arch_name, ARCHIVE *arch)
+/*
+Read the archive information to ARCHIVE structure, if archive exist.
+Otherwise create the archive struct with basic information.
+
+Input:
+	char *arch_name - the name of file
+	ARCHIVE *arch - the indicator to archive struct.
+
+Output:
+	Return 0 if everything is OK, else 1.
+*/
+{
+	#ifdef DEBUG
+		print_func_name(__func__);
+	#endif
+
+	FILE *arch_file;
+	struct stat file_status;
+	char line[256];
+	int i = 0;
+
+	if (is_arch_file(arch_name))
+	{
+		printf("The file '%s' is not an archive of %s program.\n", arch_name, ARC_NAME);
+		exit(1);
+	}
+	if (stat(arch_name, &file_status) < 0)
+	{
+		printf("Permission denied to the archive '%s'\n", arch_name);
+		exit(1);
+	}
+
+	strcpy(arch->name, arch_name);
+	if ((arch_file = fopen(arch_name, "r")) == NULL)
+	{
+		/* CREATE THE ARCHIVE */
+		printf("created : arch->name == '%s'\n", arch->name);
+		strcpy(arch->files[0], "");
+		strcpy(arch->version, ARC_VERSION);
+		return 0;
+		// fprintf(arch_file, "%s {\n\n}\n", FILES_TAG);
+		// arch->last_file = ftell(arch_file) - 2;
+		// fprintf(arch_file, "%s { %s }\n", VERSION_TAG, ARC_VERSION);
+	}
+
+	/* IF ARCHIVE EXIST: */
+	strcpy(arch->name, arch_name);
+	while (fscanf(arch_file, "%s {\n", line) != EOF)
+	{
+		// printf("'%s'\n", line);
+		if (strcmp(line, FILES_TAG) == 0)
+		{
+			// arch->files = (char **)malloc(sizeof(char));
+			/* Malloc doesn't work. Of course it's my mistake.*/
+			
+			while ((fscanf(arch_file, "%s\n", line) != EOF)
+				&& (strcmp(line, "}") != 0))
+			{
+				strcpy(arch->files[i], line);
+				i += 1;
+			}
+			// arch->last_file = ftell(arch_file) - 1;
+		}
+		else if (strcmp(line, VERSION_TAG) == 0)
+		{
+			fscanf(arch_file, "%s", arch->version);
+			if (strcmp(arch->version, ARC_VERSION) != 0)
+			{
+				printf("'%s'\n'%s'\n", arch->version, ARC_VERSION);
+				return ERR_UNSUPPORTED_VERSION;
+			}
+		}
+		else if (strcmp(line, TREE_TAG) == 0)
+		{
+			printf("Tree doesn't supported!\n");
+		}
+	}
+	printf("exist : arch->name == '%s'\n", arch->name);
+	
+	#ifdef DEBUG
+		print_end_func(__func__);
+	#endif
+
+	return 0;
 }
 
 
@@ -328,7 +471,7 @@ int get_hash(unsigned char symbol)
 	 	 - 'Z'
 	 	)) % 10000;
 
-	if ((int)(hash / 1000) == 0)
+	if ((int)(hash / 10000) == 0)
 	{
 		hash += 1000 * ((int)symbol % 10);
 	}
@@ -432,6 +575,120 @@ char *encode_symbols(int *tree)
 	#endif
 
 	return NULL;
+}
+
+
+int add_to_archive(char *file_name, ARCHIVE *arch)
+{
+	#ifdef DEBUG
+		print_func_name(__func__);
+	#endif
+
+	FILE *file;
+	int i = 0, is_added = 0;
+	struct stat file_status;
+	
+	if (stat(file_name, &file_status) < 0)
+	{
+		printf("Permission denied to the archive '%s'\n", file_name);
+		exit(1);
+	}
+
+	if (strcmp(arch->name, file_name) == 0)
+	{
+		printf("Are you stupid?\n");
+		return 0;
+	}
+
+	while (strlen(arch->files[i]) != 0)
+	{
+		if (strcmp(arch->files[i], file_name) == 0)
+		{
+			is_added = 1;
+		}
+		i += 1;
+	}
+
+	if (is_added == 1)
+	{
+		printf("File exist in archive, update it?\n");
+	}
+	else
+	{
+		// fprintf(arch_file, "%s\n", file_name);
+		printf("arch->files[%d] = '%s'\n", i, file_name);
+		strcpy(arch->files[i], file_name);
+	}
+
+	#ifdef DEBUG
+		print_end_func(__func__);
+	#endif
+
+	return 0;
+}
+
+
+int show_archived_files(ARCHIVE *arch)
+{
+	#ifdef DEBUG
+		print_func_name(__func__);
+	#endif
+
+	int i = 0;
+	
+	printf("Archive: '%s'\n", arch->name);
+	while (strlen(arch->files[i]) != 0 && i < 256)
+	{
+		printf("   |---'%s'\n", arch->files[i]);
+		i += 1;
+	}
+	printf("------\nTotal: %d files.\n", i);
+
+	#ifdef DEBUG
+		print_end_func(__func__);
+	#endif
+
+	return 0;
+}
+
+
+int write_an_archive_to_file(ARCHIVE *arch)
+{
+	#ifdef DEBUG
+		print_func_name(__func__);
+	#endif
+
+	FILE *arch_file;
+	int i = 0;
+	struct stat file_status;
+	
+	if (stat(arch->name, &file_status) < 0)
+	{
+		printf("Permission denied to the archive '%s'\n", arch->name);
+		exit(1);
+	}
+
+	if ((arch_file = fopen(arch->name, "w")) != NULL)
+	{
+		printf("EXCEPTION!\n");
+		exit(1);
+	}
+
+	fprintf(arch_file, "%s { %s }\n", VERSION_TAG, arch->version);
+
+	fprintf(arch_file, "%s {\n", FILES_TAG);
+	while (strlen(arch->files[i]) != 0 && i < 256)
+	{
+		fprintf(arch_file, "%s\n", arch->files[i]);
+		i += 1;
+	}
+	fprintf(arch_file, "}\n");
+	
+	#ifdef DEBUG
+		print_end_func(__func__);
+	#endif
+
+	return 0;
 }
 
 

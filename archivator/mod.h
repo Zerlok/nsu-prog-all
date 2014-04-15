@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
 
 
 /* LIST */
@@ -27,11 +28,27 @@ int insert(
 );
 
 
-/* APPLICATION VARS */
+/* ARCHIVE */
+
+typedef struct Archive
+{
+	// int *tree;
+	// long int last_file; // The indicator in archive file to file append
+	char version[5]; // The version of archive
+	char name[256]; // The path and name of archive
+	char files[256][256]; // The list of added files
+} ARCHIVE;
+
+
+/* ARCHIVE VARS */
 
 #define ARC_NAME "Trarchive"
-#define VERSION "0.01"
+#define ARC_VERSION "v0.01"
 #define DEBUG
+#define SEPARATOR "|"
+#define TREE_TAG "TREE"
+#define FILES_TAG "FILES"
+#define VERSION_TAG "VERSION"
 
 
 /* FILE VARS*/
@@ -52,7 +69,8 @@ void print_end_func(const char name[]);
 void print_here(const char name[], const int line);
 void print_decor();
 void decorate(char str[]);
-void run_test(char *file_name);
+
+int run_test(char *file_name);
 
 #endif
 
@@ -77,11 +95,16 @@ void run_test(char *file_name);
 
 /* ERRORS > 99 */
 
+/* FLAG ERRORS */
 #define ERROR_CODE 99
 #define ERR_UNKNOWN_FLAG 100
 #define ERR_NO_FLAGS 200
 #define ERR_NO_FLAG_ARG 300
 #define ERR_NOT_ARCH_FILE 400
+#define ERR_ARCH_DOES_NOT_EXIST 500
+#define ERR_UNSUPPORTED_VERSION 600
+
+/* APPEND ARCHIVE ERRORS */
 
 
 /* FUNCTION IMAGES */
@@ -92,4 +115,7 @@ void print_err(int err_code);
 void print_bin_file(char *file_name);
 
 int read_tags(int argc, char *argv[]);
-
+int read_or_create_an_archive(char *arch_name, ARCHIVE *arch);
+int add_to_archive(char *file_name, ARCHIVE *arch);
+int show_archived_files(ARCHIVE *arch);
+int write_an_archive_to_file(ARCHIVE *arch);

@@ -3,12 +3,8 @@
 
 int main(int argc, char *argv[])
 {
-	int code=HELP_CODE, indx=0;
-
-	#ifdef DEBUG
-		// decorate("DEBUG is TRUE\n");
-		// print_func_name("main");
-	#endif
+	ARCHIVE arch;
+	int code = HELP_CODE, indx = 0;
 
 	if (argc > 1)
 	{
@@ -21,25 +17,42 @@ int main(int argc, char *argv[])
 			printf("CODE: %d, INDX: %d, ARG: %s\n", code, indx, argv[indx]);
 		#endif
 
+		if (code < HELP_CODE)
+		{
+			read_or_create_an_archive(argv[2], &arch);
+		}
+		decorate(arch.name);
+
 		switch (code)
 		{
 			case APPEND_CODE:
+			{
 				// printf("Going add '%s' file to '%s' archive\n", argv[arg_indx], argv[arg_indx + 1]);
+				if (add_to_archive(argv[indx], &arch))
+				{
+					printf("Something wrong\n");
+				}
+				else
+				{
+					write_an_archive_to_file(&arch);
+					printf("Added!\n");
+				}
 				break;
+			}
 			case EXTRACT_CODE:
-				// printf("Going extract '%s' file from '%s' archive\n", argv[arg_indx], argv[arg_indx + 1]);
+				printf("Going extract '%s' file from '%s' archive\n", argv[indx-1], argv[indx]);
 				break;
 			case LIST_CODE:
-				// printf("Going show a list of files in '%s' archive\n", argv[arg_indx + 1]);
+				printf("Going show a list of files in '%s' archive\n", argv[indx]);
+				show_archived_files(&arch);
 				break;
 			case TESTSUM_CODE:
-				// printf("Going count a test sum in '%s' archive\n", argv[arg_indx + 1]);
+				printf("Going count a test sum in '%s' archive\n", argv[indx]);
 				break;
 			case TESTMODE_CODE:
 				run_test(argv[indx]);
 				break;
 			case HELP_CODE:
-				// printf("Going show a help\n");
 				print_doc();
 				break;
 			default:
@@ -56,20 +69,15 @@ int main(int argc, char *argv[])
 				return 1;
 			}
 		}
-		// }
 	}
 	else
 	{
 		#ifdef DEBUG
-			run_test("_test/image.png");
+			run_test("_test/my_arch.trar");
 		#else
 			print_doc();
 		#endif
 	}
-
-	#ifdef DEBUG
-		// print_end_func("main");
-	#endif
-
+	
 	return 0;
 }
