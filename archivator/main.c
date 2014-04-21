@@ -73,7 +73,7 @@ int main(int argc, char *argv[])
 	else
 	{
 		#ifdef DEBUG
-			run_test("_test/my_arch.trar");
+			run_test("_test/image.png");
 		#else
 			print_doc();
 		#endif

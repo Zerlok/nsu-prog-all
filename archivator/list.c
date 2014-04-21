@@ -1,24 +1,6 @@
 #include "mod.h"
 
 
-struct List *init_list()
-{
-	#ifdef DEBUG
-		print_func_name(__func__);
-	#endif
-
-	struct List *list = (struct List*) malloc (sizeof(struct List));
-
-	list = NULL;
-
-	#ifdef DEBUG
-		print_end_func(__func__);
-	#endif
-
-	return list;
-}
-
-
 void print_list(struct List *list)
 {
 	#ifdef DEBUG
@@ -64,9 +46,9 @@ void delete_list(struct List *list)
 
 int insert(struct List **list, int hash, unsigned char value)
 {
-	#ifdef DEBUG
-		print_func_name(__func__);
-	#endif
+	// #ifdef DEBUG
+	// 	print_func_name(__func__);
+	// #endif
 	
 	struct List *left_lst, *right_lst = (*list);
 	struct List *new_lst = (struct List*) malloc (sizeof(struct List));
@@ -80,19 +62,19 @@ int insert(struct List **list, int hash, unsigned char value)
 
 	if (right_lst == NULL)
 	{
-		(*list) = new_lst;
+		list = &new_lst;
 		
-		#ifdef DEBUG
-			print_end_func(__func__);
-		#endif
+		// #ifdef DEBUG
+		// 	print_end_func(__func__);
+		// #endif
 
 		return 0;
 	}
 
 	left_lst = right_lst;
-	right_lst = right_lst->next;
+	//right_lst = right_lst->next;
 
-	while (right_lst)
+	while (right_lst != NULL)
 	{
 		if (hash == right_lst->hash)
 		{
@@ -103,9 +85,9 @@ int insert(struct List **list, int hash, unsigned char value)
 				
 				shift_list(list, &right_lst);
 
-				#ifdef DEBUG
-					print_end_func(__func__);
-				#endif
+				// #ifdef DEBUG
+				// 	print_end_func(__func__);
+				// #endif
 				
 				return 0;
 			}
@@ -122,17 +104,22 @@ int insert(struct List **list, int hash, unsigned char value)
 				return 0;
 			}
 		}
+		// else
+		// {
+		// 	// printf("!");
+		// }
 		
 		left_lst = right_lst;
 		right_lst = right_lst->next;
+		// printf("%d\n", right_lst);
 	}
-	decorate("hello");
+	// decorate("hello");
 	
 	left_lst->next = new_lst;
 
-	#ifdef DEBUG
-		print_end_func(__func__);
-	#endif
+	// #ifdef DEBUG
+	// 	print_end_func(__func__);
+	// #endif
 
 	return 0;
 }
@@ -145,10 +132,7 @@ int shift_list(struct List **list, struct List *new_lst)
 	// #endif
 
 	struct List *left_lst, *right_lst = (*list);
-	// struct List *new_lst = (struct List*) malloc (sizeof(struct List));
-
-	// struct List *left_lst = (*list);
-
+	
 	if (right_lst == NULL)
 	{
 		printf("right_lst is NULL!\n");
@@ -174,9 +158,7 @@ int shift_list(struct List **list, struct List *new_lst)
 
 	left_lst = right_lst;
 	right_lst = right_lst->next;
-
-	decorate("I'm here");
-
+	
 	while (right_lst)
 	{
 		if (right_lst->count > new_lst->count)

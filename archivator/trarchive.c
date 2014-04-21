@@ -55,56 +55,56 @@ int run_test(char *file_name)
 		print_func_name(__func__);
 	#endif
 
-	// print_bin_file(file_name);
+	print_bin_file(file_name);
 
-	FILE *arch_file;
-	ARCHIVE archive;
-	char line[256];
-	int i = 0;
+	// FILE *arch_file;
+	// ARCHIVE archive;
+	// char line[256];
+	// int i = 0;
 
-	if ((arch_file = fopen(file_name, "r")) == NULL)
-	{
-		printf("Wrong file name '%s'\n", file_name);
-		exit(1);
-	}
+	// if ((arch_file = fopen(file_name, "r")) == NULL)
+	// {
+	// 	printf("Wrong file name '%s'\n", file_name);
+	// 	exit(1);
+	// }
 
-	while (fscanf(arch_file, "%s {\n", line) != EOF)
-	{
-		// printf("'%s'\n", line);
-		if (strcmp(line, FILES_TAG) == 0)
-		{
-			// archive.files = (char **)malloc(sizeof(char));
-			/* Malloc doesn't work!*/
+	// while (fscanf(arch_file, "%s {\n", line) != EOF)
+	// {
+	// 	// printf("'%s'\n", line);
+	// 	if (strcmp(line, FILES_TAG) == 0)
+	// 	{
+	// 		// archive.files = (char **)malloc(sizeof(char));
+	// 		/* Malloc doesn't work!*/
 			
-			while ((fscanf(arch_file, "%s\n", line) != EOF)
-				&& (strcmp(line, "}") != 0))
-			{
-				// printf("archive.files[%d] = '%s';\n", i, line);
-				strcpy(archive.files[i], line);
-				i += 1;
-			}
-		}
-		else if (strcmp(line, VERSION_TAG) == 0)
-		{
-			fscanf(arch_file, "%s", archive.version);
-			if (strcmp(archive.version, ARC_VERSION) != 0)
-			{
-				printf("'%s'\n'%s'\n", archive.version, ARC_VERSION);
-				return ERR_UNSUPPORTED_VERSION;
-			}
-			fscanf(arch_file, "%s", archive.version);
-			// fscanf(arch_file, "%s", line);
-			// strcpy(archive.version[0], line);
-		}
-		else if (strcmp(line, TREE_TAG) == 0)
-		{
-			printf("Tree doesn't supported!\n");
-		}
-	}
+	// 		while ((fscanf(arch_file, "%s\n", line) != EOF)
+	// 			&& (strcmp(line, "}") != 0))
+	// 		{
+	// 			// printf("archive.files[%d] = '%s';\n", i, line);
+	// 			strcpy(archive.files[i], line);
+	// 			i += 1;
+	// 		}
+	// 	}
+	// 	else if (strcmp(line, VERSION_TAG) == 0)
+	// 	{
+	// 		fscanf(arch_file, "%s", archive.version);
+	// 		if (strcmp(archive.version, ARC_VERSION) != 0)
+	// 		{
+	// 			printf("'%s'\n'%s'\n", archive.version, ARC_VERSION);
+	// 			return ERR_UNSUPPORTED_VERSION;
+	// 		}
+	// 		fscanf(arch_file, "%s", archive.version);
+	// 		// fscanf(arch_file, "%s", line);
+	// 		// strcpy(archive.version[0], line);
+	// 	}
+	// 	else if (strcmp(line, TREE_TAG) == 0)
+	// 	{
+	// 		printf("Tree doesn't supported!\n");
+	// 	}
+	// }
 	
-	fclose(arch_file);
-	// printf("archive version: %s\n", archive.version);
-	// printf("archive has '%s' file\n", archive.files[0]);
+	// fclose(arch_file);
+	// // printf("archive version: %s\n", archive.version);
+	// // printf("archive has '%s' file\n", archive.files[0]);
 
 	#ifdef DEBUG
 		print_end_func(__func__);
@@ -490,8 +490,8 @@ void print_bin_file(char *file_name)
 
 	FILE *file;
 	unsigned char str;
-	int i = 1;
-	struct List *lst = init_list();
+	int h, i = 1;
+	struct List *lst = NULL;
 	
 
 	if((file = fopen(file_name, "rb")) == NULL)
@@ -500,20 +500,18 @@ void print_bin_file(char *file_name)
 		exit(1);
 	}
 
-	int h;
-	printf("The content of '%s' file:\n", file_name);
+	// printf("The content of '%s' file:\n", file_name);
 	while (fread(&str, sizeof(str), 1, file))
 	{
-		// printf("%02x", str);
 		h = get_hash(str);
-		
-		printf("sym: '%x'\n", str);
-		printf("hsh: '%d'\n", h);
-
 		insert(&lst, get_hash(str), str);
-		if (!(i % 2)) printf(" ");
-		if (!(i % 16)) printf("\n");
-		i++;
+		
+		// printf("%02x", str);
+		// printf("sym: '%x'\n", str);
+		// printf("hsh: '%d'\n", h);
+		// if (!(i % 2)) printf(" ");
+		// if (!(i % 16)) printf("\n");
+		// i++;
 	}
 
 	fclose(file);
