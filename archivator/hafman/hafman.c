@@ -30,15 +30,16 @@ SYMLIST *get_symbols_list(unsigned char *string)
 		print_start_func(__func__);
 	#endif
 
-	// SYMLIST *symbols_list = (SYMLIST*)malloc(sizeof(SYMLIST));
-	SYMLIST *symbols_list = NULL;
+	SYMLIST *symbols_list = (SYMLIST*)malloc(sizeof(SYMLIST));
+	// SYMLIST *symbols_list = NULL;
 	int i;
 	
-	printf("%x - %s\n", string, (signed)string);
-	print_list(symbols_list);
+	// printf("%x - %s\n", string, (signed)string);
+	// print_list(symbols_list);
 	for (i = 0; i < strlen(string); i++)
 	{
-		insert(&symbols_list, get_hash(string[i]), string[i]);
+		// printf("%x - %c\n", (unsigned)string[i], string[i]);
+		append(symbols_list, get_hash(string[i]), string[i]);
 		// print_list(symbols_list);
 	}
 	
@@ -89,6 +90,7 @@ void print_list(SYMLIST *list)
 		nxt_lst = nxt_lst->next;
 	}
 	printf("]\n");
+	// printf("%d\n", nxt_ls);
 
 	#ifdef DEBUG
 		print_end_func(__func__);
@@ -96,13 +98,13 @@ void print_list(SYMLIST *list)
 }
 
 
-int insert(SYMLIST **list, int hash, unsigned char value)
+int append(SYMLIST *main_lst, int hash, unsigned char value)
 {
 	#ifdef DEBUG
 		print_start_func(__func__);
 	#endif
 	
-	SYMLIST *left_lst, *right_lst = (*list);
+	SYMLIST *left_lst = main_lst, *right_lst = main_lst->next;
 	SYMLIST *new_lst = (SYMLIST*)malloc(sizeof(SYMLIST));
 
 	new_lst->next = NULL;
@@ -110,48 +112,34 @@ int insert(SYMLIST **list, int hash, unsigned char value)
 	new_lst->value = value;
 	new_lst->count = 1;
 
-
-	if (right_lst == NULL)
+	if (left_lst == NULL)
 	{
-		list = &new_lst;
-
+		main_lst = new_lst;
+		// printf("insert right_lst : %d\n", right_lst);
+		// printf("new_lst is :%d\n", &new_lst);
+		// printf("list is : %d\n", list);
 		#ifdef DEBUG
 			print_end_func(__func__);
 		#endif
 		return 0;
 	}
 
-	left_lst = right_lst;
-	// right_lst = right_lst->next;
-	// printf("%d\n", right_lst);
+		// && (value != right_lst->value))
 	while (right_lst != NULL)
 	{
-		if (hash == right_lst->hash)
+		if (value == right_lst->value)
 		{
-			if (value == right_lst->value)
-			{
-				right_lst->count += 1;
-				left_lst->next = right_lst->next;
-				
-				shift_list(list, right_lst);
-
-				#ifdef DEBUG
-					print_end_func(__func__);
-				#endif
-				return 0;
-			}
-			else
-			{
-				printf("Collision!!!\nHash : '%d' for values : (%x) (%x)\n", hash, value, right_lst->value);
-				return 0;
-			}
-		}	
+			right_lst->count += 1;
+			left_lst->next = right_lst->next;	
+			insert(main_lst, right_lst);
+			#ifdef DEBUG
+				print_end_func(__func__);
+			#endif
+			return 0;
+		}
 		left_lst = right_lst;
 		right_lst = right_lst->next;
-		// printf("%d\n", right_lst);
 	}
-	// print_decor();
-	
 	left_lst->next = new_lst;
 
 	#ifdef DEBUG
@@ -161,52 +149,34 @@ int insert(SYMLIST **list, int hash, unsigned char value)
 }
 
 
-int shift_list(SYMLIST **list, SYMLIST *new_lst)
+int insert(SYMLIST *main_lst, SYMLIST *new_lst)
 {
 	#ifdef DEBUG
 		print_start_func(__func__);
 	#endif
 	
-	SYMLIST *left_lst, *right_lst = (*list);
-	
-	if (right_lst == NULL)
-	{
-		printf("right_lst is NULL!\n");
-		return 0;
-	}
+	SYMLIST *left_lst = main_lst, *right_lst = main_lst->next;
 
-	if (right_lst->count < new_lst->count)
+	if (left_lst == NULL)
 	{
-		new_lst->next = right_lst;
-		list = &new_lst;
-
+		main_lst = new_lst;
+		
 		#ifdef DEBUG
 			print_end_func(__func__);
 		#endif
 		return 0;
 	}
 
-	left_lst = right_lst;
-	right_lst = right_lst->next;
-	
-	while (right_lst)
+	while ((right_lst != NULL)
+		&& (new_lst->count > right_lst->count))
 	{
-		if (right_lst->count > new_lst->count)
-		{
-			new_lst->next = right_lst;
-			left_lst->next = new_lst;
-
-			#ifdef DEBUG
-				print_end_func(__func__);
-			#endif
-			return 0;
-		}
 		left_lst = right_lst;
 		right_lst = right_lst->next;
 	}
-	
-	left_lst->next = new_lst;
 
+	left_lst->next = new_lst;
+	new_lst->next = right_lst;
+	
 	#ifdef DEBUG
 		print_end_func(__func__);
 	#endif

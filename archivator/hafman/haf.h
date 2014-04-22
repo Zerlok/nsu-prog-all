@@ -22,7 +22,9 @@ typedef struct SymbolList
 
 void print_list(SYMLIST *list);
 int get_hash(unsigned char symbol);
-int shift_list(SYMLIST **list, SYMLIST *new_lst);
-int insert(SYMLIST **list, int hash, unsigned char value);
+// int shift_list(SYMLIST **list, SYMLIST *new_lst);
+// int insert(SYMLIST **list, int hash, unsigned char value);
+int insert(SYMLIST *list, SYMLIST *new_lst);
+int append(SYMLIST *list, int hash, unsigned char value);
 char *encode(char *string);
 SYMLIST *get_symbols_list(unsigned char *string);
