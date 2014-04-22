@@ -5,7 +5,10 @@ syntax: glob
 *.gch
 *.sublime-project
 *.sublime-workspace
+*hfmn
+*harc
 
 syntax: regexp
-^(\w+/)+\w+$
-_samples/.*
+^_samples/.*$
+^task\_\d+\/\w+$
+^.*?\/(\_\w+\/).*?$

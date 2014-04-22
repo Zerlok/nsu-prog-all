@@ -10,14 +10,12 @@
 
 struct List
 {
-	struct List * next;
+	struct List *next;
 	
 	int hash;
 	unsigned char value;
 	int count;
 };
-
-struct List *init_list();
 
 void print_list(struct List *list);
 
@@ -56,22 +54,19 @@ typedef struct Archive
 #define ARC_FILE_TAG ".trar"
 
 
-#ifdef DEBUG
 /* DEBUG */
 
-#define TESTMODE_FLAG "--test"
-#define TESTMODE_CODE 9000
-#define TESTMODE_ERROR -9000
+#ifdef DEBUG
+	#define TESTMODE_FLAG "--test"
+	#define TESTMODE_CODE 9000
+	#define TESTMODE_ERROR -9000
 
-void print_flag(char flag[]);
-void print_func_name(const char name[]);
-void print_end_func(const char name[]);
-void print_here(const char name[], const int line);
-void print_decor();
-void decorate(char str[]);
-
-int run_test(char *file_name);
-
+	void print_flag(char flag[]);
+	void print_start_func(const char name[]);
+	void print_end_func(const char name[]);
+	void print_here(const char name[], const int line);
+	void print_decor();
+	void decorate(char str[]);
 #endif
 
 

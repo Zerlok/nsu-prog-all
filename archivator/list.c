@@ -46,9 +46,9 @@ void delete_list(struct List *list)
 
 int insert(struct List **list, int hash, unsigned char value)
 {
-	// #ifdef DEBUG
-	// 	print_func_name(__func__);
-	// #endif
+	#ifdef DEBUG
+		print_func_name(__func__);
+	#endif
 	
 	struct List *left_lst, *right_lst = (*list);
 	struct List *new_lst = (struct List*) malloc (sizeof(struct List));
@@ -64,9 +64,9 @@ int insert(struct List **list, int hash, unsigned char value)
 	{
 		list = &new_lst;
 		
-		// #ifdef DEBUG
-		// 	print_end_func(__func__);
-		// #endif
+		#ifdef DEBUG
+			print_end_func(__func__);
+		#endif
 
 		return 0;
 	}
@@ -83,11 +83,11 @@ int insert(struct List **list, int hash, unsigned char value)
 				right_lst->count += 1;
 				left_lst->next = right_lst->next;
 				
-				shift_list(list, &right_lst);
+				shift_list(list, right_lst);
 
-				// #ifdef DEBUG
-				// 	print_end_func(__func__);
-				// #endif
+				#ifdef DEBUG
+					print_end_func(__func__);
+				#endif
 				
 				return 0;
 			}
@@ -104,22 +104,18 @@ int insert(struct List **list, int hash, unsigned char value)
 				return 0;
 			}
 		}
-		// else
-		// {
-		// 	// printf("!");
-		// }
 		
 		left_lst = right_lst;
 		right_lst = right_lst->next;
 		// printf("%d\n", right_lst);
 	}
-	// decorate("hello");
+	decorate("hello");
 	
 	left_lst->next = new_lst;
 
-	// #ifdef DEBUG
-	// 	print_end_func(__func__);
-	// #endif
+	#ifdef DEBUG
+		print_end_func(__func__);
+	#endif
 
 	return 0;
 }
@@ -127,9 +123,9 @@ int insert(struct List **list, int hash, unsigned char value)
 
 int shift_list(struct List **list, struct List *new_lst)
 {
-	// #ifdef DEBUG
-	// 	print_func_name(__func__);
-	// #endif
+	#ifdef DEBUG
+		print_func_name(__func__);
+	#endif
 
 	struct List *left_lst, *right_lst = (*list);
 	
@@ -137,9 +133,9 @@ int shift_list(struct List **list, struct List *new_lst)
 	{
 		printf("right_lst is NULL!\n");
 
-		// #ifdef DEBUG
-		// 	print_end_func(__func__);
-		// #endif
+		#ifdef DEBUG
+			print_end_func(__func__);
+		#endif
 
 		return 0;
 	}
@@ -147,11 +143,11 @@ int shift_list(struct List **list, struct List *new_lst)
 	if (right_lst->count < new_lst->count)
 	{
 		new_lst->next = right_lst;
-		(*list) = new_lst;
+		list = &new_lst;
 
-		// #ifdef DEBUG
-		// 	print_end_func(__func__);
-		// #endif
+		#ifdef DEBUG
+			print_end_func(__func__);
+		#endif
 
 		return 0;
 	}
@@ -166,9 +162,9 @@ int shift_list(struct List **list, struct List *new_lst)
 			new_lst->next = right_lst;
 			left_lst->next = new_lst;
 			
-			// #ifdef DEBUG
-			// 	print_end_func(__func__);
-			// #endif
+			#ifdef DEBUG
+				print_end_func(__func__);
+			#endif
 
 			return 0;
 		}
@@ -178,9 +174,9 @@ int shift_list(struct List **list, struct List *new_lst)
 	
 	left_lst->next = new_lst;
 
-	// #ifdef DEBUG
-	// 	print_end_func(__func__);
-	// #endif
+	#ifdef DEBUG
+		print_end_func(__func__);
+	#endif
 
 	return 0;
 }
