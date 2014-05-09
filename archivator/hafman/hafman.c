@@ -3,151 +3,151 @@
 #include "../debug_trar.h"
 #define DEBUG
 
+#ifdef DEBUG
+	#define PRINT_START \
+		print_start_func(__func__);
+	#define PRINT_END \
+		print_end_func(__func__);
+#else
+	#define PRINT_START
+	#define PRINT_END
+#endif
+
 
 char *encode(char *string)
 {
-	#ifdef DEBUG
-		print_start_func(__func__);
-	#endif
+	PRINT_START
 
 	char *new = (char*)malloc(sizeof(string));
 	int i;
 	char s[] = "<<<";
-	SYMLIST *symbols_list = get_symbols_list((unsigned char*)string);
-	BINTREE *bin_tree = get_bintree(symbols_list);
+	BINTREE *symbols_list = get_symbols_list((unsigned char*)string);
+	BINTREE *bin_tree;
 
 	print_list(symbols_list);
-	print_decor();
-	// print_bintree(bin_tree, s);
+	bin_tree = build_bintree(symbols_list);
+	decorate("bin_tree created");
+	// print_list(pop(symbols_list));
+	print_list(symbols_list);
+	// printf("code: %d", bin_tree->hash);
 
-	#ifdef DEBUG
-		print_end_func(__func__);
-	#endif
-
+	PRINT_END
 	return new;
 }
 
 
-BINTREE *get_bintree(SYMLIST *main_lst)
+BINTREE *build_bintree(BINTREE *main_lst)
 {
-	#ifdef DEBUG
-		print_start_func(__func__);
-	#endif
+	PRINT_START
 
-	SYMLIST *new_lst, *right_lst, *left_lst = pop(main_lst);
-	 // *right_lst = pop(main_lst);
-	BINTREE *right_trunk, *left_trunk;
-
-	print_list(main_lst);
-	int i = 1;
-	while ((i < 2) &&
-		(((left_lst = pop(main_lst)) != NULL)
-		|| ((right_lst = pop(main_lst)) != NULL))
+	BINTREE *new_lst, *left_lst, *right_lst;
+	int i = 0;
+	while (i < 10
+        // && ((left_lst = pop(&main_lst)) != NULL)
+        && (main_lst != NULL)
 		)
 	{
-		print_list(left_lst);
-		print_list(right_lst);
-		left_trunk = get_trunk("1", left_lst);
-		right_trunk = get_trunk("0", right_lst);
-
-		new_lst = (SYMLIST*)malloc(sizeof(SYMLIST));
-		// new_lst->count = left_lst->count + right_lst->count;
-		// new_lst->hash = right_lst->hash;
-		// new_lst->value = left_lst->value;
-		new_lst->count = 69;
-		new_lst->hash = 696;
-		new_lst->value = (unsigned) "123";
+		left_lst = pop(&main_lst);
+		new_lst = (BINTREE*)malloc(sizeof(BINTREE));
+		
+		left_lst->code = "1";
+		new_lst->left = left_lst;
+		new_lst->right = right_lst;
+		new_lst->value = left_lst->value;
+		
+        if ((right_lst = pop(&main_lst)) != NULL)
+		{
+			right_lst->code = "0";
+			new_lst->count = left_lst->count + right_lst->count;
+            new_lst->hash = right_lst->hash - 100;
+		}
+        else
+		{
+			new_lst->count = left_lst->count;
+			new_lst->hash = left_lst->hash + 200;
+		}
+		
+		if (left_lst != NULL)
+		{
+			printf("pop result: list (%d)\n", left_lst->hash);
+		}
+		else
+		{
+			printf("pop result: NULL\n");
+		}
+		if (right_lst != NULL)
+		{
+			printf("pop result: list (%d)\n", right_lst->hash);
+		}
+		else
+		{
+			printf("pop result: NULL\n");
+		}
+		print_list(main_lst);
 		print_list(new_lst);
 		
-		// insert(main_lst, new_lst);
+		insert(&main_lst, new_lst);
+
+		print_list(main_lst);
 		i++;
 	}
+	print_decor();
 
-	#ifdef DEBUG
-		print_end_func(__func__);
-	#endif
+	PRINT_END
+	return new_lst;
 }
-// {
-// 	#ifdef DEBUG
-// 		print_start_func(__func__);
-// 	#endif
-
-// 	SYMLIST *lst = main_lst;
-// 	BINTREE *root, *trunk = get_trunk("0", (unsigned)"");
-// 	// *root = get_trunk("1", (unsigned)"");
-// 	// root->left = trunk;
-// 	// root->right = NULL;
-
-// 	if (lst == NULL)
-// 	{
-// 		return trunk;
-// 	}
-// 	trunk->left = get_trunk("1", lst->value);
-
-// 	// if (lst->next == NULL)
-// 	// {
-// 	// 	return trunk;
-// 	// }
-// 	lst = lst->next;
-// 	while (lst)
-// 	{
-// 		trunk->right = get_trunk("0", lst->value);
-		
-// 		root = get_trunk("1", (unsigned)"");
-// 		root->left = trunk;
-// 		root->right = NULL;
-		
-// 		lst = lst->next;
-// 	}
-	
-// 	#ifdef DEBUG
-// 		print_end_func(__func__);
-// 	#endif
-
-// 	return root;
-// }
 
 
-BINTREE *get_trunk(char *code, SYMLIST *list)
+BINTREE *pop(BINTREE **main_lst)
 {
-	#ifdef DEBUG
-		print_start_func(__func__);
-	#endif
+	PRINT_START
+	// if ()
+	// {
+	// 	return NULL;
+	// }
+
+	BINTREE *lst = *main_lst;
+	printf(">> %u\n", *main_lst);
+	if ((*main_lst) != NULL)
+	{
+		*main_lst = (*main_lst)->next;
+		(lst->next) = NULL;
+	}
+
+	PRINT_END
+	return lst;
+}
+
+
+BINTREE *get_trunk(char *code, BINTREE *list)
+{
+	PRINT_START
 	
 	if (list == NULL)
 	{
-		// free(root);
-		#ifdef DEBUG
-			print_end_func(__func__);
-		#endif
+		PRINT_END
 		return NULL;
 	}
 
 	BINTREE *root = (BINTREE*)malloc(sizeof(BINTREE));
 	root->left = root->right = NULL;
 	strcpy(root->code, code);
-	// root->value = list->value;
-	// print_decor();
 
-	#ifdef DEBUG
-		print_end_func(__func__);
-	#endif
+	PRINT_END
 	return root;
 }
 
 
 int print_bintree(BINTREE *root, char *seq)
 {
-	// #ifdef DEBUG
-	// 	print_start_func(__func__);
-	// #endif
+	PRINT_START
 
-	char *left_seq = (char*)malloc(sizeof(seq));
-	char *right_seq = (char*)malloc(sizeof(seq));
+	// char *left_seq = (char*)malloc(sizeof(seq));
+	// char *right_seq = (char*)malloc(sizeof(seq));
+	char *left_seq, *right_seq;
 
-	strcpy(left_seq, seq);
-	strcpy(right_seq, seq);
-
+	// strcpy(left_seq, seq);
+	// strcpy(right_seq, seq);
 	if (root != NULL)
 	{
 		// printf("connect codes [%s %x]\n", root->code, root->value);
@@ -159,30 +159,30 @@ int print_bintree(BINTREE *root, char *seq)
 		}
 		if (root->left != NULL)
 		{
-			print_bintree(root->left, strcat(left_seq, root->code));
+			// decorate(seq);
+			print_decor();
+			printf("%d\n", root->hash);
+			left_seq = strcat(seq, root->code);
+			print_bintree(root->left, left_seq);
 		}
 		if (root->right != NULL)
 		{
+			right_seq = strcat(seq, root->code);
 			print_bintree(root->right, strcat(right_seq, root->code));
 		}
 	}
-
-	// #ifdef DEBUG
-	// 	print_end_func(__func__);
-	// #endif
-
+	
+	PRINT_END
 	return 0;
 }
 
 
-SYMLIST *get_symbols_list(unsigned char *string)
+BINTREE *get_symbols_list(unsigned char *string)
 {
-	#ifdef DEBUG
-		print_start_func(__func__);
-	#endif
+	PRINT_START
 
-	SYMLIST *symbols_list = (SYMLIST*)malloc(sizeof(SYMLIST));
-	// SYMLIST *symbols_list;
+	BINTREE *symbols_list = (BINTREE*)malloc(sizeof(BINTREE));
+	// BINTREE *symbols_list;
 	int i;
 	
 	// printf("%x - %s\n", string, (signed)string);
@@ -193,10 +193,7 @@ SYMLIST *get_symbols_list(unsigned char *string)
 		append(symbols_list, get_hash(string[i]), string[i]);
 	}
 	
-	#ifdef DEBUG
-		print_end_func(__func__);
-	#endif
-	
+	PRINT_END
 	return symbols_list->next;
 }
 
@@ -224,13 +221,11 @@ int get_hash(unsigned char symbol)
 }
 
 
-void print_list(SYMLIST *list)
+void print_list(BINTREE *list)
 {
-	// #ifdef DEBUG
-	// 	print_start_func(__func__);
-	// #endif
-	
-	SYMLIST *nxt_lst = list;
+	// PRINT_START
+
+	BINTREE *nxt_lst = list;
 
 	printf("[\n");
 	while (nxt_lst != NULL)
@@ -241,33 +236,28 @@ void print_list(SYMLIST *list)
 	}
 	printf("]\n");
 
-	// #ifdef DEBUG
-	// 	print_end_func(__func__);
-	// #endif
+	// PRINT_END
 }
 
 
-int append(SYMLIST *main_lst, int hash, unsigned char value)
+int append(BINTREE *main_lst, int hash, unsigned char value)
 {
-	// #ifdef DEBUG
-	// 	print_start_func(__func__);
-	// #endif
+	// PRINT_START
 	
-	SYMLIST *left_lst = main_lst, *right_lst = main_lst->next;
-	SYMLIST *new_lst = (SYMLIST*)malloc(sizeof(SYMLIST));
+	BINTREE *left_lst = main_lst, *right_lst = main_lst->next;
+	BINTREE *new_lst = (BINTREE*)malloc(sizeof(BINTREE));
 
-	new_lst->next = NULL;
+	new_lst->left = new_lst->right = new_lst->next = NULL;
 	new_lst->hash = hash;
-	new_lst->value = value;
 	new_lst->count = 1;
+	new_lst->code = "0";
+	new_lst->value = value;
 
 	if (left_lst == NULL)
 	{
 		main_lst = new_lst;
 
-		// #ifdef DEBUG
-		// 	print_end_func(__func__);
-		// #endif
+		// PRINT_END
 		return 0;
 	}
 
@@ -277,44 +267,37 @@ int append(SYMLIST *main_lst, int hash, unsigned char value)
 		{
 			right_lst->count += 1;
 			left_lst->next = right_lst->next;	
-			insert(main_lst, right_lst);
+			insert(&main_lst, right_lst);
 
-			// #ifdef DEBUG
-			// 	print_end_func(__func__);
-			// #endif
+			// PRINT_END
 			return 0;
 		}
 		left_lst = right_lst;
 		right_lst = right_lst->next;
 	}
-	insert(main_lst, new_lst);
+	insert(&main_lst, new_lst);
 
-	// #ifdef DEBUG
-	// 	print_end_func(__func__);
-	// #endif
+	// PRINT_END
 	return 0;
 }
 
 
-int insert(SYMLIST *main_lst, SYMLIST *new_lst)
+int insert(BINTREE **main_lst, BINTREE *new_lst)
 {
-	// #ifdef DEBUG
-	// 	print_start_func(__func__);
-	// #endif
+	PRINT_START
 	
-	SYMLIST *left_lst = main_lst, *right_lst = main_lst->next;
+	BINTREE *left_lst = (*main_lst), *right_lst;
 
 	// printf("Inserting [%02x (%d)] in\n", new_lst->value, new_lst->count);
 
 	if (left_lst == NULL)
 	{
-		main_lst = new_lst;
+		*main_lst = new_lst;
 		
-		#ifdef DEBUG
-			print_end_func(__func__);
-		#endif
+		PRINT_END
 		return 0;
 	}
+	right_lst = (*main_lst)->next;
 
 	while ((right_lst != NULL)
 		&& (new_lst->count > right_lst->count))
@@ -326,79 +309,6 @@ int insert(SYMLIST *main_lst, SYMLIST *new_lst)
 	left_lst->next = new_lst;
 	new_lst->next = right_lst;
 	
-	// #ifdef DEBUG
-	// 	print_end_func(__func__);
-	// #endif
+	PRINT_END
 	return 0;
-}
-
-
-SYMLIST *pop(SYMLIST *main_lst)
-{
-	SYMLIST *lst = main_lst;
-
-	if ((main_lst == NULL)
-		|| (main_lst->next == NULL))
-	{
-		return NULL;
-	}
-
-	main_lst = main_lst->next;
-	lst->next = NULL;
-	return lst;
-}
-
-
-
-SYMLIST *exclude(SYMLIST *main_lst, int num)
-{
-	#ifdef DEBUG
-		print_start_func(__func__);
-	#endif
-
-	SYMLIST *curr_lst, *left_lst = main_lst;
-
-	if (left_lst == NULL)
-	{
-		#ifdef DEBUG
-			print_end_func(__func__);
-		#endif
-		return NULL;
-	}
-
-	if (num == 1)
-	{
-		free(main_lst);
-
-		#ifdef DEBUG
-			print_end_func(__func__);
-		#endif
-		return NULL;
-	}
-
-	curr_lst = left_lst->next;
-	while ((curr_lst != NULL)
-		&& (num > 0))
-	{
-		// if (curr_lst->hash == hash)
-		// {
-		// 	left_lst->next = curr_lst->next;
-		// 	// curr_lst->next = NULL;
-			
-		// 	#ifdef DEBUG
-		// 		print_end_func(__func__);
-		// 	#endif
-		// 	return curr_lst;
-		// }
-
-		left_lst = curr_lst;
-		curr_lst = curr_lst->next;
-		num -= 1;
-	}
-	left_lst->next = curr_lst->next;
-
-	#ifdef DEBUG
-		print_end_func(__func__);
-	#endif
-	return curr_lst;
 }

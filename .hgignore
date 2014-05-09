@@ -5,6 +5,7 @@ syntax: glob
 *.gch
 *.sublime-project
 *.sublime-workspace
+*.pro
 *hfmn
 *harc
 
