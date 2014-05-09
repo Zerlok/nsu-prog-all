@@ -18,12 +18,12 @@ Input:
 
 void print_start_func(const char name[])
 {
-	printf("\n>-----RUN----->\t'%s' function:\n", name);
+	printf("\n>>>---RUN--->>>\t'%s' function\n", name);
 }
 
 void print_end_func(const char name[])
 {
-	printf("\n<-----END-----<\t'%s' function:\n", name);
+	printf("<<<---END---<<<\t'%s' function\n\n", name);
 }
 
 void print_decor()
