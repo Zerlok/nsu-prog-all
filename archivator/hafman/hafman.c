@@ -1,7 +1,7 @@
 #include "haf.h"
 
 #include "../debug_trar.h"
-#define DEBUG
+#define DEBUG_
 
 #ifdef DEBUG
 	#define PRINT_RUN \
@@ -20,17 +20,48 @@ char *encode(char *string)
 
 	char *new = (char*)malloc(sizeof(string));
 	int i;
-	// char s[] = "";
-	BINTREE *symbols_list = get_symbols_list((unsigned char*)string);
-	BINTREE *bin_tree;
 
-	print_list(symbols_list);
-	bin_tree = build_bintree(symbols_list);
-	print_bintree(bin_tree, "");
-	// assign_bintree_values(bin_tree, "");
+	BINTREE *symbols_list = get_symbols_list((unsigned char*)string);
+	BINTREE *bin_tree = build_bintree(symbols_list);;
+
+	#ifdef DEBUG
+		print_list(symbols_list);
+		print_bintree(bin_tree, "");
+	#endif
+	
+	assign_bintree_values(bin_tree, "");
+
+	for (i = 0; i < strlen(string); i++)
+	{
+		new = strcat(new, get_encoded(symbols_list, string[i]));
+		// printf("%s ", get_encoded(symbols_list, string[i]));
+	}
+	// printf("\n");
 
 	PRINT_END
 	return new;
+}
+
+
+char *get_encoded(BINTREE *main_lst, unsigned char symbol)
+{
+	// PRINT_RUN
+
+	BINTREE *lst = main_lst;
+
+	while (lst != NULL)
+	{
+		if (lst->value == symbol)
+		{
+			// PRINT_END
+			return lst->encoded;
+		}
+
+		lst = lst->next;
+	}
+
+	// PRINT_END
+	return NULL;
 }
 
 
@@ -38,10 +69,16 @@ BINTREE *build_bintree(BINTREE *main_lst)
 {
 	PRINT_RUN
 
-	BINTREE *new_lst, *left_lst, *right_lst;
+	BINTREE *new_lst, *left_lst, *right_lst, *header = main_lst;
 
-	while ((left_lst = pop(&main_lst)) != NULL
-		&& (right_lst = pop(&main_lst)) != NULL)
+	if (header->next == NULL)
+	{
+		header->code = "0";
+		return header;
+	}
+
+	while ((left_lst = pop(&header)) != NULL
+		&& (right_lst = pop(&header)) != NULL)
 	{
 		new_lst = (BINTREE*)malloc(sizeof(BINTREE));
 		
@@ -50,19 +87,19 @@ BINTREE *build_bintree(BINTREE *main_lst)
 
 		new_lst->left = left_lst;
 		new_lst->right = right_lst;
-		new_lst->encoded =  NULL;
-		new_lst->value = left_lst->value;
+		new_lst->hash = 1;
+		new_lst->value = (unsigned)"";
 		new_lst->count = left_lst->count + right_lst->count;
-		new_lst->hash = right_lst->hash - 100;
 		
 		// print_list(main_lst);
 		// print_list(new_lst);
 		
-		insert(&main_lst, new_lst);
+		insert(&header, new_lst);
 
 		// print_list(main_lst);
 	}
-	new_lst->code = "1";
+	new_lst->code = "";
+	insert(&main_lst, new_lst);
 
 	PRINT_END
 	return new_lst;
@@ -78,7 +115,7 @@ BINTREE *pop(BINTREE **main_lst)
 	if ((*main_lst) != NULL)
 	{
 		*main_lst = (*main_lst)->next;
-		lst->next = NULL;
+		// lst->next = NULL;
 	}
 
 	// PRINT_END
@@ -88,26 +125,29 @@ BINTREE *pop(BINTREE **main_lst)
 
 int assign_bintree_values(BINTREE *root, char *seq)
 {
-	PRINT_RUN
+	// PRINT_RUN
 
 	if (root == NULL)
 	{
-		PRINT_END
+		// PRINT_END
 		return 1;
 	}
 
 	if ((root->right == NULL)
 		&& (root->left == NULL))
 	{
-		printf("%c == %s%s\n", (signed)root->value, seq, root->code);
+		root->encoded = (char*)malloc(sizeof(seq));
 		strcpy(root->encoded, seq);
+		// printf("assigned %c == %s+%s", (signed)root->value, seq, root->code);
+		// printf(" | strcat == (%s)\n", strcat(seq, root->code));
+		// printf("\n");
 
-		PRINT_END
+		strcat(root->encoded, root->code);
+
+		// PRINT_END
 		return 0;
 	}
 	
-	// printf("connect codes [%s %x]\n", root->code, root->value);
-
 	char *left_seq = (char*)malloc(sizeof(seq));
 	char *right_seq = (char*)malloc(sizeof(seq));
 
@@ -124,7 +164,7 @@ int assign_bintree_values(BINTREE *root, char *seq)
 	assign_bintree_values(root->left, left_seq);
 	assign_bintree_values(root->right, right_seq);
 	
-	PRINT_END
+	// PRINT_END
 }
 
 

@@ -8,8 +8,8 @@ int main(int argc, char *argv[])
 	}
 	else
 	{
-		printf("Simple example of haffma algorythm.\n");
-		printf("The encode 'abracadabra' is '%s'\n", encode("abracadabra"));
+		printf("Simple example of haffman algorythm.\n");
+		printf("The encoded 'abracadabra' is '%s'\n", encode("abracadabra"));
 	}
     return 0;
 }
