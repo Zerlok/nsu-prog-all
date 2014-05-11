@@ -1,7 +1,7 @@
 #include "haf.h"
 
 #include "../debug_trar.h"
-#define DEBUG_
+#define DEBUG
 
 #ifdef DEBUG
 	#define PRINT_RUN \
@@ -38,6 +38,62 @@ char *encode(char *string)
 	}
 	// printf("\n");
 
+	#ifdef DEBUG
+		// printf("decode is: '%s'\n", decode(bin_tree, new));
+		decode(bin_tree, new);
+	#endif
+
+	PRINT_END
+	return new;
+}
+
+
+char *decode(BINTREE *root, char *string)
+{
+	PRINT_RUN
+
+	int i;
+	char *new = (char*)malloc(sizeof(string));
+	BINTREE *head = root;
+
+	if (root == NULL)
+	{
+		PRINT_END
+		return "";
+	}
+
+	// strcpy(new, "");
+	printf("Decode is: ");
+
+	for (i = 0; i < strlen(string); i++)
+	{
+		if ((head->left == NULL) && (head->right == NULL))
+		{
+			// strcat(new, (char)head->value);
+			printf("%c", (signed)head->value);
+			head = root;
+		}
+		if (string[i] == '1')
+		{
+			head = head->left;
+		}
+		else if (string[i] == '0')
+		{
+			head = head->right;
+		}
+		else
+		{
+			decorate("EXSEPTION!@@P");
+			exit(1);
+		}
+	}
+	
+	if (root->left != NULL && root->right != NULL)
+	{
+		printf("%c", (signed)head->value);
+	}
+
+	printf("\n");
 	PRINT_END
 	return new;
 }
@@ -48,6 +104,8 @@ char *get_encoded(BINTREE *main_lst, unsigned char symbol)
 	// PRINT_RUN
 
 	BINTREE *lst = main_lst;
+
+	// printf("'%c'\n", (signed)symbol);
 
 	while (lst != NULL)
 	{
@@ -73,6 +131,7 @@ BINTREE *build_bintree(BINTREE *main_lst)
 
 	if (header->next == NULL)
 	{
+		header->left = header->right = NULL;
 		header->code = "0";
 		return header;
 	}
@@ -108,7 +167,7 @@ BINTREE *build_bintree(BINTREE *main_lst)
 
 BINTREE *pop(BINTREE **main_lst)
 {
-	// PRINT_RUN
+	PRINT_RUN
 
 	BINTREE *lst = (*main_lst);
 	
@@ -118,7 +177,7 @@ BINTREE *pop(BINTREE **main_lst)
 		// lst->next = NULL;
 	}
 
-	// PRINT_END
+	PRINT_END
 	return lst;
 }
 
@@ -266,7 +325,7 @@ void print_list(BINTREE *list)
 	while (nxt_lst != NULL)
 	{
 		// printf("%d - ", nxt_lst);
-		printf("%05d : %02x (%d)\n", nxt_lst->hash, nxt_lst->value, nxt_lst->count);
+		printf("%05d : %4x (%d)\n", nxt_lst->hash, nxt_lst->value, nxt_lst->count);
 		nxt_lst = nxt_lst->next;
 	}
 	printf("]\n");
@@ -277,7 +336,7 @@ void print_list(BINTREE *list)
 
 int append(BINTREE *main_lst, int hash, unsigned char value)
 {
-	// PRINT_RUN
+	PRINT_RUN
 	
 	BINTREE *left_lst = main_lst, *right_lst = main_lst->next;
 	BINTREE *new_lst = (BINTREE*)malloc(sizeof(BINTREE));
@@ -292,7 +351,7 @@ int append(BINTREE *main_lst, int hash, unsigned char value)
 	{
 		main_lst = new_lst;
 
-		// PRINT_END
+		PRINT_END
 		return 0;
 	}
 
@@ -304,7 +363,7 @@ int append(BINTREE *main_lst, int hash, unsigned char value)
 			left_lst->next = right_lst->next;	
 			insert(&main_lst, right_lst);
 
-			// PRINT_END
+			PRINT_END
 			return 0;
 		}
 		left_lst = right_lst;
@@ -312,14 +371,14 @@ int append(BINTREE *main_lst, int hash, unsigned char value)
 	}
 	insert(&main_lst, new_lst);
 
-	// PRINT_END
+	PRINT_END
 	return 0;
 }
 
 
 int insert(BINTREE **main_lst, BINTREE *new_lst)
 {
-	// PRINT_RUN
+	PRINT_RUN
 	
 	BINTREE *left_lst = (*main_lst), *right_lst;
 
@@ -329,7 +388,7 @@ int insert(BINTREE **main_lst, BINTREE *new_lst)
 	{
 		*main_lst = new_lst;
 		
-		// PRINT_END
+		PRINT_END
 		return 0;
 	}
 	right_lst = (*main_lst)->next;
@@ -344,6 +403,6 @@ int insert(BINTREE **main_lst, BINTREE *new_lst)
 	left_lst->next = new_lst;
 	new_lst->next = right_lst;
 	
-	// PRINT_END
+	PRINT_END
 	return 0;
 }
