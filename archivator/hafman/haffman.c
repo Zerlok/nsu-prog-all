@@ -22,14 +22,16 @@ char *encode(char *string)
 	int i;
 
 	BINTREE *symbols_list = get_symbols_list((unsigned char*)string);
-	BINTREE *bin_tree = build_bintree(symbols_list);;
-
 	#ifdef DEBUG
 		print_list(symbols_list);
-		print_bintree(bin_tree, "");
 	#endif
 	
-	assign_bintree_values(bin_tree, "");
+	BINTREE *bin_tree = get_bintree(symbols_list);;
+	#ifdef DEBUG
+		print_bintree(bin_tree, "");
+	#endif
+
+	count_bintree_codes(bin_tree, "");
 
 	for (i = 0; i < strlen(string); i++)
 	{
@@ -48,18 +50,18 @@ char *encode(char *string)
 }
 
 
-char *decode(BINTREE *root, char *string)
+int decode(BINTREE *root, char *string)
 {
 	PRINT_RUN
 
 	int i;
-	char *new = (char*)malloc(sizeof(string));
+	// char *new = (char*)malloc(sizeof(string));
 	BINTREE *head = root;
 
 	if (root == NULL)
 	{
 		PRINT_END
-		return "";
+		return 1;
 	}
 
 	// strcpy(new, "");
@@ -95,7 +97,7 @@ char *decode(BINTREE *root, char *string)
 
 	printf("\n");
 	PRINT_END
-	return new;
+	return 0;
 }
 
 
@@ -123,7 +125,7 @@ char *get_encoded(BINTREE *main_lst, unsigned char symbol)
 }
 
 
-BINTREE *build_bintree(BINTREE *main_lst)
+BINTREE *get_bintree(BINTREE *main_lst)
 {
 	PRINT_RUN
 
@@ -136,8 +138,8 @@ BINTREE *build_bintree(BINTREE *main_lst)
 		return header;
 	}
 
-	while ((left_lst = pop(&header)) != NULL
-		&& (right_lst = pop(&header)) != NULL)
+	while ((left_lst = pop_list(&header)) != NULL
+		&& (right_lst = pop_list(&header)) != NULL)
 	{
 		new_lst = (BINTREE*)malloc(sizeof(BINTREE));
 		
@@ -153,36 +155,19 @@ BINTREE *build_bintree(BINTREE *main_lst)
 		// print_list(main_lst);
 		// print_list(new_lst);
 		
-		insert(&header, new_lst);
+		insert_to_list(&header, new_lst);
 
 		// print_list(main_lst);
 	}
 	new_lst->code = "";
-	insert(&main_lst, new_lst);
+	insert_to_list(&main_lst, new_lst);
 
 	PRINT_END
 	return new_lst;
 }
 
 
-BINTREE *pop(BINTREE **main_lst)
-{
-	PRINT_RUN
-
-	BINTREE *lst = (*main_lst);
-	
-	if ((*main_lst) != NULL)
-	{
-		*main_lst = (*main_lst)->next;
-		// lst->next = NULL;
-	}
-
-	PRINT_END
-	return lst;
-}
-
-
-int assign_bintree_values(BINTREE *root, char *seq)
+int count_bintree_codes(BINTREE *root, char *seq)
 {
 	// PRINT_RUN
 
@@ -220,8 +205,8 @@ int assign_bintree_values(BINTREE *root, char *seq)
 		strcpy(right_seq, root->code);
 	}
 	
-	assign_bintree_values(root->left, left_seq);
-	assign_bintree_values(root->right, right_seq);
+	count_bintree_codes(root->left, left_seq);
+	count_bintree_codes(root->right, right_seq);
 	
 	// PRINT_END
 }
@@ -246,8 +231,6 @@ int print_bintree(BINTREE *root, char *seq)
 		return 0;
 	}
 	
-	// printf("connect codes [%s %x]\n", root->code, root->value);
-
 	char *left_seq = (char*)malloc(sizeof(seq));
 	char *right_seq = (char*)malloc(sizeof(seq));
 
@@ -267,27 +250,7 @@ int print_bintree(BINTREE *root, char *seq)
 	// PRINT_END
 }
 
-
-BINTREE *get_symbols_list(unsigned char *string)
-{
-	PRINT_RUN
-
-	BINTREE *symbols_list = (BINTREE*)malloc(sizeof(BINTREE));
-	int i;
-	
-	// printf("%x - %s\n", string, (signed)string);
-	// print_list(symbols_list);
-	for (i = 0; i < strlen(string); i++)
-	{
-		// printf("%x - %c\n", (unsigned)string[i], string[i]);
-		append(symbols_list, get_hash(string[i]), string[i]);
-	}
-	
-	PRINT_END
-	return symbols_list->next;
-}
-
-
+ 
 int get_hash(unsigned char symbol)
 {
 	// PRINT_RUN
@@ -315,32 +278,49 @@ int get_hash(unsigned char symbol)
 }
 
 
-void print_list(BINTREE *list)
+BINTREE *get_symbols_list(unsigned char *string)
 {
-	// PRINT_RUN
+	PRINT_RUN
 
-	BINTREE *nxt_lst = list;
-
-	printf("[\n");
-	while (nxt_lst != NULL)
+	BINTREE *symbols_list = (BINTREE*)malloc(sizeof(BINTREE));
+	int i;
+	
+	// printf("%x - %s\n", string, (signed)string);
+	// print_list(symbols_list);
+	for (i = 0; i < strlen(string); i++)
 	{
-		// printf("%d - ", nxt_lst);
-		printf("%05d : %4x (%d)\n", nxt_lst->hash, nxt_lst->value, nxt_lst->count);
-		nxt_lst = nxt_lst->next;
+		// printf("%x - %c\n", (unsigned)string[i], string[i]);
+		append_list(symbols_list, get_hash(string[i]), string[i]);
 	}
-	printf("]\n");
-
-	// PRINT_END
+	
+	PRINT_END
+	return symbols_list->next;
 }
 
 
-int append(BINTREE *main_lst, int hash, unsigned char value)
+BINTREE *pop_list(BINTREE **main_lst)
 {
-	PRINT_RUN
+	// PRINT_RUN
+
+	BINTREE *lst = (*main_lst);
+	
+	if ((*main_lst) != NULL)
+	{
+		*main_lst = (*main_lst)->next;
+		// lst->next = NULL;
+	}
+
+	// PRINT_END
+	return lst;
+}
+
+
+int append_list(BINTREE *main_lst, int hash, unsigned char value)
+{
+	// PRINT_RUN
 	
 	BINTREE *left_lst = main_lst, *right_lst = main_lst->next;
 	BINTREE *new_lst = (BINTREE*)malloc(sizeof(BINTREE));
-
 	new_lst->left = new_lst->right = new_lst->next = NULL;
 	new_lst->hash = hash;
 	new_lst->count = 1;
@@ -351,7 +331,7 @@ int append(BINTREE *main_lst, int hash, unsigned char value)
 	{
 		main_lst = new_lst;
 
-		PRINT_END
+		// PRINT_END
 		return 0;
 	}
 
@@ -361,24 +341,24 @@ int append(BINTREE *main_lst, int hash, unsigned char value)
 		{
 			right_lst->count += 1;
 			left_lst->next = right_lst->next;	
-			insert(&main_lst, right_lst);
+			insert_to_list(&main_lst, right_lst);
 
-			PRINT_END
+			// PRINT_END
 			return 0;
 		}
 		left_lst = right_lst;
 		right_lst = right_lst->next;
 	}
-	insert(&main_lst, new_lst);
+	insert_to_list(&main_lst, new_lst);
 
-	PRINT_END
+	// PRINT_END
 	return 0;
 }
 
 
-int insert(BINTREE **main_lst, BINTREE *new_lst)
+int insert_to_list(BINTREE **main_lst, BINTREE *new_lst)
 {
-	PRINT_RUN
+	// PRINT_RUN
 	
 	BINTREE *left_lst = (*main_lst), *right_lst;
 
@@ -388,7 +368,7 @@ int insert(BINTREE **main_lst, BINTREE *new_lst)
 	{
 		*main_lst = new_lst;
 		
-		PRINT_END
+		// PRINT_END
 		return 0;
 	}
 	right_lst = (*main_lst)->next;
@@ -403,6 +383,32 @@ int insert(BINTREE **main_lst, BINTREE *new_lst)
 	left_lst->next = new_lst;
 	new_lst->next = right_lst;
 	
-	PRINT_END
+	// PRINT_END
 	return 0;
+}
+
+
+void print_list(BINTREE *main_lst)
+{
+	// PRINT_RUN
+
+	BINTREE *lst = main_lst;
+
+	printf("[\n");
+	while (lst != NULL)
+	{
+		if (lst->hash == 1)
+		{
+			printf("[1 : %x (%d)]\n", lst->value, lst->count);
+		}
+		else
+		{
+			printf("%05d : %x (%d)\n", lst->hash, lst->value, lst->count);
+		}
+
+		lst = lst->next;
+	}
+	printf("]\n");
+
+	// PRINT_END
 }

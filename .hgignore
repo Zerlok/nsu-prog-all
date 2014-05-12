@@ -6,7 +6,7 @@ syntax: glob
 *.sublime-project
 *.sublime-workspace
 *.pro
-*hfmn
+*haffman
 *harc
 
 syntax: regexp

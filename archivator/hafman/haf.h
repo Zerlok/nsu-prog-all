@@ -14,21 +14,20 @@ typedef struct BinaryTree
 
 
 /* LIST */
-void print_list(BINTREE *list);
 int get_hash(unsigned char symbol);
-int append(BINTREE *list, int hash, unsigned char value);
-int insert(BINTREE **list, BINTREE *new_lst);
-BINTREE *pop(BINTREE **list);
+void print_list(BINTREE *list);
+int append_list(BINTREE *list, int hash, unsigned char value);
+int insert_to_list(BINTREE **list, BINTREE *new_lst);
+BINTREE *pop_list(BINTREE **list);
 BINTREE *get_symbols_list(unsigned char *string);
 char *get_encoded(BINTREE *list, unsigned char symbol);
-unsigned char get_decoded(BINTREE *main_lst, char *code);
 
 /* BINTREE */
 int print_bintree(BINTREE *root, char *seq);
-int assign_bintree_values(BINTREE *root, char *seq);
-BINTREE *build_bintree(BINTREE *list);
-int delete_trunks(BINTREE **list);
+int count_bintree_codes(BINTREE *root, char *seq);
+BINTREE *get_bintree(BINTREE *list);
 
 /* MAIN FUNCTIONS */
 char *encode(char *string);
-char *decode(BINTREE *root, char *string);
+// char *decode(BINTREE *root, char *string);
+int decode(BINTREE *root, char *string);
