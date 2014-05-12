@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
+#include "debug.h"
 
 
 /* LIST */
@@ -56,18 +57,18 @@ typedef struct Archive
 
 /* DEBUG */
 
-#ifdef DEBUG
-	#define TESTMODE_FLAG "--test"
-	#define TESTMODE_CODE 9000
-	#define TESTMODE_ERROR -9000
+// #ifdef DEBUG
+// 	#define TESTMODE_FLAG "--test"
+// 	#define TESTMODE_CODE 9000
+// 	#define TESTMODE_ERROR -9000
 
-	void print_flag(char flag[]);
-	void print_start_func(const char name[]);
-	void print_end_func(const char name[]);
-	void print_here(const char name[], const int line);
-	void print_decor();
-	void decorate(char str[]);
-#endif
+// 	void print_flag(char flag[]);
+// 	void print_start_func(const char name[]);
+// 	void print_end_func(const char name[]);
+// 	void print_here(const char name[], const int line);
+// 	void print_decor();
+// 	void decorate(char str[]);
+// #endif
 
 
 /* FLAGS */

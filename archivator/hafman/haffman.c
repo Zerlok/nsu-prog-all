@@ -1,6 +1,6 @@
 #include "haf.h"
 
-#include "../debug_trar.h"
+#include "../debug.h"
 #define DEBUG
 
 #ifdef DEBUG

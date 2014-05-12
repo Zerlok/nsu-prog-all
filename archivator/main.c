@@ -1,5 +1,8 @@
 #include "mod.h"
 
+// #include "debug.h"
+#define DEBUG
+
 
 int main(int argc, char *argv[])
 {
@@ -13,7 +16,6 @@ int main(int argc, char *argv[])
 		code -= indx;
 		
 		#ifdef DEBUG
-			print_end_func("read_flags");
 			printf("CODE: %d, INDX: %d, ARG: %s\n", code, indx, argv[indx]);
 		#endif
 
