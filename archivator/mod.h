@@ -6,26 +6,6 @@
 #include <sys/stat.h>
 
 
-/* LIST */
-
-struct List
-{
-	struct List *next;
-	
-	int hash;
-	unsigned char value;
-	int count;
-};
-
-void print_list(struct List *list);
-
-int insert(
-	struct List **list,
-	int hash,
-	unsigned char value
-);
-
-
 /* ARCHIVE */
 
 typedef struct Archive
@@ -67,6 +47,7 @@ typedef struct Archive
 	void print_here(const char name[], const int line);
 	void print_decor();
 	void decorate(char str[]);
+    int run_test(char *file_name);
 #endif
 
 
@@ -109,7 +90,7 @@ void print_flag_help();
 void print_err(int err_code);
 void print_bin_file(char *file_name);
 
-int read_tags(int argc, char *argv[]);
+int read_flags(int argc, char *argv[]);
 int read_or_create_an_archive(char *arch_name, ARCHIVE *arch);
 int add_to_archive(char *file_name, ARCHIVE *arch);
 int show_archived_files(ARCHIVE *arch);

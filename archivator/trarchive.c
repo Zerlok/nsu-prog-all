@@ -44,7 +44,8 @@ int run_test(char *file_name)
 		print_func_name(__func__);
 	#endif
 
-	print_bin_file(file_name);
+//	print_bin_file(file_name);
+    encode_file(fopen(file_name, "rb"));
 
 	#ifdef DEBUG
 		print_end_func(__func__);

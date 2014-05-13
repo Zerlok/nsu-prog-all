@@ -14,7 +14,63 @@
 #endif
 
 
-char *encode(char *string)
+ARCHIVEDFILE *encode_file(FILE *file)
+{
+    PRINT_RUN
+
+    ARCHIVEDFILE *zipped_file = (ARCHIVEDFILE*)malloc(sizeof(ARCHIVEDFILE));
+    BINTREE *bin_tree, *symbols_list = NULL;
+    unsigned char chr;
+
+    while (fread(&chr, sizeof(chr), 1, file))
+    {
+        printf("'%c'\n", chr);
+        append_list(&symbols_list, chr);
+    }
+
+    print_list(symbols_list);
+    bin_tree = get_bintree(symbols_list);
+//    print_bintree(bin_tree, "");
+    count_bintree_codes(bin_tree, "");
+    fseek(file, 1, SEEK_SET);
+
+    printf("The result:\n");
+    while (fread(&chr, sizeof(chr), 1, file))
+    {
+        printf("%s", get_encoded(symbols_list, chr));
+    }
+    printf("\n");
+
+//    BINTREE *symbols_list = get_symbols_list((unsigned char*)string);
+//    #ifdef DEBUG
+//        print_list(symbols_list);
+//    #endif
+
+//    BINTREE *bin_tree = get_bintree(symbols_list);;
+//    #ifdef DEBUG
+//        print_bintree(bin_tree, "");
+//    #endif
+
+//    count_bintree_codes(bin_tree, "");
+
+//    for (i = 0; i < strlen(string); i++)
+//    {
+//        new = strcat(new, get_encoded(symbols_list, string[i]));
+//        // printf("%s ", get_encoded(symbols_list, string[i]));
+//    }
+//    // printf("\n");
+
+//    #ifdef DEBUG
+//        // printf("decode is: '%s'\n", decode(bin_tree, new));
+//        decode(bin_tree, new);
+//    #endif
+
+//    PRINT_END
+    return zipped_file;
+}
+
+
+char *encode_string(char *string)
 {
 	PRINT_RUN
 
@@ -50,7 +106,7 @@ char *encode(char *string)
 }
 
 
-int decode(BINTREE *root, char *string)
+int decode_string(BINTREE *root, char *string)
 {
 	PRINT_RUN
 
@@ -291,7 +347,7 @@ BINTREE *get_symbols_list(unsigned char *string)
     for (i = 0; i < strlen((char*)string); i++)
 	{
 		// printf("%x - %c\n", (unsigned)string[i], string[i]);
-		append_list(symbols_list, get_hash(string[i]), string[i]);
+        append_list(&symbols_list, string[i]);
 	}
 	
 	PRINT_END
@@ -316,12 +372,14 @@ BINTREE *pop_list(BINTREE **main_lst)
 }
 
 
-int append_list(BINTREE *main_lst, int hash, unsigned char value)
+int append_list(BINTREE **main_lst, unsigned char value)
 {
 	// PRINT_RUN
 	
-	BINTREE *left_lst = main_lst, *right_lst = main_lst->next;
+    int hash = get_hash(value);
+    BINTREE *left_lst = (*main_lst), *right_lst;
 	BINTREE *new_lst = (BINTREE*)malloc(sizeof(BINTREE));
+
 	new_lst->left = new_lst->right = new_lst->next = NULL;
 	new_lst->hash = hash;
 	new_lst->count = 1;
@@ -330,11 +388,12 @@ int append_list(BINTREE *main_lst, int hash, unsigned char value)
 
 	if (left_lst == NULL)
 	{
-		main_lst = new_lst;
+        *main_lst = new_lst;
 
 		// PRINT_END
 		return 0;
 	}
+    right_lst = left_lst->next;
 
 	while (right_lst != NULL)
 	{
@@ -342,7 +401,7 @@ int append_list(BINTREE *main_lst, int hash, unsigned char value)
 		{
 			right_lst->count += 1;
 			left_lst->next = right_lst->next;	
-			insert_to_list(&main_lst, right_lst);
+            insert_to_list(main_lst, right_lst);
 
 			// PRINT_END
 			return 0;
@@ -350,7 +409,7 @@ int append_list(BINTREE *main_lst, int hash, unsigned char value)
 		left_lst = right_lst;
 		right_lst = right_lst->next;
 	}
-	insert_to_list(&main_lst, new_lst);
+    insert_to_list(main_lst, new_lst);
 
 	// PRINT_END
 	return 0;
