@@ -4,27 +4,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
-#include "debug.h"
-
-
-/* LIST */
-
-struct List
-{
-	struct List *next;
-	
-	int hash;
-	unsigned char value;
-	int count;
-};
-
-void print_list(struct List *list);
-
-int insert(
-	struct List **list,
-	int hash,
-	unsigned char value
-);
 
 
 /* ARCHIVE */
@@ -57,18 +36,19 @@ typedef struct Archive
 
 /* DEBUG */
 
-// #ifdef DEBUG
-// 	#define TESTMODE_FLAG "--test"
-// 	#define TESTMODE_CODE 9000
-// 	#define TESTMODE_ERROR -9000
+#ifdef DEBUG
+	#define TESTMODE_FLAG "--test"
+	#define TESTMODE_CODE 9000
+	#define TESTMODE_ERROR -9000
 
-// 	void print_flag(char flag[]);
-// 	void print_start_func(const char name[]);
-// 	void print_end_func(const char name[]);
-// 	void print_here(const char name[], const int line);
-// 	void print_decor();
-// 	void decorate(char str[]);
-// #endif
+	void print_flag(char flag[]);
+	void print_start_func(const char name[]);
+	void print_end_func(const char name[]);
+	void print_here(const char name[], const int line);
+	void print_decor();
+	void decorate(char str[]);
+    int run_test(char *file_name);
+#endif
 
 
 /* FLAGS */
@@ -110,7 +90,7 @@ void print_flag_help();
 void print_err(int err_code);
 void print_bin_file(char *file_name);
 
-int read_tags(int argc, char *argv[]);
+int read_flags(int argc, char *argv[]);
 int read_or_create_an_archive(char *arch_name, ARCHIVE *arch);
 int add_to_archive(char *file_name, ARCHIVE *arch);
 int show_archived_files(ARCHIVE *arch);

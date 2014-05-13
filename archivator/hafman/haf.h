@@ -13,10 +13,18 @@ typedef struct BinaryTree
 } BINTREE;
 
 
+typedef struct ArchivedFile
+{
+    BINTREE *root;
+    int old_size, new_size;
+
+} ARCHIVEDFILE;
+
+
 /* LIST */
 int get_hash(unsigned char symbol);
 void print_list(BINTREE *list);
-int append_list(BINTREE *list, int hash, unsigned char value);
+int append_list(BINTREE **list, unsigned char value);
 int insert_to_list(BINTREE **list, BINTREE *new_lst);
 BINTREE *pop_list(BINTREE **list);
 BINTREE *get_symbols_list(unsigned char *string);
@@ -28,6 +36,8 @@ int count_bintree_codes(BINTREE *root, char *seq);
 BINTREE *get_bintree(BINTREE *list);
 
 /* MAIN FUNCTIONS */
-char *encode(char *string);
-// char *decode(BINTREE *root, char *string);
-int decode(BINTREE *root, char *string);
+char *encode_string(char *string);
+int decode_string(BINTREE *root, char *string);
+
+ARCHIVEDFILE *encode_file(FILE *file);
+char *decode_file(FILE *file);

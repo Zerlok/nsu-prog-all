@@ -6,7 +6,8 @@ syntax: glob
 *.sublime-project
 *.sublime-workspace
 *.pro
-*Makefile
+*.pro.user
+*.pro.autosave
 *haffman
 *harc
 
@@ -14,5 +15,4 @@ syntax: regexp
 ^_samples/.*$
 ^task\_\d+\/\w+$
 ^.*?\/(\_\w+\/).*?$
-\.pro\.user$
-
+^archivator\-debug\/.*
