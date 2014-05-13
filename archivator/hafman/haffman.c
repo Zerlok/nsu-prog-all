@@ -1,7 +1,7 @@
 #include "haf.h"
 
-#include "../debug_trar.h"
-#define DEBUG
+//#include "../debug_trar.h"
+#define DEBUG_
 
 #ifdef DEBUG
 	#define PRINT_RUN \
@@ -19,7 +19,7 @@ char *encode(char *string)
 	PRINT_RUN
 
 	char *new = (char*)malloc(sizeof(string));
-	int i;
+    unsigned long int i;
 
 	BINTREE *symbols_list = get_symbols_list((unsigned char*)string);
 	#ifdef DEBUG
@@ -54,7 +54,7 @@ int decode(BINTREE *root, char *string)
 {
 	PRINT_RUN
 
-	int i;
+    unsigned long int i;
 	// char *new = (char*)malloc(sizeof(string));
 	BINTREE *head = root;
 
@@ -85,7 +85,6 @@ int decode(BINTREE *root, char *string)
 		}
 		else
 		{
-			decorate("EXSEPTION!@@P");
 			exit(1);
 		}
 	}
@@ -209,6 +208,7 @@ int count_bintree_codes(BINTREE *root, char *seq)
 	count_bintree_codes(root->right, right_seq);
 	
 	// PRINT_END
+    return 0;
 }
 
 
@@ -248,6 +248,7 @@ int print_bintree(BINTREE *root, char *seq)
 	print_bintree(root->right, right_seq);
 	
 	// PRINT_END
+    return 0;
 }
 
  
@@ -283,11 +284,11 @@ BINTREE *get_symbols_list(unsigned char *string)
 	PRINT_RUN
 
 	BINTREE *symbols_list = (BINTREE*)malloc(sizeof(BINTREE));
-	int i;
+    unsigned long int i;
 	
 	// printf("%x - %s\n", string, (signed)string);
 	// print_list(symbols_list);
-	for (i = 0; i < strlen(string); i++)
+    for (i = 0; i < strlen((char*)string); i++)
 	{
 		// printf("%x - %c\n", (unsigned)string[i], string[i]);
 		append_list(symbols_list, get_hash(string[i]), string[i]);
