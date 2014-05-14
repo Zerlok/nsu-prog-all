@@ -3,8 +3,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/stat.h>
-
+#include <unistd.h>
+#include "hafman/haf.h"
 
 /* ARCHIVE */
 
@@ -13,8 +13,9 @@ typedef struct Archive
 	// int *tree;
 	// long int last_file; // The indicator in archive file to file append
 	char version[5]; // The version of archive
-	char name[256]; // The path and name of archive
-	char files[256][256]; // The list of added files
+	char *name; // The path and name of archive
+	unsigned int files_count;
+	ARCHIVEDFILE **files; // The list of added files
 } ARCHIVE;
 
 
@@ -85,12 +86,8 @@ typedef struct Archive
 
 /* FUNCTION IMAGES */
 
-void print_doc();
-void print_flag_help();
-void print_err(int err_code);
 void print_bin_file(char *file_name);
-
-int read_flags(int argc, char *argv[]);
+int is_arch_file(char arg[]);
 int read_or_create_an_archive(char *arch_name, ARCHIVE *arch);
 int add_to_archive(char *file_name, ARCHIVE *arch);
 int show_archived_files(ARCHIVE *arch);
