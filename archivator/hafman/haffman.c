@@ -34,6 +34,7 @@ ARCHIVEDFILE *encode_file(FILE *file)
 //	print_list(symbols_list);
 	bin_tree = get_bintree(symbols_list);
 	print_bintree(bin_tree, "");
+	write_bintree(bin_tree, 0);
 
 	/* Encoding */
 	fseek(file, 0, SEEK_SET);
@@ -298,6 +299,29 @@ int count_bintree_codes(BINTREE *root, char *seq)
 }
 
 
+int write_bintree(BINTREE *root, int lvl)
+{
+	if (root == NULL)
+	{
+		return 1;
+	}
+
+	if ((root->right == NULL)
+		&& (root->left == NULL))
+	{
+		printf("(%c)[%d]\n", (char)root->value, lvl);
+		return 0;
+	}
+
+	printf("N");
+
+	write_bintree(root->left, lvl + 1);
+	write_bintree(root->right, lvl + 1);
+
+	return 0;
+}
+
+
 int print_bintree(BINTREE *root, char *seq)
 {
 	char *left_seq = NULL, *right_seq = NULL;
@@ -318,8 +342,12 @@ int print_bintree(BINTREE *root, char *seq)
 	if (strlen(seq) != 0)
 	{
 		left_seq = (char*)calloc(strlen(seq) + 1, sizeof(char));
+		strcpy(left_seq, seq);
+		strcat(left_seq, root->code);
+
 		right_seq = (char*)calloc(strlen(seq) + 1, sizeof(char));
-		left_seq = right_seq = strcat(seq, root->code);
+		strcpy(right_seq, seq);
+		strcat(right_seq, root->code);
 	}
 	else
 	{
@@ -463,11 +491,11 @@ void print_list(BINTREE *main_lst)
 	{
 		if (lst->hash == 1)
 		{
-			printf("[1 : %x (%d)]\n", lst->value, lst->count);
+			printf("[1 : %x (%ld)]\n", lst->value, lst->count);
 		}
 		else
 		{
-			printf("%05d : %x (%d)\n", lst->hash, lst->value, lst->count);
+			printf("%05d : %x (%ld)\n", lst->hash, lst->value, lst->count);
 		}
 
 		lst = lst->next;

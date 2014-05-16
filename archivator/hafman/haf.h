@@ -6,8 +6,8 @@
 typedef struct BinaryTree
 {
 	struct BinaryTree *left, *right, *next;
-	int hash;
-	int count;
+	unsigned int hash;
+	unsigned long int count;
 	char *code, *encoded;
 	unsigned char value;
 } BINTREE;
@@ -33,6 +33,7 @@ BINTREE *get_symbols_list(unsigned char *string);
 char *get_encoded(BINTREE *list, unsigned char symbol);
 
 /* BINTREE */
+int write_bintree(BINTREE *root, int lvl);
 int print_bintree(BINTREE *root, char *seq);
 int count_bintree_codes(BINTREE *root, char *seq);
 BINTREE *get_bintree(BINTREE *list);
