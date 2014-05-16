@@ -27,7 +27,7 @@ ARCHIVEDFILE *encode_file(FILE *file)
 	/* Haffman encode preparation */
 	while (fread(&chr, sizeof(chr), 1, file))
 	{
-		printf("'%c'\n", chr);
+//		printf("'%c'\n", chr);
 		append_list(&symbols_list, chr);
 		file_size++;
 	}
@@ -54,7 +54,6 @@ ARCHIVEDFILE *encode_file(FILE *file)
 	zipped_file->old_size = file_size;
 
 	/* Decode test */
-	printf("Decode test:\n");
 	decode_string(bin_tree, new_string);
 
 	return zipped_file;
@@ -260,6 +259,8 @@ BINTREE *get_bintree(BINTREE *main_lst)
 
 int count_bintree_codes(BINTREE *root, char *seq)
 {
+	char *left_seq = NULL, *right_seq = NULL;
+
 	if (root == NULL)
 	{
 		return 1;
@@ -275,13 +276,15 @@ int count_bintree_codes(BINTREE *root, char *seq)
 		return 0;
 	}
 	
-	char *left_seq = NULL, *right_seq = NULL;
-
 	if (strlen(seq) != 0)
 	{
 		left_seq = (char*)calloc(strlen(seq) + 1, sizeof(char));
+		strcpy(left_seq, seq);
+		strcat(left_seq, root->code);
+
 		right_seq = (char*)calloc(strlen(seq) + 1, sizeof(char));
-		left_seq = right_seq = strcat(seq, root->code);
+		strcpy(right_seq, seq);
+		strcat(right_seq, root->code);
 	}
 	else
 	{

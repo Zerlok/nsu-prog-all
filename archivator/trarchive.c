@@ -11,8 +11,6 @@ int run_test(char *file_name)
 	FILE *file;
 	ARCHIVEDFILE *zipped_file;
 
-	print_bin_file(file_name);
-
 	if ((file = fopen(file_name, "rb")) == NULL)
 	{
 		printf("cannot open the file!\n");
