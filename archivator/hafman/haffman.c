@@ -27,19 +27,23 @@ ARCHIVEDFILE *encode_file(FILE *file)
 	/* Haffman encode preparation */
 	while (fread(&chr, sizeof(chr), 1, file))
 	{
+		printf("'%c'\n", chr);
 		append_list(&symbols_list, chr);
 		file_size++;
 	}
 //	print_list(symbols_list);
 	bin_tree = get_bintree(symbols_list);
+	print_bintree(bin_tree, "");
 
 	/* Encoding */
 	fseek(file, 0, SEEK_SET);
-	new_string = (char*)malloc(sizeof(char));
+	new_string = (char*)calloc(8 * file_size, sizeof(char));
 
 	while (fread(&chr, sizeof(chr), 1, file))
 	{
-		new_string = strcat(new_string, get_encoded(symbols_list, chr));
+		printf("'%c'\n", chr);
+
+		strcat(new_string, get_encoded(symbols_list, chr));
 	}
 
 	/* Zipped file structure creation */
@@ -47,6 +51,10 @@ ARCHIVEDFILE *encode_file(FILE *file)
 	zipped_file->root = bin_tree;
 	zipped_file->new_size = strlen(zipped_file->text);
 	zipped_file->old_size = file_size;
+
+	/* Decode test */
+	printf("Decode test:\n");
+	decode_string(bin_tree, new_string);
 
 	return zipped_file;
 }
@@ -59,15 +67,20 @@ char *get_letters(char *string)
 	char *new_string = (char*)calloc((int)(strlen(string) / 8), sizeof(char));
 	char little_string[8];
 
+//	printf("All file code is:\n'");
 	while (i < strlen(string))
 	{
 		if (i > 0 && (i % 8) == 0)
 		{
+			printf("'%s' == '%c'\n", little_string, get_as_one_char(little_string));
 			new_string[(int)(i / 8) - 1] = (char)(get_as_one_char(little_string));
 		}
 		little_string[i % 8] = string[i];
+//		printf("%c", string[i]);
 		i++;
 	}
+	i--;
+//	printf("'\n");
 
 	if ((i % 8) != 0)
 	{
@@ -76,6 +89,7 @@ char *get_letters(char *string)
 			little_string[i % 8] = '0';
 			i++;
 		}
+		printf("'%s' == '%c'\n", little_string, get_as_one_char(little_string));
 		new_string[(int)(i / 8) - 1] = (char)(get_as_one_char(little_string));
 	}
 	return new_string;
@@ -144,12 +158,14 @@ int decode_string(BINTREE *root, char *string)
 
 	for (i = 0; i < strlen(string); i++)
 	{
+		/* If vertex is last in this trunk, print it */
 		if ((head->left == NULL) && (head->right == NULL))
 		{
-			// strcat(new, (char)head->value);
 			printf("%c", (signed)head->value);
 			head = root;
 		}
+
+		/* If not: go down through tree */
 		if (string[i] == '1')
 		{
 			head = head->left;
@@ -160,10 +176,12 @@ int decode_string(BINTREE *root, char *string)
 		}
 		else
 		{
+			printf("Another code (%c) was found at %s\n", string[i], __func__);
 			exit(1);
 		}
 	}
 	
+	/* Last symbol */
 	if (root->left != NULL && root->right != NULL)
 	{
 		printf("%c", (signed)head->value);
@@ -217,7 +235,7 @@ BINTREE *get_bintree(BINTREE *main_lst)
 		new_lst->left = left_lst;
 		new_lst->right = right_lst;
 		new_lst->hash = 1;
-		new_lst->value = (unsigned)"";
+		new_lst->value = 0;
 		new_lst->count = left_lst->count + right_lst->count;
 		
 		// print_list(main_lst);
@@ -249,23 +267,26 @@ int count_bintree_codes(BINTREE *root, char *seq)
 	if ((root->right == NULL)
 		&& (root->left == NULL))
 	{
-		root->encoded = (char*)malloc(sizeof(seq));
+		root->encoded = (char*)calloc(strlen(seq) + 1, sizeof(char));
 		strcpy(root->encoded, seq);
 		strcat(root->encoded, root->code);
 
 		return 0;
 	}
 	
-	char *left_seq = (char*)malloc(sizeof(seq));
-	char *right_seq = (char*)malloc(sizeof(seq));
+	char *left_seq = NULL, *right_seq = NULL;
 
 	if (strlen(seq) != 0)
 	{
+		left_seq = (char*)calloc(strlen(seq) + 1, sizeof(char));
+		right_seq = (char*)calloc(strlen(seq) + 1, sizeof(char));
 		left_seq = right_seq = strcat(seq, root->code);
 	}
 	else
 	{
 		/* If it starts with "" */
+		left_seq = (char*)malloc(sizeof(seq));
+		right_seq = (char*)malloc(sizeof(seq));
 		strcpy(left_seq, root->code);
 		strcpy(right_seq, root->code);
 	}
@@ -279,6 +300,8 @@ int count_bintree_codes(BINTREE *root, char *seq)
 
 int print_bintree(BINTREE *root, char *seq)
 {
+	char *left_seq = NULL, *right_seq = NULL;
+
 	if (root == NULL)
 	{
 		return 1;
@@ -287,27 +310,28 @@ int print_bintree(BINTREE *root, char *seq)
 	if ((root->right == NULL)
 		&& (root->left == NULL))
 	{
-		printf("%c == %s%s\n", (signed)root->value, seq, root->code);
+		printf("%c == '%s%s'\n", (signed)root->value, seq, root->code);
 
 		return 0;
 	}
-	
-	char *left_seq = (char*)malloc(sizeof(seq));
-	char *right_seq = (char*)malloc(sizeof(seq));
 
 	if (strlen(seq) != 0)
 	{
+		left_seq = (char*)calloc(strlen(seq) + 1, sizeof(char));
+		right_seq = (char*)calloc(strlen(seq) + 1, sizeof(char));
 		left_seq = right_seq = strcat(seq, root->code);
 	}
 	else
 	{
+		/* If it starts with "" */
+		left_seq = (char*)malloc(sizeof(seq));
+		right_seq = (char*)malloc(sizeof(seq));
 		strcpy(left_seq, root->code);
 		strcpy(right_seq, root->code);
 	}
-	
+
 	print_bintree(root->left, left_seq);
 	print_bintree(root->right, right_seq);
-	
 	return 0;
 }
 

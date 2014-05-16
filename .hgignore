@@ -5,6 +5,7 @@ syntax: glob
 *.gch
 *.sublime-project
 *.sublime-workspace
+*.autosave
 *.pro
 *.pro.user
 *.pro.autosave
