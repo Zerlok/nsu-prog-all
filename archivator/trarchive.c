@@ -6,22 +6,21 @@
 
 int run_test(char *file_name)
 {
+//    printf("Haffman test:\nEncoded 'abracadabra' is '%s'", encode_string("abracadabra"));
+
 	FILE *file;
 	ARCHIVEDFILE *zipped_file;
 
-	if ((file = fopen(file_name, "rb")) != NULL)
-	{
-		zipped_file = encode_file(file);
-		printf("encoded: '%s'\n", zipped_file->text);
-	}
-	else
+	if ((file = fopen(file_name, "rb")) == NULL)
 	{
 		printf("cannot open the file!\n");
+		return 1;
 	}
-//    printf("Haffman test:\nEncoded 'abracadabra' is '%s'", encode_string("abracadabra"));
 
-//	print_bin_file(file_name);
+	zipped_file = encode_file(file);
+	printf("encoded: '%s'\n", zipped_file->text);
 	fclose(file);
+
 	return 0;
 }
 
@@ -59,37 +58,38 @@ Output:
 	Return 0 if everything is OK, else 1.
 */
 {
-	FILE *arch_file;
-	arch->files_count = 0;
-	arch->name = (char*)malloc(sizeof(char));
-	arch->files = (ARCHIVEDFILE**)malloc(1 * sizeof(ARCHIVEDFILE));
-
 	if (is_arch_file(arch_name))
 	{
 		printf("The file '%s' is not an archive of %s program.\n", arch_name, ARC_NAME);
 		exit(1);
 	}
 
-//	arch->name = (char*)malloc(sizeof(arch_name));
-	arch_file = fopen(arch_name, "w");
-//	if ((arch_file = fopen(arch_name, "r")) == NULL)
+	/* Archive init */
+	FILE *arch_file;
+	arch->name = (char*)malloc(sizeof(char));
+	arch->files = (ARCHIVEDFILE**)malloc(sizeof(ARCHIVEDFILE));
+	arch->files_count = 0;
+	strcpy(arch->version, ARC_VERSION);
 	strcpy(arch->name, arch_name);
-	if (arch_file == NULL)
+
+	if ((arch_file = fopen(arch_name, "r+")) == NULL)
 	{
 		/* CREATE THE ARCHIVE */
-		printf("Permission denied to the archive '%s'\n", arch_name);
-		strcpy(arch->version, ARC_VERSION);
-		arch->files_count = 0;
-		arch->files = (ARCHIVEDFILE**)malloc(1 * sizeof(ARCHIVEDFILE));
+		if ((arch_file = fopen(arch_name, "w")) == NULL)
+		{
+			printf("Permission denied to the archive '%s'\n", arch_name);
+			return 1;
+		}
+		fclose(arch_file);
 
-		printf("created : arch->name == '%s'\n", arch->name);
-//		fclose(arch_file);
+		printf("New archive file '%s' created.\n", arch->name);
+
 		return 0;
 	}
+	fclose(arch_file);
 
 	/* IF ARCHIVE EXIST: */
-	printf("exist : arch->name == '%s'\n", arch->name);
-	fclose(arch_file);
+	printf("Archive file '%s' is already exist.\n", arch->name);
 	return 0;
 }
 
