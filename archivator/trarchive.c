@@ -6,8 +6,6 @@
 
 int run_test(char *file_name)
 {
-//    printf("Haffman test:\nEncoded 'abracadabra' is '%s'", encode_string("abracadabra"));
-
 	FILE *file;
 	ARCHIVEDFILE *zipped_file;
 
@@ -18,7 +16,7 @@ int run_test(char *file_name)
 	}
 
 	zipped_file = encode_file(file);
-	printf("\nEncoded:\n'%s'\n\n", zipped_file->text);
+	printf("\nEncoded:\n%s\n\n", zipped_file->text);
 	fclose(file);
 
 	return 0;
@@ -66,8 +64,8 @@ Output:
 
 	/* Archive init */
 	FILE *arch_file;
-	arch->name = (char*)malloc(sizeof(char));
-	arch->files = (ARCHIVEDFILE**)malloc(sizeof(ARCHIVEDFILE));
+	arch->name = (char*)calloc(strlen(arch_name) + 1, sizeof(char));
+	arch->files = (ARCHIVEDFILE**)calloc(0, sizeof(ARCHIVEDFILE));
 	arch->files_count = 0;
 	strcpy(arch->version, ARC_VERSION);
 	strcpy(arch->name, arch_name);
@@ -125,17 +123,24 @@ void print_bin_file(char *file_name)
 
 int add_to_archive(char *file_name, ARCHIVE *arch)
 {
+	printf("Adding to '%s' archive\n", arch->name);
+	ARCHIVEDFILE *zipped_file;
 	FILE *file;
-	
+
+	/* Is file exist or readable */
 	if ((file = fopen(file_name, "r")) == NULL)
 	{
-		printf("Permission denied to the archive '%s'\n", file_name);
-//		fclose(file);
+		printf("Permission denied to the file '%s'\n", file_name);
 		return 1;
 	}
+	zipped_file = encode_file(file);
+	strcpy(zipped_file->name, file_name);
 
-	arch->files[arch->files_count] = encode_file(file);
+	/* Appending to archive structure */
 	arch->files_count += 1;
+	arch->files = (ARCHIVEDFILE**)realloc(arch->files, arch->files_count);
+	arch->files[arch->files_count - 1] = zipped_file;
+
 	fclose(file);
 	return 0;
 }
@@ -143,6 +148,7 @@ int add_to_archive(char *file_name, ARCHIVE *arch)
 
 int write_an_archive_to_file(ARCHIVE *arch)
 {
+	ARCHIVEDFILE *zipped_file;
 	FILE *arch_file;
 	unsigned int i = 0;
 	
@@ -163,7 +169,15 @@ int write_an_archive_to_file(ARCHIVE *arch)
 
 	while (i < arch->files_count)
 	{
-		fprintf(arch_file, "%s\n", (arch->files[i])->text);
+		zipped_file = arch->files[i];
+		fprintf(arch_file, "N%dB%ldF%ldN%sB",
+				strlen(zipped_file->name),
+				zipped_file->root->length,
+				zipped_file->new_size,
+				zipped_file->name
+		);
+		write_bintree(arch_file, zipped_file->root);
+		fprintf(arch_file, "F%s", zipped_file->text);
 		i++;
 	}
 	fclose(arch_file);
