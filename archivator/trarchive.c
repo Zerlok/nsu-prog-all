@@ -18,7 +18,7 @@ int run_test(char *file_name)
 	}
 
 	zipped_file = encode_file(file);
-	printf("encoded: '%s'\n", zipped_file->text);
+	printf("\nEncoded:\n'%s'\n\n", zipped_file->text);
 	fclose(file);
 
 	return 0;

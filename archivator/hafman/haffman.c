@@ -20,7 +20,7 @@ ARCHIVEDFILE *encode_file(FILE *file)
 
 	ARCHIVEDFILE *zipped_file = (ARCHIVEDFILE*)malloc(sizeof(ARCHIVEDFILE));
 	BINTREE *bin_tree, *symbols_list = NULL;
-	unsigned long int file_size = 0;
+	unsigned long int new_size, file_size = 0;
 	unsigned char chr;
 	char *new_string;
 
@@ -28,23 +28,47 @@ ARCHIVEDFILE *encode_file(FILE *file)
 	while (fread(&chr, sizeof(chr), 1, file))
 	{
 //		printf("'%c'\n", chr);
-		append_list(&symbols_list, chr);
-		file_size++;
+		if (chr != (unsigned)"")
+		{
+			append_list(&symbols_list, chr);
+			file_size++;
+		}
 	}
-//	print_list(symbols_list);
+	new_size = file_size;
+
+	/* If file is empty */
+	if (file_size == 0)
+	{
+		zipped_file->text = "";
+		zipped_file->root = NULL;
+		zipped_file->new_size = 0;
+		zipped_file->old_size = 0;
+
+		return zipped_file;
+	}
+
 	bin_tree = get_bintree(symbols_list);
+	print_list(symbols_list);
 	print_bintree(bin_tree, "");
 	write_bintree(bin_tree, 0);
 
 	/* Encoding */
 	fseek(file, 0, SEEK_SET);
-	new_string = (char*)calloc(8 * file_size, sizeof(char));
+	new_string = (char*)calloc(new_size * 2, sizeof(char));
 
 	while (fread(&chr, sizeof(chr), 1, file))
 	{
-		printf("'%c'\n", chr);
+		if (chr != (unsigned)"")
+		{
+			printf("'%c' (%d)\n", chr, (int)chr);
 
-		strcat(new_string, get_encoded(symbols_list, chr));
+			if (2 * strlen(new_string) > new_size)
+			{
+				new_string = (char*)realloc(new_string, new_size * 2);
+				new_size *= 2;
+			}
+			strcat(new_string, get_encoded(symbols_list, chr));
+		}
 	}
 
 	/* Zipped file structure creation */
@@ -154,7 +178,7 @@ int decode_string(BINTREE *root, char *string)
 	}
 
 	// strcpy(new, "");
-	printf("Decode is: ");
+	printf("\nDecode is:\n");
 
 	for (i = 0; i < strlen(string); i++)
 	{
@@ -198,7 +222,7 @@ char *get_encoded(BINTREE *main_lst, unsigned char symbol)
 
 	while (lst != NULL)
 	{
-		if (lst->value == symbol)
+		if (lst->hash != 0 && lst->value == symbol)
 		{
 			return lst->encoded;
 		}
@@ -234,7 +258,7 @@ BINTREE *get_bintree(BINTREE *main_lst)
 		new_lst = (BINTREE*)malloc(sizeof(BINTREE));
 		new_lst->left = left_lst;
 		new_lst->right = right_lst;
-		new_lst->hash = 1;
+		new_lst->hash = 0;
 		new_lst->value = 0;
 		new_lst->count = left_lst->count + right_lst->count;
 		
@@ -373,7 +397,7 @@ int get_hash(unsigned char symbol)
 
 	if (!symbol)
 	{
-		return (int)symbol + 1;
+		return (int)symbol + 9;
 	}
 
 	hash = (
