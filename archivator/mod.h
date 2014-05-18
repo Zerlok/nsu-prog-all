@@ -10,50 +10,40 @@
 
 typedef struct Archive
 {
-	// int *tree;
-	// long int last_file; // The indicator in archive file to file append
 	char version[5]; // The version of archive
 	char *name; // The path and name of archive
-	unsigned int files_count;
+	unsigned int files_count; // The number of files
 	ARCHIVEDFILE **files; // The list of added files
 } ARCHIVE;
 
 
 /* ARCHIVE VARS */
-
 #define ARC_NAME "Trarchive"
 #define ARC_VERSION "v0.01"
 #define DEBUG
-#define SEPARATOR "|"
-#define TREE_TAG "TREE"
-#define FILES_TAG "FILES"
-#define VERSION_TAG "VERSION"
 
 
 /* FILE VARS*/
-
 #define ARC_FILE_TAG ".trar"
 
 
 /* DEBUG */
-
 #ifdef DEBUG
 	#define TESTMODE_FLAG "--test"
 	#define TESTMODE_CODE 9000
 	#define TESTMODE_ERROR -9000
 
-	void print_flag(char flag[]);
-	void print_start_func(const char name[]);
-	void print_end_func(const char name[]);
-	void print_here(const char name[], const int line);
-	void print_decor();
-	void decorate(char str[]);
+//	void print_flag(char flag[]);
+//	void print_start_func(const char name[]);
+//	void print_end_func(const char name[]);
+//	void print_here(const char name[], const int line);
+//	void print_decor();
+//	void decorate(char str[]);
     int run_test(char *file_name);
 #endif
 
 
 /* FLAGS */
-
 #define FLAG_ADD "-a"
 #define FLAG_EXTR "-x"
 #define FLAG_LIST "-l"
@@ -62,7 +52,6 @@ typedef struct Archive
 
 
 /* FUNCTION CODES < 100 */
-
 #define APPEND_CODE 10
 #define EXTRACT_CODE 20
 #define LIST_CODE 30
@@ -81,14 +70,13 @@ typedef struct Archive
 #define ERR_ARCH_DOES_NOT_EXIST 500
 #define ERR_UNSUPPORTED_VERSION 600
 
-/* APPEND ARCHIVE ERRORS */
-
 
 /* FUNCTION IMAGES */
-
 void print_bin_file(char *file_name);
 int is_arch_file(char arg[]);
 int read_or_create_an_archive(char *arch_name, ARCHIVE *arch);
 int add_to_archive(char *file_name, ARCHIVE *arch);
 int show_archived_files(ARCHIVE *arch);
 int write_an_archive_to_file(ARCHIVE *arch);
+BINTREE *get_bintree_from_file(FILE *file, unsigned long int length);
+unsigned long int build_bintree_from_file(FILE *file, BINTREE *root, unsigned long int length, char *code);

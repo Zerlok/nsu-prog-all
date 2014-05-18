@@ -6,21 +6,32 @@
 
 int run_test(char *file_name)
 {
-	FILE *file;
+	ARCHIVE *archive = (ARCHIVE*)malloc(sizeof(ARCHIVE));
 	ARCHIVEDFILE *zipped_file;
 
-	if ((file = fopen(file_name, "rb")) == NULL)
-	{
-		printf("cannot open the file!\n");
-		return 1;
-	}
-
-	zipped_file = encode_file(file);
-	printf("\nEncoded:\n%s\n\n", zipped_file->text);
-	fclose(file);
-
+	read_or_create_an_archive("test/my_archive.trar", archive);
+	zipped_file = archive->files[archive->files_count - 1];
+	print_bintree(zipped_file->root, "");
+	printf("Encoded '%s':\n%s\n\n", zipped_file->name, zipped_file->text);
 	return 0;
 }
+
+//{
+//	FILE *file;
+//	ARCHIVEDFILE *zipped_file;
+
+//	if ((file = fopen(file_name, "rb")) == NULL)
+//	{
+//		printf("cannot open the file!\n");
+//		return 1;
+//	}
+
+//	zipped_file = encode_file(file);
+//	printf("\nEncoded:\n%s\n\n", zipped_file->text);
+//	fclose(file);
+
+//	return 0;
+//}
 
 
 /* ---------- ACCESSORY FUNCTIONS ---------- */
@@ -64,6 +75,10 @@ Output:
 
 	/* Archive init */
 	FILE *arch_file;
+	ARCHIVEDFILE *zipped_file = NULL;
+	char chr = 0;
+	int file_name_size = 0;
+	unsigned long int bin_tree_size = 0, file_text_size = 0;
 	arch->name = (char*)calloc(strlen(arch_name) + 1, sizeof(char));
 	arch->files = (ARCHIVEDFILE**)calloc(0, sizeof(ARCHIVEDFILE));
 	arch->files_count = 0;
@@ -84,6 +99,38 @@ Output:
 
 		return 0;
 	}
+
+	/* Read archive file */
+	while (fread(&chr, sizeof(chr), 1, arch_file))
+	{
+		zipped_file = (ARCHIVEDFILE*)malloc(sizeof(ARCHIVEDFILE));
+		if (chr == 'N')
+		{
+			if (fscanf(arch_file, "%dB%ldF%ldN", &file_name_size, &bin_tree_size, &file_text_size) == EOF)
+			{
+				printf("Archive is damaged!\n");
+				exit(1);
+			}
+
+			/* Read archived file name */
+			zipped_file->name = (char*)calloc(file_name_size, sizeof(char));
+			fread(zipped_file->name, file_name_size, 1, arch_file);
+
+			/* Read & build bintree */
+//			zipped_file->root = NULL;
+			zipped_file->root = (BINTREE*)malloc(sizeof(BINTREE));
+			build_bintree_from_file(arch_file, zipped_file->root, bin_tree_size, "1");
+
+			/* Read archived text */
+			zipped_file->text = (char*)calloc(file_text_size, sizeof(char));
+			fread(zipped_file->text, file_text_size, 1, arch_file);
+		}
+		count_bintree_codes(zipped_file->root, "", 0);
+		arch->files_count += 1;
+		arch->files = (ARCHIVEDFILE**)realloc(arch->files, arch->files_count);
+		arch->files[arch->files_count - 1] = zipped_file;
+	}
+
 	fclose(arch_file);
 
 	/* IF ARCHIVE EXIST: */
@@ -170,16 +217,46 @@ int write_an_archive_to_file(ARCHIVE *arch)
 	while (i < arch->files_count)
 	{
 		zipped_file = arch->files[i];
-		fprintf(arch_file, "N%dB%ldF%ldN%sB",
+		fprintf(arch_file, "N%dB%ldF%ldN%s",
 				strlen(zipped_file->name),
 				zipped_file->root->length,
 				zipped_file->new_size,
 				zipped_file->name
 		);
 		write_bintree(arch_file, zipped_file->root);
-		fprintf(arch_file, "F%s", zipped_file->text);
+		fprintf(arch_file, "%s", zipped_file->text);
 		i++;
 	}
 	fclose(arch_file);
 	return 0;
+}
+
+
+unsigned long int build_bintree_from_file(FILE *file, BINTREE *root, unsigned long int length, char *code)
+{
+	char chr;
+
+	if (length > 0)
+	{
+
+		fread(&chr, 1, 1, file);
+		if (chr == 'S')
+		{
+			fread(&chr, 1, 1, file);
+			root->left = root->right = NULL;
+			root->length = 0;
+			root->value = (unsigned)chr;
+			root->code = code;
+			return length - 2;
+		}
+
+		length -= 1;
+
+		root->left = (BINTREE*)malloc(sizeof(BINTREE));
+		root->right = (BINTREE*)malloc(sizeof(BINTREE));
+		length = build_bintree_from_file(file, root->left, length, "1");
+		length = build_bintree_from_file(file, root->right, length, "0");
+	}
+
+	return length;
 }

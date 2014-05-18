@@ -231,17 +231,17 @@ int main(int argc, char *argv[])
 				// printf("Going add '%s' file to '%s' archive\n", argv[arg_indx], argv[arg_indx + 1]);
 				if (add_to_archive(argv[indx], arch))
 				{
-					printf("Something wrong\n");
+					printf("Something wrong with file '%s'\n", argv[indx]);
 				}
 				else
 				{
 					write_an_archive_to_file(arch);
-					printf("Added!\n");
+					printf("File '%s' added to '%s' archive.\n", argv[indx], arch->name);
 				}
 				break;
 			}
 			case EXTRACT_CODE:
-				printf("Going extract '%s' file from '%s' archive\n", argv[indx-1], argv[indx]);
+				printf("Going extract '%s' file from '%s' archive\n", argv[indx], arch->name);
 				break;
 			case LIST_CODE:
 				printf("Going show a list of files in '%s' archive\n", argv[indx]);

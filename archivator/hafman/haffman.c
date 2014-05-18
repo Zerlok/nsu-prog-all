@@ -182,7 +182,7 @@ BINTREE *get_bintree(BINTREE *main_lst)
 	if (header->next == NULL)
 	{
 		header->left = header->right = NULL;
-		header->code = "0";
+		header->code = "1";
 		return header;
 	}
 
