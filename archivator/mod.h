@@ -1,13 +1,12 @@
 /* MODULES */
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 #include "hafman/haf.h"
 
-/* ARCHIVE */
 
+/* ARCHIVE */
 typedef struct Archive
 {
 	char version[5]; // The version of archive
@@ -33,12 +32,6 @@ typedef struct Archive
 	#define TESTMODE_CODE 9000
 	#define TESTMODE_ERROR -9000
 
-//	void print_flag(char flag[]);
-//	void print_start_func(const char name[]);
-//	void print_end_func(const char name[]);
-//	void print_here(const char name[], const int line);
-//	void print_decor();
-//	void decorate(char str[]);
     int run_test(char *file_name);
 #endif
 
@@ -73,10 +66,15 @@ typedef struct Archive
 
 /* FUNCTION IMAGES */
 void print_bin_file(char *file_name);
-int is_arch_file(char arg[]);
+int is_an_archive(char *file_name);
+unsigned int is_in_archive(char *file_name, ARCHIVE *archive);
+
 int read_or_create_an_archive(char *arch_name, ARCHIVE *arch);
-int add_to_archive(char *file_name, ARCHIVE *arch);
-int show_archived_files(ARCHIVE *arch);
 int write_an_archive_to_file(ARCHIVE *arch);
+
+int add_to_archive(char *file_name, ARCHIVE *arch);
+int extract_file_from_archive(char *file_name, ARCHIVE *archive);
+int show_archived_files(ARCHIVE *archive);
+
 BINTREE *get_bintree_from_file(FILE *file, unsigned long int length);
-unsigned long int build_bintree_from_file(FILE *file, BINTREE *root, unsigned long int length, char *code);
+//unsigned long int build_bintree_from_file(FILE *file, BINTREE *root, unsigned long int length, char *code);

@@ -1,5 +1,5 @@
 #include "mod.h"
-//#include "hafman/haf.h"
+
 
 /* ---------- DEBUG FUNCTIONS ---------- */
 
@@ -49,20 +49,41 @@ int run_test(char *file_name)
 /* ---------- ACCESSORY FUNCTIONS ---------- */
 
 
-int is_arch_file(char arg[])
+int is_an_archive(char *file_name)
 /*
 If file is an archive file returns 0.
 Otherwise returns 1.
+
 Input:
-	arg - (*char) the name of file.
+	char *file_name - the name of file.
 */
 {
-	if (!strstr(arg, ARC_FILE_TAG)) // If not archive file
+	if (!strstr(file_name, ARC_FILE_TAG)) // If not archive file
 		/* TODO: do not skip the '.trarlololo'. '.trar' only! */
 	{
 		return 1;
 	}
 	return 0;
+}
+
+
+unsigned int is_in_archive(char *file_name, ARCHIVE *archive)
+{
+	unsigned int i = 0;
+
+	/* Check this file in archive */
+	while (i < archive->files_count)
+	{
+		if (!strcmp(file_name, archive->files[i]->name))
+		{
+			printf("The file '%s' is in '%s' archive.\n", file_name, archive->name);
+			return i;
+		}
+
+		i++;
+	}
+
+	return archive->files_count + 1;
 }
 
 
@@ -79,7 +100,7 @@ Output:
 	Return 0 if everything is OK, else 1.
 */
 {
-	if (is_arch_file(arch_name))
+	if (is_an_archive(arch_name))
 	{
 		printf("The file '%s' is not an archive of %s program.\n", arch_name, ARC_NAME);
 		exit(1);
@@ -150,6 +171,57 @@ Output:
 }
 
 
+int write_an_archive_to_file(ARCHIVE *archive)
+{
+	ARCHIVEDFILE *zipped_file;
+	FILE *arch_file;
+	unsigned int i = 0;
+
+	if (access(archive->name, R_OK|W_OK) == -1)
+	{
+		arch_file = fopen(archive->name, "r+");
+	}
+	else
+	/* Try to create new file */
+	{
+		arch_file = fopen(archive->name, "w");
+	}
+
+	if (arch_file == NULL)
+	{
+		printf("Permission denied to the archive '%s'\n", archive->name);
+		exit(1);
+	}
+
+	/* Write every zipped file to archive file */
+	while (i < archive->files_count)
+	{
+		zipped_file = archive->files[i];
+
+		if (zipped_file->new_size == 0)
+		{
+			printf("\nThe size of new file is zero!\n");
+		}
+
+		/* Write header */
+		fprintf(arch_file, "N%dB%ldF%ldN%s",
+				strlen(zipped_file->name),
+				zipped_file->root->length,
+				zipped_file->new_size,
+				zipped_file->name
+		);
+
+		/* Write bintree & text */
+		write_bintree_to_file(arch_file, zipped_file->root);
+		fprintf(arch_file, "%s", zipped_file->text);
+
+		i++;
+	}
+	fclose(arch_file);
+	return 0;
+}
+
+
 /* ---------- ARCHIVE FUNCTIONS ---------- */
 
 void print_bin_file(char *file_name)
@@ -179,23 +251,17 @@ void print_bin_file(char *file_name)
 }
 
 
-int add_to_archive(char *file_name, ARCHIVE *arch)
+int add_to_archive(char *file_name, ARCHIVE *archive)
 {
-	printf("Adding to '%s' archive\n", arch->name);
+	printf("Adding to '%s' archive\n", archive->name);
 	ARCHIVEDFILE *zipped_file;
 	FILE *file;
-	unsigned int i = 0;
 
 	/* Check this file in archive */
-	while (i < arch->files_count)
+	if (is_in_archive(file_name, archive) != 0)
 	{
-		if (!strcmp(file_name, arch->files[i]->name))
-		{
-			printf("The file '%s' is already added to '%s' archive!\n", file_name, arch->name);
-			return 0;
-		}
-
-		i++;
+		printf("The file '%s' is already added to '%s' archive!\n", file_name, archive->name);
+		return 0;
 	}
 
 	/* Is file exist or readable */
@@ -208,86 +274,53 @@ int add_to_archive(char *file_name, ARCHIVE *arch)
 	strcpy(zipped_file->name, file_name);
 
 	/* Appending to archive structure */
-	arch->files_count += 1;
-	arch->files = (ARCHIVEDFILE**)realloc(arch->files, arch->files_count);
-	arch->files[arch->files_count - 1] = zipped_file;
+	archive->files_count += 1;
+	archive->files = (ARCHIVEDFILE**)realloc(archive->files, archive->files_count);
+	archive->files[archive->files_count - 1] = zipped_file;
 
 	fclose(file);
 	return 0;
 }
 
 
-int write_an_archive_to_file(ARCHIVE *arch)
+int extract_file_from_archive(char *file_name, ARCHIVE *archive)
 {
-	ARCHIVEDFILE *zipped_file;
-	FILE *arch_file;
-	unsigned int i = 0;
-	
-	if (access(arch->name, R_OK|W_OK) == -1)
+	FILE *file;
+	unsigned int file_num = is_in_archive(file_name, archive);
+
+	/* Check this file in archive */
+	if (file_num > archive->files_count)
 	{
-		arch_file = fopen(arch->name, "r+");
-	}
-	else
-	/* Try to create new file */
-	{
-		arch_file = fopen(arch->name, "w");
+		return 1;
 	}
 
-	if (arch_file == NULL)
+	if ((file = fopen(file_name, "w")) == NULL)
 	{
-		printf("Permission denied to the archive '%s'\n", arch->name);
-		exit(1);
+		return 2;
 	}
 
-	/* Write every zipped file to archive file */
-	while (i < arch->files_count)
-	{
-		zipped_file = arch->files[i];
+	decode_file(file, archive->files[file_num]);
 
-		/* Write header */
-		fprintf(arch_file, "N%dB%ldF%ldN%s",
-				strlen(zipped_file->name),
-				zipped_file->root->length,
-				zipped_file->new_size,
-				zipped_file->name
-		);
+	fclose(file);
 
-		/* Write bintree & text */
-		write_bintree(arch_file, zipped_file->root);
-		fprintf(arch_file, "%s", zipped_file->text);
-
-		i++;
-	}
-	fclose(arch_file);
 	return 0;
 }
 
 
-unsigned long int build_bintree_from_file(FILE *file, BINTREE *root, unsigned long int length, char *code)
+int show_archived_files(ARCHIVE *archive)
 {
-	char chr;
+	unsigned int i = 0;
+	ARCHIVEDFILE *zipped_file;
 
-	if (length > 0)
+	printf("Next files are in '%s' archive:\n", archive->name);
+	while (i < archive->files_count)
 	{
-		root->code = code;
+		zipped_file = archive->files[i];
+		printf("|---%s (%ld, %ld)\n", zipped_file->name, zipped_file->new_size, zipped_file->old_size);
 
-		fread(&chr, 1, 1, file);
-		if (chr == 'S')
-		{
-			fread(&chr, 1, 1, file);
-			root->left = root->right = NULL;
-			root->length = 0;
-			root->value = (unsigned)chr;
-			return length - 2;
-		}
-
-		length -= 1;
-
-		root->left = (BINTREE*)malloc(sizeof(BINTREE));
-		root->right = (BINTREE*)malloc(sizeof(BINTREE));
-		length = build_bintree_from_file(file, root->left, length, "1");
-		length = build_bintree_from_file(file, root->right, length, "0");
+		i++;
 	}
+	printf("\n");
 
-	return length;
+	return 0;
 }

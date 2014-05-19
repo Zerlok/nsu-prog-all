@@ -61,6 +61,71 @@ ARCHIVEDFILE *encode_file(FILE *file)
 }
 
 
+int decode_file(FILE *file, ARCHIVEDFILE *zipped_file)
+{
+	BINTREE *root = zipped_file->root;
+
+	if (root == NULL)
+	{
+		printf("ERROR");
+		return 1;
+	}
+
+	char *bin_code, *text = zipped_file->text;
+	int j = 0;
+	unsigned long int i = 0, max_len = root->length;
+
+	while (i < max_len)
+	{
+		bin_code = get_binary_code(text[i]);
+
+		j = 0;
+		while (j < 8)
+		{
+			if (root->left != NULL && root->right != NULL)
+			{
+				if (bin_code[j] == '1')
+				{
+					root = root->left;
+				}
+				else
+				{
+					root = root->right;
+				}
+			}
+			else
+			{
+				fprintf(file, "%c", (signed)root->value);
+			}
+
+			j++;
+		}
+
+		i++;
+	}
+
+	return 0;
+}
+
+
+char *get_encoded(BINTREE *main_lst, unsigned char symbol)
+{
+	BINTREE *lst = main_lst;
+
+	while (lst != NULL)
+	{
+		if (lst->hash != 0 && lst->value == symbol)
+		{
+			return lst->encoded;
+		}
+
+		lst = lst->next;
+	}
+
+	return NULL;
+}
+
+
 char *get_letters(char *string)
 {
 	unsigned int i = 0;
@@ -71,13 +136,14 @@ char *get_letters(char *string)
 	{
 		if (i > 0 && (i % 8) == 0)
 		{
-			new_string[(int)(i / 8) - 1] = (char)(get_as_one_char(little_string));
+			new_string[(int)(i / 8) - 1] = get_as_one_char(little_string);
 		}
 		little_string[i % 8] = string[i];
+
 		i++;
 	}
-	i--;
 
+	i--;
 	if ((i % 8) != 0)
 	{
 		while ((i % 8) != 0)
@@ -85,7 +151,7 @@ char *get_letters(char *string)
 			little_string[i % 8] = '0';
 			i++;
 		}
-		new_string[(int)(i / 8) - 1] = (char)(get_as_one_char(little_string));
+		new_string[(int)(i / 8) - 1] = get_as_one_char(little_string);
 	}
 	return new_string;
 }
@@ -105,6 +171,31 @@ char get_as_one_char(char string[8])
 	}
 
 	return (char)chr;
+}
+
+
+char *get_binary_code(char chr)
+{
+	char *bin_code = (char*)calloc(8, sizeof(char));
+	int i = 0, sum = 0, mask[8] = {128, 64, 32, 16, 8, 4, 2, 1};
+
+//	if (chr > 255)
+//	{
+//		return NULL;
+//	}
+
+	while (i < 8)
+	{
+		if (sum + mask[i] <= (int)chr)
+		{
+			bin_code[i] = '1';
+			sum += mask[i];
+		}
+
+		i++;
+	}
+
+	return bin_code;
 }
 
 
@@ -144,7 +235,7 @@ int decode_string(BINTREE *root, char *string)
 			exit(1);
 		}
 	}
-	
+
 	/* Last symbol */
 	if (root->left != NULL && root->right != NULL)
 	{
@@ -153,24 +244,6 @@ int decode_string(BINTREE *root, char *string)
 
 	printf("\n");
 	return 0;
-}
-
-
-char *get_encoded(BINTREE *main_lst, unsigned char symbol)
-{
-	BINTREE *lst = main_lst;
-
-	while (lst != NULL)
-	{
-		if (lst->hash != 0 && lst->value == symbol)
-		{
-			return lst->encoded;
-		}
-
-		lst = lst->next;
-	}
-
-	return NULL;
 }
 
 
@@ -269,7 +342,7 @@ unsigned long int count_bintree_codes(BINTREE *root, char *seq, unsigned long in
 }
 
 
-int write_bintree(FILE *file, BINTREE *root)
+int write_bintree_to_file(FILE *file, BINTREE *root)
 {
 	if (root == NULL)
 	{
@@ -285,10 +358,43 @@ int write_bintree(FILE *file, BINTREE *root)
 
 	fprintf(file, "N");
 
-	write_bintree(file, root->left);
-	write_bintree(file, root->right);
+	write_bintree_to_file(file, root->left);
+	write_bintree_to_file(file, root->right);
 
 	return 0;
+}
+
+
+unsigned long int build_bintree_from_file(FILE *file, BINTREE *root, unsigned long int length, char *code)
+{
+	char chr;
+
+	if (length > 0)
+	{
+		root->code = code;
+
+		fread(&chr, 1, 1, file);
+		if (chr == 'S')
+		{
+			fread(&chr, 1, 1, file);
+			root->next = root->left = root->right = NULL;
+			root->hash = get_hash((unsigned)chr);
+			root->count = root->length = 0;
+			root->value = (unsigned)chr;
+
+			return length - 2;
+		}
+
+		length -= 1;
+
+		root->hash = 0;
+		root->left = (BINTREE*)malloc(sizeof(BINTREE));
+		root->right = (BINTREE*)malloc(sizeof(BINTREE));
+		length = build_bintree_from_file(file, root->left, length, "1");
+		length = build_bintree_from_file(file, root->right, length, "0");
+	}
+
+	return length;
 }
 
 

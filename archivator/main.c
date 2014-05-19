@@ -1,6 +1,5 @@
 #include "mod.h"
 
-// #include "debug.h"
 #define DEBUG
 
 
@@ -103,7 +102,7 @@ Input:
 			arg_indx++;
 			if(arg_indx + 1 < argc)
 			{
-				if (!is_arch_file(argv[arg_indx]))
+				if (!is_an_archive(argv[arg_indx]))
 				{
 					return APPEND_CODE + arg_indx + 1;
 				}
@@ -122,7 +121,7 @@ Input:
 			arg_indx++;
 			if(arg_indx + 1 < argc)
 			{
-				if (!is_arch_file(argv[arg_indx]))
+				if (!is_an_archive(argv[arg_indx]))
 				{
 					return EXTRACT_CODE + arg_indx + 1;
 				}
@@ -140,7 +139,7 @@ Input:
 		{
 			if(arg_indx + 1 < argc)
 			{
-				if (!is_arch_file(argv[arg_indx + 1]))
+				if (!is_an_archive(argv[arg_indx + 1]))
 				{
 					return LIST_CODE + arg_indx + 1;
 				}
@@ -158,7 +157,7 @@ Input:
 		{
 			if(arg_indx + 1 < argc)
 			{
-				if (!is_arch_file(argv[arg_indx + 1]))
+				if (!is_an_archive(argv[arg_indx + 1]))
 				{
 					return TESTSUM_CODE + arg_indx + 1;
 				}
@@ -205,7 +204,7 @@ Input:
 
 int main(int argc, char *argv[])
 {
-	ARCHIVE *arch = (ARCHIVE*)malloc(sizeof(ARCHIVE));
+	ARCHIVE *archive = (ARCHIVE*)malloc(sizeof(ARCHIVE));
 	int code = HELP_CODE, indx = 0;
 
 	if (argc > 1)
@@ -214,37 +213,37 @@ int main(int argc, char *argv[])
 		indx = code % 10;
 		code -= indx;
 		
-		#ifdef DEBUG
-			printf("CODE: %d, INDX: %d, ARG: %s\n", code, indx, argv[indx]);
-		#endif
+//		#ifdef DEBUG
+//			printf("CODE: %d, INDX: %d, ARG: %s\n", code, indx, argv[indx]);
+//		#endif
 
 		if (code < HELP_CODE)
 		{
-			read_or_create_an_archive(argv[2], arch);
+			read_or_create_an_archive(argv[2], archive);
 		}
-		printf("Archive name is '%s'\n", arch->name);
 
 		switch (code)
 		{
 			case APPEND_CODE:
 			{
-				// printf("Going add '%s' file to '%s' archive\n", argv[arg_indx], argv[arg_indx + 1]);
-				if (add_to_archive(argv[indx], arch))
+				if (add_to_archive(argv[indx], archive))
 				{
 					printf("Something wrong with file '%s'\n", argv[indx]);
 				}
 				else
 				{
-					write_an_archive_to_file(arch);
-					printf("File '%s' added to '%s' archive.\n", argv[indx], arch->name);
+					write_an_archive_to_file(archive);
+					printf("File '%s' added to '%s' archive.\n", argv[indx], archive->name);
 				}
 				break;
 			}
 			case EXTRACT_CODE:
-				printf("Going extract '%s' file from '%s' archive\n", argv[indx], arch->name);
+//				printf("Going extract '%s' file from '%s' archive\n", argv[indx], arch->name);
+				extract_file_from_archive(argv[indx], archive);
 				break;
 			case LIST_CODE:
-				printf("Going show a list of files in '%s' archive\n", argv[indx]);
+//				printf("Going show a list of files in '%s' archive\n", argv[indx]);
+				show_archived_files(archive);
 				break;
 			case TESTSUM_CODE:
 				printf("Going count a test sum in '%s' archive\n", argv[indx]);
