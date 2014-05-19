@@ -7,7 +7,19 @@
 int run_test(char *file_name)
 {
 	ARCHIVE *archive = (ARCHIVE*)malloc(sizeof(ARCHIVE));
-	ARCHIVEDFILE *zipped_file;
+	ARCHIVEDFILE *zipped_file, *encoded_file;
+	FILE *file;
+
+	if ((file = fopen(file_name, "rb")) == NULL)
+	{
+		printf("cannot open the file!\n");
+		return 1;
+	}
+
+	encoded_file = encode_file(file);
+	print_bintree(encoded_file->root, "");
+	printf("\nEncoded:\n%s\n\n", encoded_file->text);
+	fclose(file);
 
 	read_or_create_an_archive("test/my_archive.trar", archive);
 	zipped_file = archive->files[archive->files_count - 1];
@@ -117,9 +129,8 @@ Output:
 			fread(zipped_file->name, file_name_size, 1, arch_file);
 
 			/* Read & build bintree */
-//			zipped_file->root = NULL;
 			zipped_file->root = (BINTREE*)malloc(sizeof(BINTREE));
-			build_bintree_from_file(arch_file, zipped_file->root, bin_tree_size, "1");
+			build_bintree_from_file(arch_file, zipped_file->root, bin_tree_size, "");
 
 			/* Read archived text */
 			zipped_file->text = (char*)calloc(file_text_size, sizeof(char));
@@ -173,6 +184,19 @@ int add_to_archive(char *file_name, ARCHIVE *arch)
 	printf("Adding to '%s' archive\n", arch->name);
 	ARCHIVEDFILE *zipped_file;
 	FILE *file;
+	unsigned int i = 0;
+
+	/* Check this file in archive */
+	while (i < arch->files_count)
+	{
+		if (!strcmp(file_name, arch->files[i]->name))
+		{
+			printf("The file '%s' is already added to '%s' archive!\n", file_name, arch->name);
+			return 0;
+		}
+
+		i++;
+	}
 
 	/* Is file exist or readable */
 	if ((file = fopen(file_name, "r")) == NULL)
@@ -204,6 +228,7 @@ int write_an_archive_to_file(ARCHIVE *arch)
 		arch_file = fopen(arch->name, "r+");
 	}
 	else
+	/* Try to create new file */
 	{
 		arch_file = fopen(arch->name, "w");
 	}
@@ -214,17 +239,23 @@ int write_an_archive_to_file(ARCHIVE *arch)
 		exit(1);
 	}
 
+	/* Write every zipped file to archive file */
 	while (i < arch->files_count)
 	{
 		zipped_file = arch->files[i];
+
+		/* Write header */
 		fprintf(arch_file, "N%dB%ldF%ldN%s",
 				strlen(zipped_file->name),
 				zipped_file->root->length,
 				zipped_file->new_size,
 				zipped_file->name
 		);
+
+		/* Write bintree & text */
 		write_bintree(arch_file, zipped_file->root);
 		fprintf(arch_file, "%s", zipped_file->text);
+
 		i++;
 	}
 	fclose(arch_file);
@@ -238,6 +269,7 @@ unsigned long int build_bintree_from_file(FILE *file, BINTREE *root, unsigned lo
 
 	if (length > 0)
 	{
+		root->code = code;
 
 		fread(&chr, 1, 1, file);
 		if (chr == 'S')
@@ -246,7 +278,6 @@ unsigned long int build_bintree_from_file(FILE *file, BINTREE *root, unsigned lo
 			root->left = root->right = NULL;
 			root->length = 0;
 			root->value = (unsigned)chr;
-			root->code = code;
 			return length - 2;
 		}
 
