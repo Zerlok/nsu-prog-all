@@ -34,7 +34,7 @@ BINTREE *get_symbols_list(unsigned char *string);
 char *get_encoded(BINTREE *list, unsigned char symbol);
 char *get_letters(char *string);
 char get_as_one_char(char string[8]);
-char *get_binary_code(char chr);
+char *get_binary_code(unsigned char chr);
 
 
 /* BINTREE */

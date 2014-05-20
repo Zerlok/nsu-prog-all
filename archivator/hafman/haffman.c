@@ -63,26 +63,34 @@ ARCHIVEDFILE *encode_file(FILE *file)
 
 int decode_file(FILE *file, ARCHIVEDFILE *zipped_file)
 {
-	BINTREE *root = zipped_file->root;
 
-	if (root == NULL)
+	if (zipped_file->root == NULL)
 	{
 		printf("ERROR");
 		return 1;
 	}
 
+	BINTREE *root = zipped_file->root;
 	char *bin_code, *text = zipped_file->text;
-	int j = 0;
-	unsigned long int i = 0, max_len = root->length;
+	unsigned int code;
+	int j;
+	unsigned long int prnt = 0, i = 0, max_len = zipped_file->new_size, max_prints = zipped_file->old_size;
 
-	while (i < max_len)
+	while (prnt < max_prints && i < max_len)
 	{
+		code = (unsigned)text[i];
 		bin_code = get_binary_code(text[i]);
 
 		j = 0;
-		while (j < 8)
+		while (prnt < max_prints && j < 8)
 		{
-			if (root->left != NULL && root->right != NULL)
+			if (root->left == NULL && root->right == NULL)
+			{
+				fprintf(file, "%c", (signed)root->value);
+				prnt += 1;
+				root = zipped_file->root;
+			}
+			else
 			{
 				if (bin_code[j] == '1')
 				{
@@ -92,13 +100,9 @@ int decode_file(FILE *file, ARCHIVEDFILE *zipped_file)
 				{
 					root = root->right;
 				}
-			}
-			else
-			{
-				fprintf(file, "%c", (signed)root->value);
-			}
 
-			j++;
+				j++;
+			}
 		}
 
 		i++;
@@ -174,22 +178,21 @@ char get_as_one_char(char string[8])
 }
 
 
-char *get_binary_code(char chr)
+char *get_binary_code(unsigned char chr)
 {
 	char *bin_code = (char*)calloc(8, sizeof(char));
-	int i = 0, sum = 0, mask[8] = {128, 64, 32, 16, 8, 4, 2, 1};
-
-//	if (chr > 255)
-//	{
-//		return NULL;
-//	}
+	unsigned int code = chr, i = 0, sum = 0, mask[8] = {128, 64, 32, 16, 8, 4, 2, 1};
 
 	while (i < 8)
 	{
-		if (sum + mask[i] <= (int)chr)
+		if (sum + mask[i] <= code)
 		{
 			bin_code[i] = '1';
 			sum += mask[i];
+		}
+		else
+		{
+			bin_code[i] = '0';
 		}
 
 		i++;
@@ -514,7 +517,7 @@ int append_list(BINTREE **main_lst, unsigned char value)
 	while (right_lst != NULL)
 	{
 		/* If this value exists in main_lst */
-		if (hash == right_lst->hash && value == right_lst->value)
+		if (value == right_lst->value)
 		{
 			right_lst->count += 1;
 			left_lst->next = right_lst->next;	

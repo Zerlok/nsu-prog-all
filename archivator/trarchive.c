@@ -139,7 +139,7 @@ Output:
 		zipped_file = (ARCHIVEDFILE*)malloc(sizeof(ARCHIVEDFILE));
 		if (chr == 'N')
 		{
-			if (fscanf(arch_file, "%dB%ldF%ldN", &file_name_size, &bin_tree_size, &file_text_size) == EOF)
+			if (fscanf(arch_file, "%dB%ldF%ld|%ldN", &file_name_size, &bin_tree_size, &file_text_size, &(zipped_file->old_size)) == EOF)
 			{
 				printf("Archive is damaged!\n");
 				exit(1);
@@ -155,6 +155,7 @@ Output:
 
 			/* Read archived text */
 			zipped_file->text = (char*)calloc(file_text_size, sizeof(char));
+			zipped_file->new_size = file_text_size;
 			fread(zipped_file->text, file_text_size, 1, arch_file);
 		}
 		count_bintree_codes(zipped_file->root, "", 0);
@@ -204,10 +205,11 @@ int write_an_archive_to_file(ARCHIVE *archive)
 		}
 
 		/* Write header */
-		fprintf(arch_file, "N%dB%ldF%ldN%s",
+		fprintf(arch_file, "N%dB%ldF%ld|%ldN%s",
 				strlen(zipped_file->name),
 				zipped_file->root->length,
 				zipped_file->new_size,
+				zipped_file->old_size,
 				zipped_file->name
 		);
 
@@ -221,8 +223,6 @@ int write_an_archive_to_file(ARCHIVE *archive)
 	return 0;
 }
 
-
-/* ---------- ARCHIVE FUNCTIONS ---------- */
 
 void print_bin_file(char *file_name)
 {
@@ -251,6 +251,9 @@ void print_bin_file(char *file_name)
 }
 
 
+/* ---------- ARCHIVE FUNCTIONS ---------- */
+
+
 int add_to_archive(char *file_name, ARCHIVE *archive)
 {
 	printf("Adding to '%s' archive\n", archive->name);
@@ -258,7 +261,7 @@ int add_to_archive(char *file_name, ARCHIVE *archive)
 	FILE *file;
 
 	/* Check this file in archive */
-	if (is_in_archive(file_name, archive) != 0)
+	if (is_in_archive(file_name, archive) < archive->files_count)
 	{
 		printf("The file '%s' is already added to '%s' archive!\n", file_name, archive->name);
 		return 0;
