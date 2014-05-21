@@ -150,13 +150,24 @@ Output:
 			fread(zipped_file->name, file_name_size, 1, arch_file);
 
 			/* Read & build bintree */
-			zipped_file->root = (BINTREE*)malloc(sizeof(BINTREE));
-			build_bintree_from_file(arch_file, zipped_file->root, bin_tree_size, "");
+			if (bin_tree_size > 0)
+			{
+				zipped_file->root = (BINTREE*)malloc(sizeof(BINTREE));
+				build_bintree_from_file(arch_file, zipped_file->root, bin_tree_size, "");
+			}
+			else
+			{
+				zipped_file->root = NULL;
+			}
+
 
 			/* Read archived text */
 			zipped_file->text = (char*)calloc(file_text_size, sizeof(char));
-			zipped_file->new_size = file_text_size;
-			fread(zipped_file->text, file_text_size, 1, arch_file);
+			if (file_text_size > 0)
+			{
+				zipped_file->new_size = file_text_size;
+				fread(zipped_file->text, file_text_size, 1, arch_file);
+			}
 		}
 		count_bintree_codes(zipped_file->root, "", 0);
 		arch->files_count += 1;
@@ -199,55 +210,34 @@ int write_an_archive_to_file(ARCHIVE *archive)
 	{
 		zipped_file = archive->files[i];
 
-		if (zipped_file->new_size == 0)
+		if (zipped_file->new_size == 0 && zipped_file->old_size == 0)
 		{
 			printf("\nThe size of new file is zero!\n");
+			fprintf(arch_file, "N%dB0F0|0N%s",
+					strlen(zipped_file->name),
+					zipped_file->name
+			);
 		}
+		else
+		{
+			/* Write header */
+			fprintf(arch_file, "N%dB%ldF%ld|%ldN%s",
+					strlen(zipped_file->name),
+					zipped_file->root->length,
+					zipped_file->new_size,
+					zipped_file->old_size,
+					zipped_file->name
+			);
 
-		/* Write header */
-		fprintf(arch_file, "N%dB%ldF%ld|%ldN%s",
-				strlen(zipped_file->name),
-				zipped_file->root->length,
-				zipped_file->new_size,
-				zipped_file->old_size,
-				zipped_file->name
-		);
-
-		/* Write bintree & text */
-		write_bintree_to_file(arch_file, zipped_file->root);
-		fprintf(arch_file, "%s", zipped_file->text);
+			/* Write bintree & text */
+			write_bintree_to_file(arch_file, zipped_file->root);
+			fprintf(arch_file, "%s", zipped_file->text);
+		}
 
 		i++;
 	}
 	fclose(arch_file);
 	return 0;
-}
-
-
-void print_bin_file(char *file_name)
-{
-	FILE *file;
-	unsigned char str;
-    int i = 1;
-
-	if((file = fopen(file_name, "rb")) == NULL)
-	{
-		printf("Error while file opening!\n");
-		fclose(file);
-		exit(1);
-	}
-
-    printf("The content of '%s' file:\n", file_name);
-	while (fread(&str, sizeof(str), 1, file))
-    {
-         printf("%02x", str);
-         if (!(i % 2)) printf(" ");
-         if (!(i % 16)) printf("\n");
-         i++;
-	}
-	printf("\n");
-
-	fclose(file);
 }
 
 
@@ -315,11 +305,11 @@ int show_archived_files(ARCHIVE *archive)
 	unsigned int i = 0;
 	ARCHIVEDFILE *zipped_file;
 
-	printf("Next files are in '%s' archive:\n", archive->name);
+	printf("\nNext files are in '%s' archive:\n", archive->name);
 	while (i < archive->files_count)
 	{
 		zipped_file = archive->files[i];
-		printf("|---%s (%ld, %ld)\n", zipped_file->name, zipped_file->new_size, zipped_file->old_size);
+		printf("\t%s (zipped %ld, unzipped %ld) bytes\n", zipped_file->name, zipped_file->new_size, zipped_file->old_size);
 
 		i++;
 	}

@@ -19,7 +19,7 @@ typedef struct Archive
 /* ARCHIVE VARS */
 #define ARC_NAME "Trarchive"
 #define ARC_VERSION "v0.01"
-#define DEBUG
+#define DEBUG_
 
 
 /* FILE VARS*/

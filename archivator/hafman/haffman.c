@@ -72,13 +72,11 @@ int decode_file(FILE *file, ARCHIVEDFILE *zipped_file)
 
 	BINTREE *root = zipped_file->root;
 	char *bin_code, *text = zipped_file->text;
-	unsigned int code;
 	int j;
 	unsigned long int prnt = 0, i = 0, max_len = zipped_file->new_size, max_prints = zipped_file->old_size;
 
 	while (prnt < max_prints && i < max_len)
 	{
-		code = (unsigned)text[i];
 		bin_code = get_binary_code(text[i]);
 
 		j = 0;
