@@ -66,7 +66,6 @@ int decode_file(FILE *file, ARCHIVEDFILE *zipped_file)
 
 	if (zipped_file->root == NULL)
 	{
-		printf("ERROR");
 		return 1;
 	}
 

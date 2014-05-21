@@ -154,6 +154,7 @@ Output:
 			{
 				zipped_file->root = (BINTREE*)malloc(sizeof(BINTREE));
 				build_bintree_from_file(arch_file, zipped_file->root, bin_tree_size, "");
+				count_bintree_codes(zipped_file->root, "", 0);
 			}
 			else
 			{
@@ -168,8 +169,11 @@ Output:
 				zipped_file->new_size = file_text_size;
 				fread(zipped_file->text, file_text_size, 1, arch_file);
 			}
+			else
+			{
+				zipped_file->new_size = 0;
+			}
 		}
-		count_bintree_codes(zipped_file->root, "", 0);
 		arch->files_count += 1;
 		arch->files = (ARCHIVEDFILE**)realloc(arch->files, arch->files_count);
 		arch->files[arch->files_count - 1] = zipped_file;
