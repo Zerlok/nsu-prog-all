@@ -4,12 +4,8 @@
 
 
 void print_flag_help()
-/*	Function shows help about flags.	*/
+/*	Function shows help about flags. */
 {
-	// #ifdef DEBUG
-	// 	print_func_name(__func__);
-	// #endif
-
 	printf("You can use this flags:\n");
 	printf("   %s\t\t-\tto add file to archive. \t\t Usage: %s <archive> <file>\n", FLAG_ADD, FLAG_ADD);
 	printf("   %s\t\t-\tto extract file from archive. \t\t Usage: %s <archive> <file>\n", FLAG_EXTR, FLAG_EXTR);
@@ -19,7 +15,6 @@ void print_flag_help()
 
 	#ifdef DEBUG
 		printf("   %s\t-\tto run test function (FOR DEBUG ONLY!!!).\n", TESTMODE_FLAG);
-		// print_end_func(__func__);
 	#endif
 }
 
@@ -71,7 +66,7 @@ Input:
 		{
 			if (err_code > ERROR_CODE)
 			{
-				printf("Unknown error (code %d)\n", err_code);
+				printf("Unknown error: %d\n", err_code);
 			}
 			else
 			{
@@ -212,10 +207,6 @@ int main(int argc, char *argv[])
 		code = read_flags(argc, argv);
 		indx = code % 10;
 		code -= indx;
-		
-//		#ifdef DEBUG
-//			printf("CODE: %d, INDX: %d, ARG: %s\n", code, indx, argv[indx]);
-//		#endif
 
 		if (code < HELP_CODE)
 		{
@@ -232,17 +223,14 @@ int main(int argc, char *argv[])
 				}
 				else
 				{
-					write_an_archive_to_file(archive);
 					printf("File '%s' added to '%s' archive.\n", argv[indx], archive->name);
 				}
 				break;
 			}
 			case EXTRACT_CODE:
-//				printf("Going extract '%s' file from '%s' archive\n", argv[indx], arch->name);
 				extract_file_from_archive(argv[indx], archive);
 				break;
 			case LIST_CODE:
-//				printf("Going show a list of files in '%s' archive\n", argv[indx]);
 				show_archived_files(archive);
 				break;
 			case TESTSUM_CODE:
@@ -258,7 +246,6 @@ int main(int argc, char *argv[])
 			{
 				if (code > ERROR_CODE)
 				{
-					printf("Program was stopped with error code %d\n", code);
 					print_err(code);
 				}
 				else

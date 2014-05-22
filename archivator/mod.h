@@ -11,7 +11,7 @@ typedef struct Archive
 {
 	char version[5]; // The version of archive
 	char *name; // The path and name of archive
-	unsigned int files_count; // The number of files
+	int files_count; // The number of files
 	ARCHIVEDFILE **files; // The list of added files
 } ARCHIVE;
 
@@ -32,9 +32,9 @@ typedef struct Archive
 	#define TESTMODE_CODE 9000
 	#define TESTMODE_ERROR -9000
 
-    int run_test(char *file_name);
-#endif
+	int run_test(char *file_name);
 
+#endif
 
 /* FLAGS */
 #define FLAG_ADD "-a"
@@ -67,7 +67,7 @@ typedef struct Archive
 /* FUNCTION IMAGES */
 void print_bin_file(char *file_name);
 int is_an_archive(char *file_name);
-unsigned int is_in_archive(char *file_name, ARCHIVE *archive);
+int is_in_archive(char *file_name, ARCHIVE *archive);
 
 int read_or_create_an_archive(char *arch_name, ARCHIVE *arch);
 int write_an_archive_to_file(ARCHIVE *arch);
