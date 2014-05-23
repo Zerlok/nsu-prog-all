@@ -1,15 +1,13 @@
 #include "haf.h"
 
 
-ARCHIVEDFILE *encode_file(FILE *file, FILE *archive_file)
+ARCHIVEDFILE *encode_file(FILE *file)
 {
 	ARCHIVEDFILE *zipped_file = (ARCHIVEDFILE*)malloc(sizeof(ARCHIVEDFILE));
 
 	BINTREE *bin_tree, *symbols_list = NULL;
-	unsigned long int new_size = 0, file_size = 0;
+	unsigned long int file_size = 0;
 	unsigned char chr;
-	int i = 0;
-	char buffer[128] = {'\0'}, *buf_start = buffer;
 
 	/* Haffman encode preparation */
 	while (fread(&chr, sizeof(chr), 1, file))
@@ -18,64 +16,28 @@ ARCHIVEDFILE *encode_file(FILE *file, FILE *archive_file)
 		file_size++;
 	}
 
+	bin_tree = get_bintree(symbols_list);
+
+//	#ifdef DEBUG
+//		print_list(symbols_list);
+		print_bintree(bin_tree, "");
+//	#endif
+
 	/* If file is empty */
 	if (file_size == 0)
 	{
 		zipped_file->root = NULL;
+		zipped_file->list = NULL;
 		zipped_file->new_size = 0;
 		zipped_file->old_size = 0;
-
-		return zipped_file;
 	}
-
-	bin_tree = get_bintree(symbols_list);
-
-	#ifdef DEBUG
-		print_list(symbols_list);
-		print_bintree(bin_tree, "");
-	#endif
-
-	/* Encoding */
-	fseek(file, 0, SEEK_SET);
-
-	while (fread(&chr, sizeof(chr), 1, file))
+	else
 	{
-		if (strlen(buffer) < 8)
-		{
-			strcat(buffer, get_encoded(symbols_list, chr));
-		}
-
-		/* While first 8 bits are full */
-		while (strlen(buffer) >= 8)
-		{
-			/* Write as letter */
-			fprintf(archive_file, "%c", get_as_one_char(buffer));
-			new_size++;
-
-			/* Shift buffer */
-			buf_start = memmove(buffer, buffer+8, strlen(buffer+8));
-		}
+		zipped_file->root = bin_tree;
+		zipped_file->list = symbols_list;
+		zipped_file->new_size = 0;
+		zipped_file->old_size = file_size;
 	}
-
-	/* If buffer is not empty */
-	if ((i = strlen(buffer)) > 0)
-	{
-		/* Fill it with '0' value */
-		while (i < 8)
-		{
-			buffer[i] = '0';
-			i++;
-		}
-
-		/* Write last letter */
-		fprintf(archive_file, "%c", get_as_one_char(buffer));
-		new_size++;
-	}
-
-	/* Zipped file structure creation */
-	zipped_file->root = bin_tree;
-	zipped_file->new_size = new_size;
-	zipped_file->old_size = file_size;
 
 	return zipped_file;
 }
@@ -83,7 +45,12 @@ ARCHIVEDFILE *encode_file(FILE *file, FILE *archive_file)
 
 int decode_file(FILE *file, FILE *archive_file, ARCHIVEDFILE *zipped_file)
 {
-	BINTREE *root = zipped_file->root;
+	if (zipped_file == NULL)
+	{
+		return 1;
+	}
+
+	BINTREE *head = zipped_file->root;
 	char *buffer, chr;
 	int j;
 	unsigned long int prnt = 0, i = 0, max_len = zipped_file->new_size, max_prints = zipped_file->old_size;
@@ -97,21 +64,21 @@ int decode_file(FILE *file, FILE *archive_file, ARCHIVEDFILE *zipped_file)
 		j = 0;
 		while (prnt < max_prints && j < 8)
 		{
-			if (root->left == NULL && root->right == NULL)
+			if (head->left == NULL && head->right == NULL)
 			{
-				fprintf(file, "%c", (signed)root->value);
+				fprintf(file, "%c", (signed)head->value);
 				prnt += 1;
-				root = zipped_file->root;
+				head = zipped_file->root;
 			}
 			else
 			{
 				if (buffer[j] == '1')
 				{
-					root = root->left;
+					head = head->left;
 				}
 				else
 				{
-					root = root->right;
+					head = head->right;
 				}
 
 				j++;
@@ -240,7 +207,7 @@ Input:
 	if ((root->right == NULL)
 		&& (root->left == NULL))
 	{
-		root->encoded = (char*)calloc(strlen(seq) + 1, sizeof(char));
+		root->encoded = (char*)calloc(strlen(seq), sizeof(char));
 		root->length = 0;
 		strcpy(root->encoded, seq);
 		strcat(root->encoded, root->code);
@@ -333,6 +300,7 @@ Output:
 		root->code = code;
 
 		fread(&chr, 1, sizeof(char), file);
+		/* Create the head end if the symbol */
 		if (chr == 'S')
 		{
 			fread(&chr, 1, sizeof(char), file);
@@ -344,12 +312,16 @@ Output:
 			return length - 2;
 		}
 
+		/* Hash is zero for all vertices */
+		root->hash = 0;
 		length -= 1;
 
-		root->hash = 0;
+		/* Left trunk */
 		root->left = (BINTREE*)malloc(sizeof(BINTREE));
-		root->right = (BINTREE*)malloc(sizeof(BINTREE));
 		length = build_bintree_from_file(file, root->left, length, "1");
+
+		/* Right trunk */
+		root->right = (BINTREE*)malloc(sizeof(BINTREE));
 		length = build_bintree_from_file(file, root->right, length, "0");
 	}
 
@@ -492,6 +464,16 @@ Input:
 
 		return 0;
 	}
+
+	if (value == left_lst->value)
+	{
+		left_lst->count += 1;
+		*main_lst = left_lst->next;
+		insert_to_list(main_lst, left_lst);
+
+		return 0;
+	}
+
 	right_lst = left_lst->next;
 
 	while (right_lst != NULL)
@@ -604,7 +586,7 @@ Input:
 		/* If it's not the vertex (the end of head in tree) */
 		if (lst->hash != 0)
 		{
-			printf("%05d : %x (%ld)\n", lst->hash, lst->value, lst->count);
+			printf("%05d : %x (%ld) enc (%s)\n", lst->hash, lst->value, lst->count, lst->encoded);
 		}
 		/* If it's the vertex */
 		else

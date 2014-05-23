@@ -15,7 +15,7 @@ typedef struct BinaryTree
 
 typedef struct ArchivedFile
 {
-	BINTREE *root;
+	BINTREE *root, *list;
 	long int start_byte;
 	char *name;
 	unsigned long int old_size, new_size;
@@ -56,7 +56,7 @@ BINTREE *get_bintree(BINTREE *list);
 
 
 /* MAIN FUNCTIONS */
-ARCHIVEDFILE *encode_file(FILE *file, FILE *archive_file);
+ARCHIVEDFILE *encode_file(FILE *file);
 int decode_file(FILE *file, FILE *archive_file, ARCHIVEDFILE *zipped_file);
 
 int decode_string(BINTREE *root, char *string);

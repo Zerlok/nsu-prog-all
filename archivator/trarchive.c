@@ -124,6 +124,7 @@ Output:
 			fread(zipped_file->name, file_name_size, 1, archive_file);
 
 			/* Read & build bintree */
+			zipped_file->list = NULL;
 			if (bin_tree_size > 0)
 			{
 				zipped_file->root = (BINTREE*)malloc(sizeof(BINTREE));
@@ -151,53 +152,30 @@ Output:
 }
 
 
-int write_an_archive_to_file(ARCHIVE *archive)
-{
-	ARCHIVEDFILE *zipped_file;
-	FILE *archive_file;
-	int i = 0;
-
-	if ((archive_file = fopen(archive->name, "w")) == NULL)
-	{
-		printf("Permission denied to the archive '%s'\n", archive->name);
-		return 1;
-	}
-
-	/* Write every zipped file to archive file */
-	while (i < archive->files_count)
-	{
-		zipped_file = archive->files[i];
-
-		if (zipped_file->new_size == 0)
-		{
-			printf("\nThe size of new file is zero!\n");
-			fprintf(archive_file, "N%dB0F0|0N%s", strlen(zipped_file->name), zipped_file->name);
-
-			fclose(archive_file);
-
-			return 0;
-		}
-
-		/* Write header */
-		fprintf(archive_file, "N%dB%ldF%ld|%ldN%s",
-				strlen(zipped_file->name),
-				zipped_file->root->length,
-				zipped_file->new_size,
-				zipped_file->old_size,
-				zipped_file->name
-		);
-
-		/* Write bintree & text */
-		write_bintree_to_file(archive_file, zipped_file->root);
-
-		i++;
-	}
-	fclose(archive_file);
-	return 0;
-}
-
-
 /* ---------- ARCHIVE FUNCTIONS ---------- */
+
+
+int get_nums(unsigned long int x)
+{
+	int n = 10;
+	unsigned long int k = 1000000000;
+
+	while (n > 0 && (int)(x / k) == 0)
+	{
+		if (k != 1)
+		{
+			k /= 10;
+		}
+		n--;
+	}
+
+	if (n < 1)
+	{
+		n = 1;
+	}
+
+	return n;
+}
 
 
 int add_to_archive(char *file_name, ARCHIVE *archive)
@@ -214,6 +192,11 @@ Output:
 {
 	ARCHIVEDFILE *zipped_file;
 	FILE *file, *archive_file;
+	char buffer[128] = {}, *buf_start = buffer;
+	unsigned long int new_size = 0;
+	unsigned char chr;
+	long int new_size_byte;
+	int i = 0;
 
 	/* Check this file in archive */
 	if (is_in_archive(file_name, archive) > -1)
@@ -235,26 +218,63 @@ Output:
 		return 2;
 	}
 
-	/* Write header to archive file */
-	fprintf(archive_file, "N%dB%ldF%ld|%ldN%s",
-			strlen(zipped_file->name),
-			zipped_file->root->length,
-			zipped_file->new_size,
-			zipped_file->old_size,
-			zipped_file->name
-	);
+	/* Encode the file (Build bintree and count size) */
+	zipped_file = encode_file(file);
+	print_list(zipped_file->list);
 
-	/* Write bintree & text */
+	/* Write header */
+	fprintf(archive_file, "N%dB%ldF", strlen(file_name), zipped_file->root->length);
+	new_size_byte = ftell(archive_file);
+	fprintf(archive_file, "0000000000|%ldN%s", zipped_file->old_size, file_name);
 	write_bintree_to_file(archive_file, zipped_file->root);
 
-	/* Encode the file */
-	zipped_file = encode_file(file, archive_file);
+	fseek(file, 0, SEEK_SET);
+	while (fread(&chr, sizeof(chr), 1, file))
+	{
+		if (strlen(buffer) < 8)
+		{
+			strcat(buffer, get_encoded(zipped_file->list, chr));
+		}
 
+		/* While first 8 bits are full */
+		while (strlen(buffer) >= 8)
+		{
+			/* Write as letter */
+			fprintf(archive_file, "%c", get_as_one_char(buffer));
+			new_size++;
+
+			/* Shift buffer */
+			buf_start = memmove(buffer, buffer+8, 120);
+		}
+	}
+
+	/* If buffer is not empty */
+	if ((i = strlen(buffer)) > 0)
+	{
+		/* Fill it with '0' value */
+		while (i < 8)
+		{
+			buffer[i] = '0';
+			i++;
+		}
+
+		/* Write last letter */
+		fprintf(archive_file, "%c", get_as_one_char(buffer));
+		new_size++;
+	}
 	fclose(file);
+
+	/* Write zipped size */
+	fseek(archive_file, new_size_byte + (10 - get_nums(new_size)), SEEK_SET);
+	fprintf(archive_file, "%ld", new_size);
+
 	fclose(archive_file);
 
 	/* Appending to archive structure */
+	zipped_file->name = (char*)calloc(strlen(file_name), sizeof(char));
 	strcpy(zipped_file->name, file_name);
+	zipped_file->new_size = new_size;
+
 	archive->files_count += 1;
 	archive->files = (ARCHIVEDFILE**)realloc(archive->files, archive->files_count);
 	archive->files[archive->files_count - 1] = zipped_file;
