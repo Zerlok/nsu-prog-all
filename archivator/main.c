@@ -236,9 +236,11 @@ int main(int argc, char *argv[])
 			case TESTSUM_CODE:
 				printf("Going count a test sum in '%s' archive\n", argv[indx]);
 				break;
+		#ifdef DEBUG
 			case TESTMODE_CODE:
 				run_test(argv[indx]);
 				break;
+		#endif
 			case HELP_CODE:
 				print_doc();
 				break;
@@ -258,11 +260,11 @@ int main(int argc, char *argv[])
 	}
 	else
 	{
-		#ifdef DEBUG
-			run_test("test/second.txt");
-		#else
-			print_doc();
-		#endif
+	#ifdef DEBUG
+		run_test("test/second.txt");
+	#else
+		print_doc();
+	#endif
 	}
 	
 	return 0;

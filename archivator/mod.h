@@ -77,4 +77,3 @@ int extract_file_from_archive(char *file_name, ARCHIVE *archive);
 int show_archived_files(ARCHIVE *archive);
 
 BINTREE *get_bintree_from_file(FILE *file, unsigned long int length);
-//unsigned long int build_bintree_from_file(FILE *file, BINTREE *root, unsigned long int length, char *code);

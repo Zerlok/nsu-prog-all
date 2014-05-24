@@ -192,8 +192,8 @@ Output:
 {
 	ARCHIVEDFILE *zipped_file;
 	FILE *file, *archive_file;
-	char buffer[128] = {}, *buf_start = buffer;
-	unsigned long int new_size = 0;
+	char buffer[128] = {};
+	unsigned long int bin_tree_size, new_size = 0;
 	unsigned char chr;
 	long int new_size_byte;
 	int i = 0;
@@ -220,10 +220,20 @@ Output:
 
 	/* Encode the file (Build bintree and count size) */
 	zipped_file = encode_file(file);
+
+	if (zipped_file->root != NULL)
+	{
+		bin_tree_size = zipped_file->root->length;
+	}
+	else
+	{
+		bin_tree_size = 0;
+	}
+
 	print_list(zipped_file->list);
 
 	/* Write header */
-	fprintf(archive_file, "N%dB%ldF", strlen(file_name), zipped_file->root->length);
+	fprintf(archive_file, "N%dB%ldF", strlen(file_name), bin_tree_size);
 	new_size_byte = ftell(archive_file);
 	fprintf(archive_file, "0000000000|%ldN%s", zipped_file->old_size, file_name);
 	write_bintree_to_file(archive_file, zipped_file->root);
@@ -244,7 +254,7 @@ Output:
 			new_size++;
 
 			/* Shift buffer */
-			buf_start = memmove(buffer, buffer+8, 120);
+			memmove(buffer, buffer+8, 120);
 		}
 	}
 

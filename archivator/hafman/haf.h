@@ -29,11 +29,10 @@ void print_list(BINTREE *list);
 int append_list(BINTREE **list, unsigned char value);
 int insert_to_list(BINTREE **list, BINTREE *new_lst);
 BINTREE *pop_list(BINTREE **list);
-BINTREE *get_symbols_list(unsigned char *string);
+
 
 /* CODES */
 char *get_encoded(BINTREE *list, unsigned char symbol);
-char *get_letters(char *string);
 char get_as_one_char(char *string);
 char *get_binary_code(unsigned char chr);
 
@@ -58,5 +57,3 @@ BINTREE *get_bintree(BINTREE *list);
 /* MAIN FUNCTIONS */
 ARCHIVEDFILE *encode_file(FILE *file);
 int decode_file(FILE *file, FILE *archive_file, ARCHIVEDFILE *zipped_file);
-
-int decode_string(BINTREE *root, char *string);
