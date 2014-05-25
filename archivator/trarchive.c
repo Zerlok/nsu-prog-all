@@ -80,9 +80,9 @@ Output:
 
 	FILE *archive_file;
 	ARCHIVEDFILE *zipped_file = NULL;
-	char chr = 0;
+//	char chr = 0;
 	int file_name_size = 0;
-	unsigned long int bin_tree_size = 0, file_text_size = 0;
+	unsigned long int bin_tree_size = 0, file_text_size = 0, file_normal_size = 0;
 
 	/* Archive init */
 	archive->name = (char*)calloc(strlen(arch_name) + 1, sizeof(char));
@@ -108,38 +108,38 @@ Output:
 	}
 
 	/* Read archive file */
-	while (fread(&chr, sizeof(chr), 1, archive_file))
+	while (fscanf(archive_file, "N%dB%ldF%ld|%ldN",
+				&file_name_size,
+				&bin_tree_size,
+				&file_text_size,
+				&file_normal_size
+			) != EOF)
 	{
 		zipped_file = (ARCHIVEDFILE*)malloc(sizeof(ARCHIVEDFILE));
-		if (chr == 'N')
+		zipped_file->old_size = file_normal_size;
+
+		/* Read archived file name */
+		zipped_file->name = (char*)calloc(file_name_size, sizeof(char));
+		fread(zipped_file->name, file_name_size, 1, archive_file);
+
+		/* Read & build bintree */
+		zipped_file->list = NULL;
+		if (bin_tree_size > 0)
 		{
-			if (fscanf(archive_file, "%dB%ldF%ld|%ldN", &file_name_size, &bin_tree_size, &file_text_size, &(zipped_file->old_size)) == EOF)
-			{
-				printf("Archive is damaged!\n");
-				return 1;
-			}
-
-			/* Read archived file name */
-			zipped_file->name = (char*)calloc(file_name_size, sizeof(char));
-			fread(zipped_file->name, file_name_size, 1, archive_file);
-
-			/* Read & build bintree */
-			zipped_file->list = NULL;
-			if (bin_tree_size > 0)
-			{
-				zipped_file->root = (BINTREE*)malloc(sizeof(BINTREE));
-				build_bintree_from_file(archive_file, zipped_file->root, bin_tree_size, "");
-				count_bintree_codes(zipped_file->root, "", 0);
-			}
-			else
-			{
-				zipped_file->root = NULL;
-			}
-
-			/* Seek archived text */
-			zipped_file->new_size = file_text_size;
-			fseek(archive_file, file_text_size, SEEK_CUR);
+			zipped_file->root = (BINTREE*)malloc(sizeof(BINTREE));
+			build_bintree_from_file(archive_file, zipped_file->root, bin_tree_size, "");
+			count_bintree_codes(zipped_file->root, "", 0);
 		}
+		else
+		{
+			zipped_file->root = NULL;
+		}
+
+		/* Skip archived text */
+		zipped_file->start_byte = ftell(archive_file);
+		zipped_file->new_size = file_text_size;
+		fseek(archive_file, file_text_size, SEEK_CUR);
+
 		archive->files_count += 1;
 		archive->files = (ARCHIVEDFILE**)realloc(archive->files, archive->files_count);
 		archive->files[archive->files_count - 1] = zipped_file;
@@ -195,7 +195,7 @@ Output:
 	char buffer[128] = {};
 	unsigned long int bin_tree_size, new_size = 0;
 	unsigned char chr;
-	long int new_size_byte;
+	long int new_size_byte, start_text, end_text;
 	int i = 0;
 
 	/* Check this file in archive */
@@ -218,9 +218,10 @@ Output:
 		return 2;
 	}
 
-	/* Encode the file (Build bintree and count size) */
+	/* Encode the file (Build bintree and count size of file) */
 	zipped_file = encode_file(file);
 
+	/* Get bin_tree depth */
 	if (zipped_file->root != NULL)
 	{
 		bin_tree_size = zipped_file->root->length;
@@ -238,7 +239,10 @@ Output:
 	fprintf(archive_file, "0000000000|%ldN%s", zipped_file->old_size, file_name);
 	write_bintree_to_file(archive_file, zipped_file->root);
 
-	fseek(file, 0, SEEK_SET);
+	/* Write zipped file */
+	fseek(file, 0, SEEK_SET); // Start read the file again.
+	fseek(archive_file, 0, SEEK_END); // Go to the end of archive file.
+	start_text = ftell(archive_file);
 	while (fread(&chr, sizeof(chr), 1, file))
 	{
 		if (strlen(buffer) < 8)
@@ -252,6 +256,12 @@ Output:
 			/* Write as letter */
 			fprintf(archive_file, "%c", get_as_one_char(buffer));
 			new_size++;
+
+			/*
+			Say hello to bugs there:
+			1) If strle(buffer) > 120 -> memmove will copy buffer+8 to buffer,
+			but last 8 cells will not copy they still will be not \0!
+			*/
 
 			/* Shift buffer */
 			memmove(buffer, buffer+8, 120);
@@ -272,11 +282,13 @@ Output:
 		fprintf(archive_file, "%c", get_as_one_char(buffer));
 		new_size++;
 	}
+	end_text = ftell(archive_file);
 	fclose(file);
 
 	/* Write zipped size */
 	fseek(archive_file, new_size_byte + (10 - get_nums(new_size)), SEEK_SET);
 	fprintf(archive_file, "%ld", new_size);
+	printf("%ld == %ld\n", new_size, end_text - start_text);
 
 	fclose(archive_file);
 
@@ -326,6 +338,7 @@ Output:
 		return 1;
 	}
 
+	/* Unzip the file */
 	decode_file(file, archive_file, archive->files[file_num]);
 
 	fclose(file);

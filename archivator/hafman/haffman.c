@@ -52,27 +52,29 @@ int decode_file(FILE *file, FILE *archive_file, ARCHIVEDFILE *zipped_file)
 
 	BINTREE *head = zipped_file->root;
 	char *buffer, chr;
-	int j;
-	unsigned long int prnt = 0, i = 0, max_len = zipped_file->new_size, max_prints = zipped_file->old_size;
+	int i;
+	unsigned long int print_num = 0, max_prints = zipped_file->old_size;
 
+	/* Get to zipped file text */
 	fseek(archive_file, zipped_file->start_byte, SEEK_SET);
-	while (prnt < max_prints && i < max_len)
+
+	while (print_num < max_prints)
 	{
 		fread(&chr, 1, sizeof(char), archive_file);
 		buffer = get_binary_code(chr);
 
-		j = 0;
-		while (prnt < max_prints && j < 8)
+		i = 0;
+		while (print_num < max_prints && i < 8)
 		{
 			if (head->left == NULL && head->right == NULL)
 			{
 				fprintf(file, "%c", (signed)head->value);
-				prnt += 1;
+				print_num += 1;
 				head = zipped_file->root;
 			}
 			else
 			{
-				if (buffer[j] == '1')
+				if (buffer[i] == '1')
 				{
 					head = head->left;
 				}
@@ -81,11 +83,9 @@ int decode_file(FILE *file, FILE *archive_file, ARCHIVEDFILE *zipped_file)
 					head = head->right;
 				}
 
-				j++;
+				i++;
 			}
 		}
-
-		i++;
 	}
 
 	return 0;
@@ -218,11 +218,11 @@ Input:
 	/* Append left and right sequences */
 	if (strlen(seq) != 0)
 	{
-		left_seq = (char*)calloc(strlen(seq) + 1, sizeof(char));
+		left_seq = (char*)calloc(strlen(seq), sizeof(char));
 		strcpy(left_seq, seq);
 		strcat(left_seq, root->code);
 
-		right_seq = (char*)calloc(strlen(seq) + 1, sizeof(char));
+		right_seq = (char*)calloc(strlen(seq), sizeof(char));
 		strcpy(right_seq, seq);
 		strcat(right_seq, root->code);
 	}
@@ -366,11 +366,12 @@ Input:
 		strcat(right_seq, root->code);
 	}
 	else
+	/* If it starts with "" */
 	{
-		/* If it starts with "" */
 		left_seq = (char*)malloc(sizeof(seq));
-		right_seq = (char*)malloc(sizeof(seq));
 		strcpy(left_seq, root->code);
+
+		right_seq = (char*)malloc(sizeof(seq));
 		strcpy(right_seq, root->code);
 	}
 
