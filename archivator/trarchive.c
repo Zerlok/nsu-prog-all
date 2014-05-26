@@ -133,7 +133,7 @@ Output:
 		zipped_file->original_size = file_normal_size;
 
 		/* Read archived file name */
-		zipped_file->name = (char*)calloc(file_name_size, sizeof(char));
+		zipped_file->name = (char*)calloc(file_name_size + 1, sizeof(char));
 		check_mem(zipped_file->name, __func__);
 
 		fread(zipped_file->name, file_name_size, sizeof(char), archive_file);
@@ -310,7 +310,11 @@ Output:
 	fseek(archive_file, 0, SEEK_END); // Go to the end of archive file.
 	while (fread(&chr, 1, sizeof(char), file))
 	{
-		if (strlen(buffer) < 8)
+		if (strlen(buffer) == 0)
+		{
+			strcpy(buffer, get_encoded(zipped_file->list, chr));
+		}
+		else if (strlen(buffer) < 8)
 		{
 			strcat(buffer, get_encoded(zipped_file->list, chr));
 		}

@@ -213,6 +213,10 @@ Output:
 	{
 		header->left = header->right = NULL;
 		header->code = "1";
+
+		count_bintree_codes(header, "", 0);
+		header->length = 2; // This is how it is.
+
 		return header;
 	}
 
