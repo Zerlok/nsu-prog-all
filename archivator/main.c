@@ -49,6 +49,7 @@ int main(int argc, char *argv[])
 					printf("Program stopped with unknown code: %d\n", code);
 				}
 				return 1;
+				break;
 			}
 		}
 	}
