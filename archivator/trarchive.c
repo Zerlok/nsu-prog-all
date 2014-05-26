@@ -80,7 +80,6 @@ Output:
 
 	FILE *archive_file;
 	ARCHIVEDFILE *zipped_file = NULL;
-//	char chr = 0;
 	int file_name_size = 0;
 	unsigned long int bin_tree_size = 0, file_text_size = 0, file_normal_size = 0;
 
@@ -120,7 +119,7 @@ Output:
 
 		/* Read archived file name */
 		zipped_file->name = (char*)calloc(file_name_size, sizeof(char));
-		fread(zipped_file->name, file_name_size, 1, archive_file);
+		fread(zipped_file->name, file_name_size, sizeof(char), archive_file);
 
 		/* Read & build bintree */
 		zipped_file->list = NULL;
@@ -195,7 +194,7 @@ Output:
 	char buffer[128] = {};
 	unsigned long int bin_tree_size, new_size = 0;
 	unsigned char chr;
-	long int new_size_byte, start_text, end_text;
+	long int new_size_byte;
 	int i = 0;
 
 	/* Check this file in archive */
@@ -231,7 +230,7 @@ Output:
 		bin_tree_size = 0;
 	}
 
-	print_list(zipped_file->list);
+//	print_list(zipped_file->list);
 
 	/* Write header */
 	fprintf(archive_file, "N%dB%ldF", strlen(file_name), bin_tree_size);
@@ -242,7 +241,6 @@ Output:
 	/* Write zipped file */
 	fseek(file, 0, SEEK_SET); // Start read the file again.
 	fseek(archive_file, 0, SEEK_END); // Go to the end of archive file.
-	start_text = ftell(archive_file);
 	while (fread(&chr, sizeof(chr), 1, file))
 	{
 		if (strlen(buffer) < 8)
@@ -282,13 +280,11 @@ Output:
 		fprintf(archive_file, "%c", get_as_one_char(buffer));
 		new_size++;
 	}
-	end_text = ftell(archive_file);
 	fclose(file);
 
 	/* Write zipped size */
 	fseek(archive_file, new_size_byte + (10 - get_nums(new_size)), SEEK_SET);
 	fprintf(archive_file, "%ld", new_size);
-	printf("%ld == %ld\n", new_size, end_text - start_text);
 
 	fclose(archive_file);
 
@@ -356,6 +352,7 @@ Input:
 	ARCHIVE *archive - the pointer to the archive.
 */
 {
+	float zip_rate;
 	int i = 0;
 	ARCHIVEDFILE *zipped_file;
 
@@ -363,7 +360,20 @@ Input:
 	while (i < archive->files_count)
 	{
 		zipped_file = archive->files[i];
-		printf("|---%s (%ld, %ld)\n", zipped_file->name, zipped_file->new_size, zipped_file->old_size);
+		if (zipped_file->old_size != 0)
+		{
+			zip_rate = (float)zipped_file->new_size / (float)zipped_file->old_size;
+		}
+		else
+		{
+			zip_rate = 1.0;
+		}
+		printf("\t%s    zip rate: %d%% (%ld, %ld)\n",
+			   zipped_file->name,
+			   (int)((1 - zip_rate) * 100),
+			   zipped_file->new_size,
+			   zipped_file->old_size
+		);
 
 		i++;
 	}

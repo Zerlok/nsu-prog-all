@@ -2,26 +2,28 @@
 
 
 ARCHIVEDFILE *encode_file(FILE *file)
+/*
+This function uses Haffman algorithm and builds symbols frequency table and binary tree of file.
+
+Input:
+	FILE *file - the FILE pointer.
+
+Output:
+	ARCHIVEDFILE * - the pointer to ARCHIVEDFILE structure.
+*/
 {
 	ARCHIVEDFILE *zipped_file = (ARCHIVEDFILE*)malloc(sizeof(ARCHIVEDFILE));
 
-	BINTREE *bin_tree, *symbols_list = NULL;
+	BINTREE *symbols_list = NULL;
 	unsigned long int file_size = 0;
 	unsigned char chr;
 
-	/* Haffman encode preparation */
+	/* Append frequency table */
 	while (fread(&chr, sizeof(chr), 1, file))
 	{
 		append_list(&symbols_list, chr);
 		file_size++;
 	}
-
-	bin_tree = get_bintree(symbols_list);
-
-//	#ifdef DEBUG
-//		print_list(symbols_list);
-		print_bintree(bin_tree, "");
-//	#endif
 
 	/* If file is empty */
 	if (file_size == 0)
@@ -33,7 +35,7 @@ ARCHIVEDFILE *encode_file(FILE *file)
 	}
 	else
 	{
-		zipped_file->root = bin_tree;
+		zipped_file->root = get_bintree(symbols_list);
 		zipped_file->list = symbols_list;
 		zipped_file->new_size = 0;
 		zipped_file->old_size = file_size;
@@ -44,6 +46,17 @@ ARCHIVEDFILE *encode_file(FILE *file)
 
 
 int decode_file(FILE *file, FILE *archive_file, ARCHIVEDFILE *zipped_file)
+/*
+This function creates unzipped file.
+
+Input:
+	FILE *file - the FILE pointer (where to unzip).
+	FILE *archive_file - the FILE pointer (archive with zipped file).
+	ARCHIVEDFILE *zipped_file - the pointer to ARCHIVEDFILE structure.
+
+Output:
+
+*/
 {
 	if (zipped_file == NULL)
 	{
@@ -58,14 +71,17 @@ int decode_file(FILE *file, FILE *archive_file, ARCHIVEDFILE *zipped_file)
 	/* Get to zipped file text */
 	fseek(archive_file, zipped_file->start_byte, SEEK_SET);
 
+	/* Unzip & print to file */
 	while (print_num < max_prints)
 	{
+		/* Read zipped char */
 		fread(&chr, 1, sizeof(char), archive_file);
-		buffer = get_binary_code(chr);
+		buffer = get_binary_code(chr); // Buffer length == 8
 
 		i = 0;
 		while (print_num < max_prints && i < 8)
 		{
+			/* If end head reached */
 			if (head->left == NULL && head->right == NULL)
 			{
 				fprintf(file, "%c", (signed)head->value);
@@ -73,6 +89,7 @@ int decode_file(FILE *file, FILE *archive_file, ARCHIVEDFILE *zipped_file)
 				head = zipped_file->root;
 			}
 			else
+			/* Go down through tree */
 			{
 				if (buffer[i] == '1')
 				{
@@ -93,6 +110,15 @@ int decode_file(FILE *file, FILE *archive_file, ARCHIVEDFILE *zipped_file)
 
 
 char get_as_one_char(char *string)
+/*
+Encodes first 8 char symbols of string to one char.
+
+Input:
+	char *string - the sequence of '0' & '1'.
+
+Output:
+	char - one char.
+*/
 {
 	int i, chr = 0;
 	int mask[8] = {128, 64, 32, 16, 8, 4, 2, 1};
@@ -110,6 +136,15 @@ char get_as_one_char(char *string)
 
 
 char *get_binary_code(unsigned char chr)
+/*
+Decodes one char to binary code.
+
+Input:
+	char chr - one char.
+
+Output:
+	char * - the pointer to string[8] with '0' & '1'.
+*/
 {
 	char *bin_code = (char*)calloc(8, sizeof(char));
 	unsigned int code = chr, i = 0, sum = 0, mask[8] = {128, 64, 32, 16, 8, 4, 2, 1};
@@ -134,6 +169,15 @@ char *get_binary_code(unsigned char chr)
 
 
 BINTREE *get_bintree(BINTREE *main_lst)
+/*
+Makes binary tree using Haffman algorithm.
+
+Input:
+	BINTREE *main_lst - the pointer to symbols' frequency table.
+
+Output:
+	BINTREE * - the pointer to root of BINTREE.
+*/
 {
 	BINTREE *new_lst, *left_lst, *right_lst, *header = main_lst;
 
@@ -167,9 +211,6 @@ BINTREE *get_bintree(BINTREE *main_lst)
 		new_lst->value = 0;
 		new_lst->count = left_lst->count + right_lst->count;
 		
-		// print_list(main_lst);
-		// print_list(new_lst);
-		
 		/* Insert new vertex */
 		insert_to_list(&header, new_lst);
 
@@ -177,7 +218,7 @@ BINTREE *get_bintree(BINTREE *main_lst)
 	}
 	/* The last vertex has no code" */
 	new_lst->code = "";
-	insert_to_list(&main_lst, new_lst);
+	insert_to_list(&main_lst, new_lst); // Am I need this?
 
 	/* All values assigning */
 	count_bintree_codes(new_lst, "", 0);
@@ -466,10 +507,16 @@ Input:
 		return 0;
 	}
 
+	/* Check the first item */
 	if (value == left_lst->value)
 	{
+		/* Increase count */
 		left_lst->count += 1;
+
+		/* Change main_lst pointer */
 		*main_lst = left_lst->next;
+
+		/* Insert item to list */
 		insert_to_list(main_lst, left_lst);
 
 		return 0;
@@ -482,13 +529,19 @@ Input:
 		/* If this value exists in main_lst */
 		if (value == right_lst->value)
 		{
+			/* Increase count */
 			right_lst->count += 1;
-			left_lst->next = right_lst->next;	
+
+			/* Break nodes with this item */
+			left_lst->next = right_lst->next;
+
+			/* Insert item to list */
 			insert_to_list(main_lst, right_lst);
 
 			return 0;
 		}
 		#ifdef DEBUG
+			/* Show same hash but not same values */
 			else if (hash == right_lst->hash && value != right_lst->value)
 			{
 				printf("Hash collision:\n%d for (%c) and (%c) values!!!\n", hash, value, right_lst->value);
