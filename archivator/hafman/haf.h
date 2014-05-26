@@ -5,21 +5,21 @@
 
 typedef struct BinaryTree
 {
-	struct BinaryTree *left, *right, *next;
-	unsigned int hash;
-	unsigned char value;
-	char *code, *encoded;
-	unsigned long int count, length;
-} BINTREE;
+	struct BinaryTree *left, *right, *next;			// Binary tree (left, right), list (next)
+	unsigned int hash;								// Hash value
+	unsigned char value;							// Value of symbol
+	char *code, *encoded;							// The code of vertex in BINTREE (1 or 0), path to vertex (1010101)
+	unsigned long int count, length;				// The frequency of symbol appearing in file, depth of vertex in binary tree
+} BINTREE;											// Binary tree vertex
 
 
 typedef struct ArchivedFile
 {
-	BINTREE *root;
-	char *text, *name;
-	unsigned long int old_size, new_size;
-
-} ARCHIVEDFILE;
+	BINTREE *root, *list;							// The file's binary tree, the frequency taable of symbols in file
+	long int start_byte;							// The first byte of zipped file text
+	unsigned long int original_size, zipped_size;	// The unzipped size, the zipped size
+	char *name;										// The name of file
+} ARCHIVEDFILE;										// The zipped file structure
 
 
 /* LIST */
@@ -28,12 +28,11 @@ void print_list(BINTREE *list);
 int append_list(BINTREE **list, unsigned char value);
 int insert_to_list(BINTREE **list, BINTREE *new_lst);
 BINTREE *pop_list(BINTREE **list);
-BINTREE *get_symbols_list(unsigned char *string);
+
 
 /* CODES */
 char *get_encoded(BINTREE *list, unsigned char symbol);
-char *get_letters(char *string);
-char get_as_one_char(char string[8]);
+char get_as_one_char(char *string);
 char *get_binary_code(unsigned char chr);
 
 
@@ -56,6 +55,4 @@ BINTREE *get_bintree(BINTREE *list);
 
 /* MAIN FUNCTIONS */
 ARCHIVEDFILE *encode_file(FILE *file);
-int decode_file(FILE *file, ARCHIVEDFILE *zipped_file);
-
-int decode_string(BINTREE *root, char *string);
+int decode_file(FILE *file, FILE *archive_file, ARCHIVEDFILE *zipped_file);

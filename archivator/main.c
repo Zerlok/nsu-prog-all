@@ -1,26 +1,14 @@
 #include "mod.h"
 
-#define DEBUG_
-
 
 void print_flag_help()
-/*	Function shows help about flags.	*/
+/*	Function shows help about flags. */
 {
-	// #ifdef DEBUG
-	// 	print_func_name(__func__);
-	// #endif
-
 	printf("You can use this flags:\n");
 	printf("   %s\t\t-\tto add file to archive. \t\t Usage: %s <archive> <file>\n", FLAG_ADD, FLAG_ADD);
 	printf("   %s\t\t-\tto extract file from archive. \t\t Usage: %s <archive> <file>\n", FLAG_EXTR, FLAG_EXTR);
 	printf("   %s\t\t-\tto get a list of files in archive. \t Usage: %s <archive>\n", FLAG_LIST, FLAG_LIST);
-	printf("   %s\t\t-\tto get a control sum of archive. \t Usage: %s <archive>\n", FLAG_TEST, FLAG_TEST);
 	printf("   %s\t-\tto show this help documentation.\n", FLAG_HELP);
-
-	#ifdef DEBUG
-		printf("   %s\t-\tto run test function (FOR DEBUG ONLY!!!).\n", TESTMODE_FLAG);
-		// print_end_func(__func__);
-	#endif
 }
 
 
@@ -30,7 +18,7 @@ void print_doc()
 	printf("%s - %s\n", ARC_NAME, ARC_VERSION);
 	printf("You're reading a documentation about %s\n", ARC_NAME);
 	printf("Archive tag is %s\n", ARC_FILE_TAG);
-	printf("Using: $ harc <flag> <archive> <file>\n");
+	printf("Usage: $ harc <flag> <archive> <file>\n");
 	printf("\n");
 	print_flag_help();
 	printf("\n");
@@ -71,7 +59,7 @@ Input:
 		{
 			if (err_code > ERROR_CODE)
 			{
-				printf("Unknown error (code %d)\n", err_code);
+				printf("Unknown error: %d\n", err_code);
 			}
 			else
 			{
@@ -153,24 +141,6 @@ Input:
 				return ERR_NO_FLAG_ARG + arg_indx;
 			}
 		}
-		else if (!strcmp(argv[arg_indx], FLAG_TEST))
-		{
-			if(arg_indx + 1 < argc)
-			{
-				if (!is_an_archive(argv[arg_indx + 1]))
-				{
-					return TESTSUM_CODE + arg_indx + 1;
-				}
-				else
-				{
-					return ERR_NOT_ARCH_FILE + arg_indx + 1;
-				}
-			}
-			else
-			{
-				return ERR_NO_FLAG_ARG;
-			}
-		}
 		else if (!strcmp(argv[arg_indx], FLAG_HELP))
 		{
 			return HELP_CODE;
@@ -212,55 +182,116 @@ int main(int argc, char *argv[])
 		code = read_flags(argc, argv);
 		indx = code % 10;
 		code -= indx;
-		
-//		#ifdef DEBUG
-//			printf("CODE: %d, INDX: %d, ARG: %s\n", code, indx, argv[indx]);
-//		#endif
-
-		if (code < HELP_CODE)
-		{
-			read_or_create_an_archive(argv[2], archive);
-		}
 
 		switch (code)
 		{
+			/* Add file to an archive */
 			case APPEND_CODE:
 			{
-				if (add_to_archive(argv[indx], archive))
+				/* Read the archive file */
+				switch (read_an_archive(argv[2], archive))
 				{
-					printf("Something wrong with file '%s'\n", argv[indx]);
+					case 1:
+						/* Create an archive if not exist */
+						if (create_an_archive(argv[2], archive) != 0)
+						{
+							printf("The archive '%s' is not exist.\n", argv[2]);
+							return 1;
+						}
+						printf("The new archive was created.\n");
+						break;
+					case 2:
+						printf("The file '%s' is not an archive of %s program.\n", argv[2], ARC_NAME);
+						return 1;
 				}
-				else
+
+				/* Add to the archive */
+				switch (add_to_archive(argv[indx], archive))
 				{
-					write_an_archive_to_file(archive);
-					printf("File '%s' added to '%s' archive.\n", argv[indx], archive->name);
+					case 1:
+						printf("The archive '%s' is not exist.\n", argv[2]);
+						return 1;
+					case 2:
+						printf("The file '%s' is not exist.\n", argv[indx]);
+						return 1;
+					case 3:
+						printf("The file '%s' is already added to '%s' archive!\n", argv[indx], argv[2]);
+						return 1;
+					default:
+						printf("The file '%s' added to '%s' archive.\n", argv[indx], argv[2]);
 				}
-				break;
+
+				return 0;
 			}
+
+			/* Extract file from the archive */
 			case EXTRACT_CODE:
-//				printf("Going extract '%s' file from '%s' archive\n", argv[indx], arch->name);
-				extract_file_from_archive(argv[indx], archive);
-				break;
+			{
+				/* Read the archive file */
+				switch (read_an_archive(argv[2], archive))
+				{
+					case 1:
+						printf("The archive '%s' is not exist.\n", argv[2]);
+						return 1;
+					case 2:
+						printf("The file '%s' is not an archive of %s program.\n", argv[2], ARC_NAME);
+						return 1;
+				}
+
+				/* Extract file */
+				switch (extract_file_from_archive(argv[indx], archive))
+				{
+					case 1:
+						printf("The archive '%s' is not exist.\n", argv[2]);
+						return 1;
+					case 2:
+						printf("The file '%s' is not exist.\n", argv[indx]);
+						return 1;
+					case 3:
+						printf("The file '%s' was not found in '%s' archive.\n", argv[indx], argv[2]);
+						return 1;
+					default:
+						printf("The file '%s' was extracted from '%s' archive.\n", argv[indx], argv[2]);
+				}
+
+				return 0;
+			}
+
+			/* Print the simple list of archived files */
 			case LIST_CODE:
-//				printf("Going show a list of files in '%s' archive\n", argv[indx]);
+			{
+				/* Read the archive file */
+				switch (read_an_archive(argv[2], archive))
+				{
+					case 1:
+						printf("The archive '%s' is not exist.\n", argv[2]);
+						return 1;
+					case 2:
+						printf("The file '%s' is not an archive of %s program.\n", argv[2], ARC_NAME);
+						return 1;
+				}
+
+				/* Print the list */
 				show_archived_files(archive);
-				break;
-			case TESTSUM_CODE:
-				printf("Going count a test sum in '%s' archive\n", argv[indx]);
-				break;
-			#ifdef DEBUG
-				case TESTMODE_CODE:
-					run_test(argv[indx]);
-					break;
-			#endif
+				return 0;
+			}
+
+#ifdef DEBUG
+			case TESTMODE_CODE:
+				read_an_archive(argv[2], archive);
+				run_test(argv[indx]);
+				return 0;
+#endif
+			/* Print the documentation */
 			case HELP_CODE:
 				print_doc();
-				break;
+				return 0;
+
+			/* Otherwise - bad input */
 			default:
 			{
 				if (code > ERROR_CODE)
 				{
-					printf("Program was stopped with error code %d\n", code);
 					print_err(code);
 				}
 				else
@@ -272,12 +303,9 @@ int main(int argc, char *argv[])
 		}
 	}
 	else
+	/* Documentation */
 	{
-		#ifdef DEBUG
-			run_test("test/second.txt");
-		#else
-			print_doc();
-		#endif
+		print_doc();
 	}
 	
 	return 0;

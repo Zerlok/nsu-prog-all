@@ -2,163 +2,123 @@
 
 
 ARCHIVEDFILE *encode_file(FILE *file)
+/*
+This function uses Haffman algorithm and builds symbols frequency table and binary tree of file.
+
+Input:
+	FILE *file - the FILE pointer.
+
+Output:
+	ARCHIVEDFILE * - the pointer to ARCHIVEDFILE structure.
+*/
 {
 	ARCHIVEDFILE *zipped_file = (ARCHIVEDFILE*)malloc(sizeof(ARCHIVEDFILE));
-	zipped_file->name = (char*)calloc(1, sizeof(char));
 
-	BINTREE *bin_tree, *symbols_list = NULL;
-	unsigned long int new_size, file_size = 0;
+	BINTREE *symbols_list = NULL;
+	unsigned long int file_size = 0;
 	unsigned char chr;
-	char *new_string;
 
-	/* Haffman encode preparation */
+	/* Append frequency table */
 	while (fread(&chr, sizeof(chr), 1, file))
 	{
 		append_list(&symbols_list, chr);
 		file_size++;
 	}
-	new_size = file_size;
 
 	/* If file is empty */
 	if (file_size == 0)
 	{
-		zipped_file->text = "";
 		zipped_file->root = NULL;
-		zipped_file->new_size = 0;
-		zipped_file->old_size = 0;
-
-		return zipped_file;
+		zipped_file->list = NULL;
+		zipped_file->zipped_size = 0;
+		zipped_file->original_size = 0;
 	}
-
-	bin_tree = get_bintree(symbols_list);
-//	print_list(symbols_list);
-//	print_bintree(bin_tree, "");
-
-	/* Encoding */
-	fseek(file, 0, SEEK_SET);
-	new_string = (char*)calloc(new_size * 2, sizeof(char));
-
-	while (fread(&chr, sizeof(chr), 1, file))
+	else
 	{
-		if (2 * strlen(new_string) > new_size)
-		{
-			new_string = (char*)realloc(new_string, new_size * 2);
-			new_size *= 2;
-		}
-		strcat(new_string, get_encoded(symbols_list, chr));
+		zipped_file->root = get_bintree(symbols_list);
+		zipped_file->list = symbols_list;
+		zipped_file->zipped_size = 0;
+		zipped_file->original_size = file_size;
 	}
-
-	/* Zipped file structure creation */
-	zipped_file->text = get_letters(new_string);
-	zipped_file->root = bin_tree;
-	zipped_file->new_size = strlen(zipped_file->text);
-	zipped_file->old_size = file_size;
-
-	/* Decode test */
-	decode_string(bin_tree, new_string);
 
 	return zipped_file;
 }
 
 
-int decode_file(FILE *file, ARCHIVEDFILE *zipped_file)
-{
+int decode_file(FILE *file, FILE *archive_file, ARCHIVEDFILE *zipped_file)
+/*
+This function creates unzipped file.
 
-	if (zipped_file->root == NULL)
+Input:
+	FILE *file - the FILE pointer (where to unzip).
+	FILE *archive_file - the FILE pointer (archive with zipped file).
+	ARCHIVEDFILE *zipped_file - the pointer to ARCHIVEDFILE structure.
+
+Output:
+
+*/
+{
+	if (zipped_file == NULL)
 	{
 		return 1;
 	}
 
-	BINTREE *root = zipped_file->root;
-	char *bin_code, *text = zipped_file->text;
-	int j;
-	unsigned long int prnt = 0, i = 0, max_len = zipped_file->new_size, max_prints = zipped_file->old_size;
+	BINTREE *head = zipped_file->root;
+	char *buffer, chr;
+	int i;
+	unsigned long int print_num = 0, max_prints = zipped_file->original_size;
 
-	while (prnt < max_prints && i < max_len)
+	/* Get to zipped file text */
+	fseek(archive_file, zipped_file->start_byte, SEEK_SET);
+
+	/* Unzip & print to file */
+	while (print_num < max_prints)
 	{
-		bin_code = get_binary_code(text[i]);
+		/* Read zipped char */
+		fread(&chr, 1, sizeof(char), archive_file);
+		buffer = get_binary_code(chr); // Buffer length == 8
 
-		j = 0;
-		while (prnt < max_prints && j < 8)
+		i = 0;
+		while (print_num < max_prints && i < 8)
 		{
-			if (root->left == NULL && root->right == NULL)
+			/* If end head reached */
+			if (head->left == NULL && head->right == NULL)
 			{
-				fprintf(file, "%c", (signed)root->value);
-				prnt += 1;
-				root = zipped_file->root;
+				fprintf(file, "%c", (signed)head->value);
+				print_num += 1;
+				head = zipped_file->root;
 			}
 			else
+			/* Go down through tree */
 			{
-				if (bin_code[j] == '1')
+				if (buffer[i] == '1')
 				{
-					root = root->left;
+					head = head->left;
 				}
 				else
 				{
-					root = root->right;
+					head = head->right;
 				}
 
-				j++;
+				i++;
 			}
 		}
-
-		i++;
 	}
 
 	return 0;
 }
 
 
-char *get_encoded(BINTREE *main_lst, unsigned char symbol)
-{
-	BINTREE *lst = main_lst;
+char get_as_one_char(char *string)
+/*
+Encodes first 8 char symbols of string to one char.
 
-	while (lst != NULL)
-	{
-		if (lst->hash != 0 && lst->value == symbol)
-		{
-			return lst->encoded;
-		}
+Input:
+	char *string - the sequence of '0' & '1'.
 
-		lst = lst->next;
-	}
-
-	return NULL;
-}
-
-
-char *get_letters(char *string)
-{
-	unsigned int i = 0;
-	char *new_string = (char*)calloc((int)(strlen(string) / 8), sizeof(char));
-	char little_string[8];
-
-	while (i < strlen(string))
-	{
-		if (i > 0 && (i % 8) == 0)
-		{
-			new_string[(int)(i / 8) - 1] = get_as_one_char(little_string);
-		}
-		little_string[i % 8] = string[i];
-
-		i++;
-	}
-
-	i--;
-	if ((i % 8) != 0)
-	{
-		while ((i % 8) != 0)
-		{
-			little_string[i % 8] = '0';
-			i++;
-		}
-		new_string[(int)(i / 8) - 1] = get_as_one_char(little_string);
-	}
-	return new_string;
-}
-
-
-char get_as_one_char(char string[8])
+Output:
+	char - one char.
+*/
 {
 	int i, chr = 0;
 	int mask[8] = {128, 64, 32, 16, 8, 4, 2, 1};
@@ -176,6 +136,15 @@ char get_as_one_char(char string[8])
 
 
 char *get_binary_code(unsigned char chr)
+/*
+Decodes one char to binary code.
+
+Input:
+	char chr - one char.
+
+Output:
+	char * - the pointer to string[8] with '0' & '1'.
+*/
 {
 	char *bin_code = (char*)calloc(8, sizeof(char));
 	unsigned int code = chr, i = 0, sum = 0, mask[8] = {128, 64, 32, 16, 8, 4, 2, 1};
@@ -199,59 +168,26 @@ char *get_binary_code(unsigned char chr)
 }
 
 
-int decode_string(BINTREE *root, char *string)
-{
-	unsigned long int i;
-	BINTREE *head = root;
-
-	if (root == NULL)
-	{
-		return 1;
-	}
-
-	printf("\nDecode is:\n");
-
-	for (i = 0; i < strlen(string); i++)
-	{
-		/* If vertex is last in this trunk, print it */
-		if ((head->left == NULL) && (head->right == NULL))
-		{
-			printf("%c", (signed)head->value);
-			head = root;
-		}
-
-		/* If not: go down through tree */
-		if (string[i] == '1')
-		{
-			head = head->left;
-		}
-		else if (string[i] == '0')
-		{
-			head = head->right;
-		}
-		else
-		{
-			printf("Another code (%c) was found at %s\n", string[i], __func__);
-			exit(1);
-		}
-	}
-
-	/* Last symbol */
-	if (root->left != NULL && root->right != NULL)
-	{
-		printf("%c", (signed)head->value);
-	}
-
-	printf("\n");
-	return 0;
-}
-
-
 BINTREE *get_bintree(BINTREE *main_lst)
+/*
+Makes binary tree using Haffman algorithm.
+
+Input:
+	BINTREE *main_lst - the pointer to symbols' frequency table.
+
+Output:
+	BINTREE * - the pointer to root of BINTREE.
+*/
 {
 	BINTREE *new_lst, *left_lst, *right_lst, *header = main_lst;
 
-	/* If only one letter in code */
+	/* If it's no symbols in file */
+	if (header == NULL)
+	{
+		return NULL;
+	}
+
+	/* If it's only one symbol in file */
 	if (header->next == NULL)
 	{
 		header->left = header->right = NULL;
@@ -275,9 +211,6 @@ BINTREE *get_bintree(BINTREE *main_lst)
 		new_lst->value = 0;
 		new_lst->count = left_lst->count + right_lst->count;
 		
-		// print_list(main_lst);
-		// print_list(new_lst);
-		
 		/* Insert new vertex */
 		insert_to_list(&header, new_lst);
 
@@ -285,7 +218,7 @@ BINTREE *get_bintree(BINTREE *main_lst)
 	}
 	/* The last vertex has no code" */
 	new_lst->code = "";
-	insert_to_list(&main_lst, new_lst);
+	insert_to_list(&main_lst, new_lst); // Am I need this?
 
 	/* All values assigning */
 	count_bintree_codes(new_lst, "", 0);
@@ -295,6 +228,14 @@ BINTREE *get_bintree(BINTREE *main_lst)
 
 
 unsigned long int count_bintree_codes(BINTREE *root, char *seq, unsigned long int len)
+/*
+Counts paths to every head end (symbol).
+
+Input:
+	BINTREE *root - the pointer to binary tree structure.
+	char *seq - the pointer to the path sequence.
+	unsigned long int - the depth of vertex.
+*/
 {
 	char *left_seq = NULL, *right_seq = NULL;
 
@@ -303,10 +244,11 @@ unsigned long int count_bintree_codes(BINTREE *root, char *seq, unsigned long in
 		return len;
 	}
 
+	/* If it is the end of head */
 	if ((root->right == NULL)
 		&& (root->left == NULL))
 	{
-		root->encoded = (char*)calloc(strlen(seq) + 1, sizeof(char));
+		root->encoded = (char*)calloc(strlen(seq), sizeof(char));
 		root->length = 0;
 		strcpy(root->encoded, seq);
 		strcat(root->encoded, root->code);
@@ -314,13 +256,14 @@ unsigned long int count_bintree_codes(BINTREE *root, char *seq, unsigned long in
 		return len + 2;
 	}
 	
+	/* Append left and right sequences */
 	if (strlen(seq) != 0)
 	{
-		left_seq = (char*)calloc(strlen(seq) + 1, sizeof(char));
+		left_seq = (char*)calloc(strlen(seq), sizeof(char));
 		strcpy(left_seq, seq);
 		strcat(left_seq, root->code);
 
-		right_seq = (char*)calloc(strlen(seq) + 1, sizeof(char));
+		right_seq = (char*)calloc(strlen(seq), sizeof(char));
 		strcpy(right_seq, seq);
 		strcat(right_seq, root->code);
 	}
@@ -334,8 +277,10 @@ unsigned long int count_bintree_codes(BINTREE *root, char *seq, unsigned long in
 	}
 	len += 1;
 
+	/* Go down through tree */
 	len = count_bintree_codes(root->left, left_seq, len);
 	len = count_bintree_codes(root->right, right_seq, len);
+
 	root->length = len;
 
 	return len;
@@ -343,12 +288,20 @@ unsigned long int count_bintree_codes(BINTREE *root, char *seq, unsigned long in
 
 
 int write_bintree_to_file(FILE *file, BINTREE *root)
+/*
+Writes the tree into file.
+
+Input:
+	FILE *file - the pointer to the file.
+	BINTREE *root - the pointer to the binary tree.
+*/
 {
 	if (root == NULL)
 	{
 		return 1;
 	}
 
+	/* If it is the end of head */
 	if ((root->right == NULL)
 		&& (root->left == NULL))
 	{
@@ -356,8 +309,10 @@ int write_bintree_to_file(FILE *file, BINTREE *root)
 		return 0;
 	}
 
-	fprintf(file, "N");
+	/* V for Vertex */
+	fprintf(file, "V");
 
+	/* Go down through tree */
 	write_bintree_to_file(file, root->left);
 	write_bintree_to_file(file, root->right);
 
@@ -366,6 +321,18 @@ int write_bintree_to_file(FILE *file, BINTREE *root)
 
 
 unsigned long int build_bintree_from_file(FILE *file, BINTREE *root, unsigned long int length, char *code)
+/*
+Reads the tree from file.
+
+Input:
+	FILE *file - the pointer to the file.
+	BINTREE *root - the pointer to the binary tree structure.
+	unsigned long int length - the length of written tree symbols in file.
+	char *code - the pointer to trunk code ("1" or "0").
+
+Output:
+	unsigned long int - the depth of this root.
+*/
 {
 	char chr;
 
@@ -373,10 +340,11 @@ unsigned long int build_bintree_from_file(FILE *file, BINTREE *root, unsigned lo
 	{
 		root->code = code;
 
-		fread(&chr, 1, 1, file);
+		fread(&chr, 1, sizeof(char), file);
+		/* Create the head end if the symbol */
 		if (chr == 'S')
 		{
-			fread(&chr, 1, 1, file);
+			fread(&chr, 1, sizeof(char), file);
 			root->next = root->left = root->right = NULL;
 			root->hash = get_hash((unsigned)chr);
 			root->count = root->length = 0;
@@ -385,12 +353,16 @@ unsigned long int build_bintree_from_file(FILE *file, BINTREE *root, unsigned lo
 			return length - 2;
 		}
 
+		/* Hash is zero for all vertices */
+		root->hash = 0;
 		length -= 1;
 
-		root->hash = 0;
+		/* Left trunk */
 		root->left = (BINTREE*)malloc(sizeof(BINTREE));
-		root->right = (BINTREE*)malloc(sizeof(BINTREE));
 		length = build_bintree_from_file(file, root->left, length, "1");
+
+		/* Right trunk */
+		root->right = (BINTREE*)malloc(sizeof(BINTREE));
 		length = build_bintree_from_file(file, root->right, length, "0");
 	}
 
@@ -399,6 +371,13 @@ unsigned long int build_bintree_from_file(FILE *file, BINTREE *root, unsigned lo
 
 
 int print_bintree(BINTREE *root, char *seq)
+/*
+Prints the binary tree on screen.
+
+Input:
+	BINTREE *root - the pointer to the binary tree structure.
+	char *seq - the sequence of codes (path to the value).
+*/
 {
 	char *left_seq = NULL, *right_seq = NULL;
 
@@ -407,6 +386,7 @@ int print_bintree(BINTREE *root, char *seq)
 		return 1;
 	}
 
+	/* If it is the end of head */
 	if ((root->right == NULL)
 		&& (root->left == NULL))
 	{
@@ -415,6 +395,7 @@ int print_bintree(BINTREE *root, char *seq)
 		return 0;
 	}
 
+	/* Append left and right sequences */
 	if (strlen(seq) != 0)
 	{
 		left_seq = (char*)calloc(strlen(seq) + 1, sizeof(char));
@@ -426,20 +407,32 @@ int print_bintree(BINTREE *root, char *seq)
 		strcat(right_seq, root->code);
 	}
 	else
+	/* If it starts with "" */
 	{
-		/* If it starts with "" */
 		left_seq = (char*)malloc(sizeof(seq));
-		right_seq = (char*)malloc(sizeof(seq));
 		strcpy(left_seq, root->code);
+
+		right_seq = (char*)malloc(sizeof(seq));
 		strcpy(right_seq, root->code);
 	}
 
+	/* Go down through tree */
 	print_bintree(root->left, left_seq);
 	print_bintree(root->right, right_seq);
+
 	return 0;
 }
 
 unsigned int get_hash(unsigned char symbol)
+/*
+Creates the integer value from symbol.
+
+Input:
+	unsigned char symbol - the symbol.
+
+Output:
+	unsigned int - the hash value.
+*/
 {
 	unsigned int hash;
 
@@ -462,24 +455,21 @@ unsigned int get_hash(unsigned char symbol)
 	return hash;
 }
 
-BINTREE *get_symbols_list(unsigned char *string)
-{
-	BINTREE *symbols_list = (BINTREE*)malloc(sizeof(BINTREE));
-	unsigned long int i;
-	
-	for (i = 0; i < strlen((char*)string); i++)
-	{
-		append_list(&symbols_list, string[i]);
-	}
-	
-	return symbols_list->next;
-}
-
 
 BINTREE *pop_list(BINTREE **main_lst)
+/*
+Pops the first list item from binary tree structure.
+
+Input:
+	BINTREE **main_lst - the address of pointer to binary tree list structure.
+
+Output:
+	BINTREE * - the pointer to the first item.
+*/
 {
 	BINTREE *lst = (*main_lst);
 	
+	/* Shift the pointer if not NULL */
 	if ((*main_lst) != NULL)
 	{
 		*main_lst = (*main_lst)->next;
@@ -490,6 +480,13 @@ BINTREE *pop_list(BINTREE **main_lst)
 
 
 int append_list(BINTREE **main_lst, unsigned char value)
+/*
+Appends the list of symbols with new item or increments the existed symbol's counter.
+
+Input:
+	BINTREE **main_lst - the address of pointer to binary tree list structure.
+	unsigned char value - the symbol.
+*/
 {
 	unsigned int hash = get_hash(value);
 	BINTREE *left_lst = (*main_lst), *right_lst;
@@ -509,6 +506,22 @@ int append_list(BINTREE **main_lst, unsigned char value)
 
 		return 0;
 	}
+
+	/* Check the first item */
+	if (value == left_lst->value)
+	{
+		/* Increase count */
+		left_lst->count += 1;
+
+		/* Change main_lst pointer */
+		*main_lst = left_lst->next;
+
+		/* Insert item to list */
+		insert_to_list(main_lst, left_lst);
+
+		return 0;
+	}
+
 	right_lst = left_lst->next;
 
 	while (right_lst != NULL)
@@ -516,15 +529,24 @@ int append_list(BINTREE **main_lst, unsigned char value)
 		/* If this value exists in main_lst */
 		if (value == right_lst->value)
 		{
+			/* Increase count */
 			right_lst->count += 1;
-			left_lst->next = right_lst->next;	
+
+			/* Break nodes with this item */
+			left_lst->next = right_lst->next;
+
+			/* Insert item to list */
 			insert_to_list(main_lst, right_lst);
 
 			return 0;
-		} else if (hash == right_lst->hash && value != right_lst->value)
-		{
-			printf("Hash collision:\n%d for (%c) and (%c) values!!!\n", hash, value, right_lst->value);
 		}
+		#ifdef DEBUG
+			/* Show same hash but not same values */
+			else if (hash == right_lst->hash && value != right_lst->value)
+			{
+				printf("Hash collision:\n%d for (%c) and (%c) values!!!\n", hash, value, right_lst->value);
+			}
+		#endif
 
 		left_lst = right_lst;
 		right_lst = right_lst->next;
@@ -538,6 +560,13 @@ int append_list(BINTREE **main_lst, unsigned char value)
 
 
 int insert_to_list(BINTREE **main_lst, BINTREE *new_lst)
+/*
+Inserts the new item to the list.
+
+Input:
+	BINTREE **main_lst - the address of pointer to binary tree list structure.
+	BINTREE *new_lst - the pointer to the new item.
+*/
 {
 	BINTREE *left_lst = (*main_lst), *right_lst;
 
@@ -566,17 +595,54 @@ int insert_to_list(BINTREE **main_lst, BINTREE *new_lst)
 }
 
 
+char *get_encoded(BINTREE *main_lst, unsigned char symbol)
+/*
+Returns the encoded symbol.
+
+Input:
+	BINTREE *main_lst - the pointer to binary tree list structure.
+	unsigned char - the symbol.
+
+Output:
+	char * - the pointer to binary code of this symbol.
+*/
+{
+	BINTREE *lst = main_lst;
+
+	while (lst != NULL)
+	{
+		/* If not the vertex and values are same */
+		if (lst->hash != 0 && lst->value == symbol)
+		{
+			return lst->encoded;
+		}
+
+		lst = lst->next;
+	}
+
+	return NULL;
+}
+
+
 void print_list(BINTREE *main_lst)
+/*
+Prints the list of symbols.
+
+Input:
+	BINTREE *main_lst - the pointer to hte list.
+*/
 {
 	BINTREE *lst = main_lst;
 
 	printf("[\n");
 	while (lst != NULL)
 	{
+		/* If it's not the vertex (the end of head in tree) */
 		if (lst->hash != 0)
 		{
-			printf("%05d : %x (%ld)\n", lst->hash, lst->value, lst->count);
+			printf("%05d : %x (%ld) enc (%s)\n", lst->hash, lst->value, lst->count, lst->encoded);
 		}
+		/* If it's the vertex */
 		else
 		{
 			printf("{0 : %x (%ld)}\n", lst->value, lst->count);

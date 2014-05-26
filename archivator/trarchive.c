@@ -3,47 +3,11 @@
 
 /* ---------- DEBUG FUNCTIONS ---------- */
 
-
 int run_test(char *file_name)
 {
-	ARCHIVE *archive = (ARCHIVE*)malloc(sizeof(ARCHIVE));
-	ARCHIVEDFILE *zipped_file, *encoded_file;
-	FILE *file;
-
-	if ((file = fopen(file_name, "rb")) == NULL)
-	{
-		printf("cannot open the file!\n");
-		return 1;
-	}
-
-	encoded_file = encode_file(file);
-	print_bintree(encoded_file->root, "");
-	printf("\nEncoded:\n%s\n\n", encoded_file->text);
-	fclose(file);
-
-	read_or_create_an_archive("test/my_archive.trar", archive);
-	zipped_file = archive->files[archive->files_count - 1];
-	print_bintree(zipped_file->root, "");
-	printf("Encoded '%s':\n%s\n\n", zipped_file->name, zipped_file->text);
+	printf("Test for %s file", file_name);
 	return 0;
 }
-
-//{
-//	FILE *file;
-//	ARCHIVEDFILE *zipped_file;
-
-//	if ((file = fopen(file_name, "rb")) == NULL)
-//	{
-//		printf("cannot open the file!\n");
-//		return 1;
-//	}
-
-//	zipped_file = encode_file(file);
-//	printf("\nEncoded:\n%s\n\n", zipped_file->text);
-//	fclose(file);
-
-//	return 0;
-//}
 
 
 /* ---------- ACCESSORY FUNCTIONS ---------- */
@@ -59,261 +23,385 @@ Input:
 */
 {
 	if (!strstr(file_name, ARC_FILE_TAG)) // If not archive file
-		/* TODO: do not skip the '.trarlololo'. '.trar' only! */
 	{
+		/* TODO: do not skip the '.trarlololo'. '.trar' only! */
 		return 1;
 	}
 	return 0;
 }
 
 
-unsigned int is_in_archive(char *file_name, ARCHIVE *archive)
+int is_in_archive(char *file_name, ARCHIVE *archive)
+/*
+If file is in archive file returns it's number.
+Otherwise returns -1.
+
+Input:
+	char *file_name - the name of file.
+*/
 {
-	unsigned int i = 0;
+	int i = 0;
 
 	/* Check this file in archive */
 	while (i < archive->files_count)
 	{
 		if (!strcmp(file_name, archive->files[i]->name))
 		{
-			printf("The file '%s' is in '%s' archive.\n", file_name, archive->name);
 			return i;
 		}
 
 		i++;
 	}
 
-	return archive->files_count + 1;
+	return -1;
 }
 
 
-int read_or_create_an_archive(char *arch_name, ARCHIVE *arch)
+int read_an_archive(char *arch_name, ARCHIVE *archive)
 /*
 Read the archive information to ARCHIVE structure, if archive exist.
-Otherwise create the archive struct with basic information.
 
 Input:
 	char *arch_name - the name of file
 	ARCHIVE *arch - the indicator to archive struct.
 
 Output:
-	Return 0 if everything is OK, else 1.
+	Return 0 if everything is OK, else error code.
 */
 {
+	/* Is it an archive file */
 	if (is_an_archive(arch_name))
 	{
-		printf("The file '%s' is not an archive of %s program.\n", arch_name, ARC_NAME);
-		exit(1);
+		return 2;
 	}
 
-	/* Archive init */
-	FILE *arch_file;
+	FILE *archive_file;
 	ARCHIVEDFILE *zipped_file = NULL;
-	char chr = 0;
 	int file_name_size = 0;
-	unsigned long int bin_tree_size = 0, file_text_size = 0;
-	arch->name = (char*)calloc(strlen(arch_name) + 1, sizeof(char));
-	arch->files = (ARCHIVEDFILE**)calloc(0, sizeof(ARCHIVEDFILE));
-	arch->files_count = 0;
-	strcpy(arch->version, ARC_VERSION);
-	strcpy(arch->name, arch_name);
+	unsigned long int bin_tree_size = 0, file_text_size = 0, file_normal_size = 0;
 
-	if ((arch_file = fopen(arch_name, "r+")) == NULL)
+	/* Archive init */
+	archive->name = (char*)calloc(strlen(arch_name) + 1, sizeof(char));
+	archive->files = (ARCHIVEDFILE**)calloc(0, sizeof(ARCHIVEDFILE));
+	archive->files_count = 0;
+	strcpy(archive->name, arch_name);
+
+	/* Open archive file for reading */
+	if ((archive_file = fopen(arch_name, "r")) == NULL)
 	{
-		/* CREATE THE ARCHIVE */
-		if ((arch_file = fopen(arch_name, "w")) == NULL)
-		{
-			printf("Permission denied to the archive '%s'\n", arch_name);
-			return 1;
-		}
-		fclose(arch_file);
-
-		printf("New archive file '%s' created.\n", arch->name);
-
-		return 0;
+		return 1;
 	}
 
 	/* Read archive file */
-	while (fread(&chr, sizeof(chr), 1, arch_file))
+	while (fscanf(archive_file, "N%dB%ldF%ld|%ldN",
+				&file_name_size,
+				&bin_tree_size,
+				&file_text_size,
+				&file_normal_size
+			) != EOF)
 	{
 		zipped_file = (ARCHIVEDFILE*)malloc(sizeof(ARCHIVEDFILE));
-		if (chr == 'N')
+		zipped_file->list = NULL;
+		zipped_file->original_size = file_normal_size;
+
+		/* Read archived file name */
+		zipped_file->name = (char*)calloc(file_name_size, sizeof(char));
+		fread(zipped_file->name, file_name_size, sizeof(char), archive_file);
+
+		/* Read & build bintree */
+		if (bin_tree_size > 0)
 		{
-			if (fscanf(arch_file, "%dB%ldF%ld|%ldN", &file_name_size, &bin_tree_size, &file_text_size, &(zipped_file->old_size)) == EOF)
-			{
-				printf("Archive is damaged!\n");
-				exit(1);
-			}
-
-			/* Read archived file name */
-			zipped_file->name = (char*)calloc(file_name_size, sizeof(char));
-			fread(zipped_file->name, file_name_size, 1, arch_file);
-
-			/* Read & build bintree */
-			if (bin_tree_size > 0)
-			{
-				zipped_file->root = (BINTREE*)malloc(sizeof(BINTREE));
-				build_bintree_from_file(arch_file, zipped_file->root, bin_tree_size, "");
-				count_bintree_codes(zipped_file->root, "", 0);
-			}
-			else
-			{
-				zipped_file->root = NULL;
-			}
-
-
-			/* Read archived text */
-			zipped_file->text = (char*)calloc(file_text_size, sizeof(char));
-			if (file_text_size > 0)
-			{
-				zipped_file->new_size = file_text_size;
-				fread(zipped_file->text, file_text_size, 1, arch_file);
-			}
-			else
-			{
-				zipped_file->new_size = 0;
-			}
+			zipped_file->root = (BINTREE*)malloc(sizeof(BINTREE));
+			build_bintree_from_file(archive_file, zipped_file->root, bin_tree_size, "");
+			count_bintree_codes(zipped_file->root, "", 0);
 		}
-		arch->files_count += 1;
-		arch->files = (ARCHIVEDFILE**)realloc(arch->files, arch->files_count);
-		arch->files[arch->files_count - 1] = zipped_file;
+		else
+		{
+			zipped_file->root = NULL;
+		}
+
+		/* Skip archived text */
+		zipped_file->start_byte = ftell(archive_file);
+		zipped_file->zipped_size = file_text_size;
+		fseek(archive_file, file_text_size, SEEK_CUR);
+
+		archive->files_count += 1;
+		archive->files = (ARCHIVEDFILE**)realloc(archive->files, archive->files_count);
+		archive->files[archive->files_count - 1] = zipped_file;
 	}
 
-	fclose(arch_file);
+	fclose(archive_file);
 
-	/* IF ARCHIVE EXIST: */
-	printf("Archive file '%s' is already exist.\n", arch->name);
+//	("Archive file '%s' was read.\n", archive->name);
 	return 0;
 }
 
 
-int write_an_archive_to_file(ARCHIVE *archive)
+int create_an_archive(char *arch_name, ARCHIVE *archive)
+/*
+Creates the new archive file and structure with basic information.
+
+Input:
+	char *arch_name - the name of file
+	ARCHIVE *arch - the indicator to archive struct.
+
+Output:
+	Return 0 if everything is OK, else error code.
+*/
 {
-	ARCHIVEDFILE *zipped_file;
-	FILE *arch_file;
-	unsigned int i = 0;
-
-	if (access(archive->name, R_OK|W_OK) == -1)
+	if (is_an_archive(arch_name))
 	{
-		arch_file = fopen(archive->name, "r+");
-	}
-	else
-	/* Try to create new file */
-	{
-		arch_file = fopen(archive->name, "w");
+		return 1;
 	}
 
-	if (arch_file == NULL)
-	{
-		printf("Permission denied to the archive '%s'\n", archive->name);
-		exit(1);
-	}
+	FILE *archive_file;
 
-	/* Write every zipped file to archive file */
-	while (i < archive->files_count)
-	{
-		zipped_file = archive->files[i];
+	/* Archive init */
+	archive->name = (char*)calloc(strlen(arch_name) + 1, sizeof(char));
+	archive->files = (ARCHIVEDFILE**)calloc(0, sizeof(ARCHIVEDFILE));
+	archive->files_count = 0;
+	strcpy(archive->name, arch_name);
 
-		if (zipped_file->new_size == 0 && zipped_file->old_size == 0)
+	/* Check is archive file unreadable (doesn't exist) */
+	if ((archive_file = fopen(arch_name, "r")) == NULL)
+	{
+		if ((archive_file = fopen(arch_name, "w")) == NULL)
 		{
-			printf("\nThe size of new file is zero!\n");
-			fprintf(arch_file, "N%dB0F0|0N%s",
-					strlen(zipped_file->name),
-					zipped_file->name
-			);
-		}
-		else
-		{
-			/* Write header */
-			fprintf(arch_file, "N%dB%ldF%ld|%ldN%s",
-					strlen(zipped_file->name),
-					zipped_file->root->length,
-					zipped_file->new_size,
-					zipped_file->old_size,
-					zipped_file->name
-			);
-
-			/* Write bintree & text */
-			write_bintree_to_file(arch_file, zipped_file->root);
-			fprintf(arch_file, "%s", zipped_file->text);
+			return 2;
 		}
 
-		i++;
+		fclose(archive_file);
+
+		return 0;
 	}
-	fclose(arch_file);
-	return 0;
+
+	fclose(archive_file);
+
+	return 3;
 }
 
 
 /* ---------- ARCHIVE FUNCTIONS ---------- */
 
 
-int add_to_archive(char *file_name, ARCHIVE *archive)
+int get_nums(unsigned long int x)
 {
-	printf("Adding to '%s' archive\n", archive->name);
+	int n = 10;
+	unsigned long int k = 1000000000;
+
+	while (n > 0 && (int)(x / k) == 0)
+	{
+		if (k != 1)
+		{
+			k /= 10;
+		}
+		n--;
+	}
+
+	if (n < 1)
+	{
+		n = 1;
+	}
+
+	return n;
+}
+
+
+int add_to_archive(char *file_name, ARCHIVE *archive)
+/*
+Encodes file with haffman algorithm and writes the result to an archive.
+
+Input:
+	char *file_name - the name of file.
+	ARCHIVE *archive - the pointer to an archive structure.
+
+Output:
+	int - error code (everything is ok if zero).
+*/
+{
 	ARCHIVEDFILE *zipped_file;
-	FILE *file;
+	FILE *file, *archive_file;
+	char buffer[128] = {};
+	unsigned long int bin_tree_size, zipped_size = 0;
+	unsigned char chr;
+	long int zipped_size_byte;
+	int i = 0;
 
 	/* Check this file in archive */
-	if (is_in_archive(file_name, archive) < archive->files_count)
+	if (is_in_archive(file_name, archive) > -1)
 	{
-		printf("The file '%s' is already added to '%s' archive!\n", file_name, archive->name);
-		return 0;
+		return 3;
 	}
 
-	/* Is file exist or readable */
+	/* Open file to read */
 	if ((file = fopen(file_name, "r")) == NULL)
 	{
-		printf("Permission denied to the file '%s'\n", file_name);
+		return 2;
+	}
+
+	/* Open archive file to append */
+	if ((archive_file = fopen(archive->name, "r+")) == NULL)
+	{
 		return 1;
 	}
+
+	/* Encode the file (Build bintree and count size of file) */
 	zipped_file = encode_file(file);
-	strcpy(zipped_file->name, file_name);
+
+	/* Get bin_tree depth */
+	if (zipped_file->root != NULL)
+	{
+		bin_tree_size = zipped_file->root->length;
+	}
+	else
+	{
+		bin_tree_size = 0;
+	}
+
+//	print_list(zipped_file->list);
+
+	/* Write header */
+	fprintf(archive_file, "N%dB%ldF", strlen(file_name), bin_tree_size);
+	zipped_size_byte = ftell(archive_file);
+	fprintf(archive_file, "0000000000|%ldN%s", zipped_file->original_size, file_name);
+	write_bintree_to_file(archive_file, zipped_file->root);
+
+	/* Write zipped file */
+	fseek(file, 0, SEEK_SET); // Start read the file again.
+	fseek(archive_file, 0, SEEK_END); // Go to the end of archive file.
+	while (fread(&chr, sizeof(chr), 1, file))
+	{
+		if (strlen(buffer) < 8)
+		{
+			strcat(buffer, get_encoded(zipped_file->list, chr));
+		}
+
+		/* While first 8 bits are full */
+		while (strlen(buffer) >= 8)
+		{
+			/* Write as letter */
+			fprintf(archive_file, "%c", get_as_one_char(buffer));
+			zipped_size++;
+
+			/*
+			Say hello to bugs there:
+			1) If strle(buffer) > 120 -> memmove will copy buffer+8 to buffer,
+			but last 8 cells will not copy they still will be not \0!
+			*/
+
+			/* Shift buffer */
+			memmove(buffer, buffer+8, 120);
+		}
+	}
+
+	/* If buffer is not empty */
+	if ((i = strlen(buffer)) > 0)
+	{
+		/* Fill it with '0' value */
+		while (i < 8)
+		{
+			buffer[i] = '0';
+			i++;
+		}
+
+		/* Write last letter */
+		fprintf(archive_file, "%c", get_as_one_char(buffer));
+		zipped_size++;
+	}
+	fclose(file);
+
+	/* Write zipped size */
+	fseek(archive_file, zipped_size_byte + (10 - get_nums(zipped_size)), SEEK_SET);
+	fprintf(archive_file, "%ld", zipped_size);
+
+	fclose(archive_file);
 
 	/* Appending to archive structure */
+	zipped_file->name = (char*)calloc(strlen(file_name), sizeof(char));
+	strcpy(zipped_file->name, file_name);
+	zipped_file->zipped_size = zipped_size;
+
 	archive->files_count += 1;
 	archive->files = (ARCHIVEDFILE**)realloc(archive->files, archive->files_count);
 	archive->files[archive->files_count - 1] = zipped_file;
 
-	fclose(file);
 	return 0;
 }
 
 
 int extract_file_from_archive(char *file_name, ARCHIVE *archive)
+/*
+Decodes file with haffman algorithm and writes the result to an file.
+
+Input:
+	char *file_name - the name of file.
+	ARCHIVE *archive - the pointer to an archive structure.
+
+Output:
+	int - error code (everything is ok if zero).
+*/
 {
-	FILE *file;
-	unsigned int file_num = is_in_archive(file_name, archive);
+	FILE *file, *archive_file;
+	int file_num = is_in_archive(file_name, archive);
 
 	/* Check this file in archive */
-	if (file_num > archive->files_count)
+	if (file_num < 0)
 	{
-		return 1;
+		return 3;
 	}
 
+	/* Create extracted file */
 	if ((file = fopen(file_name, "w")) == NULL)
 	{
 		return 2;
 	}
 
-	decode_file(file, archive->files[file_num]);
+	/* Open to read archive file */
+	if ((archive_file = fopen(archive->name, "r")) == NULL)
+	{
+		return 1;
+	}
+
+	/* Unzip the file */
+	decode_file(file, archive_file, archive->files[file_num]);
 
 	fclose(file);
+	fclose(archive_file);
 
 	return 0;
 }
 
 
 int show_archived_files(ARCHIVE *archive)
+/*
+Shows the archived files.
+
+Input:
+	ARCHIVE *archive - the pointer to the archive.
+*/
 {
-	unsigned int i = 0;
+	float zip_rate;
+	int i = 0;
 	ARCHIVEDFILE *zipped_file;
 
-	printf("\nNext files are in '%s' archive:\n", archive->name);
+	printf("'%s' contains:\n", archive->name);
 	while (i < archive->files_count)
 	{
 		zipped_file = archive->files[i];
-		printf("\t%s (zipped %ld, unzipped %ld) bytes\n", zipped_file->name, zipped_file->new_size, zipped_file->old_size);
+		if (zipped_file->original_size != 0)
+		{
+			zip_rate = (float)zipped_file->zipped_size / (float)zipped_file->original_size;
+		}
+		else
+		{
+			zip_rate = 1.0;
+		}
+		printf("\t%s    zip rate: %d%% (%ld, %ld)\n",
+			   zipped_file->name,
+			   (int)((1 - zip_rate) * 100),
+			   zipped_file->zipped_size,
+			   zipped_file->original_size
+		);
 
 		i++;
 	}
