@@ -19,7 +19,7 @@ typedef struct Archive
 #define ARC_NAME "Trarchive"
 #define ARC_FILE_TAG ".trar"
 #define ARC_VERSION "v0.02"
-#define DEBUG_
+#define DEBUG
 
 
 /* DEBUG */
@@ -28,7 +28,7 @@ typedef struct Archive
 	#define TESTMODE_CODE 9000
 	#define TESTMODE_ERROR -9000
 
-	int run_test(char *file_name);
+	int run_test(char *file_name, char *archive_name);
 
 #endif
 
@@ -59,6 +59,7 @@ typedef struct Archive
 
 
 /* FUNCTION IMAGES */
+int check_mem(void *pointer, const char *func_name);
 int is_an_archive(char *file_name);
 int is_in_archive(char *file_name, ARCHIVE *archive);
 

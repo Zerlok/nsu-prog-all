@@ -1,5 +1,20 @@
 #include "haf.h"
 
+#ifndef __COMMON_H__
+#define __COMMON_H__
+
+int check_mem(void *pointer, const char *func_name)
+{
+	if (pointer == NULL)
+	{
+		printf("Cannot assign the memory at %s function!\n", func_name);
+		exit(10);
+	}
+	return 0;
+}
+
+#endif
+
 
 ARCHIVEDFILE *encode_file(FILE *file)
 /*
@@ -13,13 +28,14 @@ Output:
 */
 {
 	ARCHIVEDFILE *zipped_file = (ARCHIVEDFILE*)malloc(sizeof(ARCHIVEDFILE));
+	check_mem(zipped_file, __func__);
 
 	BINTREE *symbols_list = NULL;
 	unsigned long int file_size = 0;
 	unsigned char chr;
 
 	/* Append frequency table */
-	while (fread(&chr, sizeof(chr), 1, file))
+	while (fread(&chr, 1, sizeof(char), file))
 	{
 		append_list(&symbols_list, chr);
 		file_size++;
@@ -129,9 +145,13 @@ Output:
 		{
 			chr += mask[i];
 		}
+		else if (string[i] != '0')
+		{
+			printf("Unknown code in string '%s' : (%d)'%c'\n", string, string[i], string[i]);
+		}
 	}
 
-	return (char)chr;
+	return chr;
 }
 
 
@@ -148,6 +168,7 @@ Output:
 {
 	char *bin_code = (char*)calloc(8, sizeof(char));
 	unsigned int code = chr, i = 0, sum = 0, mask[8] = {128, 64, 32, 16, 8, 4, 2, 1};
+	check_mem(bin_code, __func__);
 
 	while (i < 8)
 	{
@@ -205,6 +226,8 @@ Output:
 
 		/* New vertex creation */
 		new_lst = (BINTREE*)malloc(sizeof(BINTREE));
+		check_mem(new_lst, __func__);
+
 		new_lst->left = left_lst;
 		new_lst->right = right_lst;
 		new_lst->hash = 0;
@@ -221,6 +244,7 @@ Output:
 	insert_to_list(&main_lst, new_lst); // Am I need this?
 
 	/* All values assigning */
+	check_mem(new_lst, __func__);
 	count_bintree_codes(new_lst, "", 0);
 
 	return new_lst;
@@ -248,7 +272,9 @@ Input:
 	if ((root->right == NULL)
 		&& (root->left == NULL))
 	{
-		root->encoded = (char*)calloc(strlen(seq), sizeof(char));
+		root->encoded = (char*)calloc(strlen(seq) * 2, sizeof(char));
+		check_mem(root->encoded, __func__);
+
 		root->length = 0;
 		strcpy(root->encoded, seq);
 		strcat(root->encoded, root->code);
@@ -259,11 +285,15 @@ Input:
 	/* Append left and right sequences */
 	if (strlen(seq) != 0)
 	{
-		left_seq = (char*)calloc(strlen(seq), sizeof(char));
+		left_seq = (char*)calloc(strlen(seq) * 2, sizeof(char));
+		check_mem(left_seq, __func__);
+
 		strcpy(left_seq, seq);
 		strcat(left_seq, root->code);
 
-		right_seq = (char*)calloc(strlen(seq), sizeof(char));
+		right_seq = (char*)calloc(strlen(seq) * 2, sizeof(char));
+		check_mem(right_seq, __func__);
+
 		strcpy(right_seq, seq);
 		strcat(right_seq, root->code);
 	}
@@ -271,7 +301,11 @@ Input:
 	{
 		/* If it starts with "" */
 		left_seq = (char*)malloc(sizeof(seq));
+		check_mem(left_seq, __func__);
+
 		right_seq = (char*)malloc(sizeof(seq));
+		check_mem(right_seq, __func__);
+
 		strcpy(left_seq, root->code);
 		strcpy(right_seq, root->code);
 	}
@@ -359,10 +393,12 @@ Output:
 
 		/* Left trunk */
 		root->left = (BINTREE*)malloc(sizeof(BINTREE));
+		check_mem(root->left, __func__);
 		length = build_bintree_from_file(file, root->left, length, "1");
 
 		/* Right trunk */
 		root->right = (BINTREE*)malloc(sizeof(BINTREE));
+		check_mem(root->right, __func__);
 		length = build_bintree_from_file(file, root->right, length, "0");
 	}
 
@@ -398,11 +434,15 @@ Input:
 	/* Append left and right sequences */
 	if (strlen(seq) != 0)
 	{
-		left_seq = (char*)calloc(strlen(seq) + 1, sizeof(char));
+		left_seq = (char*)calloc(strlen(seq) * 2, sizeof(char));
+		check_mem(left_seq, __func__);
+
 		strcpy(left_seq, seq);
 		strcat(left_seq, root->code);
 
-		right_seq = (char*)calloc(strlen(seq) + 1, sizeof(char));
+		right_seq = (char*)calloc(strlen(seq) * 2, sizeof(char));
+		check_mem(right_seq, __func__);
+
 		strcpy(right_seq, seq);
 		strcat(right_seq, root->code);
 	}
@@ -410,9 +450,11 @@ Input:
 	/* If it starts with "" */
 	{
 		left_seq = (char*)malloc(sizeof(seq));
+		check_mem(left_seq, __func__);
 		strcpy(left_seq, root->code);
 
 		right_seq = (char*)malloc(sizeof(seq));
+		check_mem(right_seq, __func__);
 		strcpy(right_seq, root->code);
 	}
 
@@ -493,6 +535,8 @@ Input:
 
 	/* New list item */
 	BINTREE *new_lst = (BINTREE*)malloc(sizeof(BINTREE));
+	check_mem(new_lst, __func__);
+
 	new_lst->left = new_lst->right = new_lst->next = NULL;
 	new_lst->hash = hash;
 	new_lst->count = 1;

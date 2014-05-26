@@ -1,17 +1,39 @@
 #include "mod.h"
 
+//#ifndef __COMMON_H__
+//#define __COMMON_H__
+
+//int check_mem(void *pointer, const char *func_name)
+//{
+//	if (pointer == NULL)
+//	{
+//		printf("Cannot assign the memory at %s function!\n", func_name);
+//		exit(10);
+//	}
+//	return 0;
+//}
+
+//#endif
+
 
 /* ---------- DEBUG FUNCTIONS ---------- */
 
-int run_test(char *file_name)
+int run_test(char *file_name, char *archive_name)
 {
-	printf("Test for %s file", file_name);
+	ARCHIVE *archive = (ARCHIVE*)malloc(sizeof(ARCHIVE));
+	check_mem(archive, __func__);
+
+	create_an_archive(archive_name, archive);
+
+	add_to_archive(file_name, archive);
+
+	print_bintree(archive->files[0]->root, "");
+
 	return 0;
 }
 
 
 /* ---------- ACCESSORY FUNCTIONS ---------- */
-
 
 int is_an_archive(char *file_name)
 /*
@@ -82,7 +104,11 @@ Output:
 
 	/* Archive init */
 	archive->name = (char*)calloc(strlen(arch_name) + 1, sizeof(char));
+	check_mem(archive->name, __func__);
+
 	archive->files = (ARCHIVEDFILE**)calloc(0, sizeof(ARCHIVEDFILE));
+	check_mem(archive->files, __func__);
+
 	archive->files_count = 0;
 	strcpy(archive->name, arch_name);
 
@@ -101,17 +127,23 @@ Output:
 			) != EOF)
 	{
 		zipped_file = (ARCHIVEDFILE*)malloc(sizeof(ARCHIVEDFILE));
+		check_mem(zipped_file, __func__);
+
 		zipped_file->list = NULL;
 		zipped_file->original_size = file_normal_size;
 
 		/* Read archived file name */
 		zipped_file->name = (char*)calloc(file_name_size, sizeof(char));
+		check_mem(zipped_file->name, __func__);
+
 		fread(zipped_file->name, file_name_size, sizeof(char), archive_file);
 
 		/* Read & build bintree */
 		if (bin_tree_size > 0)
 		{
 			zipped_file->root = (BINTREE*)malloc(sizeof(BINTREE));
+			check_mem(zipped_file->root, __func__);
+
 			build_bintree_from_file(archive_file, zipped_file->root, bin_tree_size, "");
 			count_bintree_codes(zipped_file->root, "", 0);
 		}
@@ -127,6 +159,8 @@ Output:
 
 		archive->files_count += 1;
 		archive->files = (ARCHIVEDFILE**)realloc(archive->files, archive->files_count);
+		check_mem(archive->files, __func__);
+
 		archive->files[archive->files_count - 1] = zipped_file;
 	}
 
@@ -158,7 +192,11 @@ Output:
 
 	/* Archive init */
 	archive->name = (char*)calloc(strlen(arch_name) + 1, sizeof(char));
+	check_mem(archive->name, __func__);
+
 	archive->files = (ARCHIVEDFILE**)calloc(0, sizeof(ARCHIVEDFILE));
+	check_mem(archive->files, __func__);
+
 	archive->files_count = 0;
 	strcpy(archive->name, arch_name);
 
@@ -224,7 +262,8 @@ Output:
 	char buffer[128] = {};
 	unsigned long int bin_tree_size, zipped_size = 0;
 	unsigned char chr;
-	long int zipped_size_byte;
+	char new_chr;
+	long int zipped_size_byte, b;
 	int i = 0;
 
 	/* Check this file in archive */
@@ -269,7 +308,7 @@ Output:
 	/* Write zipped file */
 	fseek(file, 0, SEEK_SET); // Start read the file again.
 	fseek(archive_file, 0, SEEK_END); // Go to the end of archive file.
-	while (fread(&chr, sizeof(chr), 1, file))
+	while (fread(&chr, 1, sizeof(char), file))
 	{
 		if (strlen(buffer) < 8)
 		{
@@ -280,8 +319,16 @@ Output:
 		while (strlen(buffer) >= 8)
 		{
 			/* Write as letter */
-			fprintf(archive_file, "%c", get_as_one_char(buffer));
+			new_chr = get_as_one_char(buffer);
+			fprintf(archive_file, "%c", new_chr);
 			zipped_size++;
+
+//			b = ftell(file);
+
+//			if ((b > 530) && (b < 560))
+//			{
+//				printf("%ld: (%03d)'%c' => [%8s] => '%c' | buff: [%20s]\n", b, chr, chr, get_encoded(zipped_file->list, chr), get_as_one_char(buffer), buffer);
+//			}
 
 			/*
 			Say hello to bugs there:
@@ -317,7 +364,9 @@ Output:
 	fclose(archive_file);
 
 	/* Appending to archive structure */
-	zipped_file->name = (char*)calloc(strlen(file_name), sizeof(char));
+	zipped_file->name = (char*)calloc(strlen(file_name) + 1, sizeof(char));
+	check_mem(zipped_file->name, __func__);
+
 	strcpy(zipped_file->name, file_name);
 	zipped_file->zipped_size = zipped_size;
 

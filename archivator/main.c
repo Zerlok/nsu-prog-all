@@ -175,6 +175,8 @@ Input:
 int main(int argc, char *argv[])
 {
 	ARCHIVE *archive = (ARCHIVE*)malloc(sizeof(ARCHIVE));
+	check_mem(archive, __func__);
+
 	int code = HELP_CODE, indx = 0;
 
 	if (argc > 1)
@@ -278,8 +280,7 @@ int main(int argc, char *argv[])
 
 #ifdef DEBUG
 			case TESTMODE_CODE:
-				read_an_archive(argv[2], archive);
-				run_test(argv[indx]);
+				run_test(argv[indx + 1], argv[indx]);
 				return 0;
 #endif
 			/* Print the documentation */
