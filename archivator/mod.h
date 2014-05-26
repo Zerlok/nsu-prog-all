@@ -1,3 +1,6 @@
+#ifndef __MOD_H__
+#define __MOD_H__
+
 /* ----- MODULES ----- */
 #include <stdio.h>
 #include <stdlib.h>
@@ -74,3 +77,5 @@ int write_an_archive_to_file(ARCHIVE *arch);
 int add_to_archive(char *file_name, ARCHIVE *arch);
 int extract_file_from_archive(char *file_name, ARCHIVE *archive);
 int show_archived_files(ARCHIVE *archive);
+
+#endif

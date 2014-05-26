@@ -1,6 +1,10 @@
+#ifndef __HAF_H__
+#define __HAF_H__
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
 
 
 /* ---- BINARY TREE STRUCTURE ----- */
@@ -61,3 +65,5 @@ BINTREE *get_bintree(BINTREE *list);
 /* ----- MAIN FUNCTIONS ----- */
 ARCHIVEDFILE *encode_file(FILE *file);
 int decode_file(FILE *file, FILE *archive_file, ARCHIVEDFILE *zipped_file);
+
+#endif
