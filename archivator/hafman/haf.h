@@ -3,6 +3,7 @@
 #include <string.h>
 
 
+/* ---- BINARY TREE STRUCTURE ----- */
 typedef struct BinaryTree
 {
 	struct BinaryTree *left, *right, *next;
@@ -13,6 +14,7 @@ typedef struct BinaryTree
 } BINTREE;
 
 
+/* ----- ZIPPED FILE STRUCTURE ----- */
 typedef struct ArchivedFile
 {
 	BINTREE *root, *list;
@@ -23,23 +25,24 @@ typedef struct ArchivedFile
 } ARCHIVEDFILE;
 
 
-/* LIST */
-unsigned int get_hash(unsigned char symbol);
-void print_list(BINTREE *list);
+/* ----- LIST.C FUNCTIONS ----- */
+BINTREE *pop_list(BINTREE **list);
 int append_list(BINTREE **list, unsigned char value);
 int insert_to_list(BINTREE **list, BINTREE *new_lst);
-BINTREE *pop_list(BINTREE **list);
 
 
-/* CODES */
+/* ----- COMMON FUNCTIONS ----- */
+unsigned int get_hash(unsigned char symbol);
+void print_list(BINTREE *list);
+
 char *get_encoded(BINTREE *list, unsigned char symbol);
 char get_as_one_char(char *string);
 char *get_binary_code(unsigned char chr);
 
-
-/* BINTREE */
 int print_bintree(BINTREE *root, char *seq);
-int write_bintree_to_file(FILE *file, BINTREE *root);
+
+
+/* ----- BINTREE FUNCTIONS ----- */
 unsigned long int count_bintree_codes(
 		BINTREE *root,
 		char *seq,
@@ -51,9 +54,10 @@ unsigned long int build_bintree_from_file(
 		unsigned long int length,
 		char *code
 );
+int write_bintree_to_file(FILE *file, BINTREE *root);
 BINTREE *get_bintree(BINTREE *list);
 
 
-/* MAIN FUNCTIONS */
+/* ----- MAIN FUNCTIONS ----- */
 ARCHIVEDFILE *encode_file(FILE *file);
 int decode_file(FILE *file, FILE *archive_file, ARCHIVEDFILE *zipped_file);

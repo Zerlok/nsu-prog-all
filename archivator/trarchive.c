@@ -2,6 +2,7 @@
 
 
 /* ---------- DEBUG FUNCTIONS ---------- */
+#ifdef DEBUG
 
 int run_test(char *file_name)
 {
@@ -9,54 +10,10 @@ int run_test(char *file_name)
 	return 0;
 }
 
+#endif
+
 
 /* ---------- ACCESSORY FUNCTIONS ---------- */
-
-
-int is_an_archive(char *file_name)
-/*
-If file is an archive file returns 0.
-Otherwise returns 1.
-
-Input:
-	char *file_name - the name of file.
-*/
-{
-	if (!strstr(file_name, ARC_FILE_TAG)) // If not archive file
-	{
-		/* TODO: do not skip the '.trarlololo'. '.trar' only! */
-		return 1;
-	}
-	return 0;
-}
-
-
-int is_in_archive(char *file_name, ARCHIVE *archive)
-/*
-If file is in archive file returns it's number.
-Otherwise returns -1.
-
-Input:
-	char *file_name - the name of file.
-*/
-{
-	int i = 0;
-
-	/* Check this file in archive */
-	while (i < archive->files_count)
-	{
-		if (!strcmp(file_name, archive->files[i]->name))
-		{
-			printf("The file '%s' is in '%s' archive.\n", file_name, archive->name);
-			return i;
-		}
-
-		i++;
-	}
-
-	return -1;
-}
-
 
 int read_or_create_an_archive(char *arch_name, ARCHIVE *archive)
 /*
@@ -87,7 +44,6 @@ Output:
 	archive->name = (char*)calloc(strlen(arch_name) + 1, sizeof(char));
 	archive->files = (ARCHIVEDFILE**)calloc(0, sizeof(ARCHIVEDFILE));
 	archive->files_count = 0;
-	strcpy(archive->version, ARC_VERSION);
 	strcpy(archive->name, arch_name);
 
 	/* Read or create archive file */
@@ -152,29 +108,6 @@ Output:
 
 
 /* ---------- ARCHIVE FUNCTIONS ---------- */
-
-
-int get_nums(unsigned long int x)
-{
-	int n = 10;
-	unsigned long int k = 1000000000;
-
-	while (n > 0 && (int)(x / k) == 0)
-	{
-		if (k != 1)
-		{
-			k /= 10;
-		}
-		n--;
-	}
-
-	if (n < 1)
-	{
-		n = 1;
-	}
-
-	return n;
-}
 
 
 int add_to_archive(char *file_name, ARCHIVE *archive)
