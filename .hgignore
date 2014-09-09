@@ -1,6 +1,7 @@
 syntax: glob
 *.o
 *.sh
+*.out
 *.orig
 *.gch
 *.sublime-project
@@ -14,6 +15,7 @@ syntax: glob
 
 syntax: regexp
 ^_samples/.*$
-^task\_\d+\/\w+$
+task\_\d+\/\w+$
+evm\/\w+$
 ^.*?\/(\_\w+\/).*?$
 ^archivator\-debug\/.*
