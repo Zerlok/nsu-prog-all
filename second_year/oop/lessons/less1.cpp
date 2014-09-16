@@ -31,6 +31,17 @@ class Array
 
 
 	public:
+		Array & operator=(const Array &array)
+		{
+			data_end = array.data_end;
+			check_and_expand_an_array();
+
+			for (int i = 0; i < data_end; i++)
+			{
+				data[i] = array.data[i];
+			}
+		}
+
 		int len()
 		{
 			return data_end;
@@ -114,18 +125,20 @@ class Array
 
 int main()
 {
-	Array arr(10);
+	Array arr1(10), arr2(20);
 
 	for (int i = 1; i < 5; i++)
 	{
-		arr.push_back(i);
+		arr1.push_back(i);
 	}
 
-	arr.show();
+	arr1.show();
+	arr2 = arr1;
+	
+	arr1.insert(2, -100);
 
-	arr.insert(2, -100);
-
-	arr.show();	
+	arr1.show();
+	arr2.show();
 
 	return 0;
 }
