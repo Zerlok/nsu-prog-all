@@ -1,34 +1,65 @@
-#include <cstdio>
 #include <cstdlib>
+#include <iostream>
 
 
 class Array
 {
 	private:
-
 		int *data;
 		int data_end;
 		int length;
 
-	public:
-
-		int len()
+		int check_and_expand_an_array()
 		{
-			return data_end;
-		}
-
-		int push_back(int value)
-		{
-			if (data_end == length)
+			if (data_end >= length)
 			{
 				length *= 2;
 				data = (int*)realloc(data, length);
 
 				if (data == NULL)
 				{
-					return 1;
+					return -1;
 				}
 			}
+			else
+			{
+				return 1;
+			}
+
+			return 0;
+		}
+
+
+	public:
+		int len()
+		{
+			return data_end;
+		}
+
+		int insert(int indx, int value)
+		{
+			if (indx > data_end)
+			{
+				return 1;
+			}
+
+			data_end += 1; // Increment the data size
+
+			check_and_expand_an_array(); // Check for allocated memmory
+
+			for (int i = data_end; i > indx; i--) // Shift values to right
+			{
+				data[i] = data[i-1];
+			}
+
+			data[indx] = value; // Insert the new value
+
+			return 0;
+		}
+
+		int push_back(int value)
+		{
+			check_and_expand_an_array();
 
 			data[data_end] = value;
 			data_end++;
@@ -40,16 +71,15 @@ class Array
 		{
 			int i;
 
-			printf("[ ");
+			std::cout << std::endl << "[ ";
 			
 			for (i = 0; i < data_end; i++)
 			{
-				printf("%d ", data[i]);
+				std::cout << data[i] << " ";
 			}
 
-			printf("]\n");
-
-			printf("Data length: %d, Allocated length: %d\n", data_end, length);
+			std::cout << "] (" << data_end << ", " << length << ")" << std::endl;
+			// std::cout << "Data length: " << data_end << ", Allocated length: " << length << std::endl;
 		}
 
 		// The functions names is the same as the class name.
@@ -64,7 +94,7 @@ class Array
 				length = _length;
 				data_end = 0;
 			
-				printf("The new array was created successfully!\n");
+				std::cout << "The new array was created successfully!" << std::endl;
 
 				show();
 			}
@@ -77,7 +107,7 @@ class Array
 
 			delete data;
 			
-			printf("This array was deleted successfully!\n");
+			std::cout << "This array was deleted successfully!" << std::endl;
 		};
 };
 
@@ -86,14 +116,16 @@ int main()
 {
 	Array arr(10);
 
-	// arr.show();
-
 	for (int i = 1; i < 5; i++)
 	{
 		arr.push_back(i);
 	}
 
-	// arr.show();
+	arr.show();
+
+	arr.insert(2, -100);
+
+	arr.show();	
 
 	return 0;
 }
