@@ -12,6 +12,7 @@ syntax: glob
 *.pro.autosave
 *.ods
 *.cvn
+*.textile
 *haffman
 *harc
 
@@ -19,5 +20,6 @@ syntax: regexp
 ^_samples/.*$
 task\_\d+\/\w+$
 evm\/\w+$
+\.svn\/.*$
 ^.*?\/(\_\w+\/).*?$
 ^archivator\-debug\/.*
