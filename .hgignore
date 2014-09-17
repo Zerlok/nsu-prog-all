@@ -20,6 +20,6 @@ syntax: regexp
 ^_samples/.*$
 task\_\d+\/\w+$
 evm\/\w+$
-\.svn\/.*$
+13202\-troshnev\/.*$
 ^.*?\/(\_\w+\/).*?$
 ^archivator\-debug\/.*
