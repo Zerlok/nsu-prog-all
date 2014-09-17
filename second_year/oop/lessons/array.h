@@ -1,6 +1,10 @@
 #include <cstdlib>
 #include <iostream>
 
+#ifndef __ARRAY_H__
+#define __ARRAY_H__
+
+
 class Array
 {
 	private:
@@ -10,15 +14,15 @@ class Array
 
 		int _check_and_expand_an_array();
 
-
 	public:
 		Array & operator=(const Array &array);
 		int operator==(const Array &array);
+		int operator[](const int indx);
 		friend std::ostream & operator<<(std::ostream & output, const Array & array);
+
 		int len();
 		int insert(int indx, int value);
 		int push_back(int value);
-		void show();
 
 		// The functions names is the same as the class name.
 		// And they have not the returning type.
@@ -31,3 +35,5 @@ class Array
 };
 
 std::ostream & operator<<(std::ostream & output, const Array & array);
+
+#endif

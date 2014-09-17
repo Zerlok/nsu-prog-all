@@ -53,6 +53,17 @@ int Array::operator==(const Array &array)
 	return 1;
 }
 
+int Array::operator[](const int indx)
+{
+	if (indx >= data_end and indx < 0)
+	{
+		std::cout << "IndexError!";
+		return indx;
+	}
+
+	return data[indx];
+}
+
 std::ostream & operator<<(std::ostream & output, const Array & array)
 {
 	output << "[";
@@ -60,7 +71,7 @@ std::ostream & operator<<(std::ostream & output, const Array & array)
 	{
 		output << array.data[i] << ", ";
 	}
-	output << "\b\b]";
+	output << "\b\b] (" << array.data_end << ", " << array.length << ")";
 	return output;
 }
 
@@ -100,67 +111,26 @@ int Array::push_back(int value)
 	return 0;
 }
 
-void Array::show()
-{
-	int i;
-
-	std::cout << "[ ";
-	
-	for (i = 0; i < data_end; i++)
-	{
-		std::cout << data[i] << " ";
-	}
-
-	std::cout << "] (" << data_end << ", " << length << ")" << std::endl;
-	// std::cout << "Data length: " << data_end << ", Allocated length: " << length << std::endl;
-}
 
 // The functions names is the same as the class name.
-// And they do not has the returning type.
+// And they have no returning type.
 		
 // Constructor
 Array::Array(int _length)
 {
 	if (_length > 0)
 	{
-		data = new int[_length];
-		length = _length;
-		data_end = 0;
-	
-		std::cout << "The new array was created successfully!" << std::endl;
-
-		show();
 	}
+	
+	data_end = 0;
+	length = _length > 0 ? _length : 1;
+	data = new int[length];
+	// std::cout << "The new array was created successfully!" << std::endl;
 }
 
 // Destructor
 Array::~Array()
 {
-	// show();
-
-	delete data;
-	
+	delete data;	
 	// std::cout << "This array was deleted successfully!" << std::endl;
 }
-
-/*
-int main()
-{
-	Array arr1(10), arr2(20);
-
-	for (int i = 1; i < 5; i++)
-	{
-		arr1.push_back(i);
-	}
-
-	arr1.show();
-	arr2 = arr1;
-	
-	arr1.insert(2, -100);
-
-	arr1.show();
-	arr2.show();
-
-	return 0;
-}
-*/
