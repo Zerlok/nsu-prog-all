@@ -1,8 +1,8 @@
-#include <cstdlib>
-#include <iostream>
-
 #ifndef __ARRAY_H__
 #define __ARRAY_H__
+
+#include <cstdlib>
+#include <iostream>
 
 
 class Array
@@ -34,6 +34,6 @@ class Array
 		~Array();
 };
 
-std::ostream & operator<<(std::ostream & output, const Array & array);
+std::ostream& operator<<(std::ostream & output, const Array & array);
 
 #endif
