@@ -7,21 +7,21 @@ unsigned int hash(String key)
 
 HashTable& HashTable::operator=(const HashTable& b)
 {
-	data_end = b.data_end;
+	// data_end = b.data_end;
 
-	try
-	{
-		data = (Value*)realloc(data, data_end);
-	}
-	catch (std::bad_alloc)
-	{
-		std::cout << ERR_BAD_ALLOC << std::endl;
-	}
+	// try
+	// {
+	// 	data = (Value*)realloc(data, data_end);
+	// }
+	// catch (std::bad_alloc)
+	// {
+	// 	std::cout << ERR_BAD_ALLOC << std::endl;
+	// }
 
-	for (int i = 0; i < data_end; i++)
-	{
-		data[i] = b.data[i];
-	}
+	// for (int i = 0; i < data_end; i++)
+	// {
+	// 	data[i] = b.data[i];
+	// }
 }
 
 
@@ -29,22 +29,32 @@ Value& HashTable::operator[](const String& key)
 {
 	unsigned int h = hash(key);
 	unsigned int index = h % data_end;
-	Value *last_data = &data[index], *curr_data = &data[index];
 
-	// std::cout << h << ", " << data_end << ", " << index << std::endl;
+	Value *last_data = data[index], *curr_data = data[index];
 
-	/* Cell is not empty */
-	while (curr_data == NULL)
+
+	std::cout << "---> Key: "
+				<< key
+				<< " ("
+				<< h
+				<< ", "
+				<< data_end
+				<< ", "
+				<< index
+				<< ")"
+				<< std::endl;
+
+	// std::cout << "nulls: " << (last_data == NULL) << " : " << (curr_data == NULL) << std::endl;
+
+	while (curr_data != NULL)
 	{
-		if (curr_data->name == key) // Can I compare strings?
+		if (curr_data->name == key)
 		{
 			return *curr_data;
 		}
 		last_data = curr_data;
 		curr_data = last_data->next;
 	}
-
-	// std::cout << "After cycle" << std::endl;
 
 	/* If empty cell or key not found -> create a new value */
 	Value *new_value = new Value;
@@ -56,13 +66,14 @@ Value& HashTable::operator[](const String& key)
 	new_value->average_mark = 4;
 	new_value->department = "Information Technology";
 
-	// std::cout << "After new value creation" << std::endl;
-
-	// std::cout << last_data << std::endl;
-
-	last_data->next = new_value;
-
-	// std::cout << "At value returning" << std::endl;
+	if (last_data == NULL)
+	{
+		data[index] = new_value;
+	}
+	else
+	{
+		last_data->next = new_value;
+	}
 
 	return *new_value;
 }
@@ -75,12 +86,18 @@ HashTable::HashTable()
 
 	try
 	{
-		data = new Value[data_end];
+		data = new Value*[data_end];
 	}
 	catch (std::bad_alloc)
 	{
 		std::cout << ERR_BAD_ALLOC << std::endl;
 	}
+
+	for (int i = 0; i < data_end; i++)
+	{
+		data[i] = NULL;
+	}
+
 }
 
 
@@ -99,7 +116,7 @@ HashTable::HashTable(const HashTable& b)
 
 	try
 	{
-		data = new Value[data_end];
+		data = new Value*[data_end];
 	}
 	catch (std::bad_alloc)
 	{
@@ -116,30 +133,12 @@ HashTable::HashTable(const HashTable& b)
 /* Will it work, if these fields are private? */
 void HashTable::swap(HashTable& b)
 {
-	unsigned int tmp_data_end = data_end;
-	Value *tmp_data = data;
+	// unsigned int tmp_data_end = data_end;
+	// Value *tmp_data = data;
 
-	data_end = b.data_end;
-	data = b.data;
+	// data_end = b.data_end;
+	// data = b.data;
 
-	b.data_end = tmp_data_end;
-	b.data = tmp_data;	
-}
-
-
-int main(int argc, char **argv)
-{
-	HashTable ht;
-
-	if (argc > 1)
-	{
-		for (int i = 1; i < argc; i++)
-		{
-			std::cout << i << " : " << ht[argv[i]].name << std::endl;
-		}
-
-		std::cout << "At [1] : " << ht[argv[1]].name << std::endl;
-	}
-
-	return 0;
+	// b.data_end = tmp_data_end;
+	// b.data = tmp_data;	
 }

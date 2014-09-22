@@ -7,7 +7,7 @@
 
 
 #define ERR_BAD_ALLOC "Not enough memmory!"
-#define ERR_KEY_NOT_SET "This key not set yet!"
+#define ERR_KEY_NOT_SET "This key is not set yet!"
 
 
 typedef std::string String;
@@ -15,7 +15,7 @@ typedef std::string String;
 
 struct Value
 {
-	String name; // Key
+	String name = "hi"; // Key
 	Value *next; // For collisions (list of elements with same hashes)
 
 	/* Info fields */
@@ -29,7 +29,7 @@ struct Value
 class HashTable
 {
 	private:
-		Value *data; // List of Value structures
+		Value **data; // List of Value structures
 		unsigned int data_end; // Cells of allocated memory
 
 	public:
