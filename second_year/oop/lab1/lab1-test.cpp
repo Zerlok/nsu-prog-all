@@ -2,50 +2,6 @@
 #include <gtest/gtest.h>
 
 
-// TEST(HashTableTest, Init)
-// {
-// 	HashTable a;
-// 	Value row = a["Danil Troshnev"];
-
-// 	EXPECT_EQ(row.age, 18);
-// }
-
-
-// /* For Hash : key.size() * key[0] */
-// TEST(HashTableTest, ValuesAddressConst)
-// {
-// 	HashTable a;
-
-// 	Value *row1 = &(a["Danil Troshnev"]);
-// 	row1->age = 19;
-
-// 	Value *row2 = &(a["Dima Vishnevyh"]); // Collision!
-// 	Value *row3 = &(a["Danil Troshnev"]);
-// 	Value *row4 = &(a["Ivan Ivanov"]);
-
-// 	EXPECT_NE(row1, row2);
-// 	EXPECT_NE(row2, row3);
-// 	EXPECT_EQ(row1, row3);
-// 	EXPECT_NE(row1, row4);
-
-// 	EXPECT_EQ(row3->age, 19);
-// }
-
-
-// TEST(HashTableTest, CreateFromParent)
-// {
-// 	HashTable a;
-// 	Value *row1 = &(a["Danil"]);
-// 	row1->age = 19;
-
-// 	HashTable b(a);
-// 	Value *row2 = &(b["Danil"]);
-
-// 	EXPECT_NE(row1, row2);
-// 	EXPECT_EQ(row2->age, 19);
-// }
-
-
 /* -------------------- STUDENT CLASS TESTS -------------------- */
 
 TEST(StudentTest, Init)
@@ -165,6 +121,52 @@ TEST(ItemTest, Empty)
 	item1.show();
 
 	EXPECT_TRUE(item1.is_empty());
+}
+
+
+/* -------------------- HASHTABLE CLASS TESTS -------------------- */
+
+TEST(HashTableTest, Init)
+{
+	HashTable a;
+}
+
+
+/* For Hash : key.size() * key[0] */
+TEST(HashTableTest, Collision)
+{
+	HashTable table(10);
+
+	Student a("Danil");
+	Student b("Diman"); // Collision!
+	Student c("Ivan");
+
+	a.set_age(19);
+
+	table.insert(a.get_name(), a);
+	table.insert(b.get_name(), b);
+	table.insert(c.get_name(), c);
+}
+
+
+TEST(HashTableTest, CreateFromParent)
+{
+	HashTable t1;
+
+	Student a("Danil");
+	Student b("Diman"); // Collision
+	Student c("Jerry");
+	Student d("Lenny");
+
+	t1.insert(a.get_name(), a);
+	t1.insert(b.get_name(), b);
+	t1.insert(c.get_name(), c);
+
+	HashTable t2(t1);
+	
+	t2.insert(c.get_name(), d);
+
+	EXPECT_NE(t1, t2);
 }
 
 

@@ -52,7 +52,7 @@ class Student
 		friend bool operator!=(const Student& a, const Student& b);
 
 		/* DEBUG */
-		void show()
+		void show() const
 		{
 			std::cout << "Student: " << name << std::endl
 					<< "|  Age  |  Course  |  Mark  |  Dep. |" << std::endl
@@ -75,15 +75,16 @@ class Item
 
 	public:
 		Item(const String& _key);
-		Item(Student& _student);
-		Item(const String& _key, Student& _student);
+		Item(const Student& _student);
+		Item(const String& _key, const Student& _student);
 		~Item();
 
 		Item(const Item& i);
 
 		/* Get Field */
 		String get_key() const { return key; }
-		Student& get_value() const;
+		Student& get_value();
+		const Student& get_value() const;
 		Item *get_next() const;
 		
 		/* Set Field */
@@ -100,7 +101,7 @@ class Item
 		bool is_empty() const;
 
 		/* DEBUG */
-		void show()
+		void show() const
 		{
 			std::cout << "Item: " << key << std::endl;
 			std::cout << "next : " << next << std::endl;
@@ -154,7 +155,7 @@ class HashTable
 		void swap(HashTable& b);
 		void clear();
 		bool erase(const String& key);
-		bool insert(const String& key, const Item& value);
+		bool insert(const String& key, const Student& value);
 		bool contains(const String& key) const;
 };
 

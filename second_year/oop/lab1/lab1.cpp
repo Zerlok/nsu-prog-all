@@ -83,18 +83,18 @@ Item::Item(const String& _key)
 }
 
 
-Item::Item(Student& _student)
+Item::Item(const Student& _student)
 {
 	this->key = _student.get_name();
-	this->value = &(_student);
+	this->value = const_cast<Student*>(&_student);
 	this->next = NULL;
 }
 
 
-Item::Item(const String& _key, Student& _student)
+Item::Item(const String& _key, const Student& _student)
 {
 	this->key = _key;
-	this->value = &_student;
+	this->value = const_cast<Student*>(&_student);
 	this->next = NULL;
 }
 
@@ -122,11 +122,22 @@ Item::Item(const Item& i)
 }
 
 
-Student& Item::get_value() const
+Student& Item::get_value()
 {
 	if (value == NULL)
 	{
-		return *(new Student("null"));
+		throw std::exception();
+	}
+
+	return *(value);
+}
+
+
+const Student& Item::get_value() const
+{
+	if (value == NULL)
+	{
+		throw std::exception();
 	}
 
 	return *(value);
@@ -469,15 +480,14 @@ bool HashTable::erase(const String& key)
 }
 
 
-bool HashTable::insert(const String& key, const Item& value)
+bool HashTable::insert(const String& key, const Student& value)
 {
-	unsigned int h = hash(key);
-	int i = h % data_end;
+	int i = get_index(key);
 	Item *curr_item = data[i];
 
 	if (curr_item == NULL)
 	{
-		data[i] = new Item(key);
+		data[i] = new Item(key, value);
 		return true;
 	}
 
@@ -486,7 +496,7 @@ bool HashTable::insert(const String& key, const Item& value)
 		curr_item = curr_item->get_next();
 	}
 
-	curr_item->set_next(new Item(key));
+	curr_item->set_next(new Item(key, value));
 
 	return true;
 }
