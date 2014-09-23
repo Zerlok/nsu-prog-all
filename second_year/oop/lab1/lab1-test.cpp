@@ -46,6 +46,8 @@
 // }
 
 
+/* -------------------- STUDENT CLASS TESTS -------------------- */
+
 TEST(StudentTest, Init)
 {
 	Student a("Danil");
@@ -87,17 +89,28 @@ TEST(StudentTest, OperatorEQEQ)
 }
 
 
-TEST(ItemTest, Init)
+/* -------------------- ITEM CLASS TESTS -------------------- */
+
+TEST(ItemTest, Init_Empty)
 {
 	Student a("Danil");
-	Item i("Danil", a);
+	Item item1("Danil", a), item2("Danil"), item3(a);
+	
+	// item1.show();
+	// item2.show();
+	// item3.show();
+
+	EXPECT_NE(item1, item2);
+	EXPECT_NE(item2, item3);
+	EXPECT_EQ(item1, item3);
+	EXPECT_TRUE(item2.is_empty());
 }
 
 
 TEST(ItemTest, Copy)
 {
 	Student a("Danil");
-	Item item1("Danil", a), item2(item1);
+	Item item1(a), item2(item1);
 
 	EXPECT_EQ(item1, item2);
 }
@@ -105,8 +118,8 @@ TEST(ItemTest, Copy)
 
 TEST(ItemTest, OperatorEQ)
 {
-	Student a("Den");
-	Item item1("Danil", a), item2("den", a);
+	Student a("Den"), b("Jeff");
+	Item item1("Danil", a), item2("J", b);
 
 	item2 = item1;
 
@@ -117,13 +130,36 @@ TEST(ItemTest, OperatorEQ)
 TEST(ItemTest, OperatorEQEQ)
 {
 	Student a("Danil"), b("Denis");
-	Item item1("Danil", a), item2("Danil2", a), item3("Denis", b), item4("Denis", b);
+	Item item1("Danil", a), item2("Danil2", a), item3(b), item4(b);
 
 	EXPECT_FALSE(item1 == item2);
 	EXPECT_FALSE(item1 == item3);
 	EXPECT_TRUE(item3 == item4);
 }
 
+
+TEST(ItemTest, Pushback)
+{
+	Student a("Danil"), b("Bob"), c("Monica");
+	Item item1(a), item2(b), item3(c);
+
+	// std::cout << "Inited...";
+
+	item1.push_back(item2);
+	item2.push_back(item3);
+
+	// std::cout << "Pushed...";
+
+	// item1.show();
+	// item2.show();
+	// item3.show();
+
+	EXPECT_EQ(item1.get_next(), item2);
+	EXPECT_EQ(item2.get_next(), item3);
+}
+
+
+/* -------------------- MAIN -------------------- */
 
 int main(int argc, char **argv)
 {

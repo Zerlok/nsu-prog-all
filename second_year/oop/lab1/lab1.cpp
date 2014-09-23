@@ -75,11 +75,26 @@ bool operator!=(const Student& a, const Student& b)
 
 /* -------------- ITEM METHODS -------------- */
 
-Item::Item(const String _key, Student& _student):
-	key(_key), value(_student)
+Item::Item(const String _key)
 {
 	this->key = _key;
-	// this->value = _student;
+	this->value = NULL;
+	this->next = NULL;
+}
+
+
+Item::Item(Student& _student)
+{
+	this->key = _student.get_name();
+	this->value = &_student;
+	this->next = NULL;
+}
+
+
+Item::Item(const String _key, Student& _student)
+{
+	this->key = _key;
+	this->value = &_student;
 	this->next = NULL;
 }
 
@@ -87,34 +102,46 @@ Item::Item(const String _key, Student& _student):
 Item::~Item()
 {
 	// std::cout << "Deleting the Item... ";
-	// delete value;
 
-	delete next;
+	/* How about that? */
+	// delete value; 
+	// std::cout << "... ";
+
+	/* When next not null, raises "double free corruption" */
+	// delete next;
 
 	// std::cout << "done" << std::endl;
 }
-
-
-// Item::Item(const String _key):
-// 	value(Student(key))
-// {
-// 	this->key = _key;
-// 	this->next = NULL;
-// }
  
 
-Item::Item(const Item& i):
-	value(i.value)
+Item::Item(const Item& i)
 {
 	this->key = i.key;
-	// this->value = Student(i.value);
+	this->value = new Student(*(i.value));
 	this->next = i.next;
 }
 
 
-void Item::link(Item& i)
+Student& Item::get_value() const
 {
-	this->next = &i;
+	if (value == NULL)
+	{
+		return *(new Student("null"));
+	}
+
+	return *(value);
+}
+
+
+Item& Item::get_next() const
+{
+	if (next == NULL)
+	{
+		// TODO: Enchance to return something lkie null (but not the Student object)
+		return *(new Item("null"));
+	}
+
+	return *(next);
 }
 
 
@@ -127,7 +154,45 @@ Item& Item::operator=(const Item& i)
 
 bool operator==(const Item& a, const Item& b)
 {
-	return (a.key == b.key && (a.value) == (b.value));
+	if (a.key == b.key)
+	{
+		if (a.is_empty() && b.is_empty())
+		{
+			return true;
+		}
+		else
+		{
+			return (a.get_value() == b.get_value());
+		}
+	}
+
+	return false;
+	// return (a.key == b.key);
+}
+
+
+bool operator!=(const Item& a, const Item& b)
+{
+	return !(a == b);
+	// return (a.key != b.key);
+}
+
+
+bool Item::push_back(Item& i)
+{
+	if (this->key == i.key)
+	{
+		return false;
+	}
+
+	this->next = &i;
+	return true;
+}
+
+
+bool Item::is_empty() const
+{
+	return (value == NULL);
 }
 
 
