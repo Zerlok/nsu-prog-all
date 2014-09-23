@@ -4,6 +4,7 @@
 #include <iostream>
 #include <cstring>
 #include <cstdlib>
+#include <stdexcept>
 
 
 /* ERRORS MESSAGES */
@@ -84,7 +85,9 @@ class Item
 		String get_key() const { return key; }
 		Student& get_value() const;
 		Item *get_next() const;
-		// Item& get_next() const;
+		
+		/* Set Field */
+		void set_next(Item *i);
 
 		/* Operators */
 		Item& operator=(const Item& i);
@@ -126,8 +129,7 @@ class HashTable
 		int data_end; // Cells of allocated memory
 		
 		/* Methods */
-		int get_cell_index(const String& key);
-		bool is_empty_cell(int index);
+		int get_index(const String& key) const;
 
 	public:
 		// Constructor / Destructor

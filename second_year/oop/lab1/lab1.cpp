@@ -133,20 +133,15 @@ Student& Item::get_value() const
 }
 
 
-// Item& Item::get_next() const
-// {
-// 	if (next == NULL)
-// 	{
-// 		// TODO: Enchance to return something lkie null (but not the Student object)
-// 		return *(new Item("empty"));
-// 	}
-
-// 	return *(next);
-// }
-
 Item *Item::get_next() const
 {
 	return next;
+}
+
+
+void Item::set_next(Item *i)
+{
+	this->next = i;
 }
 
 
@@ -203,7 +198,7 @@ bool Item::is_empty() const
 
 bool Item::push_node(Item& i)
 {
-	Item *own_item = this, *curr_item = i->get_next();
+	Item *own_item = this, *curr_item = i.get_next();
 
 	while (own_item->next != NULL)
 	{
@@ -279,11 +274,16 @@ HashTable::HashTable(const HashTable& b)
 
 Student& HashTable::at(const String& key)
 {
-	Item *curr_item = search(key);
+	Item *curr_item = data[get_index(key)];
+
+	while (curr_item != NULL && curr_item->get_key() != key)
+	{
+		curr_item = curr_item->get_next();
+	}
 
 	if (curr_item == NULL)
 	{
-		throw ERR_KEY_NOT_FOUND;
+		throw std::exception();
 	}
 
 	return curr_item->get_value();
@@ -292,11 +292,16 @@ Student& HashTable::at(const String& key)
 
 const Student& HashTable::at(const String& key) const
 {
-	Item *curr_item = search(key);
+	Item *curr_item = data[get_index(key)];
 
+	while (curr_item != NULL && curr_item->get_key() != key)
+	{
+		curr_item = curr_item->get_next();
+	}
+	
 	if (curr_item == NULL)
 	{
-		throw ERR_KEY_NOT_FOUND;
+		throw std::exception();
 	}
 
 	return curr_item->get_value();
@@ -336,15 +341,18 @@ bool HashTable::empty() const
 
 Student& HashTable::operator[](const String& key)
 {
-	Item *curr_item = search(key);
-
-	if (curr_item == NULL)
+	Student *st = new Student(key);
+	
+	try
 	{
-		insert(key);
-		curr_item = search(key);
+		st = &(at(key));
+	}
+	catch (std::exception)
+	{
+		insert(key, *(st));
 	}
 	
-	return curr_item->get_value();
+	return *(st);
 }
 
 
@@ -355,7 +363,7 @@ HashTable& HashTable::operator=(const HashTable& b)
 	try
 	{
 		delete[] data;
-		data = new Item[data_end];
+		data = new Item*[data_end];
 	}
 	catch (std::bad_alloc)
 	{
@@ -375,7 +383,7 @@ bool operator==(const HashTable& a, const HashTable& b)
 	{
 		Item *a_item, *b_item;
 
-		for (int i = 0; i < data_end; i++)
+		for (int i = 0; i < a.data_end; i++)
 		{
 			a_item = a.data[i];
 			b_item = b.data[i];
@@ -436,32 +444,70 @@ void HashTable::clear()
 
 bool HashTable::erase(const String& key)
 {
+	Item *last_item = data[get_index(key)], *curr_item = last_item;
 
+	if (curr_item == NULL)
+	{
+		return false;
+	}
+
+	while (curr_item != NULL)
+	{
+		if (curr_item->get_key() == key)
+		{
+			last_item->set_next(curr_item->get_next());
+			delete curr_item;
+
+			return true;
+		}
+
+		last_item = curr_item;
+		curr_item = curr_item->get_next();
+	}
+
+	return false;
 }
 
 
 bool HashTable::insert(const String& key, const Item& value)
 {
+	unsigned int h = hash(key);
+	int i = h % data_end;
+	Item *curr_item = data[i];
 
+	if (curr_item == NULL)
+	{
+		data[i] = new Item(key);
+		return true;
+	}
+
+	while (curr_item->get_next() != NULL)
+	{
+		curr_item = curr_item->get_next();
+	}
+
+	curr_item->set_next(new Item(key));
+
+	return true;
 }
 
 
 bool HashTable::contains(const String& key) const
 {
-	return (search(key) != NULL);
+	try
+	{
+		at(key);
+	}
+	catch (std::exception)
+	{
+		return false;
+	}
+
+	return true;
 }
 
 
-Item *HashTable::search(const String& key) const
+int HashTable::get_index(const String& key) const
 {
-	unsigned int h = hash(key);
-	int i = h % data_end;
-	Item *curr_item = data[i];
-
-	while (curr_item != NULL && curr_item->get_key() != key)
-	{
-		curr_item = curr_item->get_next();
-	}
-
-	return curr_item;
+	return hash(key) % data_end;
 }
