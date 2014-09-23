@@ -8,7 +8,7 @@
 
 /* ERRORS MESSAGES */
 #define ERR_BAD_ALLOC "Not enough memmory!"
-#define ERR_KEY_NOT_SET "This key is not set yet!"
+#define ERR_KEY_NOT_FOUND "The key was not found!"
 
 
 typedef std::string String;
@@ -25,25 +25,25 @@ class Student
 		String department;
 
 	public:
-		Student(const String _name);
-		Student(const String _name, const unsigned int _age, const unsigned int _course, const float _average_mark, const String _department);
+		Student(const String& _name);
+		Student(const String& _name, const unsigned int _age, const unsigned int _course, const float _average_mark, const String& _department);
 		~Student();
 
 		Student(const Student& s);
 
 		/* Get Field */
-		String get_name() { return name; }
-		unsigned int get_age() { return age; }
-		unsigned int get_course() { return course; }
-		float get_average_mark() { return average_mark; }
-		String get_department() { return department; }
+		String get_name() const { return name; }
+		unsigned int get_age() const { return age; }
+		unsigned int get_course() const { return course; }
+		float get_average_mark() const { return average_mark; }
+		String get_department() const { return department; }
 
 		/* Set Field */
-		void set_name(const String _name) { this->name = _name; }
+		void set_name(const String& _name) { this->name = _name; }
 		void set_age(const unsigned int _age) { this->age = _age; }
 		void set_course(const unsigned int _course) { this->course = _course; }
 		void set_average_mark(const float _average_mark) { this->average_mark = _average_mark; }
-		void set_department(const String _department) { this->department = _department; }
+		void set_department(const String& _department) { this->department = _department; }
 
 		/* Operators */
 		Student& operator=(const Student& s);
@@ -73,16 +73,18 @@ class Item
 		Item *next; // Next Item object with same hash (for collisions)
 
 	public:
-		Item(const String _key);
+		Item(const String& _key);
 		Item(Student& _student);
-		Item(const String _key, Student& _student);
+		Item(const String& _key, Student& _student);
 		~Item();
 
 		Item(const Item& i);
 
 		/* Get Field */
+		String get_key() const { return key; }
 		Student& get_value() const;
-		Item& get_next() const;
+		Item *get_next() const;
+		// Item& get_next() const;
 
 		/* Operators */
 		Item& operator=(const Item& i);
@@ -91,6 +93,7 @@ class Item
 		
 		/* Methods */
 		bool push_back(Item& i); // Sets Next field
+		bool push_node(Item& i); // Pushes back i node (except first item!)
 		bool is_empty() const;
 
 		/* DEBUG */
@@ -115,45 +118,49 @@ bool operator!=(const Item& a, const Item& b);
 
 
 /* HASHTABLE CLASS */
-// class HashTable
-// {
-// 	private:
-// 		Item **data; // List of pointers to Item objects
-// 		int data_end; // Cells of allocated memory
+class HashTable
+{
+	private:
+		/* Fields */
+		Item **data; // List of pointers to Item objects
+		int data_end; // Cells of allocated memory
+		
+		/* Methods */
+		int get_cell_index(const String& key);
+		bool is_empty_cell(int index);
 
-// 	public:
-// 		// Constructor / Destructor
-// 		HashTable();
-// 		~HashTable();
+	public:
+		// Constructor / Destructor
+		HashTable(int _mem=1000);
+		~HashTable();
 
-// 		HashTable(int _mem);
-// 		HashTable(const HashTable& b);
+		HashTable(const HashTable& b);
 
-// 		/* Get Fields */
-// 		Item& at(const String& key);
-// 		const Item& at(const String& key) const;
-// 		size_t size() const;
-// 		bool empty() const;
+		/* Get Field */
+		Student& at(const String& key);
+		const Student& at(const String& key) const;
+		size_t size() const;
+		bool empty() const;
 
-// 		/* Operators */
-// 		Item& operator[](const String& key);
-// 		HashTable& operator=(const HashTable& b);
-// 		friend bool operator==(const HashTable& a, const HashTable& b);
-// 		friend bool operator!=(const HashTable& a, const HashTable& b);
+		/* Operators */
+		Student& operator[](const String& key);
+		HashTable& operator=(const HashTable& b);
+		friend bool operator==(const HashTable& a, const HashTable& b);
+		friend bool operator!=(const HashTable& a, const HashTable& b);
 
-// 		/* Methods */
-// 		void swap(HashTable& b);
-// 		void clear();
-// 		bool erase(const String& key);
-// 		bool insert(const String& key, const Item& value);
-// 		bool contains(const String& key) const;
-// };
+		/* Methods */
+		void swap(HashTable& b);
+		void clear();
+		bool erase(const String& key);
+		bool insert(const String& key, const Item& value);
+		bool contains(const String& key) const;
+};
 
-// bool operator==(const HashTable& a, const HashTable& b);
-// bool operator!=(const HashTable& a, const HashTable& b);
+bool operator==(const HashTable& a, const HashTable& b);
+bool operator!=(const HashTable& a, const HashTable& b);
 
 
 /* ACCESSORY FUNCTIONS IMAGES */
-unsigned int hash(String key);
+unsigned int hash(const String& key);
 
 #endif

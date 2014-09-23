@@ -91,7 +91,7 @@ TEST(StudentTest, OperatorEQEQ)
 
 /* -------------------- ITEM CLASS TESTS -------------------- */
 
-TEST(ItemTest, Init_Empty)
+TEST(ItemTest, Init)
 {
 	Student a("Danil");
 	Item item1("Danil", a), item2("Danil"), item3(a);
@@ -103,7 +103,6 @@ TEST(ItemTest, Init_Empty)
 	EXPECT_NE(item1, item2);
 	EXPECT_NE(item2, item3);
 	EXPECT_EQ(item1, item3);
-	EXPECT_TRUE(item2.is_empty());
 }
 
 
@@ -156,6 +155,16 @@ TEST(ItemTest, Pushback)
 
 	EXPECT_EQ(item1.get_next(), item2);
 	EXPECT_EQ(item2.get_next(), item3);
+}
+
+
+TEST(ItemTest, Empty)
+{
+	Item item1("empty");
+
+	item1.show();
+
+	EXPECT_TRUE(item1.is_empty());
 }
 
 
