@@ -15,7 +15,7 @@ typedef std::string String;
 
 struct Value
 {
-	String name = "hi"; // Key
+	String name; // Key
 	Value *next; // For collisions (list of elements with same hashes)
 
 	/* Info fields */
@@ -34,8 +34,8 @@ class HashTable
 
 	public:
 		// Constructor / Destructor
-		HashTable();
-		~HashTable();
+		HashTable(); // Done
+		~HashTable(); // Done
 
 		HashTable(const HashTable& b);
 

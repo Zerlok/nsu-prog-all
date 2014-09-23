@@ -21,6 +21,7 @@ syntax: regexp
 ^_samples/.*$
 task\_\d+\/\w+$
 evm\/\w+$
+\/\w+$
 13202\-troshnev\/.*$
 ^.*?\/(\_\w+\/).*?$
 ^archivator\-debug\/.*

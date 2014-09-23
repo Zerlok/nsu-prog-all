@@ -7,21 +7,21 @@ unsigned int hash(String key)
 
 HashTable& HashTable::operator=(const HashTable& b)
 {
-	// data_end = b.data_end;
+	data_end = b.data_end;
 
-	// try
-	// {
-	// 	data = (Value*)realloc(data, data_end);
-	// }
-	// catch (std::bad_alloc)
-	// {
-	// 	std::cout << ERR_BAD_ALLOC << std::endl;
-	// }
+	try
+	{
+		data = (Value**)realloc(data, sizeof(Value) * data_end);
+	}
+	catch (std::bad_alloc)
+	{
+		std::cout << ERR_BAD_ALLOC << std::endl;
+	}
 
-	// for (int i = 0; i < data_end; i++)
-	// {
-	// 	data[i] = b.data[i];
-	// }
+	for (int i = 0; i < data_end; i++)
+	{
+		data[i] = b.data[i];
+	}
 }
 
 
@@ -116,6 +116,7 @@ HashTable::HashTable(const HashTable& b)
 
 	try
 	{
+		// delete[] data;
 		data = new Value*[data_end];
 	}
 	catch (std::bad_alloc)
@@ -133,12 +134,12 @@ HashTable::HashTable(const HashTable& b)
 /* Will it work, if these fields are private? */
 void HashTable::swap(HashTable& b)
 {
-	// unsigned int tmp_data_end = data_end;
-	// Value *tmp_data = data;
+	unsigned int tmp_data_end = this->data_end;
+	Value **tmp_data = this->data;
 
-	// data_end = b.data_end;
-	// data = b.data;
+	this->data_end = b.data_end;
+	this->data = b.data;
 
-	// b.data_end = tmp_data_end;
-	// b.data = tmp_data;	
+	b.data_end = tmp_data_end;
+	b.data = tmp_data;	
 }
