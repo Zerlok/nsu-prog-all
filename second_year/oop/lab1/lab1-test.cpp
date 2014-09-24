@@ -109,8 +109,8 @@ TEST(ItemTest, Pushback)
 	// item2.show();
 	// item3.show();
 
-	// EXPECT_EQ(item1.get_next(), item2);
-	// EXPECT_EQ(item2.get_next(), item3);
+	EXPECT_EQ(*(item1.get_next()), item2);
+	EXPECT_EQ(*(item2.get_next()), item3);
 }
 
 
@@ -118,7 +118,7 @@ TEST(ItemTest, Empty)
 {
 	Item item1("empty");
 
-	item1.show();
+	// item1.show();
 
 	EXPECT_TRUE(item1.is_empty());
 }
@@ -146,6 +146,9 @@ TEST(HashTableTest, Collision)
 	table.insert(a.get_name(), a);
 	table.insert(b.get_name(), b);
 	table.insert(c.get_name(), c);
+
+	EXPECT_EQ(hash(a.get_name()), hash(b.get_name()));
+	EXPECT_EQ(table.size(), 3);
 }
 
 
@@ -164,9 +167,277 @@ TEST(HashTableTest, CreateFromParent)
 
 	HashTable t2(t1);
 	
-	t2.insert(c.get_name(), d);
+
+	EXPECT_EQ(t1, t2);
+
+	t2.insert(d.get_name(), d);
 
 	EXPECT_NE(t1, t2);
+	EXPECT_EQ(t1.size(), 3);
+	EXPECT_EQ(t2.size(), 4);
+}
+
+
+TEST(HashTableTest, SizeCounting)
+{
+	HashTable t1;
+
+	Student a("Danil");
+	Student b("Diman"); // Collision
+	Student c("Jerry");
+	Student d("Lenny");
+
+	t1.insert(a.get_name(), a);
+	t1.insert(b.get_name(), b);
+	t1.insert(c.get_name(), c);
+
+	HashTable t2(t1);
+	
+	t2.insert(d.get_name(), d);
+
+	EXPECT_EQ(t1.size(), 3);
+	EXPECT_EQ(t2.size(), 4);
+}
+
+
+TEST(HashTableTest, OperatorEQ)
+{
+	HashTable t1, t2;
+
+	Student a("Danil");
+	Student b("Diman"); // Collision
+	Student c("Jerry");
+	Student d("Lenny");
+
+	t1.insert(a.get_name(), a);
+	t1.insert(b.get_name(), b);
+	t1.insert(c.get_name(), c);
+
+	t2 = t1;
+
+	EXPECT_EQ(t1, t2);
+}
+
+
+TEST(HashTableTest, OperatorEQEQ)
+{
+	HashTable t1, t2;
+
+	Student a("Danil");
+	Student b("Diman"); // Collision
+	Student c("Jerry");
+	Student d("Lenny");
+
+	t1.insert(a.get_name(), a);
+	t1.insert(b.get_name(), b);
+	t1.insert(c.get_name(), c);
+	
+	t2.insert(a.get_name(), a);
+	
+	t1.insert(d.get_name(), d);
+
+	t2.insert(b.get_name(), b);
+	t2.insert(c.get_name(), c);
+	t2.insert(d.get_name(), d);
+
+	EXPECT_TRUE(t1.contains(b.get_name()));
+	EXPECT_TRUE(t2.contains(b.get_name()));
+	EXPECT_TRUE(t1.contains(c.get_name()));
+	EXPECT_TRUE(t2.contains(c.get_name()));
+	EXPECT_TRUE(t1 == t2);
+}
+
+
+TEST(HashTableTest, Empty)
+{
+	HashTable t1;
+
+	EXPECT_EQ(t1.size(), 0);
+	EXPECT_TRUE(t1.empty());
+}
+
+
+TEST(HashTableTest, Insert)
+{
+	HashTable t1, t2, t3;
+
+	Student a("Danil");
+	Student b("Diman"); // Collision
+	Student c("Jerry");
+	Student d("Lenny");
+	Student e("Jeffy"); // Collision with c
+
+	t1.insert(a.get_name(), a);
+	t1.insert(a.get_name(), a); // Again
+	t1.insert(b.get_name(), b);
+	t1.insert(c.get_name(), c);
+	t1.insert(e.get_name(), e);
+	
+	t2.insert(a.get_name(), a);
+	
+	EXPECT_TRUE(t1.contains(a.get_name()));
+	EXPECT_TRUE(t1.contains(b.get_name()));
+	EXPECT_TRUE(t1.contains(c.get_name()));
+	EXPECT_FALSE(t1.contains(d.get_name()));
+	EXPECT_TRUE(t1.contains(e.get_name()));
+	EXPECT_EQ(t1.size(), 4);
+
+	EXPECT_TRUE(t2.contains(a.get_name()));
+	EXPECT_FALSE(t2.contains(b.get_name()));
+	EXPECT_FALSE(t2.contains(d.get_name()));
+	EXPECT_EQ(t2.size(), 1);
+
+	EXPECT_TRUE(t3.empty());
+}
+
+
+TEST(HashTableTest, Erase)
+{
+	HashTable t1, t2;
+
+	Student a("Danil");
+	Student b("Diman"); // Collision with a
+	Student c("Jerry");
+	Student d("Lenny");
+	Student e("Jeffy"); // Collision with c
+
+	t1.insert(a.get_name(), a);
+	t1.insert(b.get_name(), b);
+	t1.insert(c.get_name(), c);
+	t1.insert(e.get_name(), e);
+	
+	t2.insert(a.get_name(), a);
+	t2.insert(e.get_name(), e);
+
+	t1.erase(c.get_name());
+	EXPECT_TRUE(t1.contains(a.get_name()));
+	EXPECT_TRUE(t1.contains(b.get_name()));
+	EXPECT_FALSE(t1.contains(c.get_name()));
+	EXPECT_FALSE(t1.contains(d.get_name()));
+
+	t2.erase(c.get_name());
+	EXPECT_TRUE(t2.contains(a.get_name()));
+	EXPECT_FALSE(t2.contains(b.get_name()));
+	EXPECT_FALSE(t2.contains(d.get_name()));
+	EXPECT_TRUE(t2.contains(e.get_name()));
+
+	t1.erase(a.get_name());
+	EXPECT_FALSE(t1.contains(a.get_name()));
+	EXPECT_TRUE(t1.contains(b.get_name()));
+	EXPECT_FALSE(t1.contains(c.get_name()));
+	EXPECT_FALSE(t1.contains(d.get_name()));
+
+	t2.erase(a.get_name());
+	t2.erase(e.get_name());
+
+	EXPECT_EQ(t1.size(), 2);
+	EXPECT_EQ(t2.size(), 0);
+}
+
+
+TEST(HashTableTest, Clear)
+{
+	HashTable t1, t2, t3;
+
+	Student a("Danil");
+	Student b("Diman"); // Collision with a
+	Student c("Jerry");
+	Student d("Lenny");
+	Student e("Jeffy"); // Collision with c
+
+	t1.insert(a.get_name(), a);
+	t1.insert(b.get_name(), b);
+	t1.insert(c.get_name(), c);
+	t1.insert(e.get_name(), e);
+
+	t2.insert(a.get_name(), a);
+	t2.insert(e.get_name(), e);
+
+	t1.clear();
+	EXPECT_FALSE(t1.contains(a.get_name()));
+	EXPECT_FALSE(t1.contains(b.get_name()));
+	EXPECT_FALSE(t1.contains(c.get_name()));
+	EXPECT_FALSE(t1.contains(d.get_name()));
+	EXPECT_FALSE(t1.contains(e.get_name()));
+
+	t2.clear();
+	EXPECT_FALSE(t2.contains(a.get_name()));
+	EXPECT_FALSE(t2.contains(b.get_name()));
+	EXPECT_FALSE(t2.contains(d.get_name()));
+	EXPECT_FALSE(t2.contains(e.get_name()));
+
+	EXPECT_TRUE(t3.empty());
+	t3.clear();
+	
+	EXPECT_EQ(t1.size(), 0);
+	EXPECT_EQ(t2.size(), 0);
+	EXPECT_EQ(t3.size(), 0);
+}
+
+
+TEST(HashTableTest, Swap)
+{
+	HashTable t1, t2, t3, t4;
+
+	Student a("Danil");
+	Student b("Diman"); // Collision with a
+	Student c("Jerry");
+	Student d("Lenny");
+	Student e("Jeffy"); // Collision with c
+
+	t1.insert(a.get_name(), a);
+	t1.insert(b.get_name(), b);
+	t1.insert(c.get_name(), c);
+	t1.insert(e.get_name(), e);
+
+	t2.insert(a.get_name(), a);
+	t2.insert(e.get_name(), e);
+
+	t1.swap(t2);
+	EXPECT_EQ(t1.size(), 2);
+	EXPECT_EQ(t2.size(), 4);
+
+	t3.swap(t4);
+	EXPECT_TRUE(t3.empty());
+	EXPECT_TRUE(t4.empty());
+
+	t1.swap(t4);
+	EXPECT_TRUE(t1.empty());
+	EXPECT_EQ(t4.size(), 2);
+
+	t2.swap(t3);
+	EXPECT_TRUE(t2.empty());
+	EXPECT_EQ(t3.size(), 4);
+
+	EXPECT_TRUE(t3.contains(a.get_name()));
+	EXPECT_TRUE(t3.contains(b.get_name()));
+	EXPECT_TRUE(t3.contains(c.get_name()));
+	EXPECT_FALSE(t3.contains(d.get_name()));
+
+	EXPECT_TRUE(t4.contains(a.get_name()));
+	EXPECT_FALSE(t4.contains(b.get_name()));
+	EXPECT_FALSE(t4.contains(d.get_name()));
+	EXPECT_TRUE(t4.contains(e.get_name()));
+}
+
+
+TEST(HashTableTest, OperatorBrackets)
+{
+	HashTable t1, t2;
+
+	Student a("Danil");
+	Student b("Diman"); // Collision with a
+	Student c("Jerry");
+	Student d("Lenny");
+	Student e("Jeffy"); // Collision with c
+
+	t1.insert(a.get_name(), a);
+	t1.insert(b.get_name(), b);
+	t1.insert(c.get_name(), c);
+	t1.insert(e.get_name(), e);
+
+	t2.insert(a.get_name(), a);
+	t2.insert(e.get_name(), e);
 }
 
 

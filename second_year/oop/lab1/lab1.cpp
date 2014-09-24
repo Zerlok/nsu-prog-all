@@ -33,11 +33,7 @@ Student::Student(const String& _name, const unsigned int _age,
 }
 
 
-Student::~Student()
-{
-	// std::cout << "Destroying the Student... ";
-	// std::cout << "done" << std::endl;
-}
+Student::~Student() {}
 
 
 Student::Student(const Student& s)
@@ -104,11 +100,11 @@ Item::~Item()
 	// std::cout << "Destoying the Item... ";
 
 	/* How about that? */
-	// delete value; 
+	// if (value) delete value;
 	// std::cout << "... ";
 
 	/* When next not null, raises "double free corruption" */
-	// delete next;
+	// if (next) delete next;
 
 	// std::cout << "done" << std::endl;
 }
@@ -249,9 +245,9 @@ HashTable::HashTable(int _mem)
 
 HashTable::~HashTable()
 {
-	std::cout << "Destroying the HashTable... ";
+	// std::cout << "Destroying the HashTable... ";
 	delete[] data;
-	std::cout << "done" << std::endl;
+	// std::cout << "done" << std::endl;
 }
 
 
@@ -455,11 +451,18 @@ void HashTable::clear()
 
 bool HashTable::erase(const String& key)
 {
-	Item *last_item = data[get_index(key)], *curr_item = last_item;
+	int i= get_index(key);
+	Item *last_item = data[i], *curr_item = last_item;
 
-	if (curr_item == NULL)
+	if (last_item == NULL)
 	{
 		return false;
+	}
+
+	if (last_item->get_key() == key)
+	{
+		data[i] = last_item->get_next();
+		return true;
 	}
 
 	while (curr_item != NULL)
@@ -467,7 +470,7 @@ bool HashTable::erase(const String& key)
 		if (curr_item->get_key() == key)
 		{
 			last_item->set_next(curr_item->get_next());
-			delete curr_item;
+			// delete curr_item;
 
 			return true;
 		}
@@ -493,9 +496,19 @@ bool HashTable::insert(const String& key, const Student& value)
 
 	while (curr_item->get_next() != NULL)
 	{
+		if (curr_item->get_key() == key)
+		{
+			return false;
+		}
+
 		curr_item = curr_item->get_next();
 	}
 
+	if (curr_item->get_key() == key)
+	{
+		return false;
+	}
+	
 	curr_item->set_next(new Item(key, value));
 
 	return true;
