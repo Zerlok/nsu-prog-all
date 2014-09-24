@@ -9,16 +9,16 @@
 
 /* ERRORS MESSAGES */
 #define ERR_BAD_ALLOC "Not enough memmory!"
-#define ERR_KEY_NOT_FOUND "The key was not found!"
 
 
 typedef std::string String;
 
 
 /* STUDENT CLASS */
-class Student
+class Value
 {
 	private:
+		/* Fields */
 		String name;
 		unsigned int age;
 		unsigned int course;
@@ -26,11 +26,12 @@ class Student
 		String department;
 
 	public:
-		Student(const String& _name);
-		Student(const String& _name, const unsigned int _age, const unsigned int _course, const float _average_mark, const String& _department);
-		~Student();
+		/* Constructors / Destructor */
+		Value(const String& _name);
+		Value(const String& _name, const unsigned int _age, const unsigned int _course, const float _average_mark, const String& _department);
+		~Value();
 
-		Student(const Student& s);
+		Value(const Value& s);
 
 		/* Get Field */
 		String get_name() const { return name; }
@@ -47,44 +48,45 @@ class Student
 		void set_department(const String& _department) { this->department = _department; }
 
 		/* Operators */
-		Student& operator=(const Student& s);
-		friend bool operator==(const Student& s1, const Student& s2);
-		friend bool operator!=(const Student& a, const Student& b);
+		Value& operator=(const Value& s);
+		friend bool operator==(const Value& s1, const Value& s2);
+		friend bool operator!=(const Value& a, const Value& b);
 
 		/* DEBUG */
 		void show() const
 		{
-			std::cout << "Student: " << name << std::endl
+			std::cout << "Value: " << name << std::endl
 					<< "|  Age  |  Course  |  Mark  |  Dep. |" << std::endl
 					<< "|" << age << "|" << course << "|" << average_mark
 					<< "|" << department << "|" << std::endl << std::endl;
 		}
 };
 
-bool operator==(const Student& a, const Student& b);
-bool operator!=(const Student& a, const Student& b);
+bool operator==(const Value& a, const Value& b);
+bool operator!=(const Value& a, const Value& b);
 
 
 /* ITEM CLASS */
 class Item
 {
 	private:
+		/* Fields */
 		String key; // Key (name)
-		Student *value; // Pointer to Student object ()
+		Value *value; // Pointer to Value object ()
 		Item *next; // Next Item object with same hash (for collisions)
 
 	public:
+		/* Constructors / Desctructor */
 		Item(const String& _key);
-		Item(const Student& _student);
-		Item(const String& _key, const Student& _student);
+		Item(const Value& _value);
+		Item(const String& _key, const Value& _value);
 		~Item();
 
 		Item(const Item& i);
 
 		/* Get Field */
 		String get_key() const { return key; }
-		Student& get_value();
-		const Student& get_value() const;
+		Value& get_value();
 		Item *get_next() const;
 		
 		/* Set Field */
@@ -96,9 +98,9 @@ class Item
 		friend bool operator!=(const Item& a, const Item& b);
 		
 		/* Methods */
-		bool push_back(Item& i); // Sets Next field
+		bool push_back(Item& i); // Adds i item object to next
 		bool push_node(Item& i); // Pushes back i node (except first item!)
-		bool is_empty() const;
+		bool is_empty() const;	// Is empty object
 
 		/* DEBUG */
 		void show() const
@@ -130,23 +132,23 @@ class HashTable
 		int data_end; // Cells of allocated memory
 		
 		/* Methods */
-		int get_index(const String& key) const;
+		int get_index(const String& key) const; // Counts index of item in hashtable
 
 	public:
-		// Constructor / Destructor
+		// Constructors / Destructor
 		HashTable(int _mem=1000);
 		~HashTable();
 
 		HashTable(const HashTable& b);
 
 		/* Get Field */
-		Student& at(const String& key);
-		const Student& at(const String& key) const;
+		Value& at(const String& key);
+		const Value& at(const String& key) const;
 		size_t size() const;
 		bool empty() const;
 
 		/* Operators */
-		Student& operator[](const String& key);
+		Value& operator[](const String& key);
 		HashTable& operator=(const HashTable& b);
 		friend bool operator==(const HashTable& a, const HashTable& b);
 		friend bool operator!=(const HashTable& a, const HashTable& b);
@@ -155,7 +157,7 @@ class HashTable
 		void swap(HashTable& b);
 		void clear();
 		bool erase(const String& key);
-		bool insert(const String& key, const Student& value);
+		bool insert(const String& key, const Value& value);
 		bool contains(const String& key) const;
 };
 
@@ -164,6 +166,6 @@ bool operator!=(const HashTable& a, const HashTable& b);
 
 
 /* ACCESSORY FUNCTIONS IMAGES */
-unsigned int hash(const String& key);
+unsigned int hash(const String& key); // Hash function
 
 #endif

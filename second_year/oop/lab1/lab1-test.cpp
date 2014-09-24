@@ -4,19 +4,19 @@
 
 /* -------------------- STUDENT CLASS TESTS -------------------- */
 
-TEST(StudentTest, Init)
+TEST(Value, Init)
 {
-	Student a("Danil");
-	Student b("Igor", 21, 3, 4.2, "Physics");
+	Value a("Danil");
+	Value b("Igor", 21, 3, 4.2, "Physics");
 	
 	EXPECT_EQ(a.get_age(), 18);
 	EXPECT_NE(a, b);
 }
 
 
-TEST(StudentTest, Copy)
+TEST(Value, Copy)
 {
-	Student a("Danil"), b(a);
+	Value a("Danil"), b(a);
 	
 	b.set_age(19);
 
@@ -25,10 +25,10 @@ TEST(StudentTest, Copy)
 }
 
 
-TEST(StudentTest, OperatorEQ)
+TEST(Value, OperatorEQ)
 {
-	Student a("Danil");
-	Student b("Igor");
+	Value a("Danil");
+	Value b("Igor");
 
 	b = a;
 
@@ -36,10 +36,10 @@ TEST(StudentTest, OperatorEQ)
 }
 
 
-TEST(StudentTest, OperatorEQEQ)
+TEST(Value, OperatorEQEQ)
 {
-	Student a("Danil");
-	Student b(a);
+	Value a("Danil");
+	Value b(a);
 
 	EXPECT_TRUE(a == b);
 }
@@ -47,9 +47,9 @@ TEST(StudentTest, OperatorEQEQ)
 
 /* -------------------- ITEM CLASS TESTS -------------------- */
 
-TEST(ItemTest, Init)
+TEST(Item, Init)
 {
-	Student a("Danil");
+	Value a("Danil");
 	Item item1("Danil", a), item2("Den"), item3(a);
 	
 	// item1.show();
@@ -62,18 +62,18 @@ TEST(ItemTest, Init)
 }
 
 
-TEST(ItemTest, Copy)
+TEST(Item, Copy)
 {
-	Student a("Danil");
+	Value a("Danil");
 	Item item1(a), item2(item1);
 
 	EXPECT_EQ(item1, item2);
 }
 
 
-TEST(ItemTest, OperatorEQ)
+TEST(Item, OperatorEQ)
 {
-	Student a("Den"), b("Jeff");
+	Value a("Den"), b("Jeff");
 	Item item1("Danil", a), item2("J", b);
 
 	item2 = item1;
@@ -82,9 +82,9 @@ TEST(ItemTest, OperatorEQ)
 }
 
 
-TEST(ItemTest, OperatorEQEQ)
+TEST(Item, OperatorEQEQ)
 {
-	Student a("Danil"), b("Denis");
+	Value a("Danil"), b("Denis");
 	Item item1("Danil", a), item2("Danil2", a), item3(b), item4(b);
 
 	EXPECT_FALSE(item1 == item2);
@@ -93,9 +93,9 @@ TEST(ItemTest, OperatorEQEQ)
 }
 
 
-TEST(ItemTest, Pushback)
+TEST(Item, Pushback)
 {
-	Student a("Danil"), b("Bob"), c("Monica");
+	Value a("Danil"), b("Bob"), c("Monica");
 	Item item1(a), item2(b), item3(c);
 
 	// std::cout << "Inited...";
@@ -114,7 +114,7 @@ TEST(ItemTest, Pushback)
 }
 
 
-TEST(ItemTest, Empty)
+TEST(Item, Empty)
 {
 	Item item1("empty");
 
@@ -126,20 +126,20 @@ TEST(ItemTest, Empty)
 
 /* -------------------- HASHTABLE CLASS TESTS -------------------- */
 
-TEST(HashTableTest, Init)
+TEST(HashTable, Init)
 {
 	HashTable a;
 }
 
 
 /* For Hash : key.size() * key[0] */
-TEST(HashTableTest, Collision)
+TEST(HashTable, Collision)
 {
 	HashTable table(10);
 
-	Student a("Danil");
-	Student b("Diman"); // Collision!
-	Student c("Ivan");
+	Value a("Danil");
+	Value b("Diman"); // Collision!
+	Value c("Ivan");
 
 	a.set_age(19);
 
@@ -152,14 +152,14 @@ TEST(HashTableTest, Collision)
 }
 
 
-TEST(HashTableTest, CreateFromParent)
+TEST(HashTable, CreateFromParent)
 {
 	HashTable t1;
 
-	Student a("Danil");
-	Student b("Diman"); // Collision
-	Student c("Jerry");
-	Student d("Lenny");
+	Value a("Danil");
+	Value b("Diman"); // Collision
+	Value c("Jerry");
+	Value d("Lenny");
 
 	t1.insert(a.get_name(), a);
 	t1.insert(b.get_name(), b);
@@ -178,14 +178,14 @@ TEST(HashTableTest, CreateFromParent)
 }
 
 
-TEST(HashTableTest, SizeCounting)
+TEST(HashTable, SizeCounting)
 {
 	HashTable t1;
 
-	Student a("Danil");
-	Student b("Diman"); // Collision
-	Student c("Jerry");
-	Student d("Lenny");
+	Value a("Danil");
+	Value b("Diman"); // Collision
+	Value c("Jerry");
+	Value d("Lenny");
 
 	t1.insert(a.get_name(), a);
 	t1.insert(b.get_name(), b);
@@ -200,14 +200,14 @@ TEST(HashTableTest, SizeCounting)
 }
 
 
-TEST(HashTableTest, OperatorEQ)
+TEST(HashTable, OperatorEQ)
 {
 	HashTable t1, t2;
 
-	Student a("Danil");
-	Student b("Diman"); // Collision
-	Student c("Jerry");
-	Student d("Lenny");
+	Value a("Danil");
+	Value b("Diman"); // Collision
+	Value c("Jerry");
+	Value d("Lenny");
 
 	t1.insert(a.get_name(), a);
 	t1.insert(b.get_name(), b);
@@ -219,14 +219,14 @@ TEST(HashTableTest, OperatorEQ)
 }
 
 
-TEST(HashTableTest, OperatorEQEQ)
+TEST(HashTable, OperatorEQEQ)
 {
 	HashTable t1, t2;
 
-	Student a("Danil");
-	Student b("Diman"); // Collision
-	Student c("Jerry");
-	Student d("Lenny");
+	Value a("Danil");
+	Value b("Diman"); // Collision
+	Value c("Jerry");
+	Value d("Lenny");
 
 	t1.insert(a.get_name(), a);
 	t1.insert(b.get_name(), b);
@@ -248,7 +248,7 @@ TEST(HashTableTest, OperatorEQEQ)
 }
 
 
-TEST(HashTableTest, Empty)
+TEST(HashTable, Empty)
 {
 	HashTable t1;
 
@@ -257,15 +257,15 @@ TEST(HashTableTest, Empty)
 }
 
 
-TEST(HashTableTest, Insert)
+TEST(HashTable, Insert)
 {
 	HashTable t1, t2, t3;
 
-	Student a("Danil");
-	Student b("Diman"); // Collision
-	Student c("Jerry");
-	Student d("Lenny");
-	Student e("Jeffy"); // Collision with c
+	Value a("Danil");
+	Value b("Diman"); // Collision
+	Value c("Jerry");
+	Value d("Lenny");
+	Value e("Jeffy"); // Collision with c
 
 	t1.insert(a.get_name(), a);
 	t1.insert(a.get_name(), a); // Again
@@ -291,15 +291,15 @@ TEST(HashTableTest, Insert)
 }
 
 
-TEST(HashTableTest, Erase)
+TEST(HashTable, Erase)
 {
 	HashTable t1, t2;
 
-	Student a("Danil");
-	Student b("Diman"); // Collision with a
-	Student c("Jerry");
-	Student d("Lenny");
-	Student e("Jeffy"); // Collision with c
+	Value a("Danil");
+	Value b("Diman"); // Collision with a
+	Value c("Jerry");
+	Value d("Lenny");
+	Value e("Jeffy"); // Collision with c
 
 	t1.insert(a.get_name(), a);
 	t1.insert(b.get_name(), b);
@@ -335,15 +335,15 @@ TEST(HashTableTest, Erase)
 }
 
 
-TEST(HashTableTest, Clear)
+TEST(HashTable, Clear)
 {
 	HashTable t1, t2, t3;
 
-	Student a("Danil");
-	Student b("Diman"); // Collision with a
-	Student c("Jerry");
-	Student d("Lenny");
-	Student e("Jeffy"); // Collision with c
+	Value a("Danil");
+	Value b("Diman"); // Collision with a
+	Value c("Jerry");
+	Value d("Lenny");
+	Value e("Jeffy"); // Collision with c
 
 	t1.insert(a.get_name(), a);
 	t1.insert(b.get_name(), b);
@@ -375,15 +375,15 @@ TEST(HashTableTest, Clear)
 }
 
 
-TEST(HashTableTest, Swap)
+TEST(HashTable, Swap)
 {
 	HashTable t1, t2, t3, t4;
 
-	Student a("Danil");
-	Student b("Diman"); // Collision with a
-	Student c("Jerry");
-	Student d("Lenny");
-	Student e("Jeffy"); // Collision with c
+	Value a("Danil");
+	Value b("Diman"); // Collision with a
+	Value c("Jerry");
+	Value d("Lenny");
+	Value e("Jeffy"); // Collision with c
 
 	t1.insert(a.get_name(), a);
 	t1.insert(b.get_name(), b);
@@ -421,15 +421,15 @@ TEST(HashTableTest, Swap)
 }
 
 
-TEST(HashTableTest, OperatorBrackets)
+TEST(HashTable, OperatorBrackets)
 {
 	HashTable t1, t2;
 
-	Student a("Danil");
-	Student b("Diman"); // Collision with a
-	Student c("Jerry");
-	Student d("Lenny");
-	Student e("Jeffy"); // Collision with c
+	Value a("Danil");
+	Value b("Diman"); // Collision with a
+	Value c("Jerry");
+	Value d("Lenny");
+	Value e("Jeffy"); // Collision with c
 
 	t1.insert(a.get_name(), a);
 	t1.insert(b.get_name(), b);
@@ -449,15 +449,15 @@ TEST(HashTableTest, OperatorBrackets)
 }
 
 
-TEST(HashTableTest, At)
+TEST(HashTable, At)
 {
 	HashTable t1;
 
-	Student a("Danil");
-	Student b("Diman"); // Collision with a
-	Student c("Jerry");
-	Student d("Lenny");
-	Student e("Jeffy"); // Collision with c
+	Value a("Danil");
+	Value b("Diman"); // Collision with a
+	Value c("Jerry");
+	Value d("Lenny");
+	Value e("Jeffy"); // Collision with c
 
 	t1.insert(a.get_name(), a);
 	t1[b.get_name()];

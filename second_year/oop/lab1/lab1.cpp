@@ -3,6 +3,7 @@
 
 /* -------------- ACCESSORY FUNCTIONS -------------- */
 
+/* DO NOT CHANGE IT! (It's necessaty for collisions test) */
 unsigned int hash(const String& key)
 {
 	return key.size() * key[0];
@@ -11,7 +12,7 @@ unsigned int hash(const String& key)
 
 /* -------------- STUDENT METHODS -------------- */
 
-Student::Student(const String& _name)
+Value::Value(const String& _name)
 {
 	this->name = _name;
 	this->age = 18;
@@ -21,7 +22,7 @@ Student::Student(const String& _name)
 }
 
 
-Student::Student(const String& _name, const unsigned int _age,
+Value::Value(const String& _name, const unsigned int _age,
 	const unsigned int _course, const float _average_mark,
 	const String& _department)
 {
@@ -33,10 +34,10 @@ Student::Student(const String& _name, const unsigned int _age,
 }
 
 
-Student::~Student() {}
+Value::~Value() {}
 
 
-Student::Student(const Student& s)
+Value::Value(const Value& s)
 {
 	this->name = s.name;
 	this->age = s.age;
@@ -46,7 +47,7 @@ Student::Student(const Student& s)
 }
 
 
-Student& Student::operator=(const Student& s)
+Value& Value::operator=(const Value& s)
 {
 	this->name = s.name;
 	this->age = s.age;
@@ -56,14 +57,14 @@ Student& Student::operator=(const Student& s)
 }
 
 
-bool operator==(const Student& a, const Student& b)
+bool operator==(const Value& a, const Value& b)
 {
 	return (a.name == b.name && a.age == b.age && a.course == b.course &&
 		a.average_mark == b.average_mark && a.department == b.department);
 }
 
 
-bool operator!=(const Student& a, const Student& b)
+bool operator!=(const Value& a, const Value& b)
 {
 	return !(a == b);
 }
@@ -79,32 +80,32 @@ Item::Item(const String& _key)
 }
 
 
-Item::Item(const Student& _student)
+Item::Item(const Value& _value)
 {
-	this->key = _student.get_name();
-	this->value = const_cast<Student*>(&_student);
+	this->key = _value.get_name();
+	this->value = const_cast<Value*>(&_value);
 	this->next = NULL;
 }
 
 
-Item::Item(const String& _key, const Student& _student)
+Item::Item(const String& _key, const Value& _value)
 {
 	this->key = _key;
-	this->value = const_cast<Student*>(&_student);
+	this->value = const_cast<Value*>(&_value);
 	this->next = NULL;
 }
 
 
+// TODO: Ask about delete
 Item::~Item()
 {
 	// std::cout << "Destoying the Item... ";
 
-	/* How about that? */
 	// if (value) delete value;
 	// std::cout << "... ";
 
-	/* When next not null, raises "double free corruption" */
 	// if (next) delete next;
+	/* When next not null, raises "double free corruption" */
 
 	// std::cout << "done" << std::endl;
 }
@@ -113,23 +114,12 @@ Item::~Item()
 Item::Item(const Item& i)
 {
 	this->key = i.key;
-	this->value = new Student(*(i.value));
+	this->value = new Value(*(i.value));
 	this->next = i.next;
 }
 
 
-Student& Item::get_value()
-{
-	if (value == NULL)
-	{
-		throw std::exception();
-	}
-
-	return *(value);
-}
-
-
-const Student& Item::get_value() const
+Value& Item::get_value()
 {
 	if (value == NULL)
 	{
@@ -161,26 +151,12 @@ Item& Item::operator=(const Item& i)
 
 bool operator==(const Item& a, const Item& b)
 {
-	// if (a.key == b.key)
-	// {
-	// 	if (a.is_empty() && b.is_empty())
-	// 	{
-	// 		return true;
-	// 	}
-	// 	else
-	// 	{
-	// 		return (a.get_value() == b.get_value());
-	// 	}
-	// }
-
-	// return false;
 	return (a.key == b.key);
 }
 
 
 bool operator!=(const Item& a, const Item& b)
 {
-	// return !(a == b);
 	return (a.key != b.key);
 }
 
@@ -279,7 +255,7 @@ HashTable::HashTable(const HashTable& b)
 }
 
 
-Student& HashTable::at(const String& key)
+Value& HashTable::at(const String& key)
 {
 	Item *curr_item = data[get_index(key)];
 
@@ -297,7 +273,7 @@ Student& HashTable::at(const String& key)
 }
 
 
-const Student& HashTable::at(const String& key) const
+const Value& HashTable::at(const String& key) const
 {
 	Item *curr_item = data[get_index(key)];
 
@@ -346,9 +322,9 @@ bool HashTable::empty() const
 }
 
 
-Student& HashTable::operator[](const String& key)
+Value& HashTable::operator[](const String& key)
 {
-	Student *st = new Student(key);
+	Value *st = new Value(key);
 	
 	try
 	{
@@ -483,7 +459,7 @@ bool HashTable::erase(const String& key)
 }
 
 
-bool HashTable::insert(const String& key, const Student& value)
+bool HashTable::insert(const String& key, const Value& value)
 {
 	int i = get_index(key);
 	Item *curr_item = data[i];
@@ -508,7 +484,7 @@ bool HashTable::insert(const String& key, const Student& value)
 	{
 		return false;
 	}
-	
+
 	curr_item->set_next(new Item(key, value));
 
 	return true;
