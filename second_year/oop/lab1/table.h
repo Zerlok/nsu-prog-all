@@ -9,6 +9,7 @@
 
 /* ERRORS MESSAGES */
 #define ERR_BAD_ALLOC "Not enough memmory!"
+#define ERR_KEY_NOT_FOUND "The key was not found!"
 
 
 typedef std::string String;
@@ -17,49 +18,55 @@ typedef std::string String;
 /* STUDENT CLASS */
 class Value
 {
-	private:
-		/* Fields */
-		String name;
-		unsigned int age;
-		unsigned int course;
-		float average_mark;			
-		String department;
-
 	public:
 		/* Constructors / Destructor */
-		Value(const String& _name);
-		Value(const String& _name, const unsigned int _age, const unsigned int _course, const float _average_mark, const String& _department);
+		Value(
+			const String& name, // Main field (Should be defined always!).
+			const unsigned int age=18,
+			const unsigned int course=1,
+			const float average_mark=4.0,
+			const String& department="IT"
+		);
+
 		~Value();
 
-		Value(const Value& s);
+		Value(const Value& s); // Copy student.
 
 		/* Get Field */
-		String get_name() const { return name; }
-		unsigned int get_age() const { return age; }
-		unsigned int get_course() const { return course; }
-		float get_average_mark() const { return average_mark; }
-		String get_department() const { return department; }
+		String get_name() const { return _name; }
+		unsigned int get_age() const { return _age; }
+		unsigned int get_course() const { return _course; }
+		float get_average_mark() const { return _average_mark; }
+		String get_department() const { return _department; }
 
 		/* Set Field */
-		void set_name(const String& _name) { this->name = _name; }
-		void set_age(const unsigned int _age) { this->age = _age; }
-		void set_course(const unsigned int _course) { this->course = _course; }
-		void set_average_mark(const float _average_mark) { this->average_mark = _average_mark; }
-		void set_department(const String& _department) { this->department = _department; }
+		void set_name(const String& name) { _name = name; }
+		void set_age(const unsigned int age) { _age = age; }
+		void set_course(const unsigned int course) { _course = course; }
+		void set_average_mark(const float average_mark) { _average_mark = average_mark; }
+		void set_department(const String& department) { _department = department; }
 
 		/* Operators */
-		Value& operator=(const Value& s);
-		friend bool operator==(const Value& s1, const Value& s2);
-		friend bool operator!=(const Value& a, const Value& b);
+		Value& operator=(const Value& value);
+		friend bool operator==(const Value& value1, const Value& value2);
+		friend bool operator!=(const Value& value1, const Value& value2);
 
 		/* DEBUG */
-		void show() const
+		void show() const // Prints student fields to console.
 		{
-			std::cout << "Value: " << name << std::endl
+			std::cout << "Value: " << _name << std::endl
 					<< "|  Age  |  Course  |  Mark  |  Dep. |" << std::endl
-					<< "|" << age << "|" << course << "|" << average_mark
-					<< "|" << department << "|" << std::endl << std::endl;
+					<< "|" << _age << "|" << _course << "|" << _average_mark
+					<< "|" << _department << "|" << std::endl << std::endl;
 		}
+
+	private:
+		/* Fields */
+		String _name;
+		unsigned int _age;
+		unsigned int _course;
+		float _average_mark;			
+		String _department;
 };
 
 bool operator==(const Value& a, const Value& b);
@@ -69,44 +76,38 @@ bool operator!=(const Value& a, const Value& b);
 /* ITEM CLASS */
 class Item
 {
-	private:
-		/* Fields */
-		String key; // Key (name)
-		Value *value; // Pointer to Value object ()
-		Item *next; // Next Item object with same hash (for collisions)
-
 	public:
 		/* Constructors / Desctructor */
-		Item(const String& _key);
-		Item(const Value& _value);
-		Item(const String& _key, const Value& _value);
+		Item(const String& key);
+		Item(const Value& value);
+		Item(const String& key, const Value& value);
 		~Item();
 
 		Item(const Item& i);
 
 		/* Get Field */
-		String get_key() const { return key; }
+		String get_key() const { return _key; }
 		Value& get_value();
 		Item *get_next() const;
 		
 		/* Set Field */
-		void set_next(Item *i);
+		void set_next(Item *item);
 
 		/* Operators */
-		Item& operator=(const Item& i);
-		friend bool operator==(const Item& a, const Item& b);
-		friend bool operator!=(const Item& a, const Item& b);
+		Item& operator=(const Item& item);
+		friend bool operator==(const Item& value1, const Item& value2);
+		friend bool operator!=(const Item& value1, const Item& value2);
 		
 		/* Methods */
-		bool push_back(Item& i); // Adds i item object to next
-		bool push_node(Item& i); // Pushes back i node (except first item!)
-		bool is_empty() const;	// Is empty object
+		bool push_back(Item& item); // Pushes back an Item object.
+		bool push_chain(Item& item); // Links a chain of Item objects (except first item!).
+		bool is_empty() const;	// Is an empty Item object.
 
 		/* DEBUG */
-		void show() const
+		void show() const // Prints Item fields to console.
 		{
-			std::cout << "Item: " << key << std::endl;
-			std::cout << "next : " << next << std::endl;
+			std::cout << "Item: " << _key << std::endl;
+			std::cout << "next : " << _next << std::endl;
 			std::cout << "contains: ";
 			if (value != NULL)
 			{	
@@ -117,6 +118,12 @@ class Item
 				std::cout << "null" << std::endl;
 			}
 		}
+	
+	private:
+		/* Fields */
+		String _key; // Key (the Student name)
+		Value *_value; // Pointer to Value object.
+		Item *_next; // Next Item object with same hash (for collisions)
 };
 
 bool operator==(const Item& a, const Item& b);
@@ -126,14 +133,6 @@ bool operator!=(const Item& a, const Item& b);
 /* HASHTABLE CLASS */
 class HashTable
 {
-	private:
-		/* Fields */
-		Item **data; // List of pointers to Item objects
-		int data_end; // Cells of allocated memory
-		
-		/* Methods */
-		int get_index(const String& key) const; // Counts index of item in hashtable
-
 	public:
 		// Constructors / Destructor
 		HashTable(int _mem=1000);
@@ -159,6 +158,14 @@ class HashTable
 		bool erase(const String& key);
 		bool insert(const String& key, const Value& value);
 		bool contains(const String& key) const;
+
+	private:
+		/* Fields */
+		Item **data; // List of pointers to Item objects
+		int data_end; // Cells of allocated memory
+		
+		/* Methods */
+		int get_index(const String& key) const; // Counts index of item in hashtable
 };
 
 bool operator==(const HashTable& a, const HashTable& b);

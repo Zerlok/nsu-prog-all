@@ -3,7 +3,7 @@
 
 /* -------------- ACCESSORY FUNCTIONS -------------- */
 
-/* DO NOT CHANGE IT! (It's necessaty for collisions test) */
+/* DO NOT CHANGE IT! (while DEBUG it's necessaty for collisions test) */
 unsigned int hash(const String& key)
 {
 	return key.size() * key[0];
@@ -11,16 +11,6 @@ unsigned int hash(const String& key)
 
 
 /* -------------- STUDENT METHODS -------------- */
-
-Value::Value(const String& _name)
-{
-	this->name = _name;
-	this->age = 18;
-	this->course = 1;
-	this->average_mark = 4.0;
-	this->department = "Information Technology";
-}
-
 
 Value::Value(const String& _name, const unsigned int _age,
 	const unsigned int _course, const float _average_mark,
@@ -266,7 +256,7 @@ Value& HashTable::at(const String& key)
 
 	if (curr_item == NULL)
 	{
-		throw std::exception();
+		throw std::invalid_argument(ERR_KEY_NOT_FOUND);
 	}
 
 	return curr_item->get_value();
