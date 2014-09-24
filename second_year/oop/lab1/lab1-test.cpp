@@ -438,6 +438,14 @@ TEST(HashTableTest, OperatorBrackets)
 
 	t2.insert(a.get_name(), a);
 	t2.insert(e.get_name(), e);
+
+	EXPECT_EQ(t1[a.get_name()], a);
+	EXPECT_EQ(t1[b.get_name()], b);
+	EXPECT_EQ(t1.size(), 4);
+	
+	EXPECT_EQ(t2[d.get_name()], d);
+	EXPECT_EQ(t2.size(), 3);
+	EXPECT_TRUE(t2.contains(d.get_name()));
 }
 
 
