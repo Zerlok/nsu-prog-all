@@ -27,6 +27,7 @@ Value::Value(const String& _name, const unsigned int _age,
 Value::~Value() {}
 
 
+/* Creates a new Value object from */
 Value::Value(const Value& s)
 {
 	this->name = s.name;

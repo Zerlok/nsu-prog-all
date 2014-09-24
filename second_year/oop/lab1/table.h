@@ -8,6 +8,7 @@
 
 
 /* ERRORS MESSAGES */
+
 #define ERR_BAD_ALLOC "Not enough memmory!"
 #define ERR_KEY_NOT_FOUND "The key was not found!"
 
@@ -69,8 +70,8 @@ class Value
 		String _department;
 };
 
-bool operator==(const Value& a, const Value& b);
-bool operator!=(const Value& a, const Value& b);
+bool operator==(const Value& value1, const Value& value2);
+bool operator!=(const Value& value1, const Value& value2);
 
 
 /* ITEM CLASS */
@@ -126,8 +127,8 @@ class Item
 		Item *_next; // Next Item object with same hash (for collisions)
 };
 
-bool operator==(const Item& a, const Item& b);
-bool operator!=(const Item& a, const Item& b);
+bool operator==(const Item& value1, const Item& value2);
+bool operator!=(const Item& value1, const Item& value2);
 
 
 /* HASHTABLE CLASS */
@@ -138,7 +139,7 @@ class HashTable
 		HashTable(int _mem=1000);
 		~HashTable();
 
-		HashTable(const HashTable& b);
+		HashTable(const HashTable& hashtable);
 
 		/* Get Field */
 		Value& at(const String& key);
@@ -148,9 +149,9 @@ class HashTable
 
 		/* Operators */
 		Value& operator[](const String& key);
-		HashTable& operator=(const HashTable& b);
-		friend bool operator==(const HashTable& a, const HashTable& b);
-		friend bool operator!=(const HashTable& a, const HashTable& b);
+		HashTable& operator=(const HashTable& hashtable);
+		friend bool operator==(const HashTable& value1, const HashTable& value2);
+		friend bool operator!=(const HashTable& value1, const HashTable& value2);
 
 		/* Methods */
 		void swap(HashTable& b);
@@ -161,15 +162,15 @@ class HashTable
 
 	private:
 		/* Fields */
-		Item **data; // List of pointers to Item objects
-		int data_end; // Cells of allocated memory
+		Item **_data; // List of pointers to Item objects.
+		int _data_end; // Number of cells.
 		
 		/* Methods */
 		int get_index(const String& key) const; // Counts index of item in hashtable
 };
 
-bool operator==(const HashTable& a, const HashTable& b);
-bool operator!=(const HashTable& a, const HashTable& b);
+bool operator==(const HashTable& value1, const HashTable& value2);
+bool operator!=(const HashTable& value1, const HashTable& value2);
 
 
 /* ACCESSORY FUNCTIONS IMAGES */
