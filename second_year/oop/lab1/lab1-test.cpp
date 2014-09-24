@@ -449,6 +449,26 @@ TEST(HashTableTest, OperatorBrackets)
 }
 
 
+TEST(HashTableTest, At)
+{
+	HashTable t1;
+
+	Student a("Danil");
+	Student b("Diman"); // Collision with a
+	Student c("Jerry");
+	Student d("Lenny");
+	Student e("Jeffy"); // Collision with c
+
+	t1.insert(a.get_name(), a);
+	t1[b.get_name()];
+	t1[c.get_name()];
+
+	EXPECT_EQ(t1.at(a.get_name()), a);
+	EXPECT_EQ(t1.at(b.get_name()), b);
+	EXPECT_THROW(t1.at(d.get_name()), std::exception);
+}
+
+
 /* -------------------- MAIN -------------------- */
 
 int main(int argc, char **argv)
