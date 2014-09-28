@@ -1,22 +1,26 @@
 #ifndef __HASHTABLE_H__
 #define __HASHTABLE_H__
 
+
 #include <iostream>
-#include <cstring>
-#include <cstdlib>
 #include <stdexcept>
-
-
-/* ERRORS MESSAGES */
-
-#define ERR_BAD_ALLOC "Not enough memmory!"
-#define ERR_KEY_NOT_FOUND "The key was not found!"
+#include <cstring>
+// #include <cstdlib>
 
 
 typedef std::string String;
 
 
-/* STUDENT CLASS */
+/* DEBUG */
+const bool DEBUG = true;
+
+
+/* ERRORS MESSAGES */
+static const char *ERR_BAD_ALLOC = "Not enough memmory!";
+static const char *ERR_KEY_NOT_FOUND = "The key was not found!";
+
+
+/* VALUE CLASS (a student used as value) */
 class Value
 {
 	public:
@@ -33,24 +37,14 @@ class Value
 
 		Value(const Value& s); // Copy student.
 
-		/* Get Field */
-		String get_name() const { return _name; }
-		unsigned int get_age() const { return _age; }
-		unsigned int get_course() const { return _course; }
-		float get_average_mark() const { return _average_mark; }
-		String get_department() const { return _department; }
-
-		/* Set Field */
-		void set_name(const String& name) { _name = name; }
-		void set_age(const unsigned int age) { _age = age; }
-		void set_course(const unsigned int course) { _course = course; }
-		void set_average_mark(const float average_mark) { _average_mark = average_mark; }
-		void set_department(const String& department) { _department = department; }
-
 		/* Operators */
 		Value& operator=(const Value& value);
 		friend bool operator==(const Value& value1, const Value& value2);
 		friend bool operator!=(const Value& value1, const Value& value2);
+
+		/* Methods */
+		String get_name() const { return _name; }
+		String as_string() const;
 
 		/* DEBUG */
 		void show() const // Prints student fields to console.
@@ -63,11 +57,11 @@ class Value
 
 	private:
 		/* Fields */
-		String _name;
-		unsigned int _age;
-		unsigned int _course;
-		float _average_mark;			
-		String _department;
+		String _name; // Student name.
+		unsigned int _age; // Student age.
+		unsigned int _course; // Student course at university.
+		float _average_mark; // Student average mark at university.
+		String _department; // Student department at university.
 };
 
 bool operator==(const Value& value1, const Value& value2);
@@ -110,9 +104,9 @@ class Item
 			std::cout << "Item: " << _key << std::endl;
 			std::cout << "next : " << _next << std::endl;
 			std::cout << "contains: ";
-			if (value != NULL)
+			if (_value != NULL)
 			{	
-				value->show();
+				_value->show();
 			}
 			else
 			{
@@ -136,7 +130,7 @@ class HashTable
 {
 	public:
 		// Constructors / Destructor
-		HashTable(int _mem=1000);
+		HashTable(int mem=1000);
 		~HashTable();
 
 		HashTable(const HashTable& hashtable);
@@ -144,8 +138,8 @@ class HashTable
 		/* Get Field */
 		Value& at(const String& key);
 		const Value& at(const String& key) const;
-		size_t size() const;
 		bool empty() const;
+		size_t size() const;
 
 		/* Operators */
 		Value& operator[](const String& key);
@@ -154,15 +148,15 @@ class HashTable
 		friend bool operator!=(const HashTable& value1, const HashTable& value2);
 
 		/* Methods */
-		void swap(HashTable& b);
 		void clear();
+		bool contains(const String& key) const;
 		bool erase(const String& key);
 		bool insert(const String& key, const Value& value);
-		bool contains(const String& key) const;
+		void swap(HashTable& b);
 
 	private:
 		/* Fields */
-		Item **_data; // List of pointers to Item objects.
+		Item **_data; // Array of pointers to Item object.
 		int _data_end; // Number of cells.
 		
 		/* Methods */
@@ -174,6 +168,7 @@ bool operator!=(const HashTable& value1, const HashTable& value2);
 
 
 /* ACCESSORY FUNCTIONS IMAGES */
-unsigned int hash(const String& key); // Hash function
+unsigned int hash(const String& key); // Hash function (for collision tests).
+int good_hash(const String& key); // Good hash function.
 
 #endif

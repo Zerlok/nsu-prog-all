@@ -1,15 +1,16 @@
 #include "table.h"
 #include <gtest/gtest.h>
+// #include <iostream>
 
 
 /* -------------------- STUDENT CLASS TESTS -------------------- */
 
 TEST(Value, Init)
 {
-	Value a("Danil");
+	Value a("Danil", 19, 2);
 	Value b("Igor", 21, 3, 4.2, "Physics");
 	
-	EXPECT_EQ(a.get_age(), 18);
+	// EXPECT_EQ(a.get_age(), "Danil:(19,2,4.0,IT)");
 	EXPECT_NE(a, b);
 }
 
@@ -18,10 +19,10 @@ TEST(Value, Copy)
 {
 	Value a("Danil"), b(a);
 	
-	b.set_age(19);
+	// b.set_age(19);
 
 	EXPECT_EQ(a.get_name(), b.get_name());
-	EXPECT_NE(a.get_age(), b.get_age());
+	// EXPECT_NE(a.get_age(), b.get_age());
 }
 
 
@@ -138,10 +139,8 @@ TEST(HashTable, Collision)
 	HashTable table(10);
 
 	Value a("Danil");
-	Value b("Diman"); // Collision!
+	Value b("Diman"); // Collision with a
 	Value c("Ivan");
-
-	a.set_age(19);
 
 	table.insert(a.get_name(), a);
 	table.insert(b.get_name(), b);
@@ -157,7 +156,7 @@ TEST(HashTable, CreateFromParent)
 	HashTable t1;
 
 	Value a("Danil");
-	Value b("Diman"); // Collision
+	Value b("Diman"); // Collision with a
 	Value c("Jerry");
 	Value d("Lenny");
 
@@ -183,7 +182,7 @@ TEST(HashTable, SizeCounting)
 	HashTable t1;
 
 	Value a("Danil");
-	Value b("Diman"); // Collision
+	Value b("Diman"); // Collision with a
 	Value c("Jerry");
 	Value d("Lenny");
 
@@ -205,7 +204,7 @@ TEST(HashTable, OperatorEQ)
 	HashTable t1, t2;
 
 	Value a("Danil");
-	Value b("Diman"); // Collision
+	Value b("Diman"); // Collision with a
 	Value c("Jerry");
 	Value d("Lenny");
 
@@ -224,7 +223,7 @@ TEST(HashTable, OperatorEQEQ)
 	HashTable t1, t2;
 
 	Value a("Danil");
-	Value b("Diman"); // Collision
+	Value b("Diman"); // Collision with a
 	Value c("Jerry");
 	Value d("Lenny");
 
@@ -262,7 +261,7 @@ TEST(HashTable, Insert)
 	HashTable t1, t2, t3;
 
 	Value a("Danil");
-	Value b("Diman"); // Collision
+	Value b("Diman"); // Collision with a
 	Value c("Jerry");
 	Value d("Lenny");
 	Value e("Jeffy"); // Collision with c
