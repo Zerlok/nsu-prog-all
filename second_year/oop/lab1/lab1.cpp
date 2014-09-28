@@ -54,7 +54,14 @@ Value::Value(const String& name, const unsigned int age,
 }
 
 
-Value::~Value() {}
+Value::~Value()
+{
+	std::cout << "Destoying the Student... ";
+
+	// ...
+
+	std::cout << "done" << std::endl;
+}
 
 
 /*
@@ -169,7 +176,7 @@ Item::Item(const String& key, const Value& value)
 // TODO: use delete!
 Item::~Item()
 {
-	// std::cout << "Destoying the Item... ";
+	std::cout << "Destoying the Item... ";
 
 	// if (value) delete value;
 	// std::cout << "... ";
@@ -177,7 +184,7 @@ Item::~Item()
 	// if (next) delete next;
 	/* When next not null, raises "double free corruption" */
 
-	// std::cout << "done" << std::endl;
+	std::cout << "done" << std::endl;
 }
 
 
@@ -263,7 +270,7 @@ bool operator!=(const Item& value1, const Item& value2)
 */
 bool Item::push_back(Item& item)
 {
-	if (*this != item)
+	if (*this == item)
 	{
 		return false;
 	}

@@ -99,16 +99,16 @@ TEST(Item, Pushback)
 	Value a("Danil"), b("Bob"), c("Monica");
 	Item item1(a), item2(b), item3(c);
 
-	// std::cout << "Inited...";
+	std::cout << "Inited...";
 
-	item1.push_back(item2);
-	item2.push_back(item3);
+	EXPECT_TRUE(item1.push_back(item2));
+	EXPECT_TRUE(item2.push_back(item3));
 
-	// std::cout << "Pushed...";
+	std::cout << "Pushed...";
 
-	// item1.show();
-	// item2.show();
-	// item3.show();
+	item1.show();
+	item2.show();
+	item3.show();
 
 	EXPECT_EQ(*(item1.get_next()), item2);
 	EXPECT_EQ(*(item2.get_next()), item3);
