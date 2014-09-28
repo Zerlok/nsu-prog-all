@@ -57,7 +57,9 @@ Value::Value(const String& name, const unsigned int age,
 
 Value::~Value()
 {
-	if (DEBUG_SUPER) std::cout << "Destoying the Value... done" << std::endl;
+	if (DEBUG_SUPER) std::cout << "Destoying the Value "
+								<< as_string()
+								<< "... done" << std::endl;
 }
 
 
@@ -136,6 +138,7 @@ String Value::as_string() const
 /* -------------- ITEM METHODS -------------- */
 
 /*
+	===Not necessary===
 	Creates an empty Item object with specified key.
 */
 Item::Item(const String& key)
@@ -153,7 +156,7 @@ Item::Item(const String& key)
 Item::Item(const Value& value)
 {
 	_key = value.get_name();
-	_value = const_cast<Value*>(&value); // TODO: remove cons_cast!
+	_value = new Value(value);
 	_next = NULL;
 }
 
@@ -164,21 +167,18 @@ Item::Item(const Value& value)
 Item::Item(const String& key, const Value& value)
 {
 	_key = key;
-	_value = const_cast<Value*>(&value); // TODO: remove const_cast!
+	_value = new Value(value);
 	_next = NULL;
 }
 
 
-// TODO: use delete!
 Item::~Item()
 {
-	if (DEBUG_SUPER) std::cout << "Destoying the Item... ";
+	if (DEBUG_SUPER) std::cout << "Destoying the Item "
+								<< as_string() << "... ";
 
-	// if (value) delete value;
-	// std::cout << "... ";
-
-	// if (next) delete next;
-	/* When next not null, raises "double free corruption" */
+	delete _value;
+	delete _next;
 
 	if (DEBUG_SUPER) std::cout << "done" << std::endl;
 }
@@ -187,8 +187,10 @@ Item::~Item()
 /*
 	Copy Item object from given Item object.
 */
-Item::Item(const Item& item) // TODO: copy (no linking).
+Item::Item(const Item& item)
 {
+	Item *p_item = item.get_next();
+
 	_key = item._key;
 
 	if (item._value == NULL)
@@ -197,10 +199,17 @@ Item::Item(const Item& item) // TODO: copy (no linking).
 	}
 	else
 	{
-		_value = new Value(*(item._value));
+		_value = new Value(item.get_value());
 	}
 
-	_next = item._next;
+	if (p_item != NULL)
+	{
+		push_back(*p_item);
+	}
+	else
+	{
+		_next = NULL;
+	}
 }
 
 
@@ -212,7 +221,18 @@ Value& Item::get_value()
 {
 	if (_value == NULL)
 	{
-		throw std::exception(); // TODO: raise an bad_argument_exception!
+		throw std::invalid_argument(ERR_NO_VALUE_IN_ITEM);
+	}
+
+	return *(_value);
+}
+
+
+const Value& Item::get_value() const
+{
+	if (_value == NULL)
+	{
+		throw std::invalid_argument(ERR_NO_VALUE_IN_ITEM);
 	}
 
 	return *(_value);
@@ -229,16 +249,6 @@ Item *Item::get_next() const
 
 
 /*
-	===May be not necessary===
-	Links the given Item object with current.
-*/
-void Item::set_next(Item *item) // TODO: reference to the item object!
-{
-	_next = item;
-}
-
-
-/*
 	Sets fields of Item object from given Item object.
 */
 Item& Item::operator=(const Item& item)
@@ -251,7 +261,7 @@ Item& Item::operator=(const Item& item)
 	}
 	else
 	{
-		_value = new Value(*(item._value));
+		_value = new Value(item.get_value());
 	}
 
 	_next = item._next;
@@ -280,40 +290,25 @@ bool operator!=(const Item& value1, const Item& value2)
 
 /*
 	Pushes back an Item object to the list of Item objects.
-	Fails if current Item object and the given Item object are equal.
+	Fails if current Item object and any Item object
+	from given Item objects list are equal.
 */
+// TODO: Rewrite the function description.
 bool Item::push_back(Item& item)
 {
-	if (*this == item)
+	Item *p_item = &(item);
+
+	while (p_item != NULL)
 	{
-		return false;
+		if (*this == *p_item)
+		{
+			return false;
+		}
+
+		p_item = p_item->get_next();
 	}
 
-	_next = &(item);
-	return true;
-}
-
-
-/*
-	Pushes the list of Item objects from given Item objects to the current
-	Item object.
-*/
-bool Item::push_chain(Item& item)
-{
-	Item *own_item = this, *curr_item = item.get_next();
-
-	while (own_item->_next != NULL)
-	{
-		own_item = own_item->_next;
-	}
-
-	while (curr_item != NULL)
-	{
-		own_item->_next = new Item(curr_item->get_value());
-		curr_item = curr_item->get_next();
-	}
-
-	own_item->_next = NULL;
+	_next = new Item(item);
 
 	return true;
 }
@@ -411,7 +406,6 @@ HashTable::HashTable(const HashTable& hashtable)
 		if (hashtable._data[i] != NULL)
 		{
 			_data[i] = new Item(*(hashtable._data[i]));
-			_data[i]->push_chain(*(hashtable._data[i]));
 		}
 		else
 		{
@@ -593,7 +587,7 @@ void HashTable::clear()
 
 bool HashTable::erase(const String& key)
 {
-	int i= get_index(key);
+	int i = get_index(key);
 	Item *last_item = _data[i], *curr_item = last_item;
 
 	if (last_item == NULL)
@@ -612,7 +606,7 @@ bool HashTable::erase(const String& key)
 		if (curr_item->get_key() == key)
 		{
 			last_item->push_back(*(curr_item->get_next()));
-			// delete curr_item;
+			delete curr_item;
 
 			return true;
 		}
@@ -651,7 +645,9 @@ bool HashTable::insert(const String& key, const Value& value)
 		return false;
 	}
 
-	curr_item->push_back(*(new Item(key, value)));
+	Item new_item(key, value);
+
+	curr_item->push_back(new_item);
 
 	return true;
 }

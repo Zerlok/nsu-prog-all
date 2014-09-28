@@ -17,6 +17,7 @@ const bool DEBUG_SUPER = true;
 /* ERRORS MESSAGES */
 static const char *ERR_BAD_ALLOC = "Not enough memmory!";
 static const char *ERR_KEY_NOT_FOUND = "The key was not found!";
+static const char *ERR_NO_VALUE_IN_ITEM = "The Item object has no value (empty item)!";
 
 
 /* VALUE CLASS (a student used as value) */
@@ -73,6 +74,7 @@ class Item
 		/* Get Field */
 		String get_key() const { return _key; }
 		Value& get_value();
+		const Value& get_value() const;
 		Item *get_next() const;
 		
 		/* Set Field */
@@ -85,7 +87,6 @@ class Item
 		
 		/* Methods */
 		bool push_back(Item& item); // Pushes back an Item object.
-		bool push_chain(Item& item); // Links a chain of Item objects (except first item!).
 		bool is_empty() const;	// Is an empty Item object.
 		String as_string() const; // For debug.
 	
