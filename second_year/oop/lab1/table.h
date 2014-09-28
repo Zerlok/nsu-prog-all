@@ -2,10 +2,8 @@
 #define __HASHTABLE_H__
 
 
-#include <iostream>
 #include <stdexcept>
-#include <cstring>
-// #include <cstdlib>
+#include <sstream>
 
 
 typedef std::string String;
@@ -13,6 +11,7 @@ typedef std::string String;
 
 /* DEBUG */
 const bool DEBUG = true;
+const bool DEBUG_SUPER = true;
 
 
 /* ERRORS MESSAGES */
@@ -44,16 +43,7 @@ class Value
 
 		/* Methods */
 		String get_name() const { return _name; }
-		String as_string() const;
-
-		/* DEBUG */
-		void show() const // Prints student fields to console.
-		{
-			std::cout << "Value: " << _name << std::endl
-					<< "|  Age  |  Course  |  Mark  |  Dep. |" << std::endl
-					<< "|" << _age << "|" << _course << "|" << _average_mark
-					<< "|" << _department << "|" << std::endl << std::endl;
-		}
+		String as_string() const; // For DEBUG.
 
 	private:
 		/* Fields */
@@ -97,22 +87,7 @@ class Item
 		bool push_back(Item& item); // Pushes back an Item object.
 		bool push_chain(Item& item); // Links a chain of Item objects (except first item!).
 		bool is_empty() const;	// Is an empty Item object.
-
-		/* DEBUG */
-		void show() const // Prints Item fields to console.
-		{
-			std::cout << "Item: " << _key << std::endl;
-			std::cout << "next : " << _next << std::endl;
-			std::cout << "contains: ";
-			if (_value != NULL)
-			{	
-				_value->show();
-			}
-			else
-			{
-				std::cout << "null" << std::endl;
-			}
-		}
+		String as_string() const; // For debug.
 	
 	private:
 		/* Fields */
@@ -160,7 +135,7 @@ class HashTable
 		int _data_end; // Number of cells.
 		
 		/* Methods */
-		int get_index(const String& key) const; // Counts index of item in hashtable
+		int get_index(const String& key) const; // Counts index of item in hashtable.
 };
 
 bool operator==(const HashTable& value1, const HashTable& value2);

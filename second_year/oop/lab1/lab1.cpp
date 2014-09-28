@@ -1,4 +1,5 @@
 #include "table.h"
+#include <iostream>
 
 
 /* -------------- ACCESSORY FUNCTIONS -------------- */
@@ -56,11 +57,7 @@ Value::Value(const String& name, const unsigned int age,
 
 Value::~Value()
 {
-	std::cout << "Destoying the Student... ";
-
-	// ...
-
-	std::cout << "done" << std::endl;
+	if (DEBUG_SUPER) std::cout << "Destoying the Value... done" << std::endl;
 }
 
 
@@ -124,16 +121,15 @@ bool operator!=(const Value& value1, const Value& value2)
 */
 String Value::as_string() const
 {
-	// std::stringstream str_stream;
+	std::stringstream str_stream;
 	
-	// str_stream << _name << ":("
-	// 			<< _age << ","
-	// 			<< _course << ","
-	// 			<< _average_mark << ","
-	// 			<< _department << ")";
+	str_stream << _name << ":("
+				<< _age << ","
+				<< _course << ","
+				<< _average_mark << ","
+				<< _department << ")";
 
-	// return str_stream.str();
-	return "<student>";
+	return str_stream.str();
 }
 
 
@@ -176,7 +172,7 @@ Item::Item(const String& key, const Value& value)
 // TODO: use delete!
 Item::~Item()
 {
-	std::cout << "Destoying the Item... ";
+	if (DEBUG_SUPER) std::cout << "Destoying the Item... ";
 
 	// if (value) delete value;
 	// std::cout << "... ";
@@ -184,7 +180,7 @@ Item::~Item()
 	// if (next) delete next;
 	/* When next not null, raises "double free corruption" */
 
-	std::cout << "done" << std::endl;
+	if (DEBUG_SUPER) std::cout << "done" << std::endl;
 }
 
 
@@ -194,7 +190,16 @@ Item::~Item()
 Item::Item(const Item& item) // TODO: copy (no linking).
 {
 	_key = item._key;
-	_value = new Value(*(item._value));
+
+	if (item._value == NULL)
+	{
+		_value = NULL;
+	}
+	else
+	{
+		_value = new Value(*(item._value));
+	}
+
 	_next = item._next;
 }
 
@@ -239,7 +244,16 @@ void Item::set_next(Item *item) // TODO: reference to the item object!
 Item& Item::operator=(const Item& item)
 {
 	_key = item._key;
-	_value = item._value;
+	
+	if (item._value == NULL)
+	{
+		_value = NULL;
+	}
+	else
+	{
+		_value = new Value(*(item._value));
+	}
+
 	_next = item._next;
 }
 
@@ -281,16 +295,6 @@ bool Item::push_back(Item& item)
 
 
 /*
-	Checks the current object is empty (value field not specified).
-	Returns: is value pointer a NULL.
-*/
-bool Item::is_empty() const
-{
-	return (_value == NULL);
-}
-
-
-/*
 	Pushes the list of Item objects from given Item objects to the current
 	Item object.
 */
@@ -312,6 +316,53 @@ bool Item::push_chain(Item& item)
 	own_item->_next = NULL;
 
 	return true;
+}
+
+
+/*
+	Checks the current object is empty (value field not specified).
+	Returns: is value pointer a NULL.
+*/
+bool Item::is_empty() const
+{
+	return (_value == NULL);
+}
+
+
+/*
+	Converts Item fields to string.
+	Returns: string about Item object.
+	"<key>:[<value>,<next (key)>]".
+*/
+String Item::as_string() const
+{
+	std::stringstream str_stream;
+	
+	str_stream << _key << ":[";
+	
+	if (_value == NULL)
+	{
+		str_stream << "NULL";
+	}
+	else
+	{
+		str_stream << _value->as_string();
+	}
+
+	str_stream << ",";
+
+	if (_next == NULL)
+	{
+		str_stream << "NULL";
+	}
+	else
+	{
+		str_stream << _next->get_key();
+	}
+
+	str_stream << "]";
+
+	return str_stream.str();
 }
 
 
@@ -560,7 +611,7 @@ bool HashTable::erase(const String& key)
 	{
 		if (curr_item->get_key() == key)
 		{
-			last_item->set_next(curr_item->get_next());
+			last_item->push_back(*(curr_item->get_next()));
 			// delete curr_item;
 
 			return true;
@@ -600,7 +651,7 @@ bool HashTable::insert(const String& key, const Value& value)
 		return false;
 	}
 
-	curr_item->set_next(new Item(key, value));
+	curr_item->push_back(*(new Item(key, value)));
 
 	return true;
 }

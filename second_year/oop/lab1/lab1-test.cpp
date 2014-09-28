@@ -1,6 +1,6 @@
 #include "table.h"
 #include <gtest/gtest.h>
-// #include <iostream>
+#include <iostream>
 
 
 /* -------------------- STUDENT CLASS TESTS -------------------- */
@@ -9,20 +9,17 @@ TEST(Value, Init)
 {
 	Value a("Danil", 19, 2);
 	Value b("Igor", 21, 3, 4.2, "Physics");
-	
-	// EXPECT_EQ(a.get_age(), "Danil:(19,2,4.0,IT)");
-	EXPECT_NE(a, b);
+
+	EXPECT_EQ(a.as_string(), "Danil:(19,2,4,IT)");
+	EXPECT_EQ(b.as_string(), "Igor:(21,3,4.2,Physics)");
 }
 
 
 TEST(Value, Copy)
 {
 	Value a("Danil"), b(a);
-	
-	// b.set_age(19);
 
-	EXPECT_EQ(a.get_name(), b.get_name());
-	// EXPECT_NE(a.get_age(), b.get_age());
+	EXPECT_EQ(a, b);
 }
 
 
@@ -33,7 +30,7 @@ TEST(Value, OperatorEQ)
 
 	b = a;
 
-	EXPECT_EQ(a.get_name(), b.get_name());
+	EXPECT_EQ(a, b);
 }
 
 
@@ -41,8 +38,13 @@ TEST(Value, OperatorEQEQ)
 {
 	Value a("Danil");
 	Value b(a);
+	Value c("Danil");
+	Value d("Danil", 19);
 
 	EXPECT_TRUE(a == b);
+	EXPECT_TRUE(a == c);
+	EXPECT_FALSE(a == d);
+	EXPECT_FALSE(b == d);
 }
 
 
@@ -51,24 +53,25 @@ TEST(Value, OperatorEQEQ)
 TEST(Item, Init)
 {
 	Value a("Danil");
-	Item item1("Danil", a), item2("Den"), item3(a);
+	Value b("Merlin");
+	Item item1("Danil", a), item2("Den"), item3(a), item4("Den", b);
 	
-	// item1.show();
-	// item2.show();
-	// item3.show();
-
 	EXPECT_NE(item1, item2);
 	EXPECT_NE(item2, item3);
+	EXPECT_NE(item1, item4);
 	EXPECT_EQ(item1, item3);
+	EXPECT_EQ(item2, item4);
 }
 
 
 TEST(Item, Copy)
 {
-	Value a("Danil");
-	Item item1(a), item2(item1);
+	Value a("Lucy");
+	Item item1(a), item2(item1), item3(item2);
 
 	EXPECT_EQ(item1, item2);
+	EXPECT_EQ(item2, item3);
+	EXPECT_EQ(item1, item3);
 }
 
 
@@ -78,6 +81,10 @@ TEST(Item, OperatorEQ)
 	Item item1("Danil", a), item2("J", b);
 
 	item2 = item1;
+
+	EXPECT_EQ(item1, item2);
+
+	item1 = item2;
 
 	EXPECT_EQ(item1, item2);
 }
@@ -99,16 +106,13 @@ TEST(Item, Pushback)
 	Value a("Danil"), b("Bob"), c("Monica");
 	Item item1(a), item2(b), item3(c);
 
-	std::cout << "Inited...";
+	// std::cout << "Inited...";
 
-	EXPECT_TRUE(item1.push_back(item2));
-	EXPECT_TRUE(item2.push_back(item3));
+	EXPECT_TRUE(item1.push_back(item2)) << item1.as_string();
+	EXPECT_TRUE(item2.push_back(item3)) << item2.as_string();
+	EXPECT_FALSE(item3.push_back(item3)) << item3.as_string();
 
-	std::cout << "Pushed...";
-
-	item1.show();
-	item2.show();
-	item3.show();
+	// std::cout << "Pushed...";
 
 	EXPECT_EQ(*(item1.get_next()), item2);
 	EXPECT_EQ(*(item2.get_next()), item3);
@@ -117,11 +121,23 @@ TEST(Item, Pushback)
 
 TEST(Item, Empty)
 {
-	Item item1("empty");
+	Value a("Emily");
 
-	// item1.show();
+	Item item1("empty"), item2("empty2"), item3("312", a);
+	Item item4(item1);
+	item2.push_back(item3);
 
-	EXPECT_TRUE(item1.is_empty());
+	if (DEBUG_SUPER)
+	{
+		std::cout << item1.as_string() << std::endl;
+		std::cout << item2.as_string() << std::endl;
+		std::cout << item3.as_string() << std::endl;
+		std::cout << item4.as_string() << std::endl;
+	}
+
+	EXPECT_TRUE(item1.is_empty()) << item1.as_string();
+	EXPECT_TRUE(item2.is_empty()) << item2.as_string();
+	EXPECT_FALSE(item3.is_empty()) << item3.as_string();
 }
 
 
