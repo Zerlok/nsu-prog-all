@@ -82,9 +82,9 @@ TEST(Item, Pushback)
 	Value a("Danil"), b("Bob"), c("Monica");
 	Item item1(a), item2(b), item3(c);
 
-	EXPECT_TRUE(item1.push_back(item2)) << item1.as_string();
-	EXPECT_TRUE(item2.push_back(item3)) << item2.as_string();
-	EXPECT_FALSE(item3.push_back(item3)) << item3.as_string();
+	EXPECT_TRUE(item1.push_back(&item2)) << item1.as_string();
+	EXPECT_TRUE(item2.push_back(&item3)) << item2.as_string();
+	EXPECT_FALSE(item3.push_back(&item3)) << item3.as_string();
 
 	EXPECT_EQ(*(item1.get_next()), item2);
 	EXPECT_EQ(*(item2.get_next()), item3);

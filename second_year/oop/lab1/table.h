@@ -78,7 +78,9 @@ class Item
 
 		/* Get Field */
 		Item *get_next() const;
+		String return_key();
 		Value& return_value();
+		const String return_key() const;
 		const Value& return_value() const;
 
 		/* Operators */
@@ -138,11 +140,12 @@ class HashTable
 		/* Fields */
 		Item **_data; // Array of pointers to Item object.
 		int _cells_num; // Number of cells in array.
+		int _critical_items_num; // Critical number of Items object in hashtable to expand it.
 		
 		/* Methods */
 		int _get_index(const String& key) const;
 		Value *_search(const String& key) const;
-		void _check_and_expand();
+		bool _check_and_expand();
 };
 
 bool operator==(const HashTable& value1, const HashTable& value2);

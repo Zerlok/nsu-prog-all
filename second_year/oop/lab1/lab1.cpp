@@ -196,6 +196,18 @@ Item *Item::get_next() const
 }
 
 
+String Item::return_key()
+{
+	return _key;
+}
+
+
+const String Item::return_key() const
+{
+	return _key;
+}
+
+
 /*
 	Returns: Value object from Item object field.
 	If Item object is empty, raises an exception.
@@ -275,13 +287,13 @@ bool Item::push_back(Item *item)
 }
 
 
-/*
-	Do the same as a method above, if input is a reference to Item object.
-*/
-bool Item::push_back(Item& item)
-{
-	return push_back(&item);
-}
+
+// 	Do the same as a method above, if input is a reference to Item object.
+
+// bool Item::push_back(Item& item)
+// {
+// 	return push_back(&item);
+// }
 
 
 /*
@@ -330,7 +342,7 @@ HashTable::HashTable(int mem)
 		throw std::invalid_argument(ERR_BAD_HTABLE_SIZE);
 	}
 
-	_cells_num = mem;
+	_critical_items_num = _cells_num = mem;
 
 	try
 	{
@@ -355,10 +367,9 @@ HashTable::~HashTable()
 }
 
 
-// TODO: rewrite with expanding
 HashTable::HashTable(const HashTable& hashtable)
 {
-	_cells_num = hashtable._cells_num;
+	_critical_items_num = _cells_num = hashtable._cells_num;
 
 	try
 	{
@@ -447,15 +458,15 @@ Value& HashTable::operator[](const String& key)
 }
 
 
-// TODO: rewrite with expanding!
 HashTable& HashTable::operator=(const HashTable& hashtable)
 {
 	clear();
 
-	_cells_num = hashtable._cells_num;
+	_critical_items_num = _cells_num = hashtable._cells_num;
 	
 	try
 	{
+		delete[] *_data; // TODO: Ask about that.
 		_data = new Item*[_cells_num];
 	}
 	catch (std::bad_alloc)
@@ -588,9 +599,10 @@ bool HashTable::erase(const String& key)
 }
 
 
-// TODO: rewrite with expanding!
 bool HashTable::insert(const String& key, const Value& value)
 {
+	_check_and_expand();
+
 	int i = _get_index(key);
 	Item *last_item, *curr_item = _data[i];
 
@@ -652,8 +664,32 @@ Value *HashTable::_search(const String& key) const
 }
 
 
-// TODO: write the function specified below.
-void HashTable::_check_and_expand()
+bool HashTable::_check_and_expand()
 {
+	if (get_size() < _critical_items_num)
+	{
+		return false;
+	}
 
+	HashTable tmp_table(_cells_num * 2);
+	Item *curr_item;
+
+	for (int i = 0; i < _cells_num; i++)
+	{
+		curr_item = _data[i];
+
+		while (curr_item != NULL)
+		{
+			tmp_table.insert(
+					curr_item->return_key(),
+					curr_item->return_value()
+			);
+
+			curr_item = curr_item->get_next();
+		}
+	}
+
+	*this = tmp_table;
+
+	return true;
 }
