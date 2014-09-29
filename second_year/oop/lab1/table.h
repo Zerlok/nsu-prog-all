@@ -11,13 +11,13 @@ typedef std::string String;
 
 /* DEBUG */
 const bool DEBUG = true;
-const bool DEBUG_SUPER = true;
+const bool DEBUG_SUPER = false;
 
 
 /* ERRORS MESSAGES */
 static const char *ERR_BAD_ALLOC = "Not enough memmory!";
 static const char *ERR_KEY_NOT_FOUND = "The key was not found!";
-static const char *ERR_NO_VALUE_IN_ITEM = "The Item object has no value (empty item)!";
+static const char *ERR_NO_VALUE_IN_ITEM = "The Item object has no value!";
 
 
 /* VALUE CLASS (a student used as value) */
@@ -29,7 +29,6 @@ class Value
 			const String& name, // Main field (Should be defined always!).
 			const unsigned int age=18,
 			const unsigned int course=1,
-			const float average_mark=4.0,
 			const String& department="IT"
 		);
 
@@ -38,7 +37,6 @@ class Value
 		Value(const Value& s); // Copy student.
 
 		/* Operators */
-		Value& operator=(const Value& value);
 		friend bool operator==(const Value& value1, const Value& value2);
 		friend bool operator!=(const Value& value1, const Value& value2);
 
@@ -51,7 +49,6 @@ class Value
 		String _name; // Student name.
 		unsigned int _age; // Student age.
 		unsigned int _course; // Student course at university.
-		float _average_mark; // Student average mark at university.
 		String _department; // Student department at university.
 };
 
@@ -64,7 +61,6 @@ class Item
 {
 	public:
 		/* Constructors / Desctructor */
-		Item(const String& key);
 		Item(const Value& value);
 		Item(const String& key, const Value& value);
 		~Item();
@@ -72,22 +68,19 @@ class Item
 		Item(const Item& i);
 
 		/* Get Field */
-		String get_key() const { return _key; }
+		bool is_key_equals(const String& key) const;
+		bool is_key_not_equals(const String& key) const;
+		Item *get_next() const;
 		Value& get_value();
 		const Value& get_value() const;
-		Item *get_next() const;
-		
-		/* Set Field */
-		void set_next(Item *item);
 
 		/* Operators */
-		Item& operator=(const Item& item);
 		friend bool operator==(const Item& value1, const Item& value2);
 		friend bool operator!=(const Item& value1, const Item& value2);
 		
 		/* Methods */
+		bool push_back(Item *item); // Pushes back an Item object.
 		bool push_back(Item& item); // Pushes back an Item object.
-		bool is_empty() const;	// Is an empty Item object.
 		String as_string() const; // For debug.
 	
 	private:
@@ -111,12 +104,6 @@ class HashTable
 
 		HashTable(const HashTable& hashtable);
 
-		/* Get Field */
-		Value& at(const String& key);
-		const Value& at(const String& key) const;
-		bool empty() const;
-		size_t size() const;
-
 		/* Operators */
 		Value& operator[](const String& key);
 		HashTable& operator=(const HashTable& hashtable);
@@ -125,9 +112,13 @@ class HashTable
 
 		/* Methods */
 		void clear();
-		bool contains(const String& key) const;
 		bool erase(const String& key);
+		Value& get(const String& key);
+		const Value& get(const String& key) const;
+		size_t get_size() const;
 		bool insert(const String& key, const Value& value);
+		bool is_empty() const;
+		bool is_contains(const String& key) const;
 		void swap(HashTable& b);
 
 	private:
@@ -136,7 +127,8 @@ class HashTable
 		int _data_end; // Number of cells.
 		
 		/* Methods */
-		int get_index(const String& key) const; // Counts index of item in hashtable.
+		int _get_index(const String& key) const; // Counts index of Item in hashtable.
+		Value *_search(const String& key) const;
 };
 
 bool operator==(const HashTable& value1, const HashTable& value2);

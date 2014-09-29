@@ -44,13 +44,11 @@ int good_hash(const String& key)
 	Creates new Value object.
 */
 Value::Value(const String& name, const unsigned int age,
-	const unsigned int course, const float average_mark,
-	const String& department)
+	const unsigned int course, const String& department)
 {
 	_name = name;
 	_age = age;
 	_course = course;
-	_average_mark = average_mark;
 	_department = department;
 }
 
@@ -71,21 +69,6 @@ Value::Value(const Value& value)
 	_name = value._name;
 	_age = value._age;
 	_course = value._course;
-	_average_mark = value._average_mark;
-	_department = value._department;
-}
-
-
-/*
-	===May be not necessary operator!===
-	Copy the Value object from given Value object.
-*/
-Value& Value::operator=(const Value& value)
-{
-	_name = value._name;
-	_age = value._age;
-	_course = value._course;
-	_average_mark = value._average_mark;
 	_department = value._department;
 }
 
@@ -100,7 +83,6 @@ bool operator==(const Value& value1, const Value& value2)
 			value1._name == value2._name &&
 			value1._age == value2._age &&
 			value1._course == value2._course &&
-			value1._average_mark == value2._average_mark &&
 			value1._department == value2._department
 	);
 }
@@ -128,7 +110,6 @@ String Value::as_string() const
 	str_stream << _name << ":("
 				<< _age << ","
 				<< _course << ","
-				<< _average_mark << ","
 				<< _department << ")";
 
 	return str_stream.str();
@@ -136,18 +117,6 @@ String Value::as_string() const
 
 
 /* -------------- ITEM METHODS -------------- */
-
-/*
-	===Not necessary===
-	Creates an empty Item object with specified key.
-*/
-Item::Item(const String& key)
-{
-	_key = key;
-	_value = NULL;
-	_next = NULL;
-}
-
 
 /*
 	Creates an Item object with specified Value object.
@@ -189,27 +158,32 @@ Item::~Item()
 */
 Item::Item(const Item& item)
 {
-	Item *p_item = item.get_next();
+	Value value = item.get_value();
 
 	_key = item._key;
+	_value = new Value(item.get_value());
+	push_back(item.get_next());
+}
 
-	if (item._value == NULL)
-	{
-		_value = NULL;
-	}
-	else
-	{
-		_value = new Value(item.get_value());
-	}
 
-	if (p_item != NULL)
-	{
-		push_back(*p_item);
-	}
-	else
-	{
-		_next = NULL;
-	}
+bool Item::is_key_equals(const String& key) const
+{
+	return (_key == key);
+}
+
+
+bool Item::is_key_not_equals(const String& key) const
+{
+	return (_key != key);
+}
+
+
+/*
+	Returns: the pointer to the next Value object in list of Value objects.
+*/
+Item *Item::get_next() const
+{
+	return _next;
 }
 
 
@@ -240,41 +214,12 @@ const Value& Item::get_value() const
 
 
 /*
-	Returns: the pointer to the next Value object in list of Value objects.
-*/
-Item *Item::get_next() const
-{
-	return _next;
-}
-
-
-/*
-	Sets fields of Item object from given Item object.
-*/
-Item& Item::operator=(const Item& item)
-{
-	_key = item._key;
-	
-	if (item._value == NULL)
-	{
-		_value = NULL;
-	}
-	else
-	{
-		_value = new Value(item.get_value());
-	}
-
-	_next = item._next;
-}
-
-
-/*
 	Checks is two Item object are equal.
 	Returns: is keys are equal.
 */
-bool operator==(const Item& value1, const Item& value2)
+bool operator==(const Item& item1, const Item& item2)
 {
-	return (value1._key == value2._key);
+	return (item1._key == item2._key && *(item1._value) == *(item2._value));
 }
 
 
@@ -282,9 +227,9 @@ bool operator==(const Item& value1, const Item& value2)
 	Checks is two Item objects are NOT equal.
 	Returns: is keys are NOT equal.
 */
-bool operator!=(const Item& value1, const Item& value2)
+bool operator!=(const Item& item1, const Item& item2)
 {
-	return (value1._key != value2._key);
+	return !(item1 == item2);
 }
 
 
@@ -294,13 +239,20 @@ bool operator!=(const Item& value1, const Item& value2)
 	from given Item objects list are equal.
 */
 // TODO: Rewrite the function description.
-bool Item::push_back(Item& item)
+bool Item::push_back(Item *item)
 {
-	Item *p_item = &(item);
+	Item *p_item = item;
+
+	if (item == NULL)
+	{
+		_next = NULL;
+
+		return true;
+	}
 
 	while (p_item != NULL)
 	{
-		if (*this == *p_item)
+		if (p_item->is_key_equals(_key))
 		{
 			return false;
 		}
@@ -308,19 +260,18 @@ bool Item::push_back(Item& item)
 		p_item = p_item->get_next();
 	}
 
-	_next = new Item(item);
+	_next = new Item(*item);
 
 	return true;
 }
 
 
 /*
-	Checks the current object is empty (value field not specified).
-	Returns: is value pointer a NULL.
+	Do the same as a method above, if input is a reference to Item object.
 */
-bool Item::is_empty() const
+bool Item::push_back(Item& item)
 {
-	return (_value == NULL);
+	return push_back(&item);
 }
 
 
@@ -352,7 +303,7 @@ String Item::as_string() const
 	}
 	else
 	{
-		str_stream << _next->get_key();
+		str_stream << _next->as_string();
 	}
 
 	str_stream << "]";
@@ -376,15 +327,20 @@ HashTable::HashTable(int mem)
 		std::cout << ERR_BAD_ALLOC << std::endl;
 	}
 
-	clear();
+	for (int i = 0; i < _data_end; i++)
+	{
+		_data[i] = NULL;
+	}
 }
 
 
 HashTable::~HashTable()
 {
-	// std::cout << "Destroying the HashTable... ";
+	if (DEBUG_SUPER) std::cout << "Destroying the HashTable... ";
+	
 	delete[] _data;
-	// std::cout << "done" << std::endl;
+
+	if (DEBUG_SUPER) std::cout << "done" << std::endl;
 }
 
 
@@ -415,11 +371,11 @@ HashTable::HashTable(const HashTable& hashtable)
 }
 
 
-Value& HashTable::at(const String& key)
+Value& HashTable::get(const String& key)
 {
-	Item *curr_item = _data[get_index(key)];
+	Item *curr_item = _data[_get_index(key)];
 
-	while (curr_item != NULL && curr_item->get_key() != key)
+	while (curr_item != NULL && curr_item->is_key_not_equals(key))
 	{
 		curr_item = curr_item->get_next();
 	}
@@ -433,25 +389,25 @@ Value& HashTable::at(const String& key)
 }
 
 
-const Value& HashTable::at(const String& key) const
+const Value& HashTable::get(const String& key) const
 {
-	Item *curr_item = _data[get_index(key)];
+	Item *curr_item = _data[_get_index(key)];
 
-	while (curr_item != NULL && curr_item->get_key() != key)
+	while (curr_item != NULL && curr_item->is_key_not_equals(key))
 	{
 		curr_item = curr_item->get_next();
 	}
 	
 	if (curr_item == NULL)
 	{
-		throw std::exception();
+		throw std::invalid_argument(ERR_KEY_NOT_FOUND);
 	}
 
 	return curr_item->get_value();
 }
 
 
-size_t HashTable::size() const
+size_t HashTable::get_size() const
 {
 	size_t items_num = 0;
 	Item *curr_item;
@@ -471,12 +427,19 @@ size_t HashTable::size() const
 }
 
 
-bool HashTable::empty() const
+bool HashTable::is_empty() const
 {
+	std::cout << "trying to find out is this hashtable an empty...";
 	for (int i = 0; i < _data_end; i++)
 	{
-		if (_data[i] != NULL) { return false; }
+		if (_data[i] != NULL)
+		{
+			std::cout << _data[i]->as_string() << std::endl;
+			return false;
+		}
 	}
+
+	std::cout << "seems like it is.";
 
 	return true;
 }
@@ -484,39 +447,47 @@ bool HashTable::empty() const
 
 Value& HashTable::operator[](const String& key)
 {
-	Value *st = new Value(key);
+	Value *value = new Value(key), *inner_value = _search(key);
 	
-	try
+	if (inner_value == NULL)
 	{
-		st = &(at(key));
+		insert(key, *value);
+
+		return *value;
 	}
-	catch (std::exception)
+	else
 	{
-		insert(key, *(st));
+		delete value;
+
+		return *inner_value;
 	}
-	
-	return *(st);
 }
 
 
 HashTable& HashTable::operator=(const HashTable& hashtable)
 {
-	_data_end = hashtable._data_end;
+//	clear();
 
-	try
-	{
-		delete[] _data; // TODO: call clear method!
-		_data = new Item*[_data_end];
-	}
-	catch (std::bad_alloc)
-	{
-		std::cout << ERR_BAD_ALLOC << std::endl;
-	}
+//	_data_end = hashtable._data_end;
+	
+//	try
+//	{
+//		_data = new Item*[_data_end];
+//	}
+//	catch (std::bad_alloc)
+//	{
+//		std::cout << ERR_BAD_ALLOC << std::endl;
+//	}
 
-	for (int i = 0; i < _data_end; i++)
-	{
-		_data[i] = hashtable._data[i];
-	}
+
+//	for (int i = 0; i < _data_end; i++)
+//	{
+//		_data[i] = hashtable._data[i];
+//	}
+
+	static HashTable new_table(hashtable);
+
+	return new_table;
 }
 
 
@@ -533,8 +504,9 @@ bool operator==(const HashTable& hashtable1, const HashTable& hashtable2)
 
 			while (a_item != NULL && b_item != NULL)
 			{
-				if (a_item->get_key() != b_item->get_key() ||
-					a_item->get_value() != b_item->get_value())
+				// if (a_item->get_key() != b_item->get_key() ||
+				// 	a_item->get_value() != b_item->get_value())
+				if (*a_item != *b_item)
 				{
 					return false;
 				}
@@ -578,36 +550,54 @@ void HashTable::swap(HashTable& hashtable)
 
 void HashTable::clear()
 {
-	for (int i = 0; i < _data_end; i++)
-	{
-		_data[i] = NULL;
-	}
+	// Raises the segmentation fault if uncommented!
+//	delete[] _data;
 }
 
 
 bool HashTable::erase(const String& key)
 {
-	int i = get_index(key);
-	Item *last_item = _data[i], *curr_item = last_item;
+	std::cout << "start erasing at " << key << "..." << std::endl;
+
+	int i = _get_index(key);
+	Item *last_item = _data[i], *curr_item = _data[i], *next_item = _data[i];
+
+	std::cout << hash(key) << " | "<< i << std::endl;
 
 	if (last_item == NULL)
 	{
 		return false;
 	}
 
-	if (last_item->get_key() == key)
+	std::cout << "Not empty cell" << std::endl;
+	std::cout << _data[i]->as_string() << std::endl;
+
+	if (last_item->is_key_equals(key))
 	{
-		_data[i] = last_item->get_next();
+		next_item = last_item->get_next();
+
+		if (next_item == NULL)
+		{
+			_data[i] = NULL;
+		}
+		else
+		{
+			_data[i] = new Item(*next_item);
+			delete last_item;
+		}
+
 		return true;
 	}
 
+	std::cout << "Not first key" << std::endl;
+
 	while (curr_item != NULL)
 	{
-		if (curr_item->get_key() == key)
+		if (curr_item->is_key_equals(key))
 		{
-			last_item->push_back(*(curr_item->get_next()));
+			last_item->push_back(next_item);
 			delete curr_item;
-
+			
 			return true;
 		}
 
@@ -615,14 +605,20 @@ bool HashTable::erase(const String& key)
 		curr_item = curr_item->get_next();
 	}
 
+	std::cout << ERR_KEY_NOT_FOUND << std::endl;
+
 	return false;
 }
 
 
 bool HashTable::insert(const String& key, const Value& value)
 {
-	int i = get_index(key);
-	Item *curr_item = _data[i];
+	std::cout << "start inserting" << std::endl;
+
+	int i = _get_index(key);
+	Item *last_item, *curr_item = _data[i];
+
+	std::cout << hash(key) << " | "<< i << std::endl;
 
 	if (curr_item == NULL)
 	{
@@ -630,45 +626,61 @@ bool HashTable::insert(const String& key, const Value& value)
 		return true;
 	}
 
-	while (curr_item->get_next() != NULL)
+	std::cout << "the same index " << curr_item->as_string() << std::endl;
+	std::cout << "inserting... " << value.as_string() << std::endl;
+
+	while (curr_item != NULL)
 	{
-		if (curr_item->get_key() == key)
+		if (curr_item->is_key_equals(key))
 		{
 			return false;
+		}
+
+		last_item = curr_item;
+		curr_item = curr_item->get_next();
+	}
+
+	std::cout << key << " " << ERR_KEY_NOT_FOUND << std::endl;
+
+	static Item *new_item = new Item(key, value);
+
+	std::cout << new_item->as_string() << std::endl;
+
+	last_item->push_back(new_item);
+
+	std::cout << "pushed back." << std::endl;
+
+	return true;
+}
+
+
+bool HashTable::is_contains(const String& key) const
+{
+	if (_search(key) == NULL) return false;
+	return true;
+}
+
+
+int HashTable::_get_index(const String& key) const
+{
+	return (DEBUG) ? (hash(key) % _data_end) : (good_hash(key) % _data_end);
+}
+
+
+Value *HashTable::_search(const String& key) const
+{
+	int i = _get_index(key);
+	Item *curr_item = _data[i];
+
+	while (curr_item != NULL)
+	{
+		if (curr_item->is_key_equals(key))
+		{
+			return &(curr_item->get_value());
 		}
 
 		curr_item = curr_item->get_next();
 	}
 
-	if (curr_item->get_key() == key)
-	{
-		return false;
-	}
-
-	Item new_item(key, value);
-
-	curr_item->push_back(new_item);
-
-	return true;
-}
-
-
-bool HashTable::contains(const String& key) const
-{
-	try
-	{
-		at(key);
-	}
-	catch (std::exception)
-	{
-		return false;
-	}
-
-	return true;
-}
-
-
-int HashTable::get_index(const String& key) const
-{
-	return (DEBUG) ? (hash(key) % _data_end) : (good_hash(key) % _data_end);
+	return NULL;
 }
