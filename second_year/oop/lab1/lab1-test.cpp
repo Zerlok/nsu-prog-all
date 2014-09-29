@@ -3,6 +3,8 @@
 #include <iostream>
 
 
+#ifdef __HTABLE_DEBUG__
+
 /* -------------------- STUDENT CLASS TESTS -------------------- */
 
 TEST(Value, Init)
@@ -92,6 +94,7 @@ TEST(Item, Pushback)
 	EXPECT_EQ(*(item2.get_next()), item3);
 }
 
+#endif
 
 /* -------------------- HASHTABLE CLASS TESTS -------------------- */
 
@@ -104,34 +107,17 @@ TEST(HashTable, Init)
 /* Hash func only! */
 TEST(HashTable, Collision)
 {
-	std::cout << "Start...";
-
 	HashTable table(10);
-
-	std::cout << "|...";
 
 	Value a("Danil");
 	Value b("Diman"); // Collision with a
 	Value c("Ivan");
 
-	std::cout << "|...";
-
-	EXPECT_TRUE(table.insert(a.get_name(), a));
-
-	std::cout << "|...";
-	
-	EXPECT_TRUE(table.insert(b.get_name(), b));
-
-	std::cout << "|...";
-
-	EXPECT_TRUE(table.insert(c.get_name(), c));
-
-	std::cout << "|...";
-
-	EXPECT_EQ(hash(a.get_name()), hash(b.get_name()));
+	EXPECT_TRUE(table.insert(a.return_name(), a));
+	EXPECT_TRUE(table.insert(b.return_name(), b));
+	EXPECT_TRUE(table.insert(c.return_name(), c));
+	// EXPECT_EQ(hash(a.return_name()), hash(b.return_name()));
 	EXPECT_EQ(table.get_size(), 3);
-
-	std::cout << "|...";
 }
 
 
@@ -144,16 +130,16 @@ TEST(HashTable, CreateFromParent)
 	Value c("Jerry");
 	Value d("Lenny");
 
-	t1.insert(a.get_name(), a);
-	t1.insert(b.get_name(), b);
-	t1.insert(c.get_name(), c);
+	t1.insert(a.return_name(), a);
+	t1.insert(b.return_name(), b);
+	t1.insert(c.return_name(), c);
 
 	HashTable t2(t1);
 	
 
 	EXPECT_EQ(t1, t2);
 
-	t2.insert(d.get_name(), d);
+	t2.insert(d.return_name(), d);
 
 	EXPECT_NE(t1, t2);
 	EXPECT_EQ(t1.get_size(), 3);
@@ -170,13 +156,13 @@ TEST(HashTable, SizeCounting)
 	Value c("Jerry");
 	Value d("Lenny");
 
-	t1.insert(a.get_name(), a);
-	t1.insert(b.get_name(), b);
-	t1.insert(c.get_name(), c);
+	t1.insert(a.return_name(), a);
+	t1.insert(b.return_name(), b);
+	t1.insert(c.return_name(), c);
 
 	HashTable t2(t1);
 	
-	t2.insert(d.get_name(), d);
+	t2.insert(d.return_name(), d);
 
 	EXPECT_EQ(t1.get_size(), 3);
 	EXPECT_EQ(t2.get_size(), 4);
@@ -192,9 +178,9 @@ TEST(HashTable, OperatorEQ)
 	Value c("Jerry");
 	Value d("Lenny");
 
-	t1.insert(a.get_name(), a);
-	t1.insert(b.get_name(), b);
-	t1.insert(c.get_name(), c);
+	t1.insert(a.return_name(), a);
+	t1.insert(b.return_name(), b);
+	t1.insert(c.return_name(), c);
 
 	t2 = t1;
 
@@ -211,22 +197,22 @@ TEST(HashTable, OperatorEQEQ)
 	Value c("Jerry");
 	Value d("Lenny");
 
-	t1.insert(a.get_name(), a);
-	t1.insert(b.get_name(), b);
-	t1.insert(c.get_name(), c);
+	t1.insert(a.return_name(), a);
+	t1.insert(b.return_name(), b);
+	t1.insert(c.return_name(), c);
 	
-	t2.insert(a.get_name(), a);
+	t2.insert(a.return_name(), a);
 	
-	t1.insert(d.get_name(), d);
+	t1.insert(d.return_name(), d);
 
-	t2.insert(b.get_name(), b);
-	t2.insert(c.get_name(), c);
-	t2.insert(d.get_name(), d);
+	t2.insert(b.return_name(), b);
+	t2.insert(c.return_name(), c);
+	t2.insert(d.return_name(), d);
 
-	EXPECT_TRUE(t1.is_contains(b.get_name()));
-	EXPECT_TRUE(t2.is_contains(b.get_name()));
-	EXPECT_TRUE(t1.is_contains(c.get_name()));
-	EXPECT_TRUE(t2.is_contains(c.get_name()));
+	EXPECT_TRUE(t1.is_contains(b.return_name()));
+	EXPECT_TRUE(t2.is_contains(b.return_name()));
+	EXPECT_TRUE(t1.is_contains(c.return_name()));
+	EXPECT_TRUE(t2.is_contains(c.return_name()));
 	EXPECT_TRUE(t1 == t2);
 }
 
@@ -250,24 +236,24 @@ TEST(HashTable, Insert)
 	Value d("Lenny");
 	Value e("Jeffy"); // Collision with c
 
-	t1.insert(a.get_name(), a);
-	t1.insert(a.get_name(), a); // Again
-	t1.insert(b.get_name(), b);
-	t1.insert(c.get_name(), c);
-	t1.insert(e.get_name(), e);
+	t1.insert(a.return_name(), a);
+	t1.insert(a.return_name(), a); // Again
+	t1.insert(b.return_name(), b);
+	t1.insert(c.return_name(), c);
+	t1.insert(e.return_name(), e);
 	
-	t2.insert(a.get_name(), a);
+	t2.insert(a.return_name(), a);
 	
-	EXPECT_TRUE(t1.is_contains(a.get_name()));
-	EXPECT_TRUE(t1.is_contains(b.get_name()));
-	EXPECT_TRUE(t1.is_contains(c.get_name()));
-	EXPECT_FALSE(t1.is_contains(d.get_name()));
-	EXPECT_TRUE(t1.is_contains(e.get_name()));
+	EXPECT_TRUE(t1.is_contains(a.return_name()));
+	EXPECT_TRUE(t1.is_contains(b.return_name()));
+	EXPECT_TRUE(t1.is_contains(c.return_name()));
+	EXPECT_FALSE(t1.is_contains(d.return_name()));
+	EXPECT_TRUE(t1.is_contains(e.return_name()));
 	EXPECT_EQ(t1.get_size(), 4);
 
-	EXPECT_TRUE(t2.is_contains(a.get_name()));
-	EXPECT_FALSE(t2.is_contains(b.get_name()));
-	EXPECT_FALSE(t2.is_contains(d.get_name()));
+	EXPECT_TRUE(t2.is_contains(a.return_name()));
+	EXPECT_FALSE(t2.is_contains(b.return_name()));
+	EXPECT_FALSE(t2.is_contains(d.return_name()));
 	EXPECT_EQ(t2.get_size(), 1);
 
 	EXPECT_TRUE(t3.is_empty());
@@ -284,34 +270,34 @@ TEST(HashTable, Erase)
 	Value d("Lenny");
 	Value e("Jeffy"); // Collision with c
 
-	t1.insert(a.get_name(), a);
-	t1.insert(b.get_name(), b);
-	t1.insert(c.get_name(), c);
-	t1.insert(e.get_name(), e);
+	t1.insert(a.return_name(), a);
+	t1.insert(b.return_name(), b);
+	t1.insert(c.return_name(), c);
+	t1.insert(e.return_name(), e);
 	
-	t2.insert(a.get_name(), a);
-	t2.insert(e.get_name(), e);
+	t2.insert(a.return_name(), a);
+	t2.insert(e.return_name(), e);
 
-	t1.erase(c.get_name());
-	EXPECT_TRUE(t1.is_contains(a.get_name()));
-	EXPECT_TRUE(t1.is_contains(b.get_name()));
-	EXPECT_FALSE(t1.is_contains(c.get_name()));
-	EXPECT_FALSE(t1.is_contains(d.get_name()));
+	t1.erase(c.return_name());
+	EXPECT_TRUE(t1.is_contains(a.return_name()));
+	EXPECT_TRUE(t1.is_contains(b.return_name()));
+	EXPECT_FALSE(t1.is_contains(c.return_name()));
+	EXPECT_FALSE(t1.is_contains(d.return_name()));
 
-	t2.erase(c.get_name());
-	EXPECT_TRUE(t2.is_contains(a.get_name()));
-	EXPECT_FALSE(t2.is_contains(b.get_name()));
-	EXPECT_FALSE(t2.is_contains(d.get_name()));
-	EXPECT_TRUE(t2.is_contains(e.get_name()));
+	t2.erase(c.return_name());
+	EXPECT_TRUE(t2.is_contains(a.return_name()));
+	EXPECT_FALSE(t2.is_contains(b.return_name()));
+	EXPECT_FALSE(t2.is_contains(d.return_name()));
+	EXPECT_TRUE(t2.is_contains(e.return_name()));
 
-	t1.erase(a.get_name());
-	EXPECT_FALSE(t1.is_contains(a.get_name()));
-	EXPECT_TRUE(t1.is_contains(b.get_name()));
-	EXPECT_FALSE(t1.is_contains(c.get_name()));
-	EXPECT_FALSE(t1.is_contains(d.get_name()));
+	t1.erase(a.return_name());
+	EXPECT_FALSE(t1.is_contains(a.return_name()));
+	EXPECT_TRUE(t1.is_contains(b.return_name()));
+	EXPECT_FALSE(t1.is_contains(c.return_name()));
+	EXPECT_FALSE(t1.is_contains(d.return_name()));
 
-	t2.erase(a.get_name());
-	t2.erase(e.get_name());
+	t2.erase(a.return_name());
+	t2.erase(e.return_name());
 
 	EXPECT_EQ(t1.get_size(), 2);
 	EXPECT_EQ(t2.get_size(), 0);
@@ -328,26 +314,26 @@ TEST(HashTable, Clear)
 	Value d("Lenny");
 	Value e("Jeffy"); // Collision with c
 
-	t1.insert(a.get_name(), a);
-	t1.insert(b.get_name(), b);
-	t1.insert(c.get_name(), c);
-	t1.insert(e.get_name(), e);
+	t1.insert(a.return_name(), a);
+	t1.insert(b.return_name(), b);
+	t1.insert(c.return_name(), c);
+	t1.insert(e.return_name(), e);
 
-	t2.insert(a.get_name(), a);
-	t2.insert(e.get_name(), e);
+	t2.insert(a.return_name(), a);
+	t2.insert(e.return_name(), e);
 
 	t1.clear();
-	EXPECT_FALSE(t1.is_contains(a.get_name()));
-	EXPECT_FALSE(t1.is_contains(b.get_name()));
-	EXPECT_FALSE(t1.is_contains(c.get_name()));
-	EXPECT_FALSE(t1.is_contains(d.get_name()));
-	EXPECT_FALSE(t1.is_contains(e.get_name()));
+	EXPECT_FALSE(t1.is_contains(a.return_name()));
+	EXPECT_FALSE(t1.is_contains(b.return_name()));
+	EXPECT_FALSE(t1.is_contains(c.return_name()));
+	EXPECT_FALSE(t1.is_contains(d.return_name()));
+	EXPECT_FALSE(t1.is_contains(e.return_name()));
 
 	t2.clear();
-	EXPECT_FALSE(t2.is_contains(a.get_name()));
-	EXPECT_FALSE(t2.is_contains(b.get_name()));
-	EXPECT_FALSE(t2.is_contains(d.get_name()));
-	EXPECT_FALSE(t2.is_contains(e.get_name()));
+	EXPECT_FALSE(t2.is_contains(a.return_name()));
+	EXPECT_FALSE(t2.is_contains(b.return_name()));
+	EXPECT_FALSE(t2.is_contains(d.return_name()));
+	EXPECT_FALSE(t2.is_contains(e.return_name()));
 
 	EXPECT_TRUE(t3.is_empty());
 	t3.clear();
@@ -368,13 +354,13 @@ TEST(HashTable, Swap)
 	Value d("Lenny");
 	Value e("Jeffy"); // Collision with c
 
-	t1.insert(a.get_name(), a);
-	t1.insert(b.get_name(), b);
-	t1.insert(c.get_name(), c);
-	t1.insert(e.get_name(), e);
+	t1.insert(a.return_name(), a);
+	t1.insert(b.return_name(), b);
+	t1.insert(c.return_name(), c);
+	t1.insert(e.return_name(), e);
 
-	t2.insert(a.get_name(), a);
-	t2.insert(e.get_name(), e);
+	t2.insert(a.return_name(), a);
+	t2.insert(e.return_name(), e);
 
 	t1.swap(t2);
 	EXPECT_EQ(t1.get_size(), 2);
@@ -392,15 +378,15 @@ TEST(HashTable, Swap)
 	EXPECT_TRUE(t2.is_empty());
 	EXPECT_EQ(t3.get_size(), 4);
 
-	EXPECT_TRUE(t3.is_contains(a.get_name()));
-	EXPECT_TRUE(t3.is_contains(b.get_name()));
-	EXPECT_TRUE(t3.is_contains(c.get_name()));
-	EXPECT_FALSE(t3.is_contains(d.get_name()));
+	EXPECT_TRUE(t3.is_contains(a.return_name()));
+	EXPECT_TRUE(t3.is_contains(b.return_name()));
+	EXPECT_TRUE(t3.is_contains(c.return_name()));
+	EXPECT_FALSE(t3.is_contains(d.return_name()));
 
-	EXPECT_TRUE(t4.is_contains(a.get_name()));
-	EXPECT_FALSE(t4.is_contains(b.get_name()));
-	EXPECT_FALSE(t4.is_contains(d.get_name()));
-	EXPECT_TRUE(t4.is_contains(e.get_name()));
+	EXPECT_TRUE(t4.is_contains(a.return_name()));
+	EXPECT_FALSE(t4.is_contains(b.return_name()));
+	EXPECT_FALSE(t4.is_contains(d.return_name()));
+	EXPECT_TRUE(t4.is_contains(e.return_name()));
 }
 
 
@@ -414,21 +400,21 @@ TEST(HashTable, OperatorBrackets)
 	Value d("Lenny");
 	Value e("Jeffy"); // Collision with c
 
-	t1.insert(a.get_name(), a);
-	t1.insert(b.get_name(), b);
-	t1.insert(c.get_name(), c);
-	t1.insert(e.get_name(), e);
+	t1.insert(a.return_name(), a);
+	t1.insert(b.return_name(), b);
+	t1.insert(c.return_name(), c);
+	t1.insert(e.return_name(), e);
 
-	t2.insert(a.get_name(), a);
-	t2.insert(e.get_name(), e);
+	t2.insert(a.return_name(), a);
+	t2.insert(e.return_name(), e);
 
-	EXPECT_EQ(t1[a.get_name()], a);
-	EXPECT_EQ(t1[b.get_name()], b);
+	EXPECT_EQ(t1[a.return_name()], a);
+	EXPECT_EQ(t1[b.return_name()], b);
 	EXPECT_EQ(t1.get_size(), 4);
 	
-	EXPECT_EQ(t2[d.get_name()], d);
+	EXPECT_EQ(t2[d.return_name()], d);
 	EXPECT_EQ(t2.get_size(), 3);
-	EXPECT_TRUE(t2.is_contains(d.get_name()));
+	EXPECT_TRUE(t2.is_contains(d.return_name()));
 }
 
 
@@ -442,13 +428,13 @@ TEST(HashTable, Get)
 	Value d("Lenny");
 	Value e("Jeffy"); // Collision with c
 
-	t1.insert(a.get_name(), a);
-	t1[b.get_name()];
-	t1[c.get_name()];
+	t1.insert(a.return_name(), a);
+	t1[b.return_name()];
+	t1[c.return_name()];
 
-	EXPECT_EQ(t1.get(a.get_name()), a);
-	EXPECT_EQ(t1.get(b.get_name()), b);
-	EXPECT_THROW(t1.get(d.get_name()), std::exception);
+	EXPECT_EQ(t1.get(a.return_name()), a);
+	EXPECT_EQ(t1.get(b.return_name()), b);
+	EXPECT_THROW(t1.get(d.return_name()), std::exception);
 }
 
 

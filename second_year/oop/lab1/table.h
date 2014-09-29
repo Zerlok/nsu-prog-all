@@ -1,6 +1,8 @@
 #ifndef __HASHTABLE_H__
 #define __HASHTABLE_H__
 
+/* -------------- __HASHTABLE_H__ SETUP -------------- */
+
 
 #include <stdexcept>
 #include <sstream>
@@ -9,18 +11,21 @@
 typedef std::string String;
 
 
-/* DEBUG */
-const bool DEBUG = true;
-const bool DEBUG_SUPER = false;
+/* -------------- DEBUG SETTINGS -------------- */
+
+#define __HTABLE_DEBUG__
 
 
-/* ERRORS MESSAGES */
+/* -------------- ERRORS MESSAGES -------------- */
+
 static const char *ERR_BAD_ALLOC = "Not enough memmory!";
+static const char *ERR_BAD_HTABLE_SIZE = "Invalid size of hashtable!";
 static const char *ERR_KEY_NOT_FOUND = "The key was not found!";
 static const char *ERR_NO_VALUE_IN_ITEM = "The Item object has no value!";
 
 
-/* VALUE CLASS (a student used as value) */
+/* -------------- VALUE CLASS (a student used as value) -------------- */
+
 class Value
 {
 	public:
@@ -34,7 +39,7 @@ class Value
 
 		~Value();
 
-		Value(const Value& s); // Copy student.
+		Value(const Value& s);
 
 		/* Operators */
 		Value& operator=(const Value& value);
@@ -42,8 +47,10 @@ class Value
 		friend bool operator!=(const Value& value1, const Value& value2);
 
 		/* Methods */
-		String get_name() const { return _name; }
+		String return_name() const { return _name; }
+		
 		String as_string() const; // For DEBUG.
+
 
 	private:
 		/* Fields */
@@ -57,7 +64,8 @@ bool operator==(const Value& value1, const Value& value2);
 bool operator!=(const Value& value1, const Value& value2);
 
 
-/* ITEM CLASS */
+/* -------------- ITEM CLASS -------------- */
+
 class Item
 {
 	public:
@@ -69,38 +77,40 @@ class Item
 		Item(const Item& i);
 
 		/* Get Field */
-		bool is_key_equals(const String& key) const;
-		bool is_key_not_equals(const String& key) const;
 		Item *get_next() const;
-		Value& get_value();
-		const Value& get_value() const;
+		Value& return_value();
+		const Value& return_value() const;
 
 		/* Operators */
 		friend bool operator==(const Item& value1, const Item& value2);
 		friend bool operator!=(const Item& value1, const Item& value2);
 		
 		/* Methods */
-		bool push_back(Item *item); // Pushes back an Item object.
-		bool push_back(Item& item); // Pushes back an Item object.
-		String as_string() const; // For debug.
-	
+		bool is_key_equals(const String& key) const;
+		bool is_key_not_equals(const String& key) const;
+		bool push_back(Item *item);
+		bool push_back(Item& item);
+		
+		String as_string() const;
+
 	private:
 		/* Fields */
-		String _key; // Key (the Student name)
-		Value *_value; // Pointer to Value object.
-		Item *_next; // Next Item object with same hash (for collisions)
+		String _key; // Key (the Student name).
+		Value *_value; // Pointer to the Value object.
+		Item *_next; // Next Item object with the same hash (collisions).
 };
 
 bool operator==(const Item& value1, const Item& value2);
 bool operator!=(const Item& value1, const Item& value2);
 
 
-/* HASHTABLE CLASS */
+/* -------------- HASHTABLE CLASS -------------- */
+
 class HashTable
 {
 	public:
-		// Constructors / Destructor
-		HashTable(int mem=1000);
+		/* Constructors / Destructor */
+		HashTable(int mem=997);
 		~HashTable();
 
 		HashTable(const HashTable& hashtable);
@@ -122,22 +132,27 @@ class HashTable
 		bool is_contains(const String& key) const;
 		void swap(HashTable& b);
 
+		void as_string() const;
+
 	private:
 		/* Fields */
 		Item **_data; // Array of pointers to Item object.
-		int _data_end; // Number of cells.
+		int _cells_num; // Number of cells in array.
 		
 		/* Methods */
-		int _get_index(const String& key) const; // Counts index of Item in hashtable.
+		int _get_index(const String& key) const;
 		Value *_search(const String& key) const;
+		void _check_and_expand();
 };
 
 bool operator==(const HashTable& value1, const HashTable& value2);
 bool operator!=(const HashTable& value1, const HashTable& value2);
 
 
-/* ACCESSORY FUNCTIONS IMAGES */
-unsigned int hash(const String& key); // Hash function (for collision tests).
-int good_hash(const String& key); // Good hash function.
+/* -------------- ACCESSORY FUNCTIONS -------------- */
 
+int hash(const String& key);
+
+
+/* -------------- __HASHTABLE_H__ END -------------- */
 #endif

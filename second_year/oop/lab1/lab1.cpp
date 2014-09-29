@@ -4,20 +4,23 @@
 
 /* -------------- ACCESSORY FUNCTIONS -------------- */
 
+#ifdef __HTABLE_DEBUG__
+
 /* 
 	DO NOT CHANGE IT! (while DEBUG it's necessaty for collisions test).
 	For example: "Danil" and "Diman" have the same hash.
 */
-unsigned int hash(const String& key)
+int hash(const String& key)
 {
 	return key.size() * key[0];
 }
 
+#else
 
 /*
 	Gets key and calculates a big hash number.
 */
-int good_hash(const String& key)
+int hash(const String& key)
 {
 	int sum, h = 1;
 	int len = key.size();
@@ -31,11 +34,14 @@ int good_hash(const String& key)
 			sum += key[i];
 		}
 
-		h *= sum;
+		h *= (sum + 997);
 	}
 
-	return len * h;
+	// Abs?
+	return (h > 0) ? h : -h;
 }
+
+#endif
 
 
 /* -------------- STUDENT METHODS -------------- */
@@ -55,9 +61,9 @@ Value::Value(const String& name, const unsigned int age,
 
 Value::~Value()
 {
-	if (DEBUG_SUPER) std::cout << "Destoying the Value "
-								<< as_string()
-								<< "... done" << std::endl;
+	// #ifdef __HTABLE_DEBUG__
+	// std::cout << "Destoying the Value " << as_string() << "... done" << std::endl;
+	// #endif
 }
 
 
@@ -137,7 +143,7 @@ String Value::as_string() const
 */
 Item::Item(const Value& value)
 {
-	_key = value.get_name();
+	_key = value.return_name();
 	_value = new Value(value);
 	_next = NULL;
 }
@@ -156,13 +162,16 @@ Item::Item(const String& key, const Value& value)
 
 Item::~Item()
 {
-	if (DEBUG_SUPER) std::cout << "Destoying the Item "
-								<< as_string() << "... ";
+	// #ifdef __HTABLE_DEBUG__
+	// std::cout << "Destoying the Item " << as_string() << "... ";
+	// #endif
 
 	delete _value;
 	delete _next;
 
-	if (DEBUG_SUPER) std::cout << "done" << std::endl;
+	// #ifdef __HTABLE_DEBUG__
+	// std::cout << "done" << std::endl;
+	// #endif
 }
 
 
@@ -171,10 +180,10 @@ Item::~Item()
 */
 Item::Item(const Item& item)
 {
-	Value value = item.get_value();
+	Value value = item.return_value();
 
 	_key = item._key;
-	_value = new Value(item.get_value());
+	_value = new Value(item.return_value());
 	push_back(item.get_next());
 }
 
@@ -204,7 +213,7 @@ Item *Item::get_next() const
 	Returns: Value object from Item object field.
 	If Item object is empty, raises an exception.
 */
-Value& Item::get_value()
+Value& Item::return_value()
 {
 	if (_value == NULL)
 	{
@@ -215,7 +224,7 @@ Value& Item::get_value()
 }
 
 
-const Value& Item::get_value() const
+const Value& Item::return_value() const
 {
 	if (_value == NULL)
 	{
@@ -329,7 +338,12 @@ String Item::as_string() const
 
 HashTable::HashTable(int mem)
 {
-	_data_end = mem;
+	if (mem < 1)
+	{
+		throw std::invalid_argument(ERR_BAD_HTABLE_SIZE);
+	}
+
+	_cells_num = mem;
 
 	try
 	{
@@ -340,7 +354,7 @@ HashTable::HashTable(int mem)
 		std::cout << ERR_BAD_ALLOC << std::endl;
 	}
 
-	for (int i = 0; i < _data_end; i++)
+	for (int i = 0; i < _cells_num; i++)
 	{
 		_data[i] = NULL;
 	}
@@ -349,29 +363,34 @@ HashTable::HashTable(int mem)
 
 HashTable::~HashTable()
 {
-	if (DEBUG_SUPER) std::cout << "Destroying the HashTable... ";
+	// #ifdef __HTABLE_DEBUG__
+	// std::cout << "Destroying the HashTable... ";
+	// #endif
 	
 	clear();
 	delete[] *_data;
 
-	if (DEBUG_SUPER) std::cout << "done" << std::endl;
+	// #ifdef __HTABLE_DEBUG__
+	// std::cout << "done" << std::endl;
+	// #endif
 }
 
 
+// TODO: rewrite with expanding
 HashTable::HashTable(const HashTable& hashtable)
 {
-	_data_end = hashtable._data_end;
+	_cells_num = hashtable._cells_num;
 
 	try
 	{
-		_data = new Item*[_data_end];
+		_data = new Item*[_cells_num];
 	}
 	catch (std::bad_alloc)
 	{
 		std::cout << ERR_BAD_ALLOC << std::endl;
 	}
 
-	for (int i = 0; i < _data_end; i++)
+	for (int i = 0; i < _cells_num; i++)
 	{
 		if (hashtable._data[i] != NULL)
 		{
@@ -387,37 +406,30 @@ HashTable::HashTable(const HashTable& hashtable)
 
 Value& HashTable::get(const String& key)
 {
-	Item *curr_item = _data[_get_index(key)];
+	Value *requested_value = _search(key);
 
-	while (curr_item != NULL && curr_item->is_key_not_equals(key))
-	{
-		curr_item = curr_item->get_next();
-	}
+	if (requested_value == NULL) throw std::invalid_argument(ERR_KEY_NOT_FOUND);
 
-	if (curr_item == NULL)
-	{
-		throw std::invalid_argument(ERR_KEY_NOT_FOUND);
-	}
-
-	return curr_item->get_value();
+	return *requested_value;
 }
 
 
 const Value& HashTable::get(const String& key) const
 {
-	Item *curr_item = _data[_get_index(key)];
+	return get(key);
+	// Item *curr_item = _data[_get_index(key)];
 
-	while (curr_item != NULL && curr_item->is_key_not_equals(key))
-	{
-		curr_item = curr_item->get_next();
-	}
+	// while (curr_item != NULL && curr_item->is_key_not_equals(key))
+	// {
+	// 	curr_item = curr_item->get_next();
+	// }
 	
-	if (curr_item == NULL)
-	{
-		throw std::invalid_argument(ERR_KEY_NOT_FOUND);
-	}
+	// if (curr_item == NULL)
+	// {
+	// 	throw std::invalid_argument(ERR_KEY_NOT_FOUND);
+	// }
 
-	return curr_item->get_value();
+	// return curr_item->return_value();
 }
 
 
@@ -426,7 +438,7 @@ size_t HashTable::get_size() const
 	size_t items_num = 0;
 	Item *curr_item;
 
-	for (int i = 0; i < _data_end; i++)
+	for (int i = 0; i < _cells_num; i++)
 	{
 		curr_item = _data[i];
 
@@ -443,17 +455,10 @@ size_t HashTable::get_size() const
 
 bool HashTable::is_empty() const
 {
-	std::cout << "trying to find out is this hashtable an empty...";
-	for (int i = 0; i < _data_end; i++)
+	for (int i = 0; i < _cells_num; i++)
 	{
-		if (_data[i] != NULL)
-		{
-			std::cout << _data[i]->as_string() << std::endl;
-			return false;
-		}
+		if (_data[i] != NULL) return false;
 	}
-
-	std::cout << "seems like it is.";
 
 	return true;
 }
@@ -461,32 +466,31 @@ bool HashTable::is_empty() const
 
 Value& HashTable::operator[](const String& key)
 {
-	Value *value = new Value(key), *inner_value = _search(key);
+	Value *inner_value = _search(key);
 	
 	if (inner_value == NULL)
 	{
+		Value *value = new Value(key);
+
 		insert(key, *value);
 
 		return *value;
 	}
-	else
-	{
-		delete value;
 
-		return *inner_value;
-	}
+	return *inner_value;
 }
 
 
+// TODO: rewrite with expanding!
 HashTable& HashTable::operator=(const HashTable& hashtable)
 {
 	clear();
 
-	_data_end = hashtable._data_end;
+	_cells_num = hashtable._cells_num;
 	
 	try
 	{
-		_data = new Item*[_data_end];
+		_data = new Item*[_cells_num];
 	}
 	catch (std::bad_alloc)
 	{
@@ -494,7 +498,7 @@ HashTable& HashTable::operator=(const HashTable& hashtable)
 	}
 
 
-	for (int i = 0; i < _data_end; i++)
+	for (int i = 0; i < _cells_num; i++)
 	{
 		if (hashtable._data[i] == NULL)
 		{
@@ -510,11 +514,11 @@ HashTable& HashTable::operator=(const HashTable& hashtable)
 
 bool operator==(const HashTable& hashtable1, const HashTable& hashtable2)
 {
-	if (hashtable1._data_end == hashtable2._data_end)
+	if (hashtable1._cells_num == hashtable2._cells_num)
 	{
 		Item *a_item, *b_item;
 
-		for (int i = 0; i < hashtable1._data_end; i++)
+		for (int i = 0; i < hashtable1._cells_num; i++)
 		{
 			a_item = hashtable1._data[i];
 			b_item = hashtable2._data[i];
@@ -552,20 +556,20 @@ bool operator!=(const HashTable& hashtable1, const HashTable& hashtable2)
 
 void HashTable::swap(HashTable& hashtable)
 {
-	unsigned int tmp_data_end = _data_end;
+	unsigned int tmp_cells_num = _cells_num;
 	Item **tmp_data = _data;
 
-	_data_end = hashtable._data_end;
+	_cells_num = hashtable._cells_num;
 	_data = hashtable._data;
 
-	hashtable._data_end = tmp_data_end;
+	hashtable._cells_num = tmp_cells_num;
 	hashtable._data = tmp_data;	
 }
 
 
 void HashTable::clear()
 {
-	for (int i = 0; i < _data_end; i++)
+	for (int i = 0; i < _cells_num; i++)
 	{
 		delete _data[i];
 		_data[i] = NULL;
@@ -575,19 +579,13 @@ void HashTable::clear()
 
 bool HashTable::erase(const String& key)
 {
-	std::cout << "start erasing at " << key << "... ";
-
 	int i = _get_index(key);
 	Item *last_item = _data[i], *curr_item = _data[i], *next_item = _data[i];
-
-	std::cout << hash(key) << " | "<< i << std::endl;
 
 	if (last_item == NULL)
 	{
 		return false;
 	}
-
-	std::cout << "index not empty (" << _data[i]->as_string() << ")";
 
 	if (last_item->is_key_equals(key))
 	{
@@ -606,13 +604,11 @@ bool HashTable::erase(const String& key)
 		return true;
 	}
 
-	std::cout << ")" << std::endl;
-
 	while (curr_item != NULL)
 	{
 		if (curr_item->is_key_equals(key))
 		{
-			last_item->push_back(next_item);
+			last_item->push_back(curr_item->get_next());
 			delete curr_item;
 			
 			return true;
@@ -622,52 +618,33 @@ bool HashTable::erase(const String& key)
 		curr_item = curr_item->get_next();
 	}
 
-	std::cout << ERR_KEY_NOT_FOUND << std::endl;
-
 	return false;
 }
 
 
+// TODO: rewrite with expanding!
 bool HashTable::insert(const String& key, const Value& value)
 {
-	std::cout << "start inserting " << key << "... ";
-
 	int i = _get_index(key);
 	Item *last_item, *curr_item = _data[i];
-
-	std::cout << "(" << hash(key) << " | "<< i << ")... ";
 
 	if (curr_item == NULL)
 	{
 		_data[i] = new Item(key, value);
-		std::cout << "empty|" << std::endl;
 
 		return true;
 	}
 
-	std::cout << "index not empty (" << curr_item->as_string() << ")... ";
-
 	while (curr_item != NULL)
 	{
-		if (curr_item->is_key_equals(key))
-		{
-			std::cout << "key exists|" << std::endl;
-			return false;
-		}
+		if (curr_item->is_key_equals(key)) return false;
 
 		last_item = curr_item;
 		curr_item = curr_item->get_next();
 	}
 
-	std::cout << "the same key doesnt exist... " << std::endl;
-
 	Item *new_item = new Item(key, value);
-
-	std::cout << new_item->as_string();
-
 	last_item->push_back(new_item);
-
-	std::cout << " done" << std::endl;
 
 	return true;
 }
@@ -675,14 +652,18 @@ bool HashTable::insert(const String& key, const Value& value)
 
 bool HashTable::is_contains(const String& key) const
 {
-	if (_search(key) == NULL) return false;
-	return true;
+	return (_search(key) != NULL);
 }
 
 
 int HashTable::_get_index(const String& key) const
 {
-	return (DEBUG) ? (hash(key) % _data_end) : (good_hash(key) % _data_end);
+	if (_cells_num < 1)
+	{
+		throw std::invalid_argument(ERR_BAD_HTABLE_SIZE);
+	}
+
+	return hash(key) % _cells_num;
 }
 
 
@@ -695,11 +676,18 @@ Value *HashTable::_search(const String& key) const
 	{
 		if (curr_item->is_key_equals(key))
 		{
-			return &(curr_item->get_value());
+			return &(curr_item->return_value());
 		}
 
 		curr_item = curr_item->get_next();
 	}
 
 	return NULL;
+}
+
+
+// TODO: write the function specified below.
+void HashTable::_check_and_expand()
+{
+
 }
