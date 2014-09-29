@@ -337,24 +337,24 @@ TEST(HashTable, Clear)
 	t2.insert(e.get_name(), e);
 
 	t1.clear();
-	// EXPECT_FALSE(t1.is_contains(a.get_name()));
-	// EXPECT_FALSE(t1.is_contains(b.get_name()));
-	// EXPECT_FALSE(t1.is_contains(c.get_name()));
+	EXPECT_FALSE(t1.is_contains(a.get_name()));
+	EXPECT_FALSE(t1.is_contains(b.get_name()));
+	EXPECT_FALSE(t1.is_contains(c.get_name()));
 	EXPECT_FALSE(t1.is_contains(d.get_name()));
-	// EXPECT_FALSE(t1.is_contains(e.get_name()));
+	EXPECT_FALSE(t1.is_contains(e.get_name()));
 
 	t2.clear();
-	// EXPECT_FALSE(t2.is_contains(a.get_name()));
-	// EXPECT_FALSE(t2.is_contains(b.get_name()));
-	// EXPECT_FALSE(t2.is_contains(d.get_name()));
-	// EXPECT_FALSE(t2.is_contains(e.get_name()));
+	EXPECT_FALSE(t2.is_contains(a.get_name()));
+	EXPECT_FALSE(t2.is_contains(b.get_name()));
+	EXPECT_FALSE(t2.is_contains(d.get_name()));
+	EXPECT_FALSE(t2.is_contains(e.get_name()));
 
-	// EXPECT_TRUE(t3.is_empty());
-	// t3.clear();
+	EXPECT_TRUE(t3.is_empty());
+	t3.clear();
 	
-	// EXPECT_EQ(t1.get_size(), 0);
-	// EXPECT_EQ(t2.get_size(), 0);
-	// EXPECT_EQ(t3.get_size(), 0);
+	EXPECT_EQ(t1.get_size(), 0);
+	EXPECT_EQ(t2.get_size(), 0);
+	EXPECT_EQ(t3.get_size(), 0);
 }
 
 

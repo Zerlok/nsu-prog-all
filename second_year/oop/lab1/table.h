@@ -37,6 +37,7 @@ class Value
 		Value(const Value& s); // Copy student.
 
 		/* Operators */
+		Value& operator=(const Value& value);
 		friend bool operator==(const Value& value1, const Value& value2);
 		friend bool operator!=(const Value& value1, const Value& value2);
 

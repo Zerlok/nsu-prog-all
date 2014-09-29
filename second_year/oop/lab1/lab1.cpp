@@ -74,6 +74,19 @@ Value::Value(const Value& value)
 
 
 /*
+	===May be not necessary operator!===
+	Copy the Value object from given Value object.
+*/
+Value& Value::operator=(const Value& value)
+{
+	_name = value._name;
+	_age = value._age;
+	_course = value._course;
+	_department = value._department;
+}
+
+
+/*
 	Checks the equal between two Value objects.
 	Returns: is all fields are equal in both Value objects.
 */
@@ -338,7 +351,8 @@ HashTable::~HashTable()
 {
 	if (DEBUG_SUPER) std::cout << "Destroying the HashTable... ";
 	
-	delete[] _data;
+	clear();
+	delete[] *_data;
 
 	if (DEBUG_SUPER) std::cout << "done" << std::endl;
 }
@@ -466,28 +480,31 @@ Value& HashTable::operator[](const String& key)
 
 HashTable& HashTable::operator=(const HashTable& hashtable)
 {
-//	clear();
+	clear();
 
-//	_data_end = hashtable._data_end;
+	_data_end = hashtable._data_end;
 	
-//	try
-//	{
-//		_data = new Item*[_data_end];
-//	}
-//	catch (std::bad_alloc)
-//	{
-//		std::cout << ERR_BAD_ALLOC << std::endl;
-//	}
+	try
+	{
+		_data = new Item*[_data_end];
+	}
+	catch (std::bad_alloc)
+	{
+		std::cout << ERR_BAD_ALLOC << std::endl;
+	}
 
 
-//	for (int i = 0; i < _data_end; i++)
-//	{
-//		_data[i] = hashtable._data[i];
-//	}
-
-	static HashTable new_table(hashtable);
-
-	return new_table;
+	for (int i = 0; i < _data_end; i++)
+	{
+		if (hashtable._data[i] == NULL)
+		{
+			_data[i] = NULL;
+		}
+		else
+		{
+			_data[i] = new Item(*(hashtable._data[i]));
+		}
+	}
 }
 
 
@@ -504,8 +521,6 @@ bool operator==(const HashTable& hashtable1, const HashTable& hashtable2)
 
 			while (a_item != NULL && b_item != NULL)
 			{
-				// if (a_item->get_key() != b_item->get_key() ||
-				// 	a_item->get_value() != b_item->get_value())
 				if (*a_item != *b_item)
 				{
 					return false;
@@ -550,14 +565,17 @@ void HashTable::swap(HashTable& hashtable)
 
 void HashTable::clear()
 {
-	// Raises the segmentation fault if uncommented!
-//	delete[] _data;
+	for (int i = 0; i < _data_end; i++)
+	{
+		delete _data[i];
+		_data[i] = NULL;
+	}
 }
 
 
 bool HashTable::erase(const String& key)
 {
-	std::cout << "start erasing at " << key << "..." << std::endl;
+	std::cout << "start erasing at " << key << "... ";
 
 	int i = _get_index(key);
 	Item *last_item = _data[i], *curr_item = _data[i], *next_item = _data[i];
@@ -569,8 +587,7 @@ bool HashTable::erase(const String& key)
 		return false;
 	}
 
-	std::cout << "Not empty cell" << std::endl;
-	std::cout << _data[i]->as_string() << std::endl;
+	std::cout << "index not empty (" << _data[i]->as_string() << ")";
 
 	if (last_item->is_key_equals(key))
 	{
@@ -589,7 +606,7 @@ bool HashTable::erase(const String& key)
 		return true;
 	}
 
-	std::cout << "Not first key" << std::endl;
+	std::cout << ")" << std::endl;
 
 	while (curr_item != NULL)
 	{
@@ -613,26 +630,28 @@ bool HashTable::erase(const String& key)
 
 bool HashTable::insert(const String& key, const Value& value)
 {
-	std::cout << "start inserting" << std::endl;
+	std::cout << "start inserting " << key << "... ";
 
 	int i = _get_index(key);
 	Item *last_item, *curr_item = _data[i];
 
-	std::cout << hash(key) << " | "<< i << std::endl;
+	std::cout << "(" << hash(key) << " | "<< i << ")... ";
 
 	if (curr_item == NULL)
 	{
 		_data[i] = new Item(key, value);
+		std::cout << "empty|" << std::endl;
+
 		return true;
 	}
 
-	std::cout << "the same index " << curr_item->as_string() << std::endl;
-	std::cout << "inserting... " << value.as_string() << std::endl;
+	std::cout << "index not empty (" << curr_item->as_string() << ")... ";
 
 	while (curr_item != NULL)
 	{
 		if (curr_item->is_key_equals(key))
 		{
+			std::cout << "key exists|" << std::endl;
 			return false;
 		}
 
@@ -640,15 +659,15 @@ bool HashTable::insert(const String& key, const Value& value)
 		curr_item = curr_item->get_next();
 	}
 
-	std::cout << key << " " << ERR_KEY_NOT_FOUND << std::endl;
+	std::cout << "the same key doesnt exist... " << std::endl;
 
-	static Item *new_item = new Item(key, value);
+	Item *new_item = new Item(key, value);
 
-	std::cout << new_item->as_string() << std::endl;
+	std::cout << new_item->as_string();
 
 	last_item->push_back(new_item);
 
-	std::cout << "pushed back." << std::endl;
+	std::cout << " done" << std::endl;
 
 	return true;
 }
