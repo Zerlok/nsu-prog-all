@@ -82,29 +82,16 @@ TEST(Item, Pushback)
 	Value a("Danil"), b("Bob"), c("Monica");
 	Item item1(a), item2(b), item3(c);
 
-	// std::cout << "Inited...";
-
 	EXPECT_TRUE(item1.push_back(item2)) << item1.as_string();
 	EXPECT_TRUE(item2.push_back(item3)) << item2.as_string();
 	EXPECT_FALSE(item3.push_back(item3)) << item3.as_string();
-
-	// std::cout << "Pushed...";
 
 	EXPECT_EQ(*(item1.get_next()), item2);
 	EXPECT_EQ(*(item2.get_next()), item3);
 }
 
-#endif
 
-/* -------------------- HASHTABLE CLASS TESTS -------------------- */
-
-TEST(HashTable, Init)
-{
-	HashTable a, b(1);
-}
-
-
-/* Hash func only! */
+/* TEST PASSES WHEN DEBUG IS ON!!! */
 TEST(HashTable, Collision)
 {
 	HashTable table(10);
@@ -116,8 +103,17 @@ TEST(HashTable, Collision)
 	EXPECT_TRUE(table.insert(a.return_name(), a));
 	EXPECT_TRUE(table.insert(b.return_name(), b));
 	EXPECT_TRUE(table.insert(c.return_name(), c));
-	// EXPECT_EQ(hash(a.return_name()), hash(b.return_name()));
+	EXPECT_EQ(hash(a.return_name()), hash(b.return_name()));
 	EXPECT_EQ(table.get_size(), 3);
+}
+
+#endif
+
+/* -------------------- HASHTABLE CLASS TESTS -------------------- */
+
+TEST(HashTable, Init)
+{
+	HashTable a, b(1);
 }
 
 

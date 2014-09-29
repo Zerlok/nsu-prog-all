@@ -59,12 +59,7 @@ Value::Value(const String& name, const unsigned int age,
 }
 
 
-Value::~Value()
-{
-	// #ifdef __HTABLE_DEBUG__
-	// std::cout << "Destoying the Value " << as_string() << "... done" << std::endl;
-	// #endif
-}
+Value::~Value() {}
 
 
 /*
@@ -162,16 +157,8 @@ Item::Item(const String& key, const Value& value)
 
 Item::~Item()
 {
-	// #ifdef __HTABLE_DEBUG__
-	// std::cout << "Destoying the Item " << as_string() << "... ";
-	// #endif
-
 	delete _value;
 	delete _next;
-
-	// #ifdef __HTABLE_DEBUG__
-	// std::cout << "done" << std::endl;
-	// #endif
 }
 
 
@@ -363,16 +350,8 @@ HashTable::HashTable(int mem)
 
 HashTable::~HashTable()
 {
-	// #ifdef __HTABLE_DEBUG__
-	// std::cout << "Destroying the HashTable... ";
-	// #endif
-	
 	clear();
 	delete[] *_data;
-
-	// #ifdef __HTABLE_DEBUG__
-	// std::cout << "done" << std::endl;
-	// #endif
 }
 
 
@@ -417,19 +396,6 @@ Value& HashTable::get(const String& key)
 const Value& HashTable::get(const String& key) const
 {
 	return get(key);
-	// Item *curr_item = _data[_get_index(key)];
-
-	// while (curr_item != NULL && curr_item->is_key_not_equals(key))
-	// {
-	// 	curr_item = curr_item->get_next();
-	// }
-	
-	// if (curr_item == NULL)
-	// {
-	// 	throw std::invalid_argument(ERR_KEY_NOT_FOUND);
-	// }
-
-	// return curr_item->return_value();
 }
 
 
