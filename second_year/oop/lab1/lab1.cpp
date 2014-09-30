@@ -4,18 +4,7 @@
 
 /* -------------- ACCESSORY FUNCTIONS -------------- */
 
-#ifdef __HTABLE_DEBUG__
-
-/* 
-	DO NOT CHANGE IT! (while DEBUG it's necessaty for collisions test).
-	For example: "Danil" and "Diman" have the same hash.
-*/
-int hash(const String& key)
-{
-	return key.size() * key[0];
-}
-
-#else
+#ifndef __HTABLE_DEBUG__
 
 /*
 	Gets key and calculates a big hash number.
@@ -31,14 +20,30 @@ int hash(const String& key)
 
 		for (int i = 0; i < max_i; i++)
 		{
-			sum += key[i];
+			sum += key[i] + i * (MEM_INIT % 10);
 		}
 
-		h *= (sum + 997);
+		sum += max_i * (MEM_INIT % 100);
+
+		h *= sum;
 	}
 
-	// Abs?
+	h += (h % MEM_INIT);
+
+	// TODO: use Abs?
 	return (h > 0) ? h : -h;
+}
+
+#else
+
+/* 
+	DO NOT CHANGE IT!
+	HashTable class uses this function while DEBUG is defined.
+	For example: "Danil" and "Diman" have the same hash.
+*/
+int hash(const String& key)
+{
+	return key.size() * key[0];
 }
 
 #endif
@@ -112,21 +117,9 @@ bool operator!=(const Value& value1, const Value& value2)
 }
 
 
-/*
-	Converts Value fields to string.
-	Returns: string about Value object.
-	For student example: "<name>:(<age>,<course>,<average_mark>,<department>)".
-*/
-String Value::as_string() const
+const String& Value::return_name() const
 {
-	std::stringstream str_stream;
-	
-	str_stream << _name << ":("
-				<< _age << ","
-				<< _course << ","
-				<< _department << ")";
-
-	return str_stream.str();
+	return _name;
 }
 
 
@@ -259,7 +252,6 @@ bool operator!=(const Item& item1, const Item& item2)
 	Fails if current Item object and any Item object
 	from given Item objects list are equal.
 */
-// TODO: Rewrite the function description.
 bool Item::push_back(Item *item)
 {
 	Item *p_item = item;
@@ -287,52 +279,6 @@ bool Item::push_back(Item *item)
 }
 
 
-
-// 	Do the same as a method above, if input is a reference to Item object.
-
-// bool Item::push_back(Item& item)
-// {
-// 	return push_back(&item);
-// }
-
-
-/*
-	Converts Item fields to string.
-	Returns: string about Item object.
-	"<key>:[<value>,<next (key)>]".
-*/
-String Item::as_string() const
-{
-	std::stringstream str_stream;
-	
-	str_stream << _key << ":[";
-	
-	if (_value == NULL)
-	{
-		str_stream << "NULL";
-	}
-	else
-	{
-		str_stream << _value->as_string();
-	}
-
-	str_stream << ",";
-
-	if (_next == NULL)
-	{
-		str_stream << "NULL";
-	}
-	else
-	{
-		str_stream << _next->as_string();
-	}
-
-	str_stream << "]";
-
-	return str_stream.str();
-}
-
-
 /* -------------- HASHTABLE METHODS -------------- */
 
 HashTable::HashTable(int mem)
@@ -342,7 +288,8 @@ HashTable::HashTable(int mem)
 		throw std::invalid_argument(ERR_BAD_HTABLE_SIZE);
 	}
 
-	_critical_items_num = _cells_num = mem;
+	_cells_num = mem;
+	_critical_items_num = _cells_num * FULLNESS_FACTOR;
 
 	try
 	{
@@ -369,7 +316,8 @@ HashTable::~HashTable()
 
 HashTable::HashTable(const HashTable& hashtable)
 {
-	_critical_items_num = _cells_num = hashtable._cells_num;
+	_cells_num = hashtable._cells_num;
+	_critical_items_num = _cells_num * FULLNESS_FACTOR;
 
 	try
 	{
@@ -462,7 +410,8 @@ HashTable& HashTable::operator=(const HashTable& hashtable)
 {
 	clear();
 
-	_critical_items_num = _cells_num = hashtable._cells_num;
+	_cells_num = hashtable._cells_num;
+	_critical_items_num = _cells_num * FULLNESS_FACTOR;
 	
 	try
 	{
@@ -671,7 +620,7 @@ bool HashTable::_check_and_expand()
 		return false;
 	}
 
-	HashTable tmp_table(_cells_num * 2);
+	HashTable tmp_table(_cells_num * FULLNESS_FACTOR);
 	Item *curr_item;
 
 	for (int i = 0; i < _cells_num; i++)

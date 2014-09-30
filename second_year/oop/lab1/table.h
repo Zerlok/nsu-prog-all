@@ -1,19 +1,23 @@
 #ifndef __HASHTABLE_H__
 #define __HASHTABLE_H__
 
-/* -------------- __HASHTABLE_H__ SETUP -------------- */
 
+/* -------------- __HASHTABLE_H__ SETUP -------------- */
 
 #include <stdexcept>
 #include <sstream>
 
 
-typedef std::string String;
-
-
 /* -------------- DEBUG SETTINGS -------------- */
 
-#define __HTABLE_DEBUG__
+// #define __HTABLE_DEBUG__
+
+
+/* -------------- CONSTANTS -------------- */
+
+typedef std::string String;
+static const int MEM_INIT = 997;
+static const int FULLNESS_FACTOR = 2;
 
 
 /* -------------- ERRORS MESSAGES -------------- */
@@ -47,10 +51,8 @@ class Value
 		friend bool operator!=(const Value& value1, const Value& value2);
 
 		/* Methods */
-		String return_name() const { return _name; }
-		
-		String as_string() const; // For DEBUG.
-
+		const String& return_name() const;
+		const String& as_string() const;
 
 	private:
 		/* Fields */
@@ -92,8 +94,6 @@ class Item
 		bool is_key_not_equals(const String& key) const;
 		bool push_back(Item *item);
 		bool push_back(Item& item);
-		
-		String as_string() const;
 
 	private:
 		/* Fields */
@@ -112,7 +112,7 @@ class HashTable
 {
 	public:
 		/* Constructors / Destructor */
-		HashTable(int mem=997);
+		HashTable(int mem=MEM_INIT);
 		~HashTable();
 
 		HashTable(const HashTable& hashtable);
@@ -133,8 +133,6 @@ class HashTable
 		bool is_empty() const;
 		bool is_contains(const String& key) const;
 		void swap(HashTable& b);
-
-		void as_string() const;
 
 	private:
 		/* Fields */
