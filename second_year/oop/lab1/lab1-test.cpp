@@ -1,6 +1,5 @@
-#include "table.h"
+#include "htable.h"
 #include <gtest/gtest.h>
-#include <iostream>
 
 
 #ifdef __HTABLE_DEBUG__
@@ -471,6 +470,20 @@ TEST(HashTable, Get)
 	EXPECT_EQ(t1.get(a.return_name()), a);
 	EXPECT_EQ(t1.get(b.return_name()), b);
 	EXPECT_THROW(t1.get(d.return_name()), std::exception);
+}
+
+
+TEST (HashTable, BigInsert)
+{
+	HashTable table(1);
+	Value val("default", 1, 1, "defaults");
+
+	for (int i = 0; i < 1000; i++)
+	{
+		EXPECT_TRUE(table.insert(std::to_string(i), val));
+	}
+
+	EXPECT_EQ(table.get_size(), 1000);
 }
 
 

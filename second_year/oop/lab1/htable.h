@@ -5,7 +5,7 @@
 /* -------------- __HASHTABLE_H__ SETUP -------------- */
 
 #include <stdexcept>
-#include <sstream>
+#include <iostream>
 
 
 /* -------------- DEBUG SETTINGS -------------- */
@@ -52,14 +52,13 @@ class Value
 
 		/* Methods */
 		const String& return_name() const;
-		const String& as_string() const;
 
 	private:
 		/* Fields */
-		String _name; // Student name.
 		unsigned int _age; // Student age.
 		unsigned int _course; // Student course at university.
 		String _department; // Student department at university.
+		String _name; // Student name.
 };
 
 bool operator==(const Value& value1, const Value& value2);
@@ -72,8 +71,8 @@ class Item
 {
 	public:
 		/* Constructors / Desctructor */
-		Item(const Value& value);
 		Item(const String& key, const Value& value);
+
 		~Item();
 
 		Item(const Item& i);
@@ -93,13 +92,12 @@ class Item
 		bool is_key_equals(const String& key) const;
 		bool is_key_not_equals(const String& key) const;
 		bool push_back(Item *item);
-		bool push_back(Item& item);
 
 	private:
 		/* Fields */
 		String _key; // Key (the Student name).
-		Value *_value; // Pointer to the Value object.
 		Item *_next; // Next Item object with the same hash (collisions).
+		Value *_value; // Pointer to the Value object.
 };
 
 bool operator==(const Item& value1, const Item& value2);
@@ -113,6 +111,7 @@ class HashTable
 	public:
 		/* Constructors / Destructor */
 		HashTable(int mem=MEM_INIT);
+
 		~HashTable();
 
 		HashTable(const HashTable& hashtable);
@@ -130,19 +129,19 @@ class HashTable
 		const Value& get(const String& key) const;
 		size_t get_size() const;
 		bool insert(const String& key, const Value& value);
-		bool is_empty() const;
 		bool is_contains(const String& key) const;
+		bool is_empty() const;
 		void swap(HashTable& b);
 
 	private:
 		/* Fields */
-		Item **_data; // Array of pointers to Item object.
 		int _cells_num; // Number of cells in array.
+		Item **_data; // Array of pointers to Item object.
 		
 		/* Methods */
+		bool _check_and_expand();
 		int _get_index(const String& key) const;
 		Value *_search(const String& key) const;
-		bool _check_and_expand();
 };
 
 bool operator==(const HashTable& value1, const HashTable& value2);
