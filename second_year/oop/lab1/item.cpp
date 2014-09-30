@@ -139,7 +139,8 @@ bool Item::is_key_not_equals(const String& key) const
 
 /*
 	Pushes back an Item object to the list of current Item objects.
-	Fails if any Item object from given Item objects list are equal to the key of the current Item object (when trying to create a cycled list).
+	Fails if any Item object from given Item objects list are equal
+	to the key of the current Item object (when trying to create a cycled list).
 */
 bool Item::push_back(Item *item)
 {

@@ -124,7 +124,8 @@ HashTable& HashTable::operator=(const HashTable& hashtable)
 
 /*
 	Checks are two HashTable objects same.
-	Returns: false if HashTable sizes are different or any inner Item object are not same, otherwise returns true.
+	Returns: false if HashTable sizes are different or any inner Item object are not same,
+	otherwise returns true.
 */
 bool operator==(const HashTable& hashtable1, const HashTable& hashtable2)
 {
@@ -291,8 +292,9 @@ size_t HashTable::get_size() const
 
 
 /*
-	Inserts the Value object with specified key into the current HashTable object and returns true if successfull.
-	Otherwise returns false, if Item object with the same key already exists in the HashTable object.
+	Inserts the Value object with specified key into the current HashTable object
+	and returns true if successfull. Otherwise returns false, if Item object
+	with the same key already exists in the HashTable object.
 */
 bool HashTable::insert(const String& key, const Value& value)
 {

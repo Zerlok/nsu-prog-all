@@ -16,8 +16,19 @@
 /* -------------- CONSTANTS -------------- */
 
 typedef std::string String;
-static const int MEM_INIT = 997; // The default hashtable size.
-static const int FULLNESS_FACTOR = 2; // 2:1 The critical factor between the number of Item objects in HashTable and the number of allocated Items cells.
+
+
+/*
+	The default hashtable size.
+*/
+static const int MEM_INIT = 997; // Prime number.
+
+
+/*
+	The critical factor between the number of Item objects in HashTable
+	and the number of allocated Items cells.
+*/
+static const int FULLNESS_FACTOR = 2; // 2 : 1
 
 
 /* -------------- ERRORS MESSAGES -------------- */
