@@ -149,7 +149,6 @@ Item::Item(const String& key, const Value& value)
 Item::~Item()
 {
 	delete _value;
-	delete _next;
 }
 
 
@@ -543,7 +542,14 @@ void HashTable::clear()
 {
 	for (int i = 0; i < _cells_num; i++)
 	{
-		delete _data[i];
+		Item *tmp = _data[i];
+
+		while (tmp) {
+			Item *delete_item = tmp;
+			tmp = tmp->get_next();
+			delete delete_item;
+		}
+
 		_data[i] = NULL;
 	}
 }
