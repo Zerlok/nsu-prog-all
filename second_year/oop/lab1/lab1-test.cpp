@@ -501,6 +501,12 @@ TEST(Common, HashTable)
 
 	ASSERT_TRUE(t4.is_contains(a.return_name()));
 	ASSERT_FALSE(t3.is_contains(e.return_name()));
+
+	EXPECT_NO_THROW(t2["my"] = b);
+	EXPECT_EQ(t2.get("my"), b);
+
+	EXPECT_NO_THROW(t2[a.return_name()] = b);
+	EXPECT_EQ(t2.get(a.return_name()), b);
 }
 
 

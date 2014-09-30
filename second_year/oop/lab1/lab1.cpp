@@ -395,11 +395,11 @@ Value& HashTable::operator[](const String& key)
 	
 	if (inner_value == NULL)
 	{
-		Value *value = new Value(key);
+		Value value(key);
 
-		insert(key, *value);
+		insert(key, value);
 
-		return *value;
+		return *_search(key);
 	}
 
 	return *inner_value;
