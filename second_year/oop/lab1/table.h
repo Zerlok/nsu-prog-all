@@ -10,14 +10,14 @@
 
 /* -------------- DEBUG SETTINGS -------------- */
 
-// #define __HTABLE_DEBUG__
+#define __HTABLE_DEBUG__
 
 
 /* -------------- CONSTANTS -------------- */
 
 typedef std::string String;
-static const int MEM_INIT = 997;
-static const int FULLNESS_FACTOR = 2;
+static const int MEM_INIT = 997; // The default hashtable size.
+static const int FULLNESS_FACTOR = 2; // 2:1 The critical factor between the number of Item objects in HashTable and the number of allocated Items cells.
 
 
 /* -------------- ERRORS MESSAGES -------------- */
@@ -138,7 +138,6 @@ class HashTable
 		/* Fields */
 		Item **_data; // Array of pointers to Item object.
 		int _cells_num; // Number of cells in array.
-		int _critical_items_num; // Critical number of Items object in hashtable to expand it.
 		
 		/* Methods */
 		int _get_index(const String& key) const;

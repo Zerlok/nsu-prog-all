@@ -42,7 +42,7 @@ TEST(Item, Init)
 {
 	Value a("Danil");
 	Value b("Merlin");
-	Item item1("Danil", a), item2("Den", a), item3(a), item4("Den", b);
+	Item item1("Danil", a), item2("Den", a), item3("Danil", a), item4("Den", b);
 	
 	EXPECT_NE(item1, item2);
 	EXPECT_EQ(item1, item3);
@@ -55,7 +55,7 @@ TEST(Item, Init)
 TEST(Item, Copy)
 {
 	Value a("Lucy");
-	Item item1(a), item2(item1), item3(item2);
+	Item item1("she", a), item2(item1), item3(item2);
 
 	EXPECT_EQ(item1, item2);
 	EXPECT_EQ(item2, item3);
@@ -66,7 +66,7 @@ TEST(Item, Copy)
 TEST(Item, OperatorEQEQ)
 {
 	Value a("Danil"), b("Denis");
-	Item item1("Danil", a), item2("Danil2", a), item3(b), item4(b);
+	Item item1("Danil", a), item2("Danil2", a), item3("Denis", b), item4("Denis", b);
 
 	EXPECT_FALSE(item1 == item2);
 	EXPECT_FALSE(item1 == item3);
@@ -77,7 +77,7 @@ TEST(Item, OperatorEQEQ)
 TEST(Item, Pushback)
 {
 	Value a("Danil"), b("Bob"), c("Monica");
-	Item item1(a), item2(b), item3(c);
+	Item item1("1", a), item2("2", b), item3("3", c);
 
 	EXPECT_TRUE(item1.push_back(&item2));
 	EXPECT_TRUE(item2.push_back(&item3));

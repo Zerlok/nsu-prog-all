@@ -7,7 +7,7 @@
 #ifndef __HTABLE_DEBUG__
 
 /*
-	Gets key and calculates a big hash number.
+	Calculates a big hash number for the specified key.
 */
 int hash(const String& key)
 {
@@ -30,7 +30,6 @@ int hash(const String& key)
 
 	h += (h % MEM_INIT);
 
-	// TODO: use Abs?
 	return (h > 0) ? h : -h;
 }
 
@@ -51,9 +50,6 @@ int hash(const String& key)
 
 /* -------------- STUDENT METHODS -------------- */
 
-/*
-	Creates new Value object.
-*/
 Value::Value(const String& name, const unsigned int age,
 	const unsigned int course, const String& department)
 {
@@ -68,7 +64,7 @@ Value::~Value() {}
 
 
 /*
-	Copy the Value object from given Value object.
+	Makes a copy of given Value object.
 */
 Value::Value(const Value& value)
 {
@@ -80,8 +76,7 @@ Value::Value(const Value& value)
 
 
 /*
-	===May be not necessary operator!===
-	Copy the Value object from given Value object.
+	Copies all fields from given Value object to the current Value object.
 */
 Value& Value::operator=(const Value& value)
 {
@@ -93,8 +88,8 @@ Value& Value::operator=(const Value& value)
 
 
 /*
-	Checks the equal between two Value objects.
-	Returns: is all fields are equal in both Value objects.
+	Checks are two Value objects same.
+	Returns: is all fields are same in both Value objects.
 */
 bool operator==(const Value& value1, const Value& value2)
 {
@@ -108,8 +103,8 @@ bool operator==(const Value& value1, const Value& value2)
 
 
 /*
-	Checks the difference between two Value objects.
-	Returns: is not equal objects.
+	Checks are Value objects different.
+	Returns: is NOT equal objects.
 */
 bool operator!=(const Value& value1, const Value& value2)
 {
@@ -117,6 +112,9 @@ bool operator!=(const Value& value1, const Value& value2)
 }
 
 
+/*
+	Returns the value from _name field of current Value object.
+*/
 const String& Value::return_name() const
 {
 	return _name;
@@ -129,12 +127,12 @@ const String& Value::return_name() const
 	Creates an Item object with specified Value object.
 	Key generates from Value (for example the student name is a key).
 */
-Item::Item(const Value& value)
-{
-	_key = value.return_name();
-	_value = new Value(value);
-	_next = NULL;
-}
+// Item::Item(const Value& value)
+// {
+// 	_key = value.return_name();
+// 	_value = new Value(value);
+// 	_next = NULL;
+// }
 
 
 /*
@@ -156,7 +154,7 @@ Item::~Item()
 
 
 /*
-	Copy Item object from given Item object.
+	Makes a copy of given Item object.
 */
 Item::Item(const Item& item)
 {
@@ -168,12 +166,18 @@ Item::Item(const Item& item)
 }
 
 
+/*
+	Checks are specified key and Item object key same.
+*/
 bool Item::is_key_equals(const String& key) const
 {
 	return (_key == key);
 }
 
 
+/*
+	Checks are specified key and Item object key NOT same.
+*/
 bool Item::is_key_not_equals(const String& key) const
 {
 	return (_key != key);
@@ -189,12 +193,18 @@ Item *Item::get_next() const
 }
 
 
+/*
+	Returns: the current Item object key.
+*/
 String Item::return_key()
 {
 	return _key;
 }
 
 
+/*
+	Returns: the current Item object key.
+*/
 const String Item::return_key() const
 {
 	return _key;
@@ -202,7 +212,7 @@ const String Item::return_key() const
 
 
 /*
-	Returns: Value object from Item object field.
+	Returns: Value object from Item object.
 	If Item object is empty, raises an exception.
 */
 Value& Item::return_value()
@@ -216,6 +226,10 @@ Value& Item::return_value()
 }
 
 
+/*
+	Returns: Value object from Item object.
+	If Item object is empty, raises an invalid argument exception.
+*/
 const Value& Item::return_value() const
 {
 	if (_value == NULL)
@@ -228,8 +242,8 @@ const Value& Item::return_value() const
 
 
 /*
-	Checks is two Item object are equal.
-	Returns: is keys are equal.
+	Checks are two Item object same.
+	Returns: are keys and values equal.
 */
 bool operator==(const Item& item1, const Item& item2)
 {
@@ -238,8 +252,8 @@ bool operator==(const Item& item1, const Item& item2)
 
 
 /*
-	Checks is two Item objects are NOT equal.
-	Returns: is keys are NOT equal.
+	Checks are two Item objects NOT same.
+	Returns: are objects NOT equal.
 */
 bool operator!=(const Item& item1, const Item& item2)
 {
@@ -248,9 +262,8 @@ bool operator!=(const Item& item1, const Item& item2)
 
 
 /*
-	Pushes back an Item object to the list of Item objects.
-	Fails if current Item object and any Item object
-	from given Item objects list are equal.
+	Pushes back an Item object to the list of current Item objects.
+	Fails if any Item object from given Item objects list are equal to the key of the current Item object (when trying to create a cycled list).
 */
 bool Item::push_back(Item *item)
 {
@@ -289,7 +302,6 @@ HashTable::HashTable(int mem)
 	}
 
 	_cells_num = mem;
-	_critical_items_num = _cells_num * FULLNESS_FACTOR;
 
 	try
 	{
@@ -314,10 +326,12 @@ HashTable::~HashTable()
 }
 
 
+/*
+	Makes a copy of given HashTable object.
+*/
 HashTable::HashTable(const HashTable& hashtable)
 {
 	_cells_num = hashtable._cells_num;
-	_critical_items_num = _cells_num * FULLNESS_FACTOR;
 
 	try
 	{
@@ -342,6 +356,9 @@ HashTable::HashTable(const HashTable& hashtable)
 }
 
 
+/*
+	Returns: the Value from given key from current HashTable object.
+*/
 Value& HashTable::get(const String& key)
 {
 	Value *requested_value = _search(key);
@@ -352,12 +369,18 @@ Value& HashTable::get(const String& key)
 }
 
 
+/*
+	Returns: the Value from given key from current HashTable object.
+*/
 const Value& HashTable::get(const String& key) const
 {
 	return get(key);
 }
 
 
+/*
+	Calculates and returns how many Item objects are in the current HashTable object.
+*/
 size_t HashTable::get_size() const
 {
 	size_t items_num = 0;
@@ -378,6 +401,9 @@ size_t HashTable::get_size() const
 }
 
 
+/*
+	Checks is the current HashTable object empty.
+*/
 bool HashTable::is_empty() const
 {
 	for (int i = 0; i < _cells_num; i++)
@@ -389,6 +415,10 @@ bool HashTable::is_empty() const
 }
 
 
+/*
+	Returns: the Value object from specified key from current HashTable object.
+	If Value does not exist - inserts the new Value object into HashTable and returns it.
+*/
 Value& HashTable::operator[](const String& key)
 {
 	Value *inner_value = _search(key);
@@ -406,12 +436,14 @@ Value& HashTable::operator[](const String& key)
 }
 
 
+/*
+	Copies all fields from specified HashTable object to the current HashTable object.
+*/
 HashTable& HashTable::operator=(const HashTable& hashtable)
 {
 	clear();
 
 	_cells_num = hashtable._cells_num;
-	_critical_items_num = _cells_num * FULLNESS_FACTOR;
 	
 	try
 	{
@@ -438,6 +470,10 @@ HashTable& HashTable::operator=(const HashTable& hashtable)
 }
 
 
+/*
+	Checks are two HashTable objects same.
+	Returns: false if HashTable sizes are different or any inner Item object are not same, otherwise returns true.
+*/
 bool operator==(const HashTable& hashtable1, const HashTable& hashtable2)
 {
 	if (hashtable1._cells_num == hashtable2._cells_num)
@@ -474,12 +510,19 @@ bool operator==(const HashTable& hashtable1, const HashTable& hashtable2)
 }
 
 
+/*
+	Checks are two HashTable objects NOT same.
+	Returns: are HashTable objects NOT equal.
+*/
 bool operator!=(const HashTable& hashtable1, const HashTable& hashtable2)
 {
 	return !(hashtable1 == hashtable2);
 }
 
 
+/*
+	Changes fields between current and specified HashTable objects.
+*/
 void HashTable::swap(HashTable& hashtable)
 {
 	unsigned int tmp_cells_num = _cells_num;
@@ -493,6 +536,9 @@ void HashTable::swap(HashTable& hashtable)
 }
 
 
+/*
+	Erases all data from current HashTable object.
+*/
 void HashTable::clear()
 {
 	for (int i = 0; i < _cells_num; i++)
@@ -503,6 +549,10 @@ void HashTable::clear()
 }
 
 
+/*
+	Erases value with specified key from current HashTable object and returns true.
+	Otherwise returns false, if the value with specified key does not exist in HashTable object.
+*/
 bool HashTable::erase(const String& key)
 {
 	int i = _get_index(key);
@@ -548,6 +598,10 @@ bool HashTable::erase(const String& key)
 }
 
 
+/*
+	Inserts the Value object with specified key into the current HashTable object and returns true if successfull.
+	Otherwise returns false, if Item object with the same key already exists in the HashTable object.
+*/
 bool HashTable::insert(const String& key, const Value& value)
 {
 	_check_and_expand();
@@ -577,12 +631,20 @@ bool HashTable::insert(const String& key, const Value& value)
 }
 
 
+/*
+	Checks does the value with specified key exist in the HashTable object.
+	Returns: true if it does, false - if not.
+*/
 bool HashTable::is_contains(const String& key) const
 {
 	return (_search(key) != NULL);
 }
 
 
+/*
+	Private method!
+	Calculates the index of specified key in HashTable object and returns it.
+*/
 int HashTable::_get_index(const String& key) const
 {
 	if (_cells_num < 1)
@@ -594,6 +656,11 @@ int HashTable::_get_index(const String& key) const
 }
 
 
+/*
+	Private method!
+	Looks for the value with specified key in Hashtable object.
+	Returns: pointer to the value if exists, otherwise - NULL.
+*/
 Value *HashTable::_search(const String& key) const
 {
 	int i = _get_index(key);
@@ -613,9 +680,14 @@ Value *HashTable::_search(const String& key) const
 }
 
 
+/*
+	Private method!
+	Checks the HashTable object for fullness.
+	If there are a lot of objects, expands this HashTable object.
+*/
 bool HashTable::_check_and_expand()
 {
-	if (get_size() < _critical_items_num)
+	if (get_size() * FULLNESS_FACTOR < _cells_num)
 	{
 		return false;
 	}
