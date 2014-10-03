@@ -31,7 +31,7 @@ HashTable::HashTable(int mem)
 HashTable::~HashTable()
 {
 	clear();
-	delete[] *_data;
+	delete _data;
 }
 
 
