@@ -65,6 +65,11 @@ Universe::Universe(const Universe& u)
 bool Universe::init(const int x, const int y, const LifeformState state)
 {
 	Lifeform point(state);
+
+	if (x < 0 || y < 0 || x > _width-1 || y > _width-1)
+	{
+		throw std::invalid_argument(ERR_INDEX_OUT_RANGE);
+	}
 	
 	_data[x][y] = point;
 
@@ -94,7 +99,7 @@ void Universe::draw()
 	int x;
 
 	std::cout << "+";
-	for (x = 1; x < _width-1; x++) std::cout << "-";
+	for (x = 0; x < (2 * _width)-1; x++) std::cout << "-";
 	std::cout << "+" << std::endl;
 
 	for (x = 0; x < _width; x++)
@@ -104,12 +109,12 @@ void Universe::draw()
 		std::cout << "|";
 		for (int y = 0; y < _width; y++)
 		{
-			std::cout << p_form[y];
+			std::cout << p_form[y] << " ";
 		}
-		std::cout << "|" << std::endl;
+		std::cout << "\b|" << std::endl;
 	}
 
 	std::cout << "+";
-	for (x = 1; x < _width-1; x++) std::cout << "-";
+	for (x = 0; x < (2 * _width)-1; x++) std::cout << "-";
 	std::cout << "+" << std::endl;
 }

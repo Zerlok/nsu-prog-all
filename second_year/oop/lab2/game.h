@@ -12,6 +12,7 @@
 static const char ERR_BAD_ALLOC[] = "Not enough memory!";
 static const char ERR_BAD_UNIVERSE_SIZE[] = "The universe size must be grater than 1!";
 static const char ERR_NEGATIVE_VALUE[] = "The value must be grater or equal 0!";
+static const char ERR_INDEX_OUT_RANGE[] = "Index is out of range (0 <= index <= <universe size> - 1)!";
 
 static const int MAX_HEALTH = 5;
 static const int ZERO_HEALTH = 0;
