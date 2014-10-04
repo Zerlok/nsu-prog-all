@@ -77,18 +77,18 @@ int main(int argc, char **argv)
 	
 	Universe space(10);
 
-	for (int x = 2; x < 5; x++)
+	for (int x = 2; x < 7; x++)
 	{
-		for (int y = 2; y < 5; y++)
+		for (int y = 2; y < 7; y++)
 		{
-			space.init(x, y, ALIVE);
+			if ((x % 2 == 1) || (y % 2 == 0)) space.init(x, y, ALIVE);
 		}
 	}
 
 
 	space.draw();
 
-	for (int i = 0; i < 2; i++)
+	for (int i = 0; i < 10; i++)
 	{
 		space.do_step();
 		space.draw();

@@ -116,7 +116,7 @@ bool Lifeform::heal(const int points)
 
 bool Lifeform::apply_state()
 {
-	if (_neighbours_num > 3 && _neighbours_num < 6)
+	if (_neighbours_num >= 3 && _neighbours_num <= 5)
 	{
 		born();
 		return true;
