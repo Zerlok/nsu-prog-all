@@ -9,6 +9,7 @@ Universe::Universe(const int length)
 	}
 
 	_width = length;
+	_step = 0;
 
 	Lifeform point(DEAD);
 
@@ -39,6 +40,7 @@ Universe::~Universe()
 Universe::Universe(const Universe& u)
 {
 	_width = u._width;
+	_step = u._step;
 
 	try
 	{
@@ -57,8 +59,6 @@ Universe::Universe(const Universe& u)
 			_data[x][y] = u._data[x][y];
 		}
 	}
-
-	_has_alive_object = u._has_alive_object;
 }
 
 
@@ -73,11 +73,6 @@ bool Universe::init(const int x, const int y, const LifeformState state)
 	
 	_data[x][y] = point;
 
-	if (state != DEAD)
-	{
-		_has_alive_object = true;
-	}
-
 	return true;
 }
 
@@ -90,25 +85,16 @@ bool Universe::init_from_file()
 
 bool Universe::is_freezed() const
 {
-	return !_has_alive_object;
+	return false;
 }
 
 
-int Universe::get_neighbours_number(const int x, const int y) const
+int Universe::count_neighbours_number(const int x, const int y) const
 {
 	if (x < 0 || y < 0 || x > _width-1 || y > _width-1)
 	{
 		throw std::invalid_argument(ERR_INDEX_OUT_RANGE);
 	}
-
-	/*
-	There are the dot's neighbours:
-		+-------+
-		| 8 1 2 |
-		| 7 . 3 |
-		| 6 5 4 |
-	   	+-------+
-	*/
 
 	// #ifdef __DEBUG__
 	// std::cout << "1: (" <<
@@ -121,6 +107,15 @@ int Universe::get_neighbours_number(const int x, const int y) const
 	// 		x << " " << (y-1 + _width) % _width << "), 8: (" <<
 	// 		(x-1 + _width) % _width << " " << (y-1 + _width) % _width << ")" << std::endl;
 	// #endif
+
+	/*
+	There are the dot's neighbours (the dot location is x, y):
+		+-------+
+		| 8 1 2 |
+		| 7 . 3 |
+		| 6 5 4 |
+	   	+-------+
+	*/
 
 	return (
 			_data[(x-1 + _width) % _width][y] +	// 1
@@ -137,19 +132,34 @@ int Universe::get_neighbours_number(const int x, const int y) const
 
 void Universe::do_step()
 {
-	for (int x = 0; x < _width; x++)
-	{
-		for (int y = 0; y < _width; y++)
-		{
+	int x, y, sum;
 
+	for (x = 0; x < _width; x++)
+	{
+		for (y = 0; y < _width; y++)
+		{
+			_data[x][y].set_neighbours_num(count_neighbours_number(x,y));
+			// std::cout << "[" << x << ", " << y << "]";
 		}
 	}
+
+	for (x = 0; x < _width; x++)
+	{
+		for (y = 0; y < _width; y++)
+		{
+			_data[x][y].apply_state();
+		}
+	}
+
+	_step++;
 }
 
 
 void Universe::draw()
 {
 	int x;
+	
+	std::cout << "Universe step: [" << _step << "]" << std::endl;
 
 	std::cout << "+";
 	for (x = 0; x < (2 * _width)+1; x++) std::cout << "-";
@@ -157,12 +167,10 @@ void Universe::draw()
 
 	for (x = 0; x < _width; x++)
 	{
-		Lifeform *p_form = _data[x];
-
 		std::cout << "| ";
 		for (int y = 0; y < _width; y++)
 		{
-			std::cout << p_form[y] << " ";
+			std::cout << _data[x][y] << " ";
 		}
 		std::cout << "|" << std::endl;
 	}

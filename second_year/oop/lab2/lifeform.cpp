@@ -8,6 +8,7 @@
 Lifeform::Lifeform(const LifeformState state)
 {
 	_state = state;
+	_neighbours_num = 0;
 
 	switch (state)
 	{
@@ -23,9 +24,10 @@ Lifeform::Lifeform(const LifeformState state)
 			break;
 		}
 
-		case DEAD:
+		default:
 		{
 			_health = ZERO_HEALTH;
+			_state = DEAD;
 			break;
 		}
 	}
@@ -39,6 +41,7 @@ Lifeform::Lifeform(const Lifeform& form)
 {
 	_health = form._health;
 	_state = form._state;
+	_neighbours_num = form._neighbours_num;
 }
 
 
@@ -46,6 +49,7 @@ Lifeform& Lifeform::operator=(const Lifeform& form)
 {
 	_health = form._health;
 	_state = form._state;
+	_neighbours_num = form._neighbours_num;
 
 	return *this;
 }
@@ -74,8 +78,8 @@ bool Lifeform::is_alive() const
 {
 	switch (_state)
 	{
-		case DEAD: return false;
-		default: return true;
+		case ALIVE: return true;
+		default: return false;
 	}
 }
 
@@ -110,23 +114,67 @@ bool Lifeform::heal(const int points)
 }
 
 
+bool Lifeform::apply_state()
+{
+	if (_neighbours_num > 3 && _neighbours_num < 6)
+	{
+		born();
+		return true;
+	}
+
+	kill();
+	return true;
+}
+
+
 bool Lifeform::born()
 {
-	if (_state != DEAD) return false;
-
+	if (_state == ALIVE) return false;
+	
 	_health = MAX_HEALTH;
 	_state = ALIVE;
 
 	return true;
+
+	// std::cout << "born - (was " << _state << ")";
+
+	// switch (_state)
+	// {
+	// 	// case ALIVE: return false;
+	// 	case RECENTLY_DEAD:
+	// 	{
+	// 		return kill();
+	// 	}
+		
+	// 	case DEAD:
+	// 	{
+	// 		_state = RECENTLY_BORN;
+	// 		return true;
+	// 	}
+	// }
 }
 
 
 bool Lifeform::kill()
 {
 	if (_state == DEAD) return false;
-
+	
 	_health = ZERO_HEALTH;
 	_state = DEAD;
-
+	
 	return true;
 }
+
+	// switch (_state)
+	// {
+	// 	case RECENTLY_BORN:
+	// 	{
+	// 		return born();
+	// 	}
+		
+	// 	case ALIVE:
+	// 	{
+	// 		_state = RECENTLY_DEAD;
+	// 		return true;
+	// 	}
+	// }

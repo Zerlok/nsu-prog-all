@@ -20,11 +20,12 @@ static const int ZERO_HEALTH = 0;
 
 enum LifeformState
 {
-	ALIVE,
-	RECENTLY_BORN,
-	HURT,
-	RECENTLY_DIE,
-	DEAD
+	ALIVE, // 0
+	HURT, // 1
+	DEAD, // 2
+
+	RECENTLY_BORN, // 3
+	RECENTLY_DEAD // 4
 };
 
 
@@ -41,6 +42,9 @@ class Lifeform
 
 		friend int operator+(int x, Lifeform& form);
 		friend int operator+(const Lifeform& form1, const Lifeform& form2);
+		int get_neighbours_num() const { return _neighbours_num; }
+		void set_neighbours_num(const int n) { _neighbours_num = n; }
+		bool apply_state();
 
 		bool is_alive() const;
 		
@@ -52,6 +56,7 @@ class Lifeform
 
 	private:
 		int _health;
+		int _neighbours_num;
 		LifeformState _state;
 };
 
@@ -72,7 +77,7 @@ class Universe
 		bool init_from_file();
 
 		bool is_freezed() const;
-		int get_neighbours_number(const int x, const int y) const;
+		int count_neighbours_number(const int x, const int y) const;
 
 		void do_step();
 		void draw();
@@ -80,8 +85,7 @@ class Universe
 	private:
 		Lifeform **_data;
 		int _width;
-		bool _has_alive_object;
-		int _state;
+		int _step;
 };
 
 
