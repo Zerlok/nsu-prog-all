@@ -2,8 +2,10 @@
 #include <iostream>
 
 
-void check_full_desk(Universe& space)
+void check_full_desk()
 {
+	Universe space(10);
+
 	for (int x = 0; x < 10; x++)
 	{
 		for (int y = 0; y < 10; y++)
@@ -22,6 +24,8 @@ void check_full_desk(Universe& space)
 	space.init(0, 3, DEAD);
 	space.init(5, 5, DEAD);
 
+	space.draw();
+
 	std::cout << "(0, 0) : " << space.get_neighbours_number(0, 0) << std::endl;
 	std::cout << "(0, 9) : " << space.get_neighbours_number(0, 9) << std::endl;
 	std::cout << "(9, 0) : " << space.get_neighbours_number(9, 0) << std::endl;
@@ -34,17 +38,9 @@ void check_full_desk(Universe& space)
 }
 
 
-int main(int argc, char **argv)
+void check_ij_desk(int i, int j)
 {
-	// if (argc == 2)
-	// {
-	// 	Universe space(atoi(argv[1]))
-	// 	space.draw();
-	// }
-
 	Universe space(10);
-
-	int i=9, j=8;
 
 	space.init(9, 9, ALIVE);
 	space.init(0, 9, ALIVE);
@@ -62,6 +58,22 @@ int main(int argc, char **argv)
 	std::cout << "(0, 3) : " << space.get_neighbours_number(0, 3) << std::endl;
 	std::cout << "(5, 5) : " << space.get_neighbours_number(5, 5) << std::endl;
 	std::cout << "(" << i << ", " << j << ") : " << space.get_neighbours_number(i, j) << std::endl;
-	
+}
+
+
+int main(int argc, char **argv)
+{
+	// if (argc == 2)
+	// {
+	// 	Universe space(atoi(argv[1]))
+	// 	space.draw();
+	// }
+
+	// Universe space(10);
+
+	// space.draw();
+
+	check_full_desk();
+	check_ij_desk(1, 8);
 	return 0;
 }

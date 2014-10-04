@@ -68,9 +68,7 @@ bool Universe::init(const int x, const int y, const LifeformState state)
 
 	if (x < 0 || y < 0 || x > _width-1 || y > _width-1)
 	{
-		std::cout << "x: " << x << " y: " << y << std::endl;
-		return false;
-		// throw std::invalid_argument(ERR_INDEX_OUT_RANGE);
+		throw std::invalid_argument(ERR_INDEX_OUT_RANGE);
 	}
 	
 	_data[x][y] = point;
@@ -100,50 +98,40 @@ int Universe::get_neighbours_number(const int x, const int y) const
 {
 	if (x < 0 || y < 0 || x > _width-1 || y > _width-1)
 	{
-		std::cout << "x: " << x << " y: " << y << std::endl;
-		return 0;
-		// throw std::invalid_argument(ERR_INDEX_OUT_RANGE);
+		throw std::invalid_argument(ERR_INDEX_OUT_RANGE);
 	}
 
-	if (x == 0 && y == 0)
-		return _data[x + 1][y] + _data[x][y + 1] + _data[x + 1][y + 1];
+	/*
+	There are the dot's neighbours:
+		+-------+
+		| 8 1 2 |
+		| 7 . 3 |
+		| 6 5 4 |
+	   	+-------+
+	*/
 
-	if (x == _width-1 && y == 0)
-		return _data[x - 1][y] + _data[x][y + 1] + _data[x - 1][y + 1];
+	// #ifdef __DEBUG__
+	// std::cout << "1: (" <<
+	// 		(x-1 + _width) % _width << " " << y << "), 2: (" <<
+	// 		(x-1 + _width) % _width << " " << (y+1 + _width) % _width << "), 3: (" <<
+	// 		x << " " << (y+1 + _width) % _width << "), 4: (" <<
+	// 		(x+1 + _width) % _width << " " << (y+1 + _width) % _width << "), 5: (" <<
+	// 		(x+1 + _width) % _width << " " << y << "), 6: (" <<
+	// 		(x+1 + _width) % _width << " " << (y-1 + _width) % _width << "), 7: (" <<
+	// 		x << " " << (y-1 + _width) % _width << "), 8: (" <<
+	// 		(x-1 + _width) % _width << " " << (y-1 + _width) % _width << ")" << std::endl;
+	// #endif
 
-	if (x == 0 && y == _width-1)
-		return _data[x + 1][y] + _data[x][y - 1] + _data[x + 1][y - 1];
-
-	if (x == _width-1 && y == _width-1)
-		return _data[x - 1][y] + _data[x][y - 1] + _data[x - 1][y - 1];
-
-	if (x == 0)
-	{
-		return _data[x][y - 1] + _data[x][y + 1] + _data[x + 1][y] +
-				_data[x + 1][y - 1] + _data[x + 1][y + 1];
-	}
-
-	if (y == 0)
-	{
-		return _data[x - 1][y] + _data[x][y + 1] + _data[x + 1][y] +
-				_data[x + 1][y + 1] + _data[x - 1][y + 1];
-	}
-
-	if (x == _width-1)
-	{
-		return _data[x][y - 1] + _data[x][y + 1] + _data[x - 1][y] +
-				_data[x - 1][y - 1] + _data[x - 1][y + 1];
-	}
-
-	if (y == _width-1)
-	{
-		return _data[x][y - 1] + _data[x - 1][y] + _data[x + 1][y] +
-				_data[x - 1][y - 1] + _data[x + 1][y - 1];
-	}
-
-	return _data[x][y - 1] + _data[x][y + 1] + _data[x - 1][y] +
-			_data[x + 1][y] +_data[x + 1][y + 1] + _data[x + 1][y - 1] +
-			_data[x - 1][y - 1] + _data[x - 1][y + 1];
+	return (
+			_data[(x-1 + _width) % _width][y] +	// 1
+			_data[(x+1 + _width) % _width][y] + // 5
+			_data[x][(y+1 + _width) % _width] + // 3
+			_data[x][(y-1 + _width) % _width] + // 7
+			_data[(x-1 + _width) % _width][(y+1 + _width) % _width] + // 2
+			_data[(x+1 + _width) % _width][(y+1 + _width) % _width] + // 4
+			_data[(x+1 + _width) % _width][(y-1 + _width) % _width] + // 6
+			_data[(x-1 + _width) % _width][(y-1 + _width) % _width]   // 8
+	);
 }
 
 
