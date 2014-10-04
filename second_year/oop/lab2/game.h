@@ -42,22 +42,21 @@ class Lifeform
 
 		friend int operator+(int x, Lifeform& form);
 		friend int operator+(const Lifeform& form1, const Lifeform& form2);
-		int get_neighbours_num() const { return _neighbours_num; }
-		void set_neighbours_num(const int n) { _neighbours_num = n; }
+		
+		int count_neighbours();
+		void set_around(const int x, const int y, Lifeform **_data, const int w);
+		// void set_neighbours(const Lifeform **_data, const int x, const int y);
 		bool apply_state();
 
 		bool is_alive() const;
-		
-		bool attack(const int points);
-		bool heal(const int points);
 		
 		bool born();
 		bool kill();
 
 	private:
-		int _health;
-		int _neighbours_num;
+		Lifeform *_around[8];
 		LifeformState _state;
+		int _neighbours_num;
 };
 
 std::ostream& operator<<(std::ostream& output, const Lifeform& form);
@@ -74,10 +73,6 @@ class Universe
 		Universe(const Universe& u);
 
 		bool init(const int x, const int y, const LifeformState state);
-		bool init_from_file();
-
-		bool is_freezed() const;
-		int count_neighbours_number(const int x, const int y) const;
 
 		void do_step();
 		void draw();

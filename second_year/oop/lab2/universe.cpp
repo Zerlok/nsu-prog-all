@@ -23,6 +23,14 @@ Universe::Universe(const int length)
 	{
 		std::cout << ERR_BAD_ALLOC << std::endl;
 	}
+
+	for (int x = 0; x < length; x++)
+	{
+		for (int y = 0; y < length; y++)
+		{
+			_data[x][y].set_around(x, y, _data, _width);
+		}
+	}
 }
 
 
@@ -77,59 +85,6 @@ bool Universe::init(const int x, const int y, const LifeformState state)
 }
 
 
-bool Universe::init_from_file()
-{
-	return false;
-}
-
-
-bool Universe::is_freezed() const
-{
-	return false;
-}
-
-
-int Universe::count_neighbours_number(const int x, const int y) const
-{
-	if (x < 0 || y < 0 || x > _width-1 || y > _width-1)
-	{
-		throw std::invalid_argument(ERR_INDEX_OUT_RANGE);
-	}
-
-	// #ifdef __DEBUG__
-	// std::cout << "1: (" <<
-	// 		(x-1 + _width) % _width << " " << y << "), 2: (" <<
-	// 		(x-1 + _width) % _width << " " << (y+1 + _width) % _width << "), 3: (" <<
-	// 		x << " " << (y+1 + _width) % _width << "), 4: (" <<
-	// 		(x+1 + _width) % _width << " " << (y+1 + _width) % _width << "), 5: (" <<
-	// 		(x+1 + _width) % _width << " " << y << "), 6: (" <<
-	// 		(x+1 + _width) % _width << " " << (y-1 + _width) % _width << "), 7: (" <<
-	// 		x << " " << (y-1 + _width) % _width << "), 8: (" <<
-	// 		(x-1 + _width) % _width << " " << (y-1 + _width) % _width << ")" << std::endl;
-	// #endif
-
-	/*
-	There are the dot's neighbours (the dot location is x, y):
-		+-------+
-		| 8 1 2 |
-		| 7 . 3 |
-		| 6 5 4 |
-	   	+-------+
-	*/
-
-	return (
-			_data[(x-1 + _width) % _width][y] +	// 1
-			_data[(x+1 + _width) % _width][y] + // 5
-			_data[x][(y+1 + _width) % _width] + // 3
-			_data[x][(y-1 + _width) % _width] + // 7
-			_data[(x-1 + _width) % _width][(y+1 + _width) % _width] + // 2
-			_data[(x+1 + _width) % _width][(y+1 + _width) % _width] + // 4
-			_data[(x+1 + _width) % _width][(y-1 + _width) % _width] + // 6
-			_data[(x-1 + _width) % _width][(y-1 + _width) % _width]   // 8
-	);
-}
-
-
 void Universe::do_step()
 {
 	int x, y, sum;
@@ -138,7 +93,7 @@ void Universe::do_step()
 	{
 		for (y = 0; y < _width; y++)
 		{
-			_data[x][y].set_neighbours_num(count_neighbours_number(x,y));
+			_data[x][y].count_neighbours();
 			// std::cout << "[" << x << ", " << y << "]";
 		}
 	}

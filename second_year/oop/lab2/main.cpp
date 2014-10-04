@@ -26,15 +26,15 @@ void check_full_desk()
 
 	space.draw();
 
-	std::cout << "(0, 0) : " << space.count_neighbours_number(0, 0) << std::endl;
-	std::cout << "(0, 9) : " << space.count_neighbours_number(0, 9) << std::endl;
-	std::cout << "(9, 0) : " << space.count_neighbours_number(9, 0) << std::endl;
-	std::cout << "(9, 9) : " << space.count_neighbours_number(9, 9) << std::endl;
-	std::cout << "(3, 9) : " << space.count_neighbours_number(3, 9) << std::endl;
-	std::cout << "(9, 3) : " << space.count_neighbours_number(9, 3) << std::endl;
-	std::cout << "(3, 0) : " << space.count_neighbours_number(3, 0) << std::endl;
-	std::cout << "(0, 3) : " << space.count_neighbours_number(0, 3) << std::endl;
-	std::cout << "(5, 5) : " << space.count_neighbours_number(5, 5) << std::endl;
+	// std::cout << "(0, 0) : " << space.count_neighbours(0, 0) << std::endl;
+	// std::cout << "(0, 9) : " << space.count_neighbours(0, 9) << std::endl;
+	// std::cout << "(9, 0) : " << space.count_neighbours(9, 0) << std::endl;
+	// std::cout << "(9, 9) : " << space.count_neighbours(9, 9) << std::endl;
+	// std::cout << "(3, 9) : " << space.count_neighbours(3, 9) << std::endl;
+	// std::cout << "(9, 3) : " << space.count_neighbours(9, 3) << std::endl;
+	// std::cout << "(3, 0) : " << space.count_neighbours(3, 0) << std::endl;
+	// std::cout << "(0, 3) : " << space.count_neighbours(0, 3) << std::endl;
+	// std::cout << "(5, 5) : " << space.count_neighbours(5, 5) << std::endl;
 }
 
 
@@ -48,16 +48,16 @@ void check_ij_desk(int i, int j)
 
 	space.draw();
 
-	std::cout << "(0, 0) : " << space.count_neighbours_number(0, 0) << std::endl;
-	std::cout << "(0, 9) : " << space.count_neighbours_number(0, 9) << std::endl;
-	std::cout << "(9, 0) : " << space.count_neighbours_number(9, 0) << std::endl;
-	std::cout << "(9, 9) : " << space.count_neighbours_number(9, 9) << std::endl;
-	std::cout << "(3, 9) : " << space.count_neighbours_number(3, 9) << std::endl;
-	std::cout << "(9, 3) : " << space.count_neighbours_number(9, 3) << std::endl;
-	std::cout << "(3, 0) : " << space.count_neighbours_number(3, 0) << std::endl;
-	std::cout << "(0, 3) : " << space.count_neighbours_number(0, 3) << std::endl;
-	std::cout << "(5, 5) : " << space.count_neighbours_number(5, 5) << std::endl;
-	std::cout << "(" << i << ", " << j << ") : " << space.count_neighbours_number(i, j) << std::endl;
+	// std::cout << "(0, 0) : " << space.count_neighbours(0, 0) << std::endl;
+	// std::cout << "(0, 9) : " << space.count_neighbours(0, 9) << std::endl;
+	// std::cout << "(9, 0) : " << space.count_neighbours(9, 0) << std::endl;
+	// std::cout << "(9, 9) : " << space.count_neighbours(9, 9) << std::endl;
+	// std::cout << "(3, 9) : " << space.count_neighbours(3, 9) << std::endl;
+	// std::cout << "(9, 3) : " << space.count_neighbours(9, 3) << std::endl;
+	// std::cout << "(3, 0) : " << space.count_neighbours(3, 0) << std::endl;
+	// std::cout << "(0, 3) : " << space.count_neighbours(0, 3) << std::endl;
+	// std::cout << "(5, 5) : " << space.count_neighbours(5, 5) << std::endl;
+	// std::cout << "(" << i << ", " << j << ") : " << space.count_neighbours(i, j) << std::endl;
 }
 
 
