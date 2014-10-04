@@ -58,6 +58,18 @@ std::ostream& operator<<(std::ostream& output, const Lifeform& form)
 }
 
 
+int operator+(int x, Lifeform& form)
+{
+	return x + form.is_alive();
+}
+
+
+int operator+(const Lifeform& form1, const Lifeform& form2)
+{
+	return form1.is_alive() + form2.is_alive();
+}
+
+
 bool Lifeform::is_alive() const
 {
 	switch (_state)

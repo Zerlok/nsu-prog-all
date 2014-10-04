@@ -68,7 +68,9 @@ bool Universe::init(const int x, const int y, const LifeformState state)
 
 	if (x < 0 || y < 0 || x > _width-1 || y > _width-1)
 	{
-		throw std::invalid_argument(ERR_INDEX_OUT_RANGE);
+		std::cout << "x: " << x << " y: " << y << std::endl;
+		return false;
+		// throw std::invalid_argument(ERR_INDEX_OUT_RANGE);
 	}
 	
 	_data[x][y] = point;
@@ -94,27 +96,90 @@ bool Universe::is_freezed() const
 }
 
 
+int Universe::get_neighbours_number(const int x, const int y) const
+{
+	if (x < 0 || y < 0 || x > _width-1 || y > _width-1)
+	{
+		std::cout << "x: " << x << " y: " << y << std::endl;
+		return 0;
+		// throw std::invalid_argument(ERR_INDEX_OUT_RANGE);
+	}
+
+	if (x == 0 && y == 0)
+		return _data[x + 1][y] + _data[x][y + 1] + _data[x + 1][y + 1];
+
+	if (x == _width-1 && y == 0)
+		return _data[x - 1][y] + _data[x][y + 1] + _data[x - 1][y + 1];
+
+	if (x == 0 && y == _width-1)
+		return _data[x + 1][y] + _data[x][y - 1] + _data[x + 1][y - 1];
+
+	if (x == _width-1 && y == _width-1)
+		return _data[x - 1][y] + _data[x][y - 1] + _data[x - 1][y - 1];
+
+	if (x == 0)
+	{
+		return _data[x][y - 1] + _data[x][y + 1] + _data[x + 1][y] +
+				_data[x + 1][y - 1] + _data[x + 1][y + 1];
+	}
+
+	if (y == 0)
+	{
+		return _data[x - 1][y] + _data[x][y + 1] + _data[x + 1][y] +
+				_data[x + 1][y + 1] + _data[x - 1][y + 1];
+	}
+
+	if (x == _width-1)
+	{
+		return _data[x][y - 1] + _data[x][y + 1] + _data[x - 1][y] +
+				_data[x - 1][y - 1] + _data[x - 1][y + 1];
+	}
+
+	if (y == _width-1)
+	{
+		return _data[x][y - 1] + _data[x - 1][y] + _data[x + 1][y] +
+				_data[x - 1][y - 1] + _data[x + 1][y - 1];
+	}
+
+	return _data[x][y - 1] + _data[x][y + 1] + _data[x - 1][y] +
+			_data[x + 1][y] +_data[x + 1][y + 1] + _data[x + 1][y - 1] +
+			_data[x - 1][y - 1] + _data[x - 1][y + 1];
+}
+
+
+void Universe::do_step()
+{
+	for (int x = 0; x < _width; x++)
+	{
+		for (int y = 0; y < _width; y++)
+		{
+
+		}
+	}
+}
+
+
 void Universe::draw()
 {
 	int x;
 
 	std::cout << "+";
-	for (x = 0; x < (2 * _width)-1; x++) std::cout << "-";
-	std::cout << "+" << std::endl;
+	for (x = 0; x < (2 * _width)+1; x++) std::cout << "-";
+	std::cout << "+ y" << std::endl;
 
 	for (x = 0; x < _width; x++)
 	{
 		Lifeform *p_form = _data[x];
 
-		std::cout << "|";
+		std::cout << "| ";
 		for (int y = 0; y < _width; y++)
 		{
 			std::cout << p_form[y] << " ";
 		}
-		std::cout << "\b|" << std::endl;
+		std::cout << "|" << std::endl;
 	}
 
 	std::cout << "+";
-	for (x = 0; x < (2 * _width)-1; x++) std::cout << "-";
-	std::cout << "+" << std::endl;
+	for (x = 0; x < (2 * _width)+1; x++) std::cout << "-";
+	std::cout << "+" << std::endl << "x" << std::endl;
 }

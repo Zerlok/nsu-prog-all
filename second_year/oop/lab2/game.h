@@ -21,7 +21,9 @@ static const int ZERO_HEALTH = 0;
 enum LifeformState
 {
 	ALIVE,
+	RECENTLY_BORN,
 	HURT,
+	RECENTLY_DIE,
 	DEAD
 };
 
@@ -37,6 +39,9 @@ class Lifeform
 		Lifeform& operator=(const Lifeform& form);
 		friend std::ostream& operator<<(std::ostream& output, const Lifeform& form);
 
+		friend int operator+(int x, Lifeform& form);
+		friend int operator+(const Lifeform& form1, const Lifeform& form2);
+
 		bool is_alive() const;
 		
 		bool attack(const int points);
@@ -51,6 +56,8 @@ class Lifeform
 };
 
 std::ostream& operator<<(std::ostream& output, const Lifeform& form);
+int operator+(int x, Lifeform& form);
+int operator+(const Lifeform& form1, const Lifeform& form2);
 
 
 class Universe
@@ -65,7 +72,9 @@ class Universe
 		bool init_from_file();
 
 		bool is_freezed() const;
+		int get_neighbours_number(const int x, const int y) const;
 
+		void do_step();
 		void draw();
 
 	private:
