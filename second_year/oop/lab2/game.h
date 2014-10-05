@@ -6,7 +6,7 @@
 #include <stdexcept>
 
 
-// #define __DEBUG__
+#define __DEBUG__
 
 
 static const char ERR_BAD_ALLOC[] = "Not enough memory!";
@@ -18,7 +18,7 @@ static const char ERR_INDEX_OUT_RANGE[] = "Index is out of range (0 <= [index] <
 static const int STD_SIZE = 36;
 
 #ifdef __DEBUG__
-static const char ALIVE_FORM = 'o';
+static const char ALIVE_FORM = 'x';
 static const char DEAD_FORM = '.';
 #else
 static const char ALIVE_FORM = 'o';

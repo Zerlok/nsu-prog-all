@@ -13,13 +13,12 @@ int main(int argc, char **argv)
 	
 	Universe space(36);
 
-	init_glider(1, 1, space);
-	init_blinker(4, 20, space);
-	init_toad(10, 20, space);
+	create_glider(1, 1, space);
+	create_blinker(4, 20, space);
+	create_toad(10, 20, space);
+	create_block(30, 30, space);
 
 	space.draw();
-	// space.do_step();
-	// space.draw();
 
 	char input_key = 'g';
 
