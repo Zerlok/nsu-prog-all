@@ -192,3 +192,50 @@ void Universe::save_to_file(std::string filename)
 
 	file.close();
 }
+
+
+Universe::Universe(const std::string filename)
+{
+	int x, y, len;
+	std::ifstream file;
+	std::string line;
+	char cell;
+
+	file.open(filename);
+
+	std::cout << "Reading the input file..." << std::endl;
+	getline(file, line);
+	std::cout << "1: " << line;
+	getline(file, line);
+	std::cout << "2: " << line;
+
+	file >> line;
+	LifeformAction a;
+	for (x = 0; x < 9; x++)
+	{
+		file >> cell;
+	}
+
+	_width = 0;
+
+	while (getline(file, line))
+	{
+		if (_width == 0)
+		{
+			_width = line.size();
+			_data = new Lifeform*[_width];
+		}
+
+		for (x = 0; x < _width; x++)
+		{
+			_data[x] = new Lifeform[_width];
+			
+			for (y = 0; y < _width; y++)
+			{
+				file >> cell;
+
+				if (cell == ALIVE_FORM) init(x, y);
+			}
+		}
+	}
+}

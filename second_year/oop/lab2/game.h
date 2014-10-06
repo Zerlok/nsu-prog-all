@@ -97,8 +97,10 @@ class Universe
 		~Universe();
 
 		Universe(const Universe& u);
+		Universe(const std::string filename);
 
-		bool init(const int x, const int y, const LifeformState state);
+		bool init(const int x, const int y, const LifeformState state = ALIVE);
+		bool init_from_file(std::string filename);
 
 		int count_neighbours_number(const int x, const int y) const;
 
