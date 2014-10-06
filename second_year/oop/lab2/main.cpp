@@ -1,7 +1,5 @@
 #include "game.h"
 #include "figures.h"
-#include <iostream>
-#include <unistd.h>
 
 
 enum Signal
@@ -10,13 +8,15 @@ enum Signal
 	EXIT_GAME,
 	SAVE_GAME,
 	TICK_GAME,
+	DEMO_GAME,
 	SHOW_HELP
 };
 
 
-Signal parse_line(const std::string cmd)
+Signal parse_line(const std::string cmd, const bool is_saved_session)
 {
 	size_t found_dump = cmd.find("dump");
+	size_t found_demo = cmd.find("demo");
 	size_t found_tick = cmd.find("tick");
 	size_t found_exit = cmd.find("exit");
 	size_t found_help = cmd.find("help");
@@ -25,7 +25,15 @@ Signal parse_line(const std::string cmd)
 	
 	if (found_dump != std::string::npos)
 	{
-		std::cout <<  "Dumping in development." << std::endl;
+		std::cout << "Dumping in development." << std::endl;
+
+		return SAVE_GAME;
+	}
+	else if (found_demo != std::string::npos)
+	{
+		std::cout << "Starting the demo..." << std::endl;
+
+		return DEMO_GAME;
 	}
 	else if (found_tick != std::string::npos)
 	{
@@ -33,7 +41,9 @@ Signal parse_line(const std::string cmd)
 	}
 	else if (found_exit != std::string::npos)
 	{
-		std::cout << "Warning: Your game is not finished, do you really want exit? (yes/no): ";
+		if (is_saved_session) return EXIT_GAME;
+
+		std::cout << "Warning: Your game is not saved, do you want to save it before exit? (yes/no): ";
 		std::cin >> answer;
 
 		while (answer != "yes" && answer != "no")
@@ -42,9 +52,9 @@ Signal parse_line(const std::string cmd)
 			std::cin >> answer;
 		}
 
-		if (answer == "yes") return EXIT_GAME;
+		if (answer == "no") return EXIT_GAME;
 
-		return WAIT_CMD;
+		return SAVE_GAME;
 	}
 	else if (found_help != std::string::npos)
 	{
@@ -60,53 +70,81 @@ Signal parse_line(const std::string cmd)
 }
 
 
+void play_demo(Universe& space, int limit)
+{
+	int iterations = 0;
+	// Universe space(36);
+
+	create_glider(1, 1, space);
+	create_blinker(4, 20, space);
+	create_toad(10, 20, space);
+	create_blinker(25, 20, space);
+	create_blinker(30, 33, space);
+
+	while (iterations < limit)
+	{
+		space.draw();
+		space.do_step();
+
+		usleep(150000);
+		iterations++;
+	}
+
+	space.draw();
+}
+
+
 int main(int argc, char **argv)
 {
 	/* Online gameing */
 	if (argc == 1)
 	{
 		Signal sgnl = WAIT_CMD;
-		std::string line;
+		int iterations = 200;
+		bool is_saved = false;
+		Universe space(36);
+		std::string line, filename;
 
 		std::cout << "Life Game started." << std::endl;
 		std::cout << "Write your comand below, or type 'help' to see the commands you allow to use." << std::endl;
 
-		while (sgnl == WAIT_CMD)
+		while (sgnl != EXIT_GAME)
 		{
-			std::getline(std::cin, line);
-			if (line != "") sgnl = parse_line(line);
+			std::cin >> line;
+			if (line != "") sgnl = parse_line(line, is_saved);
+		
+			switch (sgnl)
+			{
+				case DEMO_GAME:
+				{
+					std::cin >> iterations;
+					play_demo(space, iterations);
+					break;
+				}
+				case SAVE_GAME:
+				{
+					std::cout << "Type the file name to save the game data: ";
+					std::cin >> filename;
+					space.save_to_file(filename);
+					is_saved = true;
+					break;
+				}
+				case SHOW_HELP:
+				{
+					std::cout << "The help in development." << std::endl;
+					break;
+				}
+				case EXIT_GAME:
+				{
+					exit(0);
+				}
+			}
+
+			std::cout << "Next command: ";
 		}
 
-		switch (sgnl)
-		{
-			case EXIT_GAME:
-			case SHOW_HELP:
-			{
-				exit(0);
-			}
-		}
+		std::cout << "### Warning: went out from while! ###" << std::endl;
 	}
 	
-	Universe space(36);
-
-	create_glider(1, 1, space);
-	create_blinker(4, 20, space);
-	create_toad(10, 20, space);
-	create_block(30, 30, space);
-
-	space.draw();
-
-	char input_key = 'g';
-
-	while (input_key == 'g')
-	{
-		space.do_step();
-		space.draw();
-
-		sleep(1);
-
-		std::cin >> input_key;
-	}
-
 	return 0;
 }

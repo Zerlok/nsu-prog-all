@@ -162,3 +162,33 @@ void Universe::draw()
 	for (x = 0; x < (2 * _width)+1; x++) std::cout << "-";
 	std::cout << "+" << std::endl;
 }
+
+
+void Universe::save_to_file(std::string filename)
+{
+	int x, y;
+	std::ofstream file;
+	file.open(filename);
+
+	file << "#LifeGame (developer: Zerlok)\n";
+	file << "#N Den Universe!\n";
+	file << "#R ";
+
+	for (x = 0; x < 9; x++) file << _life_criteria[x];
+
+	file << "\n";
+	file << "#S " << _step << "\n";
+	file << "#U\n";
+
+	for (x = 0; x < _width; x++)
+	{
+		for (y = 0; y < _width; y++)
+		{
+			file << _data[x][y];
+		}
+
+		file << "\n";
+	}
+
+	file.close();
+}

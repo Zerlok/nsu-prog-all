@@ -4,6 +4,8 @@
 
 #include <iostream>
 #include <stdexcept>
+#include <fstream>
+#include <unistd.h>
 
 
 #define __DEBUG__
@@ -102,6 +104,7 @@ class Universe
 
 		void do_step();
 		void draw();
+		void save_to_file(std::string filename);
 
 	private:
 		Lifeform **_data;
@@ -111,4 +114,5 @@ class Universe
 };
 
 
+// __LIFEGAME_H__
 #endif
