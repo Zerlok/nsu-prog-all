@@ -8,7 +8,7 @@
 #include <unistd.h>
 
 
-#define __DEBUG__
+// #define __DEBUG__
 
 
 static const char ERR_BAD_ALLOC[] = "Not enough memory!";

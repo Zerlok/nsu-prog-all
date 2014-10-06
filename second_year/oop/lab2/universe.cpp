@@ -184,7 +184,14 @@ void Universe::save_to_file(std::string filename)
 	{
 		for (y = 0; y < _width; y++)
 		{
-			file << _data[x][y];
+			if (_data[x][y].is_alive())
+			{
+				file << 'x';
+			}
+			else
+			{
+				file << '.';
+			}
 		}
 
 		file << "\n";
@@ -203,18 +210,24 @@ Universe::Universe(const std::string filename)
 
 	file.open(filename);
 
-	std::cout << "Reading the input file..." << std::endl;
+	// std::cout << "Reading the input file..." << std::endl;
 	getline(file, line);
-	std::cout << "1: " << line;
+	// std::cout << "1: " << line << std::endl;
 	getline(file, line);
-	std::cout << "2: " << line;
+	// std::cout << "2: " << line << std::endl;
 
 	file >> line;
-	LifeformAction a;
+	// std::cout << "3: " << line << std::endl;
+	
 	for (x = 0; x < 9; x++)
 	{
 		file >> cell;
+		// std::cout << cell;
 	}
+
+	// std::cout << std::endl;
+
+	file >> line >> _step >> line;
 
 	_width = 0;
 
@@ -222,6 +235,7 @@ Universe::Universe(const std::string filename)
 	{
 		if (_width == 0)
 		{
+			// std::cout << "4: '" << line << "'" << std::endl;
 			_width = line.size();
 			_data = new Lifeform*[_width];
 		}
@@ -229,12 +243,12 @@ Universe::Universe(const std::string filename)
 		for (x = 0; x < _width; x++)
 		{
 			_data[x] = new Lifeform[_width];
-			
+
 			for (y = 0; y < _width; y++)
 			{
 				file >> cell;
 
-				if (cell == ALIVE_FORM) init(x, y);
+				if (cell == 'x') init(x, y);
 			}
 		}
 	}
