@@ -5,6 +5,8 @@
 #include <iostream>
 #include <stdexcept>
 #include <fstream>
+#include <cstdlib>
+#include <cstring>
 #include <unistd.h>
 
 
@@ -19,13 +21,11 @@ static const char ERR_INDEX_OUT_RANGE[] = "Index is out of range (0 <= [index] <
 
 static const int STD_SIZE = 36;
 
-#ifdef __DEBUG__
-static const char ALIVE_FORM = 'x';
-static const char DEAD_FORM = '.';
-#else
+static const char ALIVE_FORM_FILE = 'x';
+static const char DEAD_FORM_FILE = '.';
+
 static const char ALIVE_FORM = 'o';
 static const char DEAD_FORM = ' ';
-#endif
 
 
 enum LifeformAction

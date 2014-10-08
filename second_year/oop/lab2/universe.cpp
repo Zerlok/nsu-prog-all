@@ -70,6 +70,53 @@ Universe::Universe(const Universe& u)
 }
 
 
+Universe::Universe(const std::string filename)
+{
+	int x, y;
+	std::ifstream file;
+	std::string line;
+	char cell;
+
+	file.open(filename);
+
+	getline(file, line);
+	getline(file, line);
+	file >> line;
+	
+	// TODO: Read lifeforms criteria.
+	for (x = 0; x < 9; x++)
+	{
+		_life_criteria[x] = STD_CRITERIA[x];
+		file >> cell;
+	}
+
+	file >> line >> _step >> line;
+
+	_width = 0;
+
+	while (getline(file, line))
+	{
+		if (_width == 0)
+		{
+			_width = line.size();
+			_data = new Lifeform*[_width];
+		}
+
+		for (x = 0; x < _width; x++)
+		{
+			_data[x] = new Lifeform[_width];
+
+			for (y = 0; y < _width; y++)
+			{
+				file >> cell;
+
+				if (cell == 'x') init(x, y);
+			}
+		}
+	}
+}
+
+
 bool Universe::init(const int x, const int y, const LifeformState state)
 {
 	if (x < 0 || y < 0 || x > _width-1 || y > _width-1)
@@ -198,58 +245,4 @@ void Universe::save_to_file(std::string filename)
 	}
 
 	file.close();
-}
-
-
-Universe::Universe(const std::string filename)
-{
-	int x, y, len;
-	std::ifstream file;
-	std::string line;
-	char cell;
-
-	file.open(filename);
-
-	// std::cout << "Reading the input file..." << std::endl;
-	getline(file, line);
-	// std::cout << "1: " << line << std::endl;
-	getline(file, line);
-	// std::cout << "2: " << line << std::endl;
-
-	file >> line;
-	// std::cout << "3: " << line << std::endl;
-	
-	for (x = 0; x < 9; x++)
-	{
-		file >> cell;
-		// std::cout << cell;
-	}
-
-	// std::cout << std::endl;
-
-	file >> line >> _step >> line;
-
-	_width = 0;
-
-	while (getline(file, line))
-	{
-		if (_width == 0)
-		{
-			// std::cout << "4: '" << line << "'" << std::endl;
-			_width = line.size();
-			_data = new Lifeform*[_width];
-		}
-
-		for (x = 0; x < _width; x++)
-		{
-			_data[x] = new Lifeform[_width];
-
-			for (y = 0; y < _width; y++)
-			{
-				file >> cell;
-
-				if (cell == 'x') init(x, y);
-			}
-		}
-	}
 }
