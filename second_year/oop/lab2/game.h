@@ -21,11 +21,18 @@ static const char ERR_INDEX_OUT_RANGE[] = "Index is out of range (0 <= [index] <
 
 static const int STD_SIZE = 36;
 
+static const char ALIVE_FORM = 'o';
+static const char DEAD_FORM = ' ';
+
 static const char ALIVE_FORM_FILE = 'x';
 static const char DEAD_FORM_FILE = '.';
 
-static const char ALIVE_FORM = 'o';
-static const char DEAD_FORM = ' ';
+
+enum LifeformState
+{
+	ALIVE, // Alive form.
+	DEAD // Dead form.
+};
 
 
 enum LifeformAction
@@ -35,7 +42,8 @@ enum LifeformAction
 	KILL  // Kill the Lifeform.
 };
 
-/* Lifeform neighbours sum criteria (if sum equals 0 - the action is kill): */
+
+/* Lifeform neighbours sum criteria (if sum equals 0 - the action is kill etc.): */
 static const LifeformAction STD_CRITERIA[9] = {
 	KILL, // 0
 	KILL, // 1
@@ -49,29 +57,18 @@ static const LifeformAction STD_CRITERIA[9] = {
 };
 
 
-enum LifeformState
-{
-	ALIVE,
-	DEAD
-};
-
-
 class Lifeform
 {
 	public:
 		Lifeform(const LifeformState state = DEAD);
 		~Lifeform();
 
-		Lifeform(const Lifeform& form);
-
-		Lifeform& operator=(const Lifeform& form);
-		friend std::ostream& operator<<(std::ostream& output, const Lifeform& form);
-
 		friend int operator+(int x, Lifeform& form);
 		friend int operator+(const Lifeform& form1, const Lifeform& form2);
 
-		void set_neighbours_num(const int n) { _neighbours_num = n; }
-		bool apply_state(const LifeformAction criteria[]);
+		void apply_state(const LifeformAction criteria[]);
+		void set_neighbours_num(const int n);
+		void set_state(const LifeformState state);
 
 		bool is_alive() const;
 		
@@ -79,11 +76,10 @@ class Lifeform
 		bool kill();
 
 	private:
-		int _neighbours_num;
 		LifeformState _state;
+		int _neighbours_num;
 };
 
-std::ostream& operator<<(std::ostream& output, const Lifeform& form);
 int operator+(int x, Lifeform& form);
 int operator+(const Lifeform& form1, const Lifeform& form2);
 
@@ -91,22 +87,21 @@ int operator+(const Lifeform& form1, const Lifeform& form2);
 class Universe
 {
 	public:
-		Universe(const int length = 10,
+		Universe(const int length = STD_SIZE,
 				const LifeformAction criteria[9] = STD_CRITERIA
 		);
+
 		~Universe();
 
-		Universe(const Universe& u);
 		Universe(const std::string filename);
+		void save_to_file(std::string filename);
 
 		bool init(const int x, const int y, const LifeformState state = ALIVE);
-		bool init_from_file(std::string filename);
 
 		int count_neighbours_number(const int x, const int y) const;
 
 		void do_step();
 		void draw();
-		void save_to_file(std::string filename);
 
 	private:
 		Lifeform **_data;

@@ -10,20 +10,12 @@ Universe::Universe(const int length, const LifeformAction criteria[9])
 
 	_width = length;
 	_step = 0;
+	for (int i = 0; i < 9; i++) _life_criteria[i] = criteria[i];
 
 	try
 	{
-		for (int i = 0; i < 9; i++) _life_criteria[i] = criteria[i];
-		
 		_data = new Lifeform*[_width];
-
-		Lifeform point(DEAD);
-		for (int x = 0; x < _width; x++)
-		{
-			_data[x] = new Lifeform[_width];
-
-			for (int y = 0; y < _width; y++) _data[x][y] = point;
-		}
+		for (int x = 0; x < _width; x++) _data[x] = new Lifeform[_width];
 	}
 	catch (std::bad_alloc)
 	{
@@ -43,33 +35,6 @@ Universe::~Universe()
 }
 
 
-Universe::Universe(const Universe& u)
-{
-	_width = u._width;
-	_step = u._step;
-
-	try
-	{
-		for (int i = 0; i < 9; i++)
-		{
-			_life_criteria[i] = u._life_criteria[i];
-		}
-
-		_data = new Lifeform*[_width];
-
-		for (int x = 0; x < _width; x++)
-		{
-			_data[x] = new Lifeform[_width];
-			for (int y = 0; y < _width; y++) _data[x][y] = u._data[x][y];
-		}
-	}
-	catch (std::bad_alloc)
-	{
-		std::cout << ERR_BAD_ALLOC << std::endl;
-	}
-}
-
-
 Universe::Universe(const std::string filename)
 {
 	int x, y;
@@ -77,24 +42,24 @@ Universe::Universe(const std::string filename)
 	std::string line;
 	char cell;
 
-	file.open(filename);
+	file.open(filename.c_str());
 
-	getline(file, line);
-	getline(file, line);
-	file >> line;
+	getline(file, line); // #LifeGame ...
+	getline(file, line); // #N Den Universe!
+	file >> line; // #R
 	
 	// TODO: Read lifeforms criteria.
 	for (x = 0; x < 9; x++)
 	{
 		_life_criteria[x] = STD_CRITERIA[x];
-		file >> cell;
+		file >> cell; // <criteria nums>
 	}
 
-	file >> line >> _step >> line;
+	file >> line >> _step >> line; // #S <step> #U
 
 	_width = 0;
 
-	while (getline(file, line))
+	while (getline(file, line)) // <universe cells>
 	{
 		if (_width == 0)
 		{
@@ -108,12 +73,52 @@ Universe::Universe(const std::string filename)
 
 			for (y = 0; y < _width; y++)
 			{
-				file >> cell;
+				file >> cell; // '.' or 'x'
 
 				if (cell == 'x') init(x, y);
 			}
 		}
 	}
+}
+
+
+void Universe::save_to_file(std::string filename)
+{
+	int x, y;
+	std::ofstream file;
+	file.open(filename.c_str());
+
+	file << "#LifeGame (developer: Zerlok)\n";
+	file << "#N Den Universe!\n";
+	file << "#R ";
+
+	for (x = 0; x < 9; x++)
+	{
+		file << _life_criteria[x];
+	}
+
+	file << "\n";
+	file << "#S " << _step << "\n";
+	file << "#U\n";
+
+	for (x = 0; x < _width; x++)
+	{
+		for (y = 0; y < _width; y++)
+		{
+			if (_data[x][y].is_alive())
+			{
+				file << ALIVE_FORM_FILE;
+			}
+			else
+			{
+				file << DEAD_FORM_FILE;
+			}
+		}
+
+		file << "\n";
+	}
+
+	file.close();
 }
 
 
@@ -124,8 +129,7 @@ bool Universe::init(const int x, const int y, const LifeformState state)
 		throw std::invalid_argument(ERR_INDEX_OUT_RANGE);
 	}
 	
-	Lifeform point(state);
-	_data[x][y] = point;
+	_data[x][y].set_state(state);
 
 	return true;
 }
@@ -200,7 +204,15 @@ void Universe::draw()
 		std::cout << "| ";
 		for (int y = 0; y < _width; y++)
 		{
-			std::cout << _data[x][y] << " ";
+			if (_data[x][y].is_alive())
+			{
+				std::cout << ALIVE_FORM;
+			}
+			else
+			{
+				std::cout << DEAD_FORM;
+			}
+			std::cout << " ";
 		}
 		std::cout << "|" << std::endl;
 	}
@@ -208,41 +220,4 @@ void Universe::draw()
 	std::cout << "+";
 	for (x = 0; x < (2 * _width)+1; x++) std::cout << "-";
 	std::cout << "+" << std::endl;
-}
-
-
-void Universe::save_to_file(std::string filename)
-{
-	int x, y;
-	std::ofstream file;
-	file.open(filename);
-
-	file << "#LifeGame (developer: Zerlok)\n";
-	file << "#N Den Universe!\n";
-	file << "#R ";
-
-	for (x = 0; x < 9; x++) file << _life_criteria[x];
-
-	file << "\n";
-	file << "#S " << _step << "\n";
-	file << "#U\n";
-
-	for (x = 0; x < _width; x++)
-	{
-		for (y = 0; y < _width; y++)
-		{
-			if (_data[x][y].is_alive())
-			{
-				file << 'x';
-			}
-			else
-			{
-				file << '.';
-			}
-		}
-
-		file << "\n";
-	}
-
-	file.close();
 }

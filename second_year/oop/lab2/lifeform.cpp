@@ -11,37 +11,6 @@ Lifeform::Lifeform(const LifeformState state)
 Lifeform::~Lifeform() {}
 
 
-Lifeform::Lifeform(const Lifeform& form)
-{
-	_state = form._state;
-	_neighbours_num = form._neighbours_num;
-}
-
-
-Lifeform& Lifeform::operator=(const Lifeform& form)
-{
-	_state = form._state;
-	_neighbours_num = form._neighbours_num;
-
-	return *this;
-}
-
-
-std::ostream& operator<<(std::ostream& output, const Lifeform& form)
-{
-	if (form.is_alive())
-	{
-		output << ALIVE_FORM;
-	}
-	else
-	{
-		output << DEAD_FORM;
-	}
-	
-	return output;
-}
-
-
 int operator+(int x, Lifeform& form)
 {
 	return x + form.is_alive();
@@ -54,26 +23,36 @@ int operator+(const Lifeform& form1, const Lifeform& form2)
 }
 
 
+void Lifeform::apply_state(const LifeformAction criteria[])
+{
+	switch (criteria[_neighbours_num])
+	{
+		case BORN: born();
+		case KILL: kill();
+	}
+}
+
+
+void Lifeform::set_neighbours_num(const int n)
+{
+	_neighbours_num = n;
+}
+
+
+void Lifeform::set_state(const LifeformState state)
+{
+	_state = state;
+}
+
+
 bool Lifeform::is_alive() const
 {
 	switch (_state)
 	{
 		case ALIVE: return true;
-		default: return false;
-	}
-}
-
-
-bool Lifeform::apply_state(const LifeformAction criteria[])
-{
-	switch (criteria[_neighbours_num])
-	{
-		case BORN: return born();
-		case KILL: return kill();
-		case KEEP: return true;
 	}
 
-	return true;
+	return false;
 }
 
 
