@@ -1,7 +1,7 @@
 #include "game.h"
 
 
-Universe::Universe(const int length, const LifeformAction criteria[9])
+Universe::Universe(const int length, const bool born_criteria[9], const bool survival_criteria[9])
 {
 	if (length < 1)
 	{
@@ -10,12 +10,16 @@ Universe::Universe(const int length, const LifeformAction criteria[9])
 
 	_width = length;
 	_step = 0;
-	for (int i = 0; i < 9; i++) _life_criteria[i] = criteria[i];
+	for (int i = 0; i < 9; i++)
+	{
+		_born_criteria[i] = born_criteria[i];
+		_survival_criteria[i] = survival_criteria[i];
+	}
 
 	try
 	{
 		_data = new Lifeform*[_width];
-		for (int x = 0; x < _width; x++) _data[x] = new Lifeform[_width];
+		for (int i = 0; i < _width; i++) _data[i] = new Lifeform[_width];
 	}
 	catch (std::bad_alloc)
 	{
@@ -38,46 +42,118 @@ Universe::~Universe()
 Universe::Universe(const std::string filename)
 {
 	int x, y;
+	int current_line_num = 0;
 	std::ifstream file;
 	std::string line;
 	char cell;
 
+	for (x = 0; x < 9; x++)
+	{
+		_born_criteria[x] = false;
+		_survival_criteria[x] = false;
+	}
+
+	#ifdef __DEBUG__UNIVERSE__
+	std::cout << "Opening " << filename << "..." << std::endl;
+	#endif
 	file.open(filename.c_str());
 
 	getline(file, line); // #LifeGame ...
+	#ifdef __DEBUG__UNIVERSE__
+	std::cout << line << " (#LifeGame...)" << std::endl;
+	#endif
 	getline(file, line); // #N Den Universe!
+	#ifdef __DEBUG__UNIVERSE__
+	std::cout << line << " (#Den Universe!)" << std::endl;
+	#endif
 	file >> line; // #R
+	#ifdef __DEBUG__UNIVERSE__
+	std::cout << line << " (#R)" << std::endl;
+	#endif
 	
-	// TODO: Read lifeforms criteria.
-	for (x = 0; x < 9; x++)
+	file >> cell;
+	#ifdef __DEBUG__UNIVERSE__
+	std::cout << cell;
+	#endif
+	file >> cell;
+	while (cell != '/')
 	{
-		_life_criteria[x] = STD_CRITERIA[x];
-		file >> cell; // <criteria nums>
+		#ifdef __DEBUG__UNIVERSE__
+		std::cout << cell;
+		#endif
+
+		_born_criteria[(cell - '0')] = true;
+		file >> cell;
 	}
 
-	file >> line >> _step >> line; // #S <step> #U
-
-	_width = 0;
-
-	while (getline(file, line)) // <universe cells>
+	file >> cell;
+	#ifdef __DEBUG__UNIVERSE__
+	std::cout << cell;
+	#endif
+	file >> cell;
+	while (cell != '#')
 	{
-		if (_width == 0)
-		{
-			_width = line.size();
-			_data = new Lifeform*[_width];
-		}
+		#ifdef __DEBUG__UNIVERSE__
+		std::cout << cell;
+		#endif
 
+		_survival_criteria[(cell - '0')] = true;
+		file >> cell;
+	}
+	#ifdef __DEBUG__UNIVERSE__
+	std::cout << " criteria" << std::endl;
+	#endif
+
+	file >> line;
+	#ifdef __DEBUG__UNIVERSE__
+	std::cout << line << " (#S)" << std::endl;
+	#endif
+	file >>_step >> line; // #S <step> (#U or #M)
+	#ifdef __DEBUG__UNIVERSE__
+	std::cout << line << " (#U or #M)" << std::endl;
+	#endif
+
+	file >> _width;
+
+	_data = new Lifeform*[_width];
+	for (x = 0; x < _width; x++)
+	{
+		_data[x] = new Lifeform[_width];
+		for (y = 0; y < _width; y++) init(x, y, DEAD);
+	}
+
+	if (line == "#U")
+	{
+		while (file >> x >> y) // TODO: while the end of file (EOF).
+		{
+			init(x, y, ALIVE);
+		}
+	}
+	else if (line == "#M")
+	{
+		
 		for (x = 0; x < _width; x++)
 		{
-			_data[x] = new Lifeform[_width];
-
 			for (y = 0; y < _width; y++)
 			{
-				file >> cell; // '.' or 'x'
+				file >> cell;
 
-				if (cell == 'x') init(x, y);
+				if (cell == ALIVE_FORM_FILE)
+				{
+					init(x, y, ALIVE);
+				}
+				else if (cell != DEAD_FORM_FILE)
+				{
+					std::cout << "Unknown cell was read: " << cell;
+					std::cout << "(" << ALIVE_FORM_FILE << ", " << DEAD_FORM_FILE << ")" << std::endl;
+				}
 			}
 		}
+	}
+	else
+	{
+		std::cout << "### life file is damaged!" << std::endl;
+		std::cout << line << std::endl;
 	}
 }
 
@@ -85,21 +161,40 @@ Universe::Universe(const std::string filename)
 void Universe::save_to_file(std::string filename)
 {
 	int x, y;
+	bool map_format;
 	std::ofstream file;
 	file.open(filename.c_str());
 
-	file << "#LifeGame (developer: Zerlok)\n";
-	file << "#N Den Universe!\n";
-	file << "#R ";
+	file << "#LifeGame\n";
+	file << "#N DenGame\n";
+	file << "#R B";
 
 	for (x = 0; x < 9; x++)
 	{
-		file << _life_criteria[x];
+		if (_born_criteria[x]) file << x;
+	}
+
+	file << "/S";
+	for (x = 0; x < 9; x++)
+	{
+		if (_survival_criteria[x]) file << x;
 	}
 
 	file << "\n";
 	file << "#S " << _step << "\n";
-	file << "#U\n";
+
+	if (count_alive_forms() > (_width * _width) / 3)
+	{
+		/* Saving all universe map. */
+		file << "#M " << _width << "\n";
+		map_format = true;
+	}
+	else
+	{
+		/* Saving alive forms coordinates. */
+		file << "#U " << _width << "\n";
+		map_format = false;
+	}
 
 	for (x = 0; x < _width; x++)
 	{
@@ -107,15 +202,15 @@ void Universe::save_to_file(std::string filename)
 		{
 			if (_data[x][y].is_alive())
 			{
-				file << ALIVE_FORM_FILE;
+				if (map_format) file << ALIVE_FORM_FILE << "\n";
+				/* else */
+				file << x << " " << y << "\n";
 			}
 			else
 			{
-				file << DEAD_FORM_FILE;
+				if (map_format) file << DEAD_FORM_FILE << "\n";
 			}
 		}
-
-		file << "\n";
 	}
 
 	file.close();
@@ -135,7 +230,24 @@ bool Universe::init(const int x, const int y, const LifeformState state)
 }
 
 
-int Universe::count_neighbours_number(const int x, const int y) const
+unsigned long long int Universe::count_alive_forms() const
+{
+	unsigned long long int total = 0;
+	int x, y;
+
+	for (x = 0; x < _width; x++)
+	{
+		for (y = 0; y < _width; y++)
+		{
+			if (_data[x][y].is_alive()) total++;
+		}
+	}
+
+	return total++;
+}
+
+
+int Universe::count_neighbours(const int x, const int y) const
 {
 	if (x < 0 || y < 0 || x > _width-1 || y > _width-1)
 	{
@@ -148,7 +260,7 @@ int Universe::count_neighbours_number(const int x, const int y) const
 		| 8 1 2 |
 		| 7 . 3 |
 		| 6 5 4 |
-	   	+-------+
+		+-------+
 	*/
 
 	return (
@@ -167,13 +279,18 @@ int Universe::count_neighbours_number(const int x, const int y) const
 // TODO: Rewrite with only one cycle.
 void Universe::do_step()
 {
-	int x, y;
+	int x, y, num;
 
 	for (x = 0; x < _width; x++)
 	{
 		for (y = 0; y < _width; y++)
 		{
-			_data[x][y].set_neighbours_num(count_neighbours_number(x, y));
+			num = count_neighbours(x, y);
+			_data[x][y].set_neighbours_num(num);
+
+			#ifdef __DEBUG__UNIVERSE__
+			std::cout << "(" << x << ", " << y << ")" << " : " << num << std::endl;
+			#endif
 		}
 	}
 
@@ -181,7 +298,7 @@ void Universe::do_step()
 	{
 		for (y = 0; y < _width; y++)
 		{
-			_data[x][y].apply_state(_life_criteria);
+			_data[x][y].apply_state(_born_criteria, _survival_criteria);
 		}
 	}
 
@@ -193,7 +310,21 @@ void Universe::draw()
 {
 	int x;
 	
-	std::cout << "Universe step: " << _step << std::endl;
+	std::cout << "Universe step: " << _step;
+
+	#ifdef __DEBUG__UNIVERSE__
+	std::cout << " Criteria: B";
+	for (int i = 0; i < 9; i++)
+	{
+		if (_born_criteria[i]) std::cout << i;
+	}
+	std::cout << "/S";
+	for (int i = 0; i < 9; i++)
+	{
+		if (_survival_criteria[i]) std::cout << i;
+	}
+	#endif
+	std::cout << std::endl;
 
 	std::cout << "+";
 	for (x = 0; x < (2 * _width)+1; x++) std::cout << "-";

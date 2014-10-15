@@ -10,7 +10,10 @@
 #include <unistd.h>
 
 
-// #define __DEBUG__
+#define __DEBUG__
+#define __DEBUG__MAIN__
+// #define __DEBUG__UNIVERSE__
+// #define __DEBUG__LIFEFORM__
 
 
 static const char ERR_BAD_ALLOC[] = "Not enough memory!";
@@ -19,13 +22,18 @@ static const char ERR_NEGATIVE_VALUE[] = "The value must be grater or equal 0!";
 static const char ERR_INDEX_OUT_RANGE[] = "Index is out of range (0 <= [index] < [universe size])!";
 
 
-static const int STD_SIZE = 36;
+static const int STD_UNIVERSE_SIZE = 36;
 
+static const char ALIVE_FORM_FILE = '#';
+static const char DEAD_FORM_FILE = '.';
+
+#ifdef __DEBUG__LIFEFORM__
+static const char ALIVE_FORM = '@';
+static const char DEAD_FORM = '.';
+#else
 static const char ALIVE_FORM = 'o';
 static const char DEAD_FORM = ' ';
-
-static const char ALIVE_FORM_FILE = 'x';
-static const char DEAD_FORM_FILE = '.';
+#endif
 
 
 enum LifeformState
@@ -34,27 +42,8 @@ enum LifeformState
 	DEAD // Dead form.
 };
 
-
-enum LifeformAction
-{
-	BORN, // Make the Lifeform alive.
-	KEEP, // Keep the Lifeform state.
-	KILL  // Kill the Lifeform.
-};
-
-
-/* Lifeform neighbours sum criteria (if sum equals 0 - the action is kill etc.): */
-static const LifeformAction STD_CRITERIA[9] = {
-	KILL, // 0
-	KILL, // 1
-	KEEP, // 2
-	BORN, // 3
-	KILL, // 4
-	KILL, // 5
-	KILL, // 6
-	KILL, // 7
-	KILL  // 8
-};
+static const bool STD_BORN_CRITERIA[9] = {false, false, false, true, false, false, false, false, false};
+static const bool STD_SURVIVAL_CRITERIA[9] = {false, false, true, true, false, false, false, false, false};
 
 
 class Lifeform
@@ -66,7 +55,7 @@ class Lifeform
 		friend int operator+(int x, Lifeform& form);
 		friend int operator+(const Lifeform& form1, const Lifeform& form2);
 
-		void apply_state(const LifeformAction criteria[]);
+		void apply_state(const bool born_criteria[9], const bool survival_criteria[9]);
 		void set_neighbours_num(const int n);
 		void set_state(const LifeformState state);
 
@@ -87,8 +76,9 @@ int operator+(const Lifeform& form1, const Lifeform& form2);
 class Universe
 {
 	public:
-		Universe(const int length = STD_SIZE,
-				const LifeformAction criteria[9] = STD_CRITERIA
+		Universe(const int length = STD_UNIVERSE_SIZE,
+				const bool born_criteria[9] = STD_BORN_CRITERIA,
+				const bool survival_criteria[9] = STD_SURVIVAL_CRITERIA
 		);
 
 		~Universe();
@@ -98,7 +88,8 @@ class Universe
 
 		bool init(const int x, const int y, const LifeformState state = ALIVE);
 
-		int count_neighbours_number(const int x, const int y) const;
+		int count_neighbours(const int x, const int y) const;
+		unsigned long long int count_alive_forms() const;
 
 		void do_step();
 		void draw();
@@ -107,7 +98,8 @@ class Universe
 		Lifeform **_data;
 		int _width;
 		int _step;
-		LifeformAction _life_criteria[9];
+		bool _born_criteria[9];
+		bool _survival_criteria[9];
 };
 
 

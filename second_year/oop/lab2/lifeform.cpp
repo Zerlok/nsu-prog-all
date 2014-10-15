@@ -23,12 +23,15 @@ int operator+(const Lifeform& form1, const Lifeform& form2)
 }
 
 
-void Lifeform::apply_state(const LifeformAction criteria[])
+void Lifeform::apply_state(const bool born_criteria[9], const bool survival_criteria[9])
 {
-	switch (criteria[_neighbours_num])
+	if (_state == DEAD)
 	{
-		case BORN: born();
-		case KILL: kill();
+		if (born_criteria[_neighbours_num]) born();
+	}
+	else
+	{
+		if (!survival_criteria[_neighbours_num]) kill();
 	}
 }
 

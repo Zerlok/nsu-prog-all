@@ -49,9 +49,9 @@ GameSignal parse_command_line(const std::string cmd, const bool is_saved)
 			std::cin >> answer;
 		}
 
-		if (answer == "no") return OPEN_GAME;
+		if (answer == "yes") return SAVE_GAME;
 
-		return SAVE_GAME;
+		return OPEN_GAME;
 	}
 	else if (found_tick != std::string::npos)
 	{
@@ -74,9 +74,9 @@ GameSignal parse_command_line(const std::string cmd, const bool is_saved)
 			std::cin >> answer;
 		}
 
-		if (answer == "no") return EXIT_GAME;
+		if (answer == "yes") return SAVE_GAME;
 
-		return SAVE_GAME;
+		return EXIT_GAME;
 	}
 	else if (cmd == "\n" || cmd == " ")
 	{
@@ -89,15 +89,12 @@ GameSignal parse_command_line(const std::string cmd, const bool is_saved)
 
 void play_animation(Universe& space, int limit)
 {
-	int iterations = 0;
-
-	while (iterations < limit)
+	for (int i = 0; i < limit; i++)
 	{
 		space.draw();
 		space.do_step();
 
 		usleep(130000); // 150000 - the normal speed.
-		iterations++;
 	}
 
 	space.draw();
@@ -130,7 +127,7 @@ int main(int argc, char **argv) // TODO: Open a filename at first argument.
 	}
 	else
 	{
-		#ifdef __DEBUG__
+		#ifdef __DEBUG__MAIN__
 		for (int i = 0; i < argc; i++)
 		{
 			std::cout << i << " : '" << argv[i] << "'" << std::endl;
@@ -141,7 +138,7 @@ int main(int argc, char **argv) // TODO: Open a filename at first argument.
 
 		if (!is_flag(argv[1]) && !is_argument(argv[1]))
 		{
-			input_filename = argv[1]; // TODO: If exists!
+			input_filename = argv[1]; // TODO: If file exists!
 			flag_start++;
 		}
 		
@@ -150,6 +147,7 @@ int main(int argc, char **argv) // TODO: Open a filename at first argument.
 		{
 			for (int i = flag_start; i < argc; i++)
 			{
+
 				if (is_argument(argv[i])) // full argument
 				{
 					std::cout << "Trying parse an argument: '" << argv[i] << "'" << std::endl;
@@ -157,9 +155,9 @@ int main(int argc, char **argv) // TODO: Open a filename at first argument.
 				}
 				else if (is_flag(argv[i])) // flag
 				{
-					if (i + 1 >= argc)
+					if (i + 1 >= argc && argv[i][1] != 'h')
 					{
-						std::cout << "Not enough arguments. [" << i << "] < [" << argc << "]" << std::endl;
+						std::cout << "Not enough arguments for " << argv[i][1] << " flag." << std::endl;
 						return 1;
 					}
 
@@ -197,23 +195,43 @@ int main(int argc, char **argv) // TODO: Open a filename at first argument.
 				}
 			}
 		
+			#ifdef __DEBUG__MAIN__
+			std::cout << "Offline gaming started:" << std::endl;
+			std::cout << "Opening from: " << input_filename << std::endl;
+			std::cout << "Making steps: " << steps << std::endl;
+			std::cout << "Saving to: " << output_filename << std::endl;
+			#endif
+
 			/* Play offline game. */
 			space = new Universe(input_filename);
-			for (int i=0; i < steps; i++)
+
+			#ifdef __DEBUG__
+			space->draw();
+			#endif
+
+			for (int i = 0; i < steps; i++)
 			{
 				space->do_step();
 			}
 			space->save_to_file(output_filename);
-			
+
+			#ifdef __DEBUG__
+			space->draw();
+			#endif
+
 			return 0;
 		}
 	}
-
-	space = new Universe(input_filename);
 	
 	/* Online gaming */
 	std::cout << "Life Game (version: 1.00 beta) was started." << std::endl;
 	std::cout << "Type a command, or use 'help' to see the allowed commands." << std::endl;
+
+	space = new Universe(input_filename);
+
+	#ifdef __DEBUG__
+	std::cout << "The universe was opened from '" << input_filename << "' file" << std::endl;
+	#endif
 
 	while (sgnl != EXIT_GAME)
 	{
@@ -249,11 +267,11 @@ int main(int argc, char **argv) // TODO: Open a filename at first argument.
 			case SHOW_HELP:
 			{
 				std::cout << "There are life game commands:" << std::endl;
-				std::cout << "\tsave <filename> - saves game into the file (<filename> - string)." << std::endl;
-				std::cout << "\topen <filename> - opens the saved game from file (<filename> - string)." << std::endl;
-				std::cout << "\ttick <n> - makes animated <n> iterations of universe (<n> - integer)." << std::endl;
-				std::cout << "\texit - exit the game." << std::endl;
-				std::cout << "\thelp - prints this help message." << std::endl;
+				std::cout << "  save <filename> - saves game into the file (<filename> - string)." << std::endl;
+				std::cout << "  open <filename> - opens the saved game from file (<filename> - string)." << std::endl;
+				std::cout << "  tick <n> - makes animated <n> iterations of universe (<n> - integer)." << std::endl;
+				std::cout << "  help - prints this help message." << std::endl;
+				std::cout << "  exit - exit the game." << std::endl;
 				break;
 			}
 			case UNKNOWN_CMD:
@@ -265,6 +283,14 @@ int main(int argc, char **argv) // TODO: Open a filename at first argument.
 			case EXIT_GAME:
 			{
 				return 0;
+			}
+			default:
+			{
+				#ifdef __DEBUG__
+				std::cout << "### Unknown signal was caught!" << std::endl;
+				std::cout << sgnl << std::endl;
+				#endif
+				break;
 			}
 		}
 	}
