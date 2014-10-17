@@ -1,4 +1,4 @@
-#include "game.h"
+#include "lifegame.h"
 
 
 Universe::Universe(const int length, const bool born_criteria[9], const bool survival_criteria[9])
@@ -39,7 +39,7 @@ Universe::~Universe()
 }
 
 
-Universe::Universe(const std::string filename)
+Universe::Universe(const char *filename)
 {
 	int x, y;
 	int current_line_num = 0;
@@ -56,7 +56,7 @@ Universe::Universe(const std::string filename)
 	#ifdef __DEBUG__UNIVERSE__
 	std::cout << "Opening " << filename << "..." << std::endl;
 	#endif
-	file.open(filename.c_str());
+	file.open(filename);
 
 	getline(file, line); // #LifeGame ...
 	#ifdef __DEBUG__UNIVERSE__
@@ -158,15 +158,15 @@ Universe::Universe(const std::string filename)
 }
 
 
-void Universe::save_to_file(std::string filename)
+void Universe::write_to_file(const char *filename) const
 {
 	int x, y;
 	bool map_format;
 	std::ofstream file;
-	file.open(filename.c_str());
+	file.open(filename);
 
-	file << "#LifeGame\n";
-	file << "#N DenGame\n";
+	file << "#L\n";
+	file << "#N " << filename << "\n";
 	file << "#R B";
 
 	for (x = 0; x < 9; x++)
@@ -183,7 +183,7 @@ void Universe::save_to_file(std::string filename)
 	file << "\n";
 	file << "#S " << _step << "\n";
 
-	if (count_alive_forms() > (_width * _width) / 3)
+	if (count_all_alive_forms() > (_width * _width) / 3)
 	{
 		/* Saving all universe map. */
 		file << "#M " << _width << "\n";
@@ -230,7 +230,7 @@ bool Universe::init(const int x, const int y, const LifeformState state)
 }
 
 
-unsigned long long int Universe::count_alive_forms() const
+unsigned long long int Universe::count_all_alive_forms() const
 {
 	unsigned long long int total = 0;
 	int x, y;
@@ -306,7 +306,7 @@ void Universe::do_step()
 }
 
 
-void Universe::draw()
+void Universe::draw() const
 {
 	int x;
 	

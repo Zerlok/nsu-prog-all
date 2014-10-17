@@ -1,4 +1,4 @@
-#include "game.h"
+#include "lifegame.h"
 
 
 Lifeform::Lifeform(const LifeformState state)
