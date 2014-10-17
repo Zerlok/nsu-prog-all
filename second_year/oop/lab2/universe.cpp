@@ -39,11 +39,10 @@ Universe::~Universe()
 }
 
 
-Universe::Universe(const char *filename)
+Universe::Universe(const std::string& filename)
 {
 	int x, y;
-	int current_line_num = 0;
-	std::ifstream file;
+	std::ifstream file(filename.c_str());
 	std::string line;
 	char cell;
 
@@ -53,32 +52,42 @@ Universe::Universe(const char *filename)
 		_survival_criteria[x] = false;
 	}
 
-	#ifdef __DEBUG__UNIVERSE__
+	#ifdef __DEBUG__
 	std::cout << "Opening " << filename << "..." << std::endl;
 	#endif
-	file.open(filename);
+//	file.open(filename.c_str());
 
-	getline(file, line); // #LifeGame ...
-	#ifdef __DEBUG__UNIVERSE__
+	if (file.is_open())
+	{
+		std::cout << "File exists, opened..." << std::endl;
+	}
+	else
+	{
+		std::cout << "File not exists!" << std::endl;
+		exit(2);
+	}
+
+	std::getline(file, line); // #LifeGame ...
+	#ifdef __DEBUG__
 	std::cout << line << " (#LifeGame...)" << std::endl;
 	#endif
-	getline(file, line); // #N Den Universe!
-	#ifdef __DEBUG__UNIVERSE__
+	std::getline(file, line); // #N Den Universe!
+	#ifdef __DEBUG__
 	std::cout << line << " (#Den Universe!)" << std::endl;
 	#endif
 	file >> line; // #R
-	#ifdef __DEBUG__UNIVERSE__
+	#ifdef __DEBUG__
 	std::cout << line << " (#R)" << std::endl;
 	#endif
 	
 	file >> cell;
-	#ifdef __DEBUG__UNIVERSE__
+	#ifdef __DEBUG__
 	std::cout << cell;
 	#endif
 	file >> cell;
 	while (cell != '/')
 	{
-		#ifdef __DEBUG__UNIVERSE__
+		#ifdef __DEBUG__
 		std::cout << cell;
 		#endif
 
@@ -87,29 +96,29 @@ Universe::Universe(const char *filename)
 	}
 
 	file >> cell;
-	#ifdef __DEBUG__UNIVERSE__
+	#ifdef __DEBUG__
 	std::cout << cell;
 	#endif
 	file >> cell;
 	while (cell != '#')
 	{
-		#ifdef __DEBUG__UNIVERSE__
+		#ifdef __DEBUG__
 		std::cout << cell;
 		#endif
 
 		_survival_criteria[(cell - '0')] = true;
 		file >> cell;
 	}
-	#ifdef __DEBUG__UNIVERSE__
+	#ifdef __DEBUG__
 	std::cout << " criteria" << std::endl;
 	#endif
 
 	file >> line;
-	#ifdef __DEBUG__UNIVERSE__
+	#ifdef __DEBUG__
 	std::cout << line << " (#S)" << std::endl;
 	#endif
 	file >>_step >> line; // #S <step> (#U or #M)
-	#ifdef __DEBUG__UNIVERSE__
+	#ifdef __DEBUG__
 	std::cout << line << " (#U or #M)" << std::endl;
 	#endif
 
@@ -144,26 +153,28 @@ Universe::Universe(const char *filename)
 				}
 				else if (cell != DEAD_FORM_FILE)
 				{
+					#ifdef __DEBUG__
 					std::cout << "Unknown cell was read: " << cell;
 					std::cout << "(" << ALIVE_FORM_FILE << ", " << DEAD_FORM_FILE << ")" << std::endl;
+					#endif
 				}
 			}
 		}
 	}
 	else
 	{
-		std::cout << "### life file is damaged!" << std::endl;
+		std::cout << "### Life file is damaged!" << std::endl;
 		std::cout << line << std::endl;
 	}
 }
 
 
-void Universe::write_to_file(const char *filename) const
+void Universe::write_to_file(const std::string& filename) const
 {
 	int x, y;
 	bool map_format;
 	std::ofstream file;
-	file.open(filename);
+	file.open(filename.c_str());
 
 	file << "#L\n";
 	file << "#N " << filename << "\n";
@@ -183,7 +194,7 @@ void Universe::write_to_file(const char *filename) const
 	file << "\n";
 	file << "#S " << _step << "\n";
 
-	if (count_all_alive_forms() > (_width * _width) / 3)
+	if (count_all_alive_forms() > (unsigned)((_width * _width) / 3))
 	{
 		/* Saving all universe map. */
 		file << "#M " << _width << "\n";

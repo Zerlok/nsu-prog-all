@@ -13,14 +13,14 @@
 #define __DEBUG__
 #define __DEBUG__GAME__
 // #define __DEBUG__UNIVERSE__
-// #define __DEBUG__LIFEFORM__
+//#define __DEBUG__LIFEFORM__
 
 
 static const char ERR_BAD_ALLOC[] = "Not enough memory!";
 
 static const char ERR_NEGATIVE_VALUE[] = "The value must be grater or equal 0!";
 static const char ERR_INDEX_OUT_RANGE[] = "Index is out of range (0 <= [index] < [universe size])!";
-static const char ERR_BAD_UNIVERSE_SIZE[] = "The universe size must be grater than 1!";
+static const char ERR_BAD_UNIVERSE_SIZE[] = "The universe size mustbe grater than 1!";
 
 static const char ERR_NOT_ENOUGH_VALUES[] = "Not enough values for arguments.";
 static const char ERR_UNKNOWN_FLAG[] = "Unknown flag. Try -h or --help to see available flags.";
@@ -28,9 +28,9 @@ static const char ERR_UNKNOWN_COMMAND[] = "Unknown command. Try help to see avai
 static const char ERR_NO_FLAGS[] = "Please, write flags or arguments.";
 
 
-static const char HELP_DESCRIPTION[] = "Description:\n   This is a simple cell's lyfecycle emulator was written on C++.\n   Note that the developer hate this programming language, so you may will find\n   some bugs :3";
-static const char HELP_USAGE[] = "Usage:\n   lifegame [input_file] [flags]\n   - input_file - the name of start game file.";
-static const char HELP_FLAGS[] = "These flags are available:\n   -i <int>, --iterations=<int>		- set the number of iterations.\n   -o <string>, --output=<string>	- set the name of output file.\n   -h, --help						- show help.";
+static const char HELP_DESCRIPTION[] = "Description:\n   This is a simple cell's lyfecycle emulator was written on C++.\n   Note that the developer hate this programming language, so you may will find\n   some bugs :3\n\n";
+static const char HELP_USAGE[] = "Usage:\n   lifegame [input_file] [flags]\n   - input_file - the name of start game file.\n\n";
+static const char HELP_FLAGS[] = "These flags are available:\n   -i <int>, --iterations=<int>		- set the number of iterations.\n   -o <string>, --output=<string>	- set the name of output file.\n   -h, --help						- show help.\n";
 static const char HELP_COMMANDS[] = "These commands are available:\n   save <filename> - save the current game into file.\n   open <filename> - open the game from file.\n   tick <n> - play <n> iterations.\n   help - show this help.\n   exit - exit the game.";
 
 
@@ -125,8 +125,8 @@ class Universe
 
 		~Universe();
 
-		Universe(const char *filename);
-		void write_to_file(const char *filename) const;
+		Universe(const std::string& filename);
+		void write_to_file(const std::string& filename) const;
 
 		bool init(const int x, const int y, const LifeformState state = ALIVE);
 
@@ -175,10 +175,10 @@ class Game
 
 		int _steps_limit;
 		Universe *_space;
-		char *_input_filename;
-		char *_output_filename;
+		std::string _input_filename;
+		std::string _output_filename;
 		
-		char *_line;
+		std::string _line;
 };
 
 
