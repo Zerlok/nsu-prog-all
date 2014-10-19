@@ -5,15 +5,16 @@
 #include <iostream> // cout, endl
 #include <stdexcept> // throw
 #include <fstream> // file << >>
-#include <cstdlib> // ???
-#include <cstring> // atoi
-#include <unistd.h> // usleep
+#include <cstdlib> // atoi
+#include <cstring> // strcpy, strlen
+#include <string> // to_string
+#include <unistd.h> // usleep, system
 
 
-#define __DEBUG__
-#define __DEBUG__GAME__
+// #define __DEBUG__
+// #define __DEBUG__GAME__
 // #define __DEBUG__UNIVERSE__
-//#define __DEBUG__LIFEFORM__
+// #define __DEBUG__LIFEFORM__
 
 
 static const char ERR_BAD_ALLOC[] = "Not enough memory!";
@@ -23,6 +24,7 @@ static const char ERR_INDEX_OUT_RANGE[] = "Index is out of range (0 <= [index] <
 static const char ERR_BAD_UNIVERSE_SIZE[] = "The universe size mustbe grater than 1!";
 
 static const char ERR_NOT_ENOUGH_VALUES[] = "Not enough values for arguments.";
+static const char ERR_NO_VALUE[] = "The command value was expected.";
 static const char ERR_UNKNOWN_FLAG[] = "Unknown flag. Try -h or --help to see available flags.";
 static const char ERR_UNKNOWN_COMMAND[] = "Unknown command. Try help to see available commands.";
 static const char ERR_NO_FLAGS[] = "Please, write flags or arguments.";
@@ -34,7 +36,7 @@ static const char HELP_FLAGS[] = "These flags are available:\n   -i <int>, --ite
 static const char HELP_COMMANDS[] = "These commands are available:\n   save <filename> - save the current game into file.\n   open <filename> - open the game from file.\n   tick <n> - play <n> iterations.\n   help - show this help.\n   exit - exit the game.";
 
 
-static const char CMD_IN[] = "$ ";
+static const char CMD_IN[] = "> ";
 static const char MSG_GREETING[] = "Welcome into Life Game (version 1.00 beta)!\nType a command below, or use 'help' to see available commands.";
 static const char MSG_SAVED[] = "The universe was saved successfully.";
 static const char MSG_OPEND[] = "The universe was opend successfully.";
@@ -158,6 +160,7 @@ class Game
 		bool is_saved();
 
 		void run();
+		void summarize();
 		void help();
 
 	private:

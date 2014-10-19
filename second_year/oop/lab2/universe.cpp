@@ -10,6 +10,7 @@ Universe::Universe(const int length, const bool born_criteria[9], const bool sur
 
 	_width = length;
 	_step = 0;
+
 	for (int i = 0; i < 9; i++)
 	{
 		_born_criteria[i] = born_criteria[i];
@@ -46,82 +47,45 @@ Universe::Universe(const std::string& filename)
 	std::string line;
 	char cell;
 
+	#ifdef __DEBUG__
+	std::cout << "Opening " << filename << "..." << std::endl;
+	#endif
+
+	if (!file.is_open())
+	{
+		std::cout << "Cannot open the file!" << std::endl;
+		throw 1;
+	}
+	
 	for (x = 0; x < 9; x++)
 	{
 		_born_criteria[x] = false;
 		_survival_criteria[x] = false;
 	}
 
-	#ifdef __DEBUG__
-	std::cout << "Opening " << filename << "..." << std::endl;
-	#endif
-//	file.open(filename.c_str());
-
-	if (file.is_open())
-	{
-		std::cout << "File exists, opened..." << std::endl;
-	}
-	else
-	{
-		std::cout << "File not exists!" << std::endl;
-		exit(2);
-	}
-
-	std::getline(file, line); // #LifeGame ...
-	#ifdef __DEBUG__
-	std::cout << line << " (#LifeGame...)" << std::endl;
-	#endif
+	std::getline(file, line); // #L
 	std::getline(file, line); // #N Den Universe!
-	#ifdef __DEBUG__
-	std::cout << line << " (#Den Universe!)" << std::endl;
-	#endif
 	file >> line; // #R
-	#ifdef __DEBUG__
-	std::cout << line << " (#R)" << std::endl;
-	#endif
 	
 	file >> cell;
-	#ifdef __DEBUG__
-	std::cout << cell;
-	#endif
 	file >> cell;
 	while (cell != '/')
 	{
-		#ifdef __DEBUG__
-		std::cout << cell;
-		#endif
-
 		_born_criteria[(cell - '0')] = true;
 		file >> cell;
 	}
 
 	file >> cell;
-	#ifdef __DEBUG__
-	std::cout << cell;
-	#endif
 	file >> cell;
 	while (cell != '#')
 	{
-		#ifdef __DEBUG__
-		std::cout << cell;
-		#endif
-
 		_survival_criteria[(cell - '0')] = true;
 		file >> cell;
 	}
-	#ifdef __DEBUG__
-	std::cout << " criteria" << std::endl;
-	#endif
 
 	file >> line;
-	#ifdef __DEBUG__
-	std::cout << line << " (#S)" << std::endl;
-	#endif
 	file >>_step >> line; // #S <step> (#U or #M)
-	#ifdef __DEBUG__
-	std::cout << line << " (#U or #M)" << std::endl;
-	#endif
-
+	
 	file >> _width;
 
 	_data = new Lifeform*[_width];
@@ -154,7 +118,7 @@ Universe::Universe(const std::string& filename)
 				else if (cell != DEAD_FORM_FILE)
 				{
 					#ifdef __DEBUG__
-					std::cout << "Unknown cell was read: " << cell;
+					std::cout << "Unknown cell was readen: " << cell;
 					std::cout << "(" << ALIVE_FORM_FILE << ", " << DEAD_FORM_FILE << ")" << std::endl;
 					#endif
 				}
@@ -174,6 +138,7 @@ void Universe::write_to_file(const std::string& filename) const
 	int x, y;
 	bool map_format;
 	std::ofstream file;
+	int width_digits_num = std::to_string(_width).size();
 	file.open(filename.c_str());
 
 	file << "#L\n";
@@ -194,7 +159,8 @@ void Universe::write_to_file(const std::string& filename) const
 	file << "\n";
 	file << "#S " << _step << "\n";
 
-	if (count_all_alive_forms() > (unsigned)((_width * _width) / 3))
+	if (count_all_alive_forms() >
+		(unsigned)(_width / (2 * width_digits_num) * _width))
 	{
 		/* Saving all universe map. */
 		file << "#M " << _width << "\n";
@@ -213,15 +179,22 @@ void Universe::write_to_file(const std::string& filename) const
 		{
 			if (_data[x][y].is_alive())
 			{
-				if (map_format) file << ALIVE_FORM_FILE << "\n";
-				/* else */
-				file << x << " " << y << "\n";
+				if (map_format)
+				{
+					file << ALIVE_FORM_FILE;
+				}
+				else
+				{
+					file << x << " " << y << "\n";
+				}
 			}
 			else
 			{
-				if (map_format) file << DEAD_FORM_FILE << "\n";
+				if (map_format) file << DEAD_FORM_FILE;
 			}
 		}
+
+		if (map_format) file << "\n";
 	}
 
 	file.close();
@@ -254,7 +227,7 @@ unsigned long long int Universe::count_all_alive_forms() const
 		}
 	}
 
-	return total++;
+	return total;
 }
 
 
@@ -323,7 +296,6 @@ void Universe::draw() const
 	
 	std::cout << "Universe step: " << _step;
 
-	#ifdef __DEBUG__UNIVERSE__
 	std::cout << " Criteria: B";
 	for (int i = 0; i < 9; i++)
 	{
@@ -334,6 +306,8 @@ void Universe::draw() const
 	{
 		if (_survival_criteria[i]) std::cout << i;
 	}
+	#ifdef __DEBUG__
+	std::cout << "(" << count_all_alive_forms() << ")";
 	#endif
 	std::cout << std::endl;
 
