@@ -16,9 +16,6 @@
 // #define __DEBUG__UNIVERSE__
 // #define __DEBUG__LIFEFORM__
 
-
-static const char ERR_BAD_ALLOC[] = "Not enough memory!";
-
 static const char ERR_NEGATIVE_VALUE[] = "The value must be grater or equal 0!";
 static const char ERR_INDEX_OUT_RANGE[] = "Index is out of range (0 <= [index] < [universe size])!";
 static const char ERR_BAD_UNIVERSE_SIZE[] = "The universe size mustbe grater than 1!";
