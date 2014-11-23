@@ -14,6 +14,7 @@ enum GameSignal
 	 * Main signals
 	 */
 	TICK_GAME,		// Play universe animation.
+	CLEAR_SCREEN,	// Clear the console screen.
 	EXIT_GAME,		// Exit the game.
 	SHOW_HELP,		// Show help message.
 
@@ -49,27 +50,21 @@ class Game
 		 * Foreground methods
 		 */
 		bool tick(const int limit = 1);	// Make <n> iterations
+		void clear_screen();		// Clear the console screen
 		void help();				// Show help message
 
 	private:
 		/*
-		 * Private methods
+		 * Parsing methods
 		 */
-		bool _parse_input();		// Parse the input line
-		bool _parse_cmd();			// Parse the input command (in foreground mode)
-
-		/*
-		 * Private fields
-		 */
-		int _argf;					// The number of first flag.
-		int _argc;					// The number of input values.
-		std::string *_argv;			// The input values.
+		void _parse_input(int argc, char **argv);	// Parse the input line
+		bool _parse_cmd(const std::string cmd);	// Parse the input command (in foreground mode)
 
 		bool _is_in_background;		// Is game playing in background.
-		bool _is_input_valid;		// Is the game input was valid.
 		GameMode *_mode;			// The playing gamemode.
-
-		std::string _cmd;			// The input command (in foreground mode)
+		int _steps_limit;
+		std::string _configs_dir;
+		std::string _matrix_file;
 };
 
 

@@ -55,17 +55,19 @@ bool is_flag(const std::string line)
  */
 size_t is_argument(const std::string line)
 {
-	size_t delimiter_pos = line.find("=");
-	size_t size = line.size();
+	return (line.size() > 2 && line[0] == '-' && line[1] == '-');
 
-	if (
-		!(size > 2 && line[0] == '-' && line[1] == '-') // not starts with '--'
-		|| (delimiter_pos == std::string::npos) 		// not includes '='
-		|| (delimiter_pos + 1== size)					// has not got any symbol after '='
-		|| (line[delimiter_pos - 1] == '-')				// has not got any symbol before '='
-	) return 0;
+	// size_t delimiter_pos = line.find("=");
+	// size_t size = line.size();
 
-	return delimiter_pos;
+	// if (
+	// 	!(size > 2 && line[0] == '-' && line[1] == '-') // not starts with '--'
+	// 	|| (delimiter_pos == std::string::npos) 		// not includes '='
+	// 	|| (delimiter_pos + 1== size)					// has not got any symbol after '='
+	// 	|| (line[delimiter_pos - 1] == '-')				// has not got any symbol before '='
+	// ) return 0;
+
+	// return delimiter_pos;
 }
 
 
@@ -90,67 +92,64 @@ bool is_value(const std::string line)
 
 
 /*
+ *
+ */
+bool is_readable(const char *path)
+{
+	struct stat info;
+
+	if (stat(path, &info) != 0)
+	{
+		std::cout
+				<< ERR_HEADER
+				<< path
+				<< ERR_PATH_NOT_ACCESSABLE
+				<< std::endl;
+		return false;
+	}
+	
+	if (!(info.st_mode & S_IFDIR))
+	{
+		std::cout
+				<< ERR_HEADER
+				<< path
+				<< ERR_PATH_NOT_EXISTS
+				<< std::endl;
+		return false;
+	}
+	
+	return true;
+}
+
+
+/*
  * --------------- GAME METHODS ---------------
  */
 
 Game::Game(int argc, char **argv)
 {
-	/*
-	 * Copy 
-	 */
-	_argc = argc - 1;
-	_argv = new std::string[_argc];
-
-	_mode = NULL;
-
-	for (int i = 1; i < argc; i++)
-	{
-		_argv[i - 1] = std::string(argv[i]);
-	}
-
 	#ifdef __DEBUG__GAME__
-	size_t eq_pos;
-	bool is_flag_value = false;
-	std::cout << "The input was:" << std::endl;
-	for (int i = 0; i < _argc; i++) 
-	{
-		std::cout << i << " : " << _argv[i] << " - ";
-		if (is_flag(_argv[i]))
-		{
-			std::cout << "('" << _argv[i][1] << "')";
-			is_flag_value = (_argv[i][1] != 'h');
-		}
-		else if (eq_pos = is_argument(_argv[i]))
-		{
-			std::cout << "('"
-					<< _argv[i].substr(2, eq_pos - 2)
-					<< "', '"
-					<< _argv[i].substr(eq_pos + 1, _argv[i].size())
-					<< "')";
-		}
-		else if (is_flag_value)
-		{
-			std::cout << "value (for " << _argv[i - 1][1] << " flag)";
-			is_flag_value = false;
-		}
-
-		std::cout << std::endl;
-	}
+	std::cout
+			<< WARNING_HEADER
+			<< "you have started the game in debug mode!\n" << std::endl;
 	#endif
 
-	if (_argc)
+	/*
+	 * Default settings
+	 */
+	_mode = new STD_MODE();
+	_steps_limit = STD_STEPS_LIMIT;
+	_configs_dir = STD_CONFIGS_DIR;
+	_matrix_file = STD_MATRIX_FILE;
+
+	if (argc > 1)
 	{
 		_is_in_background = true;
-		_is_input_valid = _parse_input();
+		_parse_input(argc, argv);
 	}
 	else
 	{
 		_is_in_background = false;
-	}
-
-	if (_mode == NULL)
-	{
-		_mode = new STD_MODE();
 	}
 }
 
@@ -158,9 +157,10 @@ Game::Game(int argc, char **argv)
 Game::~Game()
 {
 	#ifdef __DEBUG__GAME__
-	std::cout << "Exiting from the game...\nDeleting argv..." << std::endl;
+	std::cout << "Exiting from the game..." << std::endl;
+	std::cout << "Deleting the mode class..." << std::endl;
 	#endif
-	delete[] _argv;
+	delete _mode;
 	
 	#ifdef __DEBUG__GAME__
 	std::cout << "Done." << std::endl;
@@ -168,129 +168,222 @@ Game::~Game()
 }
 
 
-bool Game::_parse_input()
+void Game::_parse_input(int argc, char **argv)
 {
+	/*
+	 * Copy the input arguments, flags and values.
+	 */
+	int __argc = argc - 1;
+	std::string *__argv = new std::string[__argc];
+	for (int i = 1; i < argc; i++) __argv[i - 1] = std::string(argv[i]);
+
 	int i = 0;
-	size_t eq_pos;
+	size_t equals_pos;
 	std::string arg_name, arg_value;
-	
-	while (i < _argc)
+
+	while (i < __argc)
 	{
-		if (eq_pos = is_argument(_argv[i]))
+		if (__argv[i] == "-h" || __argv[i] == "--help")
 		{
-			arg_name = _argv[i].substr(2, eq_pos);
-			arg_value = _argv[i].substr(eq_pos + 1, _argv[i].size());
+			std::cout
+					<< HELP_DESCRIPTION << std::endl
+					<< HELP_USAGE << std::endl
+					<< HELP_FLAGS << std::endl
+					<< std::endl;
+			break;
+		}
+
+		if (is_argument(__argv[i]))
+		{
+			equals_pos = __argv[i].find("=");
+
+			if (equals_pos != std::string::npos)
+			{
+				arg_name = __argv[i].substr(2, equals_pos - 2);
+				arg_value = __argv[i].substr(equals_pos + 1, __argv[i].size());
+			}
+			else
+			{
+				std::cout
+						<< ERR_HEADER
+						<< __argv[i]
+						<< ERR_VALUE_EXPECTED
+						<< std::endl;
+			}
 			
+			#ifdef __DEBUG__GAME__
+			std::cout
+					<< "arg: '"
+					<< arg_name
+					<< "' : '"
+					<< arg_value
+					<< "'"
+					<< std::endl;
+			#endif
+
 			if (arg_name == "mode")
 			{
 				if (arg_value == "detailed")
 				{
-
+					delete _mode;
+					_mode = new DetailedMode();
 				}
 				else if (arg_value == "fast")
 				{
-
+					delete _mode;
+					_mode = new FastMode();
 				}
 				else if (arg_value == "tournament")
 				{
-
+					delete _mode;
+					_mode = new TournamentMode();
 				}
 				else
 				{
-					std::cout << ERR_INVALID_MODE << std::endl;
-					return false;
+					std::cout
+							<< ERR_HEADER
+							<< arg_value
+							<< ERR_INVALID_MODE
+							<< std::endl;
 				}
-			}
-			else if (arg_name == "mode")
-			{
-
 			}
 			else if (arg_name == "steps")
 			{
-
+				if (isdigit(arg_value[0]))
+				{
+					_steps_limit = atoi(arg_value.c_str());
+				}
+				else
+				{
+					std::cout
+							<< ERR_HEADER
+							<< arg_value
+							<< ERR_INTEGER_EXPECTED
+							<< std::endl;
+				}
 			}
 			else if (arg_name == "configs")
 			{
-
+				if (is_readable(arg_value.c_str()))
+				{
+					_configs_dir = arg_value.c_str();
+				}
 			}
 			else if (arg_name == "matrix")
 			{
-
+				if (is_readable(arg_value.c_str()))
+				{
+					_matrix_file = arg_value;
+				}
 			}
 			else
 			{
-				std::cout << ERR_UNKNOWN_ARGUMENT << arg_name << std::endl;
-				return false;
+				std::cout
+						<< ERR_HEADER
+						<< arg_name
+						<< ERR_UNKNOWN_ARGUMENT
+						<< std::endl;
 			}
 		}
-		else if (is_flag(_argv[i]))
+		else if (is_flag(__argv[i]))
 		{
-			if ((i + 1 < _argc)
-					&& !is_value(_argv[i + 1])
-					&& _argv[i][1] != 'h'
+			#ifdef __DEBUG__GAME__
+			std::cout
+					<< "flag: '"
+					<< __argv[i][1]
+					<< "' : '"
+					<< __argv[i + 1]
+					<< "'"
+					<< std::endl;
+			#endif
+			
+			if ((i + 1 == __argc)
+					&& !is_value(__argv[i + 1])
 				)
 			{
-				std::cout << ERR_INVALID_INPUT << std::endl;
-				return false;
+				std::cout
+						<< ERR_HEADER
+						<< __argv[i][1]
+						<< ERR_VALUE_EXPECTED
+						<< std::endl;
+				i++;
 			}
 
-			switch (_argv[i][1])
+			switch (__argv[i][1])
 			{
-				case 'h':
-				{
-					std::cout
-							<< HELP_DESCRIPTION
-							<< HELP_USAGE
-							<< HELP_FLAGS
-							<< std::endl;
-					return false;
-				}
 				default:
 				{
-					std::cout << _argv[i][1] << ERR_UNKNOWN_FLAG << std::endl;
-					return false;
+					std::cout
+							<< ERR_HEADER
+							<< __argv[i][1]
+							<< ERR_UNKNOWN_FLAG
+							<< std::endl;
 				}
 			}
 		}
 		else // Not right argument or flag.
 		{
-			std::cout << ERR_INVALID_INPUT << std::endl;
-			return false;
+			std::cout
+					<< ERR_HEADER
+					<< __argv[i]
+					<< ERR_INVALID_INPUT
+					<< std::endl;
 		}
 
 		i++;
 	}
-
-	return true;
 }
 
 
-bool Game::_parse_cmd()
+bool Game::_parse_cmd(const std::string cmd)
 {
-	std::string cmd(_cmd);
 	size_t cmd_len = cmd.size();
-	std::string answer;
 
-	if (cmd_len == 0)
-	{
-		return true;
-	}
+	if (cmd_len == 0) return true;
 
 	size_t delimiter_pos = cmd.find(" ");
 	size_t found_tick = cmd.find("tick");
 	size_t found_exit = cmd.find("quit");
 	size_t found_help = cmd.find("help");
+	size_t found_clear = cmd.find("clear");
 	
 	if (found_tick != std::string::npos)
 	{
 		if (delimiter_pos != std::string::npos)
 		{
-			tick();
+			if ((cmd_len - delimiter_pos) > MAX_INTEGER_LEN)
+			{
+				std::cout
+						<< ERR_HEADER
+						<< cmd
+						<< ERR_TOO_BIG_INTEGER
+						<< std::endl;
+			}
+			else if (!isdigit(cmd[delimiter_pos + 1]))
+			{
+				std::cout
+						<< ERR_HEADER
+						<< cmd
+						<< ERR_INTEGER_EXPECTED
+						<< std::endl;
+			}
+			else
+			{
+				tick(atoi(cmd.substr(delimiter_pos, cmd_len).c_str()));
+			}
 		}
 		else
 		{
-			std::cout << ERR_NO_VALUE << std::endl;
+			std::cout
+					<< ERR_HEADER
+					<< cmd
+					<< ERR_VALUE_EXPECTED
+					<< std::endl;
 		}
+	}
+	else if (found_clear != std::string::npos && cmd_len == 5)
+	{
+		clear_screen();
 	}
 	else if (found_help != std::string::npos && cmd_len == 4)
 	{
@@ -317,6 +410,12 @@ bool Game::tick(int limit)
 }
 
 
+void Game::clear_screen()
+{
+	system("clear");
+}
+
+
 void Game::help()
 {
 	std::cout << HELP_COMMANDS << std::endl;
@@ -328,21 +427,27 @@ void Game::run()
 	if (_is_in_background) // Run in background.
 	{
 		#ifdef __DEBUG__GAME__
-		std::cout << "Offline gaming started:" << std::endl;
+		std::cout
+				<< "Offline gaming started, configuration:" << std::endl
+				<< "   steps limit: "<< _steps_limit << std::endl
+				<< "   configs dir: " << _configs_dir << std::endl
+				<< "   matrix file: " << _matrix_file << std::endl
+				<< std::endl;
 		#endif
 	}
 	else // Run in foreground.
 	{
 		bool is_running = true;
+		std::string cmd;
 
 		std::cout << MSG_GREETING << std::endl;
 
 		while (is_running)
 		{
 			std::cout << CMD_IN;
-			getline(std::cin, _cmd);
+			getline(std::cin, cmd);
 
-			is_running = _parse_cmd();
+			is_running = _parse_cmd(cmd);
 		}
 	}
 }
