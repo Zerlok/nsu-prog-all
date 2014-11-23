@@ -5,19 +5,19 @@
  * --------------- DETAILED MODE METHODS ---------------
  */
 
-DeatailedMode::DeatailedMode()
+DetailedMode::DetailedMode()
 {
 
 }
 
 
-DeatailedMode::~DeatailedMode()
+DetailedMode::~DetailedMode()
 {
 
 }
 
 
-void DeatailedMode::play()
+void DetailedMode::play()
 {
 	std::cout << "Playing a detailed mode..." << std::endl;
 }

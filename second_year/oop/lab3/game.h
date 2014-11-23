@@ -55,7 +55,7 @@ class Game
 		/*
 		 * Private methods
 		 */
-		void _parse_input();		// Parse the input line
+		bool _parse_input();		// Parse the input line
 		bool _parse_cmd();			// Parse the input command (in foreground mode)
 
 		/*
@@ -63,13 +63,13 @@ class Game
 		 */
 		int _argf;					// The number of first flag.
 		int _argc;					// The number of input values.
-		char **_argv;				// The input values.
+		std::string *_argv;			// The input values.
 
 		bool _is_in_background;		// Is game playing in background.
-
+		bool _is_input_valid;		// Is the game input was valid.
 		GameMode *_mode;			// The playing gamemode.
 
-		std::string _cmd;			// The input command (foreground mode)
+		std::string _cmd;			// The input command (in foreground mode)
 };
 
 

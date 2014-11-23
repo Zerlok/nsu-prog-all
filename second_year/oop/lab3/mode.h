@@ -25,11 +25,11 @@ class GameMode
  * This class describes the detailed mode playing.
  *
  */
-class DeatailedMode : public GameMode
+class DetailedMode : public GameMode
 {
 	public:
-		DeatailedMode();
-		~DeatailedMode();
+		DetailedMode();
+		~DetailedMode();
 
 		virtual void play();
 };
