@@ -22,9 +22,11 @@
  *    If it starts with '-' and it's length equals 2,
  *    then it is a flag. Otherwise - not a flag.
  */
-bool is_flag(const std::string line)
+inline bool is_flag(const std::string line)
 {
-	return (line.size() == 2 && line[0] == '-');
+	return ((line.size() == 2)
+			&& (line[0] == '-')
+	);
 }
 
 
@@ -53,9 +55,12 @@ bool is_flag(const std::string line)
  *    --char          - 0
  *    --=             - 0
  */
-size_t is_argument(const std::string line)
+inline bool is_argument(const std::string line)
 {
-	return (line.size() > 2 && line[0] == '-' && line[1] == '-');
+	return ((line.size() > 2)
+			&& (line[0] == '-')
+			&& (line[1] == '-')
+	);
 
 	// size_t delimiter_pos = line.find("=");
 	// size_t size = line.size();
@@ -85,20 +90,23 @@ size_t is_argument(const std::string line)
  *    then it is a value, otherwise - not.
  * 
  */
-bool is_value(const std::string line)
+inline bool is_value(const std::string line)
 {
-	return (!is_flag(line) && !is_argument(line));
+	return (!is_flag(line)
+			&& !is_argument(line)
+	);
 }
 
 
 /*
  *
  */
-bool is_readable(const char *path)
+inline bool is_exists(const char *path)
 {
 	struct stat info;
+	int status = stat(path, &info);
 
-	if (stat(path, &info) != 0)
+	if (status != 0)
 	{
 		std::cout
 				<< ERR_HEADER
@@ -107,17 +115,7 @@ bool is_readable(const char *path)
 				<< std::endl;
 		return false;
 	}
-	
-	if (!(info.st_mode & S_IFDIR))
-	{
-		std::cout
-				<< ERR_HEADER
-				<< path
-				<< ERR_PATH_NOT_EXISTS
-				<< std::endl;
-		return false;
-	}
-	
+
 	return true;
 }
 
@@ -126,49 +124,36 @@ bool is_readable(const char *path)
  * --------------- GAME METHODS ---------------
  */
 
-Game::Game(int argc, char **argv)
+Game::Game(const int argc, const char **argv)
 {
-	#ifdef __DEBUG__GAME__
-	std::cout
-			<< WARNING_HEADER
-			<< "you have started the game in debug mode!\n" << std::endl;
-	#endif
-
 	/*
 	 * Default settings
 	 */
+	_debug = false;
 	_mode = new STD_MODE();
+	_is_in_background = false;
 	_steps_limit = STD_STEPS_LIMIT;
 	_configs_dir = STD_CONFIGS_DIR;
 	_matrix_file = STD_MATRIX_FILE;
-
-	if (argc > 1)
-	{
-		_is_in_background = true;
-		_parse_input(argc, argv);
-	}
-	else
-	{
-		_is_in_background = false;
-	}
+	
+	_parse_input(argc, argv);
 }
 
 
 Game::~Game()
 {
-	#ifdef __DEBUG__GAME__
-	std::cout << "Exiting from the game..." << std::endl;
-	std::cout << "Deleting the mode class..." << std::endl;
-	#endif
+	if (_debug)
+	{
+		std::cout << "Exiting from the game..." << std::endl;
+		std::cout << "Deleting the mode class..." << std::endl;
+	}
 	delete _mode;
 	
-	#ifdef __DEBUG__GAME__
-	std::cout << "Done." << std::endl;
-	#endif
+	if (_debug) std::cout << "Done." << std::endl;
 }
 
 
-void Game::_parse_input(int argc, char **argv)
+void Game::_parse_input(const int argc, const char **argv)
 {
 	/*
 	 * Copy the input arguments, flags and values.
@@ -183,16 +168,9 @@ void Game::_parse_input(int argc, char **argv)
 
 	while (i < __argc)
 	{
-		if (__argv[i] == "-h" || __argv[i] == "--help")
-		{
-			std::cout
-					<< HELP_DESCRIPTION << std::endl
-					<< HELP_USAGE << std::endl
-					<< HELP_FLAGS << std::endl
-					<< std::endl;
-			break;
-		}
-
+		/*
+		 * If the argument was given.
+		 */
 		if (is_argument(__argv[i]))
 		{
 			equals_pos = __argv[i].find("=");
@@ -202,6 +180,10 @@ void Game::_parse_input(int argc, char **argv)
 				arg_name = __argv[i].substr(2, equals_pos - 2);
 				arg_value = __argv[i].substr(equals_pos + 1, __argv[i].size());
 			}
+			else if (__argv[i] == "--help")
+			{
+				arg_name = std::string("help");
+			}
 			else
 			{
 				std::cout
@@ -210,16 +192,6 @@ void Game::_parse_input(int argc, char **argv)
 						<< ERR_VALUE_EXPECTED
 						<< std::endl;
 			}
-			
-			#ifdef __DEBUG__GAME__
-			std::cout
-					<< "arg: '"
-					<< arg_name
-					<< "' : '"
-					<< arg_value
-					<< "'"
-					<< std::endl;
-			#endif
 
 			if (arg_name == "mode")
 			{
@@ -227,16 +199,19 @@ void Game::_parse_input(int argc, char **argv)
 				{
 					delete _mode;
 					_mode = new DetailedMode();
+					_is_in_background = false;
 				}
 				else if (arg_value == "fast")
 				{
 					delete _mode;
 					_mode = new FastMode();
+					_is_in_background = true;
 				}
 				else if (arg_value == "tournament")
 				{
 					delete _mode;
 					_mode = new TournamentMode();
+					_is_in_background = true;
 				}
 				else
 				{
@@ -245,6 +220,7 @@ void Game::_parse_input(int argc, char **argv)
 							<< arg_value
 							<< ERR_INVALID_MODE
 							<< std::endl;
+					_is_in_background = true;
 				}
 			}
 			else if (arg_name == "steps")
@@ -264,17 +240,22 @@ void Game::_parse_input(int argc, char **argv)
 			}
 			else if (arg_name == "configs")
 			{
-				if (is_readable(arg_value.c_str()))
+				if (is_exists(arg_value.c_str()))
 				{
 					_configs_dir = arg_value.c_str();
 				}
 			}
 			else if (arg_name == "matrix")
 			{
-				if (is_readable(arg_value.c_str()))
+				if (is_exists(arg_value.c_str()))
 				{
 					_matrix_file = arg_value;
 				}
+			}
+			else if (arg_name == "help")
+			{
+				std::cout << HELP_USAGE << std::endl;
+				_is_in_background = true;
 			}
 			else
 			{
@@ -285,40 +266,120 @@ void Game::_parse_input(int argc, char **argv)
 						<< std::endl;
 			}
 		}
+		/*
+		 * If the flag was given.
+		 */
 		else if (is_flag(__argv[i]))
 		{
-			#ifdef __DEBUG__GAME__
-			std::cout
-					<< "flag: '"
-					<< __argv[i][1]
-					<< "' : '"
-					<< __argv[i + 1]
-					<< "'"
-					<< std::endl;
-			#endif
-			
 			if ((i + 1 == __argc)
-					&& !is_value(__argv[i + 1])
+					|| !is_value(__argv[i + 1])
 				)
 			{
-				std::cout
-						<< ERR_HEADER
-						<< __argv[i][1]
-						<< ERR_VALUE_EXPECTED
-						<< std::endl;
+				switch (__argv[i][1])
+				{
+					case 'd':
+					{
+						std::cout
+								<< WARNING_HEADER
+								<< DEBUG_ENABLED
+								<< std::endl;
+						_debug = true;
+						break;
+					}
+					case 'h':
+					{
+						std::cout << HELP_USAGE << std::endl;
+						_is_in_background = true;
+						break;
+					}
+					default: std::cout
+							<< ERR_HEADER
+							<< __argv[i][1]
+							<< ERR_VALUE_EXPECTED
+							<< std::endl;
+				}
 				i++;
+				continue;
 			}
 
 			switch (__argv[i][1])
 			{
-				default:
+				case 'm':
 				{
-					std::cout
-							<< ERR_HEADER
-							<< __argv[i][1]
-							<< ERR_UNKNOWN_FLAG
-							<< std::endl;
+					if (__argv[i + 1] == "detailed")
+					{
+						delete _mode;
+						_mode = new DetailedMode();
+						_is_in_background = false;
+					}
+					else if (__argv[i + 1] == "fast")
+					{
+						delete _mode;
+						_mode = new FastMode();
+						_is_in_background = true;
+					}
+					else if (__argv[i + 1] == "tournament")
+					{
+						delete _mode;
+						_mode = new TournamentMode();
+						_is_in_background = true;
+					}
+					else
+					{
+						std::cout
+								<< ERR_HEADER
+								<< __argv[i + 1]
+								<< ERR_INVALID_MODE
+								<< std::endl;
+						_is_in_background = true;
+					}
+
+					i++;
+					break;
 				}
+				case 's':
+				{
+					if (isdigit(__argv[i + 1][0]))
+					{
+						_steps_limit = atoi(__argv[i + 1].c_str());
+					}
+					else
+					{
+						std::cout
+								<< ERR_HEADER
+								<< __argv[i + 1]
+								<< ERR_INTEGER_EXPECTED
+								<< std::endl;
+					}
+
+					i++;
+					break;
+				}
+				case 'c':
+				{
+					if (is_exists(__argv[i + 1].c_str()))
+					{
+						_configs_dir = __argv[i + 1].c_str();
+					}
+					
+					i++;
+					break;
+				}
+				case 'x':
+				{
+					if (is_exists(__argv[i + 1].c_str()))
+					{
+						_matrix_file = __argv[i + 1].c_str();
+					}
+					
+					i++;
+					break;
+				}
+				default: std::cout
+						<< ERR_HEADER
+						<< __argv[i][1]
+						<< ERR_UNKNOWN_FLAG
+						<< std::endl;
 			}
 		}
 		else // Not right argument or flag.
@@ -331,7 +392,7 @@ void Game::_parse_input(int argc, char **argv)
 		}
 
 		i++;
-	}
+	} // while (i < __argc)
 }
 
 
@@ -369,7 +430,11 @@ bool Game::_parse_cmd(const std::string cmd)
 			}
 			else
 			{
-				tick(atoi(cmd.substr(delimiter_pos, cmd_len).c_str()));
+				tick(atoi(
+						cmd.substr(
+								delimiter_pos,
+								cmd_len
+						).c_str()));
 			}
 		}
 		else
@@ -395,18 +460,23 @@ bool Game::_parse_cmd(const std::string cmd)
 	}
 	else
 	{
-		std::cout << ERR_UNKNOWN_COMMAND << std::endl;
+		std::cout
+				<< ERR_HEADER
+			 	<< ERR_UNKNOWN_COMMAND
+			 	<< std::endl;
 	}
 
 	return true;
 }
 
 
-bool Game::tick(int limit)
+void Game::tick(int limit)
 {
-	std::cout << limit << std::endl;
-
-	return true;
+	if (_debug) std::cout
+			<< "Start ticking until "
+			<< limit
+			<< "..."
+			<< std::endl;
 }
 
 
@@ -424,19 +494,25 @@ void Game::help()
 
 void Game::run()
 {
+	if (_debug) std::cout
+			<< "The game start running with configuration:\n"
+			<< "   steps limit: "<< _steps_limit << std::endl
+			<< "   configs dir: " << _configs_dir << std::endl
+			<< "   matrix file: " << _matrix_file << std::endl
+			<< std::endl;
+
 	if (_is_in_background) // Run in background.
 	{
-		#ifdef __DEBUG__GAME__
-		std::cout
-				<< "Offline gaming started, configuration:" << std::endl
-				<< "   steps limit: "<< _steps_limit << std::endl
-				<< "   configs dir: " << _configs_dir << std::endl
-				<< "   matrix file: " << _matrix_file << std::endl
-				<< std::endl;
-		#endif
+		if (_debug) std::cout << "Gaming in background started..." << std::endl;
+		
+		for (int i = 0; i < _steps_limit; i++) _mode->play();
 	}
 	else // Run in foreground.
 	{
+		if (_debug) std::cout << "Gaming in foreground started..." << std::endl;
+
+		for (int i = 0; i < _steps_limit; i++) _mode->play();
+
 		bool is_running = true;
 		std::string cmd;
 

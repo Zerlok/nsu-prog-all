@@ -38,7 +38,7 @@ enum GameSignal
 class Game
 {
 	public:
-		Game(int argc, char **argv);
+		Game(const int argc, const char **argv);
 		~Game();
 
 		/*
@@ -49,7 +49,7 @@ class Game
 		/*
 		 * Foreground methods
 		 */
-		bool tick(const int limit = 1);	// Make <n> iterations
+		void tick(const int limit = 1);	// Make <n> iterations
 		void clear_screen();		// Clear the console screen
 		void help();				// Show help message
 
@@ -57,8 +57,10 @@ class Game
 		/*
 		 * Parsing methods
 		 */
-		void _parse_input(int argc, char **argv);	// Parse the input line
+		void _parse_input(const int argc, const char **argv);	// Parse the input line
 		bool _parse_cmd(const std::string cmd);	// Parse the input command (in foreground mode)
+
+		bool _debug;
 
 		bool _is_in_background;		// Is game playing in background.
 		GameMode *_mode;			// The playing gamemode.

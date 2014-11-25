@@ -1,7 +1,7 @@
 #include "main.h"
 
 
-int main(int argc, char **argv)
+int main(const int argc, const char **argv)
 {
 	Game game(argc, argv);
 
