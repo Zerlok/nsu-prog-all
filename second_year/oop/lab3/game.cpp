@@ -191,6 +191,9 @@ void Game::_parse_input(const int argc, const char **argv)
 						<< __argv[i]
 						<< ERR_VALUE_EXPECTED
 						<< std::endl;
+				
+				i++;
+				continue;
 			}
 
 			if (arg_name == "mode")
@@ -504,26 +507,28 @@ void Game::run()
 	if (_is_in_background) // Run in background.
 	{
 		if (_debug) std::cout << "Gaming in background started..." << std::endl;
-		
-		for (int i = 0; i < _steps_limit; i++) _mode->play();
+
+		_mode->play();
+		// for (int i = 0; i < _steps_limit; i++) _mode->play();
 	}
 	else // Run in foreground.
 	{
 		if (_debug) std::cout << "Gaming in foreground started..." << std::endl;
 
-		for (int i = 0; i < _steps_limit; i++) _mode->play();
+		_mode->play();
+		// for (int i = 0; i < _steps_limit; i++) _mode->play();
 
-		bool is_running = true;
-		std::string cmd;
+		// bool is_running = true;
+		// std::string cmd;
 
-		std::cout << MSG_GREETING << std::endl;
+		// std::cout << MSG_GREETING << std::endl;
 
-		while (is_running)
-		{
-			std::cout << CMD_IN;
-			getline(std::cin, cmd);
+		// while (is_running)
+		// {
+		// 	std::cout << CMD_IN;
+		// 	getline(std::cin, cmd);
 
-			is_running = _parse_cmd(cmd);
-		}
+		// 	is_running = _parse_cmd(cmd);
+		// }
 	}
 }
