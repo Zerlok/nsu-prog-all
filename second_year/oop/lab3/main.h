@@ -63,6 +63,7 @@ static const size_t MAX_INTEGER_LEN = 5;
 
 // --------------- INCLUDE MY MODULES ---------------
 
+#include "strategy.h"
 #include "mode.h"
 #include "game.h"
 

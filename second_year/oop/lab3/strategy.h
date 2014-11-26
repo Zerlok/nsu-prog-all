@@ -1,6 +1,3 @@
-#include "main.h"
-
-
 class Strategy
 {
 	public:
@@ -30,12 +27,12 @@ class StrategyCreator : public AbstractCreator
 class StrategyFactory
 {
 	protected:
-		typedef std::map<std::string, *AbstractCreator> FactoryMap;
+		typedef std::map<std::string, AbstractCreator*> FactoryMap;
 		FactoryMap _factory;
 
 	public:
-		StrategyFactory();
-		~StrategyFactory();
+		StrategyFactory() {};
+		~StrategyFactory() {};
 
 		template <class S>
 		void push(const std::string& id)
