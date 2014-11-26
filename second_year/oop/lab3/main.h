@@ -6,6 +6,7 @@
 #include <cstring>		// strcpy, strlen.
 #include <string>		// string
 #include <sys/stat.h>	// floder info
+#include <map>			// map
 
 
 // --------------- ERRORS ---------------

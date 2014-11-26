@@ -63,7 +63,7 @@ class Game
 		bool _debug;
 
 		bool _is_in_background;		// Is game playing in background.
-		GameMode *_mode;			// The playing gamemode.
+		Mode *_mode;			// The playing gamemode.
 		int _steps_limit;
 		std::string _configs_dir;
 		std::string _matrix_file;

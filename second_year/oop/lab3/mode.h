@@ -10,11 +10,9 @@
  * The Game class uses it.
  *
  */
-class GameMode
+class Mode
 {
 	public:
-		virtual ~GameMode() {};
-
 		virtual void play() = 0;
 };
 
@@ -25,7 +23,7 @@ class GameMode
  * This class describes the detailed mode playing.
  *
  */
-class DetailedMode : public GameMode
+class DetailedMode : public Mode
 {
 	public:
 		DetailedMode();
@@ -41,7 +39,7 @@ class DetailedMode : public GameMode
  * This class describes the fast mode playing.
  *
  */
-class FastMode : public GameMode
+class FastMode : public Mode
 {
 	public:
 		FastMode();
@@ -57,7 +55,7 @@ class FastMode : public GameMode
  * This class describes the tournament mode playing.
  *
  */
-class TournamentMode : public GameMode
+class TournamentMode : public Mode
 {
 	public:
 		TournamentMode();
