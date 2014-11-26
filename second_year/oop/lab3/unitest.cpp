@@ -74,9 +74,34 @@ TEST(Input, InvalidInput)
 }
 
 
+TEST(CrazyStrategy, Init)
+{
+	EXPECT_NO_THROW(
+	{
+		TrustfullStrategy strat;
+	});
+}
+
+
 TEST(Factory, Init)
 {
-	EXPECT_NO_THROW(StrategyFactory strategies);
+	EXPECT_NO_THROW(
+	{
+		StrategyFactory strategies;
+
+		strategies.push<TrustfullStrategy>("t");
+		strategies.push<MistrustfullStrategy>("m");
+		strategies.push<CrazyStrategy>("c");
+
+		std::string strat("t");
+		Strategy *my = strategies.get(strat);
+
+		std::cout
+				<< strat
+				<< " - "
+				<< my->get_decision()
+				<< std::endl;
+	});
 }
 
 

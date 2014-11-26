@@ -37,6 +37,7 @@ CONSOLE ERR_PATH_NOT_ACCESSABLE[] = " - permission denied or not exists!";
  */
 CONSOLE ERR_UNKNOWN_COMMAND[] = "Unknown command. Try help to see available commands.";
 
+
 // --------------- WARNINGS ---------------
 
 CONSOLE WARNING_HEADER[] = "*** Warning ***\n";
@@ -60,10 +61,17 @@ CONSOLE WARNING_YES_NO_ONLY[] = "Type 'yes' or 'no': ";
 
 static const size_t MAX_INTEGER_LEN = 5;
 
+enum Decision
+{
+	cooperate,
+	betray
+};
+
 
 // --------------- INCLUDE MY MODULES ---------------
 
 #include "strategy.h"
+#include "factory.h"
 #include "mode.h"
 #include "game.h"
 

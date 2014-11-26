@@ -1,49 +1,50 @@
 class Strategy
 {
 	public:
-		virtual ~Strategy() {}
-		virtual void make_decision() = 0;
+		Strategy() {}
+		~Strategy() {}
+
+		virtual Decision get_decision() = 0;
 };
 
 
-class AbstractCreator
+class TrustfullStrategy : public Strategy
 {
 	public:
-		virtual Strategy *create() const = 0;
-};
+		TrustfullStrategy() {}
+		~TrustfullStrategy() {}
 
-
-template <class S>
-class StrategyCreator : public AbstractCreator
-{
-	public:
-		virtual Strategy *create() const
+		virtual Decision get_decision()
 		{
-			return new S();
+			std::cout << "coop" << std::endl;
+			return cooperate;
 		}
 };
 
 
-class StrategyFactory
+class MistrustfullStrategy : public Strategy
 {
-	protected:
-		typedef std::map<std::string, AbstractCreator*> FactoryMap;
-		FactoryMap _factory;
-
 	public:
-		StrategyFactory() {};
-		~StrategyFactory() {};
+		MistrustfullStrategy() {}
+		~MistrustfullStrategy() {}
 
-		template <class S>
-		void push(const std::string& id)
+		virtual Decision get_decision()
 		{
-			// If creator exist -> it will be replaced
-			_factory[id] = new StrategyCreator<S>();
+			std::cout << "betr" << std::endl;
+			return betray;
 		}
+};
 
-		Strategy *get(const std::string & id)
+
+class CrazyStrategy : public Strategy
+{
+	public:
+		CrazyStrategy() {}
+		~CrazyStrategy() {}
+
+		virtual Decision get_decision()
 		{
-			// If creator was not found -> an error will occured.
-			return _factory.find(id)->second->create();
+			if (rand() % 2) return cooperate;
+			return betray;
 		}
 };
