@@ -28,6 +28,7 @@ CONSOLE ERR_NEGATIVE_VALUE[] = " - must be grater or equals 0!";
 CONSOLE ERR_UNKNOWN_FLAG[] = " - unknown flag.";
 CONSOLE ERR_UNKNOWN_ARGUMENT[] = " - unknown argument.";
 CONSOLE ERR_VALUE_EXPECTED[] = " - the value was expected!";
+CONSOLE ERR_INVALID_ARGUMENT[] = " - input argument is invalid.";
 CONSOLE ERR_INVALID_INPUT[] = " - invalid input. Try -h or --help to see how to start this program.";
 CONSOLE ERR_INVALID_MODE[] = " - invalid game mode. Available modes are:\n   detailed    - ...\n   fast        - ...\n   tournament  - ...";
 CONSOLE ERR_PATH_NOT_ACCESSABLE[] = " - permission denied or not exists!";
@@ -60,12 +61,58 @@ CONSOLE WARNING_YES_NO_ONLY[] = "Type 'yes' or 'no': ";
 // --------------- CONSTANTS ---------------
 
 static const size_t MAX_INTEGER_LEN = 5;
+static const size_t str_none = std::string::npos;
 
 enum Decision
 {
-	cooperate,
-	betray
+	cooperate = 1,
+	betray = 0
 };
+
+
+typedef struct MatrixField
+{
+	Decision decisions[3];
+	int scores[3];
+} MatrixField;
+
+
+static const MatrixField STD_MATRIX[8] = {
+	{
+		{cooperate, cooperate, cooperate},
+		{4, 4, 4}
+	},
+	{
+		{cooperate, cooperate, betray},
+		{2, 2, 5}
+	},
+	{
+		{cooperate, betray, cooperate},
+		{2, 5, 2}
+	}
+	{
+		{betray, cooperate, cooperate},
+		{5, 2, 2}
+	},
+	{
+		{cooperate, betray, betray},
+		{0, 3, 3}
+	},
+	{
+		{betray, cooperate, betray},
+		{3, 0, 3}
+	},
+	{
+		{betray, betray, cooperate},
+		{3, 3, 0}
+	},
+	{
+		{betray, betray, betray},
+		{1, 1, 1}
+	}
+	// 8 structures, with 2 values (decisions, scores)
+};
+
 
 
 // --------------- INCLUDE MY MODULES ---------------

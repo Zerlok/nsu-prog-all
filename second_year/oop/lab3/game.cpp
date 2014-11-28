@@ -67,7 +67,7 @@ inline bool is_argument(const std::string line)
 
 	// if (
 	// 	!(size > 2 && line[0] == '-' && line[1] == '-') // not starts with '--'
-	// 	|| (delimiter_pos == std::string::npos) 		// not includes '='
+	// 	|| (delimiter_pos == str_none) 		// not includes '='
 	// 	|| (delimiter_pos + 1== size)					// has not got any symbol after '='
 	// 	|| (line[delimiter_pos - 1] == '-')				// has not got any symbol before '='
 	// ) return 0;
@@ -175,7 +175,7 @@ void Game::_parse_input(const int argc, const char **argv)
 		{
 			equals_pos = __argv[i].find("=");
 
-			if (equals_pos != std::string::npos)
+			if (equals_pos != str_none)
 			{
 				arg_name = __argv[i].substr(2, equals_pos - 2);
 				arg_value = __argv[i].substr(equals_pos + 1, __argv[i].size());
@@ -406,60 +406,87 @@ bool Game::_parse_cmd(const std::string cmd)
 	if (cmd_len == 0) return true;
 
 	size_t delimiter_pos = cmd.find(" ");
-	size_t found_tick = cmd.find("tick");
+
+	size_t found_clear = cmd.find("clear");
 	size_t found_exit = cmd.find("quit");
 	size_t found_help = cmd.find("help");
-	size_t found_clear = cmd.find("clear");
+	size_t found_scores = cmd.find("scores");
+	size_t found_show = cmd.find("show");
+	size_t found_step = cmd.find("step");
+	size_t found_strategies = cmd.find("strategies");
+	size_t found_tick = cmd.find("tick");
+	size_t found_use = cmd.find("use");
 	
-	if (found_tick != std::string::npos)
+	if ((found_tick != str_none) && (delimiter_pos == 4))
 	{
-		if (delimiter_pos != std::string::npos)
+		if ((cmd_len - delimiter_pos) > MAX_INTEGER_LEN)
 		{
-			if ((cmd_len - delimiter_pos) > MAX_INTEGER_LEN)
-			{
-				std::cout
-						<< ERR_HEADER
-						<< cmd
-						<< ERR_TOO_BIG_INTEGER
-						<< std::endl;
-			}
-			else if (!isdigit(cmd[delimiter_pos + 1]))
-			{
-				std::cout
-						<< ERR_HEADER
-						<< cmd
-						<< ERR_INTEGER_EXPECTED
-						<< std::endl;
-			}
-			else
-			{
-				tick(atoi(
-						cmd.substr(
-								delimiter_pos,
-								cmd_len
-						).c_str()));
-			}
+			std::cout
+					<< ERR_HEADER
+					<< cmd
+					<< ERR_TOO_BIG_INTEGER
+					<< std::endl;
+		}
+		else if (!isdigit(cmd[delimiter_pos + 1]))
+		{
+			std::cout
+					<< ERR_HEADER
+					<< cmd
+					<< ERR_INTEGER_EXPECTED
+					<< std::endl;
+		}
+		else
+		{
+			tick(atoi(
+					cmd.substr(
+							delimiter_pos,
+							cmd_len
+					).c_str()));
+		}
+	}
+	else if ((found_show != str_none) && (delimiter_pos == 4))
+	{
+		if ((found_strategies != str_none) && (cmd_len == 15))
+		{
+			show("strategies");
+		}
+		else ((found_scores != str_none) && (cmd_len == 11))
+		{
+			show("scores");
 		}
 		else
 		{
 			std::cout
 					<< ERR_HEADER
-					<< cmd
-					<< ERR_VALUE_EXPECTED
+					<< 
+					<< ERR_INVALID_ARGUMENT
 					<< std::endl;
 		}
 	}
-	else if (found_clear != std::string::npos && cmd_len == 5)
+	else if ((found_use != str_none) && (delemiter_pos == 3))
+	{
+
+	}
+	else if ((found_clear != str_none) && (cmd_len == 5))
 	{
 		clear_screen();
 	}
-	else if (found_help != std::string::npos && cmd_len == 4)
+	else if ((found_help != str_none) && (cmd_len == 4))
 	{
 		help();
 	}
-	else if (found_exit != std::string::npos && cmd_len == 4)
+	else if ((found_exit != str_none) && (cmd_len == 4))
 	{
 		return false;
+	}
+	else if (((found_tick != str_none) || (found_show != str_none) || (found_use != str_none))
+			&& (delimiter_pos == str_none))
+	)
+	{
+		std::cout
+				<< ERR_HEADER
+				<< ERR_VALUE_EXPECTED
+				<< std::endl;
 	}
 	else
 	{
