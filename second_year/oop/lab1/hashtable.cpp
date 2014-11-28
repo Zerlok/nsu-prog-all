@@ -11,19 +11,23 @@ HashTable::HashTable(int mem)
 		throw std::invalid_argument(ERR_BAD_HTABLE_SIZE);
 	}
 
+	_items_num = 0;
 	_cells_num = mem;
 	_data = new Item*[mem];
 
-	for (int i = 0; i < _cells_num; i++)
-	{
-		_data[i] = NULL;
-	}
+	std::fill(_data, _data + _cells_num, static_cast<Item *>(NULL));
 }
 
 
+/*
+ *	Hashtable destructor doesn't use the clear function,
+ *	because clear deletes, then allocates new memory for _data
+ *	and fills NULLs into each _data pointer - it takes a time.
+ *	But when hashtable object destroying, it will never be used again,
+ *	that's why it's better use only 'delete[] _data;' without clear.
+ */
 HashTable::~HashTable()
 {
-	clear();
 	delete[] _data;
 }
 
@@ -33,6 +37,7 @@ HashTable::~HashTable()
  */
 HashTable::HashTable(const HashTable& hashtable)
 {
+	_items_num = hashtable._items_num;
 	_cells_num = hashtable._cells_num;
 	_data = new Item*[_cells_num];
 
@@ -64,10 +69,10 @@ Value& HashTable::operator[](const String& key)
 
 		insert(key, value);
 
-		return *_search(key);
+		return (*_search(key));
 	}
 
-	return *inner_value;
+	return (*inner_value);
 }
 
 
@@ -76,12 +81,12 @@ Value& HashTable::operator[](const String& key)
  */
 HashTable& HashTable::operator=(const HashTable& hashtable)
 {
-	clear();
+	if (this == (&hashtable))
+		return (*this);
 
 	_cells_num = hashtable._cells_num;
-
-	delete[] *_data;
-	_data = new Item*[_cells_num];
+	
+	clear();
 
 	for (int i = 0; i < _cells_num; i++)
 	{
@@ -95,6 +100,8 @@ HashTable& HashTable::operator=(const HashTable& hashtable)
 		}
 	}
 
+	_items_num = hashtable._items_num;
+
 	return (*this);
 }
 
@@ -106,7 +113,8 @@ HashTable& HashTable::operator=(const HashTable& hashtable)
  */
 bool operator==(const HashTable& hashtable1, const HashTable& hashtable2)
 {
-	if (hashtable1._cells_num == hashtable2._cells_num)
+	if ((hashtable1._cells_num == hashtable2._cells_num)
+		&& (hashtable1._items_num == hashtable2._items_num))
 	{
 		Item *a_item, *b_item;
 
@@ -152,21 +160,16 @@ bool operator!=(const HashTable& hashtable1, const HashTable& hashtable2)
 
 /*
  *	Cleans all data from current HashTable object.
+ *	Deletes _data's pointers, allocates new memory
+ *	and fills NULLs into each _data's pointer.
  */
 void HashTable::clear()
 {
-	for (int i = 0; i < _cells_num; i++)
-	{
-		Item *tmp = _data[i];
+	_items_num = 0;
 
-		while (tmp) {
-			Item *delete_item = tmp;
-			tmp = tmp->get_next();
-			delete delete_item;
-		}
-
-		_data[i] = NULL;
-	}
+	delete[] _data;
+	_data = new Item*[_cells_num];
+	std::fill(_data, _data + _cells_num, static_cast<Item *>(NULL));
 }
 
 
@@ -186,6 +189,7 @@ bool HashTable::erase(const String& key)
 
 	if (last_item->is_key_equals(key))
 	{
+		_items_num--;
 		next_item = last_item->get_next();
 
 		if (next_item == NULL)
@@ -205,6 +209,7 @@ bool HashTable::erase(const String& key)
 	{
 		if (curr_item->is_key_equals(key))
 		{
+			_items_num--;
 			last_item->push_back(curr_item->get_next());
 			delete curr_item;
 			
@@ -226,7 +231,8 @@ Value& HashTable::get(const String& key)
 {
 	Value *requested_value = _search(key);
 
-	if (requested_value == NULL) throw std::invalid_argument(ERR_KEY_NOT_FOUND);
+	if (requested_value == NULL)
+		throw std::invalid_argument(ERR_KEY_NOT_FOUND);
 
 	return *requested_value;
 }
@@ -239,7 +245,8 @@ const Value& HashTable::get(const String& key) const
 {
 	Value *requested_value = _search(key);
 
-	if (requested_value == NULL) throw std::invalid_argument(ERR_KEY_NOT_FOUND);
+	if (requested_value == NULL)
+		throw std::invalid_argument(ERR_KEY_NOT_FOUND);
 
 	return *requested_value;
 }
@@ -250,21 +257,7 @@ const Value& HashTable::get(const String& key) const
  */
 size_t HashTable::get_size() const
 {
-	size_t items_num = 0;
-	Item *curr_item;
-
-	for (int i = 0; i < _cells_num; i++)
-	{
-		curr_item = _data[i];
-
-		while (curr_item != NULL)
-		{
-			items_num++;
-			curr_item = curr_item->get_next();
-		}
-	}
-
-	return items_num;
+	return _items_num;
 }
 
 
@@ -282,6 +275,7 @@ bool HashTable::insert(const String& key, const Value& value)
 
 	if (curr_item == NULL)
 	{
+		_items_num++;
 		_data[i] = new Item(key, value);
 
 		return true;
@@ -295,6 +289,7 @@ bool HashTable::insert(const String& key, const Value& value)
 		curr_item = curr_item->get_next();
 	}
 
+	_items_num++;
 	Item *new_item = new Item(key, value);
 	last_item->push_back(new_item);
 
@@ -317,28 +312,18 @@ bool HashTable::is_contains(const String& key) const
  */
 bool HashTable::is_empty() const
 {
-	for (int i = 0; i < _cells_num; i++)
-	{
-		if (_data[i] != NULL) return false;
-	}
-
-	return true;
+	return !(_items_num);
 }
 
 
 /*
- *	Changes fields between current and specified HashTable objects.
+ *	Changes fields between two HashTable objects.
  */
-void HashTable::swap(HashTable& hashtable)
+void swap(HashTable& a, HashTable& b)
 {
-	unsigned int tmp_cells_num = _cells_num;
-	Item **tmp_data = _data;
-
-	_cells_num = hashtable._cells_num;
-	_data = hashtable._data;
-
-	hashtable._cells_num = tmp_cells_num;
-	hashtable._data = tmp_data;	
+	std::swap(a._items_num, b._items_num);
+	std::swap(a._cells_num, b._cells_num);
+	std::swap(a._data, b._data);
 }
 
 
@@ -349,12 +334,16 @@ void HashTable::swap(HashTable& hashtable)
  */
 bool HashTable::_check_and_expand()
 {
-	if (get_size() * FULLNESS_FACTOR < _cells_num)
+	if (_items_num * FULLNESS_FACTOR < _cells_num)
 	{
 		return false;
 	}
 
-	// Table has got a lot of items -> make table bigger
+	/*
+	 *	Table has got a lot of items ->
+	 *	Have to create a bigger table, to copy all data into it.
+	 *	Then swap them.
+	 */
 	HashTable tmp_table(_cells_num * FULLNESS_FACTOR);
 	Item *curr_item;
 
@@ -373,8 +362,7 @@ bool HashTable::_check_and_expand()
 		}
 	}
 
-	*this = tmp_table;
-
+	swap((*this), tmp_table);
 	return true;
 }
 

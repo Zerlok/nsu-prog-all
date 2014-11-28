@@ -37,10 +37,9 @@ static const int FULLNESS_FACTOR = 2; // 2 : 1
 /*
  *	-------------- ERRORS MESSAGES --------------
  */
-static const char *ERR_BAD_ALLOC = "Not enough memmory!";
-static const char *ERR_BAD_HTABLE_SIZE = "Invalid size of hashtable!";
-static const char *ERR_KEY_NOT_FOUND = "The key was not found!";
-static const char *ERR_NO_VALUE_IN_ITEM = "The Item object has no value!";
+static const char ERR_BAD_HTABLE_SIZE[] = "Invalid size of hashtable!";
+static const char ERR_KEY_NOT_FOUND[] = "The key was not found!";
+static const char ERR_NO_VALUE_IN_ITEM[] = "The Item object has no value!";
 
 
 /*
@@ -148,11 +147,12 @@ class HashTable
 		bool insert(const String& key, const Value& value);
 		bool is_contains(const String& key) const;
 		bool is_empty() const;
-		void swap(HashTable& b);
+		friend void swap(HashTable& a, HashTable& b);
 
 	private:
 		/* Fields */
 		int _cells_num; // Number of cells in array.
+		int _items_num; // The total value of items in array.
 		Item **_data; // Array of pointers to Item object.
 		
 		/* Methods */
@@ -161,6 +161,7 @@ class HashTable
 		Value *_search(const String& key) const;
 };
 
+void swap(HashTable& a, HashTable& b);
 bool operator==(const HashTable& value1, const HashTable& value2);
 bool operator!=(const HashTable& value1, const HashTable& value2);
 

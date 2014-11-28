@@ -397,19 +397,19 @@ TEST(HashTable, Swap)
 	ASSERT_TRUE(t2.insert(a.return_name(), a));
 	ASSERT_TRUE(t2.insert(e.return_name(), e));
 
-	t1.swap(t2);
+	swap(t1, t2);
 	EXPECT_EQ(t1.get_size(), 2);
 	EXPECT_EQ(t2.get_size(), 4);
 
-	t3.swap(t4);
+	swap(t3, t4);
 	EXPECT_TRUE(t3.is_empty());
 	EXPECT_TRUE(t4.is_empty());
 
-	t1.swap(t4);
+	swap(t1, t4);
 	EXPECT_TRUE(t1.is_empty());
 	EXPECT_EQ(t4.get_size(), 2);
 
-	t2.swap(t3);
+	swap(t2, t3);
 	EXPECT_TRUE(t2.is_empty());
 	EXPECT_EQ(t3.get_size(), 4);
 
@@ -450,6 +450,9 @@ TEST(HashTable, OperatorBrackets)
 	EXPECT_EQ(t2[d.return_name()], d); // Inserts.
 	EXPECT_EQ(t2.get_size(), 3);
 	EXPECT_TRUE(t2.is_contains(d.return_name()));
+
+	EXPECT_NO_THROW(t1[""] = e);
+	EXPECT_EQ(t1[""], e);
 }
 
 
@@ -515,16 +518,17 @@ TEST(Common, HashTable)
 	ASSERT_TRUE(t4.is_contains(a.return_name()));
 	ASSERT_FALSE(t3.is_contains(e.return_name()));
 
-	EXPECT_NO_THROW(t2["my"] = b);
-	EXPECT_EQ(t2.get("my"), b);
+	ASSERT_NO_THROW(t2["my"] = b);
+	ASSERT_EQ(t2.get("my"), b);
 
-	EXPECT_NO_THROW(t2[a.return_name()] = b);
-	EXPECT_EQ(t2.get(a.return_name()), b);
+	ASSERT_NO_THROW(t2[a.return_name()] = b);
+	ASSERT_EQ(t2.get(a.return_name()), b);
 }
 
 
-/* -------------------- MAIN -------------------- */
-
+/*
+ * -------------------- MAIN --------------------
+ */
 int main(int argc, char **argv)
 {
 	::testing::InitGoogleTest(&argc, argv);
