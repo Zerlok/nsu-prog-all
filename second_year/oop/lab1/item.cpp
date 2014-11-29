@@ -14,6 +14,7 @@ Item::Item(const String& key, const Value& value)
 
 Item::~Item()
 {
+//	std::cout << " I" << this;
 	delete _value;
 }
 

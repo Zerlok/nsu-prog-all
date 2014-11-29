@@ -210,6 +210,7 @@ TEST(HashTable, OperatorEQ)
 
 	EXPECT_EQ(t1, t3);
 	EXPECT_EQ(t4, t2);
+
 }
 
 
@@ -397,19 +398,19 @@ TEST(HashTable, Swap)
 	ASSERT_TRUE(t2.insert(a.return_name(), a));
 	ASSERT_TRUE(t2.insert(e.return_name(), e));
 
-	swap(t1, t2);
+	swap_ht(t1, t2);
 	EXPECT_EQ(t1.get_size(), 2);
 	EXPECT_EQ(t2.get_size(), 4);
 
-	swap(t3, t4);
+	swap_ht(t3, t4);
 	EXPECT_TRUE(t3.is_empty());
 	EXPECT_TRUE(t4.is_empty());
 
-	swap(t1, t4);
+	swap_ht(t1, t4);
 	EXPECT_TRUE(t1.is_empty());
 	EXPECT_EQ(t4.get_size(), 2);
 
-	swap(t2, t3);
+	swap_ht(t2, t3);
 	EXPECT_TRUE(t2.is_empty());
 	EXPECT_EQ(t3.get_size(), 4);
 
@@ -476,17 +477,55 @@ TEST(HashTable, Get)
 }
 
 
-TEST (HashTable, BigInsert)
+TEST (HashTable, LittleBigData)
 {
-	HashTable table(1);
+	HashTable t1(1), t2(1), t3, t4;
 	Value val("default", 1, 1, "defaults");
 
-	for (int i = 0; i < 1000; i++)
+	for (int i = 0; i < 2000; i++)
 	{
-		EXPECT_TRUE(table.insert(std::to_string(i), val));
+		EXPECT_TRUE(t1.insert(std::to_string(i), val));
+		EXPECT_TRUE(t2.insert(std::to_string(i), val));
+		EXPECT_TRUE(t3.insert(std::to_string(i), val));
 	}
 
-	EXPECT_EQ(table.get_size(), 1000);
+	EXPECT_EQ(t1.get_size(), 2000);
+	EXPECT_EQ(t2.get_size(), 2000);
+	EXPECT_EQ(t3.get_size(), 2000);
+	EXPECT_EQ(t4.get_size(), 0);
+	
+	EXPECT_NO_THROW(t2.clear());
+	EXPECT_NO_THROW(t3.clear());
+	EXPECT_NO_THROW(t4.clear());
+
+	EXPECT_EQ(t2.get_size(), 0);
+	EXPECT_EQ(t3.get_size(), 0);
+	EXPECT_EQ(t4.get_size(), 0);
+
+	for (int i = 2000; i < 4000; i++)
+	{
+		EXPECT_TRUE(t1.insert(std::to_string(i), val));
+		EXPECT_TRUE(t2.insert(std::to_string(i), val));
+		EXPECT_TRUE(t3.insert(std::to_string(i), val));
+	}
+
+	EXPECT_EQ(t1.get_size(), 4000);
+	EXPECT_EQ(t2.get_size(), 2000);
+	EXPECT_EQ(t3.get_size(), 2000);
+	EXPECT_EQ(t4.get_size(), 0);
+
+	EXPECT_NO_THROW(swap_ht(t3, t4));
+	EXPECT_NO_THROW(t3 = t1);
+	EXPECT_NO_THROW(swap_ht(t2, t1));
+
+	EXPECT_EQ(t1.get_size(), 2000);
+	EXPECT_EQ(t2.get_size(), 4000);
+	EXPECT_EQ(t3.get_size(), 4000);
+	EXPECT_EQ(t4.get_size(), 2000);
+	
+	EXPECT_NO_THROW(t1.clear());
+	EXPECT_NO_THROW(t2.clear());
+	EXPECT_NO_THROW(t3.clear());
 }
 
 

@@ -147,7 +147,7 @@ class HashTable
 		bool insert(const String& key, const Value& value);
 		bool is_contains(const String& key) const;
 		bool is_empty() const;
-		friend void swap(HashTable& a, HashTable& b);
+		friend void swap_ht(HashTable& a, HashTable& b);
 
 	private:
 		/* Fields */
@@ -156,12 +156,13 @@ class HashTable
 		Item **_data; // Array of pointers to Item object.
 		
 		/* Methods */
+		void _remove_data();
 		bool _check_and_expand();
 		int _get_index(const String& key) const;
 		Value *_search(const String& key) const;
 };
 
-void swap(HashTable& a, HashTable& b);
+void swap_ht(HashTable& a, HashTable& b);
 bool operator==(const HashTable& value1, const HashTable& value2);
 bool operator!=(const HashTable& value1, const HashTable& value2);
 

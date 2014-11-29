@@ -28,7 +28,7 @@ HashTable::HashTable(int mem)
  */
 HashTable::~HashTable()
 {
-	delete[] _data;
+	_remove_data();
 }
 
 
@@ -84,9 +84,10 @@ HashTable& HashTable::operator=(const HashTable& hashtable)
 	if (this == (&hashtable))
 		return (*this);
 
+	_remove_data();
+
 	_cells_num = hashtable._cells_num;
-	
-	clear();
+	_data = new Item*[_cells_num];
 
 	for (int i = 0; i < _cells_num; i++)
 	{
@@ -165,9 +166,8 @@ bool operator!=(const HashTable& hashtable1, const HashTable& hashtable2)
  */
 void HashTable::clear()
 {
-	_items_num = 0;
+	_remove_data();
 
-	delete[] _data;
 	_data = new Item*[_cells_num];
 	std::fill(_data, _data + _cells_num, static_cast<Item *>(NULL));
 }
@@ -319,7 +319,7 @@ bool HashTable::is_empty() const
 /*
  *	Changes fields between two HashTable objects.
  */
-void swap(HashTable& a, HashTable& b)
+void swap_ht(HashTable& a, HashTable& b)
 {
 	std::swap(a._items_num, b._items_num);
 	std::swap(a._cells_num, b._cells_num);
@@ -362,7 +362,7 @@ bool HashTable::_check_and_expand()
 		}
 	}
 
-	swap((*this), tmp_table);
+	swap_ht((*this), tmp_table);
 	return true;
 }
 
@@ -403,6 +403,23 @@ Value *HashTable::_search(const String& key) const
 	}
 
 	return NULL;
+}
+
+
+/*
+ *	Private method!
+ *	Remove all pointers from _data.
+ */
+void HashTable::_remove_data()
+{
+	_items_num = 0;
+
+	for (int i = 0; i < _cells_num; i++)
+	{
+		delete _data[i];
+	}
+
+	delete[] _data;
 }
 
 
