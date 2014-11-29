@@ -99,7 +99,7 @@ class Lifeform
 		friend int operator+(const Lifeform& form1, const Lifeform& form2);
 
 		void apply_state(const bool born_criteria[9],
-						const bool survival_criteria[9]);
+				  		 const bool survival_criteria[9]);
 		void set_neighbours_num(const int n);
 		void set_state(const LifeformState state);
 

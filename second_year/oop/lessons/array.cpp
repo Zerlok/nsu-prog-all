@@ -103,8 +103,7 @@ int Array::push_back(int value)
 {
 	_check_and_expand_an_array();
 
-	data[data_end] = value;
-	data_end++;
+	data[data_end++] = value;
 
 	return 0;
 }
