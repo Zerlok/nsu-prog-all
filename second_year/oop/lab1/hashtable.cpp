@@ -117,7 +117,8 @@ bool operator==(const HashTable& hashtable1, const HashTable& hashtable2)
 	if ((hashtable1._cells_num == hashtable2._cells_num)
 		&& (hashtable1._items_num == hashtable2._items_num))
 	{
-		Item *a_item, *b_item;
+		Item *a_item = NULL;
+		Item *b_item = NULL;
 
 		for (int i = 0; i < hashtable1._cells_num; i++)
 		{
