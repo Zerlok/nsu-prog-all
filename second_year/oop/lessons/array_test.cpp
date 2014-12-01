@@ -1,4 +1,4 @@
-#include "array.h"
+#include "autopointer.h"
 #include <gtest/gtest.h>
 
 

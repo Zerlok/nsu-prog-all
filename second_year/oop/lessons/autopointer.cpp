@@ -1,74 +1,61 @@
 #include <iostream>
 
 
-template <class Pointer>
-class AutoPointer
+AutoPointer::AutoPointer() : _ptr(NULL)
 {
-	public:
-		AutoPointer() : _ptr(NULL) {};
-		~AutoPointer() { delete _ptr; }
-		
-		AutoPointer(Pointer *p) : _ptr(p) {};		
-		
-		AutoPointer(AutoPointer& auto_ptr)
-		{
-			reset(auto_ptr.release());
-		}
-
-		Pointer *release()
-		{
-			Pointer *tmp = _ptr;
-			_ptr = NULL;
-
-			return tmp;
-		}
-
-		Pointer *reset(Pointer *p)
-		{
-			delete _ptr;
-
-			_ptr = p;
-
-			return _ptr;
-		}
-
-		AutoPointer& operator=(AutoPointer& auto_ptr)
-		{
-			delete _ptr;
-			_ptr = auto_ptr._ptr;
-		}
-		
-		Pointer& operator*() const
-		{
-			return (*_ptr);
-		}
-
-		Pointer *operator->() const
-		{
-			return _ptr;
-		}
-
-	private:
-		Pointer *_ptr;
-};
-
-
-class A
-{
-	public:
-		A() { std::cout << "A : Constr" << std::endl; }
-		~A() { std::cout << "A : Destr" << std::endl; }
-};
-
-
-void call_throw()
-{
-	AutoPointer<A> ptr(new A());
 }
 
 
-int main(int argc, char **argv)
+AutoPointer::~AutoPointer()
 {
-	call_throw();
-	return 0;
-};
+	delete _ptr;
+}
+
+		
+AutoPointer::AutoPointer(Pointer *p) : _ptr(p)
+{
+}
+
+		
+AutoPointer::AutoPointer(AutoPointer& auto_ptr)
+{
+	reset(auto_ptr.release());
+}
+
+
+Pointer *AutoPointer::release()
+{
+	Pointer *tmp = _ptr;
+	_ptr = NULL;
+
+	return tmp;
+}
+
+
+Pointer *AutoPointer::reset(Pointer *p)
+{
+	delete _ptr;
+
+	_ptr = p;
+
+	return _ptr;
+}
+
+
+AutoPointer& AutoPointer::operator=(AutoPointer& auto_ptr)
+{
+	delete _ptr;
+	_ptr = auto_ptr._ptr;
+}
+
+		
+Pointer& AutoPointer::operator*() const
+{
+	return (*_ptr);
+}
+
+
+Pointer *AutoPointer::operator->() const
+{
+	return _ptr;
+}
