@@ -14,6 +14,7 @@ class Mode
 {
 	public:
 		virtual void play() = 0;
+		virtual void setup(Strategy *s0, Strategy *s1, Strategy *s2) {};
 };
 
 
@@ -30,6 +31,19 @@ class DetailedMode : public Mode
 		~DetailedMode();
 
 		virtual void play();
+		
+		virtual void setup(
+				Strategy *s0,
+				Strategy *s1,
+				Strategy *s2
+		);
+
+	private:
+		bool _debug;
+
+		Strategy *_strategy_0;
+		Strategy *_strategy_1;
+		Strategy *_strategy_2;
 };
 
 
@@ -46,6 +60,9 @@ class FastMode : public Mode
 		~FastMode();
 		
 		virtual void play();
+
+	private:
+		bool _debug;
 };
 
 
@@ -62,6 +79,9 @@ class TournamentMode : public Mode
 		~TournamentMode();
 		
 		virtual void play();
+
+	private:
+		bool _debug;
 };
 
 

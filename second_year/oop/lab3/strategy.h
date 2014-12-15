@@ -1,38 +1,36 @@
+#ifndef __STRATEGY_H__
+#define __STRATEGY_H__
+
+
 class Strategy
 {
 	public:
 		Strategy() {}
-		~Strategy() {}
+		virtual ~Strategy() {}
 
 		virtual Decision get_decision() = 0;
+		virtual void learn_choices(int id, Decision decision[3]) {}
+		virtual void setup(GameMatrix *matrix, std::string& config_path) {}
 };
 
 
-class TrustfullStrategy : public Strategy
+class TrustfulStrategy : public Strategy
 {
 	public:
-		TrustfullStrategy() {}
-		~TrustfullStrategy() {}
+		TrustfulStrategy() {}
+		~TrustfulStrategy() {}
 
-		virtual Decision get_decision()
-		{
-			std::cout << "coop" << std::endl;
-			return cooperate;
-		}
+		virtual Decision get_decision() { return cooperate; }
 };
 
 
-class MistrustfullStrategy : public Strategy
+class MistrustfulStrategy : public Strategy
 {
 	public:
-		MistrustfullStrategy() {}
-		~MistrustfullStrategy() {}
+		MistrustfulStrategy() {}
+		~MistrustfulStrategy() {}
 
-		virtual Decision get_decision()
-		{
-			std::cout << "betr" << std::endl;
-			return betray;
-		}
+		virtual Decision get_decision() { return defect; }
 };
 
 
@@ -44,7 +42,12 @@ class CrazyStrategy : public Strategy
 
 		virtual Decision get_decision()
 		{
-			if (rand() % 2) return cooperate;
-			return betray;
+			srand(time(NULL));
+
+			return (rand() % 2) ? cooperate : defect;
 		}
 };
+
+
+// __STRATEGY_H__
+#endif

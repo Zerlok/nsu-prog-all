@@ -78,7 +78,7 @@ TEST(CrazyStrategy, Init)
 {
 	EXPECT_NO_THROW(
 	{
-		TrustfullStrategy strat;
+		TrustfulStrategy strat;
 	});
 }
 
@@ -89,18 +89,19 @@ TEST(Factory, Init)
 	{
 		StrategyFactory strategies;
 
-		strategies.push<TrustfullStrategy>("t");
-		strategies.push<MistrustfullStrategy>("m");
-		strategies.push<CrazyStrategy>("c");
+		strategies.set<TrustfulStrategy>("trust");
+		strategies.set<MistrustfulStrategy>("mistrust");
+		strategies.set<CrazyStrategy>("crazy");
 
-		std::string strat("t");
+		std::string strat("trust");
 		Strategy *my = strategies.get(strat);
 
-		std::cout
-				<< strat
-				<< " - "
-				<< my->get_decision()
-				<< std::endl;
+		Keys skeys = strategies.get_registered();
+
+		for (Keys::iterator item = skeys.begin(); item != skeys.end(); item++)
+		{
+			std::cout << (*item) << std::endl;
+		}
 	});
 }
 

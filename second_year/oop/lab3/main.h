@@ -4,16 +4,18 @@
 
 #include <iostream>		// cout, endl.
 #include <cstring>		// strcpy, strlen.
-#include <string>		// string
-#include <sys/stat.h>	// floder info
-#include <map>			// map
+#include <string>		// string.
+#include <sys/stat.h>	// floder info.
+#include <vector>		// vector.
+#include <map>			// map.
+#include <time.h>		// time for srand.
 
 
 // --------------- ERRORS ---------------
 
 #define CONSOLE static const char
 
-CONSOLE ERR_HEADER[] = "### Error ###\n";
+CONSOLE ERR_HEADER[] = "# Error: ";
 
 /*
  * Simple errors.
@@ -41,7 +43,7 @@ CONSOLE ERR_UNKNOWN_COMMAND[] = "Unknown command. Try help to see available comm
 
 // --------------- WARNINGS ---------------
 
-CONSOLE WARNING_HEADER[] = "*** Warning ***\n";
+CONSOLE WARNING_HEADER[] = "* Warning: ";
 CONSOLE DEBUG_ENABLED[] = "You started this program with full debug!";
 
 
@@ -65,8 +67,8 @@ static const size_t str_none = std::string::npos;
 
 enum Decision
 {
-	cooperate = 1,
-	betray = 0
+	defect = 0,
+	cooperate = 1
 };
 
 
@@ -74,40 +76,39 @@ typedef struct MatrixField
 {
 	Decision decisions[3];
 	int scores[3];
-} MatrixField;
+} GameMatrix;
 
-
-static const MatrixField STD_MATRIX[8] = {
+static const GameMatrix STD_MATRIX[8] = {
 	{
 		{cooperate, cooperate, cooperate},
 		{4, 4, 4}
 	},
 	{
-		{cooperate, cooperate, betray},
+		{cooperate, cooperate, defect},
 		{2, 2, 5}
 	},
 	{
-		{cooperate, betray, cooperate},
+		{cooperate, defect, cooperate},
 		{2, 5, 2}
-	}
+	},
 	{
-		{betray, cooperate, cooperate},
+		{defect, cooperate, cooperate},
 		{5, 2, 2}
 	},
 	{
-		{cooperate, betray, betray},
+		{cooperate, defect, defect},
 		{0, 3, 3}
 	},
 	{
-		{betray, cooperate, betray},
+		{defect, cooperate, defect},
 		{3, 0, 3}
 	},
 	{
-		{betray, betray, cooperate},
+		{defect, defect, cooperate},
 		{3, 3, 0}
 	},
 	{
-		{betray, betray, betray},
+		{defect, defect, defect},
 		{1, 1, 1}
 	}
 	// 8 structures, with 2 values (decisions, scores)
@@ -123,13 +124,13 @@ static const MatrixField STD_MATRIX[8] = {
 #include "game.h"
 
 
-enum MODULE
-{
-	GAME,
-	MODE,
+// enum MODULE
+// {
+// 	GAME,
+// 	MODE,
 
-	MAIN
-};
+// 	MAIN
+// };
 
 
 // --------------- STANDARD CONFIGURATION ---------------

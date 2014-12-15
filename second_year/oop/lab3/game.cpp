@@ -22,7 +22,7 @@
  *    If it starts with '-' and it's length equals 2,
  *    then it is a flag. Otherwise - not a flag.
  */
-inline bool is_flag(const std::string line)
+inline bool is_flag(const std::string& line)
 {
 	return ((line.size() == 2)
 			&& (line[0] == '-')
@@ -32,8 +32,6 @@ inline bool is_flag(const std::string line)
 
 /*
  * Returns is the input line an argument.
- * If it is, then returns the '=' position in line.
- * Otherwise returns 0.
  *
  * Input:
  *    line - std::string
@@ -42,37 +40,14 @@ inline bool is_flag(const std::string line)
  *    '=' position (true) / 0 (false).
  *
  * Algorithm:
- *    An argument must:
- *       * starts with '--' symbols
- *       * includes a '=' symbol.
- *       * includes some symbols before '=' symbol
- *       * includes some symbols after '=' symbol
- *
- * Examples (line - result):
- *    --mode=detailed - 6
- *    --n=3           - 3
- *    -t              - 0
- *    --char          - 0
- *    --=             - 0
+ *    An argument must starts with '--' symbols.
  */
-inline bool is_argument(const std::string line)
+inline bool is_argument(const std::string& line)
 {
 	return ((line.size() > 2)
 			&& (line[0] == '-')
 			&& (line[1] == '-')
 	);
-
-	// size_t delimiter_pos = line.find("=");
-	// size_t size = line.size();
-
-	// if (
-	// 	!(size > 2 && line[0] == '-' && line[1] == '-') // not starts with '--'
-	// 	|| (delimiter_pos == str_none) 		// not includes '='
-	// 	|| (delimiter_pos + 1== size)					// has not got any symbol after '='
-	// 	|| (line[delimiter_pos - 1] == '-')				// has not got any symbol before '='
-	// ) return 0;
-
-	// return delimiter_pos;
 }
 
 
@@ -90,7 +65,7 @@ inline bool is_argument(const std::string line)
  *    then it is a value, otherwise - not.
  * 
  */
-inline bool is_value(const std::string line)
+inline bool is_value(const std::string& line)
 {
 	return (!is_flag(line)
 			&& !is_argument(line)
@@ -99,7 +74,13 @@ inline bool is_value(const std::string line)
 
 
 /*
+ * Returns is input path (to folder or file) exists.
  *
+ * Input:
+ *    line - *char
+ *
+ * Output:
+ *    true / false.
  */
 inline bool is_exists(const char *path)
 {
@@ -130,7 +111,7 @@ Game::Game(const int argc, const char **argv)
 	 * Default settings
 	 */
 	_debug = false;
-	_mode = new STD_MODE();
+	_mode = new STD_MODE;
 	_is_in_background = false;
 	_steps_limit = STD_STEPS_LIMIT;
 	_configs_dir = STD_CONFIGS_DIR;
@@ -149,7 +130,8 @@ Game::~Game()
 	}
 	delete _mode;
 	
-	if (_debug) std::cout << "Done." << std::endl;
+	if (_debug)
+		std::cout << "Done." << std::endl;
 }
 
 
@@ -240,6 +222,7 @@ void Game::_parse_input(const int argc, const char **argv)
 							<< ERR_INTEGER_EXPECTED
 							<< std::endl;
 				}
+				_is_in_background = true;
 			}
 			else if (arg_name == "configs")
 			{
@@ -356,6 +339,7 @@ void Game::_parse_input(const int argc, const char **argv)
 					}
 
 					i++;
+					_is_in_background = true;
 					break;
 				}
 				case 'c':
@@ -410,12 +394,12 @@ bool Game::_parse_cmd(const std::string cmd)
 	size_t found_clear = cmd.find("clear");
 	size_t found_exit = cmd.find("quit");
 	size_t found_help = cmd.find("help");
-	size_t found_scores = cmd.find("scores");
-	size_t found_show = cmd.find("show");
 	size_t found_step = cmd.find("step");
-	size_t found_strategies = cmd.find("strategies");
 	size_t found_tick = cmd.find("tick");
-	size_t found_use = cmd.find("use");
+	// size_t found_scores = cmd.find("scores");
+	// size_t found_show = cmd.find("show");
+	// size_t found_strategies = cmd.find("strategies");
+	// size_t found_use = cmd.find("use");
 	
 	if ((found_tick != str_none) && (delimiter_pos == 4))
 	{
@@ -444,29 +428,6 @@ bool Game::_parse_cmd(const std::string cmd)
 					).c_str()));
 		}
 	}
-	else if ((found_show != str_none) && (delimiter_pos == 4))
-	{
-		if ((found_strategies != str_none) && (cmd_len == 15))
-		{
-			show("strategies");
-		}
-		else ((found_scores != str_none) && (cmd_len == 11))
-		{
-			show("scores");
-		}
-		else
-		{
-			std::cout
-					<< ERR_HEADER
-					<< 
-					<< ERR_INVALID_ARGUMENT
-					<< std::endl;
-		}
-	}
-	else if ((found_use != str_none) && (delemiter_pos == 3))
-	{
-
-	}
 	else if ((found_clear != str_none) && (cmd_len == 5))
 	{
 		clear_screen();
@@ -479,9 +440,7 @@ bool Game::_parse_cmd(const std::string cmd)
 	{
 		return false;
 	}
-	else if (((found_tick != str_none) || (found_show != str_none) || (found_use != str_none))
-			&& (delimiter_pos == str_none))
-	)
+	else if ((found_tick != str_none) && (delimiter_pos == str_none))
 	{
 		std::cout
 				<< ERR_HEADER
@@ -531,16 +490,25 @@ void Game::run()
 			<< "   matrix file: " << _matrix_file << std::endl
 			<< std::endl;
 
+	_mode->setup(
+			new TrustfulStrategy(),
+			new MistrustfulStrategy(),
+			new CrazyStrategy());
+
 	if (_is_in_background) // Run in background.
 	{
-		if (_debug) std::cout << "Gaming in background started..." << std::endl;
+		if (_debug) std::cout
+				<< "Gaming in background started..."
+				<< std::endl;
 
 		_mode->play();
 		// for (int i = 0; i < _steps_limit; i++) _mode->play();
 	}
 	else // Run in foreground.
 	{
-		if (_debug) std::cout << "Gaming in foreground started..." << std::endl;
+		if (_debug) std::cout
+				<< "Gaming in foreground started..."
+				<< std::endl;
 
 		_mode->play();
 		// for (int i = 0; i < _steps_limit; i++) _mode->play();
