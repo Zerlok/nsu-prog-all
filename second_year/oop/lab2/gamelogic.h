@@ -25,10 +25,10 @@ class Game
 		~Game();
 
 		/* Methods */
-		bool save();
-		bool open();
-		bool tick();
-		bool animate();
+		void save();
+		void open();
+		void tick();
+		void animate();
 
 		bool is_saved();
 
@@ -38,10 +38,11 @@ class Game
 	private:
 		/* Methods */
 		void _parse_input(int argc, char **argv);
-		bool _parse_command(const std::string &cmd);
+		bool _parse_command(const std::string& cmd);
 
 		/* Fields */
 		bool _debug;
+		bool _is_valid_input;
 		bool _online;
 		bool _saved;
 

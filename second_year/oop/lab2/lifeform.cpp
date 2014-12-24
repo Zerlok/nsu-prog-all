@@ -1,4 +1,5 @@
-#include "lifegame.h"
+#include "main.h"
+#include "lifeform.h"
 
 
 Lifeform::Lifeform(const LifeformState state)
@@ -17,13 +18,17 @@ int operator+(int x, Lifeform& form)
 }
 
 
-int operator+(const Lifeform& form1, const Lifeform& form2)
+int operator+(
+		const Lifeform& form1,
+		const Lifeform& form2)
 {
 	return form1.is_alive() + form2.is_alive();
 }
 
 
-void Lifeform::apply_state(const bool born_criteria[9], const bool survival_criteria[9])
+void Lifeform::apply_state_by_criteria(
+		const bool born_criteria[9],
+		const bool survival_criteria[9])
 {
 	if (_state == DEAD)
 	{

@@ -1,7 +1,12 @@
-#include "lifegame.h"
+#include "main.h"
+#include "lifeform.h"
+#include "universe.h"
 
 
-Universe::Universe(const int length, const bool born_criteria[9], const bool survival_criteria[9])
+Universe::Universe(
+		const int length,
+		const bool born_criteria[9],
+		const bool survival_criteria[9])
 {
 	if (length < 1)
 	{
@@ -17,26 +22,18 @@ Universe::Universe(const int length, const bool born_criteria[9], const bool sur
 		_survival_criteria[i] = survival_criteria[i];
 	}
 
-	try
-	{
-		_data = new Lifeform*[_width];
-		for (int i = 0; i < _width; i++) _data[i] = new Lifeform[_width];
-	}
-	catch (std::bad_alloc)
-	{
-		std::cout << ERR_BAD_ALLOC << std::endl;
-	}
+	_data = new Lifeform*[_width];
+	for (int i = 0; i < _width; i++)
+		_data[i] = new Lifeform[_width];
 }
 
 
 Universe::~Universe()
 {
 	for (int i = 0; i < _width; i++)
-	{
 		delete[] _data[i];
-	}
 
-	delete _data;
+	delete[] _data;
 }
 
 
@@ -159,8 +156,8 @@ void Universe::write_to_file(const std::string& filename) const
 	file << "\n";
 	file << "#S " << _step << "\n";
 
-	if (count_all_alive_forms() >
-		(unsigned)(_width / (2 * width_digits_num) * _width))
+	if (count_alive_forms() >
+		(size_t)(_width / (2 * width_digits_num) * _width))
 	{
 		/* Saving all universe map. */
 		file << "#M " << _width << "\n";
@@ -201,7 +198,10 @@ void Universe::write_to_file(const std::string& filename) const
 }
 
 
-bool Universe::init(const int x, const int y, const LifeformState state)
+bool Universe::init(
+		const int x,
+		const int y,
+		const LifeformState state)
 {
 	if (x < 0 || y < 0 || x > _width-1 || y > _width-1)
 	{
@@ -214,9 +214,9 @@ bool Universe::init(const int x, const int y, const LifeformState state)
 }
 
 
-unsigned long long int Universe::count_all_alive_forms() const
+size_t Universe::count_alive_forms() const
 {
-	unsigned long long int total = 0;
+	size_t total = 0;
 	int x, y;
 
 	for (x = 0; x < _width; x++)
@@ -282,7 +282,9 @@ void Universe::do_step()
 	{
 		for (y = 0; y < _width; y++)
 		{
-			_data[x][y].apply_state(_born_criteria, _survival_criteria);
+			_data[x][y].apply_state_by_criteria(
+					_born_criteria,
+					_survival_criteria);
 		}
 	}
 
@@ -307,7 +309,7 @@ void Universe::draw() const
 		if (_survival_criteria[i]) std::cout << i;
 	}
 	#ifdef __DEBUG__
-	std::cout << "(" << count_all_alive_forms() << ")";
+	std::cout << "(" << count_alive_forms() << ")";
 	#endif
 	std::cout << std::endl;
 
