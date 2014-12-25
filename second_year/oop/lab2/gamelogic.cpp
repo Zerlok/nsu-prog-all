@@ -70,9 +70,17 @@ bool is_value(const std::string& line)
 
 
 /*
- * Game class methods
+ * --------------- GAME CLASS METHODS ---------------
+ *
+ * Next functions declares whole logic of the game.
+ *
  */
 
+/*
+ * Game constructor:
+ *    This method initializes game data from argc and argv variables,
+ *    which your main program recieves when it runs.
+ */
 Game::Game(int argc, char **argv)
 {
 	_debug = false;
@@ -100,6 +108,10 @@ Game::Game(int argc, char **argv)
 }
 
 
+/*
+ * Game destructor:
+ *    This method erases all game data (used when exiting from the game).
+ */
 Game::~Game()
 {
 	if (_debug) std::cout
@@ -121,6 +133,15 @@ Game::~Game()
 }
 
 
+/*
+ * Game input parsing method:
+ *    This method matches input with available flags and arguments,
+ *    which you can specify when running the game, and validates the
+ *    input data.
+ *
+ *    If input is valid, then the game will be started, otherwise
+ *    game will be finished.
+ */
 void Game::_parse_input(int argc, char **argv)
 {
 	int i;
@@ -135,12 +156,14 @@ void Game::_parse_input(int argc, char **argv)
 		// std::cout << c_argv[i] << std::endl;
 	}
 
-	if (argc > 1 && is_value(c_argv[1])) // The saved game is specified at input as a value.
+	// The saved game is specified at input as a value.
+	if (argc > 1 && is_value(c_argv[1]))
 	{
 		i = 2;
 		_input_filename = std::string(argv[1]);
 	}
-	else // The saved game is not specified.
+	// The saved game is not specified.
+	else
 	{
 		i = 1;
 		_input_filename = std::string(STD_INPUT_FILENAME);
@@ -148,7 +171,10 @@ void Game::_parse_input(int argc, char **argv)
 	
 	while ((i < argc) && (_is_valid_input))
 	{
-		if (is_argument(c_argv[i])) // argument
+		/*
+		 * If an argument was given
+		 */
+		if (is_argument(c_argv[i]))
 		{
 			equals_pos = c_argv[i].find("=");
 
@@ -227,7 +253,11 @@ void Game::_parse_input(int argc, char **argv)
 						<< std::endl;
 			}
 		}
-		else if (is_flag(c_argv[i])) // flag
+
+		/*
+		 * If a flag was given
+		 */
+		else if (is_flag(c_argv[i]))
 		{
 			switch (c_argv[i][1])
 			{
@@ -288,9 +318,11 @@ void Game::_parse_input(int argc, char **argv)
 				}
 			}
 		}
+		// Something else was given --> bad input.
 		else
 			_is_valid_input = false;
 
+		// Increase argv counter.
 		i++;
 	}
 
@@ -301,7 +333,17 @@ void Game::_parse_input(int argc, char **argv)
 }
 
 
-
+/*
+ * Command parsing method:
+ *    This method matches the input line with available commands,
+ *    when user plays online.
+ *
+ *    Also this method returns boolean (true or false, is the game
+ *    still running or not accordingly).
+ *
+ *    In this release you will exit the game only after 'exit' command
+ *    was entered.
+ */
 bool Game::_parse_command(const std::string& cmd)
 {
 	size_t cmd_len = cmd.size();
@@ -318,6 +360,7 @@ bool Game::_parse_command(const std::string& cmd)
 	size_t found_help = cmd.find("help");
 	size_t found_exit = cmd.find("exit");
 	
+	// Save command
 	if ((found_save == 0) && ((delimiter_pos == 4) || (cmd_len == 4)))
 	{
 		if (cmd_len > 5)
@@ -332,6 +375,7 @@ bool Game::_parse_command(const std::string& cmd)
 				<< ERR_CMD_VALUE_EXPECTED
 				<< std::endl;
 	}
+	// Open command
 	else if ((found_open == 0) && ((delimiter_pos == 4) || (cmd_len == 4)))
 	{
 		if (cmd_len > 5)
@@ -349,6 +393,7 @@ bool Game::_parse_command(const std::string& cmd)
 				<< ERR_CMD_VALUE_EXPECTED
 				<< std::endl;
 	}
+	// Tick command
 	else if ((found_tick == 0) && ((delimiter_pos == 4) || (cmd_len == 4)))
 	{
 		if (cmd_len > 5)
@@ -363,6 +408,7 @@ bool Game::_parse_command(const std::string& cmd)
 				<< ERR_CMD_VALUE_EXPECTED
 				<< std::endl;
 	}
+	// Animate command
 	else if (found_anim == 0 && ((delimiter_pos == 7) || (cmd_len == 7)))
 	{
 		if (cmd_len > 8)
@@ -377,26 +423,34 @@ bool Game::_parse_command(const std::string& cmd)
 				<< ERR_CMD_VALUE_EXPECTED
 				<< std::endl;
 	}
+	// Help command
 	else if (found_help == 0 && cmd_len == 4)
 	{
 		help();
 	}
+	// Exit command
 	else if (found_exit == 0 && cmd_len == 4)
 	{
 		if (!_debug)
 			is_saved();
 
-		return false;
+		return false; // Stop commands reading.
 	}
+	// Unknown command
 	else std::cout
 			<< ERR_HEADER
 			<< ERR_UNKNOWN_COMMAND
 			<< std::endl;
 
-	return true;
+	return true; // Read the next command.
 }
 
-
+ 
+/*
+ * Game saving method:
+ *    This method writes game's universe into the specified
+ *    input file.
+ */
 void Game::save()
 {
 	if (_debug) std::cout
@@ -415,6 +469,10 @@ void Game::save()
 }
 
 
+/*
+ * Game opening method:
+ *    This method restores the game from saved universe file.
+ */
 void Game::open()
 {
 	if (_debug) std::cout
@@ -428,6 +486,13 @@ void Game::open()
 }
 
 
+/*
+ * Game ticking method:
+ *    This method makes 'universe moving' (calls 'do_step' method
+ *    to Universe object) untill the steps limit will be reached.
+ *
+ *    At the end calls 'draw' method to Universe object.
+ */
 void Game::tick()
 {
 	if (_steps_limit > 0)
@@ -440,6 +505,11 @@ void Game::tick()
 }
 
 
+/*
+ * Game animating method:
+ *    This method makes 'universe moving' (see also 'tick' method),
+ *    but each step will be shown at the screen.
+ */
 void Game::animate()
 {
 	if (_steps_limit > 0)
@@ -450,15 +520,19 @@ void Game::animate()
 		_space->draw();
 		_space->do_step();
 
-		usleep(SLEEP_MSEC);
+		usleep(SLEEP_MSEC); // Call sleep function.
 
-		system("clear");
+		system("clear"); // Call system clear screen function.
 	}
 
 	_space->draw();
 }
 
 
+/*
+ * Game helping method:
+ *    This method shows command help message at the game screen.
+ */
 void Game::help()
 {
 	std::cout
@@ -467,6 +541,12 @@ void Game::help()
 }
 
 
+/*
+ * Game checking game save method:
+ *    This method checks was the current game saved.
+ *    If it was, then returns 'true', otherwise it asks
+ *    confirming to not save current game.
+ */
 bool Game::is_saved()
 {
 	if (!_saved)
@@ -497,6 +577,16 @@ bool Game::is_saved()
 }
 
 
+/* 
+ * Game running method:
+ *    This method runs the game if the program input was valid.
+ *
+ *    If user wants play online, then it starts the cycle,
+ *    untill the commands are parsing.
+ *
+ *    If user specified offline mode, then it makes a number of steps
+ *    iterations to Universe and saves the result into the output file.
+ */
 void Game::run()
 {
 	if (_debug) std::cout
@@ -507,7 +597,8 @@ void Game::run()
 	if (!_is_valid_input)
 		return;
 
-	if (_online) // Online mode.
+	// Online mode.
+	if (_online)
 	{
 		bool is_running = true;
 		std::string cmd_line;
@@ -525,7 +616,9 @@ void Game::run()
 			is_running = _parse_command(cmd_line);
 		}
 	}
-	else // Offline mode.
+
+	// Offline mode.
+	else
 	{
 		if (_debug) std::cout
 				<< DBG_HEADER

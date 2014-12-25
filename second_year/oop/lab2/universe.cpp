@@ -9,9 +9,7 @@ Universe::Universe(
 		const bool survival_criteria[9])
 {
 	if (length < 1)
-	{
 		throw std::invalid_argument(ERR_BAD_UNIVERSE_SIZE);
-	}
 
 	_width = length;
 	_step = 0;
@@ -49,10 +47,7 @@ Universe::Universe(const std::string& filename)
 	#endif
 
 	if (!file.is_open())
-	{
-		std::cout << "Cannot open the file!" << std::endl;
-		throw 1;
-	}
+		throw std::invalid_argument(ERR_INVALID_INPUT_FILE);
 	
 	for (x = 0; x < 9; x++)
 	{
@@ -101,7 +96,6 @@ Universe::Universe(const std::string& filename)
 	}
 	else if (line == "#M")
 	{
-		
 		for (x = 0; x < _width; x++)
 		{
 			for (y = 0; y < _width; y++)
@@ -124,8 +118,8 @@ Universe::Universe(const std::string& filename)
 	}
 	else
 	{
-		std::cout << "### Life file is damaged!" << std::endl;
-		std::cout << line << std::endl;
+		std::cout << "# Life file is invalid!" << std::endl;
+		std::cout << "# " << line << std::endl;
 	}
 }
 
@@ -144,13 +138,15 @@ void Universe::write_to_file(const std::string& filename) const
 
 	for (x = 0; x < 9; x++)
 	{
-		if (_born_criteria[x]) file << x;
+		if (_born_criteria[x])
+			file << x;
 	}
 
 	file << "/S";
 	for (x = 0; x < 9; x++)
 	{
-		if (_survival_criteria[x]) file << x;
+		if (_survival_criteria[x])
+			file << x;
 	}
 
 	file << "\n";
@@ -187,11 +183,13 @@ void Universe::write_to_file(const std::string& filename) const
 			}
 			else
 			{
-				if (map_format) file << DEAD_FORM_FILE;
+				if (map_format)
+					file << DEAD_FORM_FILE;
 			}
 		}
 
-		if (map_format) file << "\n";
+		if (map_format)
+			file << "\n";
 	}
 
 	file.close();
@@ -239,13 +237,13 @@ int Universe::count_neighbours(const int x, const int y) const
 	}
 
 	/*
-	There are the dot's neighbours (the dot location is x, y):
-		+-------+
-		| 8 1 2 |
-		| 7 . 3 |
-		| 6 5 4 |
-		+-------+
-	*/
+	 * There are the dot's neighbours (the dot location is x, y):
+	 *  +-------+
+	 *  | 8 1 2 |
+	 *  | 7 . 3 |
+	 *  | 6 5 4 |
+	 *  +-------+
+	 */
 
 	return (
 			_data[(x-1 + _width) % _width][y] +	// 1
@@ -336,6 +334,6 @@ void Universe::draw() const
 	}
 
 	std::cout << "+";
-	for (x = 0; x < (2 * _width)+1; x++) std::cout << "-";
+	for (x = 0; x < (2 * _width) + 1; x++) std::cout << "-";
 	std::cout << "+" << std::endl;
 }

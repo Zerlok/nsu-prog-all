@@ -25,6 +25,8 @@ static const char ERR_HEADER[] = "# Error: ";
 static const char ERR_NEGATIVE_VALUE[] = "The value must be grater or equal 0!";
 static const char ERR_INDEX_OUT_RANGE[] = "Index is out of range (0 <= [index] < [universe size])!";
 static const char ERR_BAD_UNIVERSE_SIZE[] = "The universe size mustbe grater than 1!";
+static const char ERR_INVALID_INPUT_FILE[] = "The name of input file is invalid (file not exists or program couldn't get access to it)!";
+static const char ERR_INVALID_INPUT[] = "Input is invalid. Game was stopped!";
 
 static const char ERR_CMD_VALUE_EXPECTED[] = " - value was expected.";
 static const char ERR_ARG_VALUE_EXPECTED[] = " - argument expects a value.";
@@ -32,13 +34,12 @@ static const char ERR_FLAG_VALUE_EXPECTED[] = " - flag expects a value.";
 static const char ERR_UNKNOWN_ARGUMENT[] = " - unknown argument. Try -h or --help.";
 static const char ERR_UNKNOWN_FLAG[] = " - unknown flag. Try -h or --help.";
 static const char ERR_UNKNOWN_COMMAND[] = "Unknown command. Try help.";
-static const char ERR_INVALID_INPUT[] = "Input is invalid. Game was stopped!";
 
 
 static const char HELP_DESCRIPTION[] = "Description:\n   This is a simple cell's lyfecycle emulator was written on C++.\n   Note that the developer hate this programming language, so you may will find\n   some bugs :3\n\n";
-static const char HELP_USAGE[] = "Usage:\n   lifegame [input_file] [flags]\n   - input_file - the name of start game file.\n\n";
-static const char HELP_FLAGS[] = "These flags and arguments are available:\n   -i <int>, --iterations=<int>		- set the number of iterations.\n   -o <string>, --output=<string>	- set the name of output file.\n   -h, --help						- show help.\n";
-static const char HELP_COMMANDS[] = "* These commands are available:\n*   save <filename>   - save the current game into file.\n*   open <filename>   - open the game from file.\n*   tick <n>          - make <n> iterations (will show you the result of <n> iterations).\n*   animate <n>       - play <n> iterations (will play an animation of <n> iterations).\n*   help              - show this help.\n*   exit              - exit the game.";
+static const char HELP_USAGE[] = "Usage:\n   lifegame [input_file] [flags]\n   input_file - the name of start game file.\n\n";
+static const char HELP_FLAGS[] = "These flags and arguments are available:\n   -i <int>, --iterations=<int>     - set the number of iterations.\n   -o <string>, --output=<string>   - set the name of output file.\n   -h, --help                       - show this help.\n";
+static const char HELP_COMMANDS[] = "* These commands are available:\n*   save <filename>   - save the current game into file.\n*   open <filename>   - open the game from file.\n*   tick <n>          - make <n> iterations (will show you the result of <n> iterations).\n*   animate <n>       - play <n> iterations (will play an animation of <n> iterations).\n*   help              - show this help message.\n*   exit              - exit the game.";
 
 
 static const char CMD_IN[] = "> ";
