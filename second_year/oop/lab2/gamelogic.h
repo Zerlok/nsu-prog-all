@@ -50,6 +50,8 @@ class Game
 		Universe *_space;
 		std::string _input_filename;
 		std::string _output_filename;
+
+		// std::vector _cmd_history;
 };
 
 

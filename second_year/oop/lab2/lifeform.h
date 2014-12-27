@@ -22,12 +22,13 @@ class Lifeform
 				const Lifeform& form1,
 				const Lifeform& form2);
 
+		Lifeform& operator=(const LifeformState state);
+
 		void apply_state_by_criteria(
 				const bool born_criteria[9],
 				const bool survival_criteria[9]);
 		
 		void set_neighbours_num(const int n);
-		void set_state(const LifeformState state);
 
 		bool is_alive() const;
 		

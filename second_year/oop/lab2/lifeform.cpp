@@ -30,14 +30,11 @@ void Lifeform::apply_state_by_criteria(
 		const bool born_criteria[9],
 		const bool survival_criteria[9])
 {
-	if (_state == DEAD)
-	{
-		if (born_criteria[_neighbours_num]) born();
-	}
-	else
-	{
-		if (!survival_criteria[_neighbours_num]) kill();
-	}
+	if ((_state == DEAD) && (born_criteria[_neighbours_num]))
+		born();
+	
+	else if (!survival_criteria[_neighbours_num])
+		kill();
 }
 
 
@@ -47,26 +44,27 @@ void Lifeform::set_neighbours_num(const int n)
 }
 
 
-void Lifeform::set_state(const LifeformState state)
+Lifeform& Lifeform::operator=(const LifeformState state)
 {
 	_state = state;
+	return *this;
 }
 
 
 bool Lifeform::is_alive() const
 {
-	switch (_state)
-	{
-		case ALIVE: return true;
-	}
+	if (_state == ALIVE)
+		return true;
 
-	return false;
+	else
+		return false;
 }
 
 
 bool Lifeform::born()
 {
-	if (_state == ALIVE) return false;
+	if (_state == ALIVE)
+		return false;
 	
 	_state = ALIVE;
 
@@ -76,7 +74,8 @@ bool Lifeform::born()
 
 bool Lifeform::kill()
 {
-	if (_state == DEAD) return false;
+	if (_state == DEAD)
+		return false;
 	
 	_state = DEAD;
 	

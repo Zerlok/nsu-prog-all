@@ -202,11 +202,9 @@ bool Universe::init(
 		const LifeformState state)
 {
 	if (x < 0 || y < 0 || x > _width-1 || y > _width-1)
-	{
 		throw std::invalid_argument(ERR_INDEX_OUT_RANGE);
-	}
 	
-	_data[x][y].set_state(state);
+	_data[x][y] = state;
 
 	return true;
 }
@@ -218,12 +216,9 @@ size_t Universe::count_alive_forms() const
 	int x, y;
 
 	for (x = 0; x < _width; x++)
-	{
 		for (y = 0; y < _width; y++)
-		{
-			if (_data[x][y].is_alive()) total++;
-		}
-	}
+			if (_data[x][y].is_alive())
+				total++;
 
 	return total;
 }
@@ -232,9 +227,7 @@ size_t Universe::count_alive_forms() const
 int Universe::count_neighbours(const int x, const int y) const
 {
 	if (x < 0 || y < 0 || x > _width-1 || y > _width-1)
-	{
 		throw std::invalid_argument(ERR_INDEX_OUT_RANGE);
-	}
 
 	/*
 	 * There are the dot's neighbours (the dot location is x, y):
@@ -258,10 +251,11 @@ int Universe::count_neighbours(const int x, const int y) const
 }
 
 
-// TODO: Rewrite with only one cycle.
 void Universe::do_step()
 {
-	int x, y, num;
+	int x;
+	int y;
+	int num;
 
 	for (x = 0; x < _width; x++)
 	{
@@ -277,14 +271,10 @@ void Universe::do_step()
 	}
 
 	for (x = 0; x < _width; x++)
-	{
 		for (y = 0; y < _width; y++)
-		{
 			_data[x][y].apply_state_by_criteria(
 					_born_criteria,
 					_survival_criteria);
-		}
-	}
 
 	_step++;
 }
