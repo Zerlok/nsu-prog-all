@@ -20,6 +20,8 @@ class Universe
 				const int y,
 				const LifeformState state = ALIVE);
 
+		Lifeform& get(const int x, const int y) { return _data[x][y]; }
+
 		int count_neighbours(const int x, const int y) const;
 		size_t count_alive_forms() const;
 
