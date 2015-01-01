@@ -2,45 +2,49 @@
 #define __HASHTABLE_H__
 
 
-/* -------------- __HASHTABLE_H__ SETUP -------------- */
-
+/*
+ *	-------------- __HASHTABLE_H__ SETUP --------------
+ */
 #include <stdexcept>
 #include <iostream>
 
 
-/* -------------- DEBUG SETTINGS -------------- */
-
+/*
+ *	-------------- DEBUG SETTINGS --------------
+ */
 #define __HTABLE_DEBUG__
 
 
-/* -------------- CONSTANTS -------------- */
-
+/*
+ *	-------------- CONSTANTS --------------
+ */
 typedef std::string String;
 
 
 /*
-	The default hashtable size.
-*/
+ *	The default hashtable size.
+ */
 static const int MEM_INIT = 997; // Prime number.
 
 
 /*
-	The critical factor between the number of Item objects in HashTable
-	and the number of allocated Items cells.
-*/
+ *	The critical factor between the number of Item objects in HashTable
+ *	and the number of allocated Items cells.
+ */
 static const int FULLNESS_FACTOR = 2; // 2 : 1
 
 
-/* -------------- ERRORS MESSAGES -------------- */
+/*
+ *	-------------- ERRORS MESSAGES --------------
+ */
+static const char ERR_BAD_HTABLE_SIZE[] = "Invalid size of hashtable!";
+static const char ERR_KEY_NOT_FOUND[] = "The key was not found!";
+static const char ERR_NO_VALUE_IN_ITEM[] = "The Item object has no value!";
 
-static const char *ERR_BAD_ALLOC = "Not enough memmory!";
-static const char *ERR_BAD_HTABLE_SIZE = "Invalid size of hashtable!";
-static const char *ERR_KEY_NOT_FOUND = "The key was not found!";
-static const char *ERR_NO_VALUE_IN_ITEM = "The Item object has no value!";
 
-
-/* -------------- VALUE CLASS (a student used as value) -------------- */
-
+/*
+ *	------------- VALUE CLASS (a student used as value) --------------
+ */
 class Value
 {
 	public:
@@ -51,7 +55,6 @@ class Value
 			const unsigned int course=1,
 			const String& department="IT"
 		);
-
 		~Value();
 
 		Value(const Value& s);
@@ -76,8 +79,9 @@ bool operator==(const Value& value1, const Value& value2);
 bool operator!=(const Value& value1, const Value& value2);
 
 
-/* -------------- ITEM CLASS -------------- */
-
+/*
+ *	-------------- ITEM CLASS --------------
+ */
 class Item
 {
 	public:
@@ -115,8 +119,9 @@ bool operator==(const Item& value1, const Item& value2);
 bool operator!=(const Item& value1, const Item& value2);
 
 
-/* -------------- HASHTABLE CLASS -------------- */
-
+/*
+ *	-------------- HASHTABLE CLASS --------------
+ */
 class HashTable
 {
 	public:
@@ -142,27 +147,31 @@ class HashTable
 		bool insert(const String& key, const Value& value);
 		bool is_contains(const String& key) const;
 		bool is_empty() const;
-		void swap(HashTable& b);
+		friend void swap_ht(HashTable& a, HashTable& b);
 
 	private:
 		/* Fields */
 		int _cells_num; // Number of cells in array.
+		int _items_num; // The total value of items in array.
 		Item **_data; // Array of pointers to Item object.
 		
 		/* Methods */
+		void _remove_data();
 		bool _check_and_expand();
 		int _get_index(const String& key) const;
 		Value *_search(const String& key) const;
 };
 
+void swap_ht(HashTable& a, HashTable& b);
 bool operator==(const HashTable& value1, const HashTable& value2);
 bool operator!=(const HashTable& value1, const HashTable& value2);
 
 
-/* -------------- ACCESSORY FUNCTIONS -------------- */
-
+/*
+ *	-------------- ACCESSORY FUNCTIONS --------------
+ */
 int hash(const String& key);
 
 
-/* -------------- __HASHTABLE_H__ END -------------- */
+// __HASHTABLE_H__ END
 #endif
