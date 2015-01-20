@@ -9,22 +9,17 @@
  * --------------- DETAILED MODE METHODS ---------------
  */
 
-DetailedMode::DetailedMode()
+DetailedMode::DetailedMode(
+		const MatrixField **matrix,
+		const std::string& configs_dir)
+	// : _matrix(matrix), _configs_dir(configs_dir)
 {
+	_factory = new StrategyFactory(matrix, configs_dir);
 	_strategies = NULL;
-	_factory = NULL;
 }
 
 
 DetailedMode::~DetailedMode() {}
-
-
-void DetailedMode::setup(
-		const MatrixField **matrix,
-		const std::string& configs_dir)
-{
-	_factory = new StrategyFactory(matrix, configs_dir);
-}
 
 
 void DetailedMode::play()
@@ -64,22 +59,16 @@ void DetailedMode::play()
  * --------------- FAST MODE METHODS ---------------
  */
 
-FastMode::FastMode()
-{
-	_strategies = NULL;
-	_factory = NULL;
-}
-
-
-FastMode::~FastMode() {}
-
-
-void FastMode::setup(
+FastMode::FastMode(
 		const MatrixField **matrix,
 		const std::string& configs_dir)
 {
 	_factory = new StrategyFactory(matrix, configs_dir);
+	_strategies = NULL;
 }
+
+
+FastMode::~FastMode() {}
 
 
 void FastMode::play()
@@ -92,22 +81,16 @@ void FastMode::play()
  * --------------- TOURNAMENT MODE METHODS ---------------
  */
 
-TournamentMode::TournamentMode()
-{
-	_strategies = NULL;
-	_factory = NULL;
-}
-
-
-TournamentMode::~TournamentMode() {}
-
-
-void TournamentMode::setup(
+TournamentMode::TournamentMode(
 		const MatrixField **matrix,
 		const std::string& configs_dir)
 {
 	_factory = new StrategyFactory(matrix, configs_dir);
+	_strategies = NULL;
 }
+
+
+TournamentMode::~TournamentMode() {}
 
 
 void TournamentMode::play()

@@ -89,16 +89,16 @@ TEST(CrazyStrategy, Init)
 TEST(Factory, Init)
 {
 	EXPECT_NO_THROW({
-		StrategyFactory strategies;
+		StrategyFactory strategies(NULL, "ololo");
 
-		strategies.set<TrustfulStrategy>("trust");
-		strategies.set<MistrustfulStrategy>("mistrust");
-		strategies.set<CrazyStrategy>("crazy");
+		strategies.set_id<TrustfulStrategy>("trust");
+		strategies.set_id<MistrustfulStrategy>("mistrust");
+		strategies.set_id<CrazyStrategy>("crazy");
 
 		std::string strat("trust");
 		Strategy *my = strategies.get(strat);
 
-		Keys skeys = strategies.get_registered();
+		Keys skeys = strategies.get_all_registered();
 
 		std::copy(
 				skeys.begin(),

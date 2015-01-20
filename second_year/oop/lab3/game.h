@@ -24,7 +24,7 @@ class Game
 		/*
 		 * Foreground methods (commands)
 		 */
-		void cmd_tick();			// Make <n> iterations
+		void cmd_tick();			// Make iterations
 		void cmd_clear();			// Clear the console screen
 		void cmd_help();			// Show help message
 
@@ -40,12 +40,13 @@ class Game
 		bool _is_valid_input;
 
 		bool _is_in_background;		// Is game playing in background.
-		Mode *_mode;			// The playing gamemode.
+		Mode *_mode;				// The playing gamemode.
 		int _steps_limit;
 
 		// std::array<MatrixField, 8> _matrix;
 		MatrixField *_matrix;
 		std::string _configs_dir;
+		std::string _mode_str;
 };
 
 

@@ -34,9 +34,10 @@ static const char ERR_INVALID_MODE[] = " - invalid game mode. Available modes ar
 // static const char ERR_PATH_NOT_ACCESSABLE[] = " - permission denied or not exists!";
 
 /*
- * Errors in foreground playing.
+ * Command Errors in foreground playing.
  */
-static const char ERR_UNKNOWN_COMMAND[] = "Unknown command. Try help to see available commands.";
+static const char ERR_CMD_VALUE_EXPECTED[] = " - the command value was expected!";
+static const char ERR_CMD_UNKNOWN[] = "- an unknown command. Try help to see available commands.";
 
 
 // --------------- DEBUG ---------------

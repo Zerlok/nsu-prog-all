@@ -15,10 +15,8 @@ class Mode
 	public:
 		Mode() {};
 		virtual ~Mode() {};
+		
 		virtual void play() = 0;
-		virtual void setup(
-				const MatrixField **matrix,
-				const std::string& configs_dir) = 0;
 };
 
 
@@ -31,13 +29,13 @@ class Mode
 class DetailedMode : public Mode
 {
 	public:
-		DetailedMode();
+		DetailedMode(
+				const MatrixField **matrix,
+				const std::string& configs_dir);
+		
 		~DetailedMode();
 
 		virtual void play();
-		virtual void setup(
-				const MatrixField **matrix,
-				const std::string& configs_dir);
 
 	private:
 		// std::array<Strategy, 3> _strategies;
@@ -55,13 +53,13 @@ class DetailedMode : public Mode
 class FastMode : public Mode
 {
 	public:
-		FastMode();
+		FastMode(
+				const MatrixField **matrix,
+				const std::string& configs_dir);
+
 		~FastMode();
 		
 		virtual void play();
-		virtual void setup(
-				const MatrixField **matrix,
-				const std::string& configs_dir);
 
 	private:
 		// std::array<Strategy, 3> _strategies;
@@ -79,13 +77,13 @@ class FastMode : public Mode
 class TournamentMode : public Mode
 {
 	public:
-		TournamentMode();
+		TournamentMode(
+				const MatrixField **matrix,
+				const std::string& configs_dir);
+
 		~TournamentMode();
 		
 		virtual void play();
-		virtual void setup(
-				const MatrixField **matrix,
-				const std::string& configs_dir);
 
 	private:
 		// std::array<Strategy, 3> _strategies;

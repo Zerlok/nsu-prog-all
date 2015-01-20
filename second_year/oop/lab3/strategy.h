@@ -25,8 +25,9 @@ class TrustfulStrategy : public Strategy
 	public:
 		TrustfulStrategy(
 				// const std::array<MatrixField, 8>& matrix,
-				const MatrixField **matrix,
-				const std::string& configs_dir) : _matrix(matrix), _configs_dir(configs_dir)
+				const MatrixField **matrix = NULL,
+				const std::string& configs_dir = "")
+			: _matrix(matrix), _configs_dir(configs_dir)
 		{
 			// _matrix = new MatrixField[8];
 
@@ -49,7 +50,7 @@ class TrustfulStrategy : public Strategy
 		virtual void learn_choices(
 				// const std::array<Decision, 2>& decisions
 				const Decision *decisions
-		) = 0;
+		) {}
 	
 	private:
 		// const std::array<MatrixField, 8> _matrix;
@@ -63,8 +64,9 @@ class MistrustfulStrategy : public Strategy
 	public:
 		MistrustfulStrategy(
 				// const std::array<MatrixField, 8>& matrix,
-				const MatrixField **matrix,
-				const std::string& configs_dir) : _matrix(matrix), _configs_dir(configs_dir)
+				const MatrixField **matrix = NULL,
+				const std::string& configs_dir = "")
+			: _matrix(matrix), _configs_dir(configs_dir)
 		{
 			// _matrix = new MatrixField[8];
 
@@ -87,7 +89,7 @@ class MistrustfulStrategy : public Strategy
 		virtual void learn_choices(
 				// const std::array<Decision, 2>& decisions
 				const Decision *decisions
-		) = 0;
+		) {}
 
 	private:
 		// const std::array<MatrixField, 8> _matrix;
@@ -101,8 +103,9 @@ class CrazyStrategy : public Strategy
 	public:
 		CrazyStrategy(
 				// const std::array<MatrixField, 8>& matrix,
-				const MatrixField **matrix,
-				const std::string& configs_dir) : _matrix(matrix), _configs_dir(configs_dir)
+				const MatrixField **matrix = NULL,
+				const std::string& configs_dir = "")
+			: _matrix(matrix), _configs_dir(configs_dir)
 		{
 			// _matrix = new MatrixField[8];
 
@@ -131,7 +134,7 @@ class CrazyStrategy : public Strategy
 		virtual void learn_choices(
 				// const std::array<Decision, 2>& decisions
 				const Decision *decisions
-		) = 0;
+		) {}
 
 	private:
 		// const std::array<MatrixField, 8> _matrix;

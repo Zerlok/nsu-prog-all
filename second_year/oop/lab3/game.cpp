@@ -91,7 +91,7 @@ Game::Game(const int argc, const char **argv)
 	_is_valid_input = true;
 	_is_in_background = false;
 	_steps_limit = STD_STEPS_LIMIT;
-	_mode = new DetailedMode();
+	_mode_str = "none";
 	_matrix = NULL;
 	_configs_dir = STD_CONFIGS_DIR;
 	
@@ -102,7 +102,15 @@ Game::Game(const int argc, const char **argv)
 		if (_matrix == NULL)
 			_matrix = STD_MATRIX;
 
-		_mode->setup(&_matrix, _configs_dir);
+		if ((_mode_str == "detailed")
+			|| (_mode_str == "none"))
+			_mode = new DetailedMode(&_matrix, _configs_dir);
+
+		else if (_mode_str == "detailed")
+			_mode = new FastMode(&_matrix, _configs_dir);
+
+		else if (_mode_str == "detailed")
+			_mode = new TournamentMode(&_matrix, _configs_dir);
 	}
 }
 
@@ -185,23 +193,11 @@ void Game::_parse_input(const int argc, const char **argv)
 					break;
 				}
 
-				if (arg_value == "detailed")
+				if ((arg_value == "detailed")
+					|| (arg_value == "fast")
+					|| (arg_value == "tournament"))
 				{
-					delete _mode;
-					_mode = new DetailedMode();
-					_is_in_background = false;
-				}
-				else if (arg_value == "fast")
-				{
-					delete _mode;
-					_mode = new FastMode();
-					_is_in_background = true;
-				}
-				else if (arg_value == "tournament")
-				{
-					delete _mode;
-					_mode = new TournamentMode();
-					_is_in_background = true;
+					_mode_str = arg_value;
 				}
 				else
 				{
@@ -301,7 +297,7 @@ void Game::_parse_input(const int argc, const char **argv)
 		{
 			switch (c_argv[i][1])
 			{
-				case 'm':
+				case 'm': // for mode
 				{
 					if ( ! ((i + 1 < argc)
 						&& is_value(c_argv[i + 1])))
@@ -315,23 +311,11 @@ void Game::_parse_input(const int argc, const char **argv)
 						break;
 					}
 
-					if (c_argv[i + 1] == "detailed")
+					if ((c_argv[i + 1] == "detailed")
+						|| (c_argv[i + 1] == "fast")
+						|| (c_argv[i + 1] == "tournament"))
 					{
-						delete _mode;
-						_mode = new DetailedMode();
-						_is_in_background = false;
-					}
-					else if (c_argv[i + 1] == "fast")
-					{
-						delete _mode;
-						_mode = new FastMode();
-						_is_in_background = true;
-					}
-					else if (c_argv[i + 1] == "tournament")
-					{
-						delete _mode;
-						_mode = new TournamentMode();
-						_is_in_background = true;
+						_mode_str = c_argv[i + 1];
 					}
 					else
 					{
@@ -347,7 +331,7 @@ void Game::_parse_input(const int argc, const char **argv)
 					i++;
 					break;
 				} // endcase
-				case 's':
+				case 's': // for steps
 				{
 					if ( ! ((i + 1 < argc)
 						&& is_value(c_argv[i + 1])))
@@ -376,7 +360,7 @@ void Game::_parse_input(const int argc, const char **argv)
 
 					i++;
 				} // endcase
-				case 'c':
+				case 'c': // for configs
 				{
 					if ( ! (
 						(i + 1 < argc)
@@ -396,7 +380,7 @@ void Game::_parse_input(const int argc, const char **argv)
 					i++;
 					break;
 				} // endcase
-				case 'x':
+				case 'x': // for matrix
 				{
 					if ( ! (
 						(i + 1 < argc)
@@ -416,7 +400,7 @@ void Game::_parse_input(const int argc, const char **argv)
 					i++;
 					break;
 				} // endcase
-				case 'h':
+				case 'h': // for help
 				{
 					_is_in_background = true;
 					std::cout
@@ -453,7 +437,7 @@ void Game::_parse_input(const int argc, const char **argv)
 }
 
 
-bool Game::_parse_cmd(const std::string cmd)
+bool Game::_parse_cmd(const std::string& cmd)
 {
 	size_t cmd_len = cmd.size();
 
@@ -467,21 +451,20 @@ bool Game::_parse_cmd(const std::string cmd)
 	size_t found_help = cmd.find("help");
 	size_t found_step = cmd.find("step");
 	size_t found_tick = cmd.find("tick");
-	// size_t found_scores = cmd.find("scores");
-	// size_t found_show = cmd.find("show");
-	// size_t found_strategies = cmd.find("strategies");
 	size_t found_use = cmd.find("use");
+	size_t found_show = cmd.find("show");
+	size_t found_scores = cmd.find("scores");
+	size_t found_strategies = cmd.find("strategies");
 
-	if ((found_tick == 0) && ((delimiter_pos == 4) || (cmd_len == 4)))
+	if ((found_tick == 0)
+		&& ((delimiter_pos == 4)
+			|| (cmd_len == 4)))
 	{
 		if ((cmd_len > 5)
 			&& isdigit(cmd[5]))
 		{
-			tick(atoi(
-					cmd.substr(
-							delimiter_pos,
-							cmd_len
-					).c_str()));
+			_steps_limit = atoi(cmd.substr(delimiter_pos, cmd_len).c_str());
+			tick();
 		}
 		else std::cout
 				<< ERR_HEADER
@@ -489,9 +472,42 @@ bool Game::_parse_cmd(const std::string cmd)
 				<< ERR_INTEGER_EXPECTED
 				<< std::endl;
 	}
-	else if ((found_clear == 0) && (cmd_len == 5))
+	else if ((found_clear == 0)
+		&& (cmd_len == 5))
 	{
 		clear_screen();
+	}
+	else if ((found_use == 0)
+		&& ((delimiter_pos == 3)
+			|| (cmd_len == 3)))
+	{
+		if (cmd_len > 5)
+		{
+
+		}
+		else std::cout
+				<< ERR_HEADER
+				<< cmd
+				<< ERR_CMD_VALUE_EXPECTED
+				<< std::endl;
+	}
+	else if ((found_show == 0)
+		&& ((delimiter_pos == 4)
+			|| (cmd_len == 4)))
+	{
+		if ((found_strategies == 5)
+			&& cmd_len == 15))
+			list_strategies();
+
+		else if ((found_scores == 5)
+			&& cmd_len == 11))
+			list_scores();
+
+		else std::cout
+				<< ERR_HEADER
+				<< cmd
+				<< ERR_CMD_INVALID_VALUE
+				<< std::endl;
 	}
 	else if ((found_help != str_none) && (cmd_len == 4))
 	{
@@ -501,14 +517,12 @@ bool Game::_parse_cmd(const std::string cmd)
 	{
 		return false;
 	}
-	else
-	{
-		std::cout
-				<< ERR_HEADER
-			 	<< ERR_UNKNOWN_COMMAND
-			 	<< std::endl;
-	}
-
+	else std::cout
+			<< ERR_HEADER
+			<< cmd
+		 	<< ERR_UNKNOWN_COMMAND
+		 	<< std::endl;
+	
 	return true;
 }
 
@@ -526,6 +540,18 @@ void Game::tick(int limit)
 void Game::clear_screen()
 {
 	system("clear");
+}
+
+
+void Game::list_strategies()
+{
+	std::cout << "list strategies" << std::endl;
+}
+
+
+void Game::list_scores()
+{
+	std::cout << "list scores" << std::endl;
 }
 
 
