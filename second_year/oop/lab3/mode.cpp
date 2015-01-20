@@ -1,5 +1,9 @@
 #include "main.h"
 
+#include "strategy.h"
+#include "factory.h"
+#include "mode.h"
+
 
 /*
  * --------------- DETAILED MODE METHODS ---------------
@@ -7,52 +11,52 @@
 
 DetailedMode::DetailedMode()
 {
-	_strategy_0 = NULL;
-	_strategy_1 = NULL;
-	_strategy_2 = NULL;
+	_strategies = NULL;
+	_factory = NULL;
 }
 
 
-DetailedMode::~DetailedMode()
-{
-	delete _strategy_0;
-	delete _strategy_1;
-	delete _strategy_2;
-}
+DetailedMode::~DetailedMode() {}
 
 
 void DetailedMode::setup(
-		Strategy *s0,
-		Strategy *s1,
-		Strategy *s2)
+		const MatrixField **matrix,
+		const std::string& configs_dir)
 {
-	delete _strategy_0;
-	delete _strategy_1;
-	delete _strategy_2;
-	
-	_strategy_0 = s0;
-	_strategy_1 = s1;
-	_strategy_2 = s2;
+	_factory = new StrategyFactory(matrix, configs_dir);
 }
 
 
 void DetailedMode::play()
 {
-	Decision decision_list[3] = {
-			_strategy_0->get_decision(),
-			_strategy_1->get_decision(),
-			_strategy_2->get_decision()
-	};
+	// std::vector<Decision> decisions;
 
-	_strategy_0->learn_choices(0, decision_list);
-	_strategy_1->learn_choices(1, decision_list);
-	_strategy_2->learn_choices(2, decision_list);
+	// for (std::vector<Strategy *>::iterator item = _strategies->begin(); item != _strategies->end(); item++)
+	// 	decisions.push_back(
+	// 			(*item)->get_decision()
+	// 	);
+
+	// for (int i = 0; std::vector<Strategy *>::iterator item = _strategies.begin(); item != _strategies.end(); i++; item++)
+	// 	(*item)->learn_choices(i, decisions);
+	
+	Decision opponents[2];
+	Decision decisions[3];
+
+	for (int i = 0; i < 3; i++)
+		decisions[i] = _strategies[i]->get_decision();
+
+	for (int i = 0; i < 3; i++)
+	{
+		opponents[0] = decisions[(i + 1) % 3];
+		opponents[1] = decisions[(i + 2) % 3];
+
+		_strategies[i]->learn_choices(opponents);
+	}
 
 	std::cout
-			<< decision_list[0]
-			<< decision_list[1]
-			<< decision_list[2]
-			<< std::endl;
+			<< decisions[0] << "\n"
+			<< decisions[1] << "\n"
+			<< decisions[2] << "\n";
 }
 
 
@@ -62,13 +66,19 @@ void DetailedMode::play()
 
 FastMode::FastMode()
 {
-
+	_strategies = NULL;
+	_factory = NULL;
 }
 
 
-FastMode::~FastMode()
-{
+FastMode::~FastMode() {}
 
+
+void FastMode::setup(
+		const MatrixField **matrix,
+		const std::string& configs_dir)
+{
+	_factory = new StrategyFactory(matrix, configs_dir);
 }
 
 
@@ -84,13 +94,19 @@ void FastMode::play()
 
 TournamentMode::TournamentMode()
 {
-
+	_strategies = NULL;
+	_factory = NULL;
 }
 
 
-TournamentMode::~TournamentMode()
-{
+TournamentMode::~TournamentMode() {}
 
+
+void TournamentMode::setup(
+		const MatrixField **matrix,
+		const std::string& configs_dir)
+{
+	_factory = new StrategyFactory(matrix, configs_dir);
 }
 
 

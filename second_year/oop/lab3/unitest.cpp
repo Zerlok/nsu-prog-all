@@ -1,6 +1,10 @@
-#include "main.h"
 #include <gtest/gtest.h>
 
+#include "main.h"
+#include "strategy.h"
+#include "factory.h"
+#include "mode.h"
+#include "game.h"
 
 /* -------------------- STUDENT CLASS TESTS -------------------- */
 
@@ -76,17 +80,15 @@ TEST(Input, InvalidInput)
 
 TEST(CrazyStrategy, Init)
 {
-	EXPECT_NO_THROW(
-	{
-		TrustfulStrategy strat;
+	EXPECT_NO_THROW({
+		CrazyStrategy strat;
 	});
 }
 
 
 TEST(Factory, Init)
 {
-	EXPECT_NO_THROW(
-	{
+	EXPECT_NO_THROW({
 		StrategyFactory strategies;
 
 		strategies.set<TrustfulStrategy>("trust");
@@ -98,10 +100,16 @@ TEST(Factory, Init)
 
 		Keys skeys = strategies.get_registered();
 
-		for (Keys::iterator item = skeys.begin(); item != skeys.end(); item++)
-		{
-			std::cout << (*item) << std::endl;
-		}
+		std::copy(
+				skeys.begin(),
+				skeys.end(),
+				std::ostream_iterator<std::string>(std::cout, ", ")
+		);
+
+		// for (Keys::iterator item = skeys.begin(); item != skeys.end(); item++)
+		// {
+		// 	std::cout << (*item) << std::endl;
+		// }
 	});
 }
 

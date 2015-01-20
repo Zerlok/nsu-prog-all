@@ -1,10 +1,15 @@
 #include "main.h"
 
+#include "strategy.h"
+#include "factory.h"
+#include "mode.h"
+#include "game.h"
+
 
 /*
- * --------------- ACCESSORY FUINCTIONS ---------------
+ * --------------- EXTRA FUINCTIONS ---------------
  *
- * This functions are maden for parsing an input string
+ * This functions are maden for parsing the input string
  * from console.
  *
  */
@@ -74,34 +79,6 @@ inline bool is_value(const std::string& line)
 
 
 /*
- * Returns is input path (to folder or file) exists.
- *
- * Input:
- *    line - *char
- *
- * Output:
- *    true / false.
- */
-inline bool is_exists(const char *path)
-{
-	struct stat info;
-	int status = stat(path, &info);
-
-	if (status != 0)
-	{
-		std::cout
-				<< ERR_HEADER
-				<< path
-				<< ERR_PATH_NOT_ACCESSABLE
-				<< std::endl;
-		return false;
-	}
-
-	return true;
-}
-
-
-/*
  * --------------- GAME METHODS ---------------
  */
 
@@ -111,75 +88,103 @@ Game::Game(const int argc, const char **argv)
 	 * Default settings
 	 */
 	_debug = false;
-	_mode = new STD_MODE;
+	_is_valid_input = true;
 	_is_in_background = false;
 	_steps_limit = STD_STEPS_LIMIT;
+	_mode = new DetailedMode();
+	_matrix = NULL;
 	_configs_dir = STD_CONFIGS_DIR;
-	_matrix_file = STD_MATRIX_FILE;
 	
 	_parse_input(argc, argv);
+
+	if (_is_valid_input)
+	{
+		if (_matrix == NULL)
+			_matrix = STD_MATRIX;
+
+		_mode->setup(&_matrix, _configs_dir);
+	}
 }
 
 
 Game::~Game()
 {
-	if (_debug)
-	{
-		std::cout << "Exiting from the game..." << std::endl;
-		std::cout << "Deleting the mode class..." << std::endl;
-	}
+	if (_debug) std::cout
+			<< DBG_HEADER
+			<< "Exiting from the game..."
+			<< std::endl;
+
+	if (_debug) std::cout
+			<< DBG_HEADER
+			<< "Deleting the mode class..."
+			<< std::endl;
+
 	delete _mode;
 	
-	if (_debug)
-		std::cout << "Done." << std::endl;
+	if (_debug) std::cout
+			<< DBG_HEADER
+			<< "Done."
+			<< std::endl;
 }
 
 
+/*
+ * Game input parsing method:
+ *    This method matches input with available flags and arguments,
+ *    which you can specify when running the game, and validates the
+ *    input data.
+ *
+ *    If input is valid, then the game will be started, otherwise
+ *    game will be finished.
+ */
 void Game::_parse_input(const int argc, const char **argv)
 {
-	/*
-	 * Copy the input arguments, flags and values.
-	 */
-	int __argc = argc - 1;
-	std::string *__argv = new std::string[__argc];
-	for (int i = 1; i < argc; i++) __argv[i - 1] = std::string(argv[i]);
-
 	int i = 0;
 	size_t equals_pos;
-	std::string arg_name, arg_value;
+	std::string arg_name;
+	std::string arg_value;
+	std::vector<std::string> c_argv;
 
-	while (i < __argc)
+	for (int j = 1; j < argc; j++)
+	{
+		c_argv.push_back(std::string(argv[j]));
+		// std::cout << c_argv[i] << std::endl;
+	}
+
+	while ((i < argc - 1)
+			&& _is_valid_input)
 	{
 		/*
-		 * If the argument was given.
+		 * If an argument was given
 		 */
-		if (is_argument(__argv[i]))
+		if (is_argument(c_argv[i]))
 		{
-			equals_pos = __argv[i].find("=");
+			equals_pos = c_argv[i].find("=");
 
 			if (equals_pos != str_none)
 			{
-				arg_name = __argv[i].substr(2, equals_pos - 2);
-				arg_value = __argv[i].substr(equals_pos + 1, __argv[i].size());
-			}
-			else if (__argv[i] == "--help")
-			{
-				arg_name = std::string("help");
+				arg_name = c_argv[i].substr(2, equals_pos - 2);
+				arg_value = c_argv[i].substr(equals_pos + 1, c_argv[i].size() - equals_pos - 1);
 			}
 			else
 			{
-				std::cout
-						<< ERR_HEADER
-						<< __argv[i]
-						<< ERR_VALUE_EXPECTED
-						<< std::endl;
-				
-				i++;
-				continue;
+				arg_name = c_argv[i].substr(2, c_argv[i].size() - 2);
+				arg_value = "";
 			}
 
 			if (arg_name == "mode")
 			{
+				if (arg_value == "")
+				{
+					_is_valid_input = false;
+					std::cout
+							<< ERR_HEADER
+							<< arg_name
+							<< ERR_ARG_VALUE_EXPECTED
+							<< std::endl;
+					break;
+				}
+
 				if (arg_value == "detailed")
 				{
 					delete _mode;
@@ -200,111 +205,129 @@ void Game::_parse_input(const int argc, const char **argv)
 				}
 				else
 				{
+					_is_valid_input = false;
 					std::cout
 							<< ERR_HEADER
 							<< arg_value
 							<< ERR_INVALID_MODE
 							<< std::endl;
-					_is_in_background = true;
+					break;
 				}
 			}
 			else if (arg_name == "steps")
 			{
-				if (isdigit(arg_value[0]))
+				if (arg_value == "")
 				{
-					_steps_limit = atoi(arg_value.c_str());
-				}
-				else
-				{
+					_is_valid_input = false;
 					std::cout
 							<< ERR_HEADER
-							<< arg_value
-							<< ERR_INTEGER_EXPECTED
+							<< arg_name
+							<< ERR_ARG_VALUE_EXPECTED
 							<< std::endl;
+					break;
 				}
+				else if (!isdigit(arg_value[0]))
+				{
+					_is_valid_input = false;
+					std::cout
+							<< ERR_HEADER
+							<< arg_name
+							<< ERR_ARG_VALUE_EXPECTED
+							<< std::endl;
+					break;
+				}
+				
 				_is_in_background = true;
+				_steps_limit = atoi(arg_value.c_str());
 			}
 			else if (arg_name == "configs")
 			{
-				if (is_exists(arg_value.c_str()))
+				if (arg_value == "")
 				{
-					_configs_dir = arg_value.c_str();
+					_is_valid_input = false;
+					std::cout
+							<< ERR_HEADER
+							<< arg_name
+							<< ERR_ARG_VALUE_EXPECTED
+							<< std::endl;
+					break;
 				}
+
+				_configs_dir = arg_value.c_str();
 			}
 			else if (arg_name == "matrix")
 			{
-				if (is_exists(arg_value.c_str()))
+				if (arg_value == "")
 				{
-					_matrix_file = arg_value;
+					_is_valid_input = false;
+					std::cout
+							<< ERR_HEADER
+							<< arg_name
+							<< ERR_ARG_VALUE_EXPECTED
+							<< std::endl;
+					break;
 				}
+
+				_matrix_file = arg_value;
+			}
+			else if (arg_name == "debug")
+			{
+				_debug = true;
+				std::cout
+						<< DBG_HEADER
+						<< DEBUG_ENABLED
+						<< std::endl;
 			}
 			else if (arg_name == "help")
 			{
-				std::cout << HELP_USAGE << std::endl;
 				_is_in_background = true;
+				std::cout << HELP_USAGE << std::endl;
 			}
 			else
 			{
+				_is_valid_input = false;
 				std::cout
 						<< ERR_HEADER
 						<< arg_name
 						<< ERR_UNKNOWN_ARGUMENT
 						<< std::endl;
-			}
-		}
+				break;
+			} // endif
+		} // endif
 		/*
 		 * If the flag was given.
 		 */
-		else if (is_flag(__argv[i]))
+		else if (is_flag(c_argv[i]))
 		{
-			if ((i + 1 == __argc)
-					|| !is_value(__argv[i + 1])
-				)
-			{
-				switch (__argv[i][1])
-				{
-					case 'd':
-					{
-						std::cout
-								<< WARNING_HEADER
-								<< DEBUG_ENABLED
-								<< std::endl;
-						_debug = true;
-						break;
-					}
-					case 'h':
-					{
-						std::cout << HELP_USAGE << std::endl;
-						_is_in_background = true;
-						break;
-					}
-					default: std::cout
-							<< ERR_HEADER
-							<< __argv[i][1]
-							<< ERR_VALUE_EXPECTED
-							<< std::endl;
-				}
-				i++;
-				continue;
-			}
-
-			switch (__argv[i][1])
+			switch (c_argv[i][1])
 			{
 				case 'm':
 				{
-					if (__argv[i + 1] == "detailed")
+					if ( ! ((i + 1 < argc)
+						&& is_value(c_argv[i + 1])))
+					{
+						_is_valid_input = false;
+						std::cout
+								<< ERR_HEADER
+								<< c_argv[i][1]
+								<< ERR_FLAG_VALUE_EXPECTED
+								<<std::endl;
+						break;
+					}
+
+					if (c_argv[i + 1] == "detailed")
 					{
 						delete _mode;
 						_mode = new DetailedMode();
 						_is_in_background = false;
 					}
-					else if (__argv[i + 1] == "fast")
+					else if (c_argv[i + 1] == "fast")
 					{
 						delete _mode;
 						_mode = new FastMode();
 						_is_in_background = true;
 					}
-					else if (__argv[i + 1] == "tournament")
+					else if (c_argv[i + 1] == "tournament")
 					{
 						delete _mode;
 						_mode = new TournamentMode();
@@ -312,74 +335,121 @@ void Game::_parse_input(const int argc, const char **argv)
 					}
 					else
 					{
+						_is_valid_input = false;
 						std::cout
 								<< ERR_HEADER
-								<< __argv[i + 1]
+								<< c_argv[i + 1]
 								<< ERR_INVALID_MODE
 								<< std::endl;
-						_is_in_background = true;
+						break;
 					}
 
 					i++;
 					break;
-				}
+				} // endcase
 				case 's':
 				{
-					if (isdigit(__argv[i + 1][0]))
+					if ( ! ((i + 1 < argc)
+						&& is_value(c_argv[i + 1])))
 					{
-						_steps_limit = atoi(__argv[i + 1].c_str());
-					}
-					else
-					{
+						_is_valid_input = false;
 						std::cout
 								<< ERR_HEADER
-								<< __argv[i + 1]
+								<< c_argv[i][1]
+								<< ERR_FLAG_VALUE_EXPECTED
+								<<std::endl;
+						break;
+					}
+					else if (!isdigit(c_argv[i + 1][0]))
+					{
+						_is_valid_input = false;
+						std::cout
+								<< ERR_HEADER
+								<< c_argv[i + 1]
 								<< ERR_INTEGER_EXPECTED
 								<< std::endl;
+						break;
 					}
 
-					i++;
 					_is_in_background = true;
-					break;
-				}
+					_steps_limit = atoi(c_argv[i + 1].c_str());
+
+					i++;
+				} // endcase
 				case 'c':
 				{
-					if (is_exists(__argv[i + 1].c_str()))
+					if ( ! (
+						(i + 1 < argc)
+						&& is_value(c_argv[i + 1])))
 					{
-						_configs_dir = __argv[i + 1].c_str();
+						_is_valid_input = false;
+						std::cout
+								<< ERR_HEADER
+								<< c_argv[i]
+								<< ERR_FLAG_VALUE_EXPECTED
+								<< std::endl;
+						break;
 					}
-					
+
+					_configs_dir = c_argv[i + 1].c_str();
+
 					i++;
 					break;
-				}
+				} // endcase
 				case 'x':
 				{
-					if (is_exists(__argv[i + 1].c_str()))
+					if ( ! (
+						(i + 1 < argc)
+						&& is_value(c_argv[i + 1])))
 					{
-						_matrix_file = __argv[i + 1].c_str();
+						_is_valid_input = false;
+						std::cout
+								<< ERR_HEADER
+								<< c_argv[i]
+								<< ERR_FLAG_VALUE_EXPECTED
+								<< std::endl;
+						break;
 					}
+					
+					_matrix_file = c_argv[i + 1].c_str();
 					
 					i++;
 					break;
-				}
-				default: std::cout
-						<< ERR_HEADER
-						<< __argv[i][1]
-						<< ERR_UNKNOWN_FLAG
-						<< std::endl;
-			}
-		}
-		else // Not right argument or flag.
+				} // endcase
+				case 'h':
+				{
+					_is_in_background = true;
+					std::cout
+							<< HELP_DESCRIPTION
+							<< HELP_USAGE
+							<< HELP_FLAGS
+							<< std::endl;
+					break;
+				} // endcase
+				default:
+				{
+					_is_valid_input = false;
+					std::cout
+							<< ERR_HEADER
+							<< c_argv[i]
+							<< ERR_UNKNOWN_FLAG
+							<< std::endl;
+					break;
+				} // endcase
+			} // endswitch
+		} // endif
+		else
 		{
+			_is_valid_input = false;
 			std::cout
 					<< ERR_HEADER
-					<< __argv[i]
+					<< c_argv[i]
 					<< ERR_INVALID_INPUT
 					<< std::endl;
-		}
+		} // endif
 
 		i++;
-	} // while (i < __argc)
+	} // endwhile
 }
 
 
@@ -387,7 +457,8 @@ bool Game::_parse_cmd(const std::string cmd)
 {
 	size_t cmd_len = cmd.size();
 
-	if (cmd_len == 0) return true;
+	if (cmd_len == 0)
+		return true;
 
 	size_t delimiter_pos = cmd.find(" ");
 
@@ -399,27 +470,12 @@ bool Game::_parse_cmd(const std::string cmd)
 	// size_t found_scores = cmd.find("scores");
 	// size_t found_show = cmd.find("show");
 	// size_t found_strategies = cmd.find("strategies");
-	// size_t found_use = cmd.find("use");
-	
-	if ((found_tick != str_none) && (delimiter_pos == 4))
+	size_t found_use = cmd.find("use");
+
+	if ((found_tick == 0) && ((delimiter_pos == 4) || (cmd_len == 4)))
 	{
-		if ((cmd_len - delimiter_pos) > MAX_INTEGER_LEN)
-		{
-			std::cout
-					<< ERR_HEADER
-					<< cmd
-					<< ERR_TOO_BIG_INTEGER
-					<< std::endl;
-		}
-		else if (!isdigit(cmd[delimiter_pos + 1]))
-		{
-			std::cout
-					<< ERR_HEADER
-					<< cmd
-					<< ERR_INTEGER_EXPECTED
-					<< std::endl;
-		}
-		else
+		if ((cmd_len > 5)
+			&& isdigit(cmd[5]))
 		{
 			tick(atoi(
 					cmd.substr(
@@ -427,8 +483,13 @@ bool Game::_parse_cmd(const std::string cmd)
 							cmd_len
 					).c_str()));
 		}
+		else std::cout
+				<< ERR_HEADER
+				<< cmd
+				<< ERR_INTEGER_EXPECTED
+				<< std::endl;
 	}
-	else if ((found_clear != str_none) && (cmd_len == 5))
+	else if ((found_clear == 0) && (cmd_len == 5))
 	{
 		clear_screen();
 	}
@@ -439,13 +500,6 @@ bool Game::_parse_cmd(const std::string cmd)
 	else if ((found_exit != str_none) && (cmd_len == 4))
 	{
 		return false;
-	}
-	else if ((found_tick != str_none) && (delimiter_pos == str_none))
-	{
-		std::cout
-				<< ERR_HEADER
-				<< ERR_VALUE_EXPECTED
-				<< std::endl;
 	}
 	else
 	{
@@ -485,10 +539,14 @@ void Game::run()
 {
 	if (_debug) std::cout
 			<< "The game start running with configuration:\n"
-			<< "   steps limit: "<< _steps_limit << std::endl
-			<< "   configs dir: " << _configs_dir << std::endl
-			<< "   matrix file: " << _matrix_file << std::endl
+			<< "   valid input: " << _is_valid_input << "\n"
+			<< "   steps limit: " << _steps_limit << "\n"
+			<< "   configs dir: " << _configs_dir << "\n"
+			<< "   matrix file: " << _matrix_file << "\n"
 			<< std::endl;
+
+	if (!_is_valid_input)
+		return;
 
 	_mode->setup(
 			new TrustfulStrategy(),
@@ -502,7 +560,8 @@ void Game::run()
 				<< std::endl;
 
 		_mode->play();
-		// for (int i = 0; i < _steps_limit; i++) _mode->play();
+		// for (int i = 0; i < _steps_limit; i++)
+		// 	_mode->play();
 	}
 	else // Run in foreground.
 	{

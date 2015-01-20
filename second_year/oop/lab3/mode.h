@@ -3,7 +3,7 @@
 
 
 /*
- * --------------- GAME MODE CLASS ---------------
+ * --------------- GAME MODE INTERFACE ---------------
  *
  * This class is an interface for other mode classess
  *
@@ -13,8 +13,12 @@
 class Mode
 {
 	public:
+		Mode() {};
+		virtual ~Mode() {};
 		virtual void play() = 0;
-		virtual void setup(Strategy *s0, Strategy *s1, Strategy *s2) {};
+		virtual void setup(
+				const MatrixField **matrix,
+				const std::string& configs_dir) = 0;
 };
 
 
@@ -31,19 +35,14 @@ class DetailedMode : public Mode
 		~DetailedMode();
 
 		virtual void play();
-		
 		virtual void setup(
-				Strategy *s0,
-				Strategy *s1,
-				Strategy *s2
-		);
+				const MatrixField **matrix,
+				const std::string& configs_dir);
 
 	private:
-		bool _debug;
-
-		Strategy *_strategy_0;
-		Strategy *_strategy_1;
-		Strategy *_strategy_2;
+		// std::array<Strategy, 3> _strategies;
+		Strategy **_strategies;
+		StrategyFactory *_factory;
 };
 
 
@@ -60,9 +59,14 @@ class FastMode : public Mode
 		~FastMode();
 		
 		virtual void play();
+		virtual void setup(
+				const MatrixField **matrix,
+				const std::string& configs_dir);
 
 	private:
-		bool _debug;
+		// std::array<Strategy, 3> _strategies;
+		Strategy **_strategies;
+		StrategyFactory *_factory;
 };
 
 
@@ -79,9 +83,14 @@ class TournamentMode : public Mode
 		~TournamentMode();
 		
 		virtual void play();
+		virtual void setup(
+				const MatrixField **matrix,
+				const std::string& configs_dir);
 
 	private:
-		bool _debug;
+		// std::array<Strategy, 3> _strategies;
+		Strategy **_strategies;
+		StrategyFactory *_factory;
 };
 
 

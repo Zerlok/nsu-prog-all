@@ -5,65 +5,69 @@
 #include <iostream>		// cout, endl.
 #include <cstring>		// strcpy, strlen.
 #include <string>		// string.
-#include <sys/stat.h>	// floder info.
 #include <vector>		// vector.
+#include <array>		// array.
 #include <map>			// map.
 #include <time.h>		// time for srand.
 
 
 // --------------- ERRORS ---------------
 
-#define CONSOLE static const char
-
-CONSOLE ERR_HEADER[] = "# Error: ";
+static const char ERR_HEADER[] = "# Error: ";
 
 /*
  * Simple errors.
  */
-CONSOLE ERR_INTEGER_EXPECTED[] = " - an integer was expected!";
-CONSOLE ERR_TOO_BIG_INTEGER[] = " - too big integer.";
-CONSOLE ERR_NEGATIVE_VALUE[] = " - must be grater or equals 0!";
+static const char ERR_INTEGER_EXPECTED[] = " - an integer was expected!";
+static const char ERR_TOO_BIG_INTEGER[] = " - too big integer.";
+static const char ERR_NEGATIVE_VALUE[] = " - must be grater or equals 0!";
 
 /*
  * Errors for input line.
  */
-CONSOLE ERR_UNKNOWN_FLAG[] = " - unknown flag.";
-CONSOLE ERR_UNKNOWN_ARGUMENT[] = " - unknown argument.";
-CONSOLE ERR_VALUE_EXPECTED[] = " - the value was expected!";
-CONSOLE ERR_INVALID_ARGUMENT[] = " - input argument is invalid.";
-CONSOLE ERR_INVALID_INPUT[] = " - invalid input. Try -h or --help to see how to start this program.";
-CONSOLE ERR_INVALID_MODE[] = " - invalid game mode. Available modes are:\n   detailed    - ...\n   fast        - ...\n   tournament  - ...";
-CONSOLE ERR_PATH_NOT_ACCESSABLE[] = " - permission denied or not exists!";
+static const char ERR_UNKNOWN_FLAG[] = " - unknown flag.";
+static const char ERR_UNKNOWN_ARGUMENT[] = " - unknown argument.";
+static const char ERR_VALUE_EXPECTED[] = " - the value was expected!";
+static const char ERR_INVALID_ARGUMENT[] = " - input argument is invalid.";
+static const char ERR_INVALID_INPUT[] = " - invalid input. Try -h or --help to see how to start this program.";
+static const char ERR_INVALID_MODE[] = " - invalid game mode. Available modes are:\n   detailed    - ...\n   fast        - ...\n   tournament  - ...";
+// static const char ERR_PATH_NOT_ACCESSABLE[] = " - permission denied or not exists!";
 
 /*
  * Errors in foreground playing.
  */
-CONSOLE ERR_UNKNOWN_COMMAND[] = "Unknown command. Try help to see available commands.";
+static const char ERR_UNKNOWN_COMMAND[] = "Unknown command. Try help to see available commands.";
+
+
+// --------------- DEBUG ---------------
+
+static const char DBG_HEADER[] = "~ Debug: ";
+static const char DBG_ENABLED[] = "You started this program with full debug!";
 
 
 // --------------- WARNINGS ---------------
 
-CONSOLE WARNING_HEADER[] = "* Warning: ";
-CONSOLE DEBUG_ENABLED[] = "You started this program with full debug!";
+static const char WARNING_HEADER[] = "! Warning: ";
 
 
 // --------------- HELP MESSAGES ---------------
 
-CONSOLE HELP_USAGE[] = "(-h, --help)";
-CONSOLE HELP_COMMANDS[] = "These commands are available:\n   tick <n=1>  - play <n> iterations.\n   clear       - clear the console screen.\n   help        - show this help.\n   quit        - exit the game.";
+static const char HELP_USAGE[] = "(-h, --help)";
+static const char HELP_COMMANDS[] = "These commands are available:\n   tick <n=1>  - play <n> iterations.\n   clear       - clear the static const char screen.\n   help        - show this help.\n   quit        - exit the game.";
 
 
 // --------------- FOREGROUND STRINGS ---------------
 
-CONSOLE CMD_IN[] = "> ";
-CONSOLE MSG_GREETING[] = "Welcome into the Game (version 0.001 alpha)!\nType a command below, or use 'help' to see available commands.";
-CONSOLE WARNING_YES_NO_ONLY[] = "Type 'yes' or 'no': ";
+static const char CMD_IN[] = "> ";
+static const char MSG_GREETING[] = "Welcome into the Game (version 0.001 alpha)!\nType a command below, or use 'help' to see available commands.";
+static const char WARNING_YES_NO_ONLY[] = "Type 'yes' or 'no': ";
 
 
 // --------------- CONSTANTS ---------------
 
 static const size_t MAX_INTEGER_LEN = 5;
 static const size_t str_none = std::string::npos;
+
 
 enum Decision
 {
@@ -74,11 +78,16 @@ enum Decision
 
 typedef struct MatrixField
 {
+	// std::array<Decision, 3> decisions;
+	// std::array<int, 3> scores;
 	Decision decisions[3];
 	int scores[3];
-} GameMatrix;
+} MatrixField;
 
-static const GameMatrix STD_MATRIX[8] = {
+// typedef std::array<MatrixField, 1> ScoreMatrix;
+// typedef MatrixField[8] ScoreMatrix;
+
+MatrixField STD_MATRIX[8] = {
 	{
 		{cooperate, cooperate, cooperate},
 		{4, 4, 4}
@@ -111,35 +120,14 @@ static const GameMatrix STD_MATRIX[8] = {
 		{defect, defect, defect},
 		{1, 1, 1}
 	}
-	// 8 structures, with 2 values (decisions, scores)
-};
-
-
-
-// --------------- INCLUDE MY MODULES ---------------
-
-#include "strategy.h"
-#include "factory.h"
-#include "mode.h"
-#include "game.h"
-
-
-// enum MODULE
-// {
-// 	GAME,
-// 	MODE,
-
-// 	MAIN
-// };
+};	// 8 structures, with 2 values (decisions, scores)
 
 
 // --------------- STANDARD CONFIGURATION ---------------
 
-typedef DetailedMode STD_MODE;
-
 static const int STD_STEPS_LIMIT = 0;
-CONSOLE STD_CONFIGS_DIR[] = "defaults";
-CONSOLE STD_MATRIX_FILE[] = "defaults/matrix";
+static const char STD_CONFIGS_DIR[] = "defaults";
+static const char STD_MATRIX_FILE[] = "defaults/matrix";
 
 
 // __MAIN_H__

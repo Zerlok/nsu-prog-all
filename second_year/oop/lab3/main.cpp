@@ -1,11 +1,16 @@
 #include "main.h"
 
+#include "strategy.h"
+#include "factory.h"
+#include "mode.h"
+#include "game.h"
+
 
 int main(const int argc, const char **argv)
 {
-	Game game(argc, argv);
+	Game prisoners_game(argc, argv);
 
-	game.run();
+	prisoners_game.run();
 
 	return 0;
 }
