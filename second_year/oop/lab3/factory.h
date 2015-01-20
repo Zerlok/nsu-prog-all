@@ -6,8 +6,7 @@ class AbstractCreator
 {
 	public:
 		virtual Strategy *create(
-				// const std::array<MatrixField, 8>& matrix,
-				const MatrixField **matrix,
+				const ScoreMatrix& matrix,
 				const std::string& configs_dir) const = 0;
 };
 
@@ -17,8 +16,7 @@ class StrategyCreator : public AbstractCreator
 {
 	public:
 		virtual Strategy *create(
-				// const std::array<MatrixField, 8>& matrix,
-				const MatrixField **matrix,
+				const ScoreMatrix& matrix,
 				const std::string& configs_dir) const
 		{
 			return new S(matrix, configs_dir);
@@ -34,29 +32,11 @@ class StrategyFactory
 {
 	public:
 		StrategyFactory(
-				// const std::array<MatrixField, 8>& matrix,
-				const MatrixField **matrix,
-				const std::string& configs_dir) : _matrix(matrix), _configs_dir(configs_dir)
-		{
-			// _matrix = new MatrixField[8];
+				const ScoreMatrix& matrix,
+				const std::string& configs_dir)
+			: _matrix(matrix), _configs_dir(configs_dir) {}
 
-			// for (int i = 0; i < 8; i++)
-			// {
-			// 	_matrix[i].decisions = new Decision[3];
-			// 	_matrix[i].scores = new int[3];
-
-			// 	for (int j = 0; j < 3; j++)
-			// 	{
-			// 		_matrix[i].decisions[j] = matrix[i].decisions[j];
-			// 		_matrix[i].scores[j] = matrix[i].scores[j];
-			// 	}
-			// }
-		}
-
-		~StrategyFactory()
-		{
-			delete[] _matrix;
-		}
+		~StrategyFactory() {}
 
 		template <class S>
 		void set_id(const std::string& id)
@@ -83,10 +63,8 @@ class StrategyFactory
 		FactoryMap _factory;
 		Keys _keys_list;
 
-		const MatrixField **_matrix;
+		const ScoreMatrix _matrix;
 		const std::string _configs_dir;
-		
-		// const std::array<MatrixField, 8> _matrix;
 };
 
 

@@ -6,7 +6,7 @@
 #include <cstring>		// strcpy, strlen.
 #include <string>		// string.
 #include <vector>		// vector.
-#include <array>		// array.
+#include <iterator>		// ostream_iterator.
 #include <map>			// map.
 #include <time.h>		// time for srand.
 
@@ -77,51 +77,7 @@ enum Decision
 };
 
 
-typedef struct MatrixField
-{
-	// std::array<Decision, 3> decisions;
-	// std::array<int, 3> scores;
-	Decision decisions[3];
-	int scores[3];
-} MatrixField;
-
-// typedef std::array<MatrixField, 1> ScoreMatrix;
-// typedef MatrixField[8] ScoreMatrix;
-
-MatrixField STD_MATRIX[8] = {
-	{
-		{cooperate, cooperate, cooperate},
-		{4, 4, 4}
-	},
-	{
-		{cooperate, cooperate, defect},
-		{2, 2, 5}
-	},
-	{
-		{cooperate, defect, cooperate},
-		{2, 5, 2}
-	},
-	{
-		{defect, cooperate, cooperate},
-		{5, 2, 2}
-	},
-	{
-		{cooperate, defect, defect},
-		{0, 3, 3}
-	},
-	{
-		{defect, cooperate, defect},
-		{3, 0, 3}
-	},
-	{
-		{defect, defect, cooperate},
-		{3, 3, 0}
-	},
-	{
-		{defect, defect, defect},
-		{1, 1, 1}
-	}
-};	// 8 structures, with 2 values (decisions, scores)
+typedef std::map< std::vector<Decision>, std::vector<int> > ScoreMatrix;
 
 
 // --------------- STANDARD CONFIGURATION ---------------
