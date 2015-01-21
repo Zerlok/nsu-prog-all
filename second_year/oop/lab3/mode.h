@@ -18,18 +18,20 @@ class Mode
 
 		virtual void clear() = 0;
 		
-		virtual void use(
-				std::vector<std::string>& strategy_names) = 0;
+		virtual bool use(
+				const std::vector<std::string>& strategy_names) = 0;
 
+		virtual const std::vector<std::string> get_available_strategies_names() const = 0;
+		virtual const std::vector<std::string> get_current_strategies_names() const = 0;
 		virtual const std::vector<int> get_scores() const = 0;
 
 		virtual bool is_registered(
-				std::string& strategy_name) const = 0;
+				const std::string& strategy_name) const = 0;
 
 		virtual bool are_registered(
-				std::vector<std::string>& strategy_names) const = 0;
+				const std::vector<std::string>& strategy_names) const = 0;
 
-		virtual void play() = 0;
+		virtual void play(int limit) = 0;
 };
 
 
@@ -51,22 +53,25 @@ class DetailedMode : public Mode
 		virtual void clear();
 
 		virtual bool use(
-				std::vector<std::string>& strategy_names);
+				const std::vector<std::string>& strategy_names);
 
+		virtual const std::vector<std::string> get_available_strategies_names() const;
+		virtual const std::vector<std::string> get_current_strategies_names() const;
 		virtual const std::vector<int> get_scores() const;
 
 		virtual bool is_registered(
-				std::string& strategy_name) const;
+				const std::string& strategy_name) const;
 
 		virtual bool are_registered(
-				std::vector<std::string>& strategy_names) const;
+				const std::vector<std::string>& strategy_names) const;
 
-		virtual void play();
+		virtual void play(int limit = 1);
 
 	private:
-		std::vector<int> _scores;
+		std::vector<int> _scoretable;
 		std::vector<std::string> _names;
 		std::vector<Strategy *> _strategies;
+		const ScoreMatrix& _matrix;
 		StrategyFactory _factory;
 };
 
@@ -89,22 +94,25 @@ class FastMode : public Mode
 		virtual void clear();
 
 		virtual bool use(
-				std::vector<std::string>& strategy_names);
+				const std::vector<std::string>& strategy_names);
 
+		virtual const std::vector<std::string> get_available_strategies_names() const;
+		virtual const std::vector<std::string> get_current_strategies_names() const;
 		virtual const std::vector<int> get_scores() const;
 
 		virtual bool is_registered(
-				std::string& strategy_name) const;
+				const std::string& strategy_name) const;
 
 		virtual bool are_registered(
-				std::vector<std::string>& strategy_names) const;
+				const std::vector<std::string>& strategy_names) const;
 
-		virtual void play();
+		virtual void play(int limit = 1);
 
 	private:
-		std::vector<int> _scores;
+		std::vector<int> _scoretable;
 		std::vector<std::string> _names;
 		std::vector<Strategy *> _strategies;
+		const ScoreMatrix& _matrix;
 		StrategyFactory _factory;
 };
 
@@ -127,22 +135,25 @@ class TournamentMode : public Mode
 		virtual void clear();
 
 		virtual bool use(
-				std::vector<std::string>& strategy_names);
+				const std::vector<std::string>& strategy_names);
 
+		virtual const std::vector<std::string> get_available_strategies_names() const;
+		virtual const std::vector<std::string> get_current_strategies_names() const;
 		virtual const std::vector<int> get_scores() const;
 
 		virtual bool is_registered(
-				std::string& strategy_name) const;
+				const std::string& strategy_name) const;
 
 		virtual bool are_registered(
-				std::vector<std::string>& strategy_names) const;
+				const std::vector<std::string>& strategy_names) const;
 
-		virtual void play();
+		virtual void play(int limit = 1);
 
 	private:
-		std::vector<int> _scores;
+		std::vector<int> _scoretable;
 		std::vector<std::string> _names;
 		std::vector<Strategy *> _strategies;
+		const ScoreMatrix& _matrix;
 		StrategyFactory _factory;
 };
 

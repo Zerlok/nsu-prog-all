@@ -58,22 +58,22 @@ class StrategyFactory
 					_configs_dir);
 		}
 
-		const Keys& get_registered() const
+		const std::vector<std::string> get_registered() const
 		{
 			std::vector<std::string> keys;
 
 			for (auto it = _map.begin();
-				it != map.end();
+				it != _map.end();
 				it++)
 			{
 				keys.push_back(it->first);
 			}
+
+			return keys;
 		}
 
 	private:
 		FactoryMap _map;
-		Keys _keys_list;
-
 		const ScoreMatrix _matrix;
 		const std::string _configs_dir;
 };

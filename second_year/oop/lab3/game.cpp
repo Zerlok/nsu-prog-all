@@ -78,6 +78,29 @@ inline bool is_value(const std::string& line)
 }
 
 
+const ScoreMatrix get_default_matrix()
+{
+	ScoreMatrix m;
+
+	m[{cooperate, cooperate, cooperate}] = {4, 4, 4};
+	m[{cooperate, cooperate, defect   }] = {2, 2, 5};
+	m[{cooperate, defect,    cooperate}] = {2, 5, 2};
+	m[{cooperate, defect,    defect   }] = {0, 3, 3};
+	m[{defect,    cooperate, cooperate}] = {5, 2, 2};
+	m[{defect,    cooperate, defect   }] = {3, 0, 3};
+	m[{defect,    defect,    cooperate}] = {3, 3, 0};
+	m[{defect,    defect,    defect   }] = {1, 1, 1};
+
+	return m;
+}
+
+
+const ScoreMatrix get_matrix_from_file(std::string& matrix_path)
+{
+	return get_default_matrix();
+}
+
+
 /*
  * --------------- GAME METHODS ---------------
  */
@@ -91,26 +114,31 @@ Game::Game(const int argc, const char **argv)
 	_is_valid_input = true;
 	_is_in_background = false;
 	_steps_limit = STD_STEPS_LIMIT;
-	_mode_str = "none";
-	_matrix = NULL;
-	_configs_dir = STD_CONFIGS_DIR;
+	_mode_name = "none";
+	_matrix_path = "";
+	_configs_path = STD_CONFIGS_PATH;
 	
 	_parse_input(argc, argv);
 
 	if (_is_valid_input)
 	{
-		if (_matrix == NULL)
-			_matrix = STD_MATRIX;
+		ScoreMatrix matrix;
 
-		if ((_mode_str == "detailed")
-			|| (_mode_str == "none"))
-			_mode = new DetailedMode(&_matrix, _configs_dir);
+		if (_matrix_path == "")
+			matrix = get_default_matrix();
 
-		else if (_mode_str == "detailed")
-			_mode = new FastMode(&_matrix, _configs_dir);
+		else
+			matrix = get_matrix_from_file(_matrix_path);
 
-		else if (_mode_str == "detailed")
-			_mode = new TournamentMode(&_matrix, _configs_dir);
+		if ((_mode_name == "detailed")
+			|| (_mode_name == "none"))
+			_mode = new DetailedMode(matrix, _configs_path);
+
+		else if (_mode_name == "detailed")
+			_mode = new FastMode(matrix, _configs_path);
+
+		else if (_mode_name == "detailed")
+			_mode = new TournamentMode(matrix, _configs_path);
 	}
 }
 
@@ -188,7 +216,7 @@ void Game::_parse_input(const int argc, const char **argv)
 					std::cout
 							<< ERR_HEADER
 							<< arg_name
-							<< ERR_ARG_VALUE_EXPECTED
+							<< ERR_VALUE_EXPECTED
 							<< std::endl;
 					break;
 				}
@@ -197,7 +225,7 @@ void Game::_parse_input(const int argc, const char **argv)
 					|| (arg_value == "fast")
 					|| (arg_value == "tournament"))
 				{
-					_mode_str = arg_value;
+					_mode_name = arg_value;
 				}
 				else
 				{
@@ -218,7 +246,7 @@ void Game::_parse_input(const int argc, const char **argv)
 					std::cout
 							<< ERR_HEADER
 							<< arg_name
-							<< ERR_ARG_VALUE_EXPECTED
+							<< ERR_VALUE_EXPECTED
 							<< std::endl;
 					break;
 				}
@@ -228,7 +256,7 @@ void Game::_parse_input(const int argc, const char **argv)
 					std::cout
 							<< ERR_HEADER
 							<< arg_name
-							<< ERR_ARG_VALUE_EXPECTED
+							<< ERR_VALUE_EXPECTED
 							<< std::endl;
 					break;
 				}
@@ -244,12 +272,12 @@ void Game::_parse_input(const int argc, const char **argv)
 					std::cout
 							<< ERR_HEADER
 							<< arg_name
-							<< ERR_ARG_VALUE_EXPECTED
+							<< ERR_VALUE_EXPECTED
 							<< std::endl;
 					break;
 				}
 
-				_configs_dir = arg_value.c_str();
+				_configs_path = arg_value.c_str();
 			}
 			else if (arg_name == "matrix")
 			{
@@ -259,19 +287,19 @@ void Game::_parse_input(const int argc, const char **argv)
 					std::cout
 							<< ERR_HEADER
 							<< arg_name
-							<< ERR_ARG_VALUE_EXPECTED
+							<< ERR_VALUE_EXPECTED
 							<< std::endl;
 					break;
 				}
 
-				_matrix_file = arg_value;
+				_matrix_path = arg_value;
 			}
 			else if (arg_name == "debug")
 			{
 				_debug = true;
 				std::cout
 						<< DBG_HEADER
-						<< DEBUG_ENABLED
+						<< DBG_ENABLED
 						<< std::endl;
 			}
 			else if (arg_name == "help")
@@ -306,7 +334,7 @@ void Game::_parse_input(const int argc, const char **argv)
 						std::cout
 								<< ERR_HEADER
 								<< c_argv[i][1]
-								<< ERR_FLAG_VALUE_EXPECTED
+								<< ERR_VALUE_EXPECTED
 								<<std::endl;
 						break;
 					}
@@ -315,7 +343,7 @@ void Game::_parse_input(const int argc, const char **argv)
 						|| (c_argv[i + 1] == "fast")
 						|| (c_argv[i + 1] == "tournament"))
 					{
-						_mode_str = c_argv[i + 1];
+						_mode_name = c_argv[i + 1];
 					}
 					else
 					{
@@ -340,7 +368,7 @@ void Game::_parse_input(const int argc, const char **argv)
 						std::cout
 								<< ERR_HEADER
 								<< c_argv[i][1]
-								<< ERR_FLAG_VALUE_EXPECTED
+								<< ERR_VALUE_EXPECTED
 								<<std::endl;
 						break;
 					}
@@ -370,12 +398,12 @@ void Game::_parse_input(const int argc, const char **argv)
 						std::cout
 								<< ERR_HEADER
 								<< c_argv[i]
-								<< ERR_FLAG_VALUE_EXPECTED
+								<< ERR_VALUE_EXPECTED
 								<< std::endl;
 						break;
 					}
 
-					_configs_dir = c_argv[i + 1].c_str();
+					_configs_path = c_argv[i + 1];
 
 					i++;
 					break;
@@ -390,12 +418,12 @@ void Game::_parse_input(const int argc, const char **argv)
 						std::cout
 								<< ERR_HEADER
 								<< c_argv[i]
-								<< ERR_FLAG_VALUE_EXPECTED
+								<< ERR_VALUE_EXPECTED
 								<< std::endl;
 						break;
 					}
 					
-					_matrix_file = c_argv[i + 1].c_str();
+					_matrix_path = c_argv[i + 1];
 					
 					i++;
 					break;
@@ -449,12 +477,9 @@ bool Game::_parse_cmd(const std::string& cmd)
 	size_t found_clear = cmd.find("clear");
 	size_t found_exit = cmd.find("quit");
 	size_t found_help = cmd.find("help");
-	size_t found_step = cmd.find("step");
 	size_t found_tick = cmd.find("tick");
 	size_t found_use = cmd.find("use");
-	size_t found_show = cmd.find("show");
-	size_t found_scores = cmd.find("scores");
-	size_t found_strategies = cmd.find("strategies");
+	size_t found_list = cmd.find("list");
 
 	if ((found_tick == 0)
 		&& ((delimiter_pos == 4)
@@ -464,7 +489,7 @@ bool Game::_parse_cmd(const std::string& cmd)
 			&& isdigit(cmd[5]))
 		{
 			_steps_limit = atoi(cmd.substr(delimiter_pos, cmd_len).c_str());
-			tick();
+			cmd_tick();
 		}
 		else std::cout
 				<< ERR_HEADER
@@ -473,102 +498,113 @@ bool Game::_parse_cmd(const std::string& cmd)
 				<< std::endl;
 	}
 	else if ((found_clear == 0)
-		&& (cmd_len == 5))
+			&& (cmd_len == 5))
 	{
-		clear_screen();
+		cmd_clear();
 	}
 	else if ((found_use == 0)
-		&& ((delimiter_pos == 3)
-			|| (cmd_len == 3)))
+			&& ((delimiter_pos == 3)
+				|| (cmd_len == 3)))
 	{
 		if (cmd_len > 5)
 		{
+			std::vector<std::string> names;
+			std::string substr = cmd.substr(delimiter_pos + 1, cmd_len - 4);
+			std::istringstream iss (substr);
 
+			std::copy(
+					std::istream_iterator<std::string>(iss),
+					std::istream_iterator<std::string>(),
+					std::back_inserter(names));
+
+			cmd_use(names);
 		}
 		else std::cout
 				<< ERR_HEADER
 				<< cmd
-				<< ERR_CMD_VALUE_EXPECTED
+				<< ERR_VALUE_EXPECTED
 				<< std::endl;
 	}
-	else if ((found_show == 0)
-		&& ((delimiter_pos == 4)
-			|| (cmd_len == 4)))
+	else if ((found_list == 0)
+			&& (cmd_len == 4))
 	{
-		if ((found_strategies == 5)
-			&& cmd_len == 15))
-			list_strategies();
-
-		else if ((found_scores == 5)
-			&& cmd_len == 11))
-			list_scores();
-
-		else std::cout
-				<< ERR_HEADER
-				<< cmd
-				<< ERR_CMD_INVALID_VALUE
-				<< std::endl;
+		cmd_list();
 	}
-	else if ((found_help != str_none) && (cmd_len == 4))
+	else if ((found_help != str_none)
+			&& (cmd_len == 4))
 	{
-		help();
+		cmd_help();
 	}
-	else if ((found_exit != str_none) && (cmd_len == 4))
+	else if ((found_exit != str_none)
+			&& (cmd_len == 4))
 	{
 		return false;
 	}
 	else std::cout
 			<< ERR_HEADER
 			<< cmd
-		 	<< ERR_UNKNOWN_COMMAND
+		 	<< ERR_UNKNOWN_CMD
 		 	<< std::endl;
 	
 	return true;
 }
 
 
-void Game::tick(int limit)
+void Game::cmd_tick()
 {
 	if (_debug) std::cout
 			<< "Start ticking until "
-			<< limit
+			<< _steps_limit
 			<< "..."
 			<< std::endl;
 
-	_mode.play(limit);
-	list_scores();
+	_mode->play(_steps_limit);
+	show_scores();
 }
 
 
-void Game::clear_screen()
+void Game::cmd_clear()
 {
 	system("clear");
 }
 
 
-void Game::list_strategies()
+void Game::cmd_list()
 {
-	std::cout << "list of strategies" << std::endl;
+	std::cout << "List of strategies:" << std::endl;
 
-	std::cout << _mode.get_available_strategies_names() << std::endl;
+	const std::vector<std::string> names = _mode->get_available_strategies_names();
+
+	std::copy(
+			names.begin(),
+			names.end(),
+			std::ostream_iterator<std::string>(std::cout, " "));
+
+	std::cout << std::endl;
 }
 
 
-void Game::list_scores()
+void Game::cmd_use(
+		const std::vector<std::string>& names)
+{
+	_mode->use(names);
+}
+
+
+void Game::show_scores()
 {
 	std::cout << "Scoretable:" << std::endl;
 
-	std::vector<int>& scores = _mode.get_scores();
+	std::vector<std::string> strategies = _mode->get_current_strategies_names();
+	std::vector<int> scores = _mode->get_scores();
 
-	std::copy(
-			scores.begin(),
-			scores.end(),
-			std::ostream_iterator<int>(std::cout, " ")
-	);
+	for (int i = 0; i < strategies.size(); i++) std::cout
+			<< strategies[i] << " : " << scores[i]
+			<< std::endl;
 }
 
 
-void Game::help()
+void Game::cmd_help()
 {
 	std::cout << HELP_COMMANDS << std::endl;
 }
@@ -580,8 +616,8 @@ void Game::run()
 			<< "The game start running with configuration:\n"
 			<< "   valid input: " << _is_valid_input << "\n"
 			<< "   steps limit: " << _steps_limit << "\n"
-			<< "   configs dir: " << _configs_dir << "\n"
-			<< "   matrix file: " << _matrix_file << "\n"
+			<< "   configs dir: " << _configs_path << "\n"
+			<< "   matrix file: " << _matrix_path << "\n"
 			<< std::endl;
 
 
@@ -597,7 +633,7 @@ void Game::run()
 
 		_mode->play(_steps_limit);
 
-		list_scores();
+		show_scores();
 	}
 	else // Run in foreground.
 	{

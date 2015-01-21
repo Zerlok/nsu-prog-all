@@ -10,8 +10,7 @@ class Strategy
 
 		virtual Decision get_decision() = 0;
 		virtual void learn_choices(
-				std::vector<Decision>& opponents_decisions
-		) = 0;
+				std::vector<Decision>& opponents_decisions) = 0;
 };
 
 
@@ -26,8 +25,7 @@ class TrustfulStrategy : public Strategy
 
 		virtual Decision get_decision() { return cooperate; }
 		virtual void learn_choices(
-				std::vector<Decision>& opponents_decisions
-		) {}
+				std::vector<Decision>& opponents_decisions) {}
 };
 
 
@@ -42,8 +40,7 @@ class MistrustfulStrategy : public Strategy
 
 		virtual Decision get_decision() { return defect; }
 		virtual void learn_choices(
-				std::vector<Decision>& opponents_decisions
-		) {}
+				std::vector<Decision>& opponents_decisions) {}
 };
 
 
@@ -62,8 +59,7 @@ class CrazyStrategy : public Strategy
 		}
 
 		virtual void learn_choices(
-				std::vector<Decision>& opponents_decisions
-		) {}
+				std::vector<Decision>& opponents_decisions) {}
 };
 
 

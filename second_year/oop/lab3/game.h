@@ -24,9 +24,13 @@ class Game
 		/*
 		 * Foreground methods (commands)
 		 */
+		void cmd_use(const std::vector<std::string>& names);	// Use specified strategies
+		void cmd_list();			// Show the list of registered strategies
 		void cmd_tick();			// Make iterations
 		void cmd_clear();			// Clear the console screen
 		void cmd_help();			// Show help message
+
+		void show_scores();
 
 	private:
 		/*
@@ -34,19 +38,18 @@ class Game
 		 */
 		void _parse_input(const int argc, const char **argv);	// Parse the input line
 		bool _parse_cmd(const std::string& cmd);	// Parse the input command (in foreground mode)
-		void _parse_matrix_file(const std::string& filename);
+		ScoreMatrix _parse_matrix_file(const std::string& filename);
 
 		bool _debug;
 		bool _is_valid_input;
 
 		bool _is_in_background;		// Is game playing in background.
-		Mode *_mode;				// The playing gamemode.
 		int _steps_limit;
+		Mode *_mode;				// The playing gamemode.
 
-		// std::array<MatrixField, 8> _matrix;
-		MatrixField *_matrix;
-		std::string _configs_dir;
-		std::string _mode_str;
+		std::string _mode_name;
+		std::string _matrix_path;
+		std::string _configs_path;
 };
 
 

@@ -7,7 +7,10 @@
 #include <string>		// string.
 #include <vector>		// vector.
 #include <iterator>		// ostream_iterator.
+#include <algorithm>	// sort, find, all_of, for_each.
+#include <iomanip>		// setw.
 #include <map>			// map.
+#include <sstream>		// istringstream.
 #include <time.h>		// time for srand.
 
 
@@ -42,7 +45,7 @@ static const char ERR_UNKNOWN_CMD[] = "- the unknown command. Try help to see av
 // --------------- DEBUG ---------------
 
 static const char DBG_HEADER[] = "~ Debug: ";
-static const char DBG_ENABLED[] = "You started this program with full debug!";
+static const char DBG_ENABLED[] = "You have started this program with full debug!";
 
 
 // --------------- WARNINGS ---------------
@@ -52,7 +55,9 @@ static const char WARNING_HEADER[] = "! Warning: ";
 
 // --------------- HELP MESSAGES ---------------
 
+static const char HELP_DESCRIPTION[] = "(-h, --help)";
 static const char HELP_USAGE[] = "(-h, --help)";
+static const char HELP_FLAGS[] = "(-h, --help)";
 static const char HELP_COMMANDS[] = "These commands are available:\n   tick <n=1>  - play <n> iterations.\n   clear       - clear the static const char screen.\n   help        - show this help.\n   quit        - exit the game.";
 
 
@@ -82,7 +87,7 @@ typedef std::map< std::vector<Decision>, std::vector<int> > ScoreMatrix;
 // --------------- STANDARD CONFIGURATION ---------------
 
 static const int STD_STEPS_LIMIT = 0;
-static const char STD_CONFIGS_DIR[] = "defaults";
+static const char STD_CONFIGS_PATH[] = "defaults";
 static const char STD_MATRIX_FILE[] = "defaults/matrix";
 
 
