@@ -105,11 +105,6 @@ TEST(Factory, Init)
 				skeys.end(),
 				std::ostream_iterator<std::string>(std::cout, ", ")
 		);
-
-		// for (Keys::iterator item = skeys.begin(); item != skeys.end(); item++)
-		// {
-		// 	std::cout << (*item) << std::endl;
-		// }
 	});
 }
 

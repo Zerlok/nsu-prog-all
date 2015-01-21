@@ -31,13 +31,12 @@ static const char ERR_VALUE_EXPECTED[] = " - the value was expected!";
 static const char ERR_INVALID_ARGUMENT[] = " - input argument is invalid.";
 static const char ERR_INVALID_INPUT[] = " - invalid input. Try -h or --help to see how to start this program.";
 static const char ERR_INVALID_MODE[] = " - invalid game mode. Available modes are:\n   detailed    - ...\n   fast        - ...\n   tournament  - ...";
-// static const char ERR_PATH_NOT_ACCESSABLE[] = " - permission denied or not exists!";
 
 /*
  * Command Errors in foreground playing.
  */
 static const char ERR_CMD_VALUE_EXPECTED[] = " - the command value was expected!";
-static const char ERR_CMD_UNKNOWN[] = "- an unknown command. Try help to see available commands.";
+static const char ERR_UNKNOWN_CMD[] = "- the unknown command. Try help to see available commands.";
 
 
 // --------------- DEBUG ---------------

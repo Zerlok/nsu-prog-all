@@ -534,6 +534,9 @@ void Game::tick(int limit)
 			<< limit
 			<< "..."
 			<< std::endl;
+
+	_mode.play(limit);
+	list_scores();
 }
 
 
@@ -545,13 +548,23 @@ void Game::clear_screen()
 
 void Game::list_strategies()
 {
-	std::cout << "list strategies" << std::endl;
+	std::cout << "list of strategies" << std::endl;
+
+	std::cout << _mode.get_available_strategies_names() << std::endl;
 }
 
 
 void Game::list_scores()
 {
-	std::cout << "list scores" << std::endl;
+	std::cout << "Scoretable:" << std::endl;
+
+	std::vector<int>& scores = _mode.get_scores();
+
+	std::copy(
+			scores.begin(),
+			scores.end(),
+			std::ostream_iterator<int>(std::cout, " ")
+	);
 }
 
 
@@ -571,13 +584,10 @@ void Game::run()
 			<< "   matrix file: " << _matrix_file << "\n"
 			<< std::endl;
 
+
 	if (!_is_valid_input)
 		return;
 
-	_mode->setup(
-			new TrustfulStrategy(),
-			new MistrustfulStrategy(),
-			new CrazyStrategy());
 
 	if (_is_in_background) // Run in background.
 	{
@@ -585,9 +595,9 @@ void Game::run()
 				<< "Gaming in background started..."
 				<< std::endl;
 
-		_mode->play();
-		// for (int i = 0; i < _steps_limit; i++)
-		// 	_mode->play();
+		_mode->play(_steps_limit);
+
+		list_scores();
 	}
 	else // Run in foreground.
 	{
@@ -595,20 +605,17 @@ void Game::run()
 				<< "Gaming in foreground started..."
 				<< std::endl;
 
-		_mode->play();
-		// for (int i = 0; i < _steps_limit; i++) _mode->play();
+		bool is_running = true;
+		std::string cmd;
 
-		// bool is_running = true;
-		// std::string cmd;
+		std::cout << MSG_GREETING << std::endl;
 
-		// std::cout << MSG_GREETING << std::endl;
+		while (is_running)
+		{
+			std::cout << CMD_IN;
+			getline(std::cin, cmd);
 
-		// while (is_running)
-		// {
-		// 	std::cout << CMD_IN;
-		// 	getline(std::cin, cmd);
-
-		// 	is_running = _parse_cmd(cmd);
-		// }
+			is_running = _parse_cmd(cmd);
+		}
 	}
 }

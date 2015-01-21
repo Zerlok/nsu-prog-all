@@ -58,9 +58,7 @@ class CrazyStrategy : public Strategy
 
 		virtual Decision get_decision()
 		{
-			srand(time(NULL));
-
-			return (rand() % 2) ? cooperate : defect;
+			return (rand() % 2) ? defect : cooperate;
 		}
 
 		virtual void learn_choices(

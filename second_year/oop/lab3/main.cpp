@@ -2,18 +2,18 @@
 
 #include "strategy.h"
 #include "factory.h"
-// #include "mode.h"
-// #include "game.h"
+#include "mode.h"
+#include "game.h"
 
 
-// int main(const int argc, const char **argv)
-// {
-// 	Game prisoners_game(argc, argv);
+int main(const int argc, const char **argv)
+{
+	Game prisoners_game(argc, argv);
 
-// 	prisoners_game.run();
+	prisoners_game.run();
 
-// 	return 0;
-// }
+	return 0;
+}
 
 
 const ScoreMatrix get_default_matrix()
@@ -58,7 +58,7 @@ void show_matrix(const ScoreMatrix& matrix)
 }
 
 
-int main(const int argc, const char **argv)
+int sim(const int argc, const char **argv)
 {
 	const ScoreMatrix matrix = get_default_matrix();
 
@@ -72,33 +72,41 @@ int main(const int argc, const char **argv)
 	std::vector<Decision> decisions;
 	std::vector<int> current_scores, total_scores = {0, 0, 0};
 
-	strategies.push_back(f.get("crazy"));
 	strategies.push_back(f.get("trust"));
-	strategies.push_back(f.get("mistrust"));
+	strategies.push_back(f.get("trust"));
+	strategies.push_back(f.get("crazy"));
 
-	for (auto it = strategies.begin();
-		it != strategies.end();
-		it++)
+	for (int i = 0; i < 100; i++)
 	{
-		decisions.push_back((*it)->get_decision());
-	}
+		for (auto it = strategies.begin();
+			it != strategies.end();
+			it++)
+		{
+			decisions.push_back((*it)->get_decision());
+		}
 
-	current_scores = matrix.at(decisions);
+		current_scores = matrix.at(decisions);
 
-	auto cur = current_scores.begin();
-	for (auto it = total_scores.begin();
-		it != total_scores.end();
-		it++)
-	{
-		(*it) += (*cur);
-		cur++;
+		auto cur = current_scores.begin();
+		for (auto it = total_scores.begin();
+			it != total_scores.end();
+			it++)
+		{
+			(*it) += (*cur);
+			cur++;
+		}
+
+		decisions.clear();
+		current_scores.clear();
 	}
 
 	std::copy(
 			total_scores.begin(),
 			total_scores.end(),
-			std::ostream_iterator<int>(std::cout, ", ")
+			std::ostream_iterator<int>(std::cout, " ")
 	);
+
+	std::cout << std::endl;
 
 	return 0;
 }
