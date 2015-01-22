@@ -66,26 +66,21 @@ void AdjacencyMatrix::link(const int v1, const int v2)
 void AdjacencyMatrix::link(const int v_indx, const std::vector<int>& vertices)
 {
 	for (auto it : vertices)
-	{
-		_matrix[v_indx][it] = 1;
-		_matrix[it][v_indx] = 1;
-	}
+		link(v_indx, it);
 }
 
 
 void AdjacencyMatrix::unlink(const int v1, const int v2)
 {
 	_matrix[v1][v2] = 0;
+	_matrix[v2][v1] = 0;
 }
 
 
 void AdjacencyMatrix::unlink(const int v_indx, const std::vector<int>& vertices)
 {
 	for (auto it : vertices)
-	{
-		_matrix[v_indx][it] = 0;
-		_matrix[it][v_indx] = 0;
-	}
+		unlink(v_indx, it);
 }
 
 
@@ -198,10 +193,7 @@ void IncidenceMatrix::unlink(const int v1, const int v2)
 void IncidenceMatrix::unlink(const int v_indx, const std::vector<int>& vertices)
 {
 	for (auto it :vertices)
-	{
-		_matrix[v_indx][it] = 0;
-		_matrix[it][v_indx] = 0;
-	}
+		unlink(v_indx, it);
 }
 
 
