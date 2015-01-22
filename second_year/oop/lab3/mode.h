@@ -54,7 +54,9 @@ class DetailedMode : public Mode
 				const std::string& configs_dir);
 		
 		~DetailedMode() {
-			std::cout << "Destroying the DetailedMode..." << std::endl;
+			if (DEBUG) std::cout
+					<< "Destroying the DetailedMode..."
+					<< std::endl;
 		}
 
 		virtual void clear();
@@ -79,8 +81,8 @@ class DetailedMode : public Mode
 		std::vector<std::string> _names;
 		std::vector<Strategy *> _strategies;
 
-		const StrategyFactory& _factory;
-		const ScoreMatrix& _matrix;
+		const StrategyFactory _factory;
+		const ScoreMatrix _matrix;
 		const std::string _configs_dir;
 };
 

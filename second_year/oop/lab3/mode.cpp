@@ -20,18 +20,19 @@ DetailedMode::DetailedMode(
 	{
 		std::cout
 				<< DBG_HEADER
-				<< "Creating the DetailedMode..."
+				<< "Creating the DetailedMode...\n"
+				<< "Score matrix: "
 				<< std::endl;
 
-		std::copy(
-				names.begin(),
-				names.end(),
-				std::ostream_iterator<std::string>(std::cout, " "));
-
-		std::cout << std::endl;
+		show_matrix(_matrix);
 	}
 
 	use(names);
+
+	if (DEBUG) std::cout
+			<< DBG_HEADER
+			<< "DetailedMode creating finished."
+			<< std::endl;
 }
 
 
@@ -46,6 +47,17 @@ void DetailedMode::clear()
 bool DetailedMode::use(
 		const std::vector<std::string>& strategy_names)
 {
+	if (DEBUG)
+	{
+		std::cout
+				<< DBG_HEADER
+				<< "Replacing ";
+		
+		show_str_vector(_names);
+
+		std::cout << " -- old strategies" << std::endl;
+	}
+
 	if ((strategy_names.size() != 3)
 		|| (!are_registered(strategy_names)))
 	{
@@ -69,6 +81,15 @@ bool DetailedMode::use(
 				_configs_dir));
 
 		_scoretable.push_back(0);
+	}
+
+	if (DEBUG)
+	{
+		std::cout
+				<< DBG_HEADER
+				<< "Strategies replacing finished. New: [";
+		
+		show_str_vector(_names);
 	}
 
 	return true;
@@ -139,14 +160,28 @@ void DetailedMode::play(int limit)
 	std::vector<Decision> decisions;
 	std::vector<Decision> opponents_decisions;
 	int len = _names.size();
+	int width = _names[0].size();
+
+	std::cout << _names[0].size() << " : " << _names[len-1].size() << std::endl;
 
 	for (int step = 0; step < limit; step++)
 	{
+		std::cout << "Step: " << step << std::endl;
+		
+		if (DEBUG) std::cout
+				<< DBG_HEADER
+				<< "   making decisions..."
+				<< std::endl;
+
 		// All strategies makes theirs decisions.
 		for (auto it = _strategies.begin();
 			it != _strategies.end();
 			it++)
 			decisions.push_back((*it)->get_decision());
+
+		if (DEBUG) std::cout
+			<< "   learning decisions..."
+			<< std::endl;
 
 		// Each strategy learns opponents' decisions.
 		for (int i = 0; i < len; i++)
@@ -159,9 +194,21 @@ void DetailedMode::play(int limit)
 			opponents_decisions.clear();
 		}
 
+		if (DEBUG)
+		{
+			std::cout
+					<< "   getting scores from matrix..."
+					<< std::endl;
+			// show_matrix(_matrix);
+		}
+
 		// Mode counts scores by using the game matrix.
 		std::vector<int> current_scores = _matrix.at(decisions);
 		auto cur = current_scores.begin();
+
+		if (DEBUG) std::cout
+			<< "   applying new scores..."
+			<< std::endl;
 
 		// Mode applies new scores to the scoretable.
 		for (auto it = _scoretable.begin();
@@ -172,20 +219,28 @@ void DetailedMode::play(int limit)
 			cur++;
 		}
 
+		if (DEBUG) std::cout
+			<< " done."
+			<< std::endl;
+
 		// This mode shows strategies' decisions in each step.
 		std::cout
-				<< std::setw(20) << "Name"
-				<< std::setw(20) << ": Decision"
-				<< std::setw(20) << ": Score"
+				<< std::setw(10) << "Name"
+				<< std::setw(10) << "Decision"
+				<< std::setw(10) << "Score"
 				// << std::setw(20) << ": Total score"
 				<<std::endl;
 
 		for (int i = 0; i < len; i++) std::cout
-				<< std::setw(20) << _names[i]
-				<< std::setw(20) << ": " << decisions[i]
-				<< std::setw(20) << ": " << current_scores[i]
+				<< std::setw(10) << _names[i]
+				<< std::setw(10) << decisions[i]
+				<< std::setw(10) << current_scores[i]
 				// << std::setw(20) << ": " << _scoretable[i]
 				<< std::endl;
+
+		// Clear tmp variables.
+		decisions.clear();
+		opponents_decisions.clear();
 	}
 }
 

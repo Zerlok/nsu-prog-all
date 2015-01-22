@@ -119,31 +119,6 @@ std::vector<std::string> get_several_randoms(
 }
 
 
-void show_matrix(const ScoreMatrix& matrix)
-{
-	for (ScoreMatrix::const_iterator it = matrix.begin();
-		it != matrix.end();
-		it++)
-	{
-		std::copy(
-				(*it).first.begin(),
-				(*it).first.end(),
-				std::ostream_iterator<int>(std::cout, " ")
-		);
-
-		std::cout << " => ";
-
-		std::copy(
-				(*it).second.begin(),
-				(*it).second.end(),
-				std::ostream_iterator<int>(std::cout, " ")
-		);
-
-		std::cout << std::endl;
-	}
-}
-
-
 /*
  * --------------- GAME METHODS ---------------
  */
@@ -152,7 +127,7 @@ Game::Game(
 		const int argc,
 		const char **argv,
 		const StrategyFactory& factory)
-	: _debug(DEBUG), _is_valid_input(true), _is_in_background(false),
+	: _is_valid_input(true), _is_in_background(false),
 	_steps_limit(STD_STEPS_LIMIT), _mode_name(STD_MODE_NAME), _mode(NULL),
 	_matrix_path(STD_MATRIX_PATH), _configs_path(STD_CONFIGS_PATH)
 {
@@ -213,19 +188,19 @@ Game::Game(
 
 Game::~Game()
 {
-	if (_debug) std::cout
+	if (DEBUG) std::cout
 			<< DBG_HEADER
 			<< "Exiting from the game..."
 			<< std::endl;
 
-	if (_debug) std::cout
+	if (DEBUG) std::cout
 			<< DBG_HEADER
 			<< "Deleting the mode class..."
 			<< std::endl;
 
 	delete _mode;
 	
-	if (_debug) std::cout
+	if (DEBUG) std::cout
 			<< DBG_HEADER
 			<< "Done."
 			<< std::endl;
@@ -260,7 +235,7 @@ void Game::_parse_input(const int argc, const char **argv)
 		c_argv.push_back(std::string(argv[j]));
 
 		if (DEBUG) std::cout
-				<< c_argv[i]
+				<< c_argv[j - 1]
 				<< std::endl;
 	}
 
@@ -379,7 +354,7 @@ void Game::_parse_input(const int argc, const char **argv)
 			}
 			else if (arg_name == "debug")
 			{
-				_debug = true;
+				DEBUG = true;
 				std::cout
 						<< DBG_HEADER
 						<< DBG_ENABLED
@@ -640,7 +615,7 @@ bool Game::_parse_cmd(const std::string& cmd)
 
 void Game::cmd_tick()
 {
-	if (_debug) std::cout
+	if (DEBUG) std::cout
 			<< "Start ticking until "
 			<< _steps_limit
 			<< "..."
@@ -700,24 +675,21 @@ void Game::cmd_help()
 
 void Game::run()
 {
-	if (_debug)
+	if (DEBUG)
 	{
 		std::cout
-			<< "The game start running with configuration:\n"
+			<< "\n"
+			<< "The game was started with configuration:\n"
 			<< "   valid input: " << _is_valid_input << "\n"
 			<< "   steps limit: " << _steps_limit << "\n"
 			<< "   configs dir: " << _configs_path << "\n"
 			<< "   matrix file: " << _matrix_path << "\n"
 			<< "     mode name: " << _mode_name << "\n"
-			<< "\n"
-			<< "Init list: ";
+			<< "     init list: ";
+			show_str_vector(_init_names);
+			std::cout << "\n" << std::endl;
 
-		std::copy(
-				_init_names.begin(),
-				_init_names.end(),
-				std::ostream_iterator<std::string>(std::cout, " "));
-
-		std::cout << std::endl;
+		std::cout << "Score matrix: hui znaet." << std::endl;
 	}
 
 
@@ -727,7 +699,7 @@ void Game::run()
 
 	if (_is_in_background) // Run in background.
 	{
-		if (_debug) std::cout
+		if (DEBUG) std::cout
 				<< "Gaming in background started..."
 				<< std::endl;
 
@@ -737,7 +709,7 @@ void Game::run()
 	}
 	else // Run in foreground.
 	{
-		if (_debug) std::cout
+		if (DEBUG) std::cout
 				<< "Gaming in foreground started..."
 				<< std::endl;
 

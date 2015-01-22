@@ -16,7 +16,7 @@
 
 // --------------- DEBUG ---------------
 
-static const bool DEBUG = true;
+static bool DEBUG = false;
 static const char DBG_HEADER[] = "~ debug: ";
 static const char DBG_ENABLED[] = "You have started this program with full debug!";
 
@@ -91,6 +91,12 @@ static const int STD_STEPS_LIMIT = 3;
 static const char STD_MODE_NAME[] = "detailed";
 static const char STD_CONFIGS_PATH[] = "defaults";
 static const char STD_MATRIX_PATH[] = "";
+
+
+// --------------- EXTRA FUNCITONS ---------------
+
+void show_matrix(const ScoreMatrix& matrix);
+void show_str_vector(const std::vector<std::string> v);
 
 
 // __MAIN_H__

@@ -44,7 +44,6 @@ class Game
 		bool _parse_cmd(const std::string& cmd);	// Parse the input command (in foreground mode)
 		ScoreMatrix _parse_matrix_file(const std::string& filename);
 
-		bool _debug;
 		bool _is_valid_input;
 		bool _is_in_background;		// Is game playing in background.
 
