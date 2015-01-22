@@ -2,22 +2,6 @@
 #define __GAMELOGIC_H__
 
 
-enum GameSignal
-{
-	SAVE_GAME, // Save universe to file.
-	OPEN_GAME, // Open universe from file.
-	TICK_GAME, // Tick universe steps.
-	ANIM_GAME, // Show animation of universe ticking.
-	SHOW_HELP, // Show help message.
-	EXIT_GAME, // Exit the game.
-
-	START_GAME, // Start the game.
-
-	UNKNOWN_CMD, // The input command is unknown.
-	WAIT_CMD // Wait for the next command.
-};
-
-
 class Game
 {
 	public:
