@@ -1,8 +1,9 @@
 #include "htable.h"
 
 
-/* -------------- HASHTABLE METHODS -------------- */
-
+/*
+ *	-------------- HASHTABLE METHODS --------------
+ */
 HashTable::HashTable(int mem)
 {
 	if (mem < 1)
@@ -10,65 +11,54 @@ HashTable::HashTable(int mem)
 		throw std::invalid_argument(ERR_BAD_HTABLE_SIZE);
 	}
 
+	_items_num = 0;
 	_cells_num = mem;
+	_data = new Item*[mem];
 
-	try
-	{
-		_data = new Item*[mem];
-	}
-	catch (std::bad_alloc)
-	{
-		std::cout << ERR_BAD_ALLOC << std::endl;
-	}
-
-	for (int i = 0; i < _cells_num; i++)
-	{
-		_data[i] = NULL;
-	}
-}
-
-
-HashTable::~HashTable()
-{
-	clear();
-	delete _data;
+	std::fill(_data, _data + _cells_num, static_cast<Item *>(NULL));
 }
 
 
 /*
-	Makes a copy of given HashTable object.
-*/
+ *	Hashtable destructor doesn't use the clear function,
+ *	because clear deletes, then allocates new memory for _data
+ *	and fills NULLs into each _data pointer - it takes a time.
+ *	But when hashtable object destroying, it will never be used again,
+ *	that's why it's better use only 'delete[] _data;' without clear.
+ */
+HashTable::~HashTable()
+{
+	_remove_data();
+}
+
+
+/*
+ *	Makes a copy of given HashTable object.
+ */
 HashTable::HashTable(const HashTable& hashtable)
 {
+	_items_num = hashtable._items_num;
 	_cells_num = hashtable._cells_num;
-
-	try
-	{
-		_data = new Item*[_cells_num];
-	}
-	catch (std::bad_alloc)
-	{
-		std::cout << ERR_BAD_ALLOC << std::endl;
-	}
+	_data = new Item*[_cells_num];
 
 	for (int i = 0; i < _cells_num; i++)
 	{
-		if (hashtable._data[i] != NULL)
-		{
-			_data[i] = new Item(*(hashtable._data[i]));
-		}
-		else
+		if (hashtable._data[i] == NULL)
 		{
 			_data[i] = NULL;
 		}
+		else
+		{
+			_data[i] = new Item(*(hashtable._data[i]));
+		}
 	}
 }
 
 
 /*
-	Returns: the Value object from specified key from current HashTable object.
-	If Value does not exist - inserts the new Value object into HashTable and returns it.
-*/
+ *	Returns: the Value object from specified key from current HashTable object.
+ *	If Value does not exist - inserts the new Value object into HashTable and returns it.
+ */
 Value& HashTable::operator[](const String& key)
 {
 	Value *inner_value = _search(key);
@@ -79,32 +69,25 @@ Value& HashTable::operator[](const String& key)
 
 		insert(key, value);
 
-		return *_search(key);
+		return (*_search(key));
 	}
 
-	return *inner_value;
+	return (*inner_value);
 }
 
 
 /*
-	Copies all fields from specified HashTable object to the current HashTable object.
-*/
+ *	Copies all fields from specified HashTable object to the current HashTable object.
+ */
 HashTable& HashTable::operator=(const HashTable& hashtable)
 {
-	clear();
+	if (this == (&hashtable))
+		return (*this);
+
+	_remove_data();
 
 	_cells_num = hashtable._cells_num;
-	
-	try
-	{
-		delete[] *_data; // TODO: Ask about that.
-		_data = new Item*[_cells_num];
-	}
-	catch (std::bad_alloc)
-	{
-		std::cout << ERR_BAD_ALLOC << std::endl;
-	}
-
+	_data = new Item*[_cells_num];
 
 	for (int i = 0; i < _cells_num; i++)
 	{
@@ -118,29 +101,33 @@ HashTable& HashTable::operator=(const HashTable& hashtable)
 		}
 	}
 
-	return *this;
+	_items_num = hashtable._items_num;
+
+	return (*this);
 }
 
 
 /*
-	Checks are two HashTable objects same.
-	Returns: false if HashTable sizes are different or any inner Item object are not same,
-	otherwise returns true.
-*/
+ *	Checks are two HashTable objects same.
+ *	Returns: false if HashTable sizes are different or any inner Item object are not same,
+ *	otherwise returns true.
+ */
 bool operator==(const HashTable& hashtable1, const HashTable& hashtable2)
 {
-	if (hashtable1._cells_num == hashtable2._cells_num)
+	if ((hashtable1._cells_num == hashtable2._cells_num)
+		&& (hashtable1._items_num == hashtable2._items_num))
 	{
-		Item *a_item, *b_item;
+		Item *a_item = NULL;
+		Item *b_item = NULL;
 
 		for (int i = 0; i < hashtable1._cells_num; i++)
 		{
 			a_item = hashtable1._data[i];
 			b_item = hashtable2._data[i];
 
-			while (a_item != NULL && b_item != NULL)
+			while ((a_item != NULL) && (b_item != NULL))
 			{
-				if (*a_item != *b_item)
+				if ((*a_item) != (*b_item))
 				{
 					return false;
 				}
@@ -149,8 +136,8 @@ bool operator==(const HashTable& hashtable1, const HashTable& hashtable2)
 				b_item = b_item->get_next();
 			}
 
-			if ((a_item == NULL && b_item != NULL) ||
-				(a_item != NULL && b_item == NULL))
+			if (((a_item == NULL) && (b_item != NULL))
+				|| ((a_item != NULL) && (b_item == NULL)))
 			{
 				return false;
 			}
@@ -164,9 +151,9 @@ bool operator==(const HashTable& hashtable1, const HashTable& hashtable2)
 
 
 /*
-	Checks are two HashTable objects NOT same.
-	Returns: are HashTable objects NOT equal.
-*/
+ *	Checks are two HashTable objects NOT same.
+ *	Returns: are HashTable objects NOT equal.
+ */
 bool operator!=(const HashTable& hashtable1, const HashTable& hashtable2)
 {
 	return !(hashtable1 == hashtable2);
@@ -174,29 +161,23 @@ bool operator!=(const HashTable& hashtable1, const HashTable& hashtable2)
 
 
 /*
-	Cleans all data from current HashTable object.
-*/
+ *	Cleans all data from current HashTable object.
+ *	Deletes _data's pointers, allocates new memory
+ *	and fills NULLs into each _data's pointer.
+ */
 void HashTable::clear()
 {
-	for (int i = 0; i < _cells_num; i++)
-	{
-		Item *tmp = _data[i];
+	_remove_data();
 
-		while (tmp) {
-			Item *delete_item = tmp;
-			tmp = tmp->get_next();
-			delete delete_item;
-		}
-
-		_data[i] = NULL;
-	}
+	_data = new Item*[_cells_num];
+	std::fill(_data, _data + _cells_num, static_cast<Item *>(NULL));
 }
 
 
 /*
-	Erases value with specified key from current HashTable object and returns true.
-	Otherwise returns false, if the value with specified key does not exist in HashTable object.
-*/
+ *	Erases value with specified key from current HashTable object and returns true.
+ *	Otherwise returns false, if the value with specified key does not exist in HashTable object.
+ */
 bool HashTable::erase(const String& key)
 {
 	int i = _get_index(key);
@@ -209,6 +190,7 @@ bool HashTable::erase(const String& key)
 
 	if (last_item->is_key_equals(key))
 	{
+		_items_num--;
 		next_item = last_item->get_next();
 
 		if (next_item == NULL)
@@ -228,6 +210,7 @@ bool HashTable::erase(const String& key)
 	{
 		if (curr_item->is_key_equals(key))
 		{
+			_items_num--;
 			last_item->push_back(curr_item->get_next());
 			delete curr_item;
 			
@@ -243,59 +226,47 @@ bool HashTable::erase(const String& key)
 
 
 /*
-	Returns: the Value from given key from current HashTable object.
-*/
+ *	Returns: the Value from given key from current HashTable object.
+ */
 Value& HashTable::get(const String& key)
 {
 	Value *requested_value = _search(key);
 
-	if (requested_value == NULL) throw std::invalid_argument(ERR_KEY_NOT_FOUND);
+	if (requested_value == NULL)
+		throw std::invalid_argument(ERR_KEY_NOT_FOUND);
 
 	return *requested_value;
 }
 
 
 /*
-	Returns: the constant Value from given key from current HashTable object.
-*/
+ *	Returns: the constant Value from given key from current HashTable object.
+ */
 const Value& HashTable::get(const String& key) const
 {
 	Value *requested_value = _search(key);
 
-	if (requested_value == NULL) throw std::invalid_argument(ERR_KEY_NOT_FOUND);
+	if (requested_value == NULL)
+		throw std::invalid_argument(ERR_KEY_NOT_FOUND);
 
 	return *requested_value;
 }
 
 
 /*
-	Calculates and returns how many Item objects are in the current HashTable object.
-*/
+ *	Calculates and returns how many Item objects are in the current HashTable object.
+ */
 size_t HashTable::get_size() const
 {
-	size_t items_num = 0;
-	Item *curr_item;
-
-	for (int i = 0; i < _cells_num; i++)
-	{
-		curr_item = _data[i];
-
-		while (curr_item != NULL)
-		{
-			items_num++;
-			curr_item = curr_item->get_next();
-		}
-	}
-
-	return items_num;
+	return _items_num;
 }
 
 
 /*
-	Inserts the Value object with specified key into the current HashTable object
-	and returns true if successfull. Otherwise returns false, if Item object
-	with the same key already exists in the HashTable object.
-*/
+ *	Inserts the Value object with specified key into the current HashTable object
+ *	and returns true if successfull. Otherwise returns false, if Item object
+ *	with the same key already exists in the HashTable object.
+ */
 bool HashTable::insert(const String& key, const Value& value)
 {
 	_check_and_expand();
@@ -305,6 +276,7 @@ bool HashTable::insert(const String& key, const Value& value)
 
 	if (curr_item == NULL)
 	{
+		_items_num++;
 		_data[i] = new Item(key, value);
 
 		return true;
@@ -318,6 +290,7 @@ bool HashTable::insert(const String& key, const Value& value)
 		curr_item = curr_item->get_next();
 	}
 
+	_items_num++;
 	Item *new_item = new Item(key, value);
 	last_item->push_back(new_item);
 
@@ -326,9 +299,9 @@ bool HashTable::insert(const String& key, const Value& value)
 
 
 /*
-	Checks does the value with specified key exist in the HashTable object.
-	Returns: true if it does, false - if not.
-*/
+ *	Checks does the value with specified key exist in the HashTable object.
+ *	Returns: true if it does, false - if not.
+ */
 bool HashTable::is_contains(const String& key) const
 {
 	return (_search(key) != NULL);
@@ -336,47 +309,42 @@ bool HashTable::is_contains(const String& key) const
 
 
 /*
-	Checks is the current HashTable object empty.
-*/
+ *	Checks is the current HashTable object empty.
+ */
 bool HashTable::is_empty() const
 {
-	for (int i = 0; i < _cells_num; i++)
-	{
-		if (_data[i] != NULL) return false;
-	}
-
-	return true;
+	return !(_items_num);
 }
 
 
 /*
-	Changes fields between current and specified HashTable objects.
-*/
-void HashTable::swap(HashTable& hashtable)
+ *	Changes fields between two HashTable objects.
+ */
+void swap_ht(HashTable& a, HashTable& b)
 {
-	unsigned int tmp_cells_num = _cells_num;
-	Item **tmp_data = _data;
-
-	_cells_num = hashtable._cells_num;
-	_data = hashtable._data;
-
-	hashtable._cells_num = tmp_cells_num;
-	hashtable._data = tmp_data;	
+	std::swap(a._items_num, b._items_num);
+	std::swap(a._cells_num, b._cells_num);
+	std::swap(a._data, b._data);
 }
 
 
 /*
-	Private method!
-	Checks the HashTable object for fullness.
-	If there are a lot of objects, expands this HashTable object.
-*/
+ *	Private method!
+ *	Checks the HashTable object for fullness.
+ *	If there are a lot of objects, expands this HashTable object.
+ */
 bool HashTable::_check_and_expand()
 {
-	if (get_size() * FULLNESS_FACTOR < _cells_num)
+	if (_items_num * FULLNESS_FACTOR < _cells_num)
 	{
 		return false;
 	}
 
+	/*
+	 *	Table has got a lot of items ->
+	 *	Have to create a bigger table, to copy all data into it.
+	 *	Then swap them.
+	 */
 	HashTable tmp_table(_cells_num * FULLNESS_FACTOR);
 	Item *curr_item;
 
@@ -395,16 +363,15 @@ bool HashTable::_check_and_expand()
 		}
 	}
 
-	*this = tmp_table;
-
+	swap_ht((*this), tmp_table);
 	return true;
 }
 
 
 /*
-	Private method!
-	Calculates the index of specified key in HashTable object and returns it.
-*/
+ *	Private method!
+ *	Calculates the index of specified key in HashTable object and returns it.
+ */
 int HashTable::_get_index(const String& key) const
 {
 	if (_cells_num < 1)
@@ -417,10 +384,10 @@ int HashTable::_get_index(const String& key) const
 
 
 /*
-	Private method!
-	Looks for the value with specified key in Hashtable object.
-	Returns: pointer to the value if exists, otherwise - NULL.
-*/
+ *	Private method!
+ *	Looks for the value with specified key in Hashtable object.
+ *	Returns: pointer to the value if exists, otherwise - NULL.
+ */
 Value *HashTable::_search(const String& key) const
 {
 	int i = _get_index(key);
@@ -440,13 +407,31 @@ Value *HashTable::_search(const String& key) const
 }
 
 
-/* -------------- ACCESSORY FUNCTIONS -------------- */
+/*
+ *	Private method!
+ *	Remove all pointers from _data.
+ */
+void HashTable::_remove_data()
+{
+	_items_num = 0;
 
+	for (int i = 0; i < _cells_num; i++)
+	{
+		delete _data[i];
+	}
+
+	delete[] _data;
+}
+
+
+/*
+ *	-------------- ACCESSORY FUNCTIONS --------------
+ */
 #ifndef __HTABLE_DEBUG__
 
 /*
-	Calculates a big hash number for the specified key.
-*/
+ *	Calculates a big hash number for the specified key.
+ */
 int hash(const String& key)
 {
 	int sum, h = 1;
@@ -474,10 +459,10 @@ int hash(const String& key)
 #else
 
 /* 
-	DO NOT CHANGE IT!
-	HashTable class uses this function while DEBUG is defined.
-	For example: "Danil" and "Diman" have the same hash.
-*/
+ *	DO NOT CHANGE IT!
+ *	HashTable class uses this function while DEBUG is defined.
+ *	For example: "Danil" and "Diman" have the same hash.
+ */
 int hash(const String& key)
 {
 	return key.size() * key[0];
