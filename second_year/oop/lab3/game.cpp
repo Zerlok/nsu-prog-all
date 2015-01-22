@@ -95,9 +95,52 @@ const ScoreMatrix get_default_matrix()
 }
 
 
-const ScoreMatrix get_matrix_from_file(std::string& matrix_path)
+const ScoreMatrix get_matrix_from_file(
+		std::string& matrix_path)
 {
 	return get_default_matrix();
+}
+
+
+std::vector<std::string> get_several_randoms(
+		const std::vector<std::string>& list,
+		int limit)
+{
+	int len = list.size();
+	std::vector<std::string> choices;
+
+	if (len == 0)
+		return choices;
+
+	for (int i = 0; i < limit; i++)
+		choices.push_back(list[rand() % len]);
+
+	return choices;
+}
+
+
+void show_matrix(const ScoreMatrix& matrix)
+{
+	for (ScoreMatrix::const_iterator it = matrix.begin();
+		it != matrix.end();
+		it++)
+	{
+		std::copy(
+				(*it).first.begin(),
+				(*it).first.end(),
+				std::ostream_iterator<int>(std::cout, " ")
+		);
+
+		std::cout << " => ";
+
+		std::copy(
+				(*it).second.begin(),
+				(*it).second.end(),
+				std::ostream_iterator<int>(std::cout, " ")
+		);
+
+		std::cout << std::endl;
+	}
 }
 
 
@@ -105,18 +148,24 @@ const ScoreMatrix get_matrix_from_file(std::string& matrix_path)
  * --------------- GAME METHODS ---------------
  */
 
-Game::Game(const int argc, const char **argv)
+Game::Game(
+		const int argc,
+		const char **argv,
+		const StrategyFactory& factory)
+	: _debug(DEBUG), _is_valid_input(true), _is_in_background(false),
+	_steps_limit(STD_STEPS_LIMIT), _mode_name(STD_MODE_NAME), _mode(NULL),
+	_matrix_path(STD_MATRIX_PATH), _configs_path(STD_CONFIGS_PATH)
 {
-	/*
-	 * Default settings
-	 */
-	_debug = false;
-	_is_valid_input = true;
-	_is_in_background = false;
-	_steps_limit = STD_STEPS_LIMIT;
-	_mode_name = "none";
-	_matrix_path = "";
-	_configs_path = STD_CONFIGS_PATH;
+	if (DEBUG) std::cout
+			<< DBG_HEADER
+			<< "Creating the game..."
+			<< std::endl;
+
+	// Randomize
+	time_t t;
+	time(&t);
+	
+	srand((unsigned int) t);
 	
 	_parse_input(argc, argv);
 
@@ -124,22 +173,41 @@ Game::Game(const int argc, const char **argv)
 	{
 		ScoreMatrix matrix;
 
-		if (_matrix_path == "")
+		if (_init_names.size() == 0)
+			_init_names = get_several_randoms(factory.get_registered(), 3);
+
+		if (_matrix_path.size() == 0)
 			matrix = get_default_matrix();
 
 		else
 			matrix = get_matrix_from_file(_matrix_path);
 
-		if ((_mode_name == "detailed")
-			|| (_mode_name == "none"))
-			_mode = new DetailedMode(matrix, _configs_path);
+		if (_mode_name == "detailed")
+			_mode = new DetailedMode(
+					factory,
+					_init_names,
+					matrix,
+					_configs_path);
 
-		else if (_mode_name == "detailed")
-			_mode = new FastMode(matrix, _configs_path);
+		else if (_mode_name == "fast")
+			_mode = new FastMode(
+					factory,
+					_init_names,
+					matrix,
+					_configs_path);
 
-		else if (_mode_name == "detailed")
-			_mode = new TournamentMode(matrix, _configs_path);
+		else if (_mode_name == "tournament")
+			_mode = new TournamentMode(
+					factory,
+					_init_names,
+					matrix,
+					_configs_path);
 	}
+
+	if (DEBUG) std::cout
+			<< DBG_HEADER
+			<< "Game creating finished."
+			<< std::endl;
 }
 
 
@@ -175,18 +243,33 @@ Game::~Game()
  */
 void Game::_parse_input(const int argc, const char **argv)
 {
+	if (DEBUG) std::cout
+			<< DBG_HEADER
+			<< "Parsing the input..."
+			<< std::endl;
+
 	int i = 0;
 	size_t equals_pos;
 	std::string arg_name;
 	std::string arg_value;
 	std::vector<std::string> c_argv;
 
+	// Copy-paste argv into c_argv
 	for (int j = 1; j < argc; j++)
 	{
 		c_argv.push_back(std::string(argv[j]));
-		// std::cout << c_argv[i] << std::endl;
+
+		if (DEBUG) std::cout
+				<< c_argv[i]
+				<< std::endl;
 	}
 
+	// Read initial strategies
+	while ((i < argc - 1)
+		&& is_value(c_argv[i]))
+		_init_names.push_back(c_argv[i++]);
+
+	// Move along flags and arguments
 	while ((i < argc - 1)
 			&& _is_valid_input)
 	{
@@ -462,6 +545,11 @@ void Game::_parse_input(const int argc, const char **argv)
 
 		i++;
 	} // endwhile
+
+	if (DEBUG) std::cout
+			<< DBG_HEADER
+			<< "Input parsing finished."
+			<< std::endl;
 }
 
 
@@ -612,13 +700,25 @@ void Game::cmd_help()
 
 void Game::run()
 {
-	if (_debug) std::cout
+	if (_debug)
+	{
+		std::cout
 			<< "The game start running with configuration:\n"
 			<< "   valid input: " << _is_valid_input << "\n"
 			<< "   steps limit: " << _steps_limit << "\n"
 			<< "   configs dir: " << _configs_path << "\n"
 			<< "   matrix file: " << _matrix_path << "\n"
-			<< std::endl;
+			<< "     mode name: " << _mode_name << "\n"
+			<< "\n"
+			<< "Init list: ";
+
+		std::copy(
+				_init_names.begin(),
+				_init_names.end(),
+				std::ostream_iterator<std::string>(std::cout, " "));
+
+		std::cout << std::endl;
+	}
 
 
 	if (!_is_valid_input)

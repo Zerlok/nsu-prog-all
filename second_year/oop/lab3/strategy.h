@@ -5,8 +5,8 @@
 class Strategy
 {
 	public:
-		Strategy() {}
-		virtual ~Strategy() {}
+		Strategy() {};
+		virtual ~Strategy() {};
 
 		virtual Decision get_decision() = 0;
 		virtual void learn_choices(
@@ -19,13 +19,13 @@ class TrustfulStrategy : public Strategy
 	public:
 		TrustfulStrategy(
 				const ScoreMatrix& matrix,
-				const std::string& configs_dir) {}
+				const std::string& configs_dir) {};
 
-		~TrustfulStrategy() {}
+		~TrustfulStrategy() {};
 
 		virtual Decision get_decision() { return cooperate; }
 		virtual void learn_choices(
-				std::vector<Decision>& opponents_decisions) {}
+				std::vector<Decision>& opponents_decisions) {};
 };
 
 
@@ -34,13 +34,13 @@ class MistrustfulStrategy : public Strategy
 	public:
 		MistrustfulStrategy(
 				const ScoreMatrix& matrix,
-				const std::string& configs_dir) {}
+				const std::string& configs_dir) {};
 
-		~MistrustfulStrategy() {}
+		~MistrustfulStrategy() {};
 
 		virtual Decision get_decision() { return defect; }
 		virtual void learn_choices(
-				std::vector<Decision>& opponents_decisions) {}
+				std::vector<Decision>& opponents_decisions) {};
 };
 
 
@@ -49,9 +49,9 @@ class CrazyStrategy : public Strategy
 	public:
 		CrazyStrategy(
 				const ScoreMatrix& matrix,
-				const std::string& configs_dir) {}
+				const std::string& configs_dir) {};
 
-		~CrazyStrategy() {}
+		~CrazyStrategy() {};
 
 		virtual Decision get_decision()
 		{
@@ -59,7 +59,7 @@ class CrazyStrategy : public Strategy
 		}
 
 		virtual void learn_choices(
-				std::vector<Decision>& opponents_decisions) {}
+				std::vector<Decision>& opponents_decisions) {};
 };
 
 

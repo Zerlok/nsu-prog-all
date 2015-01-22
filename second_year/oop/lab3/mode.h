@@ -13,24 +13,27 @@
 class Mode
 {
 	public:
-		Mode() {};
-		virtual ~Mode() {};
+		virtual ~Mode() {
+			if (DEBUG) std::cout
+					<< "Deleting the mode interface..."
+					<< std::endl;
+		}
 
 		virtual void clear() = 0;
 		
 		virtual bool use(
 				const std::vector<std::string>& strategy_names) = 0;
 
-		virtual const std::vector<std::string> get_available_strategies_names() const = 0;
-		virtual const std::vector<std::string> get_current_strategies_names() const = 0;
-		virtual const std::vector<int> get_scores() const = 0;
+		virtual std::vector<std::string> get_available_strategies_names() const = 0;
+		virtual std::vector<std::string> get_current_strategies_names() const = 0;
+		virtual std::vector<int> get_scores() const = 0;
 
 		virtual bool is_registered(
 				const std::string& strategy_name) const = 0;
 
 		virtual bool are_registered(
 				const std::vector<std::string>& strategy_names) const = 0;
-
+		
 		virtual void play(int limit) = 0;
 };
 
@@ -45,19 +48,23 @@ class DetailedMode : public Mode
 {
 	public:
 		DetailedMode(
+				const StrategyFactory& factory,
+				const std::vector<std::string>& names,
 				const ScoreMatrix& matrix,
 				const std::string& configs_dir);
 		
-		~DetailedMode();
+		~DetailedMode() {
+			std::cout << "Destroying the DetailedMode..." << std::endl;
+		}
 
 		virtual void clear();
 
 		virtual bool use(
 				const std::vector<std::string>& strategy_names);
 
-		virtual const std::vector<std::string> get_available_strategies_names() const;
-		virtual const std::vector<std::string> get_current_strategies_names() const;
-		virtual const std::vector<int> get_scores() const;
+		virtual std::vector<std::string> get_available_strategies_names() const;
+		virtual std::vector<std::string> get_current_strategies_names() const;
+		virtual std::vector<int> get_scores() const;
 
 		virtual bool is_registered(
 				const std::string& strategy_name) const;
@@ -71,8 +78,10 @@ class DetailedMode : public Mode
 		std::vector<int> _scoretable;
 		std::vector<std::string> _names;
 		std::vector<Strategy *> _strategies;
+
+		const StrategyFactory& _factory;
 		const ScoreMatrix& _matrix;
-		StrategyFactory _factory;
+		const std::string _configs_dir;
 };
 
 
@@ -86,19 +95,25 @@ class FastMode : public Mode
 {
 	public:
 		FastMode(
+				const StrategyFactory& factory,
+				const std::vector<std::string>& names,
 				const ScoreMatrix& matrix,
 				const std::string& configs_dir);
 
-		~FastMode();
+		~FastMode() {
+			if (DEBUG) std::cout
+					<< "Destroying the FastMode..."
+					<< std::endl;
+		}
 
 		virtual void clear();
 
 		virtual bool use(
 				const std::vector<std::string>& strategy_names);
 
-		virtual const std::vector<std::string> get_available_strategies_names() const;
-		virtual const std::vector<std::string> get_current_strategies_names() const;
-		virtual const std::vector<int> get_scores() const;
+		virtual std::vector<std::string> get_available_strategies_names() const;
+		virtual std::vector<std::string> get_current_strategies_names() const;
+		virtual std::vector<int> get_scores() const;
 
 		virtual bool is_registered(
 				const std::string& strategy_name) const;
@@ -112,8 +127,10 @@ class FastMode : public Mode
 		std::vector<int> _scoretable;
 		std::vector<std::string> _names;
 		std::vector<Strategy *> _strategies;
+
+		const StrategyFactory& _factory;
 		const ScoreMatrix& _matrix;
-		StrategyFactory _factory;
+		const std::string _configs_dir;
 };
 
 
@@ -127,19 +144,25 @@ class TournamentMode : public Mode
 {
 	public:
 		TournamentMode(
+				const StrategyFactory& factory,
+				const std::vector<std::string>& names,
 				const ScoreMatrix& matrix,
 				const std::string& configs_dir);
 
-		~TournamentMode();
+		~TournamentMode() {
+			if (DEBUG) std::cout
+					<< "Destroying the TournamentMode..."
+					<< std::endl;
+		}
 
 		virtual void clear();
 
 		virtual bool use(
 				const std::vector<std::string>& strategy_names);
 
-		virtual const std::vector<std::string> get_available_strategies_names() const;
-		virtual const std::vector<std::string> get_current_strategies_names() const;
-		virtual const std::vector<int> get_scores() const;
+		virtual std::vector<std::string> get_available_strategies_names() const;
+		virtual std::vector<std::string> get_current_strategies_names() const;
+		virtual std::vector<int> get_scores() const;
 
 		virtual bool is_registered(
 				const std::string& strategy_name) const;
@@ -153,8 +176,10 @@ class TournamentMode : public Mode
 		std::vector<int> _scoretable;
 		std::vector<std::string> _names;
 		std::vector<Strategy *> _strategies;
+
+		const StrategyFactory& _factory;
 		const ScoreMatrix& _matrix;
-		StrategyFactory _factory;
+		const std::string _configs_dir;
 };
 
 

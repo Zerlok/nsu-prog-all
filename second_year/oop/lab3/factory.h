@@ -24,38 +24,33 @@ class StrategyCreator : public AbstractCreator
 };
 
 
-typedef std::map<std::string, AbstractCreator *> FactoryMap;
-
-
 class StrategyFactory
 {
+	protected:
+		typedef std::map<std::string, AbstractCreator *> FactoryMap;
+	
 	public:
-		StrategyFactory(
-				const ScoreMatrix& matrix,
-				const std::string& configs_dir)
-			: _matrix(matrix), _configs_dir(configs_dir)
-		{
-			time_t t;
-			time(&t);
-			
-			srand((unsigned int) t);
-		}
+		StrategyFactory() {};
 
-		~StrategyFactory() {}
+		StrategyFactory(const StrategyFactory& f) : _map(f._map) {};
+
+		~StrategyFactory() {};
 
 		template <class S>
-		void set_id(const std::string& id)
+		void register_id(const std::string& id)
 		{
-			// If creator exist, it will be replaced
 			_map[id] = new StrategyCreator<S>();
 		}
 
-		Strategy *get(const std::string& id) const
+		Strategy *create(
+				const std::string& id,
+				const ScoreMatrix& matrix,
+				const std::string& configs_dir) const
 		{
 			// If creator was not found, an error will occured.
 			return _map.find(id)->second->create(
-					_matrix,
-					_configs_dir);
+					matrix,
+					configs_dir);
 		}
 
 		const std::vector<std::string> get_registered() const
@@ -65,17 +60,13 @@ class StrategyFactory
 			for (auto it = _map.begin();
 				it != _map.end();
 				it++)
-			{
 				keys.push_back(it->first);
-			}
 
 			return keys;
 		}
 
 	private:
 		FactoryMap _map;
-		const ScoreMatrix _matrix;
-		const std::string _configs_dir;
 };
 
 

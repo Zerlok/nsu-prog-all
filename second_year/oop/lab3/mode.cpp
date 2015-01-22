@@ -10,11 +10,28 @@
  */
 
 DetailedMode::DetailedMode(
+		const StrategyFactory& factory,
+		const std::vector<std::string>& names,
 		const ScoreMatrix& matrix,
 		const std::string& configs_dir)
-	: _matrix(matrix), _factory(matrix, configs_dir)
+	: _factory(factory), _matrix(matrix), _configs_dir(configs_dir)
 {
-	clear();
+	if (DEBUG)
+	{
+		std::cout
+				<< DBG_HEADER
+				<< "Creating the DetailedMode..."
+				<< std::endl;
+
+		std::copy(
+				names.begin(),
+				names.end(),
+				std::ostream_iterator<std::string>(std::cout, " "));
+
+		std::cout << std::endl;
+	}
+
+	use(names);
 }
 
 
@@ -46,7 +63,11 @@ bool DetailedMode::use(
 		it != _names.end();
 		it++)
 	{
-		_strategies.push_back(_factory.get((*it)));
+		_strategies.push_back(_factory.create(
+				(*it),
+				_matrix,
+				_configs_dir));
+
 		_scoretable.push_back(0);
 	}
 
@@ -54,19 +75,19 @@ bool DetailedMode::use(
 }
 
 
-const std::vector<std::string> DetailedMode::get_available_strategies_names() const
+std::vector<std::string> DetailedMode::get_available_strategies_names() const
 {
 	return _factory.get_registered();
 }
 
 
-const std::vector<std::string> DetailedMode::get_current_strategies_names() const
+std::vector<std::string> DetailedMode::get_current_strategies_names() const
 {
 	return _names;
 }
 
 
-const std::vector<int> DetailedMode::get_scores() const
+std::vector<int> DetailedMode::get_scores() const
 {
 	return _scoretable;
 }
@@ -125,11 +146,7 @@ void DetailedMode::play(int limit)
 		for (auto it = _strategies.begin();
 			it != _strategies.end();
 			it++)
-		{
-			decisions.push_back(
-					(*it)->get_decision()
-			);
-		}
+			decisions.push_back((*it)->get_decision());
 
 		// Each strategy learns opponents' decisions.
 		for (int i = 0; i < len; i++)
@@ -178,11 +195,13 @@ void DetailedMode::play(int limit)
  */
 
 FastMode::FastMode(
+		const StrategyFactory& factory,
+		const std::vector<std::string>& names,
 		const ScoreMatrix& matrix,
 		const std::string& configs_dir)
-	: _matrix(matrix), _factory(matrix, configs_dir)
+	: _factory(factory), _matrix(matrix), _configs_dir(configs_dir)
 {
-	clear();
+	use(names);
 }
 
 
@@ -214,7 +233,10 @@ bool FastMode::use(
 		it != _names.end();
 		it++)
 	{
-		_strategies.push_back(_factory.get((*it)));
+		_strategies.push_back(_factory.create(
+				(*it),
+				_matrix,
+				_configs_dir));
 		_scoretable.push_back(0);
 	}
 
@@ -222,19 +244,19 @@ bool FastMode::use(
 }
 
 
-const std::vector<std::string> FastMode::get_available_strategies_names() const
+std::vector<std::string> FastMode::get_available_strategies_names() const
 {
 	return _factory.get_registered();
 }
 
 
-const std::vector<std::string> FastMode::get_current_strategies_names() const
+std::vector<std::string> FastMode::get_current_strategies_names() const
 {
 	return _names;
 }
 
 
-const std::vector<int> FastMode::get_scores() const
+std::vector<int> FastMode::get_scores() const
 {
 	return _scoretable;
 }
@@ -325,11 +347,13 @@ void FastMode::play(int limit)
  */
 
 TournamentMode::TournamentMode(
+		const StrategyFactory& factory,
+		const std::vector<std::string>& names,
 		const ScoreMatrix& matrix,
 		const std::string& configs_dir)
-	: _matrix(matrix), _factory(matrix, configs_dir)
+	: _factory(factory), _matrix(matrix), _configs_dir(configs_dir)
 {
-	clear();
+	use(names);
 }
 
 
@@ -361,7 +385,10 @@ bool TournamentMode::use(
 		it != _names.end();
 		it++)
 	{
-		_strategies.push_back(_factory.get((*it)));
+		_strategies.push_back(_factory.create(
+				(*it),
+				_matrix,
+				_configs_dir));
 		_scoretable.push_back(0);
 	}
 
@@ -369,19 +396,19 @@ bool TournamentMode::use(
 }
 
 
-const std::vector<std::string> TournamentMode::get_available_strategies_names() const
+std::vector<std::string> TournamentMode::get_available_strategies_names() const
 {
 	return _factory.get_registered();
 }
 
 
-const std::vector<std::string> TournamentMode::get_current_strategies_names() const
+std::vector<std::string> TournamentMode::get_current_strategies_names() const
 {
 	return _names;
 }
 
 
-const std::vector<int> TournamentMode::get_scores() const
+std::vector<int> TournamentMode::get_scores() const
 {
 	return _scoretable;
 }

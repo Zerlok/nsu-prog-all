@@ -14,9 +14,16 @@
 #include <time.h>		// time for srand.
 
 
+// --------------- DEBUG ---------------
+
+static const bool DEBUG = true;
+static const char DBG_HEADER[] = "~ debug: ";
+static const char DBG_ENABLED[] = "You have started this program with full debug!";
+
+
 // --------------- ERRORS ---------------
 
-static const char ERR_HEADER[] = "# Error: ";
+static const char ERR_HEADER[] = "# error: ";
 
 /*
  * Simple errors.
@@ -42,29 +49,23 @@ static const char ERR_CMD_VALUE_EXPECTED[] = " - the command value was expected!
 static const char ERR_UNKNOWN_CMD[] = "- the unknown command. Try help to see available commands.";
 
 
-// --------------- DEBUG ---------------
-
-static const char DBG_HEADER[] = "~ Debug: ";
-static const char DBG_ENABLED[] = "You have started this program with full debug!";
-
-
 // --------------- WARNINGS ---------------
 
-static const char WARNING_HEADER[] = "! Warning: ";
+static const char WARNING_HEADER[] = "* warning: ";
 
 
 // --------------- HELP MESSAGES ---------------
 
 static const char HELP_DESCRIPTION[] = "(-h, --help)";
-static const char HELP_USAGE[] = "(-h, --help)";
-static const char HELP_FLAGS[] = "(-h, --help)";
-static const char HELP_COMMANDS[] = "These commands are available:\n   tick <n=1>  - play <n> iterations.\n   clear       - clear the static const char screen.\n   help        - show this help.\n   quit        - exit the game.";
+static const char HELP_USAGE[] = "none";
+static const char HELP_FLAGS[] = "-h, --help  - shows this message";
+static const char HELP_COMMANDS[] = "These commands are available:\n   //list    - sdfasdf\n   // use [<strategy 1>...]  - play <n> iterations.\n   tick <n>  - play <n> iterations.\n   clear       - clear the static const char screen.\n   help        - show this help message.\n   quit        - exit the game.";
 
 
 // --------------- FOREGROUND STRINGS ---------------
 
 static const char CMD_IN[] = "> ";
-static const char MSG_GREETING[] = "Welcome into the Game (version 0.001 alpha)!\nType a command below, or use 'help' to see available commands.";
+static const char MSG_GREETING[] = "Welcome into the Game (version 0.2 alpha pre-release)!\nType a command below, or use 'help' to see available commands.";
 static const char WARNING_YES_NO_ONLY[] = "Type 'yes' or 'no': ";
 
 
@@ -86,9 +87,10 @@ typedef std::map< std::vector<Decision>, std::vector<int> > ScoreMatrix;
 
 // --------------- STANDARD CONFIGURATION ---------------
 
-static const int STD_STEPS_LIMIT = 0;
+static const int STD_STEPS_LIMIT = 3;
+static const char STD_MODE_NAME[] = "detailed";
 static const char STD_CONFIGS_PATH[] = "defaults";
-static const char STD_MATRIX_FILE[] = "defaults/matrix";
+static const char STD_MATRIX_PATH[] = "";
 
 
 // __MAIN_H__

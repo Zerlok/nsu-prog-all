@@ -13,7 +13,11 @@
 class Game
 {
 	public:
-		Game(const int argc, const char **argv);
+		Game(
+				const int argc,
+				const char **argv,
+				const StrategyFactory& factory);
+
 		~Game();
 
 		/*
@@ -42,8 +46,9 @@ class Game
 
 		bool _debug;
 		bool _is_valid_input;
-
 		bool _is_in_background;		// Is game playing in background.
+
+		std::vector<std::string> _init_names;
 		int _steps_limit;
 		Mode *_mode;				// The playing gamemode.
 
