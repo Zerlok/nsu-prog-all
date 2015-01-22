@@ -205,15 +205,11 @@ Game::Game(
 						<< std::endl;
 			}
 
-			std::cout << "TournamentMode creation..." << std::endl;
-
 			_mode = new TournamentMode(
 					factory,
 					_init_names,
 					matrix,
 					_configs_path);
-
-			std::cout << "done." << std::endl;
 		}
 	}
 

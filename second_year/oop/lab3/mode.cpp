@@ -570,8 +570,9 @@ void TournamentMode::play(int limit)
 			<< std::endl;
 
 	std::vector<int> indexies;
-	int i = 0;
-	std::fill(indexies.begin(), indexies.end(), i++);
+	
+	for (int i = 0; i < _names.size(); i++)
+		indexies.push_back(i);
 
 	if (DEBUG) std::cout
 			<< DBG_HEADER
@@ -582,7 +583,7 @@ void TournamentMode::play(int limit)
 
 	std::vector<int> trio = trios.get_next();
 	
-	i = 0;
+	int i = 0;
 	while (!trio.empty())
 	{
 		if (DEBUG) std::cout
