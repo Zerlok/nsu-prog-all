@@ -20,3 +20,20 @@ int main(const int argc, const char **argv)
 
 	return 0;
 }
+
+// #include <iostream>
+// #include <vector>
+// #include <string>
+// #include "triod.h"
+
+
+// int main(const int argc, const char **argv)
+// {
+// 	std::vector<int> v = {1, 2, 3, 4, 5};
+
+// 	Triod<std::vector<int> > list(v);
+
+// 	list.show_trios();
+
+// 	return 0;
+// }

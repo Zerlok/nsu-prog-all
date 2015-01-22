@@ -148,10 +148,10 @@ Game::Game(
 	{
 		ScoreMatrix matrix;
 
-		if (_init_names.size() == 0)
+		if (_init_names.empty())
 			_init_names = get_several_randoms(factory.get_registered(), 3);
 
-		if (_matrix_path.size() == 0)
+		if (_matrix_path.empty())
 			matrix = get_default_matrix();
 
 		else
@@ -205,11 +205,15 @@ Game::Game(
 						<< std::endl;
 			}
 
+			std::cout << "TournamentMode creation..." << std::endl;
+
 			_mode = new TournamentMode(
 					factory,
 					_init_names,
 					matrix,
 					_configs_path);
+
+			std::cout << "done." << std::endl;
 		}
 	}
 
@@ -655,9 +659,7 @@ bool Game::_parse_cmd(const std::string& cmd)
 void Game::cmd_tick()
 {
 	if (DEBUG) std::cout
-			<< "Start ticking until "
-			<< _steps_limit
-			<< "..."
+			<< "Start ticking until " << _steps_limit << " ..."
 			<< std::endl;
 
 	_mode->play(_steps_limit);
@@ -725,10 +727,7 @@ void Game::run()
 			<< "     init list: ";
 			show_str_vector(_init_names);
 			std::cout << "\n" << std::endl;
-
-		std::cout << "Score matrix: hui znaet." << std::endl;
 	}
-
 
 	if (!_is_valid_input)
 		return;

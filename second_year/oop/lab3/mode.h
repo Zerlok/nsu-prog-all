@@ -21,18 +21,15 @@ class Mode
 
 		virtual void clear() = 0;
 		
-		virtual bool use(
-				const std::vector<std::string>& strategy_names) = 0;
+		virtual bool use(const std::vector<std::string>& strategy_names) = 0;
 
 		virtual std::vector<std::string> get_available_strategies_names() const = 0;
 		virtual std::vector<std::string> get_current_strategies_names() const = 0;
 		virtual std::vector<int> get_scores() const = 0;
 
-		virtual bool is_registered(
-				const std::string& strategy_name) const = 0;
+		virtual bool is_registered(const std::string& strategy_name) const = 0;
 
-		virtual bool are_registered(
-				const std::vector<std::string>& strategy_names) const = 0;
+		virtual bool are_registered(const std::vector<std::string>& strategy_names) const = 0;
 		
 		virtual void play(int limit) = 0;
 };
@@ -61,18 +58,15 @@ class DetailedMode : public Mode
 
 		virtual void clear();
 
-		virtual bool use(
-				const std::vector<std::string>& strategy_names);
+		virtual bool use(const std::vector<std::string>& strategy_names);
 
 		virtual std::vector<std::string> get_available_strategies_names() const;
 		virtual std::vector<std::string> get_current_strategies_names() const;
 		virtual std::vector<int> get_scores() const;
 
-		virtual bool is_registered(
-				const std::string& strategy_name) const;
+		virtual bool is_registered(const std::string& strategy_name) const;
 
-		virtual bool are_registered(
-				const std::vector<std::string>& strategy_names) const;
+		virtual bool are_registered(const std::vector<std::string>& strategy_names) const;
 
 		virtual void play(int limit = 1);
 
@@ -110,18 +104,15 @@ class FastMode : public Mode
 
 		virtual void clear();
 
-		virtual bool use(
-				const std::vector<std::string>& strategy_names);
+		virtual bool use(const std::vector<std::string>& strategy_names);
 
 		virtual std::vector<std::string> get_available_strategies_names() const;
 		virtual std::vector<std::string> get_current_strategies_names() const;
 		virtual std::vector<int> get_scores() const;
 
-		virtual bool is_registered(
-				const std::string& strategy_name) const;
+		virtual bool is_registered(const std::string& strategy_name) const;
 
-		virtual bool are_registered(
-				const std::vector<std::string>& strategy_names) const;
+		virtual bool are_registered(const std::vector<std::string>& strategy_names) const;
 
 		virtual void play(int limit = 1);
 
@@ -159,20 +150,19 @@ class TournamentMode : public Mode
 
 		virtual void clear();
 
-		virtual bool use(
-				const std::vector<std::string>& strategy_names);
+		virtual bool use(const std::vector<std::string>& strategy_names);
 
 		virtual std::vector<std::string> get_available_strategies_names() const;
 		virtual std::vector<std::string> get_current_strategies_names() const;
 		virtual std::vector<int> get_scores() const;
 
-		virtual bool is_registered(
-				const std::string& strategy_name) const;
+		virtual bool is_registered(const std::string& strategy_name) const;
 
-		virtual bool are_registered(
-				const std::vector<std::string>& strategy_names) const;
+		virtual bool are_registered(const std::vector<std::string>& strategy_names) const;
 
 		virtual void play(int limit = 1);
+
+		void play_threesome(std::vector<int> trio, int limit = 1);
 
 	private:
 		std::vector<int> _scoretable;

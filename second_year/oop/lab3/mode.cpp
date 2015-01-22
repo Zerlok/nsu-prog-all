@@ -1,5 +1,6 @@
 #include "main.h"
 
+#include "triod.h"
 #include "strategy.h"
 #include "factory.h"
 #include "mode.h"
@@ -258,7 +259,7 @@ FastMode::FastMode(
 	{
 		std::cout
 				<< DBG_HEADER
-				<< "Creating the DetailedMode...\n"
+				<< "Creating the FastMode...\n"
 				<< "Score matrix: "
 				<< std::endl;
 
@@ -269,7 +270,7 @@ FastMode::FastMode(
 
 	if (DEBUG) std::cout
 			<< DBG_HEADER
-			<< "DetailedMode creating finished."
+			<< "FastMode creating finished."
 			<< std::endl;
 }
 
@@ -449,7 +450,23 @@ TournamentMode::TournamentMode(
 		const std::string& configs_dir)
 	: _factory(factory), _matrix(matrix), _configs_dir(configs_dir)
 {
+	if (DEBUG)
+	{
+		std::cout
+				<< DBG_HEADER
+				<< "Creating the TournamentMode...\n"
+				<< "Score matrix: "
+				<< std::endl;
+
+		show_matrix(_matrix);
+	}
+
 	use(names);
+
+	if (DEBUG) std::cout
+			<< DBG_HEADER
+			<< "TournamentMode creating finished."
+			<< std::endl;
 }
 
 
@@ -547,5 +564,100 @@ bool TournamentMode::are_registered(
 
 void TournamentMode::play(int limit)
 {
-	std::cout << "Nah, you will not play this time :P" << std::endl;
+	if (DEBUG) std::cout
+			<< DBG_HEADER
+			<< "Start playing tournament mode..."
+			<< std::endl;
+
+	std::vector<int> indexies;
+	int i = 0;
+	std::fill(indexies.begin(), indexies.end(), i++);
+
+	if (DEBUG) std::cout
+			<< DBG_HEADER
+			<< "Creating trioles..."
+			<< std::endl;
+
+	Triod<std::vector<int> > trios(indexies);
+
+	std::vector<int> trio = trios.get_next();
+	
+	i = 0;
+	while (!trio.empty())
+	{
+		if (DEBUG) std::cout
+				<< DBG_HEADER
+				<< "Third num: " << i++
+				<< std::endl;
+
+		play_threesome(trio, limit);
+
+		trio = trios.get_next();
+	}
+}
+
+
+void TournamentMode::play_threesome(
+		std::vector<int> trio,
+		int limit)
+{
+	std::vector<Decision> decisions;
+	std::vector<Decision> opponents_decisions;
+
+	for (int step = 0; step < limit; step++)
+	{
+		
+		if (DEBUG) std::cout
+				<< DBG_HEADER
+				<< "   making decisions..."
+				<< std::endl;
+
+		// All strategies makes theirs decisions.
+		for (auto it = trio.begin();
+			it != trio.end();
+			it++)
+			decisions.push_back(_strategies[(*it)]->get_decision());
+
+		if (DEBUG) std::cout
+			<< "   learning decisions..."
+			<< std::endl;
+
+		// Each strategy learns opponents' decisions.
+		for (int i = 0; i < 3; i++)
+		{
+			for (int j = 1; j < 3; j++)
+				opponents_decisions.push_back(decisions[(i + j) % 3]);
+
+			_strategies[trio[i]]->learn_choices(opponents_decisions);
+
+			opponents_decisions.clear();
+		}
+
+		if (DEBUG)
+		{
+			std::cout
+					<< "   getting scores from matrix..."
+					<< std::endl;
+			// show_matrix(_matrix);
+		}
+
+		// Mode counts scores by using the game matrix.
+		std::vector<int> current_scores = _matrix.at(decisions);
+
+		if (DEBUG) std::cout
+			<< "   applying new scores..."
+			<< std::endl;
+
+		// Mode applies new scores to the scoretable.
+		for (int i = 0; i < 3; i++)
+			_scoretable[trio[i]] += current_scores[i];
+
+		if (DEBUG) std::cout
+			<< "   done"
+			<< std::endl;
+
+		// Clear tmp variables.
+		decisions.clear();
+		opponents_decisions.clear();
+	}
 }
