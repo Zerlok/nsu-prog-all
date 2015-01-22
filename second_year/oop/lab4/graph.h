@@ -69,7 +69,7 @@ class AdjacencyMatrix
 class IncidenceMatrix
 {
 	public:
-		IncidenceMatrix(const int v_num, const int e_num);
+		IncidenceMatrix(const int v_num = 1, const int e_num = 0);
 		~IncidenceMatrix();
 
 		IncidenceMatrix(const IncidenceMatrix& g);
@@ -90,6 +90,7 @@ class IncidenceMatrix
 
 	private:
 		std::vector< std::vector<int> > _matrix;
+		int _vg;
 };
 
 
