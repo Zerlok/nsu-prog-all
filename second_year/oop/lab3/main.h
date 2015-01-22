@@ -28,25 +28,24 @@ static const char ERR_HEADER[] = "# error: ";
 /*
  * Simple errors.
  */
-static const char ERR_INTEGER_EXPECTED[] = " - an integer was expected!";
-static const char ERR_TOO_BIG_INTEGER[] = " - too big integer.";
-static const char ERR_NEGATIVE_VALUE[] = " - must be grater or equals 0!";
+static const char ERR_INTEGER_EXPECTED[] = " - the integer was expected!";
+static const char ERR_TOO_BIG_INTEGER[] = " - too big integer!";
 
 /*
  * Errors for input line.
  */
-static const char ERR_UNKNOWN_FLAG[] = " - unknown flag.";
-static const char ERR_UNKNOWN_ARGUMENT[] = " - unknown argument.";
-static const char ERR_VALUE_EXPECTED[] = " - the value was expected!";
-static const char ERR_INVALID_ARGUMENT[] = " - input argument is invalid.";
-static const char ERR_INVALID_INPUT[] = " - invalid input. Try -h or --help to see how to start this program.";
-static const char ERR_INVALID_MODE[] = " - invalid game mode. Available modes are:\n   detailed    - ...\n   fast        - ...\n   tournament  - ...";
+static const char ERR_UNKNOWN_FLAG[] = " flag is unknown!";
+static const char ERR_UNKNOWN_ARGUMENT[] = " argument is unknown!";
+static const char ERR_VALUE_EXPECTED[] = " expects the value!";
+static const char ERR_INVALID_INPUT[] = " - invalid input! Try -h or --help to see how to start this program.";
+static const char ERR_INVALID_MODE[] = " - invalid game mode!\n";
+static const char ERR_INVLID_STRATEGIES_AMMOUNT[] = " - is invalid number of strategies (must be 3)";
+static const char ERR_STRATEGIES_IS_NOT_ENOUGH[] = " - too few strategies (must be 3 or more)";
 
 /*
  * Command Errors in foreground playing.
  */
-static const char ERR_CMD_VALUE_EXPECTED[] = " - the command value was expected!";
-static const char ERR_UNKNOWN_CMD[] = "- the unknown command. Try help to see available commands.";
+static const char ERR_UNKNOWN_CMD[] = " command is unknown. Try help to see available commands.";
 
 
 // --------------- WARNINGS ---------------
@@ -56,16 +55,17 @@ static const char WARNING_HEADER[] = "* warning: ";
 
 // --------------- HELP MESSAGES ---------------
 
-static const char HELP_DESCRIPTION[] = "(-h, --help)";
-static const char HELP_USAGE[] = "none";
-static const char HELP_FLAGS[] = "-h, --help  - shows this message";
-static const char HELP_COMMANDS[] = "These commands are available:\n   //list    - sdfasdf\n   // use [<strategy 1>...]  - play <n> iterations.\n   tick <n>  - play <n> iterations.\n   clear       - clear the static const char screen.\n   help        - show this help message.\n   quit        - exit the game.";
+static const char HELP_DESCRIPTION[] = "Description:\n   Three (or more) men sits in the jail and everyone wants to escape from there.\n   Each can cooperate with others or betray them all.\n   And the only thing is matter - you should quit as soon as it possible...\n";
+static const char HELP_USAGE[] = "Usage:\n   ./main [STRATEGIES] [FLAGS] [ARGUMENTS]\n   STRATEGIES - the names of strategies to play with (the number of strategies depends on mode you choose to play).\n";
+static const char HELP_AVAILABLE_MODES[] = "Available mods:\n   detailed    - play and stare at huge volume of process information (requires 3 strategies)\n   fast        - just play and show the total scores (requires 3 strategies)\n   tournament  - in development \%)";
+static const char HELP_FLAGS[] = "Flags and arguments:\n   -m, --mode     - select the mode [detailed|fast|tournament]\n   -s, --steps    - specify the number of iterations to play (game will running in background).\n   -x, --matrix   - specify the path to score matrix file.\n   -c, --configs  - specify the directory for strategies.\n   -h, --help     - shows this message\n";
+static const char HELP_COMMANDS[] = "These commands are available:\n   list                 - show available strategies.\n   use <s1> <s2> <s3>   - play with another <s1>, <s2> and <s3> strategies.\n   tick <n>             - play <n> iterations.\n   clear                - clear the screen.\n   help                 - show this help message.\n   quit                 - end the game.\n";
 
 
 // --------------- FOREGROUND STRINGS ---------------
 
 static const char CMD_IN[] = "> ";
-static const char MSG_GREETING[] = "Welcome into the Game (version 0.2 alpha pre-release)!\nType a command below, or use 'help' to see available commands.";
+static const char MSG_GREETING[] = "Welcome into the Prisoners Dilemma Game (version 1.0 beta)!\nType the command below, or use 'help' to see available commands.";
 static const char WARNING_YES_NO_ONLY[] = "Type 'yes' or 'no': ";
 
 
@@ -87,7 +87,7 @@ typedef std::map< std::vector<Decision>, std::vector<int> > ScoreMatrix;
 
 // --------------- STANDARD CONFIGURATION ---------------
 
-static const int STD_STEPS_LIMIT = 3;
+static const int STD_STEPS_LIMIT = 0;
 static const char STD_MODE_NAME[] = "detailed";
 static const char STD_CONFIGS_PATH[] = "defaults";
 static const char STD_MATRIX_PATH[] = "";

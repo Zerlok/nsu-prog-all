@@ -131,8 +131,8 @@ class FastMode : public Mode
 		std::vector<Strategy *> _strategies;
 
 		const StrategyFactory& _factory;
-		const ScoreMatrix& _matrix;
-		const std::string _configs_dir;
+		const ScoreMatrix _matrix;
+		const std::string& _configs_dir;
 };
 
 
@@ -180,8 +180,8 @@ class TournamentMode : public Mode
 		std::vector<Strategy *> _strategies;
 
 		const StrategyFactory& _factory;
-		const ScoreMatrix& _matrix;
-		const std::string _configs_dir;
+		const ScoreMatrix _matrix;
+		const std::string& _configs_dir;
 };
 
 

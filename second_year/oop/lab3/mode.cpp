@@ -160,13 +160,10 @@ void DetailedMode::play(int limit)
 	std::vector<Decision> decisions;
 	std::vector<Decision> opponents_decisions;
 	int len = _names.size();
-	int width = _names[0].size();
-
-	std::cout << _names[0].size() << " : " << _names[len-1].size() << std::endl;
+	int width = _names[0].size() + 3;
 
 	for (int step = 0; step < limit; step++)
 	{
-		std::cout << "Step: " << step << std::endl;
 		
 		if (DEBUG) std::cout
 				<< DBG_HEADER
@@ -220,23 +217,24 @@ void DetailedMode::play(int limit)
 		}
 
 		if (DEBUG) std::cout
-			<< " done."
+			<< "   done"
 			<< std::endl;
 
 		// This mode shows strategies' decisions in each step.
 		std::cout
-				<< std::setw(10) << "Name"
-				<< std::setw(10) << "Decision"
-				<< std::setw(10) << "Score"
-				// << std::setw(20) << ": Total score"
+				<< "Step: " << step << "\n"
+				<< std::setw(width) << "Name"
+				<< std::setw(width) << "Decision"
+				<< std::setw(width) << "Score"
 				<<std::endl;
 
 		for (int i = 0; i < len; i++) std::cout
-				<< std::setw(10) << _names[i]
-				<< std::setw(10) << decisions[i]
-				<< std::setw(10) << current_scores[i]
-				// << std::setw(20) << ": " << _scoretable[i]
-				<< std::endl;
+				<< std::setw(width) << _names[i]
+				<< std::setw(width) << decisions[i]
+				<< std::setw(width) << current_scores[i]
+				<< "\n";
+
+		std::cout << std::endl;
 
 		// Clear tmp variables.
 		decisions.clear();
@@ -256,7 +254,23 @@ FastMode::FastMode(
 		const std::string& configs_dir)
 	: _factory(factory), _matrix(matrix), _configs_dir(configs_dir)
 {
+	if (DEBUG)
+	{
+		std::cout
+				<< DBG_HEADER
+				<< "Creating the DetailedMode...\n"
+				<< "Score matrix: "
+				<< std::endl;
+
+		show_matrix(_matrix);
+	}
+
 	use(names);
+
+	if (DEBUG) std::cout
+			<< DBG_HEADER
+			<< "DetailedMode creating finished."
+			<< std::endl;
 }
 
 
@@ -357,18 +371,25 @@ void FastMode::play(int limit)
 	std::vector<Decision> decisions;
 	std::vector<Decision> opponents_decisions;
 	int len = _names.size();
+	int width = _names[0].size() + 3;
 
 	for (int step = 0; step < limit; step++)
 	{
+		
+		if (DEBUG) std::cout
+				<< DBG_HEADER
+				<< "   making decisions..."
+				<< std::endl;
+
 		// All strategies makes theirs decisions.
 		for (auto it = _strategies.begin();
 			it != _strategies.end();
 			it++)
-		{
-			decisions.push_back(
-					(*it)->get_decision()
-			);
-		}
+			decisions.push_back((*it)->get_decision());
+
+		if (DEBUG) std::cout
+			<< "   learning decisions..."
+			<< std::endl;
 
 		// Each strategy learns opponents' decisions.
 		for (int i = 0; i < len; i++)
@@ -381,9 +402,21 @@ void FastMode::play(int limit)
 			opponents_decisions.clear();
 		}
 
+		if (DEBUG)
+		{
+			std::cout
+					<< "   getting scores from matrix..."
+					<< std::endl;
+			// show_matrix(_matrix);
+		}
+
 		// Mode counts scores by using the game matrix.
 		std::vector<int> current_scores = _matrix.at(decisions);
 		auto cur = current_scores.begin();
+
+		if (DEBUG) std::cout
+			<< "   applying new scores..."
+			<< std::endl;
 
 		// Mode applies new scores to the scoretable.
 		for (auto it = _scoretable.begin();
@@ -393,6 +426,14 @@ void FastMode::play(int limit)
 			(*it) += (*cur);
 			cur++;
 		}
+
+		if (DEBUG) std::cout
+			<< "   done"
+			<< std::endl;
+
+		// Clear tmp variables.
+		decisions.clear();
+		opponents_decisions.clear();
 	}
 }
 
@@ -507,45 +548,4 @@ bool TournamentMode::are_registered(
 void TournamentMode::play(int limit)
 {
 	std::cout << "Nah, you will not play this time :P" << std::endl;
-
-	// std::vector<Decision> decisions;
-	// std::vector<Decision> opponents_decisions;
-	// int len = _names.size();
-
-	// for (int step = 0; step < limit; step++)
-	// {
-	// 	// All strategies makes theirs decisions.
-	// 	for (auto it = _strategies.begin();
-	// 		it != _strategies.end();
-	// 		it++)
-	// 	{
-	// 		decisions.push_back(
-	// 				(*it)->get_decision()
-	// 		);
-	// 	}
-
-	// 	// Each strategy learns opponents' decisions.
-	// 	for (int i = 0; i < len; i++)
-	// 	{
-	// 		for (int j = 1; j < len; j++)
-	// 			opponents_decisions.push_back(decisions[(i + j) % len]);
-
-	// 		_strategies[i]->learn_choices(opponents_decisions);
-
-	// 		opponents_decisions.clear();
-	// 	}
-
-	// 	// Mode counts scores by using the game matrix.
-	// 	std::vector<int> current_scores = _matrix.at(decisions);
-	// 	auto cur = current_scores.begin();
-
-	// 	// Mode applies new scores to the scoretable.
-	// 	for (auto it = _scoretable.begin();
-	// 		it != _scoretable.end();
-	// 		it++)
-	// 	{
-	// 		(*it) += (*cur);
-	// 		cur++;
-	// 	}
-	// }
 }

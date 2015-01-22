@@ -158,25 +158,59 @@ Game::Game(
 			matrix = get_matrix_from_file(_matrix_path);
 
 		if (_mode_name == "detailed")
+		{
+			if (_init_names.size() != 3)
+			{
+				_is_valid_input = false;
+				std::cout
+						<< ERR_HEADER
+						<< _init_names.size()
+						<< ERR_INVLID_STRATEGIES_AMMOUNT
+						<< std::endl;
+			}
+
 			_mode = new DetailedMode(
 					factory,
 					_init_names,
 					matrix,
 					_configs_path);
-
+		}
 		else if (_mode_name == "fast")
+		{
+			if (_init_names.size() != 3)
+			{
+				_is_valid_input = false;
+				std::cout
+						<< ERR_HEADER
+						<< _init_names.size()
+						<< ERR_INVLID_STRATEGIES_AMMOUNT
+						<< std::endl;
+			}
+
 			_mode = new FastMode(
 					factory,
 					_init_names,
 					matrix,
 					_configs_path);
-
+		}
 		else if (_mode_name == "tournament")
+		{
+			if (_init_names.size() < 3)
+			{
+				_is_valid_input = false;
+				std::cout
+						<< ERR_HEADER
+						<< _init_names.size()
+						<< ERR_STRATEGIES_IS_NOT_ENOUGH
+						<< std::endl;
+			}
+
 			_mode = new TournamentMode(
 					factory,
 					_init_names,
 					matrix,
 					_configs_path);
+		}
 	}
 
 	if (DEBUG) std::cout
@@ -363,7 +397,12 @@ void Game::_parse_input(const int argc, const char **argv)
 			else if (arg_name == "help")
 			{
 				_is_in_background = true;
-				std::cout << HELP_USAGE << std::endl;
+				std::cout
+						<< HELP_DESCRIPTION << "\n"
+						<< HELP_USAGE << "\n"
+						<< HELP_FLAGS << "\n"
+						<< HELP_AVAILABLE_MODES << "\n"
+						<< std::endl;
 			}
 			else
 			{
@@ -634,14 +673,9 @@ void Game::cmd_clear()
 
 void Game::cmd_list()
 {
-	std::cout << "List of strategies:" << std::endl;
+	std::cout << "List of available strategies:" << std::endl;
 
-	const std::vector<std::string> names = _mode->get_available_strategies_names();
-
-	std::copy(
-			names.begin(),
-			names.end(),
-			std::ostream_iterator<std::string>(std::cout, " "));
+	show_str_vector(_mode->get_available_strategies_names());
 
 	std::cout << std::endl;
 }
@@ -656,20 +690,23 @@ void Game::cmd_use(
 
 void Game::show_scores()
 {
-	std::cout << "Scoretable:" << std::endl;
+	std::cout << "Total scores:" << std::endl;
 
-	std::vector<std::string> strategies = _mode->get_current_strategies_names();
+	std::vector<std::string> names = _mode->get_current_strategies_names();
 	std::vector<int> scores = _mode->get_scores();
 
-	for (int i = 0; i < strategies.size(); i++) std::cout
-			<< strategies[i] << " : " << scores[i]
-			<< std::endl;
+	int width = names[0].size() + 3;
+
+	for (int i = 0; i < names.size(); i++) std::cout
+			<< std::setw(width) << names[i] << " : " << scores[i] << std::endl;
 }
 
 
 void Game::cmd_help()
 {
-	std::cout << HELP_COMMANDS << std::endl;
+	std::cout
+			<< HELP_COMMANDS
+			<< std::endl;
 }
 
 
@@ -705,7 +742,8 @@ void Game::run()
 
 		_mode->play(_steps_limit);
 
-		show_scores();
+		if (_steps_limit > 0)
+			show_scores();
 	}
 	else // Run in foreground.
 	{
