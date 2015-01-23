@@ -10,15 +10,16 @@ void show_vertex(const VertexType& v)
 
 
 template <class Container>
-const Container get_unvisited_vertices(
-		const Container& vertices,
-		const Container& order_list)
+Container get_unvisited_vertices(
+		const Container& old_list,
+		const Container& order_list,
+		const Container& neighbours)
 {
-	Container unvisited_vertices;
+	Container unvisited_vertices(old_list);
 
 	for (auto vertex : vertices)
-		if (std::find(order_list.begin(), order_list.end(), vertex)
-			== order_list.end())
+		if ((std::find(order_list.begin(), order_list.end(), vertex) == order_list.end())
+			&& (unvisited_vertices))
 			unvisited_vertices.push_back(vertex);
 
 	return unvisited_vertices;
@@ -28,34 +29,36 @@ const Container get_unvisited_vertices(
 
 template <
 		class Graph,
-		class VertexType,
-		class Container>
+		class VertexType>
 void walk_dfs(
 		const Graph& graph,
-		const VertexType& vertex,
-		Container& visited_list)
+		const VertexType& vertex)
 {
-	if (std::find(visited_list.begin(), visited_list.end(), vertex) == visited_list.end())
+	// std::vector<VertexType> neighbours = ;
+	std::vector<VertexType> visited = {};
+	VertexType v = vertex;
+	visited.push_back(vertex);
+	std::vector<VertexType> unvisited = get_unvisited_vertices(graph.get_nearest(vertex), visited);
+	
+	while (!unvisited.empty())
 	{
-		visited_list.push_back(vertex);
+		v = unvisited.back();
+		unvisited.pop_back();
 
-		const Container unvisited_vertices = get_unvisited_vertices(
-				graph.get_nearest(vertex),
-				visited_list);
+		if (std::find(visited.begin(), visited.end(), v)
+			== visited.end())
+		{
+			visited.push_back(v);
+			std::cout << v << std::endl;
+		}
 
-		// std::cout << "{\n"
-		// 		<< "        num: " << vertex << "\n"
-		// 		<< "     nearby: " << graph.get_nearest(vertex) << "\n"
-		// 		<< "    visited: " << visited_list << "\n"
-		// 		<< "  unvisited: " << get_unvisited_vertices(graph.get_nearest(vertex), visited_list) << "\n}"
-		// 		<< std::endl;
-
-		for (auto v : unvisited_vertices)
-			walk_dfs<Graph, VertexType, Container>(graph, v, visited_list);
-			// visited_list.push_back(v);
-		
-		std::cout << vertex << std::endl;
+		unvisited = get_unvisited_vertices(
+				unvisited,
+				visited,
+				graph.get_nearest(v));
 	}
+	
+	std::cout << vertex << std::endl;
 }
 
 
