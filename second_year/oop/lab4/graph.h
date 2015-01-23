@@ -47,11 +47,9 @@ class AdjacencyMatrix
 
 		AdjacencyMatrix(const AdjacencyMatrix& m);
 
-		const std::vector<int>& operator[](int v_index) const;
-
 		bool is_linked(const int v1, const int v2) const;
 		int count_edges(const int v_indx) const;
-		const std::vector<int>& get_arounding_vertices(const int v_indx) const;
+		const std::vector<int> get_nearest(const int v_indx) const;
 
 		void link(const int v1, const int v2);
 		void link(const int v_indx, const std::vector<int>& vertices);
@@ -74,11 +72,9 @@ class IncidenceMatrix
 
 		IncidenceMatrix(const IncidenceMatrix& g);
 
-		const std::vector<int>& operator[](const int v_index) const;
-
 		bool is_linked(const int v1, const int v2) const;
 		int count_edges(const int v_indx) const;
-		const std::vector<int>& get_arounding_vertices(const int v_indx) const;
+		const std::vector<int> get_nearest(const int v_indx) const;
 
 		void link(const int v1, const int v2);
 		void link(const int v_indx, const std::vector<int>& vertices);

@@ -25,12 +25,6 @@ AdjacencyMatrix::AdjacencyMatrix(const AdjacencyMatrix& m)
 }
 
 
-const std::vector<int>& AdjacencyMatrix::operator[](const int v_index) const
-{
-	return get_arounding_vertices(v_index);
-}
-
-
 bool AdjacencyMatrix::is_linked(const int v1, const int v2) const
 {
 	return _matrix[v1][v2];
@@ -50,14 +44,29 @@ int AdjacencyMatrix::count_edges(const int v_indx) const
 }
 
 
-const std::vector<int>& AdjacencyMatrix::get_arounding_vertices(const int v_indx) const
+const std::vector<int> AdjacencyMatrix::get_nearest(const int v_indx) const
 {
-	return _matrix[v_indx];
+	int indx = 0;
+	std::vector<int> neighbours;
+
+	for (auto v : _matrix[v_indx])
+	{
+		if (v == 1)
+			neighbours.push_back(indx);
+
+		indx++;
+	}
+
+	return neighbours;
 }
 
 
 void AdjacencyMatrix::link(const int v1, const int v2)
 {
+	if ((v1 >= _matrix.size())
+		|| (v2 >= _matrix.size()))
+		return;
+
 	_matrix[v1][v2] = 1;
 	_matrix[v2][v1] = 1;
 }
@@ -119,21 +128,12 @@ IncidenceMatrix::IncidenceMatrix(const IncidenceMatrix& m)
 }
 
 
-const std::vector<int>& IncidenceMatrix::operator[](const int v_index) const
-{
-	get_arounding_vertices(v_index);
-}
-
-
 bool IncidenceMatrix::is_linked(const int v1, const int v2) const
 {
-	std::cout << "Is linked " << v1 << " - " << v2 << std::endl;
+	// std::cout << "Is linked " << v1 << " - " << v2 << std::endl;
 
 	if (_matrix.empty())
 		return false;
-
-	std::cout << v1 << " : " << _matrix[v1];
-	std::cout << v2 << " : " << _matrix[v2];
 
 	for (auto edge : _matrix)
 		if ((edge[v1] == 1)
@@ -156,10 +156,36 @@ int IncidenceMatrix::count_edges(const int v_indx) const
 }
 
 
-const std::vector<int>& IncidenceMatrix::get_arounding_vertices(const int v_indx) const
+const std::vector<int> IncidenceMatrix::get_nearest(const int v_indx) const
 {
-	return _matrix[v_indx];
+	//     0  1  2  3  4  5
+	// e1 [0, 0, 0, 1, 0, 1]
+	// e2 [1, 0, 1, 0, 0, 0]
+	// e3 [0, 0, 0, 1, 1, 0]
+	// e4 [0, 1, 0, 0, 0, 1]
+
+	std::vector<int> neighbours;
+
+	for (auto edge : _matrix)
+	{
+		if (edge[v_indx] == 1)
+		{
+			int indx = 0;
+
+			for (auto v : edge)
+			{
+				if ((v != v_indx)
+					&& (v == 1))
+					neighbours.push_back(indx);
+
+				indx++;
+			}
+		}
+	}
+
+	return neighbours;
 }
+
 
 void IncidenceMatrix::link(const int v1, const int v2)
 {
@@ -211,6 +237,13 @@ void IncidenceMatrix::unlink(const int v_indx, const std::vector<int>& vertices)
 void IncidenceMatrix::show() const
 {
 	std::cout << "IncidenceMatrix:" << std::endl;
+
+	if (_matrix.empty())
+	{
+		std::cout << "empty\n" << std::endl;
+		return;
+	}
+
 	for (auto x : _matrix)
 	{
 		for (auto y : x)

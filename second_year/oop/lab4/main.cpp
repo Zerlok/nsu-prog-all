@@ -6,9 +6,10 @@
 
 int main(int argc, char **argv)
 {
-	// AdjacencyMatrix graph(4);
+	AdjacencyMatrix graph(6);
+	std::vector<int> order;
 	// std::vector<int> vertices = {1, 3};
-	IncidenceMatrix graph(6);
+	// IncidenceMatrix graph(6);
 
 	graph.show();
 
@@ -19,8 +20,10 @@ int main(int argc, char **argv)
 	graph.link(2, 3);
 	graph.link(3, 4);
 	graph.link(3, 5);
+	
+	graph.show();
 
-	graph.show();	
+	walk_dfs<AdjacencyMatrix, int, std::vector<int> >(graph, 0, order);
 
 	return 0;
 }
