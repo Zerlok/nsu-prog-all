@@ -17,7 +17,7 @@ void VSHELL_init(int argc, char **argv, SHELL *shell)
 
 void VSHELL_run(SHELL *shell)
 {
-	int code;
+	int code = CODE_WAIT;
 	char line[LINE_BUFF];
 
 	printf("\nRunning the shell...\n");
@@ -27,21 +27,22 @@ void VSHELL_run(SHELL *shell)
 	
 	printf("Welcome to the Vshell (v0.001 alpha).\n");
 
-	fgets(line, sizeof(line), stdin);
+	while(code != CODE_EXIT)
+	{
+		printf(">>> ");
+		
+		fgets(line, sizeof(line), stdin);
+		
+		code = parse_cmd(line, shell->cmds);
 
-	code = parse_cmd(line, shell->cmds);
-
-	if (code == CODE_EXIT)
-	{
-		printf("\t The exit code was caught.\n");
-	}
-	else if (code == CODE_UNKNOWN_CMD)
-	{
-		printf("\t The unknown cmd code was caught.\n");
-	}
-	else
-	{
-		printf("\t working...\n");
+		if (code == CODE_UNKNOWN_CMD)
+		{
+			printf("### unknown cmd.\n");
+		}
+		else
+		{
+			printf("\t working...\n");
+		}
 	}
 }
 

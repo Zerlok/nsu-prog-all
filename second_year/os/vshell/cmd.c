@@ -10,27 +10,38 @@ void CMD_exit()
 
 Cmd *create_cmd(char *name, void (*func)(void))
 {
-	printf("Creating the %s command...\n", name);
+	if ((name != NULL)
+		&& (func != NULL))
+	{
+		printf("Creating the %s command...\n", name);
 
-	Cmd *command = (Cmd*)malloc(sizeof(Cmd));
+		Cmd *command = (Cmd*)malloc(sizeof(Cmd));
 
-	printf("\t memory was allocated\n");
+		printf("\t memory was allocated\n");
 
-	command->name = (char*)calloc(sizeof(char), strlen(name));
-	strcpy(command->name, name);
+		command->name = (char*)calloc(sizeof(char), strlen(name));
+		strcpy(command->name, name);
 
-	printf("\t %s name was copied\n", name);
+		printf("\t %s name was copied\n", name);
 
-	command->func = func;
+		command->func = func;
 
-	printf("\t %s function was declared\n", name);
+		printf("\t %s function was declared\n", name);
 
-	return command;
+		return command;
+	}
+	else
+	{
+		return NULL;
+	}
 }
 
 
 Commands *get_commands(int length)
 {
+	if (length < 1)
+		length = 1;
+
 	printf("Creating the array of commands...\n");
 
 	Commands *cmds = (Commands*)malloc(sizeof(Commands));
@@ -58,11 +69,15 @@ void check_length_and_expand_commands(Commands *cmds)
 
 void push_into_commands(char *cmd_name, void (*function)(void), Commands *cmds)
 {
-	check_length_and_expand_commands(cmds);
-	
-	cmds->used_length++;
-	
-	cmds->data[cmds->used_length] = create_cmd(cmd_name, function);
+	if ((cmd_name != NULL)
+		&& (function != NULL))
+	{
+		check_length_and_expand_commands(cmds);
+		
+		cmds->data[cmds->used_length] = create_cmd(cmd_name, function);
+		
+		cmds->used_length++;
+	}
 }
 
 
@@ -79,7 +94,7 @@ void show_commands(Commands *cmds)
 			printf("(%s : %p) ", (cmds->data[i])->name, (cmds->data[i])->func);
 		}
 
-		printf("\b\b");
+		printf("\b");
 	}
 
 	printf("] (%ld, %ld)\n", cmds->used_length, cmds->allocated_length);
