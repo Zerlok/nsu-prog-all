@@ -21,6 +21,8 @@ Commands *get_commands(int length);
 void check_length_and_expand_commands(Commands *cmds);
 void push_into_commands(char *cmd_name, void (*function)(void), Commands *cmds);
 void show_commands(Commands *cmds);
+void clear_commands(Commands *cmds);
+void delete_commands(Commands *cmds);
 
 
 // __CMD_H__

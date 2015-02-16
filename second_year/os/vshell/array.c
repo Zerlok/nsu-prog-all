@@ -62,3 +62,22 @@ void show_array(StringArray *array)
 
 	printf("] (%ld, %ld)\n", array->used_length, array->allocated_length);
 }
+
+
+void clear_array(StringArray *array)
+{
+	size_t i;
+
+	for (i = 0; i < array->used_length; i++)
+		free(array->data[i]);
+
+	array->used_length = 0;
+}
+
+
+void delete_array(StringArray *array)
+{
+	clear_array(array);
+
+	free(array->data);
+}

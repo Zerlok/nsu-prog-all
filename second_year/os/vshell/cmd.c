@@ -99,3 +99,22 @@ void show_commands(Commands *cmds)
 
 	printf("] (%ld, %ld)\n", cmds->used_length, cmds->allocated_length);
 }
+
+
+void clear_commands(Commands *cmds)
+{
+	size_t i;
+
+	for (i = 0; i < cmds->used_length; i++)
+		free((cmds->data[i])->name);
+
+	cmds->used_length = 0;
+}
+
+
+void delete_commands(Commands *cmds)
+{
+	clear_commands(cmds);
+
+	free(cmds->data);
+}
