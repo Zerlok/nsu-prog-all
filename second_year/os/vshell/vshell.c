@@ -1,6 +1,6 @@
 #include "main.h"
 
-#include "history.h"
+#include "array.h"
 #include "cmd.h"
 #include "vshell.h"
 
@@ -9,42 +9,50 @@ void VSHELL_init(int argc, char **argv, SHELL *shell)
 {
 	printf("\nInitializing the shell...\n");
 
-	printf("Creating the history...\n");
-	shell->history = get_history(0);
-
-	printf("Creating the array of commands...\n");
+	shell->username = "zerlok";
+	shell->history = get_array(0);
 	shell->cmds = get_commands(10);
-}
-
-
-int parse_cmd(char *line, Commands *cmds)
-{
-	if (!strcmp(line, cmds->name[0]))
-		return CMD_EXIT;
-
-	size_t i;
-
-	for (i = 1; i < cmds->used_length; i++)
-	{
-		if (!stdcmp(line, cmds->name[i]))
-			*(cmds->func[i])();
-	}
 }
 
 
 void VSHELL_run(SHELL *shell)
 {
-	int cmd = CMD_EXIT;
+	int code;
+	char line[LINE_BUFF];
 
 	printf("\nRunning the shell...\n");
 
-	show_history(shell->history);
+	show_array(shell->history);
 	show_commands(shell->cmds);
 	
 	printf("Welcome to the Vshell (v0.001 alpha).\n");
 
-	// while (cmd == CMD_EXIT)
-	// {
-	// 	scanf("%s", );
-	// }
+	fgets(line, sizeof(line), stdin);
+
+	code = parse_cmd(line, shell->cmds);
+
+	if (code == CODE_EXIT)
+	{
+		printf("\t The exit code was caught.\n");
+	}
+	else if (code == CODE_UNKNOWN_CMD)
+	{
+		printf("\t The unknown cmd code was caught.\n");
+	}
+	else
+	{
+		printf("\t working...\n");
+	}
+}
+
+
+void VSHELL_close(SHELL *shell)
+{
+	printf("\nClosing the shell...\n");
+
+	printf("Deleting the history...\n");
+	free(shell->history);
+
+	printf("Deleting the commands...\n");
+	free(shell->cmds);
 }
