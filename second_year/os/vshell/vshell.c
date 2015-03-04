@@ -5,23 +5,44 @@
 #include "vshell.h"
 
 
-void handle_signal(int signum)
-{
-	printf("\n[%d] ", signum);
-	fflush(stdout);
-}
+// void handle_signal(int signum)
+// {
+// 	printf("\n%d signal was caught!", signum);
+// 	fflush(stdout);
+// }
 
 
 void VSHELL_init(int argc, char **argv, SHELL *shell)
 {
-	printf("\nInitializing the shell...\n");
+	int i;
+	for (i = 1; i < argc; i++)
+		if (!strcmp(argv[i], "-d"))
+			DEBUG = 1;
+
+	if (DEBUG)
+		printf("\nInitializing the shell...\n");
 
 	shell->username = "zerlok";
 	shell->history = get_array(0);
 	shell->cmds = get_commands(10);
 
-	show_array(shell->history);
-	show_commands(shell->cmds);
+	if (DEBUG)
+	{
+		printf("History array: ");
+		show_array(shell->history);
+
+		printf("Cmds array: ");
+		show_commands(shell->cmds);
+	}
+}
+
+
+void VSHELL_add_command(
+		SHELL *shell,
+		char *command_name,
+		void (*function)(void))
+{
+	push_into_commands(command_name, function, shell->cmds);
 }
 
 
@@ -34,53 +55,33 @@ void VSHELL_run(SHELL *shell)
 	char line[LINE_BUFF];
 	bzero(line, LINE_BUFF);
 
-	signal(SIGINT, SIG_IGN);
-	signal(SIGINT, handle_signal);
+	if (DEBUG)
+		printf("\nRunning the shell...\n");
 
-	printf("\nRunning the shell...\n");
-	
-	// printf(">>> ");
-	// while ((c != EOF)
-	// 	&& (code != CODE_EXIT))
+	// signal(SIGINT, SIG_IGN);
+	// signal(SIGINT, handle_signal);
+
 	while(code != CODE_EXIT)
 	{
-		// while (c != LINE_END)
-		// {
-		// 	c = getchar();
-
-		// 	if (c == EOF)
-		// 	{
-		// 		break;
-		// 	}
-		// 	else if (c == LINE_SEPARATOR)
-		// 	{
-		// 		push_into_array(line, args);
-		// 		bzero(line, LINE_BUFF);
-		// 		indx = 0;
-		// 	}
-		// 	else 
-		// 	{
-		// 		line[indx++] = c;
-		// 	}
-		// }
 		printf(">>> ");
 
 		fgets(line, LINE_BUFF, stdin);
-
 		split_line_to_args(line, args);
-		
 		code = do_cmd(args, shell->cmds);
+
+		if (code != CODE_WAIT)
+			push_into_array(line, shell->history);
 
 		switch (code)
 		{
+			case CODE_SUCCESS:
+			{
+				printf("%s: command was run.\n", args->data[0]);
+				break;
+			}
 			case CODE_UNKNOWN_CMD:
 			{
 				printf("%s: command not found.\n", args->data[0]);
-				break;
-			}
-			case CODE_SUCCESS:
-			{
-				printf("%s: done.\n", args->data[0]);
 				break;
 			}
 		}
@@ -92,11 +93,17 @@ void VSHELL_run(SHELL *shell)
 
 void VSHELL_close(SHELL *shell)
 {
-	printf("\nClosing the shell...\n");
+	if (DEBUG)
+		printf("\nClosing the shell...\n");
 
-	printf("Deleting the history...\n");
+	if (DEBUG)
+	{
+		printf("Deleting the history of commands...\n");
+		// show_array(shell->history);
+	}
 	delete_array(shell->history);
 
-	printf("Deleting the commands...\n");
+	if (DEBUG)
+		printf("Deleting the commands...\n");
 	delete_commands(shell->cmds);
 }
