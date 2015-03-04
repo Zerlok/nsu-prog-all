@@ -1,8 +1,7 @@
 package com.company;
 
 
-import java.io.BufferedReader;
-import java.io.IOException;
+import java.io.*;
 
 
 /**
@@ -12,8 +11,8 @@ import java.io.IOException;
 
 public class WordParser {
 
-    public WordParser(BufferedReader buffer, WordCounter counter) {
-        fileBuffer = buffer;
+    public WordParser(File inputFile, WordCounter counter) {
+        file = inputFile;
         wordsCounter = counter;
     }
 
@@ -21,6 +20,7 @@ public class WordParser {
         try {
             String line;
             String[] wordsArray;
+            BufferedReader fileBuffer = new BufferedReader(new FileReader(file.getAbsolutePath()));
 
             while ((line = fileBuffer.readLine()) != null) {
                 if (line.isEmpty()) continue;
@@ -34,6 +34,9 @@ public class WordParser {
                 }
             }
 
+        } catch (FileNotFoundException e) {
+            System.out.println("File " + file.getAbsolutePath() + " not found!");
+
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -44,6 +47,6 @@ public class WordParser {
     // because the underscore symbol represents as a word symbol O_o
     // private static String spacesPattern = "(^\\W+)|(\\W*\\s+\\W*)|(\\W+$)";
 
-    private BufferedReader fileBuffer;
+    private File file;
     private WordCounter wordsCounter;
 }

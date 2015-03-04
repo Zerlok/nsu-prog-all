@@ -63,11 +63,17 @@ class ValueComparator implements Comparator<String> {
         if (valA > valB) {
             return -1;
 
-        } else if (valA < valB){
+        } else if (valA < valB) {
+            return 1;
+
+        } else if (keyA.length() > keyB.length()) {
+            return -1;
+
+        } else if (keyB.length() > keyA.length()) {
             return 1;
 
         } else {
-            return (keyA.compareTo(keyB));
+            return keyA.compareTo(keyB);
         }
     }
 

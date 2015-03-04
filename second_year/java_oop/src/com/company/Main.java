@@ -1,29 +1,44 @@
 package com.company;
 
 
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
+import java.io.*;
 
 
 public class Main {
 
     public static void main(String[] args) {
+        if (args.length > 2) {
+            System.out.println("Too many arguments, required file paths: [input] [output]");
+            return;
+
+        } else if (args.length < 2) {
+            System.out.println("Too few arguments, required file paths: [input] [output]");
+            return;
+        }
+
         try {
-            FileReader file = new FileReader(args[0]);
-            BufferedReader buffer = new BufferedReader(file);
+            File input= new File(args[0]);
+            File output = new File(args[1]);
+
+            if (!output.exists()){
+                output.createNewFile();
+            }
 
             WordCounter counter = new WordCounter();
-            WordParser parser = new WordParser(buffer, counter);
+            WordParser parser = new WordParser(input, counter);
             WordView view = new WordView(counter);
 
             parser.readWords();
 
-            view.summarize();
+            view.summarizeIntoFile(output);
+
+            System.out.println("Done.");
 
         } catch (FileNotFoundException e) {
-            e.printStackTrace();
+            System.out.println("File not found!");
 
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }
