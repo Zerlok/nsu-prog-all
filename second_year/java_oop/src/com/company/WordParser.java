@@ -28,7 +28,9 @@ public class WordParser {
                 wordsArray = line.split(spacesPattern);
 
                 for (String word : wordsArray) {
-                    wordsCounter.pushWord(word);
+                    if (!word.isEmpty()) {
+                        wordsCounter.pushWord(word);
+                    }
                 }
             }
 
@@ -37,7 +39,10 @@ public class WordParser {
         }
     }
 
-    private static String spacesPattern = "((\\W|[_])*\\s+(\\W|[_])*)|((\\W|[_])+$)";
+    private static String spacesPattern = "(^(\\W|[_])+)|((\\W|[_])*\\s+(\\W|[_])*)|((\\W|[_])+$)";
+    // The following spacesPattern does not work,
+    // because the underscore symbol represents as a word symbol O_o
+    // private static String spacesPattern = "(^\\W+)|(\\W*\\s+\\W*)|(\\W+$)";
 
     private BufferedReader fileBuffer;
     private WordCounter wordsCounter;

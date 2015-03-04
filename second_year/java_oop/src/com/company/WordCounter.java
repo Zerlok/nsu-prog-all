@@ -2,6 +2,7 @@ package com.company;
 
 
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -15,7 +16,7 @@ public class WordCounter {
 
     public WordCounter() {
         wordsNum = 0;
-        wordsMap = new TreeMap<String, Integer>();
+        wordsMap = new HashMap<String, Integer>();
     }
 
     public void pushWord(String word) {
