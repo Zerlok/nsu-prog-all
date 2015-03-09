@@ -40,9 +40,5 @@
 #define CODE_UNKNOWN_CMD 3
 
 
-// For debug only
-static int DEBUG = 1;
-
-
 // __MAIN_H__
 #endif

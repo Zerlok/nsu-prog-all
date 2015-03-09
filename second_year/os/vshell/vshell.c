@@ -1,5 +1,6 @@
 #include "main.h"
 
+#include "debug.h"
 #include "array.h"
 #include "cmd.h"
 #include "parser.h"
@@ -20,15 +21,13 @@ void VSHELL_init(int argc, char **argv, SHELL *shell)
 		if (!strcmp(argv[i], "-d"))
 			DEBUG = 1;
 
-	if (DEBUG)
-		printf("\nInitializing the shell ... ");
+	DEBUG_START("Initializing the shell ...");
 
 	shell->username = "zerlok";
 	shell->history = get_string_array(0);
 	shell->cmds = get_commands_array(10);
 
-	if (DEBUG)
-		printf("done.\n");
+	DEBUG_END("done.");
 }
 
 
@@ -42,13 +41,11 @@ int VSHELL_add_command(
 		|| (function == NULL))
 		return 0;
 
-	if (DEBUG)
-		printf("\nCreating a new command in the shell ... ");
+	DEBUG_START("Creating a new command in the shell ...");
 
 	push_into_commands_array(command_name, function, shell->cmds);
 
-	if (DEBUG)
-		printf("done.\n");
+	DEBUG_END("done.");
 
 	return 1;
 }
@@ -63,16 +60,9 @@ void VSHELL_run(SHELL *shell)
 	char line[LINE_LEN];
 	bzero(line, LINE_LEN);
 
-	if (DEBUG)
-	{
-		printf("\nRunning the shell ... \n");
-
-		printf("Cmds array: ");
-		show_commands_array(shell->cmds, stdout);
-	
-		printf("History array: ");
-		show_string_array(shell->history, stdout);
-	}
+	DEBUG_START("Running the shell ...");
+	// DEBUG_SHOW(shell->cmds);
+	// DEBUG_SHOW(shell->history, show_string_array);
 
 	// signal(SIGINT, SIG_IGN);
 	// signal(SIGINT, handle_signal);
@@ -82,11 +72,11 @@ void VSHELL_run(SHELL *shell)
 		printf(LINE_START_SYMBOL);
 
 		fgets(line, LINE_LEN, stdin);
-		printf("Input line: %s\n", line);
 		
 		cmd_call = get_command_call(line);
 
-		if (cmd_call->is_valid)
+		if ((cmd_call != NULL)
+			&& (cmd_call->is_valid))
 			code = do_cmd(cmd_call, shell->cmds);
 
 		// if (code != CODE_WAIT)
@@ -116,13 +106,14 @@ void VSHELL_run(SHELL *shell)
 		clear_command_call(cmd_call);
 	}
 
-	if (DEBUG)
-		printf("\nDone.\n");
+	DEBUG_END("done.");
 }
 
 
 void VSHELL_dump(SHELL *shell)
 {
+	DEBUG_START("Dumping the shell into the file ...");
+
 	FILE *dump_stream = fopen(STD_DUMP_FILENAME, "w");
 
 	if (dump_stream == NULL)
@@ -135,22 +126,20 @@ void VSHELL_dump(SHELL *shell)
 	show_string_array(shell->history, dump_stream);
 
 	fclose(dump_stream);
+
+	DEBUG_END("done.");
 }
 
 
 void VSHELL_close(SHELL *shell)
 {
-	if (DEBUG)
-		printf("\nClosing the shell ...\n");
+	DEBUG_START("Closing the shell ...");
 
-	if (DEBUG)
-		printf("Deleting the history of commands...\n");
+	DEBUG_SAY("Deleting the history of commands...\n");
 	delete_string_array(shell->history);
 
-	if (DEBUG)
-		printf("Deleting the commands...\n");
+	DEBUG_SAY("Deleting the commands...\n");
 	delete_commands_array(shell->cmds);
 
-	if (DEBUG)
-		printf("\nDone.\n");
+	DEBUG_END("done.");
 }

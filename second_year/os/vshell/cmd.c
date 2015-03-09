@@ -1,5 +1,6 @@
 #include "main.h"
 
+#include "debug.h"
 #include "array.h"
 #include "cmd.h"
 
@@ -12,28 +13,22 @@ CmdDeclaration *create_cmd(
 		|| (func == NULL))
 		return NULL;
 
-	if (DEBUG)
-		printf("\nCreating the %s command ...\n", name);
+	DEBUG_START("Creating the %s command ...", name);
 
 	CmdDeclaration *command = (CmdDeclaration*)malloc(sizeof(CmdDeclaration));
 
-	if (DEBUG)
-		printf("\t memory space was allocated\n");
+	DEBUG_SAY("memory space was allocated\n");
 
 	command->name = (char*)calloc(sizeof(char), strlen(name) + 1);
 	strcpy(command->name, name);
 
-	if (DEBUG)
-		printf("\t %s name was copied\n", name);
+	DEBUG_SAY("%s name was copied\n", name);
 
 	command->func = func;
 
-	if (DEBUG)
-		printf("\t %s function was assigned\n", name);
+	DEBUG_SAY("%s function was assigned\n", name);
 	
-	if (DEBUG)
-		printf("Done.\n");
-
+	DEBUG_END("done.");
 	return command;
 }
 
@@ -43,8 +38,7 @@ CmdArray *get_commands_array(int length)
 	if (length < 1)
 		length = 1;
 
-	if (DEBUG)
-		printf("\nCreating the array of commands ... ");
+	DEBUG_START("Creating the array of commands ...");
 
 	CmdArray *cmds = (CmdArray*)malloc(sizeof(CmdArray));
 
@@ -52,8 +46,7 @@ CmdArray *get_commands_array(int length)
 	cmds->allocated_length = length;
 	cmds->used_length = 0;
 
-	if (DEBUG)
-		printf("done.\n");
+	DEBUG_END("done.");
 
 	return cmds;
 }
@@ -88,16 +81,14 @@ void push_into_commands_array(
 		return;
 	}
 
-	if (DEBUG)
-		printf("\nPushing the command into commands array ... ");
+	DEBUG_START("Pushing the command into commands array ...");
 
 	check_length_and_expand_commands_array(cmds);
 
 	cmds->data[cmds->used_length] = create_cmd(cmd_name, function);
 	cmds->used_length++;
 
-	if (DEBUG)
-		printf("done.\n");
+	DEBUG_END("done.");
 }
 
 
@@ -105,7 +96,9 @@ void show_commands_array(CmdArray *cmds, FILE *stream)
 {
 	if (cmds == NULL)
 		return;
-	
+
+	DEBUG_START("Showing the commands array ...");
+
 	size_t i;
 
 	fprintf(stream, "[");
@@ -122,8 +115,7 @@ void show_commands_array(CmdArray *cmds, FILE *stream)
 
 	fprintf(stream, "] (%ld, %ld)\n", cmds->used_length, cmds->allocated_length);
 
-	if (DEBUG)
-		printf("done.\n");
+	DEBUG_END("done.");
 }
 
 
@@ -132,8 +124,7 @@ void clear_commands_array(CmdArray *cmds)
 	if (cmds == NULL)
 		return;
 
-	if (DEBUG)
-		printf("\nClearing the commands array ... ");
+	DEBUG_START("Clearing the commands array ...");
 
 	size_t i;
 
@@ -142,8 +133,7 @@ void clear_commands_array(CmdArray *cmds)
 
 	cmds->used_length = 0;
 
-	if (DEBUG)
-		printf("done.\n");
+	DEBUG_END("done.");
 }
 
 
@@ -152,13 +142,11 @@ void delete_commands_array(CmdArray *cmds)
 	if (cmds == NULL)
 		return;
 
-	if (DEBUG)
-		printf("Deleting the commands array ... ");
+	DEBUG_START("Deleting the commands array ...");
 
 	clear_commands_array(cmds);
 
 	free(cmds->data);
 
-	if (DEBUG)
-		printf("done.\n");
+	DEBUG_END("done.");
 }

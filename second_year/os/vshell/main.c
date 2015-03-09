@@ -1,9 +1,14 @@
 #include "main.h"
 
+#include "debug.h"
 #include "array.h"
 #include "cmd.h"
 #include "parser.h"
 #include "vshell.h"
+
+
+int DEBUG = 1;
+int LAYER = 0;
 
 
 int hello_world(FILE *strin, FILE *strout, StringArray *args)
@@ -53,6 +58,8 @@ int keypressor(FILE *strin, FILE *strout, StringArray *args)
 int main(int argc, char **argv, char **envp)
 {
 	SHELL shell;
+
+	// LAYER = 0;
 
 	// Init the shell from arguments.
 	VSHELL_init(argc, argv, &shell);
