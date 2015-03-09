@@ -9,26 +9,35 @@
 #include <unistd.h>
 
 
-#define STD_DUMP_FILENAME "vshel.dump"
+#define STRING_ARRAY_EXPANDING_CRITERIA 2
+#define CMD_ARRAY_EXPANDING_CRITERIA 2
 
-#define ARRAY_EXPANDING_CRITERIA 2
-#define CMD_EXPANDING_CRITERIA 2
+#define ARGS_LEN 256
+#define LINE_LEN 256
 
-#define ARGS_BUFF 256
-#define LINE_BUFF 256
+
+#define STD_DUMP_FILENAME "vshel.out"
+#define CMD_EXIT "exit"
+
+
+#define LINE_START_SYMBOL ">>> "
+#define LINE_SKIP_SYMBOL '\\'
 #define LINE_SEPARATOR_SYMBOL ' '
-#define LINE_INPUT_STREAM_SYMBOL '<'
-#define LINE_OUTPUT_STREAM_SYMBOL '>'
-#define LINE_APPEND_STREAM_SYMBOL '>>'
-#define LINE_BACKGROUND_SYMBOL '&'
-#define LINE_PIPE_SYMBOL '|'
 #define LINE_DELIMITTER_SYMBOL '"'
 #define LINE_END_SYMBOL '\n'
 
-#define CODE_EXIT -1
-#define CODE_WAIT 0
-#define CODE_SUCCESS 1
-#define CODE_UNKNOWN_CMD 2
+#define LINE_INPUT_STREAM_STRING "<"
+#define LINE_OUTPUT_STREAM_STRING ">"
+#define LINE_APPEND_STREAM_STRING ">>"
+#define LINE_BACKGROUND_STRING "&"
+#define LINE_PIPE_STRING "|"
+
+
+#define CODE_WAIT -1
+#define CODE_SUCCESS 0
+#define CODE_FAIL 1
+#define CODE_EXIT 2
+#define CODE_UNKNOWN_CMD 3
 
 
 // For debug only

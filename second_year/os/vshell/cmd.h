@@ -2,27 +2,34 @@
 #define __CMD_H__
 
 
-typedef struct Command
+typedef struct CommandDeclaration
 {
 	char *name;
-	void (*func)(void);
-} Cmd;
+	int ((*func)(FILE*, FILE*, StringArray*));
+} CmdDeclaration;
 
 
 typedef struct CommandArray
 {
 	size_t allocated_length;
 	size_t used_length;
-	Cmd **data;
-} Commands;
+	CmdDeclaration **data;
+} CmdArray;
 
 
-Commands *get_commands(int length);
-void check_length_and_expand_commands(Commands *cmds);
-void push_into_commands(char *cmd_name, void (*function)(void), Commands *cmds);
-void show_commands(Commands *cmds);
-void clear_commands(Commands *cmds);
-void delete_commands(Commands *cmds);
+CmdDeclaration *create_cmd(
+		char *name,
+		int ((*func)(FILE*, FILE*, StringArray*)));
+
+CmdArray *get_commands_array(int length);
+void check_length_and_expand_commands_array(CmdArray *cmds);
+void push_into_commands_array(
+		char *cmd_name,
+		int ((*function)(FILE*, FILE*, StringArray*)),
+		CmdArray *cmds);
+void show_commands_array(CmdArray *cmds, FILE *stream);
+void clear_commands_array(CmdArray *cmds);
+void delete_commands_array(CmdArray *cmds);
 
 
 // __CMD_H__
