@@ -1,8 +1,6 @@
 package com.company;
 
 
-import com.sun.xml.internal.ws.api.pipe.ServerPipeAssemblerContext;
-
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -17,36 +15,37 @@ import java.util.Set;
 
 public class WordView {
 
-    public WordView(WordCounter counter) {
+    public WordView(WordCounter counter, WordFormatter formatter) {
         wordsCounter = counter;
+        wordFormatter = formatter;
     }
 
-    public void summarize() {
-        Set wordsArray = wordsCounter.getWordsTable().entrySet();
-
-        for (Object pair : wordsArray) {
-            System.out.println(pair.toString().replace("=", " : "));
-        }
-
-        System.out.println("\nUnique words num: " + wordsArray.size());
-        System.out.println("Total words num: " + wordsCounter.getWordsNum());
-    }
-
-    public void summarizeIntoFile(File file) throws IOException {
+    public void printToScreen() {
         String[] stringPair;
-        BufferedWriter bufferWriter = new BufferedWriter(new FileWriter(file.getAbsoluteFile()));
         Set wordsArray = wordsCounter.getWordsTable().entrySet();
-        Double wordsNum = new Double(wordsCounter.getWordsNum());
 
         for (Object pair : wordsArray) {
             stringPair = pair.toString().split("=");
-            bufferWriter.write(stringPair[0] + SEPARATOR + stringPair[1] + SEPARATOR + Double.parseDouble(stringPair[1]) / wordsNum * 100.0 + LINE_END);
+            System.out.println(wordFormatter.toScreen(stringPair[0], stringPair[1]));
+        }
+
+        System.out.println("Unique words num: " + wordsArray.size());
+        System.out.println("Total words num: " + wordsCounter.getWordsNum());
+    }
+
+    public void printToFile(File file) throws IOException {
+        String[] stringPair;
+        BufferedWriter bufferWriter = new BufferedWriter(new FileWriter(file.getAbsoluteFile()));
+        Set wordsArray = wordsCounter.getWordsTable().entrySet();
+
+        for (Object pair : wordsArray) {
+            stringPair = pair.toString().split("=");
+            bufferWriter.write(String.format(wordFormatter.toCSV(stringPair[0], stringPair[1])));
         }
 
         bufferWriter.close();
     }
 
-    private static String SEPARATOR = "|";
-    private static String LINE_END = "\n";
     private WordCounter wordsCounter;
+    private WordFormatter wordFormatter;
 }
