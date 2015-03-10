@@ -112,7 +112,10 @@ CmdArguments *get_command_call(char *line)
 
 	if ((args_array == NULL)
 		|| (args_array->used_length == 0))
+	{
+		DEBUG_END("done.");
 		return NULL;
+	}
 
 	DEBUG_SAY("After if-else condition\n");
 
@@ -204,8 +207,7 @@ void show_command_call(CmdArguments *cmd_call, FILE *stream)
 	DEBUG_SAY(">>      %s\n", cmd_call->appends);
 	DEBUG_SAY("&       %d\n", cmd_call->is_in_background);
 	DEBUG_SAY("valid:  %d\n", cmd_call->is_valid);
-	DEBUG_SAY("args: \n");
-	// show_string_array(cmd_call->args, stream));
+	// DEBUG_SAY("args: \n");
 	
 	DEBUG_END(".");
 }
@@ -224,21 +226,12 @@ int do_cmd(CmdArguments *call, CmdArray *cmds)
 {
 	if ((call == NULL)
 		|| (call->origin == NULL))
-	{
-		// if (DEBUG)
-		// 	printf("args is null ...\n");
-		
 		return CODE_WAIT;
-	}
 
-	DEBUG_START("Calling the command ...");
-	// DEBUG_DO(show_command_call(call, stdout));
+	if (!(call->is_valid))
+		return CODE_INVALID_CALL;
 
-	if (!strcmp(call->origin, CMD_EXIT))
-	{
-		DEBUG_END("done.");
-		return CODE_EXIT;
-	}
+	DEBUG_START("Calling the %s command ...", call->origin);
 
 	FILE *strin;
 	FILE *strout;

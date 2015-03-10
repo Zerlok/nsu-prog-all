@@ -23,7 +23,8 @@ void VSHELL_init(
 int VSHELL_add_command(
 		SHELL *shell,
 		char *command_name,
-		int (*function)(FILE*, FILE*, StringArray*));
+		int ((*function)(FILE*, FILE*, StringArray*)));
+		// int ((*function)(...)));
 
 void VSHELL_run(SHELL *shell);
 

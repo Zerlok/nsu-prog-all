@@ -18,6 +18,7 @@
 
 #define STD_DUMP_FILENAME "vshel.out"
 #define CMD_EXIT "exit"
+#define CMD_HELP "help"
 
 
 #define LINE_START_SYMBOL ">>> "
@@ -37,7 +38,8 @@
 #define CODE_SUCCESS 0
 #define CODE_FAIL 1
 #define CODE_EXIT 2
-#define CODE_UNKNOWN_CMD 3
+#define CODE_INVALID_CALL 4
+#define CODE_UNKNOWN_CMD 5
 
 
 // __MAIN_H__

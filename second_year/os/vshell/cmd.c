@@ -8,6 +8,7 @@
 CmdDeclaration *create_cmd(
 		char *name,
 		int ((*func)(FILE*, FILE*, StringArray*)))
+		// int ((*func)(...)))
 {
 	if ((name == NULL)
 		|| (func == NULL))
@@ -67,6 +68,7 @@ void push_into_commands_array(
 		char *cmd_name,
 		int ((*function)(FILE*, FILE*, StringArray*)),
 		CmdArray *cmds)
+		// int ((*function)(...)),
 {
 	if ((cmd_name == NULL)
 		|| (function == NULL))

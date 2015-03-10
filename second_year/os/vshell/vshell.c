@@ -14,6 +14,31 @@
 // }
 
 
+// int VSHELL_CMD_EXIT()
+// {
+// 	return CODE_EXIT;
+// }
+
+
+// int VSHELL_CMD_HELP(CmdArray *p_cmds)
+// {
+// 	static CmdArray *cmds = NULL;
+
+// 	if (cmds == NULL)
+// 	{
+// 		cmds = p_cmds;
+
+// 		return CODE_SUCCESS;
+// 	}
+
+// 	printf("Commands : ");
+// 	show_commands_array(cmds);
+// 	printf("%s\n", );
+
+// 	return CODE_SUCCESS;
+// }
+
+
 void VSHELL_init(int argc, char **argv, SHELL *shell)
 {
 	int i;
@@ -27,6 +52,9 @@ void VSHELL_init(int argc, char **argv, SHELL *shell)
 	shell->history = get_string_array(0);
 	shell->cmds = get_commands_array(10);
 
+	// VSHELL_add_command(shell, CMD_EXIT, VSHELL_CMD_EXIT);
+	// VSHELL_add_command(shell, CMD_HELP, VSHELL_CMD_HELP);
+
 	DEBUG_END("done.");
 }
 
@@ -35,6 +63,7 @@ int VSHELL_add_command(
 		SHELL *shell,
 		char *command_name,
 		int (*function)(FILE*, FILE*, StringArray*))
+		// int ((*function)(...)))
 {
 	if ((shell == NULL)
 		|| (command_name == NULL)
@@ -60,12 +89,15 @@ void VSHELL_run(SHELL *shell)
 	char line[LINE_LEN];
 	bzero(line, LINE_LEN);
 
-	DEBUG_START("Running the shell ...");
+	// VSHELL_CMD_HELP(shell->cmds);
+
 	// DEBUG_SHOW(shell->cmds);
 	// DEBUG_SHOW(shell->history, show_string_array);
 
 	// signal(SIGINT, SIG_IGN);
 	// signal(SIGINT, handle_signal);
+
+	DEBUG_START("Running the shell ...");
 
 	while(code != CODE_EXIT)
 	{
@@ -75,9 +107,10 @@ void VSHELL_run(SHELL *shell)
 		
 		cmd_call = get_command_call(line);
 
-		if ((cmd_call != NULL)
-			&& (cmd_call->is_valid))
-			code = do_cmd(cmd_call, shell->cmds);
+		if (cmd_call == NULL)
+			continue;
+		
+		code = do_cmd(cmd_call, shell->cmds);
 
 		// if (code != CODE_WAIT)
 		// 	push_into_string_array(line, shell->history);
@@ -93,6 +126,12 @@ void VSHELL_run(SHELL *shell)
 			case CODE_FAIL:
 			{
 				printf("%s: command was crashed.\n", cmd_call->origin);
+				break;
+			}
+
+			case CODE_INVALID_CALL:
+			{
+				printf("%s: invalid command call.\n", cmd_call->origin);
 				break;
 			}
 
