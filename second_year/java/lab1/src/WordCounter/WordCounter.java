@@ -1,5 +1,4 @@
-package com.company;
-
+package WordCounter;
 
 import java.util.Comparator;
 import java.util.HashMap;

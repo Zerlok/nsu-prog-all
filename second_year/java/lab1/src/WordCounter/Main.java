@@ -1,8 +1,4 @@
-package com.company;
-
-
-import java.io.*;
-
+package WordCounter;
 
 public class Main {
 

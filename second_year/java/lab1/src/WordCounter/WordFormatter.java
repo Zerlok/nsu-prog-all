@@ -1,8 +1,11 @@
-package com.company;
+package WordCounter;
+
 
 /**
  * Created by zerlok on 3/11/15.
  */
+
+
 public class WordFormatter {
 
     public WordFormatter(WordCounter counter) {

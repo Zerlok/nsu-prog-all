@@ -1,4 +1,4 @@
-package com.company;
+package WordCounter;
 
 
 import java.io.*;
