@@ -1,4 +1,1 @@
 my "new line" symbol.
-and "quote"
-"here" too.
-Do you know what does the fox say? :)

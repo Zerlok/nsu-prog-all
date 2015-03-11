@@ -11,41 +11,28 @@ import java.io.*;
 
 public class WordParser {
 
-    public WordParser(File inputFile, WordCounter counter) {
-        file = inputFile;
+    public WordParser(WordReader input, WordCounter counter) {
+        inputReader = input;
         wordsCounter = counter;
     }
 
-    public void readWords() {
-        try {
-            String line;
-            String[] wordsArray;
-            BufferedReader fileBuffer = new BufferedReader(new FileReader(file.getAbsolutePath()));
+    public void readWords() throws IOException {
+        int chr;
+        StringBuilder word = new StringBuilder();
 
-            while ((line = fileBuffer.readLine()) != null) {
-                if (line.isEmpty())
-                    continue;
+        while ((chr = inputReader.getNextChar()) != -1) {
+            if (Character.isLetterOrDigit(chr)) {
+                word.append((char) chr);
 
-                wordsArray = line.split(spacesPattern);
-
-                for (String word : wordsArray)
-                    if (!word.isEmpty())
-                        wordsCounter.pushWord(word);
+            } else if (word.length() != 0) {
+                wordsCounter.pushWord(word.toString());
+                word = new StringBuilder();
             }
-
-        } catch (FileNotFoundException e) {
-            System.out.println("File " + file.getAbsolutePath() + " not found!");
-
-        } catch (IOException e) {
-            e.printStackTrace();
         }
+
+        inputReader.closeReader();
     }
 
-    private static String spacesPattern = "(^(\\W|[_])+)|((\\W|[_])*\\s+(\\W|[_])*)|((\\W|[_])+$)";
-    // private static String spacesPattern = "(^\\W+)|(\\W*\\s+\\W*)|(\\W+$)";
-    // The spacesPattern was written above does not work,
-    // because the underscore symbol '_' represents as a word symbol O_o
-
-    private File file;
+    private WordReader inputReader;
     private WordCounter wordsCounter;
 }

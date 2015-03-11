@@ -12,37 +12,9 @@ import java.util.TreeMap;
 
 
 public class WordCounter {
-    // Thanks for stackoverflow (compare method was rewrited):
-    // http://stackoverflow.com/questions/109383/how-to-sort-a-mapkey-value-on-the-values-in-java
-    class WordComparator implements Comparator<String> {
 
-        public WordComparator(Map<String, Integer> base) {
-            baseMap = base;
-        }
-
-        public int compare(String keyA, String keyB) {
-            int valA = baseMap.get(keyA);
-            int valB = baseMap.get(keyB);
-
-            if (valA > valB) {
-                return -1;
-
-            } else if (valA < valB) {
-                return 1;
-
-            } else if (keyA.length() > keyB.length()) {
-                return -1;
-
-            } else if (keyB.length() > keyA.length()) {
-                return 1;
-
-            } else {
-                return keyA.compareTo(keyB);
-            }
-        }
-
-        private Map<String, Integer> baseMap;
-    }
+    private int wordsNum;
+    private Map<String, Integer> wordsMap;
 
     public WordCounter() {
         wordsNum = 0;
@@ -63,16 +35,10 @@ public class WordCounter {
     }
 
     public Map getWordsTable() {
-        Map<String, Integer> sortedTable = new TreeMap<String, Integer>(new WordComparator(wordsMap));
-        sortedTable.putAll(wordsMap);
-
-        return sortedTable;
+        return wordsMap;
     }
 
     public int getWordsNum() {
         return wordsNum;
     }
-
-    private int wordsNum;
-    private Map<String, Integer> wordsMap;
 }
