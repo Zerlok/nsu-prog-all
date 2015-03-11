@@ -5,11 +5,12 @@ import java.io.*;
 
 
 /**
- * Created by zerlok on 3/11/15.
+ * WordReader class represents as a bufferedReader, but
+ * it may have rewritten methods, to read data from other input.
  */
-
-
 public class WordReader {
+
+    private BufferedReader fileBuffer;
 
     public WordReader(File input) throws FileNotFoundException {
         fileBuffer = new BufferedReader(new FileReader(input.getAbsolutePath()));
@@ -22,6 +23,4 @@ public class WordReader {
     public void closeReader() throws IOException {
         fileBuffer.close();
     }
-
-    private BufferedReader fileBuffer;
 }

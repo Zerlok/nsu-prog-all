@@ -5,10 +5,10 @@ import java.io.IOException;
 
 
 /**
- * Created by zerlok on 3/11/15.
+ * The Controller class is a logic of the word counter program.
+ * It takes WordReader object to take data from it and
+ * WordWriter object to put data into it.
  */
-
-
 public class Controller {
 
     private WordReader inputReader;
@@ -20,12 +20,19 @@ public class Controller {
     }
 
     public void run() throws IOException {
+        // Create the word-storage object.
         WordCounter counter = new WordCounter();
-        WordParser parser = new WordParser(inputReader, counter);
-        WordView view = new WordView(counter, outputWriter);
 
+        // Create the word parser (takes data-input and word-storage objects).
+        WordParser parser = new WordParser(inputReader, counter);
+
+        // Create a word viewer (takes data-output and word-storage objects).
+        WordView view = new WordView(outputWriter, counter);
+
+        // Parse words from input.
         parser.readWords();
 
+        // Show parsed words in CSV format.
         view.printToCSV();
     }
 }

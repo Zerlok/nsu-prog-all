@@ -3,41 +3,55 @@ package WordCounter;
 
 import java.io.IOException;
 import java.util.Map;
-import java.util.Set;
 import java.util.TreeMap;
 
 
 /**
- * Created by zerlok on 3/4/15.
+ * WordView class writes word storage information
+ * into the WordWriter (output).
  */
-
-
 public class WordView {
 
     private WordCounter wordsCounter;
     private WordWriter wordWriter;
 
-    public WordView(WordCounter counter, WordWriter writer) {
-        wordsCounter = counter;
+    public WordView(WordWriter writer, WordCounter counter) {
         wordWriter = writer;
+        wordsCounter = counter;
     }
 
     public void printToCSV() throws IOException {
+        // Temp array of strings.
         String[] stringPair;
-        Double wordsNum = new Double(wordsCounter.getWordsNum());
-        Set wordsArray = getSortedTabe().entrySet();
 
-        for (Object pair : wordsArray) {
+        // Get words amount number in float (required for divination).
+        Double wordsNum = new Double(wordsCounter.getWordsNum());
+
+        // Write each pair (word, frequency) into the output.
+        for (Object pair : getSortedTabe().entrySet()) {
+
+            // Split pair by equals symbol.
             stringPair = pair.toString().split("=");
+
+            // Write info into output (format: word|frequency|percentage).
             wordWriter.write(String.format("%1$s|%2$s|%3$.4f\n", stringPair[0], stringPair[1], Double.parseDouble(stringPair[1]) / wordsNum * 100.0));
         }
 
         wordWriter.closeWriter();
     }
 
+    /**
+     * Returns the table of words, ordered by word frequency.
+     */
     private Map getSortedTabe() {
+        // Get the table from the word storage.
         Map wordsMap = wordsCounter.getWordsTable();
+
+        // Create a new table, which uses WordComparator,
+        // when pushes data into it.
         Map<String, Integer> sortedTable = new TreeMap<String, Integer>(new WordComparator(wordsMap));
+
+        // Push whole word table into sortedTable.
         sortedTable.putAll(wordsMap);
 
         return sortedTable;

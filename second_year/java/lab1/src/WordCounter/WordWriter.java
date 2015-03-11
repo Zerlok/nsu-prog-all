@@ -5,11 +5,12 @@ import java.io.*;
 
 
 /**
- * Created by zerlok on 3/11/15.
+ * WordWriter class represents as a bufferedWriter, but
+ * it may have rewritten methods, to write data into other output.
  */
-
-
 public class WordWriter {
+
+    private BufferedWriter bufferWriter;
 
     public WordWriter(File output) throws IOException {
         bufferWriter = new BufferedWriter(new FileWriter(output.getAbsoluteFile()));;
@@ -22,6 +23,4 @@ public class WordWriter {
     public void closeWriter() throws IOException {
         bufferWriter.close();
     }
-
-    private BufferedWriter bufferWriter;
 }
