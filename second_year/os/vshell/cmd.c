@@ -7,11 +7,10 @@
 
 CmdDeclaration *create_cmd(
 		char *name,
-		int ((*func)(FILE*, FILE*, StringArray*)))
-		// int ((*func)(...)))
+		char *filename)
 {
 	if ((name == NULL)
-		|| (func == NULL))
+		|| (filename == NULL))
 		return NULL;
 
 	DEBUG_START("Creating the %s command ...", name);
@@ -25,7 +24,8 @@ CmdDeclaration *create_cmd(
 
 	DEBUG_SAY("%s name was copied\n", name);
 
-	command->func = func;
+	command->filename = (char*)calloc(sizeof(char), strlen(filename) + 1);
+	strcpy(command->filename, filename);
 
 	DEBUG_SAY("%s function was assigned\n", name);
 	
@@ -44,8 +44,8 @@ CmdArray *get_commands_array(int length)
 	CmdArray *cmds = (CmdArray*)malloc(sizeof(CmdArray));
 
 	cmds->data = (CmdDeclaration**)calloc(sizeof(CmdDeclaration*), length);
-	cmds->allocated_length = length;
 	cmds->used_length = 0;
+	cmds->allocated_length = length;
 
 	DEBUG_END("done.");
 
@@ -58,20 +58,24 @@ void check_length_and_expand_commands_array(CmdArray *cmds)
 	if ((cmds->allocated_length)
 		!= (cmds->used_length))
 		return;
+
+	if (cmds->allocated_length == 0)
+		cmds->allocated_length = 1;
 	
-	cmds->allocated_length *= CMD_ARRAY_EXPANDING_CRITERIA;
+	else	
+		cmds->allocated_length *= CMD_ARRAY_EXPANDING_CRITERIA;
+	
 	cmds->data = (CmdDeclaration**)realloc(cmds->data, cmds->allocated_length);
 }
 
 
 void push_into_commands_array(
 		char *cmd_name,
-		int ((*function)(FILE*, FILE*, StringArray*)),
+		char *filename,
 		CmdArray *cmds)
-		// int ((*function)(...)),
 {
 	if ((cmd_name == NULL)
-		|| (function == NULL))
+		|| (filename == NULL))
 	{
 		printf("Invalid command while pushing it into commands array!\n");
 		return;
@@ -87,7 +91,7 @@ void push_into_commands_array(
 
 	check_length_and_expand_commands_array(cmds);
 
-	cmds->data[cmds->used_length] = create_cmd(cmd_name, function);
+	cmds->data[cmds->used_length] = create_cmd(cmd_name, filename);
 	cmds->used_length++;
 
 	DEBUG_END("done.");
@@ -109,7 +113,7 @@ void show_commands_array(CmdArray *cmds, FILE *stream)
 	{
 		for (i = 0; i < cmds->used_length; i++)
 		{
-			fprintf(stream, "(%s : %p) ", (cmds->data[i])->name, (cmds->data[i])->func);
+			fprintf(stream, "(%s : %s) ", (cmds->data[i])->name, (cmds->data[i])->filename);
 		}
 
 		fprintf(stream, "\b");
@@ -131,10 +135,14 @@ void clear_commands_array(CmdArray *cmds)
 	size_t i;
 
 	for (i = 0; i < cmds->used_length; i++)
+	{
+		DEBUG_SAY("Removing %s : %s\n", (cmds->data[i])->name, (cmds->data[i])->filename);
 		free((cmds->data[i])->name);
+		free((cmds->data[i])->filename);
+	}
 
 	cmds->used_length = 0;
-
+	
 	DEBUG_END("done.");
 }
 
@@ -149,6 +157,67 @@ void delete_commands_array(CmdArray *cmds)
 	clear_commands_array(cmds);
 
 	free(cmds->data);
+	free(cmds);
 
 	DEBUG_END("done.");
+}
+
+
+int do_cmd(CmdArguments *call, CmdArray *cmds)
+{
+	if ((call == NULL)
+		|| (call->origin == NULL))
+		return CODE_WAIT;
+
+	if (!(call->is_valid))
+		return CODE_INVALID_CALL;
+
+	DEBUG_START("Calling the %s command ...", call->origin);
+	size_t i;
+	pid_t pid;
+
+	if (!strcmp(call->origin, CMD_EXIT))
+	{
+		DEBUG_END("done.");
+		return CODE_EXIT;
+	}
+
+	if (!strcmp(call->origin, CMD_HELP))
+	{
+		for (i = 0; i < cmds->used_length; i++)
+			printf("%s - %s\n", (cmds->data[i])->name, (cmds->data[i])->filename);
+
+		DEBUG_END("done.");
+
+		return CODE_SUCCESS;
+	}
+
+	for (i = 0; i < cmds->used_length; i++)
+		if (!strcmp(call->origin, (cmds->data[i])->name))
+		{
+			int status;
+			
+			DEBUG_SAY("Forking ...\n");
+			
+			pid = fork();
+
+			if (pid < 0)
+			{
+				printf("Cannot create a fork.\n");
+				return CODE_FAIL;
+			}
+			else if (pid > 0)
+			{
+				DEBUG_SAY("Parent pid: %d\n", pid);
+				
+				waitpid(pid, &status, 0);
+			}
+			else
+				return execvp((cmds->data[i])->filename, call->argv);
+
+			return CODE_SUCCESS;
+		}
+
+	DEBUG_END("done.");
+	return CODE_UNKNOWN_CMD;
 }

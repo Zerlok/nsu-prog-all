@@ -83,7 +83,7 @@ CmdArguments *get_empty_command_call(char *cmd_name)
 	cmd_call->outs = NULL;
 	cmd_call->appends = NULL;
 	cmd_call->is_in_background = 0;
-	cmd_call->args = NULL;
+	cmd_call->argv = NULL;
 
 	strcpy(cmd_call->origin, cmd_name);
 	
@@ -119,10 +119,9 @@ CmdArguments *get_command_call(char *line)
 
 	DEBUG_SAY("After if-else condition\n");
 
-	// DEBUG_SHOW(args_array, show_string_array);
-
 	// Setting up the CmdArguments structure.
 	CmdArguments *cmd_call = get_empty_command_call(args_array->data[0]);
+
 	DEBUG_SAY("After empty command call creation\n");
 	DEBUG_SAY("%p %p %ld -> %s\n", args_array, args_array->data, args_array->used_length, args_array->data[args_array->used_length-1]);
 
@@ -185,8 +184,15 @@ CmdArguments *get_command_call(char *line)
 		i++;
 	} // ENDWHILE
 
+	DEBUG_SAY("After while block\n");
+
 	cmd_call->is_valid = is_valid;
-	cmd_call->args = args_array;
+	cmd_call->argc = args_array->used_length;
+	cmd_call->argv = string_array_to_chars(args_array);
+
+	DEBUG_SAY("After cmd call assignment\n");
+
+	delete_string_array(args_array);
 	
 	DEBUG_END("done.");
 
@@ -218,77 +224,35 @@ void clear_command_call(CmdArguments *cmd_call)
 	if (cmd_call == NULL)
 		return;
 
-	delete_string_array(cmd_call->args);
+	DEBUG_START("Clearing the command call ...");
+
+	int i;
+
+	for (i = 0; i < cmd_call->argc; i++)
+		free(cmd_call->argv[i]);
+
+	cmd_call->argc = 0;
+	
+	free(cmd_call->argv);
+
+	free(cmd_call->ins);
+	free(cmd_call->outs);
+	free(cmd_call->appends);
+	free(cmd_call->origin);
+
+	DEBUG_END("done.");
 }
 
 
-int do_cmd(CmdArguments *call, CmdArray *cmds)
+void delete_command_call(CmdArguments *cmd_call)
 {
-	if ((call == NULL)
-		|| (call->origin == NULL))
-		return CODE_WAIT;
+	if (cmd_call == NULL)
+		return;
 
-	if (!(call->is_valid))
-		return CODE_INVALID_CALL;
+	DEBUG_START("Deleting the command call ...");
 
-	DEBUG_START("Calling the %s command ...", call->origin);
-
-	FILE *strin;
-	FILE *strout;
-
-	if (call->ins != NULL)
-	{
-		strin = fopen(call->ins, "r");
-		
-		if (strin == NULL)
-		{
-			printf("Cannot open input stream from %s file!\n", call->ins);
-
-			DEBUG_END("done.");
-			return CODE_FAIL;
-		}
-	}
-	else
-		strin = stdin;
-
-	if (call->outs != NULL)
-	{
-		strout = fopen(call->outs, "w");
-		
-		if (strout == NULL)
-		{
-			printf("Cannot open output stream into %s file!\n", call->outs);
-
-			DEBUG_END("done.");
-			return CODE_FAIL;
-		}
-	}
-	else if (call->appends != NULL)
-	{
-		strout = fopen(call->appends, "r+");
-		
-		if (strout == NULL)
-		{
-			printf("Cannot open append stream into %s file!\n", call->appends);
-
-			DEBUG_END("done.");
-			return CODE_FAIL;
-		}
-	}
-	else
-		strout = stdout;
-
-	size_t i;
-
-	for (i = 0; i < cmds->used_length; i++)
-	{
-		if (!strcmp(call->origin, (cmds->data[i])->name))
-		{
-			DEBUG_END("done.");
-			return ((cmds->data[i])->func)(strin, strout, call->args);
-		}
-	}
+	clear_command_call(cmd_call);
+	free(cmd_call);
 
 	DEBUG_END("done.");
-	return CODE_UNKNOWN_CMD;
 }

@@ -28,8 +28,13 @@ void check_length_and_expand_string_array(StringArray *array)
 	if ((array->allocated_length)
 		< (array->used_length))
 		return;
+
+	if (array->allocated_length == 0)
+		array->allocated_length = 1;
 	
-	array->allocated_length *= STRING_ARRAY_EXPANDING_CRITERIA;
+	else
+		array->allocated_length *= STRING_ARRAY_EXPANDING_CRITERIA;
+	
 	array->data = (char**)realloc(array->data, array->allocated_length);
 }
 
@@ -40,12 +45,14 @@ void push_into_string_array(char *string, StringArray *array)
 		|| (string == NULL))
 		return;
 
-	DEBUG_START("Pushing the string into string array ...");
+	DEBUG_START("Pushing the string into string array '%s' ...", string);
 	
 	check_length_and_expand_string_array(array);
 	
 	array->data[array->used_length] = (char*)calloc(sizeof(char), strlen(string) + 1);
 	strcpy(array->data[array->used_length], string);
+
+	DEBUG_SAY("Inserted: '%s'\n", array->data[array->used_length]);
 	
 	array->used_length++;
 
@@ -62,7 +69,7 @@ void delete_string_from_array(size_t indx, StringArray *array)
 
 	DEBUG_START("Deleting the string from string array ...");
 	
-	int i;
+	size_t i;
 
 	for (i = indx; i < array->used_length - 1; i++)
 	{
@@ -113,8 +120,14 @@ void clear_string_array(StringArray *array)
 	
 	size_t i;
 
+	DEBUG_SAY("used: %ld, allocated: %ld\n", array->used_length, array->allocated_length);
+	DEBUG_SAY("array pointer: %p, data pointer: %p\n", array, array->data);
+
 	for (i = 0; i < array->used_length; i++)
+	{
+		DEBUG_SAY("Removing %p\n", array->data[i]);
 		free(array->data[i]);
+	}
 
 	array->used_length = 0;
 
@@ -132,6 +145,22 @@ void delete_string_array(StringArray *array)
 	clear_string_array(array);
 
 	free(array->data);
+	free(array);
 
 	DEBUG_END("done.");
+}
+
+
+char **string_array_to_chars(StringArray *array)
+{
+	size_t i;
+	char **pointer = (char**)calloc(sizeof(char*), array->used_length);
+
+	for (i = 0; i < array->used_length; i++)
+	{
+		pointer[i] = (char*)calloc(sizeof(char), strlen(array->data[i]) + 1);
+		strcpy(pointer[i], array->data[i]);
+	}
+
+	return pointer;
 }

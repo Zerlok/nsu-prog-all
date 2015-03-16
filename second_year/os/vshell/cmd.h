@@ -5,8 +5,7 @@
 typedef struct CommandDeclaration
 {
 	char *name;
-	int ((*func)(FILE*, FILE*, StringArray*));
-	// int ((*func)(...));
+	char *filename;
 } CmdDeclaration;
 
 
@@ -18,22 +17,36 @@ typedef struct CommandArray
 } CmdArray;
 
 
+typedef struct CommandArguments
+{
+	char *ins;
+	char *outs;
+	char *appends;
+	char *origin;
+	int is_in_background;
+	int is_valid;
+	int argc;
+	char **argv;
+} CmdArguments;
+
+
 CmdDeclaration *create_cmd(
 		char *name,
-		int ((*func)(FILE*, FILE*, StringArray*)));
-		// int ((*func)(...));
+		char *filename);
 
 CmdArray *get_commands_array(int length);
 void check_length_and_expand_commands_array(CmdArray *cmds);
 void push_into_commands_array(
 		char *cmd_name,
-		int ((*function)(FILE*, FILE*, StringArray*)),
+		char *filename,
 		CmdArray *cmds);
-		// int ((*function)(...)),
 
 void show_commands_array(CmdArray *cmds, FILE *stream);
 void clear_commands_array(CmdArray *cmds);
 void delete_commands_array(CmdArray *cmds);
+
+
+int do_cmd(CmdArguments *call, CmdArray *cmds);
 
 
 // __CMD_H__

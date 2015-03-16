@@ -1,2 +1,2 @@
 main:
-	gcc *.c -o vshell
+	gcc -g *.c -o vshell

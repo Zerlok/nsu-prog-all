@@ -52,9 +52,6 @@ void VSHELL_init(int argc, char **argv, SHELL *shell)
 	shell->history = get_string_array(0);
 	shell->cmds = get_commands_array(10);
 
-	// VSHELL_add_command(shell, CMD_EXIT, VSHELL_CMD_EXIT);
-	// VSHELL_add_command(shell, CMD_HELP, VSHELL_CMD_HELP);
-
 	DEBUG_END("done.");
 }
 
@@ -62,17 +59,16 @@ void VSHELL_init(int argc, char **argv, SHELL *shell)
 int VSHELL_add_command(
 		SHELL *shell,
 		char *command_name,
-		int (*function)(FILE*, FILE*, StringArray*))
-		// int ((*function)(...)))
+		char *filename)
 {
 	if ((shell == NULL)
 		|| (command_name == NULL)
-		|| (function == NULL))
+		|| (filename == NULL))
 		return 0;
 
 	DEBUG_START("Creating a new command in the shell ...");
 
-	push_into_commands_array(command_name, function, shell->cmds);
+	push_into_commands_array(command_name, filename, shell->cmds);
 
 	DEBUG_END("done.");
 
@@ -90,9 +86,6 @@ void VSHELL_run(SHELL *shell)
 	bzero(line, LINE_LEN);
 
 	// VSHELL_CMD_HELP(shell->cmds);
-
-	// DEBUG_SHOW(shell->cmds);
-	// DEBUG_SHOW(shell->history, show_string_array);
 
 	// signal(SIGINT, SIG_IGN);
 	// signal(SIGINT, handle_signal);
@@ -117,12 +110,6 @@ void VSHELL_run(SHELL *shell)
 
 		switch (code)
 		{
-			case CODE_SUCCESS:
-			{
-				printf("%s: command was successfully run.\n", cmd_call->origin);
-				break;
-			}
-
 			case CODE_FAIL:
 			{
 				printf("%s: command was crashed.\n", cmd_call->origin);
@@ -145,6 +132,8 @@ void VSHELL_run(SHELL *shell)
 		clear_command_call(cmd_call);
 	}
 
+	delete_command_call(cmd_call);
+
 	DEBUG_END("done.");
 }
 
@@ -164,7 +153,9 @@ void VSHELL_dump(SHELL *shell)
 	show_commands_array(shell->cmds, dump_stream);
 	show_string_array(shell->history, dump_stream);
 
-	fclose(dump_stream);
+	DEBUG_SAY("Then i'm trying to close the stream %p ...\n", dump_stream);
+
+	// fclose(dump_stream);
 
 	DEBUG_END("done.");
 }
@@ -172,7 +163,11 @@ void VSHELL_dump(SHELL *shell)
 
 void VSHELL_close(SHELL *shell)
 {
+	if (shell == NULL)
+		return;
+
 	DEBUG_START("Closing the shell ...");
+	// free(shell->username);
 
 	DEBUG_SAY("Deleting the history of commands...\n");
 	delete_string_array(shell->history);
