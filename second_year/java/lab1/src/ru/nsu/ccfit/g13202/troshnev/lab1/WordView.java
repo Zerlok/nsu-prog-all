@@ -1,4 +1,4 @@
-package WordCounter;
+package ru.nsu.ccfit.g13202.troshnev.lab1;
 
 
 import java.io.IOException;
@@ -28,7 +28,7 @@ public class WordView {
         Double wordsNum = new Double(wordsCounter.getWordsNum());
 
         // Write each pair (word, frequency) into the output.
-        for (Object pair : getSortedTabe().entrySet()) {
+        for (Object pair : getSortedTable().entrySet()) {
 
             // Split pair by equals symbol.
             stringPair = pair.toString().split("=");
@@ -43,7 +43,7 @@ public class WordView {
     /**
      * Returns the table of words, ordered by word frequency.
      */
-    private Map getSortedTabe() {
+    private Map getSortedTable() {
         // Get the table from the word storage.
         Map wordsMap = wordsCounter.getWordsTable();
 

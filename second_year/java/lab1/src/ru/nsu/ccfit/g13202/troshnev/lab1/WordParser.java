@@ -1,4 +1,4 @@
-package WordCounter;
+package ru.nsu.ccfit.g13202.troshnev.lab1;
 
 
 import java.io.*;
