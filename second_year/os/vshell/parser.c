@@ -137,6 +137,7 @@ CmdArguments *get_command_call(char *line)
 				break;
 			}
 
+			DEBUG_SAY("Pop '%s' in args_array (%ld < %ld)\n", args_array->data[i], i, args_array->used_length);
 			delete_string_from_array(i, args_array);
 
 			cmd_call->ins = (char*)calloc(sizeof(char), strlen(args_array->data[i + 1]) + 1);
@@ -146,16 +147,18 @@ CmdArguments *get_command_call(char *line)
 		// The output stream was set.
 		else if (!strcmp(args_array->data[i], LINE_OUTPUT_STREAM_STRING))
 		{
-			if (i + 1 == args_array->used_length)
+			if (i + 1 >= args_array->used_length)
 			{
 				is_valid = 0;
 				break;
 			}
 
-			delete_string_from_array(i, args_array);
-
 			cmd_call->outs = (char*)calloc(sizeof(char), strlen(args_array->data[i + 1]) + 1);
 			strcpy(cmd_call->outs, args_array->data[i + 1]);
+
+			DEBUG_SAY("Pop '%s' in args_array (%ld < %ld)\n", args_array->data[i], i, args_array->used_length);
+			delete_string_from_array(i, args_array);
+			delete_string_from_array(i, args_array);
 		}
 
 		// The append stream was set.
@@ -167,17 +170,20 @@ CmdArguments *get_command_call(char *line)
 				break;
 			}
 			
-			delete_string_from_array(i, args_array);
-
 			cmd_call->appends = (char*)calloc(sizeof(char), strlen(args_array->data[i + 1]) + 1);
 			strcpy(cmd_call->appends, args_array->data[i + 1]);
+
+			DEBUG_SAY("Pop '%s' in args_array (%ld < %ld)\n", args_array->data[i], i, args_array->used_length);
+			delete_string_from_array(i, args_array);
+			delete_string_from_array(i, args_array);
 		}
 
 		// The background running was set.
 		else if (!strcmp(args_array->data[i], LINE_BACKGROUND_STRING))
 		{
+			DEBUG_SAY("Pop %s in args_array (%ld < %ld)\n", args_array->data[i], i, args_array->used_length);
 			delete_string_from_array(i, args_array);
-
+			
 			cmd_call->is_in_background = 1;
 		}
 
@@ -190,32 +196,20 @@ CmdArguments *get_command_call(char *line)
 	cmd_call->argc = args_array->used_length;
 	cmd_call->argv = string_array_to_chars(args_array);
 
-	DEBUG_SAY("After cmd call assignment\n");
+	DEBUG_SAY("After cmd call assignment:\n");
+	DEBUG_SAY(" * Origin      : %s\n", cmd_call->origin);
+	DEBUG_SAY(" * Ins         : %s\n", cmd_call->ins);
+	DEBUG_SAY(" * Outs        : %s\n", cmd_call->outs);
+	DEBUG_SAY(" * Appends     : %s\n", cmd_call->appends);
+	DEBUG_SAY(" * In back     : %d\n", cmd_call->is_in_background);
+	DEBUG_SAY(" * Valid       : %d\n", cmd_call->is_valid);
+	DEBUG_SAY(" * ArgC        : %d\n", cmd_call->argc);
+	DEBUG_SAY(" * ArgV (last) : %s\n", cmd_call->argv[cmd_call->argc - 1]);
 
 	delete_string_array(args_array);
 	
 	DEBUG_END("done.");
-
 	return cmd_call;
-}
-
-
-void show_command_call(CmdArguments *cmd_call, FILE *stream)
-{
-	if (cmd_call == NULL)
-		return;
-
-	DEBUG_START("Command call:");
-
-	DEBUG_SAY("Origin: %s\n", cmd_call->origin);
-	DEBUG_SAY("<       %s\n", cmd_call->ins);
-	DEBUG_SAY(">       %s\n", cmd_call->outs);
-	DEBUG_SAY(">>      %s\n", cmd_call->appends);
-	DEBUG_SAY("&       %d\n", cmd_call->is_in_background);
-	DEBUG_SAY("valid:  %d\n", cmd_call->is_valid);
-	// DEBUG_SAY("args: \n");
-	
-	DEBUG_END(".");
 }
 
 

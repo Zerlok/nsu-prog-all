@@ -138,6 +138,29 @@ void VSHELL_run(SHELL *shell)
 }
 
 
+void VSHELL_add_commands_from_dir(SHELL *shell, char *dirname)
+{
+	DEBUG_START("Adding commands from %s directory ...", dirname);
+
+	int debug_orig = DEBUG;
+	// DEBUG = 0;
+
+	DIR *dir;
+	struct dirent *ent;
+
+	if ((dir = opendir(dirname)) != NULL)
+	{
+		while ((ent = readdir(dir)) != NULL)
+			VSHELL_add_command(shell, ent->d_name, ent->d_name);
+	}
+
+	closedir(dir);
+
+	DEBUG = debug_orig;
+	DEBUG_END("done.");
+}
+
+
 void VSHELL_dump(SHELL *shell)
 {
 	DEBUG_START("Dumping the shell into the file ...");
@@ -153,8 +176,7 @@ void VSHELL_dump(SHELL *shell)
 	show_commands_array(shell->cmds, dump_stream);
 	show_string_array(shell->history, dump_stream);
 
-	DEBUG_SAY("Then i'm trying to close the stream %p ...\n", dump_stream);
-
+	// DEBUG_SAY("Then i'm trying to close the stream %p ...\n", dump_stream);
 	// fclose(dump_stream);
 
 	DEBUG_END("done.");

@@ -20,11 +20,14 @@ int main(int argc, char **argv, char **envp)
 	
 	// Create a new command "keys", which call keypressor
 	// function in the shell.
-	VSHELL_add_command(&shell, "ls", "ls");
-	VSHELL_add_command(&shell, "which", "which");
-	VSHELL_add_command(&shell, "boss", "sudo");
-	VSHELL_add_command(&shell, "say", "echo");
-	// VSHELL_add_command(&shell, "keys", keypressor);
+	VSHELL_add_command(&shell, "ls", "/bin/ls");
+	VSHELL_add_command(&shell, "cat", "/bin/cat");
+	VSHELL_add_command(&shell, "say", "/bin/echo");
+	VSHELL_add_command(&shell, "boss", "/usr/bin/sudo");
+	VSHELL_add_command(&shell, "clear", "/usr/bin/clear");
+	VSHELL_add_command(&shell, "which", "/usr/bin/which");
+
+	// VSHELL_add_commands_from_dir(&shell, "/bin");
 
 	// Run the shell.
 	VSHELL_run(&shell);

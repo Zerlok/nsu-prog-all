@@ -7,6 +7,7 @@
 #include <string.h>
 #include <signal.h>
 #include <unistd.h>
+#include <dirent.h>
 
 
 #define STRING_ARRAY_EXPANDING_CRITERIA 2

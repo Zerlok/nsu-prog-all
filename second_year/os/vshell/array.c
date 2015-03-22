@@ -45,7 +45,7 @@ void push_into_string_array(char *string, StringArray *array)
 		|| (string == NULL))
 		return;
 
-	DEBUG_START("Pushing the string into string array '%s' ...", string);
+	DEBUG_START("Pushing the string into string array ...");
 	
 	check_length_and_expand_string_array(array);
 	
@@ -71,13 +71,14 @@ void delete_string_from_array(size_t indx, StringArray *array)
 	
 	size_t i;
 
+	DEBUG_SAY("Shifting strings from %ld index (has %s) ...\n", indx, array->data[indx]);
 	for (i = indx; i < array->used_length - 1; i++)
 	{
 		array->data[i] = (char*)realloc(array->data[i], strlen(array->data[i + 1]) + 1);
-		strcpy(array->data[i + 1], array->data[i]);
+		strcpy(array->data[i], array->data[i + 1]);
 	}
 
-	free(array->data[array->used_length]);
+	free(array->data[array->used_length - 1]);
 	array->used_length--;
 
 	DEBUG_END("done.");
@@ -120,12 +121,12 @@ void clear_string_array(StringArray *array)
 	
 	size_t i;
 
-	DEBUG_SAY("used: %ld, allocated: %ld\n", array->used_length, array->allocated_length);
-	DEBUG_SAY("array pointer: %p, data pointer: %p\n", array, array->data);
+	// DEBUG_SAY("used: %ld, allocated: %ld\n", array->used_length, array->allocated_length);
+	// DEBUG_SAY("array pointer: %p, data pointer: %p\n", array, array->data);
 
 	for (i = 0; i < array->used_length; i++)
 	{
-		DEBUG_SAY("Removing %p\n", array->data[i]);
+		DEBUG_SAY("Removing %s\n", array->data[i]);
 		free(array->data[i]);
 	}
 

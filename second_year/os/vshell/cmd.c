@@ -136,7 +136,7 @@ void clear_commands_array(CmdArray *cmds)
 
 	for (i = 0; i < cmds->used_length; i++)
 	{
-		DEBUG_SAY("Removing %s : %s\n", (cmds->data[i])->name, (cmds->data[i])->filename);
+		DEBUG_SAY("%ld : Removing %s - %s\n", i, (cmds->data[i])->name, (cmds->data[i])->filename);
 		free((cmds->data[i])->name);
 		free((cmds->data[i])->filename);
 	}
@@ -173,12 +173,12 @@ int do_cmd(CmdArguments *call, CmdArray *cmds)
 		return CODE_INVALID_CALL;
 
 	DEBUG_START("Calling the %s command ...", call->origin);
-	size_t i;
+	int i;
 	pid_t pid;
 
 	if (!strcmp(call->origin, CMD_EXIT))
 	{
-		DEBUG_END("done.");
+		DEBUG_END("done (exit).");
 		return CODE_EXIT;
 	}
 
@@ -187,37 +187,64 @@ int do_cmd(CmdArguments *call, CmdArray *cmds)
 		for (i = 0; i < cmds->used_length; i++)
 			printf("%s - %s\n", (cmds->data[i])->name, (cmds->data[i])->filename);
 
-		DEBUG_END("done.");
-
+		DEBUG_END("done (help).");
 		return CODE_SUCCESS;
 	}
 
 	for (i = 0; i < cmds->used_length; i++)
+	{
 		if (!strcmp(call->origin, (cmds->data[i])->name))
 		{
 			int status;
 			
-			DEBUG_SAY("Forking ...\n");
+			DEBUG_SAY("Forking '%s' == '%s' ...\n", call->origin, (cmds->data[i])->name);
 			
 			pid = fork();
 
-			if (pid < 0)
+			if (pid < 0) // Do it if fork failed.
 			{
 				printf("Cannot create a fork.\n");
+				DEBUG_END("done (failed fork).");
 				return CODE_FAIL;
 			}
-			else if (pid > 0)
+			else if (pid > 0) // Do it in parent process.
 			{
 				DEBUG_SAY("Parent pid: %d\n", pid);
-				
 				waitpid(pid, &status, 0);
 			}
-			else
-				return execvp((cmds->data[i])->filename, call->argv);
+			else // Do it in child process.
+			{
+				DEBUG_SAY("Calling '%s' with arguments: ", (cmds->data[i])->filename);
+				if (DEBUG)
+				{
+					int arg_index;
+					for (arg_index = 0; arg_index < call->argc; arg_index++) printf("%s ", call->argv[arg_index]);
+					printf("\n");
+				}
 
+				// if (call->ins != NULL)
+				// 	dup2(0, open(call->ins, "r"));
+
+				// if (call->outs != NULL)
+				// 	dup2(1, open(call->outs, "w"));
+
+				// else if (call->appends != NULL)
+				// 	dup2(1, open(call->appends, "r+"));
+
+				status = execvp((cmds->data[i])->filename, call->argv);
+				
+				if (status == -1)
+				{
+					DEBUG_END("done (failed exec).");
+					return CODE_FAIL;
+				}
+			} // ENDIF
+
+			DEBUG_END("done (successed fork).");
 			return CODE_SUCCESS;
-		}
+		} // ENDIF (!strcmp)
+	} // ENDFOR (cmds.used_length)
 
-	DEBUG_END("done.");
+	DEBUG_END("done (command not found).");
 	return CODE_UNKNOWN_CMD;
 }
