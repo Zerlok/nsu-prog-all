@@ -155,13 +155,15 @@ void delete_string_array(StringArray *array)
 char **string_array_to_chars(StringArray *array)
 {
 	size_t i;
-	char **pointer = (char**)calloc(sizeof(char*), array->used_length);
+	char **pointer = (char**)calloc(sizeof(char*), array->used_length + 1);
 
 	for (i = 0; i < array->used_length; i++)
 	{
 		pointer[i] = (char*)calloc(sizeof(char), strlen(array->data[i]) + 1);
 		strcpy(pointer[i], array->data[i]);
 	}
+
+	pointer[array->used_length] = NULL;
 
 	return pointer;
 }

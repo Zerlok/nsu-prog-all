@@ -223,18 +223,47 @@ int do_cmd(CmdArguments *call, CmdArray *cmds)
 				}
 
 				// if (call->ins != NULL)
-				// 	dup2(0, open(call->ins, "r"));
+				// {
+				// 	int stream_in = open(call->ins, "r");
+					
+				// 	if (stream_in != -1)
+				// 		dup2(stream_in, 0);
+
+				// 	else
+				// 		perror(strerror(errno));
+				// }
 
 				// if (call->outs != NULL)
-				// 	dup2(1, open(call->outs, "w"));
+				// {
+				// 	int stream_out = open(call->outs, "w");
+					
+				// 	if (stream_out != -1)
+				// 	{
+				// 		close(stdout);
+				// 		dup(stream_out);
+				// 	}
+
+				// 	else
+				// 		perror(strerror(errno));
+				// }
 
 				// else if (call->appends != NULL)
-				// 	dup2(1, open(call->appends, "r+"));
+				// {
+				// 	int stream_out = open(call->appends, "r+");
+					
+				// 	if (stream_out != -1)
+				// 		dup2(stream_out, 1);
+
+				// 	else
+				// 		perror(strerror(errno));
+				// }
 
 				status = execvp((cmds->data[i])->filename, call->argv);
 				
 				if (status == -1)
 				{
+					perror(strerror(errno));
+
 					DEBUG_END("done (failed exec).");
 					return CODE_FAIL;
 				}

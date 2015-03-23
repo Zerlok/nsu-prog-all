@@ -20,7 +20,7 @@ int main(int argc, char **argv, char **envp)
 	
 	// Create a new command "keys", which call keypressor
 	// function in the shell.
-	VSHELL_add_command(&shell, "ls", "/bin/ls");
+	VSHELL_add_command(&shell, "ls", "ls");
 	VSHELL_add_command(&shell, "cat", "/bin/cat");
 	VSHELL_add_command(&shell, "say", "/bin/echo");
 	VSHELL_add_command(&shell, "boss", "/usr/bin/sudo");

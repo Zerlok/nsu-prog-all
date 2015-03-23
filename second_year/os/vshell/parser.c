@@ -39,6 +39,7 @@ StringArray *split(char *line)
 				&& ((*chr) == LINE_DELIMITTER_SYMBOL))
 			|| ((!is_string)
 				&& (((*chr) == LINE_SEPARATOR_SYMBOL)
+					|| ((*chr) == LINE_TAB_SYMBOL)
 					|| ((*chr) == LINE_END_SYMBOL))))
 		{
 			if (data_len != 0)

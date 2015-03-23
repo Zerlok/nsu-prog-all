@@ -7,6 +7,7 @@
 #include <string.h>
 #include <signal.h>
 #include <unistd.h>
+#include <errno.h>
 #include <dirent.h>
 
 
@@ -26,6 +27,7 @@
 #define LINE_SKIP_SYMBOL '\\'
 #define LINE_SEPARATOR_SYMBOL ' '
 #define LINE_DELIMITTER_SYMBOL '"'
+#define LINE_TAB_SYMBOL '\t'
 #define LINE_END_SYMBOL '\n'
 
 #define LINE_INPUT_STREAM_STRING "<"
