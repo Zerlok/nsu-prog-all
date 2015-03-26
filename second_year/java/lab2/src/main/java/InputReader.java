@@ -14,8 +14,8 @@ public class InputReader {
         fileBuffer = new BufferedReader(new FileReader(input.getAbsolutePath()));
     }
 
-    public int getNextChar() throws IOException {
-        return fileBuffer.read();
+    public String getLine() throws IOException {
+        return fileBuffer.readLine();
     }
 
     public void closeReader() throws IOException {

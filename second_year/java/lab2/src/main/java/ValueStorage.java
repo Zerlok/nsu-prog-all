@@ -1,9 +1,6 @@
-import java.util.LinkedList;
 import java.util.Stack;
 
-/**
- *
- */
+
 public class ValueStorage {
 
     private Stack<Double> storage;

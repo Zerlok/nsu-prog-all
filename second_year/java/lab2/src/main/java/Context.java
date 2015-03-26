@@ -1,3 +1,4 @@
+import java.io.IOException;
 import java.util.LinkedList;
 
 
@@ -37,7 +38,7 @@ public class Context {
         calcVars.push(name, value);
     }
 
-    public void show(String line) {
+    public void show(String line) throws IOException {
         calcView.show(line);
     }
 }
