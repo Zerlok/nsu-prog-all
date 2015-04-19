@@ -142,9 +142,6 @@ void VSHELL_add_commands_from_dir(SHELL *shell, char *dirname)
 {
 	DEBUG_START("Adding commands from %s directory ...", dirname);
 
-	int debug_orig = DEBUG;
-	// DEBUG = 0;
-
 	DIR *dir;
 	struct dirent *ent;
 
@@ -156,7 +153,6 @@ void VSHELL_add_commands_from_dir(SHELL *shell, char *dirname)
 
 	closedir(dir);
 
-	DEBUG = debug_orig;
 	DEBUG_END("done.");
 }
 

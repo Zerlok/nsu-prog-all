@@ -9,6 +9,7 @@
 #include <unistd.h>
 #include <errno.h>
 #include <dirent.h>
+#include <fcntl.h>
 
 
 #define STRING_ARRAY_EXPANDING_CRITERIA 2

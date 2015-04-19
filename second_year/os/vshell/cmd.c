@@ -5,6 +5,9 @@
 #include "cmd.h"
 
 
+extern char **environ;
+
+
 CmdDeclaration *create_cmd(
 		char *name,
 		char *filename)
@@ -163,6 +166,22 @@ void delete_commands_array(CmdArray *cmds)
 }
 
 
+void redirect_stream(int old_stream, char *filename, int flags)
+{
+	int new_stream = open(filename, flags, 0644);
+	DEBUG_SAY("Opened stream: %d\n", new_stream);
+	
+	if (new_stream == -1)
+	{
+		perror(strerror(errno));
+		return;
+	}
+	
+	dup2(new_stream, old_stream);
+	close(new_stream);
+}
+
+
 int do_cmd(CmdArguments *call, CmdArray *cmds)
 {
 	if ((call == NULL)
@@ -218,47 +237,21 @@ int do_cmd(CmdArguments *call, CmdArray *cmds)
 				if (DEBUG)
 				{
 					int arg_index;
-					for (arg_index = 0; arg_index < call->argc; arg_index++) printf("%s ", call->argv[arg_index]);
+					for (arg_index = 0; arg_index < call->argc; arg_index++)
+						printf("%s ", call->argv[arg_index]);
 					printf("\n");
 				}
 
-				// if (call->ins != NULL)
-				// {
-				// 	int stream_in = open(call->ins, "r");
-					
-				// 	if (stream_in != -1)
-				// 		dup2(stream_in, 0);
+				if (call->ins != NULL)
+					redirect_stream(STDIN_FILENO, call->ins, O_RDONLY);
 
-				// 	else
-				// 		perror(strerror(errno));
-				// }
+				if (call->outs != NULL)
+					redirect_stream(STDOUT_FILENO, call->outs, O_WRONLY | O_CREAT | O_TRUNC);
 
-				// if (call->outs != NULL)
-				// {
-				// 	int stream_out = open(call->outs, "w");
-					
-				// 	if (stream_out != -1)
-				// 	{
-				// 		close(stdout);
-				// 		dup(stream_out);
-				// 	}
+				else if (call->appends != NULL)
+					redirect_stream(STDOUT_FILENO, call->appends, O_WRONLY | O_CREAT | O_APPEND);
 
-				// 	else
-				// 		perror(strerror(errno));
-				// }
-
-				// else if (call->appends != NULL)
-				// {
-				// 	int stream_out = open(call->appends, "r+");
-					
-				// 	if (stream_out != -1)
-				// 		dup2(stream_out, 1);
-
-				// 	else
-				// 		perror(strerror(errno));
-				// }
-
-				status = execvp((cmds->data[i])->filename, call->argv);
+				status = execvpe((cmds->data[i])->filename, call->argv, environ);
 				
 				if (status == -1)
 				{
@@ -267,7 +260,7 @@ int do_cmd(CmdArguments *call, CmdArray *cmds)
 					DEBUG_END("done (failed exec).");
 					return CODE_FAIL;
 				}
-			} // ENDIF
+			} // ENDIF (pid)
 
 			DEBUG_END("done (successed fork).");
 			return CODE_SUCCESS;
