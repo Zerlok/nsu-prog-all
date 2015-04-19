@@ -192,8 +192,10 @@ int do_cmd(CmdArguments *call, CmdArray *cmds)
 		return CODE_INVALID_CALL;
 
 	DEBUG_START("Calling the %s command ...", call->origin);
+
 	int i;
 	pid_t pid;
+	pid_t sid;
 
 	if (!strcmp(call->origin, CMD_EXIT))
 	{
@@ -251,6 +253,10 @@ int do_cmd(CmdArguments *call, CmdArray *cmds)
 				else if (call->appends != NULL)
 					redirect_stream(STDOUT_FILENO, call->appends, O_WRONLY | O_CREAT | O_APPEND);
 
+				DEBUG_SAY("Process running in background: %d\n", call->is_in_background);
+				
+				setsid();
+				printf("Process id: %d", sid);
 				status = execvpe((cmds->data[i])->filename, call->argv, environ);
 				
 				if (status == -1)
