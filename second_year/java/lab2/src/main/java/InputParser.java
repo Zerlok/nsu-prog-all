@@ -21,10 +21,13 @@ public class InputParser {
     }
 
     public String[] parseLine() throws IOException {
-        String[] args = null;
+        String line = streamReader.getLine();
 
-        args = streamReader.getLine().split(" ");
+        if (line == null) {
+            isIntact = false;
+            return new String[] {};
+        }
 
-        return args;
+        return line.split(" ");
     }
 }

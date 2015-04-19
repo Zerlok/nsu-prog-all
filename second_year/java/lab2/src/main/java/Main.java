@@ -1,6 +1,7 @@
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import org.apache.log4j.Logger;
 
 
 /**
@@ -10,7 +11,10 @@ import java.io.IOException;
  */
 public class Main {
 
+    public static final Logger LOG = Logger.getLogger(Main.class.getName());
+
     public static void main(String[] args) {
+        LOG.info("Running the project ...");
         try {
             // Check arguments length (two arguments required)
             if (args.length > 2) {
