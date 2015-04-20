@@ -36,7 +36,10 @@ MATRIX *multiply_matrixes(MATRIX *A, MATRIX *B)
 
 	size_t x;
 	size_t y;
+	size_t i;
+	size_t j;
 	double sum;
+	double res;
 
 	MATRIX *R = get_empty_matrix(A->size_x, B->size_y);
 
@@ -44,7 +47,18 @@ MATRIX *multiply_matrixes(MATRIX *A, MATRIX *B)
 	{
 		for (y = 0; y < R->size_y; y++)
 		{
-			R->data[x][y] += A->data[x][y] * B->data[y][x];
+			// printf("Calculating [%ld][%ld]\n", x, y);
+			
+			for (i = 0; i < A->size_y; i++)
+			{
+				R->data[x][y] += A->data[x][i] * B->data[i][y];
+				// printf("Adding [%ld][%ld] * [%ld][%ld] = ", i, y, x, i);
+				// res = A->data[x][i] * B->data[i][y];
+				// sum += res;
+				// printf("%f\n", res);
+			}
+
+			// R->data[x][y] = sum;
 		}
 	}
 
