@@ -22,6 +22,7 @@ int main(int argc, char **argv)
 
 	if (rank == 3)
 	{
+		// [variable] [length] [type] [sender] [id] [communicator] [status]
 		MPI_Recv(&b, 1, MPI_INT, 0, 15, MPI_COMM_WORLD, &mpi_status);
 	}
 

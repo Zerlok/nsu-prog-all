@@ -11,31 +11,39 @@ int main(int argc, char **argv)
 	int rank;
 	MATRIX *matrix1 = get_matrix_from_file("matrix1.txt");
 	MATRIX *matrix2 = get_matrix_from_file("matrix2.txt");
-	// MATRIX *vector = get_matrix(3, 1, ({ { 1 }, { 1 }, { 1 } }));
+	MATRIX *row;
 	MATRIX *result;
 
 	printf("First\n");
 	show_matrix(matrix1);
-	printf("Second\n");
-	show_matrix(matrix2);
-	// show_matrix(vector);
 
-	result = multiply_matrixes(matrix1, matrix2);
+	// MPI initialization.
+	MPI_Init(&argc, &argv);
+	MPI_Comm_size(MPI_COMM_WORLD, &size);
+	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+
+	// Requirements.
+	if ((size != 3) && (rank == 0))
+	{
+		printf("only 3 cpus should be!\n");
+		return 1;
+	}
+
+	row = get_column(rank, matrix2);
+
+	// Tell about this cpu.
+	printf("MPI:\n   size: %d\n   rank: %d\n", size, rank);
+	show_matrix(row);
+
+	result = multiply_matrixes(matrix1, row);
 
 	printf("Result\n");
 	show_matrix(result);
 
-	// MPI_Init(&argc, &argv);
-	// MPI_Comm_size(MPI_COMM_WORLD, &size);
-	// MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-
-	// printf("MPI:\n   size: %d\n   rank: %d\n", size, rank);
-
-	// MPI_Finalize();
-
 	delete_matrix(matrix1);
 	delete_matrix(matrix2);
 	delete_matrix(result);
-	// delete_matrix(vector);
+
+	MPI_Finalize();
 	return 0;
 }

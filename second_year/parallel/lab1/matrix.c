@@ -37,7 +37,6 @@ MATRIX *multiply_matrixes(MATRIX *A, MATRIX *B)
 	size_t x;
 	size_t y;
 	size_t i;
-	size_t j;
 	double sum;
 	double res;
 
@@ -46,23 +45,54 @@ MATRIX *multiply_matrixes(MATRIX *A, MATRIX *B)
 	for (x = 0; x < R->size_x; x++)
 	{
 		for (y = 0; y < R->size_y; y++)
-		{
-			// printf("Calculating [%ld][%ld]\n", x, y);
-			
+		{			
 			for (i = 0; i < A->size_y; i++)
 			{
 				R->data[x][y] += A->data[x][i] * B->data[i][y];
-				// printf("Adding [%ld][%ld] * [%ld][%ld] = ", i, y, x, i);
-				// res = A->data[x][i] * B->data[i][y];
-				// sum += res;
-				// printf("%f\n", res);
 			}
-
-			// R->data[x][y] = sum;
 		}
 	}
 
+	// printf("Calculating [%ld][%ld]\n", x, y);
+	// for (i = 0; i < A->size_y; i++)
+	// {
+	// 	printf("Adding [%ld][%ld] * [%ld][%ld] = ", i, y, x, i);
+	// 	res = A->data[x][i] * B->data[i][y];
+	// 	sum += res;
+	// 	printf("%f\n", res);
+	// }
+
 	return R;
+}
+
+
+MATRIX *get_row(size_t row_num, MATRIX *mtrx)
+{
+	if ((row_num < 0) || (row_num >= mtrx->size_x))
+		return NULL;
+
+	size_t i;
+	MATRIX *row = get_empty_matrix(1, mtrx->size_y);
+
+	for (i = 0; i < mtrx->size_y; i++)
+		row->data[0][i] = mtrx->data[row_num][i];
+
+	return row;
+}
+
+
+MATRIX *get_column(size_t col_num, MATRIX *mtrx)
+{
+	if ((col_num < 0) || (col_num >= mtrx->size_y))
+		return NULL;
+
+	size_t i;
+	MATRIX *col = get_empty_matrix(mtrx->size_x, 1);
+
+	for (i = 0; i < mtrx->size_x; i++)
+		col->data[i][0] = mtrx->data[i][col_num];
+
+	return col;
 }
 
 
@@ -70,6 +100,7 @@ MATRIX *get_matrix(size_t size_x, size_t size_y, double **values)
 {
 	if (values == NULL)
 	{
+		printf("No values were specified!\n");
 		return NULL;
 	}
 
