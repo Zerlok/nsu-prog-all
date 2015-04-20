@@ -138,11 +138,12 @@ CmdArguments *get_command_call(char *line)
 				break;
 			}
 
-			DEBUG_SAY("Pop '%s' in args_array (%ld < %ld)\n", args_array->data[i], i, args_array->used_length);
-			delete_string_from_array(i, args_array);
-
 			cmd_call->ins = (char*)calloc(sizeof(char), strlen(args_array->data[i + 1]) + 1);
 			strcpy(cmd_call->ins, args_array->data[i + 1]);
+
+			DEBUG_SAY("Pop '%s' in args_array (%ld < %ld)\n", args_array->data[i], i, args_array->used_length);
+			delete_string_from_array(i, args_array); // delete LINE_INPUT_STREAM_STRING
+			delete_string_from_array(i, args_array); // delete argument
 		}
 
 		// The output stream was set.
@@ -158,8 +159,8 @@ CmdArguments *get_command_call(char *line)
 			strcpy(cmd_call->outs, args_array->data[i + 1]);
 
 			DEBUG_SAY("Pop '%s' in args_array (%ld < %ld)\n", args_array->data[i], i, args_array->used_length);
-			delete_string_from_array(i, args_array);
-			delete_string_from_array(i, args_array);
+			delete_string_from_array(i, args_array); // delete LINE_OUTPUT_STREAM_STRING
+			delete_string_from_array(i, args_array); // delete argument
 		}
 
 		// The append stream was set.
@@ -175,21 +176,21 @@ CmdArguments *get_command_call(char *line)
 			strcpy(cmd_call->appends, args_array->data[i + 1]);
 
 			DEBUG_SAY("Pop '%s' in args_array (%ld < %ld)\n", args_array->data[i], i, args_array->used_length);
-			delete_string_from_array(i, args_array);
-			delete_string_from_array(i, args_array);
+			delete_string_from_array(i, args_array); // delete LINE_APPEND_STREAM_STRING
+			delete_string_from_array(i, args_array); // delete argument
 		}
 
 		// The background running was set.
 		else if (!strcmp(args_array->data[i], LINE_BACKGROUND_STRING))
 		{
-			DEBUG_SAY("Pop %s in args_array (%ld < %ld)\n", args_array->data[i], i, args_array->used_length);
-			delete_string_from_array(i, args_array);
-			
 			cmd_call->is_in_background = 1;
+			
+			DEBUG_SAY("Pop %s in args_array (%ld < %ld)\n", args_array->data[i], i, args_array->used_length);
+			delete_string_from_array(i, args_array); // delete LINE_BACKGROUND_STRING
 		}
 
 		i++;
-	} // ENDWHILE
+	} // ENDWHILE (args_array->used_length)
 
 	DEBUG_SAY("After while block\n");
 

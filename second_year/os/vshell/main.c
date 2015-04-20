@@ -26,6 +26,10 @@ int main(int argc, char **argv, char **envp)
 	VSHELL_add_command(&shell, "boss", "/usr/bin/sudo");
 	VSHELL_add_command(&shell, "clear", "/usr/bin/clear");
 	VSHELL_add_command(&shell, "which", "/usr/bin/which");
+	VSHELL_add_command(&shell, "daem", "samples/daem");
+	VSHELL_add_command(&shell, "loop", "samples/loop");
+	VSHELL_add_command(&shell, "nano", "/usr/bin/nano");
+	VSHELL_add_command(&shell, "env", "env");
 
 	// VSHELL_add_commands_from_dir(&shell, "/bin");
 

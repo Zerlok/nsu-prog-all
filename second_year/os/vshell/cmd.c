@@ -194,7 +194,9 @@ int do_cmd(CmdArguments *call, CmdArray *cmds)
 	DEBUG_START("Calling the %s command ...", call->origin);
 
 	int i;
+	pid_t id;
 	pid_t pid;
+	pid_t gid;
 	pid_t sid;
 
 	if (!strcmp(call->origin, CMD_EXIT))
@@ -218,23 +220,29 @@ int do_cmd(CmdArguments *call, CmdArray *cmds)
 		{
 			int status;
 			
-			DEBUG_SAY("Forking '%s' == '%s' ...\n", call->origin, (cmds->data[i])->name);
-			
-			pid = fork();
+			// Forking
+			pid = getpid();
+			gid = getpgid(pid);
+			DEBUG_SAY("Forking from process %d %d ...\n", pid, gid);
+			id = fork();
 
-			if (pid < 0) // Do it if fork failed.
+			if (id < 0) // Do it if fork failed.
 			{
 				printf("Cannot create a fork.\n");
 				DEBUG_END("done (failed fork).");
 				return CODE_FAIL;
 			}
-			else if (pid > 0) // Do it in parent process.
+			else if (id > 0) // Do it in PARENT process.
 			{
-				DEBUG_SAY("Parent pid: %d\n", pid);
-				waitpid(pid, &status, 0);
+				waitpid(id, &status, 0);
+				DEBUG_SAY("Parent id: %d %d %d\n", id, getpid(), getpgid(id));
 			}
-			else // Do it in child process.
+			else // Do it in CHILD process.
 			{
+				pid = getpid();
+				DEBUG_SAY("Child id: %d %d %d\n", id, getpid(), getpgid(id));
+
+				// Show all calling arguments. 
 				DEBUG_SAY("Calling '%s' with arguments: ", (cmds->data[i])->filename);
 				if (DEBUG)
 				{
@@ -244,6 +252,7 @@ int do_cmd(CmdArguments *call, CmdArray *cmds)
 					printf("\n");
 				}
 
+				// Redirect inputs.
 				if (call->ins != NULL)
 					redirect_stream(STDIN_FILENO, call->ins, O_RDONLY);
 
@@ -253,20 +262,29 @@ int do_cmd(CmdArguments *call, CmdArray *cmds)
 				else if (call->appends != NULL)
 					redirect_stream(STDOUT_FILENO, call->appends, O_WRONLY | O_CREAT | O_APPEND);
 
-				DEBUG_SAY("Process running in background: %d\n", call->is_in_background);
+				DEBUG_SAY("Is process running in background? %d\n", call->is_in_background);
 				
-				setsid();
-				printf("Process id: %d", sid);
+				// if (gid == 0)
+				// 	gid = pid;
+				
+				// setpgid(pid, gid);
+				
+				// if (!(call->is_in_background))
+				// 	tcsetpgrp(shell_terminal, gid);
+
+				// sid = setsid();
+				// printf("Process id: %d\n", getpid());
 				status = execvpe((cmds->data[i])->filename, call->argv, environ);
 				
+				// If exec failed.
 				if (status == -1)
 				{
-					perror(strerror(errno));
+					perror("Error:");
 
 					DEBUG_END("done (failed exec).");
 					return CODE_FAIL;
 				}
-			} // ENDIF (pid)
+			} // ENDIF (CHILD process)
 
 			DEBUG_END("done (successed fork).");
 			return CODE_SUCCESS;
