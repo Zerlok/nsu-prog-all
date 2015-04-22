@@ -32,7 +32,7 @@ public class CommandMinus extends Command {
     }
 
     @Override
-    public void execute(String[] arguments) throws Exception {
+    public void execute() throws Exception {
         if ((minuend == null) || (subtrahend == null))
             throw new UnvalidatedCommandExecutionException();
 

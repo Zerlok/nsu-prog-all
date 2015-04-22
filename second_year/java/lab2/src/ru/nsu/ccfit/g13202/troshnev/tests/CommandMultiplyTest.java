@@ -33,7 +33,7 @@ public class CommandMultiplyTest {
 
     @Test(expected = UnvalidatedCommandExecutionException.class)
     public void testUnvalidatedExecution() throws Exception {
-        cmd.execute(defaults);
+        cmd.execute();
     }
 
     @Test
@@ -76,7 +76,7 @@ public class CommandMultiplyTest {
             calcContext.pushValue(equations[i][1]);
             calcContext.pushValue(equations[i][0]);
             cmd.isValid(defaults);
-            cmd.execute(defaults);
+            cmd.execute();
             expected_results[i] = (equations[i][0] * equations[i][1]);
         }
 

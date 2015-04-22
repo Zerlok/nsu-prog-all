@@ -33,7 +33,7 @@ public class CommandSqrtTest {
 
     @Test(expected = UnvalidatedCommandExecutionException.class)
     public void testUnvalidatedExecution() throws Exception {
-        cmd.execute(defaults);
+        cmd.execute();
     }
 
     @Test
@@ -66,7 +66,7 @@ public class CommandSqrtTest {
         for (int i = 0; i < equations.length; i++) {
             calcContext.pushValue(equations[i]);
             cmd.isValid(defaults);
-            cmd.execute(defaults);
+            cmd.execute();
             expected_results[i] = Math.sqrt(equations[i]);
         }
 

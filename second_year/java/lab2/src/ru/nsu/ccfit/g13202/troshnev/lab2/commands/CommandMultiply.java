@@ -32,7 +32,7 @@ public class CommandMultiply extends Command {
     }
 
     @Override
-    public void execute(String[] arguments) throws Exception {
+    public void execute() throws Exception {
         if ((first_multiplicand == null) || (second_multiplicand == null))
             throw new UnvalidatedCommandExecutionException();
 

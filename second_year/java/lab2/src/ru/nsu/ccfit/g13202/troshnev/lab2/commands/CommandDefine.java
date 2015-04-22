@@ -12,18 +12,21 @@ import ru.nsu.ccfit.g13202.troshnev.lab2.Context;
 public class CommandDefine extends Command {
 
     private static final Logger LOG = Logger.getLogger(CommandDefine.class.getName());
+    private String name;
+    private Double value;
 
     public CommandDefine(Context ctx) {
         super(ctx);
     }
 
-    public boolean isValid(String[] arguments) throws IOException {
+    public boolean isValid(String[] arguments) throws Exception {
         if ((arguments.length != 3)
                 || calcContext.isDefined(arguments[1]))
             return false;
 
         try {
-            Double.valueOf(arguments[2]);
+            value = Double.valueOf(arguments[2]);
+            name = arguments[0];
 
         } catch (NumberFormatException e) {
             return false;
@@ -32,8 +35,8 @@ public class CommandDefine extends Command {
         return true;
     }
 
-    public void execute(String[] arguments) throws IOException {
-        LOG.info(String.format("New variable definition: %1$s = %2$s", arguments[1], arguments[2]));
-        calcContext.defineVar(arguments[1], Double.valueOf(arguments[2]));
+    public void execute() throws IOException {
+        LOG.info(String.format("New variable definition: %1$s = %2$f", name, value));
+        calcContext.defineVar(name, value);
     }
 }

@@ -37,7 +37,8 @@ public class CommandDefineTest {
 
     @Test
     public void testExecute() throws Exception {
-        cmd.execute(new String[] {"DEFINE", "one", "1"});
+        assertTrue(cmd.isValid(new String[] {"DEFINE", "one", "1"}));
+        cmd.execute();
     }
 
     @Test
@@ -45,7 +46,8 @@ public class CommandDefineTest {
         assertTrue(cmd.isValid(new String[]{"DEFINE", "two", "2"}));
         assertTrue(cmd.isValid(new String[]{"DEFINE", "two", "2"}));
 
-        cmd.execute(new String[] {"DEFINE", "two", "2"});
+        assertTrue(cmd.isValid(new String[] {"DEFINE", "two", "2"}));
+        cmd.execute();
         assertFalse(cmd.isValid(new String[]{"DEFINE", "two", "2"}));
     }
 }

@@ -34,4 +34,12 @@ public class CommandPush extends Command {
 
         return true;
     }
+
+    @Override
+    public void execute() throws Exception {
+        if (value == null)
+            throw new UnvalidatedCommandExecutionException();
+
+        calcContext.pushValue(value);
+    }
 }

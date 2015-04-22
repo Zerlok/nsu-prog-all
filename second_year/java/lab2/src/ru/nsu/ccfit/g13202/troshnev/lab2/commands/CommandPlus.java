@@ -32,7 +32,7 @@ public class CommandPlus extends Command {
     }
 
     @Override
-    public void execute(String[] arguments) throws Exception {
+    public void execute() throws Exception {
         if ((first_summand == null) || (second_summand == null))
             throw new UnvalidatedCommandExecutionException();
 

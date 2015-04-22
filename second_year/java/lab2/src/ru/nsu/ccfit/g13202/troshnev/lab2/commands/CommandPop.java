@@ -21,4 +21,7 @@ public class CommandPop extends Command {
 
         return true;
     }
+
+    @Override
+    public void execute() throws Exception {}
 }

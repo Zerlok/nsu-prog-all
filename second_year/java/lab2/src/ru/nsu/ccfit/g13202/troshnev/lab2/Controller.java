@@ -59,7 +59,7 @@ public class Controller {
                 // Execute the command if it is valid.
                 if (calcCmd.isValid(args)) {
                     LOG.info(String.format("Executing the %1s command ...", calcCmd.getClass().getName()));
-                    calcCmd.execute(args);
+                    calcCmd.execute();
 
                 // Return values back, if command is invalid.
                 } else {

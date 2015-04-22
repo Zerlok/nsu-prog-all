@@ -34,7 +34,7 @@ public class CommandSqrt extends Command {
     }
 
     @Override
-    public void execute(String[] arguments) throws Exception {
+    public void execute() throws Exception {
         if (value == null)
             throw new UnvalidatedCommandExecutionException();
 

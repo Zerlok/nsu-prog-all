@@ -35,7 +35,7 @@ public class CommandDivide extends Command {
     }
 
     @Override
-    public void execute(String[] arguments) throws Exception {
+    public void execute() throws Exception {
         if ((numerator == null)
                 || (denominator == null))
             throw new UnvalidatedCommandExecutionException();

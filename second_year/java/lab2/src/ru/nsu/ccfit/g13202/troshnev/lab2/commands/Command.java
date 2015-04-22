@@ -24,7 +24,7 @@ public abstract class Command {
         return true;
     }
 
-    public void execute(String[] arguments) throws Exception {
+    public void execute() throws Exception {
         calcContext.println("Command doesn't have the declaration what to do.");
     }
 
