@@ -22,6 +22,9 @@ public class CommandMultiply extends Command {
     public boolean isValid(String[] arguments) throws Exception {
         Double[] values = calcContext.getValues(2);
 
+        if (values == null)
+            return false;
+
         first_multiplicand = values[0];
         second_multiplicand = values[1];
 
@@ -30,6 +33,9 @@ public class CommandMultiply extends Command {
 
     @Override
     public void execute(String[] arguments) throws Exception {
+        if ((first_multiplicand == null) || (second_multiplicand == null))
+            throw new UnvalidatedCommandExecutionException();
+
         calcContext.pushValue((first_multiplicand * second_multiplicand));
     }
 }

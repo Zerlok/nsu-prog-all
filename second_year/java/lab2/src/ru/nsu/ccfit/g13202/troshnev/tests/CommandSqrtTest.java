@@ -6,13 +6,10 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 import org.junit.rules.ExpectedException;
 import ru.nsu.ccfit.g13202.troshnev.lab2.*;
-import ru.nsu.ccfit.g13202.troshnev.lab2.commands.Command;
-import ru.nsu.ccfit.g13202.troshnev.lab2.commands.CommandDivide;
-import ru.nsu.ccfit.g13202.troshnev.lab2.commands.UnvalidatedCommandExecutionException;
-import ru.nsu.ccfit.g13202.troshnev.lab2.commands.ZeroDivisionException;
+import ru.nsu.ccfit.g13202.troshnev.lab2.commands.*;
 
 
-public class CommandDivideTest {
+public class CommandSqrtTest {
 
     private ValueStorage values;
     private VariableStorage variables;
@@ -30,7 +27,7 @@ public class CommandDivideTest {
         variables = new VariableStorage();
         view = new View(new OutputWriter(System.out));
         calcContext = new Context(values, variables, view);
-        cmd = new CommandDivide(calcContext);
+        cmd = new CommandSqrt(calcContext);
         defaults = new String[] {};
     }
 
@@ -46,13 +43,6 @@ public class CommandDivideTest {
     }
 
     @Test
-    public void testOneArgument() throws Exception {
-//        Only one value in stack.
-        calcContext.pushValue(1.0);
-        assertFalse(cmd.isValid(defaults));
-    }
-
-    @Test
     public void testIsValid() throws Exception {
 //        Two values in stack is enough.
         calcContext.pushValue(1.0);
@@ -60,32 +50,24 @@ public class CommandDivideTest {
         assertTrue(cmd.isValid(defaults));
     }
 
-    @Test(expected = ZeroDivisionException.class)
-    public void testZeroDivision() throws Exception {
-//        Zero division.
-        calcContext.pushValue(0.0);
-        calcContext.pushValue(1.0);
-        cmd.isValid(defaults);
-    }
-
     @Test
     public void testExecute() throws Exception {
-        Double[][] equations = new Double[][] {
-                {1.0, 1.0},
-                {100.0, 10.0},
-                {10.0, 100.0},
-                {1.0, 0.01},
-                {0.0, 1234.5678},
-                {24.0, 7.0},
+        Double[] equations = new Double[] {
+                1.0,
+                100.0,
+                0.1,
+                2.0,
+                25.0,
+                36.7,
+                0.0,
         };
         Double[] expected_results = new Double[equations.length];
 
         for (int i = 0; i < equations.length; i++) {
-            calcContext.pushValue(equations[i][1]);
-            calcContext.pushValue(equations[i][0]);
+            calcContext.pushValue(equations[i]);
             cmd.isValid(defaults);
             cmd.execute(defaults);
-            expected_results[i] = (equations[i][0] / equations[i][1]);
+            expected_results[i] = Math.sqrt(equations[i]);
         }
 
         Double[] actual_results = calcContext.getValues(equations.length);
@@ -96,7 +78,7 @@ public class CommandDivideTest {
 
     @Test
     public void testRevert() throws Exception {
-        Double[] expected_values = new Double[] {1.0, 0.0};
+        Double[] expected_values = new Double[] {-0.001};
 
         try {
             cmd.isValid(defaults);
@@ -105,10 +87,9 @@ public class CommandDivideTest {
         }
 
         try {
-            calcContext.pushValue(0.0);
-            calcContext.pushValue(1.0);
+            calcContext.pushValue(-0.001);
             cmd.isValid(defaults);
-        } catch (ZeroDivisionException e) {
+        } catch (NegativeValueException e) {
             cmd.revert();
         }
 

@@ -24,11 +24,28 @@ public class Context {
         calcView = view;
     }
 
-    public Double[] getValues(int amount) throws EmptyStorageException {
+    public Double[] getValues(int amount) {
+        int i = 0;
         Double[] valuesArray = new Double[amount];
+        Double val;
 
-        for (int i = 0; i < amount; i++)
-            valuesArray[i] = calcValues.pop();
+        try {
+            for (; i < amount; i++) {
+                val = calcValues.pop();
+
+                if (val == null)
+                    val = 0.0;
+
+                valuesArray[i] = val;
+            }
+
+        } catch (EmptyStorageException e) {
+            LOG.warn("Too many values to pop, reverting back!");
+            for (; i > 0; i--)
+                calcValues.push(valuesArray[i]);
+
+            return null;
+        }
 
         LOG.debug(String.format("Returning %1$d values ...", amount));
         return valuesArray;

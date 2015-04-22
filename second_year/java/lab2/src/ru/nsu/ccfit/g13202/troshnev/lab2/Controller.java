@@ -63,7 +63,7 @@ public class Controller {
 
                 // Return values back, if command is invalid.
                 } else {
-                    LOG.info("Reverting the values back into the stack ...");
+                    LOG.warn("Command validation filed - reverting values back in storage.");
                     calcCmd.revert();
                 }
 

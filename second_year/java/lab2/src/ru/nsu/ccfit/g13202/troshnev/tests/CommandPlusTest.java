@@ -6,13 +6,10 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 import org.junit.rules.ExpectedException;
 import ru.nsu.ccfit.g13202.troshnev.lab2.*;
-import ru.nsu.ccfit.g13202.troshnev.lab2.commands.Command;
-import ru.nsu.ccfit.g13202.troshnev.lab2.commands.CommandDivide;
-import ru.nsu.ccfit.g13202.troshnev.lab2.commands.UnvalidatedCommandExecutionException;
-import ru.nsu.ccfit.g13202.troshnev.lab2.commands.ZeroDivisionException;
+import ru.nsu.ccfit.g13202.troshnev.lab2.commands.*;
 
 
-public class CommandDivideTest {
+public class CommandPlusTest {
 
     private ValueStorage values;
     private VariableStorage variables;
@@ -30,7 +27,7 @@ public class CommandDivideTest {
         variables = new VariableStorage();
         view = new View(new OutputWriter(System.out));
         calcContext = new Context(values, variables, view);
-        cmd = new CommandDivide(calcContext);
+        cmd = new CommandPlus(calcContext);
         defaults = new String[] {};
     }
 
@@ -60,14 +57,6 @@ public class CommandDivideTest {
         assertTrue(cmd.isValid(defaults));
     }
 
-    @Test(expected = ZeroDivisionException.class)
-    public void testZeroDivision() throws Exception {
-//        Zero division.
-        calcContext.pushValue(0.0);
-        calcContext.pushValue(1.0);
-        cmd.isValid(defaults);
-    }
-
     @Test
     public void testExecute() throws Exception {
         Double[][] equations = new Double[][] {
@@ -77,6 +66,9 @@ public class CommandDivideTest {
                 {1.0, 0.01},
                 {0.0, 1234.5678},
                 {24.0, 7.0},
+                {-3.0, 3.0},
+                {-1.0, -2.0},
+                {10.0, 0.1},
         };
         Double[] expected_results = new Double[equations.length];
 
@@ -85,36 +77,12 @@ public class CommandDivideTest {
             calcContext.pushValue(equations[i][0]);
             cmd.isValid(defaults);
             cmd.execute(defaults);
-            expected_results[i] = (equations[i][0] / equations[i][1]);
+            expected_results[i] = (equations[i][0] + equations[i][1]);
         }
 
         Double[] actual_results = calcContext.getValues(equations.length);
 
         for (int i = 0; i < equations.length; i++)
             assertEquals(expected_results[i], actual_results[equations.length - i - 1]);
-    }
-
-    @Test
-    public void testRevert() throws Exception {
-        Double[] expected_values = new Double[] {1.0, 0.0};
-
-        try {
-            cmd.isValid(defaults);
-        } catch (EmptyStorageException e) {
-            cmd.revert();
-        }
-
-        try {
-            calcContext.pushValue(0.0);
-            calcContext.pushValue(1.0);
-            cmd.isValid(defaults);
-        } catch (ZeroDivisionException e) {
-            cmd.revert();
-        }
-
-        Double[] actual_values = calcContext.getValues(expected_values.length);
-
-        for (int i = 0; i < expected_values.length; i++)
-            assertEquals(expected_values[i], actual_values[i]);
     }
 }

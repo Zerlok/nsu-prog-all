@@ -22,6 +22,9 @@ public class CommandPlus extends Command {
     public boolean isValid(String[] arguments) throws Exception {
         Double[] values = calcContext.getValues(2);
 
+        if (values == null)
+            return false;
+
         first_summand = values[0];
         second_summand = values[1];
 
@@ -30,6 +33,9 @@ public class CommandPlus extends Command {
 
     @Override
     public void execute(String[] arguments) throws Exception {
+        if ((first_summand == null) || (second_summand == null))
+            throw new UnvalidatedCommandExecutionException();
+
         calcContext.pushValue((first_summand + second_summand));
     }
 }

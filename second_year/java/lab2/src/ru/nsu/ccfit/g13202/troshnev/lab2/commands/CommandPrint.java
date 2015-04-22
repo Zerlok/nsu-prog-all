@@ -26,6 +26,9 @@ public class CommandPrint extends Command {
 
     @Override
     public void execute(String[] arguments) throws Exception {
+        if (value == null)
+            throw new UnvalidatedCommandExecutionException();
+
         calcContext.println(String.valueOf(value));
     }
 }

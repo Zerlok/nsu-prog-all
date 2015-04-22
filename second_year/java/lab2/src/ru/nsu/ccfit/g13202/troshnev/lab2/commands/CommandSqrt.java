@@ -20,7 +20,12 @@ public class CommandSqrt extends Command {
 
     @Override
     public boolean isValid(String[] arguments) throws Exception {
-        value = calcContext.getValues(1)[0];
+        Double[] values = calcContext.getValues(1);
+
+        if (values == null)
+            return false;
+
+        value = values[0];
 
         if (value < 0.0)
             throw new NegativeValueException();
@@ -30,11 +35,15 @@ public class CommandSqrt extends Command {
 
     @Override
     public void execute(String[] arguments) throws Exception {
+        if (value == null)
+            throw new UnvalidatedCommandExecutionException();
+
         calcContext.pushValue(Math.sqrt(value));
     }
 
     @Override
     public void revert() {
-        calcContext.pushValue(value);
+        if (value != null)
+            calcContext.pushValue(value);
     }
 }

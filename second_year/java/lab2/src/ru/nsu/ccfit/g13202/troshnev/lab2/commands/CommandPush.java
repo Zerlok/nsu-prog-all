@@ -14,7 +14,7 @@ import java.io.IOException;
 
 public class CommandPush extends Command {
 
-    private static final Logger LOG = Logger.getLogger(CommandDefine.class.getName());
+    Double value;
 
     public CommandPush(Context ctx) {
         super(ctx);
@@ -25,15 +25,6 @@ public class CommandPush extends Command {
         if (arguments.length != 2)
             return false;
 
-        return true;
-    }
-
-    @Override
-    public void execute(String[] arguments) throws Exception {
-        LOG.info(String.format("Pushing %1$s into stack", arguments[1]));
-
-        Double value;
-
         try {
             value = (double) Double.valueOf(arguments[1]);
 
@@ -41,6 +32,6 @@ public class CommandPush extends Command {
             value = calcContext.getVarValue(arguments[1]);
         }
 
-        calcContext.pushValue(value);
+        return true;
     }
 }

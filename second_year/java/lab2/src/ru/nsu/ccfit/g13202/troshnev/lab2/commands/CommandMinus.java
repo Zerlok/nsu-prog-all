@@ -22,6 +22,9 @@ public class CommandMinus extends Command {
     public boolean isValid(String[] arguments) throws Exception {
         Double[] values = calcContext.getValues(2);
 
+        if (values == null)
+            return false;
+
         minuend = values[0];
         subtrahend = values[1];
 
@@ -30,6 +33,9 @@ public class CommandMinus extends Command {
 
     @Override
     public void execute(String[] arguments) throws Exception {
+        if ((minuend == null) || (subtrahend == null))
+            throw new UnvalidatedCommandExecutionException();
+
         calcContext.pushValue((minuend - subtrahend));
     }
 }

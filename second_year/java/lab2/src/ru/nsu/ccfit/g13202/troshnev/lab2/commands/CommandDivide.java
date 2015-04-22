@@ -21,6 +21,10 @@ public class CommandDivide extends Command {
     @Override
     public boolean isValid(String[] arguments) throws Exception {
         Double[] values = calcContext.getValues(2);
+
+        if (values == null)
+            return false;
+
         numerator = values[0];
         denominator = values[1];
 
@@ -41,10 +45,9 @@ public class CommandDivide extends Command {
 
     @Override
     public void revert() {
-        if (denominator != null)
+        if ((denominator != null) && (numerator != null)) {
             calcContext.pushValue(denominator);
-
-        if (numerator != null)
             calcContext.pushValue(numerator);
+        }
     }
 }

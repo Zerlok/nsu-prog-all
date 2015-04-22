@@ -16,7 +16,9 @@ public class CommandPop extends Command {
 
     @Override
     public boolean isValid(String[] arguments) throws Exception {
-        calcContext.getValues(1);
+        if (calcContext.getValues(1) == null)
+            return false;
+
         return true;
     }
 }
