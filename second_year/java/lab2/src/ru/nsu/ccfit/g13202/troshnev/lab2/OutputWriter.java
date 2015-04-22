@@ -1,4 +1,9 @@
-import java.io.*;
+package ru.nsu.ccfit.g13202.troshnev.lab2;
+
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 
 
 /**

@@ -1,3 +1,5 @@
+package ru.nsu.ccfit.g13202.troshnev.lab2;
+
 import java.io.*;
 
 

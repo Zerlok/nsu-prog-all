@@ -1,3 +1,5 @@
+package ru.nsu.ccfit.g13202.troshnev.lab2;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -15,11 +17,11 @@ public class VariableStorage {
         storage = new HashMap<String, Double>();
     }
 
-    public void push(String name, Double value) {
+    public void setVar(String name, Double value) {
         storage.put(name, value);
     }
 
-    public Double pop(String name) {
+    public Double getVar(String name) {
         return storage.get(name);
     }
 }

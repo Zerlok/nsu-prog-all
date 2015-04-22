@@ -1,5 +1,6 @@
+package ru.nsu.ccfit.g13202.troshnev.lab2;
+
 import java.io.IOException;
-import java.util.Vector;
 
 
 /**
@@ -25,6 +26,9 @@ public class InputParser {
 
         if (line == null) {
             isIntact = false;
+            return new String[] {};
+
+        } else if (line.startsWith("#")) {
             return new String[] {};
         }
 

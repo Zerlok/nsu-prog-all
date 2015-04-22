@@ -1,7 +1,10 @@
+package ru.nsu.ccfit.g13202.troshnev.lab2;
+
+import org.apache.log4j.Logger;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import org.apache.log4j.Logger;
 
 
 /**
@@ -14,7 +17,6 @@ public class Main {
     public static final Logger LOG = Logger.getLogger(Main.class.getName());
 
     public static void main(String[] args) {
-        LOG.info("Running the project ...");
         try {
             // Check arguments length (two arguments required)
             if (args.length > 2) {
@@ -47,11 +49,16 @@ public class Main {
             if (!output.canWrite())
                 throw new Exception("Can't write into file: " + output.getAbsolutePath());
 
+            // Init input, output.
+            InputReader inputReader = new InputReader(input);
+            OutputWriter outputWriter = new OutputWriter(output);
+
             // Create and run the controller.
-            Controller calculator = new Controller(new InputReader(input), new OutputWriter(output));
+            Controller calculator = new Controller(inputReader, outputWriter);
             calculator.run();
 
-            System.out.println("Done.");
+            inputReader.closeReader();
+            outputWriter.closeWriter();
 
         } catch (FileNotFoundException e) {
             System.out.println("File not found: " + e.getMessage());

@@ -1,5 +1,9 @@
-import java.io.IOException;
+package ru.nsu.ccfit.g13202.troshnev.lab2;
+
 import org.apache.log4j.Logger;
+import ru.nsu.ccfit.g13202.troshnev.lab2.commands.*;
+
+import java.io.IOException;
 
 
 /**
@@ -17,7 +21,7 @@ public class Controller {
     private CommandFactory calcCommandFactory;
 
     public Controller(InputReader reader, OutputWriter writer) {
-        LOG.debug("Creating the controller.");
+        LOG.info("Creating the calculator controller ...");
 
         calcParser = new InputParser(reader);
         calcViewer = new View(writer);
@@ -25,10 +29,22 @@ public class Controller {
         calcCommandFactory = new CommandFactory(calcContext);
 
         LOG.info("Start commands registration ...");
-        calcCommandFactory.registerCommand("HELP", HelpCommand.class);
+        calcCommandFactory.registerCommand("+", CommandPlus.class);
+        calcCommandFactory.registerCommand("-", CommandMinus.class);
+        calcCommandFactory.registerCommand("*", CommandMultiply.class);
+        calcCommandFactory.registerCommand("/", CommandDivide.class);
+        calcCommandFactory.registerCommand("SQRT", CommandSqrt.class);
+        calcCommandFactory.registerCommand("DEFINE", CommandDefine.class);
+        calcCommandFactory.registerCommand("PRINT", CommandPrint.class);
+        calcCommandFactory.registerCommand("PUSH", CommandPush.class);
+        calcCommandFactory.registerCommand("POP", CommandPop.class);
+        calcCommandFactory.registerCommand("HELP", CommandHelp.class);
+
+        LOG.info("Calculator controller created.");
     }
 
     public void run() throws IOException {
+        LOG.info("Running the calculator ...");
         Command calcCmd;
 
         while (calcParser.isIntact()) {
@@ -40,8 +56,8 @@ public class Controller {
             calcCmd = calcCommandFactory.createCommand(args[0]);
 
             // Execute the command if it is valid.
-            if (calcCmd.isValid()) {
-                LOG.info("Executing the %1s command ...".format(calcCmd.getClass().getName()));
+            if (calcCmd.isValid(args)) {
+                LOG.info(String.format("Executing the %1s command ...", calcCmd.getClass().getName()));
                 calcCmd.execute(args);
 
             // Return values back, if command is invalid.
@@ -51,6 +67,6 @@ public class Controller {
             }
         }
 
-        LOG.info("Done.");
+        LOG.info("Calculator stopped.");
     }
 }
