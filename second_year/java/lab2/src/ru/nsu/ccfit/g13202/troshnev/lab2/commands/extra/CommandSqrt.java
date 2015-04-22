@@ -1,7 +1,9 @@
-package ru.nsu.ccfit.g13202.troshnev.lab2.commands;
+package ru.nsu.ccfit.g13202.troshnev.lab2.commands.extra;
 
-import ru.nsu.ccfit.g13202.troshnev.lab2.Context;
-import ru.nsu.ccfit.g13202.troshnev.lab2.EmptyStorageException;
+import ru.nsu.ccfit.g13202.troshnev.lab2.commands.Command;
+import ru.nsu.ccfit.g13202.troshnev.lab2.commands.CommandException;
+import ru.nsu.ccfit.g13202.troshnev.lab2.kernel.CalculatorException;
+import ru.nsu.ccfit.g13202.troshnev.lab2.kernel.Context;
 
 import java.io.IOException;
 
@@ -19,7 +21,7 @@ public class CommandSqrt extends Command {
     }
 
     @Override
-    public boolean isValid(String[] arguments) throws Exception {
+    public boolean isValid(String[] arguments) throws CalculatorException, IOException {
         Double[] values = calcContext.getValues(1);
 
         if (values == null)
@@ -34,7 +36,7 @@ public class CommandSqrt extends Command {
     }
 
     @Override
-    public void execute() throws Exception {
+    public void execute() throws CommandException {
         if (value == null)
             throw new UnvalidatedCommandExecutionException();
 

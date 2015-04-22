@@ -1,6 +1,10 @@
-package ru.nsu.ccfit.g13202.troshnev.lab2.commands;
+package ru.nsu.ccfit.g13202.troshnev.lab2.commands.extra;
 
-import ru.nsu.ccfit.g13202.troshnev.lab2.Context;
+import ru.nsu.ccfit.g13202.troshnev.lab2.commands.Command;
+import ru.nsu.ccfit.g13202.troshnev.lab2.commands.CommandException;
+import ru.nsu.ccfit.g13202.troshnev.lab2.kernel.Context;
+
+import java.io.IOException;
 
 
 public class CommandPrint extends Command {
@@ -11,7 +15,7 @@ public class CommandPrint extends Command {
     }
 
     @Override
-    public boolean isValid(String[] arguments) throws Exception {
+    public boolean isValid(String[] arguments) throws IOException {
         // TODO: rewrite validation without pops.
         Double[] values = calcContext.getValues(1);
 
@@ -26,7 +30,7 @@ public class CommandPrint extends Command {
     }
 
     @Override
-    public void execute() throws Exception {
+    public void execute() throws CommandException, IOException {
         if (value == null)
             throw new UnvalidatedCommandExecutionException();
 

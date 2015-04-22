@@ -1,7 +1,7 @@
 package ru.nsu.ccfit.g13202.troshnev.lab2;
 
 import org.apache.log4j.Logger;
-import ru.nsu.ccfit.g13202.troshnev.lab2.commands.NegativeValueException;
+import ru.nsu.ccfit.g13202.troshnev.lab2.kernel.Controller;
 
 import java.io.File;
 import java.io.FileNotFoundException;

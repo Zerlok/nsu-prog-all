@@ -1,7 +1,8 @@
-package ru.nsu.ccfit.g13202.troshnev.lab2.commands;
+package ru.nsu.ccfit.g13202.troshnev.lab2.commands.extra;
 
-import ru.nsu.ccfit.g13202.troshnev.lab2.Context;
-import ru.nsu.ccfit.g13202.troshnev.lab2.EmptyStorageException;
+import ru.nsu.ccfit.g13202.troshnev.lab2.commands.Command;
+import ru.nsu.ccfit.g13202.troshnev.lab2.commands.CommandException;
+import ru.nsu.ccfit.g13202.troshnev.lab2.kernel.Context;
 
 import java.io.IOException;
 
@@ -19,7 +20,7 @@ public class CommandMultiply extends Command {
     }
 
     @Override
-    public boolean isValid(String[] arguments) throws Exception {
+    public boolean isValid(String[] arguments) throws IOException {
         Double[] values = calcContext.getValues(2);
 
         if (values == null)
@@ -32,7 +33,7 @@ public class CommandMultiply extends Command {
     }
 
     @Override
-    public void execute() throws Exception {
+    public void execute() throws CommandException {
         if ((first_multiplicand == null) || (second_multiplicand == null))
             throw new UnvalidatedCommandExecutionException();
 

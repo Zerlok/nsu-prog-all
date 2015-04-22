@@ -3,11 +3,7 @@ package ru.nsu.ccfit.g13202.troshnev.tests;
 import org.junit.Before;
 import org.junit.Test;
 import ru.nsu.ccfit.g13202.troshnev.lab2.OutputWriter;
-import ru.nsu.ccfit.g13202.troshnev.lab2.View;
-
-import java.io.File;
-
-import static org.junit.Assert.*;
+import ru.nsu.ccfit.g13202.troshnev.lab2.kernel.View;
 
 public class ViewTest {
 

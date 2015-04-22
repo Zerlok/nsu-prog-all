@@ -6,7 +6,10 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 import org.junit.rules.ExpectedException;
 import ru.nsu.ccfit.g13202.troshnev.lab2.*;
-import ru.nsu.ccfit.g13202.troshnev.lab2.commands.*;
+import ru.nsu.ccfit.g13202.troshnev.lab2.commands.Command;
+import ru.nsu.ccfit.g13202.troshnev.lab2.commands.extra.CommandMultiply;
+import ru.nsu.ccfit.g13202.troshnev.lab2.commands.extra.UnvalidatedCommandExecutionException;
+import ru.nsu.ccfit.g13202.troshnev.lab2.kernel.*;
 
 
 public class CommandMultiplyTest {

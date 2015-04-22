@@ -1,7 +1,7 @@
-package ru.nsu.ccfit.g13202.troshnev.lab2;
+package ru.nsu.ccfit.g13202.troshnev.lab2.commands;
 
 import org.apache.log4j.Logger;
-import ru.nsu.ccfit.g13202.troshnev.lab2.commands.Command;
+import ru.nsu.ccfit.g13202.troshnev.lab2.kernel.Context;
 
 import java.io.IOException;
 import java.lang.reflect.Constructor;

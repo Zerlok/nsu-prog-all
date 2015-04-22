@@ -6,7 +6,11 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 import org.junit.rules.ExpectedException;
 import ru.nsu.ccfit.g13202.troshnev.lab2.*;
-import ru.nsu.ccfit.g13202.troshnev.lab2.commands.*;
+import ru.nsu.ccfit.g13202.troshnev.lab2.commands.Command;
+import ru.nsu.ccfit.g13202.troshnev.lab2.commands.extra.CommandSqrt;
+import ru.nsu.ccfit.g13202.troshnev.lab2.commands.extra.NegativeValueException;
+import ru.nsu.ccfit.g13202.troshnev.lab2.commands.extra.UnvalidatedCommandExecutionException;
+import ru.nsu.ccfit.g13202.troshnev.lab2.kernel.*;
 
 
 public class CommandSqrtTest {
@@ -80,15 +84,12 @@ public class CommandSqrtTest {
     public void testRevert() throws Exception {
         Double[] expected_values = new Double[] {-0.001};
 
-        try {
-            cmd.isValid(defaults);
-        } catch (EmptyStorageException e) {
-            cmd.revert();
-        }
+        cmd.isValid(defaults);
 
         try {
             calcContext.pushValue(-0.001);
             cmd.isValid(defaults);
+
         } catch (NegativeValueException e) {
             cmd.revert();
         }

@@ -1,8 +1,9 @@
-package ru.nsu.ccfit.g13202.troshnev.lab2.commands;
+package ru.nsu.ccfit.g13202.troshnev.lab2.commands.extra;
 
 import java.io.IOException;
 import org.apache.log4j.Logger;
-import ru.nsu.ccfit.g13202.troshnev.lab2.Context;
+import ru.nsu.ccfit.g13202.troshnev.lab2.commands.Command;
+import ru.nsu.ccfit.g13202.troshnev.lab2.kernel.Context;
 
 
 /**
@@ -19,14 +20,14 @@ public class CommandDefine extends Command {
         super(ctx);
     }
 
-    public boolean isValid(String[] arguments) throws Exception {
+    public boolean isValid(String[] arguments) throws IOException {
         if ((arguments.length != 3)
                 || calcContext.isDefined(arguments[1]))
             return false;
 
         try {
             value = Double.valueOf(arguments[2]);
-            name = arguments[0];
+            name = arguments[1];
 
         } catch (NumberFormatException e) {
             return false;
@@ -35,7 +36,7 @@ public class CommandDefine extends Command {
         return true;
     }
 
-    public void execute() throws IOException {
+    public void execute() {
         LOG.info(String.format("New variable definition: %1$s = %2$f", name, value));
         calcContext.defineVar(name, value);
     }

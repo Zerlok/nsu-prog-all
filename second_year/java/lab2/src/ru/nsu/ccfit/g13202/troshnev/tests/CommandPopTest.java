@@ -6,8 +6,11 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import ru.nsu.ccfit.g13202.troshnev.lab2.*;
 import ru.nsu.ccfit.g13202.troshnev.lab2.commands.Command;
-import ru.nsu.ccfit.g13202.troshnev.lab2.commands.CommandPop;
-import ru.nsu.ccfit.g13202.troshnev.lab2.commands.UnvalidatedCommandExecutionException;
+import ru.nsu.ccfit.g13202.troshnev.lab2.commands.extra.CommandPop;
+import ru.nsu.ccfit.g13202.troshnev.lab2.kernel.Context;
+import ru.nsu.ccfit.g13202.troshnev.lab2.kernel.ValueStorage;
+import ru.nsu.ccfit.g13202.troshnev.lab2.kernel.VariableStorage;
+import ru.nsu.ccfit.g13202.troshnev.lab2.kernel.View;
 
 import static org.junit.Assert.*;
 

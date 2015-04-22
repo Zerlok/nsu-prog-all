@@ -7,9 +7,10 @@ import static org.junit.Assert.*;
 import org.junit.rules.ExpectedException;
 import ru.nsu.ccfit.g13202.troshnev.lab2.*;
 import ru.nsu.ccfit.g13202.troshnev.lab2.commands.Command;
-import ru.nsu.ccfit.g13202.troshnev.lab2.commands.CommandDivide;
-import ru.nsu.ccfit.g13202.troshnev.lab2.commands.UnvalidatedCommandExecutionException;
-import ru.nsu.ccfit.g13202.troshnev.lab2.commands.ZeroDivisionException;
+import ru.nsu.ccfit.g13202.troshnev.lab2.commands.extra.CommandDivide;
+import ru.nsu.ccfit.g13202.troshnev.lab2.commands.extra.UnvalidatedCommandExecutionException;
+import ru.nsu.ccfit.g13202.troshnev.lab2.commands.extra.ZeroDivisionException;
+import ru.nsu.ccfit.g13202.troshnev.lab2.kernel.*;
 
 
 public class CommandDivideTest {
@@ -98,17 +99,16 @@ public class CommandDivideTest {
     public void testRevert() throws Exception {
         Double[] expected_values = new Double[] {1.0, 0.0};
 
-        try {
-            cmd.isValid(defaults);
-        } catch (EmptyStorageException e) {
-            cmd.revert();
-        }
+        cmd.isValid(defaults);
 
         try {
             calcContext.pushValue(0.0);
             calcContext.pushValue(1.0);
             cmd.isValid(defaults);
-        } catch (ZeroDivisionException e) {
+
+            throw new Exception("Failed");
+
+        } catch (CalculatorException e) {
             cmd.revert();
         }
 
