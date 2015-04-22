@@ -96,6 +96,39 @@ MATRIX *get_column(size_t col_num, MATRIX *mtrx)
 }
 
 
+void send_matrix(MATRIX *mtrx, int to)
+{
+	printf("Sending matrix [%ld][%ld] to %d.\n", mtrx->size_x, mtrx->size_y, to);
+	
+	// MPI_Send([variable] [length] [type] [reciever] [id] [communicator]);
+	MPI_Send(&(mtrx->size_x), 1, MPI_INT, to, 17, MPI_COMM_WORLD);
+	MPI_Send(&(mtrx->size_y), 1, MPI_INT, to, 17, MPI_COMM_WORLD);
+
+	printf("Matrix values: %f\n", mtrx->data[0][0]);
+	MPI_Send((mtrx->data), (mtrx->size_x * mtrx->size_y), MPI_DOUBLE, to, 17, MPI_COMM_WORLD);
+}
+
+
+MATRIX *recieve_matrix(int from)
+{
+	size_t size_x;
+	size_t size_y;
+	double **values;
+
+	printf("Recieving matrix from %d.\n", from);
+
+	// MPI_Recv([variable] [length] [type] [reciever] [id] [communicator] [status]);
+	MPI_Recv(&size_x, 1, MPI_INT, from, 17, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+	MPI_Recv(&size_y, 1, MPI_INT, from, 17, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+
+	printf("Matrix [%ld][%ld].\n", size_x, size_y);
+	MPI_Recv(values, (size_x * size_y), MPI_DOUBLE, from, 17, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+
+	printf("Matrix values: %f.\n", **values);
+	return get_matrix(size_x, size_y, values);
+}
+
+
 MATRIX *get_matrix(size_t size_x, size_t size_y, double **values)
 {
 	if (values == NULL)

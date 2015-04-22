@@ -9,6 +9,8 @@ int main(int argc, char **argv)
 {
 	int size;
 	int rank;
+	MPI_Status mpi_status;
+
 	MATRIX *matrix1 = get_matrix_from_file("matrix1.txt");
 	MATRIX *matrix2 = get_matrix_from_file("matrix2.txt");
 	MATRIX *row;
@@ -37,8 +39,22 @@ int main(int argc, char **argv)
 
 	result = multiply_matrixes(matrix1, row);
 
-	printf("Result\n");
-	show_matrix(result);
+	if (rank != 0)
+	{
+		send_matrix(result, 0);
+	}
+	else
+	{
+		printf("Col1\n");
+		show_matrix(result);
+		result = recieve_matrix(1);
+		show_matrix(result);
+		result = recieve_matrix(2);
+		show_matrix(result);
+	}
+
+	// printf("Result\n");
+	// show_matrix(result);
 
 	delete_matrix(matrix1);
 	delete_matrix(matrix2);
