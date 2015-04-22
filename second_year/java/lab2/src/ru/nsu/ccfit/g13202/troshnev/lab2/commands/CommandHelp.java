@@ -13,7 +13,7 @@ public class CommandHelp extends Command {
     }
 
     @Override
-    public void execute(String[] arguments) throws IOException {
+    public void execute(String[] arguments) throws Exception {
         calcContext.println("Help command executed.");
     }
 }

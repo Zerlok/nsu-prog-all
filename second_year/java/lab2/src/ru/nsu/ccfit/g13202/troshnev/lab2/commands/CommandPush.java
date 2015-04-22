@@ -2,6 +2,7 @@ package ru.nsu.ccfit.g13202.troshnev.lab2.commands;
 
 import org.apache.log4j.Logger;
 import ru.nsu.ccfit.g13202.troshnev.lab2.Context;
+import ru.nsu.ccfit.g13202.troshnev.lab2.UndefinedVariableException;
 
 import java.io.IOException;
 
@@ -20,7 +21,7 @@ public class CommandPush extends Command {
     }
 
     @Override
-    public boolean isValid(String[] arguments) throws IOException {
+    public boolean isValid(String[] arguments) throws Exception {
         if (arguments.length != 2)
             return false;
 
@@ -28,8 +29,18 @@ public class CommandPush extends Command {
     }
 
     @Override
-    public void execute(String[] arguments) throws IOException {
+    public void execute(String[] arguments) throws Exception {
         LOG.info(String.format("Pushing %1$s into stack", arguments[1]));
-        calcContext.pushValue(calcContext.getVarValue(arguments[1]));
+
+        Double value;
+
+        try {
+            value = (double) Double.valueOf(arguments[1]);
+
+        } catch (NumberFormatException e) {
+            value = calcContext.getVarValue(arguments[1]);
+        }
+
+        calcContext.pushValue(value);
     }
 }

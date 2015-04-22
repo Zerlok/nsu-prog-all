@@ -18,8 +18,16 @@ public class CommandDefine extends Command {
     }
 
     public boolean isValid(String[] arguments) throws IOException {
-        if (arguments.length != 3)
+        if ((arguments.length != 3)
+                || calcContext.isDefined(arguments[1]))
             return false;
+
+        try {
+            Double.valueOf(arguments[2]);
+
+        } catch (NumberFormatException e) {
+            return false;
+        }
 
         return true;
     }

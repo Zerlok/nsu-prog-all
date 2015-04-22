@@ -55,15 +55,20 @@ public class Controller {
 
             calcCmd = calcCommandFactory.createCommand(args[0]);
 
-            // Execute the command if it is valid.
-            if (calcCmd.isValid(args)) {
-                LOG.info(String.format("Executing the %1s command ...", calcCmd.getClass().getName()));
-                calcCmd.execute(args);
+            try {
+                // Execute the command if it is valid.
+                if (calcCmd.isValid(args)) {
+                    LOG.info(String.format("Executing the %1s command ...", calcCmd.getClass().getName()));
+                    calcCmd.execute(args);
 
-            // Return values back, if command is invalid.
-            } else {
-                LOG.info("Reverting the values back into the stack ...");
-                calcCmd.revert();
+                // Return values back, if command is invalid.
+                } else {
+                    LOG.info("Reverting the values back into the stack ...");
+                    calcCmd.revert();
+                }
+
+            } catch (Exception e) {
+                calcContext.println(e.getMessage());
             }
         }
 

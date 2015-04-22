@@ -1,6 +1,7 @@
 package ru.nsu.ccfit.g13202.troshnev.lab2.commands;
 
 import ru.nsu.ccfit.g13202.troshnev.lab2.Context;
+import ru.nsu.ccfit.g13202.troshnev.lab2.EmptyStorageException;
 
 import java.io.IOException;
 
@@ -18,7 +19,7 @@ public class CommandPlus extends Command {
     }
 
     @Override
-    public boolean isValid(String[] arguments) throws IOException {
+    public boolean isValid(String[] arguments) throws Exception {
         Double[] values = calcContext.getValues(2);
 
         first_summand = values[0];
@@ -28,7 +29,7 @@ public class CommandPlus extends Command {
     }
 
     @Override
-    public void execute(String[] arguments) throws IOException {
+    public void execute(String[] arguments) throws Exception {
         calcContext.pushValue((first_summand + second_summand));
     }
 }

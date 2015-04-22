@@ -1,6 +1,7 @@
 package ru.nsu.ccfit.g13202.troshnev.lab2.commands;
 
 import ru.nsu.ccfit.g13202.troshnev.lab2.Context;
+import ru.nsu.ccfit.g13202.troshnev.lab2.EmptyStorageException;
 
 import java.io.IOException;
 
@@ -18,18 +19,17 @@ public class CommandSqrt extends Command {
     }
 
     @Override
-    public boolean isValid(String[] arguments) throws IOException {
+    public boolean isValid(String[] arguments) throws Exception {
         value = calcContext.getValues(1)[0];
 
-        // TODO: Throw exception (negative value).
         if (value < 0.0)
-            return false;
+            throw new NegativeValueException();
 
         return true;
     }
 
     @Override
-    public void execute(String[] arguments) throws IOException {
+    public void execute(String[] arguments) throws Exception {
         calcContext.pushValue(Math.sqrt(value));
     }
 

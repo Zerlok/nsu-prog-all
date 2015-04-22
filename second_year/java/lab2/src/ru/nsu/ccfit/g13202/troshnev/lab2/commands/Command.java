@@ -1,6 +1,8 @@
 package ru.nsu.ccfit.g13202.troshnev.lab2.commands;
 
 import ru.nsu.ccfit.g13202.troshnev.lab2.Context;
+import ru.nsu.ccfit.g13202.troshnev.lab2.EmptyStorageException;
+import ru.nsu.ccfit.g13202.troshnev.lab2.UndefinedVariableException;
 
 import java.io.IOException;
 
@@ -18,11 +20,11 @@ public abstract class Command {
         calcContext = ctx;
     }
 
-    public boolean isValid(String[] arguments) throws IOException{
+    public boolean isValid(String[] arguments) throws Exception {
         return true;
     }
 
-    public void execute(String[] arguments) throws IOException {
+    public void execute(String[] arguments) throws Exception {
         calcContext.println("Command doesn't have the declaration what to do.");
     }
 

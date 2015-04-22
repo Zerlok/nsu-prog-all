@@ -3,9 +3,6 @@ package ru.nsu.ccfit.g13202.troshnev.lab2;
 import org.apache.log4j.Logger;
 
 import java.io.IOException;
-import java.lang.reflect.Array;
-import java.util.Arrays;
-import java.util.LinkedList;
 
 
 /**
@@ -27,7 +24,7 @@ public class Context {
         calcView = view;
     }
 
-    public Double[] getValues(int amount) {
+    public Double[] getValues(int amount) throws EmptyStorageException {
         Double[] valuesArray = new Double[amount];
 
         for (int i = 0; i < amount; i++)
@@ -37,7 +34,7 @@ public class Context {
         return valuesArray;
     }
 
-    public Double getVarValue(String name) {
+    public Double getVarValue(String name) throws UndefinedVariableException {
         LOG.debug(String.format("Returning value of %1$s variable ...", name));
         return calcVars.getVar(name);
     }
@@ -45,6 +42,10 @@ public class Context {
     public void pushValue(Double value) {
         LOG.debug(String.format("Pushing %1$f value ...", value));
         calcValues.push(value);
+    }
+
+    public boolean isDefined(String name) {
+        return calcVars.hasVar(name);
     }
 
     public void defineVar(String name, Double value) {

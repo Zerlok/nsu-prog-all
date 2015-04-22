@@ -1,5 +1,6 @@
 package ru.nsu.ccfit.g13202.troshnev.lab2;
 
+import java.util.EmptyStackException;
 import java.util.Stack;
 
 
@@ -15,7 +16,13 @@ public class ValueStorage {
         storage.push(value);
     }
 
-    public Double pop() {
-        return storage.pop();
+    public Double pop() throws EmptyStorageException {
+        try {
+            return storage.pop();
+
+        } catch (EmptyStackException e) {
+            throw new EmptyStorageException();
+        }
     }
 }
+

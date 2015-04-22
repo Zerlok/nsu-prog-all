@@ -21,7 +21,14 @@ public class VariableStorage {
         storage.put(name, value);
     }
 
-    public Double getVar(String name) {
+    public Double getVar(String name) throws UndefinedVariableException {
+        if (!storage.containsKey(name))
+            throw new UndefinedVariableException();
+
         return storage.get(name);
+    }
+
+    public boolean hasVar(String name) {
+        return storage.containsKey(name);
     }
 }

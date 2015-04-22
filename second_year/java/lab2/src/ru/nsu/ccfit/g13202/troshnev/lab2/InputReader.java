@@ -12,6 +12,10 @@ public class InputReader {
 
     private BufferedReader fileBuffer;
 
+    public InputReader(InputStream input) {
+        fileBuffer = new BufferedReader(new InputStreamReader(input));
+    }
+
     public InputReader(File input) throws FileNotFoundException {
         fileBuffer = new BufferedReader(new FileReader(input.getAbsolutePath()));
     }

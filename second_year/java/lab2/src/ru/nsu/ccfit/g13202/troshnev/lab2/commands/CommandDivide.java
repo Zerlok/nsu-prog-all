@@ -1,6 +1,7 @@
 package ru.nsu.ccfit.g13202.troshnev.lab2.commands;
 
 import ru.nsu.ccfit.g13202.troshnev.lab2.Context;
+import ru.nsu.ccfit.g13202.troshnev.lab2.EmptyStorageException;
 
 import java.io.IOException;
 
@@ -18,27 +19,32 @@ public class CommandDivide extends Command {
     }
 
     @Override
-    public boolean isValid(String[] arguments) throws IOException {
+    public boolean isValid(String[] arguments) throws Exception {
         Double[] values = calcContext.getValues(2);
         numerator = values[0];
         denominator = values[1];
 
-        // TODO: throw zero division exception.
-        if (denominator == 0.0) {
-            return false;
-        }
+        if (denominator == 0.0)
+            throw new ZeroDivisionException();
 
         return true;
     }
 
     @Override
-    public void execute(String[] arguments) throws IOException {
+    public void execute(String[] arguments) throws Exception {
+        if ((numerator == null)
+                || (denominator == null))
+            throw new UnvalidatedCommandExecutionException();
+
         calcContext.pushValue((numerator / denominator));
     }
 
     @Override
     public void revert() {
-        calcContext.pushValue(denominator);
-        calcContext.pushValue(numerator);
+        if (denominator != null)
+            calcContext.pushValue(denominator);
+
+        if (numerator != null)
+            calcContext.pushValue(numerator);
     }
 }

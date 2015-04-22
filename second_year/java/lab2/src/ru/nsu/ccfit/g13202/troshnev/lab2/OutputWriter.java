@@ -1,9 +1,6 @@
 package ru.nsu.ccfit.g13202.troshnev.lab2;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 
 
 /**
@@ -14,6 +11,10 @@ import java.io.IOException;
 public class OutputWriter {
 
     private BufferedWriter bufferWriter;
+
+    public OutputWriter(OutputStream output) {
+        bufferWriter = new BufferedWriter(new OutputStreamWriter(output));
+    }
 
     public OutputWriter(File output) throws IOException {
         bufferWriter = new BufferedWriter(new FileWriter(output.getAbsoluteFile()));;
