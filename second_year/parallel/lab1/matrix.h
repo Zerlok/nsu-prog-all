@@ -9,7 +9,7 @@ typedef struct MatrixStructure
 {
 	size_t size_x;
 	size_t size_y;
-	double **data;
+	double *data;
 } MATRIX;
 
 
@@ -19,7 +19,7 @@ MATRIX *get_matrix_from_file(char *filename);
 MATRIX *multiply_matrixes(MATRIX *A, MATRIX *B);
 MATRIX *get_row(size_t row_num, MATRIX *mtrx);
 MATRIX *get_column(size_t col_num, MATRIX *mtrx);
-MATRIX *get_matrix(size_t size_x, size_t size_y, double **values);
+MATRIX *get_matrix(size_t size_x, size_t size_y, double *values);
 MATRIX *concat_matricies(size_t col_num, MATRIX **matricies);
 
 // MPI matricies

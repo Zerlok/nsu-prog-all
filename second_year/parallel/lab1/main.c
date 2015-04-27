@@ -1,64 +1,72 @@
 #include "main.h"
 
 
-int DEBUG = 1;
-int LAYER = 0;
+void test(MATRIX *m1, MATRIX *m2)
+{
+	int c;
+	MATRIX *col;
+	MATRIX *result;
+
+	for (c = 0; c < m2->size_y; c++)
+	{
+		col = get_column(c, m2);
+		// show_matrix(col);
+		result = multiply_matrixes(m1, col);
+		printf("Resulting:\n");
+		show_matrix(result);
+	}
+
+	delete_matrix(m1);
+	delete_matrix(m2);
+}
 
 
 int main(int argc, char **argv)
 {
+	// MPI initialization.
 	int size;
 	int rank;
 	MPI_Status mpi_status;
-
-	MATRIX *matrix1 = get_matrix_from_file("matrix1.txt");
-	MATRIX *matrix2 = get_matrix_from_file("matrix2.txt");
-	MATRIX *row;
-	MATRIX *result;
-
-	printf("First\n");
-	show_matrix(matrix1);
-
-	// MPI initialization.
 	MPI_Init(&argc, &argv);
 	MPI_Comm_size(MPI_COMM_WORLD, &size);
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
+	// Internal varialbles.
+	MATRIX *matrix1 = get_matrix_from_file("matrix1.txt");
+	MATRIX *matrix2 = get_matrix_from_file("matrix2.txt");
+	MATRIX *col;
+	MATRIX *result;
+	double *values = (double*)calloc(sizeof(double), (matrix1->size_x * matrix2->size_y));
+
+	if (rank == 0) {
+		printf("Matrix 1\n");
+		show_matrix(matrix1);
+
+		printf("Matrix 2\n");
+		show_matrix(matrix2);
+	}
+
 	// Requirements.
-	if ((size != 3) && (rank == 0))
+	if ((size != matrix2->size_y) && (rank == 0))
 	{
-		printf("only 3 cpus should be!\n");
+		test(matrix1, matrix2);
 		return 1;
 	}
 
-	row = get_column(rank, matrix2);
+	col = get_column(rank, matrix2);
+	result = multiply_matrixes(matrix1, col);
+	MPI_Gather(result->data, matrix1->size_x, MPI_DOUBLE,
+				values, matrix1->size_x, MPI_DOUBLE,
+				0, MPI_COMM_WORLD);
 
-	// Tell about this cpu.
-	printf("MPI:\n   size: %d\n   rank: %d\n", size, rank);
-	show_matrix(row);
-
-	result = multiply_matrixes(matrix1, row);
-
-	if (rank != 0)
+	if (rank == 0)
 	{
-		send_matrix(result, 0);
-	}
-	else
-	{
-		printf("Col1\n");
-		show_matrix(result);
-		result = recieve_matrix(1);
-		show_matrix(result);
-		result = recieve_matrix(2);
-		show_matrix(result);
+		show_matrix(get_matrix(matrix1->size_x, matrix2->size_y, values));
 	}
 
-	// printf("Result\n");
-	// show_matrix(result);
-
-	delete_matrix(matrix1);
-	delete_matrix(matrix2);
-	delete_matrix(result);
+	// delete_matrix(matrix1);
+	// delete_matrix(matrix2);
+	// delete_matrix(result);
 
 	MPI_Finalize();
 	return 0;
