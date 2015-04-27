@@ -71,14 +71,14 @@ StringArray *split(char *line)
 }
 
 
-CmdArguments *get_empty_command_call(char *cmd_name)
+Call *get_empty_command_call(char *cmd_name)
 {
 	if (cmd_name == NULL)
 		return NULL;
 
-	DEBUG_START("Creating the empty CmdArguments structure ...");
+	DEBUG_START("Creating the empty Call structure ...");
 	
-	CmdArguments *cmd_call = (CmdArguments*)malloc(sizeof(CmdArguments));
+	Call *cmd_call = (Call*)malloc(sizeof(Call));
 	cmd_call->origin = (char*)calloc(sizeof(char), strlen(cmd_name) + 1);
 	cmd_call->ins = NULL;
 	cmd_call->outs = NULL;
@@ -94,7 +94,7 @@ CmdArguments *get_empty_command_call(char *cmd_name)
 }
 
 
-CmdArguments *get_command_call(char *line)
+Call *get_command_call(char *line)
 {
 	if ((line == NULL)
 		|| (line == 0)
@@ -120,8 +120,8 @@ CmdArguments *get_command_call(char *line)
 
 	DEBUG_SAY("After if-else condition\n");
 
-	// Setting up the CmdArguments structure.
-	CmdArguments *cmd_call = get_empty_command_call(args_array->data[0]);
+	// Setting up the Call structure.
+	Call *cmd_call = get_empty_command_call(args_array->data[0]);
 
 	DEBUG_SAY("After empty command call creation\n");
 	DEBUG_SAY("%p %p %ld -> %s\n", args_array, args_array->data, args_array->used_length, args_array->data[args_array->used_length-1]);
@@ -215,7 +215,7 @@ CmdArguments *get_command_call(char *line)
 }
 
 
-void clear_command_call(CmdArguments *cmd_call)
+void clear_command_call(Call *cmd_call)
 {
 	if (cmd_call == NULL)
 		return;
@@ -240,7 +240,7 @@ void clear_command_call(CmdArguments *cmd_call)
 }
 
 
-void delete_command_call(CmdArguments *cmd_call)
+void delete_command_call(Call *cmd_call)
 {
 	if (cmd_call == NULL)
 		return;

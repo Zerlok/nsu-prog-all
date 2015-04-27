@@ -7,38 +7,6 @@
 #include "vshell.h"
 
 
-// void handle_signal(int signum)
-// {
-// 	printf("\n%d signal was caught!", signum);
-// 	fflush(stdout);
-// }
-
-
-// int VSHELL_CMD_EXIT()
-// {
-// 	return CODE_EXIT;
-// }
-
-
-// int VSHELL_CMD_HELP(CmdArray *p_cmds)
-// {
-// 	static CmdArray *cmds = NULL;
-
-// 	if (cmds == NULL)
-// 	{
-// 		cmds = p_cmds;
-
-// 		return CODE_SUCCESS;
-// 	}
-
-// 	printf("Commands : ");
-// 	show_commands_array(cmds);
-// 	printf("%s\n", );
-
-// 	return CODE_SUCCESS;
-// }
-
-
 void VSHELL_init(int argc, char **argv, SHELL *shell)
 {
 	int i;
@@ -50,42 +18,19 @@ void VSHELL_init(int argc, char **argv, SHELL *shell)
 
 	shell->username = "zerlok";
 	shell->history = get_string_array(0);
-	shell->cmds = get_commands_array(10);
 
 	DEBUG_END("done.");
-}
-
-
-int VSHELL_add_command(
-		SHELL *shell,
-		char *command_name,
-		char *filename)
-{
-	if ((shell == NULL)
-		|| (command_name == NULL)
-		|| (filename == NULL))
-		return 0;
-
-	DEBUG_START("Creating a new command in the shell ...");
-
-	push_into_commands_array(command_name, filename, shell->cmds);
-
-	DEBUG_END("done.");
-
-	return 1;
 }
 
 
 void VSHELL_run(SHELL *shell)
 {
-	CmdArguments *cmd_call;
+	Call *cmd_call;
 	int code = CODE_WAIT;
 	int indx = 0;
 	char c = 0;
 	char line[LINE_LEN];
 	bzero(line, LINE_LEN);
-
-	// VSHELL_CMD_HELP(shell->cmds);
 
 	// signal(SIGINT, SIG_IGN);
 	// signal(SIGINT, handle_signal);
@@ -95,7 +40,6 @@ void VSHELL_run(SHELL *shell)
 	while(code != CODE_EXIT)
 	{
 		printf(LINE_START_SYMBOL);
-
 		fgets(line, LINE_LEN, stdin);
 		
 		cmd_call = get_command_call(line);
@@ -103,8 +47,9 @@ void VSHELL_run(SHELL *shell)
 		if (cmd_call == NULL)
 			continue;
 		
-		code = do_cmd(cmd_call, shell->cmds);
+		code = do_cmd(cmd_call);
 
+		// TODO: Push into history
 		// if (code != CODE_WAIT)
 		// 	push_into_string_array(line, shell->history);
 
@@ -112,7 +57,7 @@ void VSHELL_run(SHELL *shell)
 		{
 			case CODE_FAIL:
 			{
-				printf("%s: command was crashed.\n", cmd_call->origin);
+				perror(cmd_call->origin);
 				break;
 			}
 
@@ -138,25 +83,6 @@ void VSHELL_run(SHELL *shell)
 }
 
 
-void VSHELL_add_commands_from_dir(SHELL *shell, char *dirname)
-{
-	DEBUG_START("Adding commands from %s directory ...", dirname);
-
-	DIR *dir;
-	struct dirent *ent;
-
-	if ((dir = opendir(dirname)) != NULL)
-	{
-		while ((ent = readdir(dir)) != NULL)
-			VSHELL_add_command(shell, ent->d_name, ent->d_name);
-	}
-
-	closedir(dir);
-
-	DEBUG_END("done.");
-}
-
-
 void VSHELL_dump(SHELL *shell)
 {
 	DEBUG_START("Dumping the shell into the file ...");
@@ -169,7 +95,6 @@ void VSHELL_dump(SHELL *shell)
 		return;
 	}
 
-	show_commands_array(shell->cmds, dump_stream);
 	show_string_array(shell->history, dump_stream);
 
 	// DEBUG_SAY("Then i'm trying to close the stream %p ...\n", dump_stream);
@@ -189,9 +114,6 @@ void VSHELL_close(SHELL *shell)
 
 	DEBUG_SAY("Deleting the history of commands...\n");
 	delete_string_array(shell->history);
-
-	DEBUG_SAY("Deleting the commands...\n");
-	delete_commands_array(shell->cmds);
 
 	DEBUG_END("done.");
 }

@@ -46,5 +46,8 @@
 #define CODE_UNKNOWN_CMD 5
 
 
+extern char **environ;
+
+
 // __MAIN_H__
 #endif

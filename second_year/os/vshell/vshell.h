@@ -9,7 +9,6 @@ typedef struct Vshell
 {
 	char *username;
 	StringArray *history;
-	CmdArray *cmds;
 } SHELL;
 
 
@@ -19,11 +18,6 @@ void VSHELL_init(
 		int argc,
 		char **argv,
 		SHELL *shell);
-
-int VSHELL_add_command(
-		SHELL *shell,
-		char *command_name,
-		char *filename);
 
 void VSHELL_run(SHELL *shell);
 
