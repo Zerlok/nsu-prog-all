@@ -44,11 +44,12 @@ int do_cmd(Call *call)
 	pid_t pid;
 	pid_t gid;
 	pid_t sid;
+	pid_t term_id;
 
 	// Forking
-	pid = getpid();
-	gid = getpgid(pid);
-	DEBUG_SAY("Forking from process %d %d ...\n", pid, gid);
+	term_id = getpid();
+	gid = getpgid(term_id);
+	DEBUG_SAY("Forking from process %d %d ...\n", term_id, gid);
 	id = fork();
 
 	if (id < 0) // Do it if fork failed.
@@ -59,7 +60,6 @@ int do_cmd(Call *call)
 	}
 	else if (id > 0) // Do it in PARENT process.
 	{
-		// if 
 		waitpid(id, &status, 0);
 		DEBUG_SAY("Parent id: %d %d %d\n", id, getpid(), getpgid(id));
 	}
@@ -90,23 +90,24 @@ int do_cmd(Call *call)
 
 		DEBUG_SAY("Is process running in background? %d\n", call->is_in_background);
 		
-		// if (gid == 0)
-		// 	gid = pid;
+		if (gid == 0)
+			gid = pid;
 		
-		// setpgid(pid, gid);
+		setpgid(pid, gid);
+		tcsetpgrp(term_id, gid);
 		
-		// if (!(call->is_in_background))
-		// 	tcsetpgrp(shell_terminal, gid);
+		if (call->is_in_background)
+			setsid();
 
-		// sid = setsid();
-		// printf("Process id: %d\n", getpid());
+		printf("Process id: %d\n", getpid());
 		status = execvpe(call->origin, call->argv, environ);
 		
 		// If exec failed.
 		if (status == -1)
 		{
+			perror(call->origin);
 			DEBUG_END("done (failed exec).");
-			return CODE_FAIL;
+			exit(CODE_FAIL);
 		}
 	} // ENDIF (CHILD process)
 

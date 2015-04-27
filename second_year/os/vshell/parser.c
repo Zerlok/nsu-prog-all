@@ -17,7 +17,7 @@ StringArray *split(char *line)
 		return NULL;
 	}
 
-	DEBUG_START("Splitting the line of chars by spaces ...");
+	DEBUG_START("Splitting the line of chars by spaces and special symbols ...");
 
 	StringArray *array = get_string_array(2);
 	char *chr = line;
@@ -27,6 +27,7 @@ StringArray *split(char *line)
 	int data_len = 0;
 	int is_string = 0;
 
+	// TODO: make echo hi>>hello splittable!
 	while ((*chr) != 0)
 	{
 		if ((!is_string)

@@ -50,35 +50,14 @@ void VSHELL_run(SHELL *shell)
 		code = do_cmd(cmd_call);
 
 		// TODO: Push into history
-		// if (code != CODE_WAIT)
+		// if (code != CODE_WAIT) {
 		// 	push_into_string_array(line, shell->history);
-
-		switch (code)
-		{
-			case CODE_FAIL:
-			{
-				perror(cmd_call->origin);
-				break;
-			}
-
-			case CODE_INVALID_CALL:
-			{
-				printf("%s: invalid command call.\n", cmd_call->origin);
-				break;
-			}
-
-			case CODE_UNKNOWN_CMD:
-			{
-				printf("%s: command not found.\n", cmd_call->origin);
-				break;
-			}
-		}
+		// }
 
 		clear_command_call(cmd_call);
 	}
 
 	delete_command_call(cmd_call);
-
 	DEBUG_END("done.");
 }
 
@@ -88,7 +67,6 @@ void VSHELL_dump(SHELL *shell)
 	DEBUG_START("Dumping the shell into the file ...");
 
 	FILE *dump_stream = fopen(STD_DUMP_FILENAME, "w");
-
 	if (dump_stream == NULL)
 	{
 		printf("Cannot create the dump file!\n");
