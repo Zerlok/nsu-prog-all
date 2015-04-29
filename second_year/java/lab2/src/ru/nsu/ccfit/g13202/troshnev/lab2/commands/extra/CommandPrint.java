@@ -16,7 +16,6 @@ public class CommandPrint extends Command {
 
     @Override
     public boolean isValid(String[] arguments) throws IOException {
-        // TODO: rewrite validation without pops.
         Double[] values = calcContext.getValues(1);
 
         if (values == null)
@@ -30,7 +29,7 @@ public class CommandPrint extends Command {
     }
 
     @Override
-    public void execute() throws CommandException, IOException {
+    public void execute() throws UnvalidatedCommandExecutionException, IOException {
         if (value == null)
             throw new UnvalidatedCommandExecutionException();
 

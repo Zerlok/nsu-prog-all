@@ -1,10 +1,9 @@
 package ru.nsu.ccfit.g13202.troshnev.lab2.commands.extra;
 
+import java.io.IOException;
 import ru.nsu.ccfit.g13202.troshnev.lab2.commands.Command;
-import ru.nsu.ccfit.g13202.troshnev.lab2.commands.CommandException;
 import ru.nsu.ccfit.g13202.troshnev.lab2.kernel.Context;
 
-import java.io.IOException;
 
 /**
  * Created by zerlok on 4/22/15.
@@ -17,12 +16,17 @@ public class CommandPop extends Command {
 
     @Override
     public boolean isValid(String[] arguments) throws IOException {
-        if (calcContext.getValues(1) == null)
+        Double[] value = calcContext.getValues(1);
+
+        if (value == null)
             return false;
 
+        calcContext.pushValue(value[0]);
         return true;
     }
 
     @Override
-    public void execute() throws CommandException {}
+    public void execute() {
+        calcContext.getValues(1);
+    }
 }

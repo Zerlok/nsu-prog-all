@@ -1,10 +1,10 @@
 package ru.nsu.ccfit.g13202.troshnev.lab2.commands.extra;
 
-import ru.nsu.ccfit.g13202.troshnev.lab2.commands.Command;
-import ru.nsu.ccfit.g13202.troshnev.lab2.commands.CommandException;
-import ru.nsu.ccfit.g13202.troshnev.lab2.kernel.Context;
 
 import java.io.IOException;
+import ru.nsu.ccfit.g13202.troshnev.lab2.commands.Command;
+import ru.nsu.ccfit.g13202.troshnev.lab2.kernel.Context;
+
 
 /**
  * Created by zerlok on 4/22/15.
@@ -33,7 +33,7 @@ public class CommandMinus extends Command {
     }
 
     @Override
-    public void execute() throws CommandException {
+    public void execute() throws UnvalidatedCommandExecutionException {
         if ((minuend == null) || (subtrahend == null))
             throw new UnvalidatedCommandExecutionException();
 

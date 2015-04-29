@@ -21,7 +21,7 @@ public class CommandSqrt extends Command {
     }
 
     @Override
-    public boolean isValid(String[] arguments) throws CalculatorException, IOException {
+    public boolean isValid(String[] arguments) throws NegativeValueException, IOException {
         Double[] values = calcContext.getValues(1);
 
         if (values == null)
@@ -36,7 +36,7 @@ public class CommandSqrt extends Command {
     }
 
     @Override
-    public void execute() throws CommandException {
+    public void execute() throws UnvalidatedCommandExecutionException {
         if (value == null)
             throw new UnvalidatedCommandExecutionException();
 

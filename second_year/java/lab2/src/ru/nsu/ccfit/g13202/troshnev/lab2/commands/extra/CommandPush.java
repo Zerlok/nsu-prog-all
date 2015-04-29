@@ -1,8 +1,8 @@
 package ru.nsu.ccfit.g13202.troshnev.lab2.commands.extra;
 
 import ru.nsu.ccfit.g13202.troshnev.lab2.commands.Command;
-import ru.nsu.ccfit.g13202.troshnev.lab2.kernel.CalculatorException;
 import ru.nsu.ccfit.g13202.troshnev.lab2.kernel.Context;
+import ru.nsu.ccfit.g13202.troshnev.lab2.kernel.UndefinedVariableException;
 
 import java.io.IOException;
 
@@ -21,7 +21,7 @@ public class CommandPush extends Command {
     }
 
     @Override
-    public boolean isValid(String[] arguments) throws CalculatorException, IOException {
+    public boolean isValid(String[] arguments) throws IOException, UndefinedVariableException {
         if (arguments.length != 2)
             return false;
 
@@ -36,7 +36,7 @@ public class CommandPush extends Command {
     }
 
     @Override
-    public void execute() throws CalculatorException {
+    public void execute() throws UnvalidatedCommandExecutionException {
         if (value == null)
             throw new UnvalidatedCommandExecutionException();
 

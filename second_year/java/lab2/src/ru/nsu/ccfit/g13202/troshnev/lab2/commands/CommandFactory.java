@@ -1,12 +1,14 @@
 package ru.nsu.ccfit.g13202.troshnev.lab2.commands;
 
-import org.apache.log4j.Logger;
-import ru.nsu.ccfit.g13202.troshnev.lab2.kernel.Context;
-
+import java.io.FileNotFoundException;
+import java.io.InputStream;
+import java.util.HashMap;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.util.HashMap;
+import java.util.Properties;
+import org.apache.log4j.Logger;
+import ru.nsu.ccfit.g13202.troshnev.lab2.kernel.Context;
 
 
 /**
@@ -32,25 +34,18 @@ public class CommandFactory {
         LOG.info(String.format("commands.Command %1$s <%2$s> registered.", commandName, commandClass));
     }
 
-    public Command createCommand(String commandName) {
+    public Command createCommand(String commandName) throws UnknownCommandException {
         LOG.debug(String.format("Start creating %1$s command ...", commandName));
         Command cmd = null;
 
         try {
             if (calcCommands.containsKey(commandName)) {
-                // TODO: rewrite using Class.getNewInstance()
                 Class commandClass = (Class) calcCommands.get(commandName);
                 Constructor commandConstructor = commandClass.getConstructor(new Class[]{calcContext.getClass()});
-                cmd = (Command) commandConstructor.newInstance(calcContext);
+                cmd = (Command)commandConstructor.newInstance(calcContext);
 
             } else {
-                cmd = new Command(calcContext) {
-                    @Override
-                    public boolean isValid(String[] arguments) throws IOException {
-                        calcContext.println(String.format("%1$s command is not registered!", arguments[0]));
-                        return false;
-                    }
-                };
+                throw new UnknownCommandException(commandName);
             }
 
         } catch (NoSuchMethodException e) {
@@ -69,5 +64,30 @@ public class CommandFactory {
         LOG.debug(String.format("commands.Command %1$s created.", cmd.getClass().getName()));
 
         return cmd;
+    }
+
+    public void configure() throws IOException {
+        LOG.info("Start commands registration ...");
+
+        Properties prop = new Properties();
+        InputStream inputStream = getClass().getClassLoader().getResourceAsStream("cmd.properties");
+
+        if (inputStream == null) {
+            throw new FileNotFoundException("Cannot find cmd.properties file.");
+        }
+        prop.load(inputStream);
+        String cmdFolderPath = prop.getProperty("folder");
+
+        for (String key : prop.stringPropertyNames()) {
+            if (!key.contentEquals("folder")) {
+                String value = prop.getProperty(key);
+                try {
+                    calcCommands.put(key, (Class<Command>) Class.forName(cmdFolderPath + "." + value));
+
+                } catch (ClassNotFoundException e) {
+                    calcContext.println(new CommandNotFoundException().getMessage());
+                }
+            }
+        }
     }
 }

@@ -21,7 +21,7 @@ public class CommandDivide extends Command {
     }
 
     @Override
-    public boolean isValid(String[] arguments) throws CalculatorException, IOException {
+    public boolean isValid(String[] arguments) throws IOException, ZeroDivisionException {
         Double[] values = calcContext.getValues(2);
 
         if (values == null)
@@ -37,7 +37,7 @@ public class CommandDivide extends Command {
     }
 
     @Override
-    public void execute() throws CommandException {
+    public void execute() throws UnvalidatedCommandExecutionException {
         if ((numerator == null)
                 || (denominator == null))
             throw new UnvalidatedCommandExecutionException();

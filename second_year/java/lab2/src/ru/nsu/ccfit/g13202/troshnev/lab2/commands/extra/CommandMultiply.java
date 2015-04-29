@@ -1,10 +1,9 @@
 package ru.nsu.ccfit.g13202.troshnev.lab2.commands.extra;
 
+import java.io.IOException;
 import ru.nsu.ccfit.g13202.troshnev.lab2.commands.Command;
-import ru.nsu.ccfit.g13202.troshnev.lab2.commands.CommandException;
 import ru.nsu.ccfit.g13202.troshnev.lab2.kernel.Context;
 
-import java.io.IOException;
 
 /**
  * Created by zerlok on 4/22/15.
@@ -33,7 +32,7 @@ public class CommandMultiply extends Command {
     }
 
     @Override
-    public void execute() throws CommandException {
+    public void execute() throws UnvalidatedCommandExecutionException {
         if ((first_multiplicand == null) || (second_multiplicand == null))
             throw new UnvalidatedCommandExecutionException();
 
