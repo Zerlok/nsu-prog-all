@@ -20,10 +20,11 @@ int main(int argc, char **argv)
 	graph.link(2, 3);
 	graph.link(3, 4);
 	graph.link(3, 5);
-	
+
 	graph.show();
 
-	walk_dfs<AdjacencyMatrix, int, std::vector<int> >(graph, 0, order);
+	walk_dfs<AdjacencyMatrix, int>(graph, 0);
+	// walk_dfs<AdjacencyMatrix, int, std::vector<int> >(graph, 0, order);
 
 	return 0;
 }
