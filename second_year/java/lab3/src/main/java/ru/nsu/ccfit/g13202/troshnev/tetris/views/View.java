@@ -13,22 +13,22 @@ import java.awt.*;
  * Created by zerlok on 5/4/15.
  */
 public class View implements Runnable {
+    private Field gameField;
+
+    public View (Field field) {
+        gameField = field;
+    }
+
     @Override
     public void run() {
+        Block.setSize(40, 3, 2);
+
         JFrame frame = new JFrame();
         frame.setSize(500, 500);
-        frame.setTitle("Tetris Test");
+        frame.setTitle("Tetris");
 
-        Block.setSize(40, 3, 2);
-        Figure f1 = new TFigure(new Color(61, 161, 116));
-        f1.setPos(0, 1);
-        Figure f2 = new SquareFigure(new Color(116, 161, 61));
-        f2.setPos(3, 4);
-        Field gameField = new Field(10, 20);
-        gameField.addFigure(f2);
-//        gameField.addFigure(f1);
-//        gameField.moveFigureRight();
         frame.add(gameField);
+
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 //        frame.pack();
         frame.setVisible(true);

@@ -8,7 +8,7 @@ import java.awt.*;
 /**
  * Created by zerlok on 4/29/15.
  */
-public class Field extends JComponent {
+public class Field extends JPanel {
 //    Height and width in blocks.
     private int fieldWidth;
     private int fieldHeight;
@@ -69,6 +69,9 @@ public class Field extends JComponent {
     }
 
     public void moveFigureDown() {
+        if (activeFigure == null)
+            return;
+
         activeFigure.moveDown();
 
         if (hasIntersection())
@@ -76,6 +79,9 @@ public class Field extends JComponent {
     }
 
     public void moveFigureLeft() {
+        if (activeFigure == null)
+            return;
+
         activeFigure.moveLeft();
 
         if (hasIntersection())
@@ -83,6 +89,9 @@ public class Field extends JComponent {
     }
 
     public void moveFigureRight() {
+        if (activeFigure == null)
+            return;
+
         activeFigure.moveRight();
 
         if (hasIntersection())
@@ -90,6 +99,9 @@ public class Field extends JComponent {
     }
 
     public void rotateFigureLeft() {
+        if (activeFigure == null)
+            return;
+
         activeFigure.rotateLeft();
 
         if (hasIntersection())
@@ -97,6 +109,9 @@ public class Field extends JComponent {
     }
 
     public void rotateFigureRight() {
+        if (activeFigure == null)
+            return;
+
         activeFigure.rotateRight();
 
         if (hasIntersection())
