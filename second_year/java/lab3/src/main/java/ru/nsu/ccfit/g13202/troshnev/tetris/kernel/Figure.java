@@ -14,7 +14,7 @@ public abstract class Figure {
     protected Color figureColor;
     protected Block[] blocks;
 
-    protected void applyRotation() {}
+    protected void applyBlocksPositions() {}
 
     public void setRotation(int num) {
         rotation = num % maxRotationsNum;
@@ -41,20 +41,26 @@ public abstract class Figure {
 
     public void moveDown() {
         System.out.println(String.format("Moving figure %1$s down...", getClass().getName()));
-        if (movable())
+        if (movable()) {
             posY += 1;
+            applyBlocksPositions();
+        }
     }
 
     public void moveLeft() {
         System.out.println(String.format("Moving figure %1$s down...", getClass().getName()));
-        if (movable())
-            posY += 1;
+        if (movable()) {
+            posX -= 1;
+            applyBlocksPositions();
+        }
     }
 
     public void moveRight() {
         System.out.println(String.format("Moving figure %1$s down...", getClass().getName()));
-        if (movable())
-            posY += 1;
+        if (movable()) {
+            posX += 1;
+            applyBlocksPositions();
+        }
     }
 
     public void pushDown() {
@@ -66,12 +72,12 @@ public abstract class Figure {
     public void rotateLeft() {
         System.out.println(String.format("Rotating figure %1$s left...", getClass().getName()));
         rotation = (rotation + maxRotationsNum - 1) % maxRotationsNum;
-        applyRotation();
+        applyBlocksPositions();
     }
 
     public void rotateRight() {
         System.out.println(String.format("Rotating figure %1$s right...", getClass().getName()));
         rotation = (rotation + 1) % maxRotationsNum;
-        applyRotation();
+        applyBlocksPositions();
     }
 }

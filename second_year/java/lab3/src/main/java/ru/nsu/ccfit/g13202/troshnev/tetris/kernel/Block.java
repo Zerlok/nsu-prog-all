@@ -49,6 +49,14 @@ public class Block {
         blockPosY = blockY;
     }
 
+    public int getBlockPosX() {
+        return blockPosX;
+    }
+
+    public int getBlockPosY() {
+        return blockPosY;
+    }
+
     public void draw(Graphics2D g) {
         int offset = pixelWidth + pixelMargin;
         int pixelX = blockPosX * offset;
@@ -68,13 +76,5 @@ public class Block {
                 pixelWidth - (2*pixelPadding),
                 pixelWidth - (2*pixelPadding)
         );
-    }
-
-    public int getBlockPosX() {
-        return blockPosX;
-    }
-
-    public int getBlockPosY() {
-        return blockPosY;
     }
 }

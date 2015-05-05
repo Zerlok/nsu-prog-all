@@ -23,7 +23,8 @@ public class View implements Runnable {
         Figure f1 = new TFigure(new Color(61, 161, 116));
         f1.setPos(3, 1);
         Figure f2 = new SquareFigure(new Color(116, 161, 61));
-        f2.setPos(3, 6);
+        f2.setPos(3, 2);
+        f2.moveDown();
         Field gameField = new Field(10, 20);
         gameField.addFigure(f1);
         gameField.addFigure(f2);
