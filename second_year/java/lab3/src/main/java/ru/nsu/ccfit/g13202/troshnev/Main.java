@@ -1,13 +1,12 @@
 package ru.nsu.ccfit.g13202.troshnev;
 
-import javax.swing.*;
-import ru.nsu.ccfit.g13202.troshnev.tetris.views.RectanglesExample;
-import ru.nsu.ccfit.g13202.troshnev.tetris.views.SwingExample;
+import ru.nsu.ccfit.g13202.troshnev.tetris.kernel.Controller;
 
 public class Main
 {
     public static void main(String[] args)
     {
-        RectanglesExample.runExample();
+        Controller logic = new Controller();
+        logic.run();
     }
 }

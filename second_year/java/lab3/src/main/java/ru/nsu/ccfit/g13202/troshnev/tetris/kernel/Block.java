@@ -1,32 +1,73 @@
 package ru.nsu.ccfit.g13202.troshnev.tetris.kernel;
 
-import javax.swing.*;
 import java.awt.*;
 
 /**
  * Created by zerlok on 4/29/15.
  */
-
 public class Block {
-//    The block color.
-    private Color color;
-
+//    Block pixelWidth in pixels.
+    static private int pixelWidth = 100;
+    static private int pixelPadding = 5;
+    static private int pixelMargin = 1;
 //    Top left X, Y position of the block.
-    private int posX;
-    private int posY;
+    private int blockPosX;
+    private int blockPosY;
+//    The block color.
+    private Color innerColor;
+    private Color borderColor;
 
-//    Block width in pixels.
-    private int width;
-
-    public Block(int x, int y, int w) {
-        posX = x;
-        posY = y;
-        width = w;
-        color = new Color(125, 167, 116);
+    static public void setSize(int w, int p, int m) {
+        pixelWidth = w > 0 ? w : pixelWidth;
+        pixelPadding = p > 0 ? p : pixelPadding;
+        pixelMargin = m > 0 ? m : pixelMargin;
     }
 
-    public void draw() {
-//        TODO: Draw the block object form x, y position.
+    public Block(Color clr) {
+        blockPosX = 0;
+        blockPosY = 0;
+        innerColor = clr;
+        borderColor = clr;
+    }
 
+    public Block(Color inColor, Color brColor) {
+        blockPosX = 0;
+        blockPosY = 0;
+        innerColor = inColor;
+        borderColor = brColor;
+    }
+
+    public void moveToBlock(int blockX, int blockY) {
+        blockPosX = blockX;
+        blockPosY = blockY;
+    }
+
+    public void draw(Graphics2D g) {
+        int offset = pixelWidth + pixelMargin;
+        int pixelX = blockPosX * offset;
+        int pixelY = blockPosY * offset;
+
+        g.setColor(borderColor);
+        g.fillRect(
+                pixelX,
+                pixelY,
+                pixelWidth,
+                pixelWidth
+        );
+        g.setColor(innerColor);
+        g.fillRect(
+                pixelX + pixelPadding,
+                pixelY + pixelPadding,
+                pixelWidth - (2*pixelPadding),
+                pixelWidth - (2*pixelPadding)
+        );
+    }
+
+    public int getBlockPosX() {
+        return blockPosX;
+    }
+
+    public int getBlockPosY() {
+        return blockPosY;
     }
 }
