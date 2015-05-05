@@ -15,10 +15,12 @@ import java.awt.event.ActionEvent;
 public class Controller {
     private Field gameField;
     private View tetrisView;
+    private Figure activeFigure;
 
     public Controller() {
-        gameField = new Field(10, 20);
+        gameField = new Field(10, 18);
         tetrisView = new View(gameField);
+        activeFigure = null;
 
         bindKeys();
     }
@@ -27,7 +29,7 @@ public class Controller {
         Action moveRightAction = new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                gameField.moveFigureRight();
+                moveFigureRight();
                 gameField.repaint();
             }
         };
@@ -35,7 +37,7 @@ public class Controller {
         Action moveLeftAction = new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                gameField.moveFigureLeft();
+                moveFigureLeft();
                 gameField.repaint();
             }
         };
@@ -43,7 +45,7 @@ public class Controller {
         Action moveDownAction = new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                gameField.moveFigureDown();
+                moveFigureDown();
                 gameField.repaint();
             }
         };
@@ -51,7 +53,7 @@ public class Controller {
         Action rotateRightAction = new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                gameField.rotateFigureRight();
+                rotateFigureRight();
                 gameField.repaint();
             }
         };
@@ -59,7 +61,7 @@ public class Controller {
         Action rotateLeftAction = new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                gameField.rotateFigureLeft();
+                rotateFigureLeft();
                 gameField.repaint();
             }
         };
@@ -85,11 +87,77 @@ public class Controller {
 
     public void run() {
         Figure f = new SquareFigure(new Color(61, 161, 161));
-        f.setPos(5, 3);
+        f.setPos(5, 6);
         gameField.addFigure(f);
-        gameField.addFigure(new TFigure(new Color(116, 161, 61)));
+        createNewFigure();
         tetrisView.run();
 
         System.out.println("Game running...");
+    }
+
+    public void createNewFigure() {
+//        TODO: get new figure from figure factory.
+        activeFigure = new TFigure(new Color(116, 161, 61));
+        activeFigure.setPos(2, 0);
+        gameField.addFigure(activeFigure);
+
+        if (gameField.hasIntersection())
+            System.out.println("GAME OVER!");
+    }
+
+    public void moveFigureDown() {
+        if (activeFigure == null)
+            return;
+
+        activeFigure.moveDown();
+
+        if (gameField.hasIntersection()) {
+            activeFigure.moveUp();
+            activeFigure = null;
+            System.out.println("Figure position fixed.");
+
+            gameField.removeFullLines();
+            createNewFigure();
+        }
+    }
+
+    public void moveFigureLeft() {
+        if (activeFigure == null)
+            return;
+
+        activeFigure.moveLeft();
+
+        if (gameField.hasIntersection())
+            activeFigure.moveRight();
+    }
+
+    public void moveFigureRight() {
+        if (activeFigure == null)
+            return;
+
+        activeFigure.moveRight();
+
+        if (gameField.hasIntersection())
+            activeFigure.moveLeft();
+    }
+
+    public void rotateFigureLeft() {
+        if (activeFigure == null)
+            return;
+
+        activeFigure.rotateLeft();
+
+        if (gameField.hasIntersection())
+            activeFigure.rotateRight();
+    }
+
+    public void rotateFigureRight() {
+        if (activeFigure == null)
+            return;
+
+        activeFigure.rotateRight();
+
+        if (gameField.hasIntersection())
+            activeFigure.rotateLeft();
     }
 }

@@ -45,7 +45,10 @@ public class Field extends JPanel {
         activeFigure = figure;
     }
 
-    private boolean hasIntersection() {
+    public boolean hasIntersection() {
+        if (activeFigure == null)
+            return false;
+
         for (Block figureBlock : activeFigure.getBlocks()) {
             int blockPosX = figureBlock.getBlockPosX();
             int blockPosY = figureBlock.getBlockPosY();
@@ -68,56 +71,6 @@ public class Field extends JPanel {
         return false;
     }
 
-    public void moveFigureDown() {
-        if (activeFigure == null)
-            return;
-
-        activeFigure.moveDown();
-
-        if (hasIntersection())
-            activeFigure.moveUp();
-    }
-
-    public void moveFigureLeft() {
-        if (activeFigure == null)
-            return;
-
-        activeFigure.moveLeft();
-
-        if (hasIntersection())
-            activeFigure.moveRight();
-    }
-
-    public void moveFigureRight() {
-        if (activeFigure == null)
-            return;
-
-        activeFigure.moveRight();
-
-        if (hasIntersection())
-            activeFigure.moveLeft();
-    }
-
-    public void rotateFigureLeft() {
-        if (activeFigure == null)
-            return;
-
-        activeFigure.rotateLeft();
-
-        if (hasIntersection())
-            activeFigure.rotateRight();
-    }
-
-    public void rotateFigureRight() {
-        if (activeFigure == null)
-            return;
-
-        activeFigure.rotateRight();
-
-        if (hasIntersection())
-            activeFigure.rotateLeft();
-    }
-
     @Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
@@ -132,5 +85,10 @@ public class Field extends JPanel {
         for (Block fieldBlock : blocks)
             if (fieldBlock != null)
                 fieldBlock.draw(g2d);
+    }
+
+    public void removeFullLines() {
+//        TODO: remove full lines and shift each block down.
+        System.out.println("Removing full lines...");
     }
 }

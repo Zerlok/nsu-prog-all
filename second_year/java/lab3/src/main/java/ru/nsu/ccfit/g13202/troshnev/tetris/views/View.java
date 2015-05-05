@@ -21,7 +21,7 @@ public class View implements Runnable {
 
     @Override
     public void run() {
-        Block.setSize(40, 3, 2);
+        Block.setSize(30, 2, 1);
 
         JFrame frame = new JFrame();
         frame.setSize(500, 500);
