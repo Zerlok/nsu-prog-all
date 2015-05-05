@@ -16,7 +16,7 @@ public class TFigure extends Figure {
 
         blocks = new Block[4];
         for (int i = 0; i < blocks.length; i++)
-            blocks[i] = new Block(figureColor, figureColor.brighter());
+            blocks[i] = new Block(figureColor);
 
         applyRotation();
         System.out.println("TFigure created");

@@ -27,7 +27,7 @@ public class Block {
         blockPosX = 0;
         blockPosY = 0;
         innerColor = clr;
-        borderColor = clr;
+        borderColor = clr.brighter();
     }
 
     public Block(Color inColor, Color brColor) {
@@ -35,6 +35,13 @@ public class Block {
         blockPosY = 0;
         innerColor = inColor;
         borderColor = brColor;
+    }
+
+    public Block(int blockX, int blockY, Color clr) {
+        blockPosX = blockX;
+        blockPosY = blockY;
+        innerColor = clr;
+        borderColor = clr.brighter();
     }
 
     public void moveToBlock(int blockX, int blockY) {

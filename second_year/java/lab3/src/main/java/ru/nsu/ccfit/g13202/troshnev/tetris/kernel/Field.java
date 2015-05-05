@@ -28,14 +28,13 @@ public class Field extends JComponent {
         int posY = b.getBlockPosY();
 
         if ((posX >= 0)
-                && (posX < fieldWidth)
                 && (posY >= 0)
+                && (posX < fieldWidth)
                 && (posY < fieldHeight))
             blocks[posX][posY] = b;
     }
 
     public void addFigure(Figure figure) {
-        figure.setPos(3, 1);
         for (Block b : figure.blocks)
             addBlock(b);
     }
