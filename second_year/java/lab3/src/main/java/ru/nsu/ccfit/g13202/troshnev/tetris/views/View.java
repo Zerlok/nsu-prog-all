@@ -4,7 +4,7 @@ import ru.nsu.ccfit.g13202.troshnev.tetris.figures.SquareFigure;
 import ru.nsu.ccfit.g13202.troshnev.tetris.figures.TFigure;
 import ru.nsu.ccfit.g13202.troshnev.tetris.kernel.Block;
 import ru.nsu.ccfit.g13202.troshnev.tetris.kernel.Field;
-import ru.nsu.ccfit.g13202.troshnev.tetris.kernel.Figure;
+import ru.nsu.ccfit.g13202.troshnev.tetris.figures.Figure;
 
 import javax.swing.*;
 import java.awt.*;
@@ -19,19 +19,15 @@ public class View implements Runnable {
         frame.setSize(500, 500);
         frame.setTitle("Tetris Test");
 
-        Block.setSize(40, 4, 2);
+        Block.setSize(40, 3, 2);
         Figure f1 = new TFigure(new Color(61, 161, 116));
-        f1.setPos(3, 1);
+        f1.setPos(0, 1);
         Figure f2 = new SquareFigure(new Color(116, 161, 61));
-        f2.setPos(3, 2);
-        f2.moveDown();
+        f2.setPos(3, 4);
         Field gameField = new Field(10, 20);
-        gameField.addFigure(f1);
         gameField.addFigure(f2);
-
-//        gameField.addBlock(0, 0, new Block(new Color(61, 161, 116), new Color(71, 181, 117)));
-//        gameField.addBlock(1, 1, new Block(new Color(61, 111, 161), new Color(71, 117, 181)));
-//        gameField.addBlock(1, 0, new Block(new Color(116, 161, 61), new Color(117, 181, 71)));
+//        gameField.addFigure(f1);
+//        gameField.moveFigureRight();
         frame.add(gameField);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 //        frame.pack();

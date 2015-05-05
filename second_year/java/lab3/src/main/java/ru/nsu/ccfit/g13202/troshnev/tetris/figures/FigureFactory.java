@@ -1,9 +1,11 @@
-package ru.nsu.ccfit.g13202.troshnev.tetris.kernel;
+package ru.nsu.ccfit.g13202.troshnev.tetris.figures;
+
+import ru.nsu.ccfit.g13202.troshnev.tetris.figures.Figure;
+import ru.nsu.ccfit.g13202.troshnev.tetris.kernel.UnknownFigureException;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Properties;

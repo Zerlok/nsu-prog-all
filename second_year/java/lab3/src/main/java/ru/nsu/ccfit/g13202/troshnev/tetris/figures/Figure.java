@@ -1,4 +1,6 @@
-package ru.nsu.ccfit.g13202.troshnev.tetris.kernel;
+package ru.nsu.ccfit.g13202.troshnev.tetris.figures;
+
+import ru.nsu.ccfit.g13202.troshnev.tetris.kernel.Block;
 
 import java.awt.*;
 
@@ -31,42 +33,27 @@ public abstract class Figure {
         posY = y;
     }
 
-    public boolean movable() {
-        return true;
-    }
-
-    public boolean rotatable() {
-        return true;
+    public void moveUp() {
+        posY--;
+        applyBlocksPositions();
     }
 
     public void moveDown() {
         System.out.println(String.format("Moving figure %1$s down...", getClass().getName()));
-        if (movable()) {
-            posY += 1;
-            applyBlocksPositions();
-        }
+        posY++;
+        applyBlocksPositions();
     }
 
     public void moveLeft() {
-        System.out.println(String.format("Moving figure %1$s down...", getClass().getName()));
-        if (movable()) {
-            posX -= 1;
-            applyBlocksPositions();
-        }
+        System.out.println(String.format("Moving figure %1$s left...", getClass().getName()));
+        posX--;
+        applyBlocksPositions();
     }
 
     public void moveRight() {
-        System.out.println(String.format("Moving figure %1$s down...", getClass().getName()));
-        if (movable()) {
-            posX += 1;
-            applyBlocksPositions();
-        }
-    }
-
-    public void pushDown() {
-        System.out.println(String.format("Pushing figure %1$s down...", getClass().getName()));
-        while (movable())
-            moveDown();
+        System.out.println(String.format("Moving figure %1$s right...", getClass().getName()));
+        posX++;
+        applyBlocksPositions();
     }
 
     public void rotateLeft() {
@@ -79,5 +66,9 @@ public abstract class Figure {
         System.out.println(String.format("Rotating figure %1$s right...", getClass().getName()));
         rotation = (rotation + 1) % maxRotationsNum;
         applyBlocksPositions();
+    }
+
+    public Block[] getBlocks() {
+        return blocks;
     }
 }

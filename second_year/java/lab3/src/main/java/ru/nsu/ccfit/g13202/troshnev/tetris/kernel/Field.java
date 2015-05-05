@@ -1,5 +1,7 @@
 package ru.nsu.ccfit.g13202.troshnev.tetris.kernel;
 
+import ru.nsu.ccfit.g13202.troshnev.tetris.figures.Figure;
+
 import javax.swing.*;
 import java.awt.*;
 
@@ -10,33 +12,95 @@ public class Field extends JComponent {
 //    Height and width in blocks.
     private int fieldWidth;
     private int fieldHeight;
-    private Block[][] blocks;
+    private Block[] blocks;
+    private Figure activeFigure;
 
     public Field(int w, int h) {
         fieldWidth = w;
         fieldHeight = h;
-        blocks = new Block[w][h];
-    }
-
-    public void addBlock(int x, int y, Block b) {
-        b.moveToBlock(x % fieldWidth, y % fieldWidth);
-        blocks[x % fieldWidth][y % fieldHeight] = b;
+        activeFigure = null;
+        blocks = new Block[w * (h + 2)];
     }
 
     public void addBlock(Block b) {
-        int posX = b.getBlockPosX();
-        int posY = b.getBlockPosY();
+        int i;
+        for (i = 0; blocks[i] != null; i++);
+        blocks[i] = b;
+    }
 
-        if ((posX >= 0)
-                && (posY >= 0)
-                && (posX < fieldWidth)
-                && (posY < fieldHeight))
-            blocks[posX][posY] = b;
+    public void removeBlock(int x, int y) {
+        for (int i = 0; i < blocks.length; i++)
+            if ((blocks[i] != null)
+                    && (blocks[i].getBlockPosX() == x)
+                    && (blocks[i].getBlockPosY() == y))
+                blocks[i] = null;
     }
 
     public void addFigure(Figure figure) {
-        for (Block b : figure.blocks)
-            addBlock(b);
+//        Save previous figure blocks on field.
+        if (activeFigure != null)
+            for (Block b : activeFigure.getBlocks())
+                addBlock(b);
+
+        activeFigure = figure;
+    }
+
+    private boolean hasIntersection() {
+        for (Block figureBlock : activeFigure.getBlocks()) {
+            int blockPosX = figureBlock.getBlockPosX();
+            int blockPosY = figureBlock.getBlockPosY();
+
+//            Check intersections between figure block and field borders.
+            if ((blockPosX < 0)
+                    || (blockPosY < 0)
+                    || (blockPosX >= fieldWidth)
+                    || (blockPosY >= fieldHeight))
+                return true;
+
+//            Check intersections between figure block and field blocks.
+            for (Block fieldBlock : blocks)
+                if ((fieldBlock != null)
+                        && (blockPosX == fieldBlock.getBlockPosX())
+                        && (blockPosY == fieldBlock.getBlockPosY()))
+                    return true;
+        }
+
+        return false;
+    }
+
+    public void moveFigureDown() {
+        activeFigure.moveDown();
+
+        if (hasIntersection())
+            activeFigure.moveUp();
+    }
+
+    public void moveFigureLeft() {
+        activeFigure.moveLeft();
+
+        if (hasIntersection())
+            activeFigure.moveRight();
+    }
+
+    public void moveFigureRight() {
+        activeFigure.moveRight();
+
+        if (hasIntersection())
+            activeFigure.moveLeft();
+    }
+
+    public void rotateFigureLeft() {
+        activeFigure.rotateLeft();
+
+        if (hasIntersection())
+            activeFigure.rotateRight();
+    }
+
+    public void rotateFigureRight() {
+        activeFigure.rotateRight();
+
+        if (hasIntersection())
+            activeFigure.rotateLeft();
     }
 
     @Override
@@ -44,11 +108,14 @@ public class Field extends JComponent {
         super.paintComponent(g);
         Graphics2D g2d = (Graphics2D) g;
 
-        for (int x = 0; x < fieldWidth; x++) {
-            for (int y = 0; y < fieldHeight; y++) {
-                if (blocks[x][y] != null)
-                    blocks[x][y].draw(g2d);
-            }
-        }
+//        Draw figure blocks.
+        if (activeFigure != null)
+            for (Block figureBlock : activeFigure.getBlocks())
+                figureBlock.draw(g2d);
+
+//        Draw the rest blocks.
+        for (Block fieldBlock : blocks)
+            if (fieldBlock != null)
+                fieldBlock.draw(g2d);
     }
 }
