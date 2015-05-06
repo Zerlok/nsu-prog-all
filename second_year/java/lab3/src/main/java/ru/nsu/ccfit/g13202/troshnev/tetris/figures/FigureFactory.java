@@ -9,16 +9,17 @@ import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Properties;
+import java.util.Random;
 
 /**
  * Created by zerlok on 4/29/15.
  */
 
 public class FigureFactory {
-    private HashMap<String, Class<? extends Figure> > figuresMap;
+    private HashMap<String, String > figuresMap;
 
     public FigureFactory() {
-        figuresMap = new HashMap<String, Class<? extends Figure> >();
+        figuresMap = new HashMap<String, String >();
     }
 
     public Figure createFigure(String figureName) throws UnknownFigureException {
@@ -26,20 +27,45 @@ public class FigureFactory {
 
         try {
             if (figuresMap.containsKey(figureName)) {
-                Class figureClass = (Class) figuresMap.get(figureName);
-                figure = (Figure)figureClass.getConstructor().newInstance();
+                Class figureClass = Class.forName(figuresMap.get(figureName));
+                figure = (Figure)figureClass.newInstance();
 
             } else {
                 throw new UnknownFigureException(figureName);
             }
 
-        } catch (InvocationTargetException e) {
-            e.printStackTrace();
-        } catch (NoSuchMethodException e) {
-            e.printStackTrace();
         } catch (InstantiationException e) {
             e.printStackTrace();
         } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        return figure;
+    }
+
+    public Figure createRandomFigure() {
+//        TODO: copy figure from prototype.
+        Figure figure = null;
+
+        try {
+            int size = figuresMap.size();
+            int item_num = new Random().nextInt(size);
+            int indx = 0;
+
+            for (String figureClassName : figuresMap.values())
+            {
+                if (indx == item_num)
+                    figure = (Figure)Class.forName(figureClassName).newInstance();
+
+                indx++;
+            }
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
 
@@ -48,24 +74,19 @@ public class FigureFactory {
 
     public void configure() throws IOException {
         Properties prop = new Properties();
-        InputStream inputStream = getClass().getClassLoader().getResourceAsStream("cmd.properties");
+        InputStream inputStream = getClass().getClassLoader().getResourceAsStream("figures.properties");
 
         if (inputStream == null) {
-            throw new FileNotFoundException("Cannot find cmd.properties file.");
+            throw new FileNotFoundException("Cannot find figures.properties file.");
         }
 
         prop.load(inputStream);
-        String cmdFolderPath = prop.getProperty("folder");
+        String figuresFolderPath = prop.getProperty("folder");
 
         for (String key : prop.stringPropertyNames()) {
             if (!key.contentEquals("folder")) {
                 String value = prop.getProperty(key);
-                try {
-                    figuresMap.put(key, (Class<Figure>) Class.forName(cmdFolderPath + "." + value));
-
-                } catch (ClassNotFoundException e) {
-                    e.printStackTrace();
-                }
+                figuresMap.put(key, String.format("%1$s.%2$s", figuresFolderPath, value));
             }
         }
     }

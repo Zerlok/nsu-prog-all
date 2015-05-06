@@ -91,4 +91,13 @@ public class Field extends JPanel {
 //        TODO: remove full lines and shift each block down.
         System.out.println("Removing full lines...");
     }
+
+    public int getFieldWidth() {
+        return fieldWidth;
+    }
+
+    public int getFieldHeight() {
+//        TODO: repair this method (remove +1).
+        return fieldHeight + 1;
+    }
 }

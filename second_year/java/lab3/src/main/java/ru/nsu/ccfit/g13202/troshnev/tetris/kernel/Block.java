@@ -19,8 +19,16 @@ public class Block {
 
     static public void setSize(int w, int p, int m) {
         pixelWidth = w > 0 ? w : pixelWidth;
-        pixelPadding = p > 0 ? p : pixelPadding;
-        pixelMargin = m > 0 ? m : pixelMargin;
+        pixelPadding = p >= 0 ? p : pixelPadding;
+        pixelMargin = m >= 0 ? m : pixelMargin;
+    }
+
+    public static int getPixelOffset() {
+        return pixelWidth + pixelMargin;
+    }
+
+    public static int getPixelMargin() {
+        return pixelMargin;
     }
 
     public Block(Color clr) {
@@ -58,7 +66,7 @@ public class Block {
     }
 
     public void draw(Graphics2D g) {
-        int offset = pixelWidth + pixelMargin;
+        int offset = getPixelOffset();
         int pixelX = blockPosX * offset;
         int pixelY = blockPosY * offset;
 

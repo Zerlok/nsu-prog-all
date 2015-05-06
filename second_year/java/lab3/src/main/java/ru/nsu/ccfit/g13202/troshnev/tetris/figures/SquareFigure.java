@@ -8,10 +8,10 @@ import java.awt.*;
  * Created by zerlok on 5/5/15.
  */
 public class SquareFigure extends Figure {
-    public SquareFigure(Color clr) {
+    public SquareFigure() {
         rotation = 0;
         maxRotationsNum = 1;
-        figureColor = clr;
+        figureColor = new Color(116, 161, 61);
         blocks = new Block[] {
                 new Block(posX, posY, figureColor),
                 new Block(posX, posY + 1, figureColor),

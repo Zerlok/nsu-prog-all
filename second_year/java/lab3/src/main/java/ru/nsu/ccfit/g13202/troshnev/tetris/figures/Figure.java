@@ -39,8 +39,8 @@ public abstract class Figure {
     }
 
     public void moveDown() {
-        System.out.println(String.format("Moving figure %1$s down...", getClass().getName()));
         posY++;
+        System.out.println(String.format("Moving figure %1$s down... to posY %2$d", getClass().getName(), posY));
         applyBlocksPositions();
     }
 

@@ -1,26 +1,37 @@
 package ru.nsu.ccfit.g13202.troshnev.tetris.kernel;
 
 import ru.nsu.ccfit.g13202.troshnev.tetris.figures.Figure;
+import ru.nsu.ccfit.g13202.troshnev.tetris.figures.FigureFactory;
 import ru.nsu.ccfit.g13202.troshnev.tetris.figures.SquareFigure;
 import ru.nsu.ccfit.g13202.troshnev.tetris.figures.TFigure;
-import ru.nsu.ccfit.g13202.troshnev.tetris.views.View;
+import ru.nsu.ccfit.g13202.troshnev.tetris.views.GameView;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.io.IOException;
 
 /**
  * Created by zerlok on 4/29/15.
  */
 public class Controller {
     private Field gameField;
-    private View tetrisView;
+    private GameView gameView;
+    private FigureFactory figureFactory;
     private Figure activeFigure;
 
     public Controller() {
-        gameField = new Field(10, 18);
-        tetrisView = new View(gameField);
+        gameField = new Field(10, 15);
+        gameView = new GameView(gameField);
+        figureFactory = new FigureFactory();
         activeFigure = null;
+
+        try {
+            figureFactory.configure();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         bindKeys();
     }
@@ -86,18 +97,15 @@ public class Controller {
     }
 
     public void run() {
-        Figure f = new SquareFigure(new Color(61, 161, 161));
-        f.setPos(5, 6);
-        gameField.addFigure(f);
         createNewFigure();
-        tetrisView.run();
+        gameView.run();
 
         System.out.println("Game running...");
     }
 
     public void createNewFigure() {
 //        TODO: get new figure from figure factory.
-        activeFigure = new TFigure(new Color(116, 161, 61));
+        activeFigure = figureFactory.createRandomFigure();
         activeFigure.setPos(2, 0);
         gameField.addFigure(activeFigure);
 

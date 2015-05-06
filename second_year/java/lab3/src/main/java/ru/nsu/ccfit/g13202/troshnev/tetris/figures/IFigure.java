@@ -5,12 +5,12 @@ import ru.nsu.ccfit.g13202.troshnev.tetris.kernel.Block;
 import java.awt.*;
 
 /**
- * Created by zerlok on 4/29/15.
+ * Created by zerlok on 5/6/15.
  */
-public class TFigure extends Figure {
-    public TFigure() {
+public class IFigure extends Figure {
+    public IFigure() {
         rotation = 0;
-        maxRotationsNum = 4;
+        maxRotationsNum = 2;
         figureColor = new Color(116, 161, 61);
 
         blocks = new Block[4];
@@ -18,7 +18,7 @@ public class TFigure extends Figure {
             blocks[i] = new Block(figureColor);
 
         applyBlocksPositions();
-        System.out.println("TFigure created");
+        System.out.println("IFigure created");
     }
 
     @Override
@@ -28,28 +28,14 @@ public class TFigure extends Figure {
                 blocks[0].moveToBlock(posX, posY);
                 blocks[1].moveToBlock(posX - 1, posY);
                 blocks[2].moveToBlock(posX + 1, posY);
-                blocks[3].moveToBlock(posX, posY + 1);
+                blocks[3].moveToBlock(posX + 2, posY);
                 break;
             }
             case 1: {
                 blocks[0].moveToBlock(posX, posY);
                 blocks[1].moveToBlock(posX, posY - 1);
                 blocks[2].moveToBlock(posX, posY + 1);
-                blocks[3].moveToBlock(posX - 1, posY);
-                break;
-            }
-            case 2: {
-                blocks[0].moveToBlock(posX, posY);
-                blocks[1].moveToBlock(posX + 1, posY);
-                blocks[2].moveToBlock(posX - 1, posY);
-                blocks[3].moveToBlock(posX, posY - 1);
-                break;
-            }
-            case 3: {
-                blocks[0].moveToBlock(posX, posY);
-                blocks[1].moveToBlock(posX, posY + 1);
-                blocks[2].moveToBlock(posX, posY - 1);
-                blocks[3].moveToBlock(posX + 1, posY);
+                blocks[3].moveToBlock(posX, posY + 2);
                 break;
             }
         }
