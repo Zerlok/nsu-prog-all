@@ -104,12 +104,13 @@ public class Controller {
     }
 
     public void createNewFigure() {
-//        TODO: get new figure from figure factory.
         activeFigure = figureFactory.createRandomFigure();
-        activeFigure.setPos(2, 0);
-        gameField.addFigure(activeFigure);
+        activeFigure.setPos(gameField.getFieldWidth() / 2, 0);
+        gameField.setFigure(activeFigure);
 
+//        TODO: remove bug, when new figure has blocks outside of the game window.
         if (gameField.hasIntersection())
+//            activeFigure = null;
             System.out.println("GAME OVER!");
     }
 
@@ -122,9 +123,10 @@ public class Controller {
         if (gameField.hasIntersection()) {
             activeFigure.moveUp();
             activeFigure = null;
-            System.out.println("Figure position fixed.");
 
+            gameField.saveFigureBlocks();
             gameField.removeFullLines();
+            System.out.println("Figure position fixed.");
             createNewFigure();
         }
     }

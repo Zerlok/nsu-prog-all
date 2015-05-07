@@ -12,42 +12,40 @@ public class Field extends JPanel {
 //    Height and width in blocks.
     private int fieldWidth;
     private int fieldHeight;
-    private Block[] blocks;
+    private Block[][] blocks;
     private Figure activeFigure;
 
     public Field(int w, int h) {
         fieldWidth = w;
         fieldHeight = h;
         activeFigure = null;
-        blocks = new Block[w * (h + 2)];
+        blocks = new Block[w][h + 2];
     }
 
     public void addBlock(Block b) {
-        int i;
-        for (i = 0; blocks[i] != null; i++);
-        blocks[i] = b;
+        blocks[b.getBlockPosX()][b.getBlockPosY()] = b;
     }
 
     public void removeBlock(int x, int y) {
-        for (int i = 0; i < blocks.length; i++)
-            if ((blocks[i] != null)
-                    && (blocks[i].getBlockPosX() == x)
-                    && (blocks[i].getBlockPosY() == y))
-                blocks[i] = null;
+        blocks[x][y] = null;
     }
 
-    public void addFigure(Figure figure) {
-//        Save previous figure blocks on field.
+    public void setFigure(Figure figure) {
+        activeFigure = figure;
+    }
+
+    public void saveFigureBlocks() {
         if (activeFigure != null)
             for (Block b : activeFigure.getBlocks())
                 addBlock(b);
-
-        activeFigure = figure;
     }
 
     public boolean hasIntersection() {
         if (activeFigure == null)
             return false;
+
+        int x;
+        int y;
 
         for (Block figureBlock : activeFigure.getBlocks()) {
             int blockPosX = figureBlock.getBlockPosX();
@@ -61,14 +59,63 @@ public class Field extends JPanel {
                 return true;
 
 //            Check intersections between figure block and field blocks.
-            for (Block fieldBlock : blocks)
-                if ((fieldBlock != null)
-                        && (blockPosX == fieldBlock.getBlockPosX())
-                        && (blockPosY == fieldBlock.getBlockPosY()))
-                    return true;
+            for (x = 0; x < fieldWidth; x++)
+                for (y = 0; y < fieldHeight; y++)
+                    if ((blocks[x][y] != null)
+                            && (blockPosX == blocks[x][y].getBlockPosX())
+                            && (blockPosY == blocks[x][y].getBlockPosY()))
+                        return true;
         }
 
         return false;
+    }
+
+    public void removeFullLines() {
+        System.out.println("Removing full lines...");
+
+        int x;
+        int y;
+        int blocksInRow;
+        int emptyRowNum = -1;
+
+        for (y = 0; y < fieldHeight; y++) {
+            blocksInRow = 0;
+            for (x = 0; x < fieldWidth; x++)
+                if (blocks[x][y] != null)
+                    blocksInRow++;
+
+            if (blocksInRow == fieldWidth) {
+                for (x = 0; x < fieldWidth; x++)
+                    blocks[x][y] = null;
+
+                emptyRowNum = y;
+            }
+        }
+
+        if (emptyRowNum >= 0)
+            shiftLinesDownFromRow(emptyRowNum);
+    }
+
+    private void shiftLinesDownFromRow(int rowNum) {
+        int x;
+        int y;
+        for (y = rowNum; y > 0; y--) {
+            for (x = 0; x < fieldWidth; x++) {
+                if (blocks[x][y - 1] != null) {
+                    blocks[x][y] = blocks[x][y - 1];
+                    blocks[x][y].moveToBlock(x, y);
+                }
+            }
+        }
+    }
+
+    public int getFieldWidth() {
+        return fieldWidth;
+    }
+
+    public int getFieldHeight() {
+//        TODO: repair this method (remove +1).
+        return fieldHeight + 1;
     }
 
     @Override
@@ -82,22 +129,11 @@ public class Field extends JPanel {
                 figureBlock.draw(g2d);
 
 //        Draw the rest blocks.
-        for (Block fieldBlock : blocks)
-            if (fieldBlock != null)
-                fieldBlock.draw(g2d);
-    }
-
-    public void removeFullLines() {
-//        TODO: remove full lines and shift each block down.
-        System.out.println("Removing full lines...");
-    }
-
-    public int getFieldWidth() {
-        return fieldWidth;
-    }
-
-    public int getFieldHeight() {
-//        TODO: repair this method (remove +1).
-        return fieldHeight + 1;
+        int x;
+        int y;
+        for (x = 0; x < fieldWidth; x++)
+            for(y = 0; y < fieldHeight; y++)
+                if (blocks[x][y] != null)
+                    blocks[x][y].draw(g2d);
     }
 }

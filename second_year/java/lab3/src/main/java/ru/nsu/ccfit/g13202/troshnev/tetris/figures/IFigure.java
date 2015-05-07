@@ -11,7 +11,7 @@ public class IFigure extends Figure {
     public IFigure() {
         rotation = 0;
         maxRotationsNum = 2;
-        figureColor = new Color(116, 161, 61);
+        figureColor = new Color(42, 163, 139);
 
         blocks = new Block[4];
         for (int i = 0; i < blocks.length; i++)

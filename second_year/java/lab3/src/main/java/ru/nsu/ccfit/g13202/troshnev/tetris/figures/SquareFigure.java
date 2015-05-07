@@ -11,7 +11,7 @@ public class SquareFigure extends Figure {
     public SquareFigure() {
         rotation = 0;
         maxRotationsNum = 1;
-        figureColor = new Color(116, 161, 61);
+        figureColor = new Color(161, 40, 41);
         blocks = new Block[] {
                 new Block(posX, posY, figureColor),
                 new Block(posX, posY + 1, figureColor),

@@ -11,7 +11,7 @@ public class LFigure extends Figure {
     public LFigure() {
         rotation = 0;
         maxRotationsNum = 4;
-        figureColor = new Color(116, 161, 161);
+        figureColor = new Color(85, 88, 164);
 
         blocks = new Block[4];
         for (int i = 0; i < blocks.length; i++)
