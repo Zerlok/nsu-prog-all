@@ -11,7 +11,7 @@ public class MSFigure extends Figure {
     public MSFigure() {
         rotation = 0;
         maxRotationsNum = 2;
-        figureColor = new Color(16, 61, 161);
+        figureColor = new Color(67, 122, 254);
 
         blocks = new Block[4];
         for (int i = 0; i < blocks.length; i++)
