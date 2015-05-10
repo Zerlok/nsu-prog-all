@@ -17,6 +17,8 @@ public class IFigure extends Figure {
         for (int i = 0; i < blocks.length; i++)
             blocks[i] = new Block(figureColor);
 
+        blocksLocalPositions = new int[blocks.length][2];
+
         applyBlocksPositions();
         System.out.println("IFigure created");
     }
@@ -25,6 +27,7 @@ public class IFigure extends Figure {
     protected void applyBlocksPositions() {
         switch (rotation) {
             case 0: {
+
                 blocks[0].moveToBlock(posX, posY);
                 blocks[1].moveToBlock(posX - 1, posY);
                 blocks[2].moveToBlock(posX + 1, posY);

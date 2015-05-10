@@ -12,25 +12,27 @@ public abstract class Figure {
     protected int posY;
     protected int rotation;
     protected int maxRotationsNum;
-    protected int centerBlockNum = 0;
     protected Color figureColor;
     protected Block[] blocks;
+    protected int [][] blocksLocalPositions;
 
     protected void applyBlocksPositions() {}
 
     public void setRotation(int num) {
-        rotation = num % maxRotationsNum;
+        rotation = (num + maxRotationsNum) % maxRotationsNum;
+        applyBlocksPositions();
     }
 
     public void setPos(int x, int y) {
-        for (Block b : blocks)
-            b.moveToBlock(
-                    x + b.getBlockPosX() - posX,
-                    y + b.getBlockPosY() - posY
-            );
+//        for (int i = 0; i < blocksLocalPositions.length; i++)
+//            blocksLocalPositions[i] = new int[] {
+//                    x + blocksLocalPositions[i][0] - posX,
+//                    y + blocksLocalPositions[i][1] - posY
+//            };
 
         posX = x;
         posY = y;
+        applyBlocksPositions();
     }
 
     public void moveUp() {
@@ -70,5 +72,17 @@ public abstract class Figure {
 
     public Block[] getBlocks() {
         return blocks;
+    }
+
+    public int[][] getBlocksLocalPositions() {
+        int[][] positions = new int[blocks.length][];
+
+        for (int i = 0; i < blocks.length; i++)
+            positions[i] = new int[] {
+                    blocksLocalPositions[i][0],
+                    blocksLocalPositions[i][1]
+            };
+
+        return positions;
     }
 }

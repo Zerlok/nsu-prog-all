@@ -19,15 +19,15 @@ public class Field extends JPanel {
         fieldWidth = w;
         fieldHeight = h;
         activeFigure = null;
-        blocks = new Block[w][h + 2];
+        blocks = new Block[h + 2][w];
     }
 
-    public void addBlock(Block b) {
-        blocks[b.getBlockPosX()][b.getBlockPosY()] = b;
+    public void addBlock(int x, int y, Block b) {
+        blocks[y][x] = b;
     }
 
     public void removeBlock(int x, int y) {
-        blocks[x][y] = null;
+        blocks[y][x] = null;
     }
 
     public void setFigure(Figure figure) {
@@ -35,9 +35,13 @@ public class Field extends JPanel {
     }
 
     public void saveFigureBlocks() {
-        if (activeFigure != null)
-            for (Block b : activeFigure.getBlocks())
-                addBlock(b);
+        if (activeFigure == null)
+            return;
+
+        Block[] figureBlocks = activeFigure.getBlocks();
+        int[][] figureBlocksPositions = activeFigure.getBlocksLocalPositions();
+        for (Block b : )
+            addBlock(b);
     }
 
     public boolean hasIntersection() {
