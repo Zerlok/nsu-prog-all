@@ -7,7 +7,7 @@
 #include "vshell.h"
 
 
-void VSHELL_init(int argc, char **argv, SHELL *shell)
+void VSHELL_INIT(int argc, char **argv, SHELL *shell)
 {
 	int i;
 	for (i = 1; i < argc; i++)
@@ -16,16 +16,15 @@ void VSHELL_init(int argc, char **argv, SHELL *shell)
 
 	DEBUG_START("Initializing the shell ...");
 
-	shell->username = "zerlok";
 	shell->history = get_string_array(0);
 
 	DEBUG_END("done.");
 }
 
 
-void VSHELL_run(SHELL *shell)
+void VSHELL_RUN(SHELL *shell)
 {
-	Call *cmd_call;
+	Cmd *command;
 	int code = CODE_WAIT;
 	int indx = 0;
 	char c = 0;
@@ -42,27 +41,27 @@ void VSHELL_run(SHELL *shell)
 		printf(LINE_START_SYMBOL);
 		fgets(line, LINE_LEN, stdin);
 		
-		cmd_call = get_command_call(line);
+		command = get_command(line);
 
-		if (cmd_call == NULL)
+		if (command == NULL)
 			continue;
 		
-		code = do_cmd(cmd_call);
+		code = run_command(command);
 
 		// TODO: Push into history
 		// if (code != CODE_WAIT) {
 		// 	push_into_string_array(line, shell->history);
 		// }
 
-		clear_command_call(cmd_call);
+		clear_command(command);
 	}
 
-	delete_command_call(cmd_call);
+	delete_command(command);
 	DEBUG_END("done.");
 }
 
 
-void VSHELL_dump(SHELL *shell)
+void VSHELL_DUMP(SHELL *shell)
 {
 	DEBUG_START("Dumping the shell into the file ...");
 
@@ -82,7 +81,7 @@ void VSHELL_dump(SHELL *shell)
 }
 
 
-void VSHELL_close(SHELL *shell)
+void VSHELL_CLOSE(SHELL *shell)
 {
 	if (shell == NULL)
 		return;

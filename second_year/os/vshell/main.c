@@ -17,13 +17,13 @@ int main(int argc, char **argv, char **envp)
 
 	SHELL shell;
 	// Init the shell from arguments.
-	VSHELL_init(argc, argv, &shell);
+	VSHELL_INIT(argc, argv, &shell);
 	// Run the shell.
-	VSHELL_run(&shell);
+	VSHELL_RUN(&shell);
 	// Dump all data from shell into the file (for debug).
 	// VSHELL_dump(&shell);
 	// Close the shell (remove all created data).
-	VSHELL_close(&shell);
+	VSHELL_CLOSE(&shell);
 
 	return 0;
 }

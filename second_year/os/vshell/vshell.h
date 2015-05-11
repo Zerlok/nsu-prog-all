@@ -7,21 +7,20 @@ typedef void (*sighandler_t)(int);
 
 typedef struct Vshell
 {
-	char *username;
 	StringArray *history;
 } SHELL;
 
 
 void handle_signal(int signum);
 
-void VSHELL_init(
+void VSHELL_INIT(
 		int argc,
 		char **argv,
 		SHELL *shell);
 
-void VSHELL_run(SHELL *shell);
+void VSHELL_RUN(SHELL *shell);
 
-void VSHELL_close(SHELL *shell);
+void VSHELL_CLOSE(SHELL *shell);
 
 
 // __VSHELL_H__
