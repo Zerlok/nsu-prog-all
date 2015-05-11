@@ -45,12 +45,10 @@ int run_command(Cmd *command)
 	pid_t pid;
 	pid_t gid;
 	pid_t sid;
-	pid_t term_id;
 
 	// Forking
-	term_id = getpid();
-	gid = getpgid(term_id);
-	DEBUG_SAY("Forking from process %d %d ...\n", term_id, gid);
+	gid = getpid(); // Group id is a shell pid.
+	DEBUG_SAY("Forking from process %d ...\n", gid);
 	id = fork();
 
 	if (id < 0) // Do it if fork failed.
@@ -62,12 +60,12 @@ int run_command(Cmd *command)
 	else if (id > 0) // Do it in PARENT process.
 	{
 		waitpid(id, &status, 0);
-		DEBUG_SAY("Parent id: %d %d %d\n", id, getpid(), getpgid(id));
+		DEBUG_SAY("Parent pid: %d\n", getpid());
 	}
 	else // Do it in CHILD process.
 	{
 		pid = getpid();
-		DEBUG_SAY("Child id: %d %d %d\n", id, getpid(), getpgid(id));
+		DEBUG_SAY("Child pid: %d\n", pid);
 
 		// Show all commanding arguments. 
 		DEBUG_SAY("Calling '%s' with arguments: ", command->origin);
@@ -89,18 +87,19 @@ int run_command(Cmd *command)
 		else if (command->appends != NULL)
 			redirect_stream(STDOUT_FILENO, command->appends, O_WRONLY | O_CREAT | O_APPEND);
 
-		DEBUG_SAY("Is process running in background? %d\n", command->is_in_background);
-		
-		if (gid == 0)
-			gid = pid;
-		
+		// DEBUG_SAY("Is process running in background? %d\n", command->is_in_background);
+
 		setpgid(pid, gid);
-		tcsetpgrp(term_id, gid);
+		tcsetpgrp(gid, gid);
 		
 		if (command->is_in_background)
-			setsid();
+		{
+			DEBUG_SAY("Closing the input ...\n");
+			redirect_stream(STDIN_FILENO, "/dev/tty", O_RDONLY);
+			// close(STDIN_FILENO);
+		}
 
-		printf("Process id: %d\n", getpid());
+		printf("pid: %d, gid: %d\n", pid, gid);
 		status = execvpe(command->origin, command->argv, environ);
 		
 		// If exec failed.
