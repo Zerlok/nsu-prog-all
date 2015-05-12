@@ -22,7 +22,11 @@ public class Field extends JPanel {
     }
 
     public void addBlock(int rowNum, int columnNum, Block b) {
-        fieldBlocks[rowNum][columnNum] = b;
+        if ((rowNum >= 0)
+                && (columnNum >= 0)
+                && (rowNum < fieldRowsNum)
+                && (columnNum < fieldColumnsNum))
+            fieldBlocks[rowNum][columnNum] = b;
     }
 
     public void setFigure(Figure figure) {
@@ -30,6 +34,7 @@ public class Field extends JPanel {
     }
 
     public void saveFigureBlocks() {
+        System.out.println(String.format("Saving figure %1$s", activeFigure.getClass().getName()));
         if (activeFigure == null)
             return;
 
@@ -50,28 +55,27 @@ public class Field extends JPanel {
 
 //        Cycle throw figure blocks.
         for (Coordinate figureBlockPosition : activeFigure.getBlocksGlobalPositions()) {
-            int blockPosX = figureBlockPosition.getCoX();
-            int blockPosY = figureBlockPosition.getCoY();
+            int blockRowNum = figureBlockPosition.getCoY();
+            int blockColumnNum = figureBlockPosition.getCoX();
 
 //            Check intersections with field borders and field blocks.
-            if ((blockPosY < 0)
-                    || (blockPosX < 0)
-                    || (blockPosY >= fieldRowsNum)
-                    || (blockPosX >= fieldColumnsNum)
-                    || (fieldBlocks[blockPosY][blockPosX] != null))
+            if ((blockColumnNum < 0)
+                    || (blockColumnNum >= fieldColumnsNum)
+                    || (blockRowNum >= fieldRowsNum)
+                    || ((blockRowNum >= 0)
+                        && (fieldBlocks[blockRowNum][blockColumnNum] != null)))
                 return true;
         }
 
         return false;
     }
 
-    public void removeFullLines() {
+    public void removeFullRows() {
         System.out.println("Removing full lines...");
 
         int columnNum;
         int rowNum;
         int blocksInRow;
-        int emptyRowNum = -1;
 
         for (rowNum = 0; rowNum < fieldRowsNum; rowNum++) {
             blocksInRow = 0;
@@ -79,8 +83,10 @@ public class Field extends JPanel {
                 if (fieldBlocks[rowNum][columnNum] != null)
                     blocksInRow++;
 
-            if (blocksInRow == fieldColumnsNum)
+            if (blocksInRow == fieldColumnsNum) {
+                System.out.println(String.format("Removing full row %1$d", rowNum));
                 shiftLinesDownFromRow(rowNum);
+            }
         }
     }
 
@@ -89,13 +95,15 @@ public class Field extends JPanel {
         int rowNum;
 
 //        Cycle from empty row to top.
-        for (rowNum = emptyRowNum; rowNum > 0; rowNum--)
+        for (rowNum = emptyRowNum; rowNum > 0; rowNum--) {
+//            System.out.println(String.format("Placing blocks from %1$d row to %2$d", rowNum - 1, rowNum));
             for (columnNum = 0; columnNum < fieldColumnsNum; columnNum++)
                 fieldBlocks[rowNum][columnNum] = fieldBlocks[rowNum - 1][columnNum];
+        }
 
 //        Delete top fieldBlocks at 0 rowNum.
         for (columnNum = 0; columnNum < fieldColumnsNum; columnNum++)
-            fieldBlocks[columnNum][0] = null;
+            fieldBlocks[0][columnNum] = null;
     }
 
     public int getFieldColumnsNum() {

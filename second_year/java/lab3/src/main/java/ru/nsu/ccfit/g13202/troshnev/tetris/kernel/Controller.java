@@ -1,6 +1,7 @@
 package ru.nsu.ccfit.g13202.troshnev.tetris.kernel;
 
 import ru.nsu.ccfit.g13202.troshnev.tetris.figures.Figure;
+import ru.nsu.ccfit.g13202.troshnev.tetris.figures.LFigure;
 import ru.nsu.ccfit.g13202.troshnev.tetris.views.GameView;
 
 import javax.swing.*;
@@ -100,14 +101,15 @@ public class Controller {
     }
 
     public void createNewFigure() {
-        activeFigure = figureFactory.createRandomFigure();
+//        activeFigure = figureFactory.createRandomFigure();
+        activeFigure = new LFigure();
         activeFigure.setPos(gameField.getFieldColumnsNum() / 2, 0);
         gameField.setFigure(activeFigure);
 
-//        TODO: remove bug, when new figure has blocks outside of the game window.
-        if (gameField.hasIntersectionWithFigure())
-//            activeFigure = null;
+        if (gameField.hasIntersectionWithFigure()) {
+            activeFigure = null;
             System.out.println("GAME OVER!");
+        }
     }
 
     public void moveFigureDown() {
@@ -121,7 +123,7 @@ public class Controller {
             activeFigure = null;
 
             gameField.saveFigureBlocks();
-            gameField.removeFullLines();
+            gameField.removeFullRows();
             System.out.println("Figure figurePosition fixed.");
             createNewFigure();
         }
