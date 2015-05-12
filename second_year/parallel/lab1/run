@@ -3,5 +3,5 @@
 if [[ -n $1 ]]; then
 	mpirun -n $1 ./multiplyer
 else
-	mpirun -n 4 ./multiplyer
+	mpirun -n 3 valgrind ./multiplyer
 fi

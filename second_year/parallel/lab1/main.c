@@ -11,13 +11,14 @@ void test(MATRIX *m1, MATRIX *m2)
 	{
 		col = get_column(c, m2);
 		// show_matrix(col);
-		result = multiply_matrixes(m1, col);
+		result = multiply_matrix_and_vector(m1, col);
 		printf("Resulting:\n");
 		show_matrix(result);
 	}
 
 	delete_matrix(m1);
 	delete_matrix(m2);
+	exit(0);
 }
 
 
@@ -48,20 +49,25 @@ int main(int argc, char **argv)
 
 	// Requirements.
 	if ((size != matrix2->size_y) && (rank == 0))
-	{
 		test(matrix1, matrix2);
-		return 1;
-	}
 
 	col = get_column(rank, matrix2);
-	result = multiply_matrixes(matrix1, col);
-	MPI_Gather(result->data, matrix1->size_x, MPI_DOUBLE,
-				values, matrix1->size_x, MPI_DOUBLE,
+	result = multiply_matrix_and_vector(matrix1, col);
+	
+	MPI_Gather(result->data, result->size_x, MPI_DOUBLE,
+				values, result->size_x, MPI_DOUBLE,
 				0, MPI_COMM_WORLD);
 
 	if (rank == 0)
 	{
-		show_matrix(get_matrix(matrix1->size_x, matrix2->size_y, values));
+		printf("values pointer: %p\n", values);
+		printf("value: %f\n", values[0]);
+		printf("values length: %ld\n", result->size_x);
+		printf("ends pointer: %p\n", values + (result->size_x * result->size_y));
+		printf("ends value: %f\n", values[(result->size_x * result->size_y)]);
+		// delete_matrix(result);
+		result = get_matrix(matrix1->size_x, matrix2->size_y, values);
+		show_matrix(result);
 	}
 
 	// delete_matrix(matrix1);

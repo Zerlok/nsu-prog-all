@@ -24,7 +24,7 @@ MATRIX *get_empty_matrix(size_t size_x, size_t size_y)
 }
 
 
-MATRIX *multiply_matrixes(MATRIX *A, MATRIX *B)
+MATRIX *multiply_matrix_and_vector(MATRIX *A, MATRIX *B)
 {
 	if (A->size_y != B->size_x)
 	{
@@ -38,23 +38,13 @@ MATRIX *multiply_matrixes(MATRIX *A, MATRIX *B)
 	double sum;
 	double res;
 
+	printf("creating matrix (%ld x %ld)\n", A->size_x, B->size_y);
 	MATRIX *R = get_empty_matrix(A->size_x, B->size_y);
 
 	for (x = 0; x < R->size_x; x++)
-	{
-		for (y = 0; y < R->size_y; y++)
-		{			
-			// printf("Calculating [%ld][%ld]\n", (x), y);
-			for (i = 0; i < A->size_y; i++)
-			{
-				// printf("Adding [%ld][%ld] * [%ld][%d] = ", (A->size_y * x), i, i, 0);
-				R->data[(R->size_y * x) + y] += A->data[(A->size_y * x) + i]
-												* B->data[i];
-				// printf("%f\n", R->data[(R->size_y * x) + y]);
-			}
-		}
-	}
-
+		for (i = 0; i < A->size_y; i++)
+			R->data[x] += A->data[(A->size_y * x) + i] * B->data[i];
+	
 	return R;
 }
 
@@ -98,39 +88,6 @@ MATRIX *get_column(size_t col_num, MATRIX *mtrx)
 }
 
 
-void send_matrix(MATRIX *mtrx, int to)
-{
-	printf("Sending matrix [%ld][%ld] to %d.\n", mtrx->size_x, mtrx->size_y, to);
-	
-	// MPI_Send([variable] [length] [type] [reciever] [id] [communicator]);
-	// MPI_Send(&(mtrx->size_x), 1, MPI_INT, to, 17, MPI_COMM_WORLD);
-	// MPI_Send(&(mtrx->size_y), 1, MPI_INT, to, 17, MPI_COMM_WORLD);
-
-	printf("Matrix values: %f\n", *(mtrx->data));
-	MPI_Send((mtrx->data), 3, MPI_DOUBLE, to, 17, MPI_COMM_WORLD);
-}
-
-
-MATRIX *recieve_matrix(int from)
-{
-	size_t size_x = 0;
-	size_t size_y = 0;
-
-	printf("Recieving matrix from %d.\n", from);
-
-	// MPI_Recv([variable] [length] [type] [reciever] [id] [communicator] [status]);
-	MPI_Recv(&size_x, 1, MPI_INT, from, 17, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-	MPI_Recv(&size_y, 1, MPI_INT, from, 17, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-
-	double *values = (double*)calloc(sizeof(double), size_x * size_y);
-	printf("Matrix [%ld][%ld].\n", size_x, size_y);
-	MPI_Recv(values, (size_x * size_y), MPI_DOUBLE, from, 17, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-
-	printf("Matrix values: %f.\n", *values);
-	return get_matrix(size_x, size_y, values);
-}
-
-
 MATRIX *get_matrix(size_t size_x, size_t size_y, double *values)
 {
 	if (values == NULL)
@@ -143,13 +100,15 @@ MATRIX *get_matrix(size_t size_x, size_t size_y, double *values)
 	size_t y;
 
 	MATRIX *mtrx = get_empty_matrix(size_x, size_y);
+	printf("%ldx%ld\n", mtrx->size_x, mtrx->size_y);
 
-	for (x = 0; x < mtrx->size_x; x++)
+	for (x = mtrx->size_x; x > 0; x--)
 	{
-		for (y = 0; y < mtrx->size_y; y++)
+		for (y = mtrx->size_y; y > 0; y--)
 		{
-			printf("%f ", values[(mtrx->size_y * x) + y]);
-			mtrx->data[(mtrx->size_y * x) + y] = values[(mtrx->size_y * x) + y];
+			// printf("[%ld, %ld]: %f", x - 1, y - 1, values[(mtrx->size_y * (x - 1)) + y - 1]);
+			printf("%f ", values[(mtrx->size_y * (x - 1)) + y - 1]);
+			mtrx->data[(mtrx->size_y * (x - 1)) + y - 1] = values[(mtrx->size_y * (x - 1)) + y - 1];
 		}
 		printf("\n");
 	}
@@ -201,6 +160,7 @@ void show_matrix(MATRIX *mtrx)
 	if (mtrx == NULL)
 		return;
 
+	printf("Matrix pointer: %p\n", mtrx);
 	size_t x;
 	size_t y;
 
