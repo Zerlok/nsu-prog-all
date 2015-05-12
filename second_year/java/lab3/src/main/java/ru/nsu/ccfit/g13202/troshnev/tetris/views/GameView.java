@@ -1,13 +1,9 @@
 package ru.nsu.ccfit.g13202.troshnev.tetris.views;
 
-import ru.nsu.ccfit.g13202.troshnev.tetris.figures.SquareFigure;
-import ru.nsu.ccfit.g13202.troshnev.tetris.figures.TFigure;
 import ru.nsu.ccfit.g13202.troshnev.tetris.kernel.Block;
 import ru.nsu.ccfit.g13202.troshnev.tetris.kernel.Field;
-import ru.nsu.ccfit.g13202.troshnev.tetris.figures.Figure;
 
 import javax.swing.*;
-import java.awt.*;
 
 /**
  * Created by zerlok on 5/4/15.
@@ -24,8 +20,8 @@ public class GameView implements Runnable {
         int blockMargin = Block.getPixelMargin();
         int blockOffset = Block.getPixelOffset();
         gameFrame.setSize(
-                blockOffset * gameField.getFieldWidth() - blockMargin + 2,
-                blockOffset * gameField.getFieldHeight() + 4
+                blockOffset * gameField.getFieldColumnsNum() - blockMargin + 2,
+                blockOffset * gameField.getFieldRowsNum() + 4
         );
         gameFrame.setTitle("Tetris");
         gameFrame.add(gameField);

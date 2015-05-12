@@ -1,4 +1,4 @@
-package ru.nsu.ccfit.g13202.troshnev.tetris.figures;
+package ru.nsu.ccfit.g13202.troshnev.tetris.kernel;
 
 import ru.nsu.ccfit.g13202.troshnev.tetris.figures.Figure;
 import ru.nsu.ccfit.g13202.troshnev.tetris.kernel.UnknownFigureException;
@@ -56,8 +56,11 @@ public class FigureFactory {
 
             for (String figureClassName : figuresMap.values())
             {
-                if (indx == item_num)
+                if (indx == item_num) {
                     figure = (Figure)Class.forName(figureClassName).newInstance();
+//                    figure.copy();
+                    break;
+                }
 
                 indx++;
             }

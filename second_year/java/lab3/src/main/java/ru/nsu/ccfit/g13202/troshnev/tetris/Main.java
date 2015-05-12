@@ -1,4 +1,4 @@
-package ru.nsu.ccfit.g13202.troshnev;
+package ru.nsu.ccfit.g13202.troshnev.tetris;
 
 import ru.nsu.ccfit.g13202.troshnev.tetris.kernel.Controller;
 

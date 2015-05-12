@@ -10,9 +10,6 @@ public class Block {
     static private int pixelWidth = 100;
     static private int pixelPadding = 5;
     static private int pixelMargin = 1;
-//    Top left X, Y position of the block.
-    private int blockPosX;
-    private int blockPosY;
 //    The block color.
     private Color innerColor;
     private Color borderColor;
@@ -32,43 +29,19 @@ public class Block {
     }
 
     public Block(Color clr) {
-        blockPosX = 0;
-        blockPosY = 0;
         innerColor = clr;
         borderColor = clr.brighter();
     }
 
     public Block(Color inColor, Color brColor) {
-        blockPosX = 0;
-        blockPosY = 0;
         innerColor = inColor;
         borderColor = brColor;
     }
 
-    public Block(int blockX, int blockY, Color clr) {
-        blockPosX = blockX;
-        blockPosY = blockY;
-        innerColor = clr;
-        borderColor = clr.brighter();
-    }
-
-    public void moveToBlock(int blockX, int blockY) {
-        blockPosX = blockX;
-        blockPosY = blockY;
-    }
-
-    public int getBlockPosX() {
-        return blockPosX;
-    }
-
-    public int getBlockPosY() {
-        return blockPosY;
-    }
-
-    public void draw(Graphics2D g) {
+    public void draw(int rowNum, int columnNum, Graphics2D g) {
         int offset = getPixelOffset();
-        int pixelX = blockPosX * offset;
-        int pixelY = blockPosY * offset;
+        int pixelX = columnNum * offset;
+        int pixelY = rowNum * offset;
 
         g.setColor(borderColor);
         g.fillRect(

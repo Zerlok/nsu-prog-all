@@ -9,25 +9,20 @@ import java.awt.*;
  * Created by zerlok on 4/29/15.
  */
 public class Field extends JPanel {
-//    Height and width in blocks.
-    private int fieldWidth;
-    private int fieldHeight;
-    private Block[][] blocks;
+    private int fieldColumnsNum;
+    private int fieldRowsNum;
+    private Block[][] fieldBlocks;
     private Figure activeFigure;
 
     public Field(int w, int h) {
-        fieldWidth = w;
-        fieldHeight = h;
+        fieldColumnsNum = w;
+        fieldRowsNum = h;
         activeFigure = null;
-        blocks = new Block[h + 2][w];
+        fieldBlocks = new Block[fieldRowsNum][fieldColumnsNum];
     }
 
-    public void addBlock(int x, int y, Block b) {
-        blocks[y][x] = b;
-    }
-
-    public void removeBlock(int x, int y) {
-        blocks[y][x] = null;
+    public void addBlock(int rowNum, int columnNum, Block b) {
+        fieldBlocks[rowNum][columnNum] = b;
     }
 
     public void setFigure(Figure figure) {
@@ -39,36 +34,32 @@ public class Field extends JPanel {
             return;
 
         Block[] figureBlocks = activeFigure.getBlocks();
-        int[][] figureBlocksPositions = activeFigure.getBlocksLocalPositions();
-        for (Block b : )
-            addBlock(b);
+        Coordinate[] figureBlocksPositions = activeFigure.getBlocksGlobalPositions();
+
+        for (int i = 0; i < figureBlocks.length; i++)
+            addBlock(
+                    figureBlocksPositions[i].getCoY(), // rowNum
+                    figureBlocksPositions[i].getCoX(), // columnNum
+                    figureBlocks[i]
+            );
     }
 
-    public boolean hasIntersection() {
+    public boolean hasIntersectionWithFigure() {
         if (activeFigure == null)
             return false;
 
-        int x;
-        int y;
+//        Cycle throw figure blocks.
+        for (Coordinate figureBlockPosition : activeFigure.getBlocksGlobalPositions()) {
+            int blockPosX = figureBlockPosition.getCoX();
+            int blockPosY = figureBlockPosition.getCoY();
 
-        for (Block figureBlock : activeFigure.getBlocks()) {
-            int blockPosX = figureBlock.getBlockPosX();
-            int blockPosY = figureBlock.getBlockPosY();
-
-//            Check intersections between figure block and field borders.
-            if ((blockPosX < 0)
-                    || (blockPosY < 0)
-                    || (blockPosX >= fieldWidth)
-                    || (blockPosY >= fieldHeight))
+//            Check intersections with field borders and field blocks.
+            if ((blockPosY < 0)
+                    || (blockPosX < 0)
+                    || (blockPosY >= fieldRowsNum)
+                    || (blockPosX >= fieldColumnsNum)
+                    || (fieldBlocks[blockPosY][blockPosX] != null))
                 return true;
-
-//            Check intersections between figure block and field blocks.
-            for (x = 0; x < fieldWidth; x++)
-                for (y = 0; y < fieldHeight; y++)
-                    if ((blocks[x][y] != null)
-                            && (blockPosX == blocks[x][y].getBlockPosX())
-                            && (blockPosY == blocks[x][y].getBlockPosY()))
-                        return true;
         }
 
         return false;
@@ -77,49 +68,43 @@ public class Field extends JPanel {
     public void removeFullLines() {
         System.out.println("Removing full lines...");
 
-        int x;
-        int y;
+        int columnNum;
+        int rowNum;
         int blocksInRow;
         int emptyRowNum = -1;
 
-        for (y = 0; y < fieldHeight; y++) {
+        for (rowNum = 0; rowNum < fieldRowsNum; rowNum++) {
             blocksInRow = 0;
-            for (x = 0; x < fieldWidth; x++)
-                if (blocks[x][y] != null)
+            for (columnNum = 0; columnNum < fieldColumnsNum; columnNum++)
+                if (fieldBlocks[rowNum][columnNum] != null)
                     blocksInRow++;
 
-            if (blocksInRow == fieldWidth) {
-                for (x = 0; x < fieldWidth; x++)
-                    blocks[x][y] = null;
-
-                emptyRowNum = y;
-            }
-        }
-
-        if (emptyRowNum >= 0)
-            shiftLinesDownFromRow(emptyRowNum);
-    }
-
-    private void shiftLinesDownFromRow(int rowNum) {
-        int x;
-        int y;
-        for (y = rowNum; y > 0; y--) {
-            for (x = 0; x < fieldWidth; x++) {
-                if (blocks[x][y - 1] != null) {
-                    blocks[x][y] = blocks[x][y - 1];
-                    blocks[x][y].moveToBlock(x, y);
-                }
-            }
+            if (blocksInRow == fieldColumnsNum)
+                shiftLinesDownFromRow(rowNum);
         }
     }
 
-    public int getFieldWidth() {
-        return fieldWidth;
+    private void shiftLinesDownFromRow(int emptyRowNum) {
+        int columnNum;
+        int rowNum;
+
+//        Cycle from empty row to top.
+        for (rowNum = emptyRowNum; rowNum > 0; rowNum--)
+            for (columnNum = 0; columnNum < fieldColumnsNum; columnNum++)
+                fieldBlocks[rowNum][columnNum] = fieldBlocks[rowNum - 1][columnNum];
+
+//        Delete top fieldBlocks at 0 rowNum.
+        for (columnNum = 0; columnNum < fieldColumnsNum; columnNum++)
+            fieldBlocks[columnNum][0] = null;
     }
 
-    public int getFieldHeight() {
+    public int getFieldColumnsNum() {
+        return fieldColumnsNum;
+    }
+
+    public int getFieldRowsNum() {
 //        TODO: repair this method (remove +1).
-        return fieldHeight + 1;
+        return fieldRowsNum + 1;
     }
 
     @Override
@@ -127,17 +112,25 @@ public class Field extends JPanel {
         super.paintComponent(g);
         Graphics2D g2d = (Graphics2D) g;
 
-//        Draw figure blocks.
-        if (activeFigure != null)
-            for (Block figureBlock : activeFigure.getBlocks())
-                figureBlock.draw(g2d);
+//        Draw figure fieldBlocks.
+        if (activeFigure != null) {
+            Block[] figureBlocks = activeFigure.getBlocks();
+            Coordinate[] figureBlocksPositions = activeFigure.getBlocksGlobalPositions();
 
-//        Draw the rest blocks.
-        int x;
-        int y;
-        for (x = 0; x < fieldWidth; x++)
-            for(y = 0; y < fieldHeight; y++)
-                if (blocks[x][y] != null)
-                    blocks[x][y].draw(g2d);
+            for (int i = 0; i < figureBlocks.length; i++)
+                figureBlocks[i].draw(
+                        figureBlocksPositions[i].getCoY(),
+                        figureBlocksPositions[i].getCoX(),
+                        g2d);
+        }
+
+//        Draw the rest fieldBlocks.
+        int columnNum;
+        int rowNum;
+
+        for(rowNum = 0; rowNum < fieldRowsNum; rowNum++)
+            for (columnNum = 0; columnNum < fieldColumnsNum; columnNum++)
+                if (fieldBlocks[rowNum][columnNum] != null)
+                    fieldBlocks[rowNum][columnNum].draw(rowNum, columnNum, g2d);
     }
 }

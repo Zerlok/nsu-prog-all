@@ -1,13 +1,9 @@
 package ru.nsu.ccfit.g13202.troshnev.tetris.kernel;
 
 import ru.nsu.ccfit.g13202.troshnev.tetris.figures.Figure;
-import ru.nsu.ccfit.g13202.troshnev.tetris.figures.FigureFactory;
-import ru.nsu.ccfit.g13202.troshnev.tetris.figures.SquareFigure;
-import ru.nsu.ccfit.g13202.troshnev.tetris.figures.TFigure;
 import ru.nsu.ccfit.g13202.troshnev.tetris.views.GameView;
 
 import javax.swing.*;
-import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.io.IOException;
 
@@ -105,11 +101,11 @@ public class Controller {
 
     public void createNewFigure() {
         activeFigure = figureFactory.createRandomFigure();
-        activeFigure.setPos(gameField.getFieldWidth() / 2, 0);
+        activeFigure.setPos(gameField.getFieldColumnsNum() / 2, 0);
         gameField.setFigure(activeFigure);
 
 //        TODO: remove bug, when new figure has blocks outside of the game window.
-        if (gameField.hasIntersection())
+        if (gameField.hasIntersectionWithFigure())
 //            activeFigure = null;
             System.out.println("GAME OVER!");
     }
@@ -120,13 +116,13 @@ public class Controller {
 
         activeFigure.moveDown();
 
-        if (gameField.hasIntersection()) {
+        if (gameField.hasIntersectionWithFigure()) {
             activeFigure.moveUp();
             activeFigure = null;
 
             gameField.saveFigureBlocks();
             gameField.removeFullLines();
-            System.out.println("Figure position fixed.");
+            System.out.println("Figure figurePosition fixed.");
             createNewFigure();
         }
     }
@@ -137,7 +133,7 @@ public class Controller {
 
         activeFigure.moveLeft();
 
-        if (gameField.hasIntersection())
+        if (gameField.hasIntersectionWithFigure())
             activeFigure.moveRight();
     }
 
@@ -147,7 +143,7 @@ public class Controller {
 
         activeFigure.moveRight();
 
-        if (gameField.hasIntersection())
+        if (gameField.hasIntersectionWithFigure())
             activeFigure.moveLeft();
     }
 
@@ -157,7 +153,7 @@ public class Controller {
 
         activeFigure.rotateLeft();
 
-        if (gameField.hasIntersection())
+        if (gameField.hasIntersectionWithFigure())
             activeFigure.rotateRight();
     }
 
@@ -167,7 +163,7 @@ public class Controller {
 
         activeFigure.rotateRight();
 
-        if (gameField.hasIntersection())
+        if (gameField.hasIntersectionWithFigure())
             activeFigure.rotateLeft();
     }
 }
