@@ -4,6 +4,7 @@ import ru.nsu.ccfit.g13202.troshnev.tetris.kernel.Block;
 import ru.nsu.ccfit.g13202.troshnev.tetris.kernel.Field;
 
 import javax.swing.*;
+import java.awt.*;
 
 /**
  * Created by zerlok on 5/4/15.
@@ -25,6 +26,7 @@ public class GameView implements Runnable {
         );
         gameFrame.setTitle("Tetris");
         gameFrame.add(gameField);
+        gameFrame.setLayout(new GridLayout());
         gameFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     }
 

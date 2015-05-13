@@ -70,12 +70,11 @@ public class Field extends JPanel {
         return false;
     }
 
-    public void removeFullRows() {
-        System.out.println("Removing full lines...");
-
+    public int removeFullRows() {
         int columnNum;
         int rowNum;
         int blocksInRow;
+        int fullRowsNum = 0;
 
         for (rowNum = 0; rowNum < fieldRowsNum; rowNum++) {
             blocksInRow = 0;
@@ -83,9 +82,14 @@ public class Field extends JPanel {
                 if (fieldBlocks[rowNum][columnNum] != null)
                     blocksInRow++;
 
-            if (blocksInRow == fieldColumnsNum)
+            if (blocksInRow == fieldColumnsNum) {
+                System.out.println(String.format("Removing row %1$d", rowNum));
                 shiftLinesDownFromRow(rowNum);
+                ++fullRowsNum;
+            }
         }
+
+        return fullRowsNum;
     }
 
     private void shiftLinesDownFromRow(int emptyRowNum) {

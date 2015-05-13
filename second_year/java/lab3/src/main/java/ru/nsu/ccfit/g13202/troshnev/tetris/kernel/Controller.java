@@ -5,6 +5,7 @@ import ru.nsu.ccfit.g13202.troshnev.tetris.views.GameView;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.IOException;
 
 /**
@@ -15,13 +16,25 @@ public class Controller {
     private GameView gameView;
     private FigureFactory figureFactory;
     private Figure activeFigure;
+    private Timer ticker;
+    private boolean paused;
 
     public Controller() {
+        activeFigure = null;
         gameField = new Field(10, 15);
         gameView = new GameView(gameField);
-        figureFactory = new FigureFactory();
-        activeFigure = null;
+        paused = false;
+        ticker = new Timer(600, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                moveFigureDown();
+                gameField.repaint();
+            }
+        });
+        ticker.setRepeats(true);
+        ticker.setCoalesce(false);
 
+        figureFactory = new FigureFactory();
         try {
             figureFactory.configure();
 
@@ -52,6 +65,7 @@ public class Controller {
         Action moveDownAction = new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
+                ticker.restart();
                 moveFigureDown();
                 gameField.repaint();
             }
@@ -73,6 +87,13 @@ public class Controller {
             }
         };
 
+        Action togglePauseAction = new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                togglePauseGame();
+            }
+        };
+
         InputMap inputMap = gameField.getInputMap(JPanel.WHEN_IN_FOCUSED_WINDOW);
         ActionMap actionMap = gameField.getActionMap();
 
@@ -82,14 +103,17 @@ public class Controller {
         inputMap.put(KeyStroke.getKeyStroke("LEFT"), "moveLeftAction");
         actionMap.put("moveLeftAction", moveLeftAction);
 
-        inputMap.put(KeyStroke.getKeyStroke("SPACE"), "moveDownAction");
+        inputMap.put(KeyStroke.getKeyStroke("DOWN"), "moveDownAction");
         actionMap.put("moveDownAction", moveDownAction);
 
-        inputMap.put(KeyStroke.getKeyStroke("UP"), "rotateLeftAction");
+        inputMap.put(KeyStroke.getKeyStroke("Q"), "rotateLeftAction");
         actionMap.put("rotateLeftAction", rotateLeftAction);
 
-        inputMap.put(KeyStroke.getKeyStroke("DOWN"), "rotateRightAction");
+        inputMap.put(KeyStroke.getKeyStroke("E"), "rotateRightAction");
         actionMap.put("rotateRightAction", rotateRightAction);
+
+        inputMap.put(KeyStroke.getKeyStroke("P"), "togglePauseAction");
+        actionMap.put("togglePauseAction", togglePauseAction);
     }
 
     public void run() {
@@ -97,9 +121,10 @@ public class Controller {
         gameView.run();
 
         System.out.println("Game running...");
+        ticker.start();
     }
 
-    public void createNewFigure() {
+    private void createNewFigure() {
         activeFigure = figureFactory.createRandomFigure();
         activeFigure.setPos(gameField.getFieldColumnsNum() / 2, 0);
         gameField.setFigure(activeFigure);
@@ -110,8 +135,8 @@ public class Controller {
         }
     }
 
-    public void moveFigureDown() {
-        if (activeFigure == null)
+    private void moveFigureDown() {
+        if (paused || (activeFigure == null))
             return;
 
         activeFigure.moveDown();
@@ -121,14 +146,18 @@ public class Controller {
             activeFigure = null;
 
             gameField.saveFigureBlocks();
-            gameField.removeFullRows();
             System.out.println("Figure figurePosition fixed.");
+
+            int removedRowsNum = gameField.removeFullRows();
+            if (removedRowsNum > 0)
+                recalculateTickerDelay(removedRowsNum);
+
             createNewFigure();
         }
     }
 
-    public void moveFigureLeft() {
-        if (activeFigure == null)
+    private void moveFigureLeft() {
+        if (paused || (activeFigure == null))
             return;
 
         activeFigure.moveLeft();
@@ -137,8 +166,8 @@ public class Controller {
             activeFigure.moveRight();
     }
 
-    public void moveFigureRight() {
-        if (activeFigure == null)
+    private void moveFigureRight() {
+        if (paused || (activeFigure == null))
             return;
 
         activeFigure.moveRight();
@@ -147,8 +176,8 @@ public class Controller {
             activeFigure.moveLeft();
     }
 
-    public void rotateFigureLeft() {
-        if (activeFigure == null)
+    private void rotateFigureLeft() {
+        if (paused || (activeFigure == null))
             return;
 
         activeFigure.rotateLeft();
@@ -157,13 +186,32 @@ public class Controller {
             activeFigure.rotateRight();
     }
 
-    public void rotateFigureRight() {
-        if (activeFigure == null)
+    private void rotateFigureRight() {
+        if (paused || (activeFigure == null))
             return;
 
         activeFigure.rotateRight();
 
         if (gameField.hasIntersectionWithFigure())
             activeFigure.rotateLeft();
+    }
+
+    private void togglePauseGame() {
+        if (paused) {
+            System.out.println("Game runs!");
+            ticker.start();
+
+        } else {
+            System.out.println("Game paused!");
+            ticker.stop();
+        }
+
+        paused = !paused;
+    }
+
+    private void recalculateTickerDelay(int rowsNum) {
+        ticker.setDelay(
+                ticker.getDelay() - 40
+        );
     }
 }
