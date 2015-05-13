@@ -13,14 +13,14 @@ public class FigureBox {
     private int index;
     private Random rnd;
 
-    public FigureBox(int capacity) {
-        figuresArray = new Vector<Figure>(capacity);
+    public FigureBox() {
+        figuresArray = new Vector<Figure>();
         index = 0;
         rnd = new Random();
     }
 
     public void push(Figure figure) {
-        figuresArray.add(figure);
+        figuresArray.addElement(figure);
     }
 
     public Figure pop() {
@@ -47,8 +47,8 @@ public class FigureBox {
                 figurePrototype = figuresArray.get(randomIndex);
             }
 
-            shuffledArray.add(figurePrototype);
-            figuresArray.remove(randomIndex);
+            shuffledArray.addElement(figurePrototype);
+            figuresArray.removeElementAt(randomIndex);
         }
 
         figuresArray = new Vector<Figure>(shuffledArray);

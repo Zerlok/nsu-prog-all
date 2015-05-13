@@ -1,5 +1,6 @@
 package ru.nsu.ccfit.g13202.troshnev.tetris.kernel;
 
+import ru.nsu.ccfit.g13202.troshnev.tetris.events.SpacePressedAction;
 import ru.nsu.ccfit.g13202.troshnev.tetris.figures.Figure;
 import ru.nsu.ccfit.g13202.troshnev.tetris.views.GameView;
 
@@ -7,23 +8,26 @@ import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
+import java.util.Observable;
+import java.util.Vector;
 
 /**
  * Created by zerlok on 4/29/15.
  */
-public class Controller {
+public class Controller extends Observable {
     private Field gameField;
     private GameView gameView;
     private FigureFactory figureFactory;
     private Figure activeFigure;
     private Timer ticker;
-    private boolean paused;
+    private boolean gamePaused;
 
     public Controller() {
         activeFigure = null;
         gameField = new Field(10, 15);
         gameView = new GameView(gameField);
-        paused = false;
+        gamePaused = false;
+
         ticker = new Timer(600, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
@@ -65,7 +69,6 @@ public class Controller {
         Action moveDownAction = new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                ticker.restart();
                 moveFigureDown();
                 gameField.repaint();
             }
@@ -136,7 +139,7 @@ public class Controller {
     }
 
     private void moveFigureDown() {
-        if (paused || (activeFigure == null))
+        if (gamePaused || (activeFigure == null))
             return;
 
         activeFigure.moveDown();
@@ -157,7 +160,7 @@ public class Controller {
     }
 
     private void moveFigureLeft() {
-        if (paused || (activeFigure == null))
+        if (gamePaused || (activeFigure == null))
             return;
 
         activeFigure.moveLeft();
@@ -167,7 +170,7 @@ public class Controller {
     }
 
     private void moveFigureRight() {
-        if (paused || (activeFigure == null))
+        if (gamePaused || (activeFigure == null))
             return;
 
         activeFigure.moveRight();
@@ -177,7 +180,7 @@ public class Controller {
     }
 
     private void rotateFigureLeft() {
-        if (paused || (activeFigure == null))
+        if (gamePaused || (activeFigure == null))
             return;
 
         activeFigure.rotateLeft();
@@ -187,7 +190,7 @@ public class Controller {
     }
 
     private void rotateFigureRight() {
-        if (paused || (activeFigure == null))
+        if (gamePaused || (activeFigure == null))
             return;
 
         activeFigure.rotateRight();
@@ -197,7 +200,7 @@ public class Controller {
     }
 
     private void togglePauseGame() {
-        if (paused) {
+        if (gamePaused) {
             System.out.println("Game runs!");
             ticker.start();
 
@@ -206,12 +209,12 @@ public class Controller {
             ticker.stop();
         }
 
-        paused = !paused;
+        gamePaused = !gamePaused;
     }
 
     private void recalculateTickerDelay(int rowsNum) {
         ticker.setDelay(
-                ticker.getDelay() - 40
+                ticker.getDelay() - 10
         );
     }
 }

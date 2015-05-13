@@ -15,7 +15,7 @@ public class FigureFactory {
     private FigureBox figureBox;
 
     public FigureFactory() {
-        figureBox = null;
+        figureBox = new FigureBox();
     }
 
     public Figure createRandomFigure() {
@@ -32,7 +32,6 @@ public class FigureFactory {
         prop.load(inputStream);
         System.out.println(String.format("figure.properties size: %1$d", prop.size()));
         String figuresFolderPath = prop.getProperty("folder");
-        figureBox = new FigureBox(prop.size() - 1); // do not count folder property.
         Figure figurePrototype;
 
         for (String key : prop.stringPropertyNames()) {
