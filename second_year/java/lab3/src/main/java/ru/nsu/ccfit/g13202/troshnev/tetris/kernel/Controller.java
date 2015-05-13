@@ -101,8 +101,7 @@ public class Controller {
     }
 
     public void createNewFigure() {
-//        activeFigure = figureFactory.createRandomFigure();
-        activeFigure = new LFigure();
+        activeFigure = figureFactory.createRandomFigure();
         activeFigure.setPos(gameField.getFieldColumnsNum() / 2, 0);
         gameField.setFigure(activeFigure);
 

@@ -83,10 +83,8 @@ public class Field extends JPanel {
                 if (fieldBlocks[rowNum][columnNum] != null)
                     blocksInRow++;
 
-            if (blocksInRow == fieldColumnsNum) {
-                System.out.println(String.format("Removing full row %1$d", rowNum));
+            if (blocksInRow == fieldColumnsNum)
                 shiftLinesDownFromRow(rowNum);
-            }
         }
     }
 
@@ -95,11 +93,9 @@ public class Field extends JPanel {
         int rowNum;
 
 //        Cycle from empty row to top.
-        for (rowNum = emptyRowNum; rowNum > 0; rowNum--) {
-//            System.out.println(String.format("Placing blocks from %1$d row to %2$d", rowNum - 1, rowNum));
+        for (rowNum = emptyRowNum; rowNum > 0; rowNum--)
             for (columnNum = 0; columnNum < fieldColumnsNum; columnNum++)
                 fieldBlocks[rowNum][columnNum] = fieldBlocks[rowNum - 1][columnNum];
-        }
 
 //        Delete top fieldBlocks at 0 rowNum.
         for (columnNum = 0; columnNum < fieldColumnsNum; columnNum++)

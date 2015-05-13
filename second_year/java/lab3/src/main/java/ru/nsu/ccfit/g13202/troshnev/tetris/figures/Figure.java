@@ -8,7 +8,7 @@ import java.awt.*;
 /**
  * Created by zerlok on 4/29/15.
  */
-public abstract class Figure {
+public abstract class Figure implements Cloneable {
     protected Coordinate figurePosition = new Coordinate(0, 0);
     protected int rotation;
     protected int maxRotationsNum;
@@ -17,6 +17,32 @@ public abstract class Figure {
     protected Coordinate[] blocksPositions;
 
     protected abstract void applyFigureRotation();
+
+    public Figure clone() {
+        Figure figure = null;
+
+        try {
+            figure = getClass().newInstance();
+            figure.figurePosition = new Coordinate(figurePosition);
+            figure.rotation = rotation;
+            figure.maxRotationsNum = maxRotationsNum;
+            figure.figureColor = figureColor;
+            figure.blocks = new Block[blocks.length];
+            figure.blocksPositions = new Coordinate[blocks.length];
+
+            for (int i = 0; i < blocks.length; i++) {
+                figure.blocks[i] = blocks[i];
+                figure.blocksPositions[i] = new Coordinate(blocksPositions[i]);
+            }
+
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+
+        return figure;
+    }
 
     public void setRotation(int num) {
         rotation = (num + maxRotationsNum) % maxRotationsNum;
