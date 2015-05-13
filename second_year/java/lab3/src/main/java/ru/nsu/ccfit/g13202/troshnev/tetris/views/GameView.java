@@ -30,7 +30,6 @@ public class GameView implements Runnable {
 
     @Override
     public void run() {
-//        frame.pack();
         gameFrame.setVisible(true);
     }
 }

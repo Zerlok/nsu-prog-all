@@ -1,45 +1,28 @@
 package ru.nsu.ccfit.g13202.troshnev.tetris.kernel;
 
+import com.sun.jmx.remote.internal.ArrayQueue;
 import ru.nsu.ccfit.g13202.troshnev.tetris.figures.Figure;
-import ru.nsu.ccfit.g13202.troshnev.tetris.kernel.UnknownFigureException;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.InvocationTargetException;
-import java.util.HashMap;
 import java.util.Properties;
 import java.util.Random;
+import java.util.Vector;
 
 /**
  * Created by zerlok on 4/29/15.
  */
 
 public class FigureFactory {
-    private HashMap<String, Figure > figuresMap;
+    private FigureBox figureBox;
 
     public FigureFactory() {
-        figuresMap = new HashMap<String, Figure >();
+        figureBox = null;
     }
 
     public Figure createRandomFigure() {
-        Figure figure = null;
-
-        int size = figuresMap.size();
-        int item_num = new Random().nextInt(size);
-        int indx = 0;
-
-        for (Figure figurePrototype : figuresMap.values())
-        {
-            if (indx == item_num) {
-                figure = figurePrototype.clone();
-                break;
-            }
-
-            indx++;
-        }
-
-        return figure;
+        return figureBox.pop();
     }
 
     public void configure() throws IOException {
@@ -51,7 +34,9 @@ public class FigureFactory {
         }
 
         prop.load(inputStream);
+        System.out.println(String.format("figure.properties size: %1$d", prop.size()));
         String figuresFolderPath = prop.getProperty("folder");
+        figureBox = new FigureBox(prop.size() - 1); // do not count folder property.
         Figure figurePrototype;
 
         for (String key : prop.stringPropertyNames()) {
@@ -71,7 +56,7 @@ public class FigureFactory {
                 }
 
                 if (figurePrototype != null)
-                    figuresMap.put(key, figurePrototype);
+                    figureBox.push(figurePrototype);
             }
         }
     }

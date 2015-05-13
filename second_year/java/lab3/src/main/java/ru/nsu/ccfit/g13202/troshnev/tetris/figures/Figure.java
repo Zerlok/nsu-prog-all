@@ -58,28 +58,23 @@ public abstract class Figure implements Cloneable {
     }
 
     public void moveDown() {
-        System.out.println(String.format("Moving figure %1$s down...", getClass().getName()));
         figurePosition.incrementCoY();
     }
 
     public void moveLeft() {
-        System.out.println(String.format("Moving figure %1$s left...", getClass().getName()));
         figurePosition.decrementCoX();
     }
 
     public void moveRight() {
-        System.out.println(String.format("Moving figure %1$s right...", getClass().getName()));
         figurePosition.incrementCoX();
     }
 
     public void rotateLeft() {
-        System.out.println(String.format("Rotating figure %1$s left...", getClass().getName()));
         rotation = (rotation + maxRotationsNum - 1) % maxRotationsNum;
         applyFigureRotation();
     }
 
     public void rotateRight() {
-        System.out.println(String.format("Rotating figure %1$s right...", getClass().getName()));
         rotation = (rotation + 1) % maxRotationsNum;
         applyFigureRotation();
     }
