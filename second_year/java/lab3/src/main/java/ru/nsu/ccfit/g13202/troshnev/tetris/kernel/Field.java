@@ -107,8 +107,7 @@ public class Field extends JPanel {
     }
 
     public int getFieldRowsNum() {
-//        TODO: repair this method (remove +1).
-        return fieldRowsNum + 1;
+        return fieldRowsNum;
     }
 
     @Override
@@ -123,8 +122,8 @@ public class Field extends JPanel {
 
             for (int i = 0; i < figureBlocks.length; i++)
                 figureBlocks[i].draw(
-                        figureBlocksPositions[i].getCoY(),
-                        figureBlocksPositions[i].getCoX(),
+                        figureBlocksPositions[i].getCoY(), // rowNum
+                        figureBlocksPositions[i].getCoX(), // columnNum
                         g2d);
         }
 

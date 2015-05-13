@@ -21,7 +21,7 @@ public class GameView implements Runnable {
         int blockOffset = Block.getPixelOffset();
         gameFrame.setSize(
                 blockOffset * gameField.getFieldColumnsNum() - blockMargin + 2,
-                blockOffset * gameField.getFieldRowsNum() + 4
+                blockOffset * (gameField.getFieldRowsNum() + 1) + 4
         );
         gameFrame.setTitle("Tetris");
         gameFrame.add(gameField);

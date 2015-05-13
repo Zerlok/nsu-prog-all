@@ -1,7 +1,6 @@
 package ru.nsu.ccfit.g13202.troshnev.tetris.kernel;
 
 import ru.nsu.ccfit.g13202.troshnev.tetris.figures.Figure;
-import ru.nsu.ccfit.g13202.troshnev.tetris.figures.LFigure;
 import ru.nsu.ccfit.g13202.troshnev.tetris.views.GameView;
 
 import javax.swing.*;

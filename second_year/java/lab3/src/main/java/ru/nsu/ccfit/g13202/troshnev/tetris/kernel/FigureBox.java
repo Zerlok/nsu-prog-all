@@ -11,13 +11,11 @@ import java.util.Vector;
 public class FigureBox {
     private Vector<Figure> figuresArray;
     private int index;
-    private int size;
     private Random rnd;
 
     public FigureBox(int capacity) {
         figuresArray = new Vector<Figure>(capacity);
         index = 0;
-        size = capacity;
         rnd = new Random();
     }
 
@@ -26,7 +24,7 @@ public class FigureBox {
     }
 
     public Figure pop() {
-        if (index == size)
+        if (index == figuresArray.size())
             shuffle();
 
         Figure figure = figuresArray.get(index).clone();
@@ -36,6 +34,7 @@ public class FigureBox {
     }
 
     public void shuffle() {
+        int size = figuresArray.size();
         Figure figurePrototype;
         Vector<Figure> shuffledArray = new Vector<Figure>(size);
 

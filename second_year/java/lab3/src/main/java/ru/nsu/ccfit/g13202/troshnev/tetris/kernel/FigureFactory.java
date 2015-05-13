@@ -1,14 +1,11 @@
 package ru.nsu.ccfit.g13202.troshnev.tetris.kernel;
 
-import com.sun.jmx.remote.internal.ArrayQueue;
 import ru.nsu.ccfit.g13202.troshnev.tetris.figures.Figure;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
-import java.util.Random;
-import java.util.Vector;
 
 /**
  * Created by zerlok on 4/29/15.
@@ -29,9 +26,8 @@ public class FigureFactory {
         Properties prop = new Properties();
         InputStream inputStream = getClass().getClassLoader().getResourceAsStream("figures.properties");
 
-        if (inputStream == null) {
+        if (inputStream == null)
             throw new FileNotFoundException("Cannot find figures.properties file.");
-        }
 
         prop.load(inputStream);
         System.out.println(String.format("figure.properties size: %1$d", prop.size()));
@@ -59,5 +55,7 @@ public class FigureFactory {
                     figureBox.push(figurePrototype);
             }
         }
+
+        figureBox.shuffle();
     }
 }
