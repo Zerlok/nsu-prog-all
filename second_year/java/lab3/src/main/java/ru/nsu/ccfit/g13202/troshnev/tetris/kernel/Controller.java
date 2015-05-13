@@ -1,6 +1,7 @@
 package ru.nsu.ccfit.g13202.troshnev.tetris.kernel;
 
-import ru.nsu.ccfit.g13202.troshnev.tetris.events.SpacePressedAction;
+import ru.nsu.ccfit.g13202.troshnev.tetris.events.GamePausedEvent;
+import ru.nsu.ccfit.g13202.troshnev.tetris.events.GameStoppedEvent;
 import ru.nsu.ccfit.g13202.troshnev.tetris.figures.Figure;
 import ru.nsu.ccfit.g13202.troshnev.tetris.views.GameView;
 
@@ -9,23 +10,25 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.util.Observable;
-import java.util.Vector;
 
 /**
  * Created by zerlok on 4/29/15.
  */
-public class Controller extends Observable {
+public class Controller extends Observable implements Runnable {
     private Field gameField;
     private GameView gameView;
     private FigureFactory figureFactory;
     private Figure activeFigure;
     private Timer ticker;
     private boolean gamePaused;
+    private EventManager gameEvents;
+    private Thread eventListenerThread;
 
     public Controller() {
         activeFigure = null;
-        gameField = new Field(10, 15);
-        gameView = new GameView(gameField);
+        gameEvents = new EventManager();
+        gameField = new Field(10, 15, gameEvents);
+        gameView = new GameView(gameField, gameEvents);
         gamePaused = false;
 
         ticker = new Timer(600, new ActionListener() {
@@ -119,11 +122,14 @@ public class Controller extends Observable {
         actionMap.put("togglePauseAction", togglePauseAction);
     }
 
+    @Override
     public void run() {
         createNewFigure();
         gameView.run();
 
-        System.out.println("Game running...");
+        gameEvents.run();
+        eventListenerThread = new Thread(new EventListener(gameEvents));
+        eventListenerThread.start();
         ticker.start();
     }
 
@@ -134,7 +140,7 @@ public class Controller extends Observable {
 
         if (gameField.hasIntersectionWithFigure()) {
             activeFigure = null;
-            System.out.println("GAME OVER!");
+            gameEvents.push(new GameStoppedEvent("Game over"));
         }
     }
 
@@ -201,15 +207,14 @@ public class Controller extends Observable {
 
     private void togglePauseGame() {
         if (gamePaused) {
-            System.out.println("Game runs!");
             ticker.start();
 
         } else {
-            System.out.println("Game paused!");
             ticker.stop();
         }
 
         gamePaused = !gamePaused;
+        gameEvents.push(new GamePausedEvent(gamePaused));
     }
 
     private void recalculateTickerDelay(int rowsNum) {

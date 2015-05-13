@@ -1,5 +1,6 @@
 package ru.nsu.ccfit.g13202.troshnev.tetris.kernel;
 
+import ru.nsu.ccfit.g13202.troshnev.tetris.events.FieldRowRemovedEvent;
 import ru.nsu.ccfit.g13202.troshnev.tetris.figures.Figure;
 
 import javax.swing.*;
@@ -11,12 +12,14 @@ import java.awt.*;
 public class Field extends JPanel {
     private int fieldColumnsNum;
     private int fieldRowsNum;
+    private EventManager gameEvents;
     private Block[][] fieldBlocks;
     private Figure activeFigure;
 
-    public Field(int w, int h) {
+    public Field(int w, int h, EventManager eventManager) {
         fieldColumnsNum = w;
         fieldRowsNum = h;
+        gameEvents = eventManager;
         activeFigure = null;
         fieldBlocks = new Block[fieldRowsNum][fieldColumnsNum];
     }
@@ -84,6 +87,7 @@ public class Field extends JPanel {
 
             if (blocksInRow == fieldColumnsNum) {
                 System.out.println(String.format("Removing row %1$d", rowNum));
+                gameEvents.push(new FieldRowRemovedEvent(rowNum));
                 shiftLinesDownFromRow(rowNum);
                 ++fullRowsNum;
             }
