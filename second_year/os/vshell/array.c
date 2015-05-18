@@ -26,16 +26,26 @@ StringArray *get_string_array(int length)
 void check_length_and_expand_string_array(StringArray *array)
 {
 	if ((array->allocated_length)
-			< (array->used_length))
+			> (array->used_length))
 		return;
 
-	if (array->allocated_length == 0)
-		array->allocated_length = 1;
-	
-	else
+	if (array->allocated_length != 0)
 		array->allocated_length *= STRING_ARRAY_EXPANDING_CRITERIA;
-	
-	array->data = (char**)realloc(array->data, array->allocated_length);
+	else
+		array->allocated_length = 1;
+
+	char **expanded_data = (char**)calloc(sizeof(char*), array->allocated_length);
+
+	size_t i;
+	for (i = 0; i < array->used_length; i++)
+	{
+		expanded_data[i] = (char*)calloc(sizeof(char), (strlen(array->data[i]) + 1));
+		strcpy(expanded_data[i], array->data[i]);
+		free(array->data[i]);
+	}
+
+	free(array->data);
+	array->data = expanded_data;
 }
 
 
@@ -54,7 +64,7 @@ void push_into_string_array(char *string, StringArray *array)
 
 	DEBUG_SAY("Inserted: '%s'\n", array->data[array->used_length]);
 	
-	array->used_length++;
+	++array->used_length;
 
 	DEBUG_END("done.");
 }
@@ -79,7 +89,7 @@ void delete_string_from_array(size_t indx, StringArray *array)
 	}
 
 	free(array->data[array->used_length - 1]);
-	array->used_length--;
+	--array->used_length;
 
 	DEBUG_END("done.");
 }
@@ -153,15 +163,14 @@ void delete_string_array(StringArray *array)
 char **string_array_to_chars(StringArray *array)
 {
 	size_t i;
-	char **pointer = (char**)calloc(sizeof(char*), array->used_length + 1);
+	char **chars = (char**)calloc(sizeof(char*), array->used_length + 1);
 
 	for (i = 0; i < array->used_length; i++)
 	{
-		pointer[i] = (char*)calloc(sizeof(char), strlen(array->data[i]) + 1);
-		strcpy(pointer[i], array->data[i]);
+		chars[i] = (char*)calloc(sizeof(char), strlen(array->data[i]) + 1);
+		strcpy(chars[i], array->data[i]);
 	}
 
-	pointer[array->used_length] = NULL;
-
-	return pointer;
+	chars[array->used_length] = NULL;
+	return chars;
 }

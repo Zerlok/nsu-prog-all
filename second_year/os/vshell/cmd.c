@@ -159,7 +159,6 @@ Cmd *build_command(char *line)
 	// Splitting the line by spaces.
 	StringArray *args_array = split(line);
 	DEBUG_SAY("After splitting\n");
-	show_string_array(args_array, stdout);
 
 	if ((args_array == NULL)
 			|| (args_array->used_length == 0))
@@ -244,7 +243,7 @@ Cmd *build_command(char *line)
 			delete_string_from_array(i, args_array); // delete LINE_BACKGROUND_STRING
 		}
 
-		i++;
+		++i;
 	} // ENDWHILE (args_array->used_length)
 
 	DEBUG_SAY("After while block\n");
@@ -263,7 +262,6 @@ Cmd *build_command(char *line)
 	DEBUG_SAY(" * ArgC        : %d\n", command->argc);
 	DEBUG_SAY(" * ArgV (last) : %s\n", command->argv[command->argc - 1]);
 
-	show_string_array(args_array, stdout);
 	delete_string_array(args_array);
 	
 	DEBUG_END("done.");
