@@ -28,7 +28,7 @@ int redirect_stream(int old_stream, char *filename, int flags)
 int run_command(Cmd *command, ProcessArray *processes)
 {
 	if ((command == NULL)
-		|| (command->origin == NULL))
+			|| (command->origin == NULL))
 		return CODE_WAIT;
 
 	if (!(command->is_valid)) {
@@ -43,10 +43,10 @@ int run_command(Cmd *command, ProcessArray *processes)
 		DEBUG_END("done (exit).");
 		return CODE_EXIT;
 	}
-	DEBUG_SAY("'%s' != '%s'", command->origin, CMD_EXIT);
+	DEBUG_SAY("'%s' != '%s'\n", command->origin, CMD_EXIT);
 
 	int status;
-    pid_t gid;
+	pid_t gid;
 	pid_t id;
 	pid_t termid = getpid();
 
@@ -81,7 +81,7 @@ void run_child(pid_t parentid, Cmd *command)
 
 	DEBUG_START("Running child with pid: %d\n", pid);
 	
-	// Show all commanding arguments. 
+	// Show all commanding arguments.
 	DEBUG_SAY("Calling '%s' with arguments: ", command->origin);
 	if (DEBUG)
 	{
@@ -113,8 +113,9 @@ void run_child(pid_t parentid, Cmd *command)
 	}
 
 	DEBUG_END("done (executing child).");
-    execvpe(command->origin, command->argv, environ);
+	execvpe(command->origin, command->argv, environ);
 	
+	DEBUG_SAY("Exec error: ");
 	perror(command->origin);
 	exit(CODE_FAIL);
 }
@@ -145,8 +146,8 @@ Cmd *get_empty_command(char *cmd_name)
 Cmd *build_command(char *line)
 {
 	if ((line == NULL)
-		|| (line == 0)
-		|| ((*line) == LINE_END_SYMBOL))
+			|| (line == 0)
+			|| ((*line) == LINE_END_SYMBOL))
 		return NULL;
 
 	DEBUG_START("Building a new command from line ...");
@@ -161,7 +162,7 @@ Cmd *build_command(char *line)
 	show_string_array(args_array, stdout);
 
 	if ((args_array == NULL)
-		|| (args_array->used_length == 0))
+			|| (args_array->used_length == 0))
 	{
 		DEBUG_END("done.");
 		return NULL;
@@ -173,10 +174,15 @@ Cmd *build_command(char *line)
 	Cmd *command = get_empty_command(args_array->data[0]);
 
 	DEBUG_SAY("After empty command creation\n");
-	DEBUG_SAY("%p %p %ld -> %s\n", (args_array), (args_array->data), (args_array->used_length), (args_array->data)[(args_array->used_length)-1]);
+	DEBUG_SAY("%p %p %ld -> %s\n",
+			  (args_array),
+			  (args_array->data),
+			  (args_array->used_length),
+			  (args_array->data)[(args_array->used_length)-1]
+			);
 
 	while ((i < args_array->used_length)
-		&& (is_valid))
+		   && (is_valid))
 	{
 		// The input stream was set.
 		if (!strcmp(args_array->data[i], LINE_INPUT_STREAM_STRING))

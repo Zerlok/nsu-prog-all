@@ -26,7 +26,7 @@ StringArray *get_string_array(int length)
 void check_length_and_expand_string_array(StringArray *array)
 {
 	if ((array->allocated_length)
-		< (array->used_length))
+			< (array->used_length))
 		return;
 
 	if (array->allocated_length == 0)
@@ -42,7 +42,7 @@ void check_length_and_expand_string_array(StringArray *array)
 void push_into_string_array(char *string, StringArray *array)
 {
 	if ((array == NULL)
-		|| (string == NULL))
+			|| (string == NULL))
 		return;
 
 	DEBUG_START("Pushing the string into string array ...");
@@ -63,7 +63,7 @@ void push_into_string_array(char *string, StringArray *array)
 void delete_string_from_array(size_t indx, StringArray *array)
 {
 	if ((array == NULL)
-        || (indx > array->used_length))
+			|| (indx > array->used_length))
 		return;
 
 	DEBUG_START("Deleting the string from string array ...");

@@ -2,7 +2,8 @@
 #define __PARSER_H__
 
 
-#define SAVE_DATA ({\
+#define SAVE_DATA (\
+{\
 	if (data_len != 0)\
 	{\
 		push_into_string_array(data, array);\

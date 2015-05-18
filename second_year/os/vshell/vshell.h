@@ -14,13 +14,8 @@ typedef struct Vshell
 
 void handle_signal(int signum);
 
-void VSHELL_INIT(
-		int argc,
-		char **argv,
-		SHELL *shell);
-
+void VSHELL_INIT(int argc, char **argv, SHELL *shell);
 void VSHELL_RUN(SHELL *shell);
-
 void VSHELL_CLOSE(SHELL *shell);
 
 

@@ -10,8 +10,8 @@
 StringArray *split(char *line)
 {
 	if ((line == NULL)
-		|| (line == 0)
-		|| ((*line) == LINE_END_SYMBOL))
+			|| (line == 0)
+			|| ((*line) == LINE_END_SYMBOL))
 	{
 		printf("Invalid line while splitting %s\n", line);
 
@@ -22,7 +22,8 @@ StringArray *split(char *line)
 
 	StringArray *array = get_string_array(1);
 	char *chr = line;
-	char *symbol;
+	char symbol[2];
+	bzero(symbol, 2);
 	char data[LINE_LEN];
 	bzero(data, LINE_LEN);
 
@@ -41,27 +42,26 @@ StringArray *split(char *line)
 		//    * String ends with delemitter.
 		//    * Separator or tab or line end was found without delimitter.
 		else if (((is_string)
-					&& ((*chr) == LINE_DELIMITTER_SYMBOL))
-				|| ((!is_string)
-					&& (((*chr) == LINE_SEPARATOR_SYMBOL)
-						|| ((*chr) == LINE_TAB_SYMBOL)
-						|| ((*chr) == LINE_END_SYMBOL))))
+				  && ((*chr) == LINE_DELIMITTER_SYMBOL))
+				 || ((!is_string)
+					 && (((*chr) == LINE_SEPARATOR_SYMBOL)
+						 || ((*chr) == LINE_TAB_SYMBOL)
+						 || ((*chr) == LINE_END_SYMBOL))))
 			SAVE_DATA;
 
 		// Split and save redirecting symbol if this char not in string
 		// and it is one of shell redirecting symbols.
 		else if ((!is_string)
-				&& (((*chr) == LINE_INPUT_STREAM_STRING[0])
-					|| ((*chr) == LINE_OUTPUT_STREAM_STRING[0])
-					|| ((*chr) == LINE_APPEND_STREAM_STRING[0])
-					|| ((*chr) == LINE_BACKGROUND_STRING[0])
-					|| ((*chr) == LINE_PIPE_STRING[0])))
+				 && (((*chr) == LINE_INPUT_STREAM_STRING[0])
+					 || ((*chr) == LINE_OUTPUT_STREAM_STRING[0])
+					 || ((*chr) == LINE_APPEND_STREAM_STRING[0])
+					 || ((*chr) == LINE_BACKGROUND_STRING[0])
+					 || ((*chr) == LINE_PIPE_STRING[0])))
 		{
 			SAVE_DATA;
 
 			if ((*(chr + 1)) != LINE_APPEND_STREAM_STRING[1])
 			{
-				symbol = (char*)malloc(sizeof(char) * 2);
 				symbol[0] = (*chr);
 				symbol[1] = 0;
 

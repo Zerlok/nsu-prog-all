@@ -26,7 +26,7 @@ ProcessArray *get_process_array(int length)
 void check_length_and_expand_process_array(ProcessArray *array)
 {
 	if ((array->allocated_length)
-		< (array->used_length))
+			< (array->used_length))
 		return;
 
 	if (array->allocated_length == 0)
@@ -42,7 +42,7 @@ void check_length_and_expand_process_array(ProcessArray *array)
 void push_into_process_array(Process *proc, ProcessArray *array)
 {
 	if ((array == NULL)
-		|| (proc == NULL))
+			|| (proc == NULL))
 		return;
 
 	DEBUG_START("Pushing the process into array ...");
@@ -59,7 +59,7 @@ void push_into_process_array(Process *proc, ProcessArray *array)
 void delete_process_from_array(size_t indx, ProcessArray *array)
 {
 	if ((array == NULL)
-        || (indx > array->used_length))
+			|| (indx > array->used_length))
 		return;
 
 	DEBUG_START("Deleting the process from array ...");
