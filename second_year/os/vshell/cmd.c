@@ -2,11 +2,12 @@
 
 #include "debug.h"
 #include "array.h"
-#include "parser.h"
+#include "proc.h"
 #include "cmd.h"
+#include "parser.h"
 
 
-void redirect_stream(int old_stream, char *filename, int flags)
+int redirect_stream(int old_stream, char *filename, int flags)
 {
 	int new_stream = open(filename, flags, 0644);
 	DEBUG_SAY("Opened stream: %d\n", new_stream);
@@ -14,22 +15,26 @@ void redirect_stream(int old_stream, char *filename, int flags)
 	if (new_stream == -1)
 	{
 		perror(strerror(errno));
-		return;
+		return -1;
 	}
 	
 	dup2(new_stream, old_stream);
 	close(new_stream);
+
+	return old_stream;
 }
 
 
-int run_command(Cmd *command)
+int run_command(Cmd *command, ProcessArray *processes)
 {
 	if ((command == NULL)
 		|| (command->origin == NULL))
 		return CODE_WAIT;
 
-	if (!(command->is_valid))
+	if (!(command->is_valid)) {
+		printf("Invalid command.\n");
 		return CODE_INVALID_CALL;
+	}
 
 	DEBUG_START("Calling the %s command ...", command->origin);
 
@@ -38,17 +43,16 @@ int run_command(Cmd *command)
 		DEBUG_END("done (exit).");
 		return CODE_EXIT;
 	}
+	DEBUG_SAY("'%s' != '%s'", command->origin, CMD_EXIT);
 
 	int status;
-	int i;
+    pid_t gid;
 	pid_t id;
-	pid_t pid;
-	pid_t gid;
-	pid_t sid;
+	pid_t termid = getpid();
 
 	// Forking
 	gid = getpid(); // Group id is a shell pid.
-	DEBUG_SAY("Forking from process %d ...\n", gid);
+	DEBUG_SAY("Forking from process %d %d ...\n", gid, termid);
 	id = fork();
 
 	if (id < 0) // Do it if fork failed.
@@ -60,59 +64,59 @@ int run_command(Cmd *command)
 	else if (id > 0) // Do it in PARENT process.
 	{
 		waitpid(id, &status, 0);
-		DEBUG_SAY("Parent pid: %d\n", getpid());
+		DEBUG_SAY("Parent pid: %d\n", termid);
 	}
 	else // Do it in CHILD process.
-	{
-		pid = getpid();
-		DEBUG_SAY("Child pid: %d\n", pid);
-
-		// Show all commanding arguments. 
-		DEBUG_SAY("Calling '%s' with arguments: ", command->origin);
-		if (DEBUG)
-		{
-			int arg_index;
-			for (arg_index = 0; arg_index < command->argc; arg_index++)
-				printf("%s ", command->argv[arg_index]);
-			printf("\n");
-		}
-
-		// Redirect inputs.
-		if (command->ins != NULL)
-			redirect_stream(STDIN_FILENO, command->ins, O_RDONLY);
-
-		if (command->outs != NULL)
-			redirect_stream(STDOUT_FILENO, command->outs, O_WRONLY | O_CREAT | O_TRUNC);
-
-		else if (command->appends != NULL)
-			redirect_stream(STDOUT_FILENO, command->appends, O_WRONLY | O_CREAT | O_APPEND);
-
-		// DEBUG_SAY("Is process running in background? %d\n", command->is_in_background);
-
-		setpgid(pid, gid);
-		tcsetpgrp(gid, gid);
-		
-		if (command->is_in_background)
-		{
-			DEBUG_SAY("Closing the input ...\n");
-			redirect_stream(STDIN_FILENO, "/dev/tty", O_RDONLY);
-			// close(STDIN_FILENO);
-		}
-
-		printf("pid: %d, gid: %d\n", pid, gid);
-		status = execvpe(command->origin, command->argv, environ);
-		
-		// If exec failed.
-		if (status == -1)
-		{
-			perror(command->origin);
-			DEBUG_END("done (failed exec).");
-			exit(CODE_FAIL);
-		}
-	} // ENDIF (CHILD process)
+		run_child(gid, command);
 
 	DEBUG_END("done (successed fork).");
 	return CODE_SUCCESS;
+}
+
+
+void run_child(pid_t parentid, Cmd *command)
+{
+	pid_t pid = getpid();
+	pid_t gid = parentid;
+
+	DEBUG_START("Running child with pid: %d\n", pid);
+	
+	// Show all commanding arguments. 
+	DEBUG_SAY("Calling '%s' with arguments: ", command->origin);
+	if (DEBUG)
+	{
+		int arg_index;
+		for (arg_index = 0; arg_index < command->argc; arg_index++)
+			printf("%s ", command->argv[arg_index]);
+		printf("\n");
+	}
+
+	// Redirect inputs.
+	if (command->ins != NULL)
+		redirect_stream(STDIN_FILENO, command->ins, O_RDONLY);
+
+	if (command->outs != NULL)
+		redirect_stream(STDOUT_FILENO, command->outs, O_WRONLY | O_CREAT | O_TRUNC);
+
+	else if (command->appends != NULL)
+		redirect_stream(STDOUT_FILENO, command->appends, O_WRONLY | O_CREAT | O_APPEND);
+
+	// DEBUG_SAY("Is process running in background? %d\n", command->is_in_background);
+	setpgid(pid, gid);
+	tcsetpgrp(parentid, pid);
+	
+	if (command->is_in_background)
+	{
+		DEBUG_SAY("Closing the input ...\n");
+		// redirect_stream(STDIN_FILENO, "/dev/tty", O_RDONLY);
+		// close(STDIN_FILENO);
+	}
+
+	DEBUG_END("done (executing child).");
+    execvpe(command->origin, command->argv, environ);
+	
+	perror(command->origin);
+	exit(CODE_FAIL);
 }
 
 
@@ -134,19 +138,18 @@ Cmd *get_empty_command(char *cmd_name)
 	strcpy(command->origin, cmd_name);
 	
 	DEBUG_END("done.");
-
 	return command;
 }
 
 
-Cmd *get_command(char *line)
+Cmd *build_command(char *line)
 {
 	if ((line == NULL)
 		|| (line == 0)
 		|| ((*line) == LINE_END_SYMBOL))
 		return NULL;
 
-	DEBUG_START("Creating a new command call ...");
+	DEBUG_START("Building a new command from line ...");
 
 	// Initializing the variables...
 	size_t i = 0;
@@ -155,6 +158,7 @@ Cmd *get_command(char *line)
 	// Splitting the line by spaces.
 	StringArray *args_array = split(line);
 	DEBUG_SAY("After splitting\n");
+	show_string_array(args_array, stdout);
 
 	if ((args_array == NULL)
 		|| (args_array->used_length == 0))
@@ -168,8 +172,8 @@ Cmd *get_command(char *line)
 	// Setting up the Cmd structure.
 	Cmd *command = get_empty_command(args_array->data[0]);
 
-	DEBUG_SAY("After empty command call creation\n");
-	DEBUG_SAY("%p %p %ld -> %s\n", args_array, args_array->data, args_array->used_length, args_array->data[args_array->used_length-1]);
+	DEBUG_SAY("After empty command creation\n");
+	DEBUG_SAY("%p %p %ld -> %s\n", (args_array), (args_array->data), (args_array->used_length), (args_array->data)[(args_array->used_length)-1]);
 
 	while ((i < args_array->used_length)
 		&& (is_valid))
@@ -253,6 +257,7 @@ Cmd *get_command(char *line)
 	DEBUG_SAY(" * ArgC        : %d\n", command->argc);
 	DEBUG_SAY(" * ArgV (last) : %s\n", command->argv[command->argc - 1]);
 
+	show_string_array(args_array, stdout);
 	delete_string_array(args_array);
 	
 	DEBUG_END("done.");

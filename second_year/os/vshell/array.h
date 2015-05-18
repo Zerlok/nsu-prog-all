@@ -1,5 +1,5 @@
-#ifndef __HISTORY_H__
-#define __HISTORY_H__
+#ifndef __EXPANDING_ARRAY_H__
+#define __EXPANDING_ARRAY_H__
 
 
 typedef struct StringArray
@@ -20,5 +20,5 @@ void delete_string_array(StringArray *array);
 char **string_array_to_chars(StringArray *array);
 
 
-// __HISTORY_H__
+// __EXPANDING_ARRAY_H__
 #endif

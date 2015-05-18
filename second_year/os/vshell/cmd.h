@@ -15,11 +15,12 @@ typedef struct CommandCall
 } Cmd;
 
 
-void redirect_stream(int old_stream, char *filename, int flags);
-int run_command(Cmd *call);
+int redirect_stream(int old_stream, char *filename, int flags);
+int run_command(Cmd *call, ProcessArray *processes);
+void run_child(pid_t parentid, Cmd *command);
 
 Cmd *get_empty_command(char *cmd_name);
-Cmd *get_command(char *line);
+Cmd *build_command(char *line);
 void show_command(Cmd *command, FILE *stream);
 void clear_command(Cmd *command);
 void delete_command(Cmd *command);

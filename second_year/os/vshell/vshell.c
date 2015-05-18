@@ -2,6 +2,7 @@
 
 #include "debug.h"
 #include "array.h"
+#include "proc.h"
 #include "cmd.h"
 #include "parser.h"
 #include "vshell.h"
@@ -16,6 +17,7 @@ void VSHELL_INIT(int argc, char **argv, SHELL *shell)
 
 	DEBUG_START("Initializing the shell ...");
 
+	shell->processes = get_process_array(10);
 	shell->history = get_string_array(0);
 
 	DEBUG_END("done.");
@@ -26,8 +28,6 @@ void VSHELL_RUN(SHELL *shell)
 {
 	Cmd *command;
 	int code = CODE_WAIT;
-	int indx = 0;
-	char c = 0;
 	char line[LINE_LEN];
 	bzero(line, LINE_LEN);
 
@@ -41,12 +41,12 @@ void VSHELL_RUN(SHELL *shell)
 		printf(LINE_START_SYMBOL);
 		fgets(line, LINE_LEN, stdin);
 		
-		command = get_command(line);
+		command = build_command(line);
 
 		if (command == NULL)
 			continue;
 		
-		code = run_command(command);
+        code = run_command(command, shell->processes);
 
 		// TODO: Push into history
 		// if (code != CODE_WAIT) {

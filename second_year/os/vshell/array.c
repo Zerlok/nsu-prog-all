@@ -63,8 +63,7 @@ void push_into_string_array(char *string, StringArray *array)
 void delete_string_from_array(size_t indx, StringArray *array)
 {
 	if ((array == NULL)
-		|| (indx > array->used_length)
-		|| (indx < 0))
+        || (indx > array->used_length))
 		return;
 
 	DEBUG_START("Deleting the string from string array ...");
@@ -74,7 +73,8 @@ void delete_string_from_array(size_t indx, StringArray *array)
 	DEBUG_SAY("Shifting strings from %ld index (has %s) ...\n", indx, array->data[indx]);
 	for (i = indx; i < array->used_length - 1; i++)
 	{
-		array->data[i] = (char*)realloc(array->data[i], strlen(array->data[i + 1]) + 1);
+		free(array->data[i]);
+		array->data[i] = (char*)calloc(sizeof(char), strlen(array->data[i + 1]) + 1);
 		strcpy(array->data[i], array->data[i + 1]);
 	}
 
@@ -121,13 +121,11 @@ void clear_string_array(StringArray *array)
 	
 	size_t i;
 
-	// DEBUG_SAY("used: %ld, allocated: %ld\n", array->used_length, array->allocated_length);
-	// DEBUG_SAY("array pointer: %p, data pointer: %p\n", array, array->data);
-
 	for (i = 0; i < array->used_length; i++)
 	{
-		DEBUG_SAY("Removing %s\n", array->data[i]);
+		DEBUG_SAY("'%s'", array->data[i]);
 		free(array->data[i]);
+		DEBUG_SAY(" removed\n");
 	}
 
 	array->used_length = 0;
@@ -145,7 +143,7 @@ void delete_string_array(StringArray *array)
 
 	clear_string_array(array);
 
-	free(array->data);
+	// free(array->data);
 	free(array);
 
 	DEBUG_END("done.");

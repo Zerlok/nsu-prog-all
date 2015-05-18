@@ -11,21 +11,24 @@
 #include <dirent.h>
 #include <fcntl.h>
 
+#define _DEBUG_ON
 
 #define STRING_ARRAY_EXPANDING_CRITERIA 2
-#define CMD_ARRAY_EXPANDING_CRITERIA 2
+#define PROCESS_ARRAY_EXPANDING_CRITERIA 2
+
 
 #define ARGS_LEN 256
 #define LINE_LEN 256
 
 
-#define STD_DUMP_FILENAME "vshel.out"
+#define STD_DUMP_FILENAME ".vshell_out"
 #define CMD_EXIT "exit"
 #define CMD_HELP "help"
 
 
 #define LINE_START_SYMBOL ">>> "
-#define LINE_SKIP_SYMBOL '\\'
+
+#define LINE_SKIPPER_SYMBOL '\\'
 #define LINE_SEPARATOR_SYMBOL ' '
 #define LINE_DELIMITTER_SYMBOL '"'
 #define LINE_TAB_SYMBOL '\t'
