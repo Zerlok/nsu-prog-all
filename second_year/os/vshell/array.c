@@ -135,7 +135,7 @@ void clear_string_array(StringArray *array)
 	{
 		DEBUG_SAY("'%s'", array->data[i]);
 		free(array->data[i]);
-		DEBUG_SAY(" removed\n");
+		DEBUG_SHOUT(" removed\n");
 	}
 
 	array->used_length = 0;
@@ -153,14 +153,14 @@ void delete_string_array(StringArray *array)
 
 	clear_string_array(array);
 
-	// free(array->data);
+	free(array->data);
 	free(array);
 
 	DEBUG_END("done.");
 }
 
 
-char **string_array_to_chars(StringArray *array)
+char **get_string_array_data(StringArray *array)
 {
 	size_t i;
 	char **chars = (char**)calloc(sizeof(char*), array->used_length + 1);

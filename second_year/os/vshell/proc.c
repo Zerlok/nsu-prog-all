@@ -26,16 +26,26 @@ ProcessArray *get_process_array(int length)
 void check_length_and_expand_process_array(ProcessArray *array)
 {
 	if ((array->allocated_length)
-			< (array->used_length))
+			> (array->used_length))
 		return;
 
-	if (array->allocated_length == 0)
+	if (array->allocated_length != 0)
+		array->allocated_length *= PROCESS_ARRAY_EXPANDING_CRITERIA;
+	else
 		array->allocated_length = 1;
 	
-	else
-		array->allocated_length *= PROCESS_ARRAY_EXPANDING_CRITERIA;
-	
-	array->data = (Process**)realloc(array->data, array->allocated_length);
+	Process **expanded_data = (Process**)calloc(sizeof(Process*), array->allocated_length);
+
+	size_t i;
+	for (i = 0; i < array->used_length; i++)
+	{
+		expanded_data[i] = (Process*)malloc(sizeof(Process));
+//		expanded_data[i], array->data[i]);
+		free(array->data[i]);
+	}
+
+	free(array->data);
+	array->data = expanded_data;
 }
 
 
@@ -50,7 +60,7 @@ void push_into_process_array(Process *proc, ProcessArray *array)
 	check_length_and_expand_process_array(array);
 	
 	array->data[array->used_length] = proc;
-	array->used_length++;
+	++array->used_length;
 
 	DEBUG_END("done.");
 }
@@ -70,7 +80,7 @@ void delete_process_from_array(size_t indx, ProcessArray *array)
 		array->data[i] = array->data[i + 1];
 
 	free(array->data[array->used_length - 1]);
-	array->used_length--;
+	--array->used_length;
 
 	DEBUG_END("done.");
 }
@@ -114,8 +124,9 @@ void clear_process_array(ProcessArray *array)
 
 	for (i = 0; i < array->used_length; i++)
 	{
-		DEBUG_SAY("Removing process [%d]\n", array->data[i]->pid);
+		DEBUG_SAY("Process [%d] ", array->data[i]->pid);
 		free(array->data[i]);
+		DEBUG_SHOUT(" removed");
 	}
 
 	array->used_length = 0;

@@ -9,7 +9,7 @@ extern int LAYER;
 #ifdef _DEBUG_ON
 
 #define DEBUG_START_STR "o "
-#define DEBUG_SAY_STR "~ "
+//#define DEBUG_SAY_STR "~ "
 #define DEBUG_END_STR "x "
 #define DEBUG_LINE_STR "|  "
 
@@ -30,6 +30,7 @@ extern int LAYER;
 	}\
 })
 
+//		printf(DEBUG_SAY_STR);
 #define DEBUG_SAY( ... )(\
 {\
 	if (DEBUG)\
@@ -37,9 +38,14 @@ extern int LAYER;
 		int _layer_index;\
 		for (_layer_index = 0; _layer_index < LAYER; _layer_index++)\
 			printf(DEBUG_LINE_STR);\
-		printf(DEBUG_SAY_STR);\
 		printf(__VA_ARGS__);\
 	}\
+})
+
+#define DEBUG_SHOUT( ... )(\
+{\
+	if (DEBUG)\
+		printf(__VA_ARGS__);\
 })
 
 #define DEBUG_END( ... )(\
@@ -65,6 +71,7 @@ extern int LAYER;
 
 #define DEBUG_START( ... )
 #define DEBUG_SAY( ... )
+#define DEBUG_SHOUT( ... )
 #define DEBUG_END( ... )
 
 // if DEBUG_ON

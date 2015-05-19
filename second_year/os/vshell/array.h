@@ -17,7 +17,7 @@ void delete_string_from_array(size_t indx, StringArray *array);
 void show_string_array(StringArray *array, FILE *stream);
 void clear_string_array(StringArray *array);
 void delete_string_array(StringArray *array);
-char **string_array_to_chars(StringArray *array);
+char **get_string_array_data(StringArray *array);
 
 
 // __EXPANDING_ARRAY_H__

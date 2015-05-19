@@ -79,7 +79,7 @@ void run_child(pid_t parentid, Cmd *command)
 	pid_t pid = getpid();
 	pid_t gid = parentid;
 
-	DEBUG_START("Running child with pid: %d\n", pid);
+	DEBUG_START("Running child with pid: %d", pid);
 	
 	// Show all commanding arguments.
 	DEBUG_SAY("Calling '%s' with arguments: ", command->origin);
@@ -250,15 +250,15 @@ Cmd *build_command(char *line)
 
 	command->is_valid = is_valid;
 	command->argc = args_array->used_length;
-	command->argv = string_array_to_chars(args_array);
+	command->argv = get_string_array_data(args_array);
 
-	DEBUG_SAY("After cmd call assignment:\n");
+	DEBUG_SAY("After cmd assignment:\n");
 	DEBUG_SAY(" * Origin      : %s\n", command->origin);
 	DEBUG_SAY(" * Ins         : %s\n", command->ins);
 	DEBUG_SAY(" * Outs        : %s\n", command->outs);
 	DEBUG_SAY(" * Appends     : %s\n", command->appends);
-	DEBUG_SAY(" * In back     : %d\n", command->is_in_background);
-	DEBUG_SAY(" * Valid       : %d\n", command->is_valid);
+	DEBUG_SAY(" * In back     : %s\n", command->is_in_background ? "True" : "False");
+	DEBUG_SAY(" * Valid       : %s\n", command->is_valid ? "True" : "False");
 	DEBUG_SAY(" * ArgC        : %d\n", command->argc);
 	DEBUG_SAY(" * ArgV (last) : %s\n", command->argv[command->argc - 1]);
 

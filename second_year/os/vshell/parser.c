@@ -30,7 +30,6 @@ StringArray *split(char *line)
 	int data_len = 0;
 	int is_string = 0;
 
-	// TODO: make echo hi>>hello splittable!
 	while ((*chr) != 0)
 	{
 		// Start string if it was not started and this char is a delimitter.
