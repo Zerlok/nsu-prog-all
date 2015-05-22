@@ -70,7 +70,7 @@ void push_into_string_array(char *string, StringArray *array)
 }
 
 
-void delete_string_from_array(size_t indx, StringArray *array)
+char *pop_string_from_array(size_t indx, StringArray *array)
 {
 	if ((array == NULL)
 			|| (indx > array->used_length))
@@ -78,20 +78,19 @@ void delete_string_from_array(size_t indx, StringArray *array)
 
 	DEBUG_START("Deleting the string from string array ...");
 	
-	size_t i;
+	// Save current pointer
+	char *element = array->data[indx];
 
 	DEBUG_SAY("Shifting strings from %ld index (has %s) ...\n", indx, array->data[indx]);
+	size_t i;
 	for (i = indx; i < array->used_length - 1; i++)
-	{
-		free(array->data[i]);
-		array->data[i] = (char*)calloc(sizeof(char), strlen(array->data[i + 1]) + 1);
-		strcpy(array->data[i], array->data[i + 1]);
-	}
+		array->data[i] = array->data[i + 1];
 
-	free(array->data[array->used_length - 1]);
+	array->data[array->used_length - 1] = NULL;
 	--array->used_length;
 
 	DEBUG_END("done.");
+	return element;
 }
 
 

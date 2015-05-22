@@ -5,11 +5,15 @@
 typedef struct Process
 {
 	pid_t pid;
-	int jid;
+	pid_t gid;
 	int is_stopped;
 	int is_finished;
 	int is_in_background;
 } Process;
+
+Process *create_process(int pid);
+void show_process(Process *proc);
+void delete_process(Process *proc);
 
 
 typedef struct ProcessArray
@@ -19,11 +23,10 @@ typedef struct ProcessArray
 	Process **data;
 } ProcessArray;
 
-
-ProcessArray *get_process_array(int length);
+ProcessArray *create_process_array(int length);
 void check_length_and_expand_process_array(ProcessArray *array);
 void push_into_process_array(Process *proc, ProcessArray *array);
-void delete_process_from_array(size_t indx, ProcessArray *array);
+Process *pop_process_from_array(size_t indx, ProcessArray *array);
 void show_process_array(ProcessArray *array, FILE *stream);
 void clear_process_array(ProcessArray *array);
 void delete_process_array(ProcessArray *array);

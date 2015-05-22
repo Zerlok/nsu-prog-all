@@ -2,21 +2,15 @@
 #define __VSHELL_H__
 
 
-// typedef void (*sighandler_t)(int);
-
-
 typedef struct Vshell
 {
 	ProcessArray *processes;
 	StringArray *history;
-} SHELL;
+} Shell;
 
-
-void handle_signal(int signum);
-
-void VSHELL_INIT(int argc, char **argv, SHELL *shell);
-void VSHELL_RUN(SHELL *shell);
-void VSHELL_CLOSE(SHELL *shell);
+void SHELL_INIT(int argc, char **argv, Shell *shell);
+void SHELL_RUN(Shell *shell);
+void SHELL_CLOSE(Shell *shell);
 
 
 // __VSHELL_H__

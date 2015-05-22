@@ -25,13 +25,61 @@ int redirect_stream(int old_stream, char *filename, int flags)
 }
 
 
+void run_child(pid_t parentid, Cmd *command)
+{
+	pid_t pid = getpid();
+	pid_t gid = parentid;
+
+	DEBUG_START("Running child with pid: %d", pid);
+
+	// Show all commanding arguments.
+	DEBUG_SAY("Calling '%s' with arguments: ", command->origin);
+	if (DEBUG)
+	{
+		int arg_index;
+		for (arg_index = 0; arg_index < command->argc; arg_index++)
+			printf("%s ", command->argv[arg_index]);
+		printf("\n");
+	}
+
+	// Redirect inputs.
+	if (command->ins != NULL)
+		redirect_stream(STDIN_FILENO, command->ins, O_RDONLY);
+
+	if (command->outs != NULL)
+		redirect_stream(STDOUT_FILENO, command->outs, O_WRONLY | O_CREAT | O_TRUNC);
+
+	else if (command->appends != NULL)
+		redirect_stream(STDOUT_FILENO, command->appends, O_WRONLY | O_CREAT | O_APPEND);
+
+	// DEBUG_SAY("Is process running in background? %d\n", command->is_in_background);
+	setpgid(pid, gid);
+	tcsetpgrp(parentid, pid);
+
+	if (command->is_in_background)
+	{
+		DEBUG_SAY("Closing the input ...\n");
+		// redirect_stream(STDIN_FILENO, "/dev/tty", O_RDONLY);
+		// close(STDIN_FILENO);
+	}
+
+	DEBUG_END("done (executing child).");
+	execvpe(command->origin, command->argv, environ);
+
+	DEBUG_SAY("Exec error: ");
+	perror(command->origin);
+	exit(CODE_FAIL);
+}
+
+
 int run_command(Cmd *command, ProcessArray *processes)
 {
 	if ((command == NULL)
 			|| (command->origin == NULL))
 		return CODE_WAIT;
 
-	if (!(command->is_valid)) {
+	if (!(command->is_valid))
+	{
 		printf("Invalid command.\n");
 		return CODE_INVALID_CALL;
 	}
@@ -43,7 +91,6 @@ int run_command(Cmd *command, ProcessArray *processes)
 		DEBUG_END("done (exit).");
 		return CODE_EXIT;
 	}
-	DEBUG_SAY("'%s' != '%s'\n", command->origin, CMD_EXIT);
 
 	int status;
 	pid_t gid;
@@ -74,54 +121,7 @@ int run_command(Cmd *command, ProcessArray *processes)
 }
 
 
-void run_child(pid_t parentid, Cmd *command)
-{
-	pid_t pid = getpid();
-	pid_t gid = parentid;
-
-	DEBUG_START("Running child with pid: %d", pid);
-	
-	// Show all commanding arguments.
-	DEBUG_SAY("Calling '%s' with arguments: ", command->origin);
-	if (DEBUG)
-	{
-		int arg_index;
-		for (arg_index = 0; arg_index < command->argc; arg_index++)
-			printf("%s ", command->argv[arg_index]);
-		printf("\n");
-	}
-
-	// Redirect inputs.
-	if (command->ins != NULL)
-		redirect_stream(STDIN_FILENO, command->ins, O_RDONLY);
-
-	if (command->outs != NULL)
-		redirect_stream(STDOUT_FILENO, command->outs, O_WRONLY | O_CREAT | O_TRUNC);
-
-	else if (command->appends != NULL)
-		redirect_stream(STDOUT_FILENO, command->appends, O_WRONLY | O_CREAT | O_APPEND);
-
-	// DEBUG_SAY("Is process running in background? %d\n", command->is_in_background);
-	setpgid(pid, gid);
-	tcsetpgrp(parentid, pid);
-	
-	if (command->is_in_background)
-	{
-		DEBUG_SAY("Closing the input ...\n");
-		// redirect_stream(STDIN_FILENO, "/dev/tty", O_RDONLY);
-		// close(STDIN_FILENO);
-	}
-
-	DEBUG_END("done (executing child).");
-	execvpe(command->origin, command->argv, environ);
-	
-	DEBUG_SAY("Exec error: ");
-	perror(command->origin);
-	exit(CODE_FAIL);
-}
-
-
-Cmd *get_empty_command(char *cmd_name)
+Cmd *create_empty_command(char *cmd_name)
 {
 	if (cmd_name == NULL)
 		return NULL;
@@ -153,119 +153,123 @@ Cmd *build_command(char *line)
 	DEBUG_START("Building a new command from line ...");
 
 	// Initializing the variables...
-	size_t i = 0;
+	size_t i = 1;
 	int is_valid = 1; // (true)
 
 	// Splitting the line by spaces.
-	StringArray *args_array = split(line);
+	StringArray *splitted_line = split(line);
 	DEBUG_SAY("After splitting\n");
 
-	if ((args_array == NULL)
-			|| (args_array->used_length == 0))
+	if ((splitted_line == NULL)
+			|| (splitted_line->used_length == 0))
 	{
 		DEBUG_END("done.");
 		return NULL;
 	}
-
 	DEBUG_SAY("After if-else condition\n");
 
 	// Setting up the Cmd structure.
-	Cmd *command = get_empty_command(args_array->data[0]);
-
+	Cmd *main_command = create_empty_command(splitted_line->data[0]);
+	Cmd *command = main_command;
 	DEBUG_SAY("After empty command creation\n");
-	DEBUG_SAY("%p %p %ld -> %s\n",
-			  (args_array),
-			  (args_array->data),
-			  (args_array->used_length),
-			  (args_array->data)[(args_array->used_length)-1]
-			);
 
-	while ((i < args_array->used_length)
-		   && (is_valid))
+	DEBUG_SAY("%p %p %ld -- %s\n",
+			(splitted_line),
+			(splitted_line->data),
+			(splitted_line->used_length),
+			(splitted_line->data)[(splitted_line->used_length)-1]
+	);
+
+	StringArray *command_args = get_string_array(1);
+	while ((i < splitted_line->used_length)
+		   && is_valid)
 	{
 		// The input stream was set.
-		if (!strcmp(args_array->data[i], LINE_INPUT_STREAM_STRING))
+		if (!strcmp(splitted_line->data[i], LINE_INPUT_STREAM_STRING))
 		{
-			if (i + 1 == args_array->used_length)
+			DEBUG_SAY("Special symbol '%s' was found\n", splitted_line->data[i]);
+			if (i + 1 == splitted_line->used_length)
 			{
 				is_valid = 0;
 				break;
 			}
 
-			command->ins = (char*)calloc(sizeof(char), strlen(args_array->data[i + 1]) + 1);
-			strcpy(command->ins, args_array->data[i + 1]);
-
-			DEBUG_SAY("Pop '%s' in args_array (%ld < %ld)\n", args_array->data[i], i, args_array->used_length);
-			delete_string_from_array(i, args_array); // delete LINE_INPUT_STREAM_STRING
-			delete_string_from_array(i, args_array); // delete argument
+			command->ins = pop_string_from_array(i + 1, splitted_line); // pop argument
 		}
 
 		// The output stream was set.
-		else if (!strcmp(args_array->data[i], LINE_OUTPUT_STREAM_STRING))
+		else if (!strcmp(splitted_line->data[i], LINE_OUTPUT_STREAM_STRING))
 		{
-			if (i + 1 >= args_array->used_length)
+			DEBUG_SAY("Special symbol '%s' was found\n", splitted_line->data[i]);
+			if (i + 1 == splitted_line->used_length)
 			{
 				is_valid = 0;
 				break;
 			}
 
-			command->outs = (char*)calloc(sizeof(char), strlen(args_array->data[i + 1]) + 1);
-			strcpy(command->outs, args_array->data[i + 1]);
-
-			DEBUG_SAY("Pop '%s' in args_array (%ld < %ld)\n", args_array->data[i], i, args_array->used_length);
-			delete_string_from_array(i, args_array); // delete LINE_OUTPUT_STREAM_STRING
-			delete_string_from_array(i, args_array); // delete argument
+			command->outs = pop_string_from_array(i + 1, splitted_line); // pop argument
 		}
 
 		// The append stream was set.
-		else if (!strcmp(args_array->data[i], LINE_APPEND_STREAM_STRING))
+		else if (!strcmp(splitted_line->data[i], LINE_APPEND_STREAM_STRING))
 		{
-			if (i + 1 == args_array->used_length)
+			DEBUG_SAY("Special symbol '%s' was found\n", splitted_line->data[i]);
+			if (i + 1 == splitted_line->used_length)
 			{
 				is_valid = 0;
 				break;
 			}
-			
-			command->appends = (char*)calloc(sizeof(char), strlen(args_array->data[i + 1]) + 1);
-			strcpy(command->appends, args_array->data[i + 1]);
 
-			DEBUG_SAY("Pop '%s' in args_array (%ld < %ld)\n", args_array->data[i], i, args_array->used_length);
-			delete_string_from_array(i, args_array); // delete LINE_APPEND_STREAM_STRING
-			delete_string_from_array(i, args_array); // delete argument
+			command->appends = pop_string_from_array(i + 1, splitted_line); // delete argument
 		}
 
 		// The background running was set.
-		else if (!strcmp(args_array->data[i], LINE_BACKGROUND_STRING))
+		else if (!strcmp(splitted_line->data[i], LINE_BACKGROUND_STRING))
 		{
+			DEBUG_SAY("Special symbol %s was found\n", splitted_line->data[i]);
 			command->is_in_background = 1;
-			
-			DEBUG_SAY("Pop %s in args_array (%ld < %ld)\n", args_array->data[i], i, args_array->used_length);
-			delete_string_from_array(i, args_array); // delete LINE_BACKGROUND_STRING
 		}
 
+		// Pipe symbol was captured.
+		else if (!strcmp(splitted_line->data[i], LINE_PIPE_STRING))
+		{
+			DEBUG_SAY("Special symbol %s was found\n", splitted_line->data[i]);
+			if (i + 1 == splitted_line->used_length)
+			{
+				is_valid = 0;
+				break;
+			}
+
+			command->pipe = create_empty_command(splitted_line->data[i + 1]); // delete argument
+			command->argc = command_args->used_length;
+			command->argv = get_string_array_data(command_args);
+			clear_string_array(command_args);
+
+			DEBUG_SHOW_CMD(command);
+
+			command = command->pipe;
+		}
+
+		// The argument was found
+		else
+			push_into_string_array(
+					splitted_line->data[i],
+					command_args
+			);
+
 		++i;
-	} // ENDWHILE (args_array->used_length)
+	} // ENDWHILE (splitted_line->used_length)
 
-	DEBUG_SAY("After while block\n");
+	command->argc = command_args->used_length;
+	command->argv = get_string_array_data(command_args);
 
-	command->is_valid = is_valid;
-	command->argc = args_array->used_length;
-	command->argv = get_string_array_data(args_array);
+	DEBUG_SHOW_CMD(main_command);
 
-	DEBUG_SAY("After cmd assignment:\n");
-	DEBUG_SAY(" * Origin      : %s\n", command->origin);
-	DEBUG_SAY(" * Ins         : %s\n", command->ins);
-	DEBUG_SAY(" * Outs        : %s\n", command->outs);
-	DEBUG_SAY(" * Appends     : %s\n", command->appends);
-	DEBUG_SAY(" * In back     : %s\n", command->is_in_background ? "True" : "False");
-	DEBUG_SAY(" * Valid       : %s\n", command->is_valid ? "True" : "False");
-	DEBUG_SAY(" * ArgC        : %d\n", command->argc);
-	DEBUG_SAY(" * ArgV (last) : %s\n", command->argv[command->argc - 1]);
-
-	delete_string_array(args_array);
+	delete_string_array(command_args);
+	delete_string_array(splitted_line);
 	
 	DEBUG_END("done.");
-	return command;
+	return main_command;
 }
 
 
@@ -276,19 +280,22 @@ void clear_command(Cmd *command)
 
 	DEBUG_START("Clearing the command call ...");
 
+	DEBUG_SAY("Removing argv ...\n");
 	int i;
-
 	for (i = 0; i < command->argc; i++)
 		free(command->argv[i]);
+	free(command->argv);
 
 	command->argc = 0;
 	
-	free(command->argv);
-
-	free(command->ins);
-	free(command->outs);
-	free(command->appends);
+	DEBUG_SAY("Removing origin ...\n");
 	free(command->origin);
+	DEBUG_SAY("Removing ins ...\n");
+	free(command->ins);
+	DEBUG_SAY("Removing outs ...\n");
+	free(command->outs);
+	DEBUG_SAY("Removing appends ...\n");
+	free(command->appends);
 
 	DEBUG_END("done.");
 }

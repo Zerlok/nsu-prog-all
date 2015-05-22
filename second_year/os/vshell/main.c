@@ -16,15 +16,19 @@ int main(int argc, char **argv, char **envp)
 {
 	environ = envp;
 
-	SHELL shell;
+	DEBUG_START("GUCKC");
+
+	Shell shell;
 	// Init the shell from arguments.
-	VSHELL_INIT(argc, argv, &shell);
+	SHELL_INIT(argc, argv, &shell);
 	// Run the shell.
-	VSHELL_RUN(&shell);
+	SHELL_RUN(&shell);
 	// Dump all data from shell into the file (for debug).
-	// VSHELL_dump(&shell);
+	// SHELL_dump(&shell);
 	// Close the shell (remove all created data).
-	VSHELL_CLOSE(&shell);
+	SHELL_CLOSE(&shell);
+
+	DEBUG_END("GUGUGUG");
 
 	return 0;
 }

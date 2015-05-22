@@ -8,33 +8,29 @@
 #include "vshell.h"
 
 
-void VSHELL_INIT(int argc, char **argv, SHELL *shell)
+void SHELL_INIT(int argc, char **argv, Shell *shell)
 {
+	DEBUG_START("Initializing the shell ...");
+
 	int i;
 	for (i = 1; i < argc; i++)
 		if (!strcmp(argv[i], "-d"))
 			DEBUG = 1;
 
-	DEBUG_START("Initializing the shell ...");
-
-	shell->processes = get_process_array(10);
-	shell->history = get_string_array(0);
+	shell->processes = create_process_array(10);
 
 	DEBUG_END("done.");
 }
 
 
-void VSHELL_RUN(SHELL *shell)
+void SHELL_RUN(Shell *shell)
 {
+	DEBUG_START("Running the shell ...");
+
 	Cmd *command;
 	int code = CODE_WAIT;
 	char line[LINE_LEN];
 	bzero(line, LINE_LEN);
-
-	// signal(SIGINT, SIG_IGN);
-	// signal(SIGINT, handle_signal);
-
-	DEBUG_START("Running the shell ...");
 
 	while(code != CODE_EXIT)
 	{
@@ -53,7 +49,7 @@ void VSHELL_RUN(SHELL *shell)
 		// 	push_into_string_array(line, shell->history);
 		// }
 
-		clear_command(command);
+		delete_command(command);
 	}
 
 	delete_command(command);
@@ -61,7 +57,7 @@ void VSHELL_RUN(SHELL *shell)
 }
 
 
-void VSHELL_DUMP(SHELL *shell)
+void SHELL_DUMP(Shell *shell)
 {
 	DEBUG_START("Dumping the shell into the file ...");
 
@@ -72,22 +68,19 @@ void VSHELL_DUMP(SHELL *shell)
 		return;
 	}
 
-	show_string_array(shell->history, dump_stream);
-
-	// DEBUG_SAY("Then i'm trying to close the stream %p ...\n", dump_stream);
-	// fclose(dump_stream);
+	 DEBUG_SAY("Then i'm trying to close the stream %p ...\n", dump_stream);
+	 fclose(dump_stream);
 
 	DEBUG_END("done.");
 }
 
 
-void VSHELL_CLOSE(SHELL *shell)
+void SHELL_CLOSE(Shell *shell)
 {
 	if (shell == NULL)
 		return;
 
 	DEBUG_START("Closing the shell ...");
-	// free(shell->username);
 
 	DEBUG_SAY("Deleting the history of commands...\n");
 	delete_string_array(shell->history);

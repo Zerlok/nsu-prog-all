@@ -14,7 +14,6 @@ StringArray *split(char *line)
 			|| ((*line) == LINE_END_SYMBOL))
 	{
 		printf("Invalid line while splitting %s\n", line);
-
 		return NULL;
 	}
 
