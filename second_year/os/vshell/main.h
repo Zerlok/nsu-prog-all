@@ -12,7 +12,9 @@
 #include <fcntl.h>
 
 
-#define _DEBUG_ON
+// DEBUG SETTINGS
+#define _DEBUG_IS_ON_
+#include "debug.h"
 
 
 #define STRING_ARRAY_EXPANDING_CRITERIA 2

@@ -4,16 +4,19 @@
 
 #define DEBUG_SHOW_CMD(command)(\
 {\
-	DEBUG_SAY("Cmd structure\n");\
-	DEBUG_SAY(" * Origin      : %s\n", command->origin);\
-	DEBUG_SAY(" * Ins         : %s\n", command->ins);\
-	DEBUG_SAY(" * Outs        : %s\n", command->outs);\
-	DEBUG_SAY(" * Appends     : %s\n", command->appends);\
-	DEBUG_SAY(" * Pipe        : %p\n", command->pipe);\
-	DEBUG_SAY(" * In back     : %s\n", command->is_in_background ? "True" : "False");\
-	DEBUG_SAY(" * Valid       : %s\n", command->is_valid ? "True" : "False");\
-	DEBUG_SAY(" * ArgC        : %d\n", command->argc);\
-	DEBUG_SAY(" * ArgV (last) : %s\n", command->argv[command->argc - 1]);\
+	if (DEBUG)\
+	{\
+		printf("Cmd structure\n");\
+		printf(" * Origin      : %s\n", command->origin);\
+		printf(" * Ins         : %s\n", command->ins);\
+		printf(" * Outs        : %s\n", command->outs);\
+		printf(" * Appends     : %s\n", command->appends);\
+		printf(" * Pipe        : %p\n", command->pipe);\
+		printf(" * In back     : %s\n", command->is_in_background ? "True" : "False");\
+		printf(" * Valid       : %s\n", command->is_valid ? "True" : "False");\
+		printf(" * ArgC        : %d\n", command->argc);\
+		printf(" * ArgV (last) : %s\n", command->argv[command->argc - 1]);\
+	}\
 })
 
 

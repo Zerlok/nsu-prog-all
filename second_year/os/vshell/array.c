@@ -1,6 +1,4 @@
 #include "main.h"
-
-#include "debug.h"
 #include "array.h"
 
 
@@ -74,7 +72,7 @@ char *pop_string_from_array(size_t indx, StringArray *array)
 {
 	if ((array == NULL)
 			|| (indx > array->used_length))
-		return;
+		return NULL;
 
 	DEBUG_START("Deleting the string from string array ...");
 	

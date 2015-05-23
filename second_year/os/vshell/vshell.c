@@ -1,6 +1,4 @@
 #include "main.h"
-
-#include "debug.h"
 #include "array.h"
 #include "proc.h"
 #include "cmd.h"
@@ -12,12 +10,13 @@ void SHELL_INIT(int argc, char **argv, Shell *shell)
 {
 	DEBUG_START("Initializing the shell ...");
 
+	shell->processes = create_process_array(10);
+
+	// The shell was inited with special command
 	int i;
 	for (i = 1; i < argc; i++)
-		if (!strcmp(argv[i], "-d"))
-			DEBUG = 1;
-
-	shell->processes = create_process_array(10);
+		if (!strcmp(argv[i], "-c") && (i + 1 < argc))
+			run_command(build_command(argv[i + 1]), shell->processes);
 
 	DEBUG_END("done.");
 }
@@ -52,7 +51,6 @@ void SHELL_RUN(Shell *shell)
 		delete_command(command);
 	}
 
-	delete_command(command);
 	DEBUG_END("done.");
 }
 

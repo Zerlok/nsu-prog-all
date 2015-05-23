@@ -1,6 +1,4 @@
 #include "main.h"
-
-#include "debug.h"
 #include "array.h"
 #include "proc.h"
 #include "cmd.h"

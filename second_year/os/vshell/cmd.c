@@ -1,6 +1,4 @@
 #include "main.h"
-
-#include "debug.h"
 #include "array.h"
 #include "proc.h"
 #include "cmd.h"
@@ -84,7 +82,7 @@ int run_command(Cmd *command, ProcessArray *processes)
 		return CODE_INVALID_CALL;
 	}
 
-	DEBUG_START("Calling the %s command ...", command->origin);
+	DEBUG_START("Calling the '%s' command ...", command->origin);
 
 	if (!strcmp(command->origin, CMD_EXIT))
 	{
@@ -129,13 +127,13 @@ Cmd *create_empty_command(char *cmd_name)
 	DEBUG_START("Creating the empty Cmd ...");
 	
 	Cmd *command = (Cmd*)malloc(sizeof(Cmd));
-	command->origin = (char*)calloc(sizeof(char), strlen(cmd_name) + 1);
 	command->ins = NULL;
 	command->outs = NULL;
 	command->appends = NULL;
 	command->is_in_background = 0;
 	command->argv = NULL;
 
+	command->origin = (char*)calloc(sizeof(char), strlen(cmd_name) + 1);
 	strcpy(command->origin, cmd_name);
 	
 	DEBUG_END("done.");
@@ -152,10 +150,6 @@ Cmd *build_command(char *line)
 
 	DEBUG_START("Building a new command from line ...");
 
-	// Initializing the variables...
-	size_t i = 1;
-	int is_valid = 1; // (true)
-
 	// Splitting the line by spaces.
 	StringArray *splitted_line = split(line);
 	DEBUG_SAY("After splitting\n");
@@ -163,7 +157,8 @@ Cmd *build_command(char *line)
 	if ((splitted_line == NULL)
 			|| (splitted_line->used_length == 0))
 	{
-		DEBUG_END("done.");
+		delete_string_array(splitted_line);
+		DEBUG_END("done (empty split).");
 		return NULL;
 	}
 	DEBUG_SAY("After if-else condition\n");
@@ -171,6 +166,7 @@ Cmd *build_command(char *line)
 	// Setting up the Cmd structure.
 	Cmd *main_command = create_empty_command(splitted_line->data[0]);
 	Cmd *command = main_command;
+	StringArray *command_args = get_string_array(1);
 	DEBUG_SAY("After empty command creation\n");
 
 	DEBUG_SAY("%p %p %ld -- %s\n",
@@ -180,7 +176,8 @@ Cmd *build_command(char *line)
 			(splitted_line->data)[(splitted_line->used_length)-1]
 	);
 
-	StringArray *command_args = get_string_array(1);
+	size_t i = 0;
+	int is_valid = 1; // (true)
 	while ((i < splitted_line->used_length)
 		   && is_valid)
 	{
@@ -260,6 +257,8 @@ Cmd *build_command(char *line)
 		++i;
 	} // ENDWHILE (splitted_line->used_length)
 
+	main_command->is_valid = is_valid;
+	command->is_valid = is_valid;
 	command->argc = command_args->used_length;
 	command->argv = get_string_array_data(command_args);
 
