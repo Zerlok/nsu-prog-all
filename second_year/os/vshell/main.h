@@ -13,7 +13,7 @@
 
 
 // DEBUG SETTINGS
-#define _DEBUG_IS_ON_
+#define DEBUG_IS_ON
 #include "debug.h"
 
 

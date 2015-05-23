@@ -2,24 +2,6 @@
 #define __CMD_H__
 
 
-#define DEBUG_SHOW_CMD(command)(\
-{\
-	if (DEBUG)\
-	{\
-		printf("Cmd structure\n");\
-		printf(" * Origin      : %s\n", command->origin);\
-		printf(" * Ins         : %s\n", command->ins);\
-		printf(" * Outs        : %s\n", command->outs);\
-		printf(" * Appends     : %s\n", command->appends);\
-		printf(" * Pipe        : %p\n", command->pipe);\
-		printf(" * In back     : %s\n", command->is_in_background ? "True" : "False");\
-		printf(" * Valid       : %s\n", command->is_valid ? "True" : "False");\
-		printf(" * ArgC        : %d\n", command->argc);\
-		printf(" * ArgV (last) : %s\n", command->argv[command->argc - 1]);\
-	}\
-})
-
-
 typedef struct Command
 {
 	char *origin;			// main command
