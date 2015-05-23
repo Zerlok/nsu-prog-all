@@ -237,17 +237,20 @@ Cmd *build_command(char *line)
 				break;
 			}
 
-			command->pipe = create_empty_command(splitted_line->data[i + 1]); // delete argument
+			// Save current arguments.
 			command->argc = command_args->used_length;
 			command->argv = get_string_array_data(command_args);
-			clear_string_array(command_args);
-
+			DEBUG_SAY("Current cmd: ");
 			DEBUG_SHOW_CMD(command);
+
+			// Create a new command in pipe.
+			command->pipe = create_empty_command(splitted_line->data[i + 1]);
+			clear_string_array(command_args);
 
 			command = command->pipe;
 		}
 
-		// The argument was found
+		// The clean argument was found -> push it into cmd argv
 		else
 			push_into_string_array(
 					splitted_line->data[i],

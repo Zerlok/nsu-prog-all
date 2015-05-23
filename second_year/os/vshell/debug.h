@@ -8,19 +8,18 @@ extern int LAYER;
 
 #ifdef DEBUG_IS_ON
 
-// ----------- DEBUG MAIN SETUP -----------
-#define DEBUG_START_STR "o "
-//#define DEBUG_SAY_STR "~ "
-#define DEBUG_END_STR "x "
-#define DEBUG_LAYER_STR "|  "
+// ----------- DEBUG MAIN SETUP ----------- //
+#define _DEBUG_START_STR_ "o "
+#define _DEBUG_END_STR_ "x "
+#define _DEBUG_LAYER_STR_ "|  "
 
 
-// ----------- DEBUG MAIN MACROS -----------
+// ----------- DEBUG MAIN MACROS ----------- //
 #define _DEBUG_PRINT_LAYER_ (\
 {\
 	int _layer_index;\
 	for (_layer_index = 0; _layer_index < LAYER; ++_layer_index)\
-		printf(DEBUG_LAYER_STR);\
+		printf(_DEBUG_LAYER_STR_);\
 })
 
 #define DEBUG_LAYER (\
@@ -28,7 +27,7 @@ extern int LAYER;
 	if (DEBUG) _DEBUG_PRINT_LAYER_;\
 })
 
-#define TOGGLE_DEBUG(argc, argv)(\
+#define SWITCH_DEBUG(argc, argv)(\
 {\
 	int i;\
 	for (i = 1; i < argc; i++)\
@@ -43,7 +42,7 @@ extern int LAYER;
 		_DEBUG_PRINT_LAYER_;\
 		printf("\n");\
 		_DEBUG_PRINT_LAYER_;\
-		printf(DEBUG_START_STR);\
+		printf(_DEBUG_START_STR_);\
 		printf(__VA_ARGS__);\
 		printf("\n");\
 		++LAYER;\
@@ -72,7 +71,7 @@ extern int LAYER;
 	{\
 		--LAYER;\
 		_DEBUG_PRINT_LAYER_;\
-		printf(DEBUG_END_STR);\
+		printf(_DEBUG_END_STR_);\
 		printf(__VA_ARGS__);\
 		printf("\n");\
 		_DEBUG_PRINT_LAYER_;\
@@ -80,27 +79,26 @@ extern int LAYER;
 	}\
 })
 
-// ----------- DEBUG EXTRA MACROS -----------
-
+// ----------- DEBUG EXTRA MACROS ----------- //
 #define DEBUG_SHOW_CMD(cmd)(\
 {\
 	if (DEBUG)\
 	{\
-		_DEBUG_PRINT_LAYER_; printf("Cmd structure\n");\
-		_DEBUG_PRINT_LAYER_; printf(" * Origin      : %s\n", cmd->origin);\
-		_DEBUG_PRINT_LAYER_; printf(" * Ins         : %s\n", cmd->ins);\
-		_DEBUG_PRINT_LAYER_; printf(" * Outs        : %s\n", cmd->outs);\
-		_DEBUG_PRINT_LAYER_; printf(" * Appends     : %s\n", cmd->appends);\
-		_DEBUG_PRINT_LAYER_; printf(" * Pipe        : %p\n", cmd->pipe);\
-		_DEBUG_PRINT_LAYER_; printf(" * In back     : %s\n", cmd->is_in_background ? "True" : "False");\
-		_DEBUG_PRINT_LAYER_; printf(" * Valid       : %s\n", cmd->is_valid ? "True" : "False");\
-		_DEBUG_PRINT_LAYER_; printf(" * ArgC        : %d\n", cmd->argc);\
-		_DEBUG_PRINT_LAYER_; printf(" * ArgV (last) : %s\n", (cmd->argc > 0) ? cmd->argv[cmd->argc - 1] : cmd->argv[0]);\
+		_DEBUG_PRINT_LAYER_; printf("Cmd structure:\n");\
+		_DEBUG_PRINT_LAYER_; printf(" - Origin      : %s\n", cmd->origin);\
+		_DEBUG_PRINT_LAYER_; printf(" - Ins         : %s\n", cmd->ins);\
+		_DEBUG_PRINT_LAYER_; printf(" - Outs        : %s\n", cmd->outs);\
+		_DEBUG_PRINT_LAYER_; printf(" - Appends     : %s\n", cmd->appends);\
+		_DEBUG_PRINT_LAYER_; printf(" - Pipe        : %p\n", cmd->pipe);\
+		_DEBUG_PRINT_LAYER_; printf(" - In back     : %s\n", cmd->is_in_background ? "True" : "False");\
+		_DEBUG_PRINT_LAYER_; printf(" - Valid       : %s\n", cmd->is_valid ? "True" : "False");\
+		_DEBUG_PRINT_LAYER_; printf(" - ArgC        : %d\n", cmd->argc);\
+		_DEBUG_PRINT_LAYER_; printf(" - ArgV (last) : %s\n", (cmd->argc > 0) ? cmd->argv[cmd->argc - 1] : cmd->argv[0]);\
 	}\
 })
 
 
-// DEBUG_IS_ON was not defined.
+// ----------- ELSE ifdef DEBUG_IS_ON ----------- //
 #else
 
 #define TOGGLE_DEBUG( ... )
@@ -111,9 +109,10 @@ extern int LAYER;
 #define DEBUG_END( ... )
 #define DEBUG_SHOW_CMD( ... )
 
-// ifdef DEBUG_IS_ON
+
+// ----------- END ifdef DEBUG_IS_ON ----------- //
 #endif
 
 
-// if __LAYER_DEBUG_H__
+// ----------- END ifdef __LAYER_DEBUG_H__ ----------- //
 #endif

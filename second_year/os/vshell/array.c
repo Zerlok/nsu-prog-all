@@ -159,6 +159,13 @@ void delete_string_array(StringArray *array)
 
 char **get_string_array_data(StringArray *array)
 {
+	if ((array == NULL)
+			|| (array->data == NULL)
+			|| (array->used_length == 0))
+		return NULL;
+
+	DEBUG_START("Extracting data from string array ...");
+
 	size_t i;
 	char **chars = (char**)calloc(sizeof(char*), array->used_length + 1);
 
@@ -169,5 +176,7 @@ char **get_string_array_data(StringArray *array)
 	}
 
 	chars[array->used_length] = NULL;
+
+	DEBUG_END("done.");
 	return chars;
 }
