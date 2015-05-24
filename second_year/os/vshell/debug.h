@@ -17,8 +17,8 @@ extern int LAYER;
 // ----------- DEBUG MAIN MACROS ----------- //
 #define _DEBUG_PRINT_LAYER_ (\
 {\
-	int _layer_index;\
-	for (_layer_index = 0; _layer_index < LAYER; ++_layer_index)\
+	int _debug_layer_index_;\
+	for (_debug_layer_index_ = 0; _debug_layer_index_ < LAYER; ++_debug_layer_index_)\
 		printf(_DEBUG_LAYER_STR_);\
 })
 
@@ -39,12 +39,8 @@ extern int LAYER;
 {\
 	if (DEBUG)\
 	{\
-		_DEBUG_PRINT_LAYER_;\
-		printf("\n");\
-		_DEBUG_PRINT_LAYER_;\
-		printf(_DEBUG_START_STR_);\
-		printf(__VA_ARGS__);\
-		printf("\n");\
+		_DEBUG_PRINT_LAYER_; printf("\n");\
+		_DEBUG_PRINT_LAYER_; printf(_DEBUG_START_STR_); printf(__VA_ARGS__); printf("\n");\
 		++LAYER;\
 	}\
 })
@@ -58,7 +54,6 @@ extern int LAYER;
 	}\
 })
 
-
 #define DEBUG_SHOUT( ... )(\
 {\
 	if (DEBUG)\
@@ -70,14 +65,11 @@ extern int LAYER;
 	if (DEBUG)\
 	{\
 		--LAYER;\
-		_DEBUG_PRINT_LAYER_;\
-		printf(_DEBUG_END_STR_);\
-		printf(__VA_ARGS__);\
-		printf("\n");\
-		_DEBUG_PRINT_LAYER_;\
-		printf("\n");\
+		_DEBUG_PRINT_LAYER_; printf(_DEBUG_END_STR_); printf(__VA_ARGS__); printf("\n");\
+		_DEBUG_PRINT_LAYER_; printf("\n");\
 	}\
 })
+
 
 // ----------- DEBUG EXTRA MACROS ----------- //
 #define DEBUG_SHOW_CMD(cmd)(\
@@ -97,6 +89,18 @@ extern int LAYER;
 	}\
 })
 
+#define DEBUG_SHOW_ARGV(argc, argv)(\
+{\
+	if (DEBUG)\
+	{\
+		int _arg_index;\
+		_DEBUG_PRINT_LAYER_; printf("Argv (%d) : ", argc);\
+		for (_arg_index = 0; _arg_index < argc; _arg_index++)\
+			printf("%s ", argv[_arg_index]);\
+		printf("\n");\
+	}\
+})
+
 
 // ----------- ELSE ifdef DEBUG_IS_ON ----------- //
 #else
@@ -108,6 +112,7 @@ extern int LAYER;
 #define DEBUG_LAYER( ... )
 #define DEBUG_END( ... )
 #define DEBUG_SHOW_CMD( ... )
+#define DEBUG_SHOW_ARGV( ... )
 
 
 // ----------- END ifdef DEBUG_IS_ON ----------- //

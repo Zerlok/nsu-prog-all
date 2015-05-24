@@ -10,13 +10,39 @@ void SHELL_INIT(int argc, char **argv, Shell *shell)
 {
 	DEBUG_START("Initializing the shell ...");
 
-	shell->processes = create_process_array(10);
+	shell->input_fileno = STDIN_FILENO;
+	shell->is_interactive = isatty(shell->input_fileno);
 
-	// The shell was inited with special command
-	int i;
-	for (i = 1; i < argc; i++)
-		if (!strcmp(argv[i], "-c") && (i + 1 < argc))
-			run_command(build_command(argv[i + 1]), shell->processes);
+	if (shell->is_interactive)
+	{
+		DEBUG_SAY("Current shell is interactive.\n");
+		shell->processes = create_process_array(10);
+	}
+	else
+		DEBUG_SAY("Current shell is not interactive\n");
+
+	/* Loop until we are in the foreground.  */
+//	while (tcgetpgrp (shell_terminal) != (shell_pgid = getpgrp ()))
+//	  kill (- shell_pgid, SIGTTIN);
+
+	/* Ignore interactive and job-control signals.  */
+//	signal(SIGINT, SIG_IGN);
+//	signal(SIGQUIT, SIG_IGN);
+//	signal(SIGTSTP, SIG_IGN);
+//	signal(SIGTTIN, SIG_IGN);
+//	signal(SIGTTOU, SIG_IGN);
+//	signal(SIGCHLD, SIG_IGN);
+
+	/* Put ourselves in our own process group.  */
+	shell->pgid = getpid();
+	if (setpgid(shell->pgid, shell->pgid) < 0)
+	{
+		perror("Couldn't put the shell in its own process group");
+		exit(1);
+	}
+
+	/* Grab control of the terminal.  */
+	tcsetpgrp(shell->input_fileno, shell->pgid);
 
 	DEBUG_END("done.");
 }
@@ -24,6 +50,9 @@ void SHELL_INIT(int argc, char **argv, Shell *shell)
 
 void SHELL_RUN(Shell *shell)
 {
+	if (!(shell->is_interactive))
+		return;
+
 	DEBUG_START("Running the shell ...");
 
 	Cmd *command;
@@ -41,33 +70,9 @@ void SHELL_RUN(Shell *shell)
 		if (command == NULL)
 			continue;
 		
-        code = run_command(command, shell->processes);
-
-		// TODO: Push into history
-		// if (code != CODE_WAIT) {
-		// 	push_into_string_array(line, shell->history);
-		// }
-
+		code = launch_command(command, shell);
 		delete_command(command);
 	}
-
-	DEBUG_END("done.");
-}
-
-
-void SHELL_DUMP(Shell *shell)
-{
-	DEBUG_START("Dumping the shell into the file ...");
-
-	FILE *dump_stream = fopen(STD_DUMP_FILENAME, "w");
-	if (dump_stream == NULL)
-	{
-		printf("Cannot create the dump file!\n");
-		return;
-	}
-
-	 DEBUG_SAY("Then i'm trying to close the stream %p ...\n", dump_stream);
-	 fclose(dump_stream);
 
 	DEBUG_END("done.");
 }
@@ -80,8 +85,7 @@ void SHELL_CLOSE(Shell *shell)
 
 	DEBUG_START("Closing the shell ...");
 
-	DEBUG_SAY("Deleting the history of commands...\n");
-	delete_string_array(shell->history);
+	delete_process_array(shell->processes);
 
 	DEBUG_END("done.");
 }

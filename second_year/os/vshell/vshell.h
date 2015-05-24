@@ -4,8 +4,10 @@
 
 typedef struct Vshell
 {
+	pid_t pgid;
+	int input_fileno;
+	int is_interactive;
 	ProcessArray *processes;
-	StringArray *history;
 } Shell;
 
 void SHELL_INIT(int argc, char **argv, Shell *shell);

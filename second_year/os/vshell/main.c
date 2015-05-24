@@ -1,9 +1,11 @@
 #include "main.h"
+#include "streams.h"
 #include "array.h"
-#include "proc.h"
 #include "cmd.h"
+#include "proc.h"
 #include "parser.h"
 #include "vshell.h"
+#include "launcher.h"
 
 
 int DEBUG = 0;

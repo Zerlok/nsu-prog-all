@@ -8,6 +8,7 @@ typedef struct Command
 	char *ins;				// input filename
 	char *outs;				// output filename
 	char *appends;			// append filename
+	char *errs;				// errors filename
 
 	struct Command *pipe;	// pipe to next command
 
@@ -17,11 +18,6 @@ typedef struct Command
 	int argc;				// arguments num
 	char **argv;			// arguments chars
 } Cmd;
-
-
-void run_child(pid_t parentid, Cmd *command);
-int run_command(Cmd *call, ProcessArray *processes);
-int redirect_stream(int old_stream, char *filename, int flags);
 
 Cmd *create_empty_command(char *cmd_name);
 Cmd *build_command(char *line);

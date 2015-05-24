@@ -10,6 +10,7 @@
 #include <errno.h>
 #include <dirent.h>
 #include <fcntl.h>
+#include <termios.h>
 
 
 // DEBUG SETTINGS
@@ -25,12 +26,7 @@
 #define LINE_LEN 256
 
 
-#define STD_DUMP_FILENAME ".vshell_out"
-#define CMD_EXIT "exit"
-#define CMD_HELP "help"
-
-
-#define LINE_START_SYMBOL ">>> "
+#define LINE_START_SYMBOL "\e[1;20m>>>\e[m "
 
 #define LINE_SKIPPER_SYMBOL '\\'
 #define LINE_SEPARATOR_SYMBOL ' '
@@ -49,7 +45,7 @@
 #define CODE_SUCCESS 0
 #define CODE_FAIL 1
 #define CODE_EXIT 2
-#define CODE_INVALID_CALL 4
+#define CODE_INVALID_CMD 4
 #define CODE_UNKNOWN_CMD 5
 
 

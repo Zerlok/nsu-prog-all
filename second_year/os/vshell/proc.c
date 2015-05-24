@@ -2,16 +2,17 @@
 #include "proc.h"
 
 
-Process *create_process(int pid)
+Process *create_process(char *name)
 {
 	DEBUG_START("Creating the process ...");
 
 	Process *proc = (Process*)malloc(sizeof(Process));
-	proc->pid = pid;
-	proc->gid = 0;
-	proc->is_stopped = 0;
-	proc->is_finished = 0;
-	proc->is_in_background = 0;
+	proc->name = NULL;
+	clear_process(proc);
+
+	// Assign the name.
+	proc->name = (char*)calloc(sizeof(char), strlen(name) + 1);
+	strcpy(proc->name, name);
 
 	DEBUG_END("done.");
 	return proc;
@@ -20,20 +21,42 @@ Process *create_process(int pid)
 
 void show_process(Process *proc)
 {
-	printf("[(%d) : %d, %s%s%s]",
+	printf("[%d : %d]\t\t%s\t%s%s%s\n",
 			proc->pid,
-			proc->gid,
+			proc->pgid,
+			proc->name,
 			proc->is_stopped ? "stopped " : "",
-			proc->is_finished ? "finished " : "",
-			proc->is_in_background ? "bg" : "fg"
+			proc->is_completed ? "completed" : "",
+			proc->is_in_bg? "bg" : "fg"
 	);
+}
+
+
+void clear_process(Process *proc)
+{
+	DEBUG_START("Clearing the process ...");
+
+	proc->pid = 0;
+	proc->pgid = 0;
+	proc->in_fileno = -1;
+	proc->out_fileno = -1;
+	proc->err_fileno = -1;
+	proc->is_stopped = 0;
+	proc->is_completed = 0;
+	proc->is_in_bg = 0;
+	free(proc->name);
+
+	DEBUG_END("done.");
 }
 
 
 void delete_process(Process *proc)
 {
 	DEBUG_START("Deleting the process ...");
+
+	clear_process(proc);
 	free(proc);
+
 	DEBUG_END("done.");
 }
 
@@ -116,28 +139,21 @@ Process *pop_process_from_array(size_t indx, ProcessArray *array)
 }
 
 
-void show_process_array(ProcessArray *array, FILE *stream)
+void show_process_array(ProcessArray *array)
 {
-	if (array == NULL)
+	if ((array == NULL)
+			|| (array->used_length == 0))
 		return;
 
 	DEBUG_START("Showing the process array ...");
-	
-	// size_t i;
+	printf("Processes %ld:\n", array->used_length, array->allocated_length);
 
-	// fprintf(stream, "[");
-
-	// if (array->used_length != 0)
-	// {
-	// 	for (i = 0; i < array->used_length; i++)
-	// 	{
-	// 		fprintf(stream, "'%s', ", array->data[i]);
-	// 	}
-
-	// 	fprintf(stream, "\b\b");
-	// }
-
-	// fprintf(stream, "] (%ld, %ld)\n", array->used_length, array->allocated_length);
+	size_t i;
+	for (i = 0; i < array->used_length; i++)
+	{
+		printf("\t");
+		show_process(array->data[i]);
+	}
 
 	DEBUG_END("done.");
 }
