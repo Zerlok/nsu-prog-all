@@ -1,5 +1,6 @@
 #include "main.h"
 #include "streams.h"
+#include "signals.h"
 #include "array.h"
 #include "cmd.h"
 #include "proc.h"

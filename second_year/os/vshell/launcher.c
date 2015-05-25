@@ -1,5 +1,6 @@
 #include "main.h"
 #include "streams.h"
+#include "signals.h"
 #include "cmd.h"
 #include "proc.h"
 #include "vshell.h"
@@ -21,12 +22,7 @@ void launch_process(Process *proc, char **argv, int termgrp)
 		tcsetpgrp(termgrp, proc->pgid);
 
 	/* Set the handling for command control signals back to the default.  */
-//	signal (SIGINT, SIG_DFL);
-//	signal (SIGQUIT, SIG_DFL);
-//	signal (SIGTSTP, SIG_DFL);
-//	signal (SIGTTIN, SIG_DFL);
-//	signal (SIGTTOU, SIG_DFL);
-//	signal (SIGCHLD, SIG_DFL);
+	handle_signals();
 
 	// Redirect inputs, if necessary.
 	redirect_stream(STDIN_FILENO, proc->in_fileno);
@@ -60,6 +56,8 @@ int launch_command(Cmd *command, Shell *shell)
 	int in_fileno = -1;
 	int proc_pipes[2];
 	Process *current_process;
+	ProcessGroup *current_group = create_process_group(0);
+	push_process_group_into_list(current_group, shell->processes);
 
 	// For each pipe.
 	Cmd *current_command;
@@ -70,7 +68,7 @@ int launch_command(Cmd *command, Shell *shell)
 		current_process = create_process(current_command->origin);
 
 		// File input/output/append/error redirect setup.
-		DEBUG_SAY("Applying descriptors ...");
+		DEBUG_SAY("Applying descriptors ...\n");
 		if (current_command->ins == NULL)
 			current_process->in_fileno = create_stream(current_command->ins, INPUT_STREAM_FLAGS);
 
@@ -83,7 +81,7 @@ int launch_command(Cmd *command, Shell *shell)
 		if (current_command->errs == NULL)
 			current_process->err_fileno = create_stream(current_command->errs, ERROR_STREAM_FLAGS);
 
-		DEBUG_SAY("Applying pipes ...");
+		DEBUG_SAY("Applying pipes ...\n");
 		// Pipes input setup.
 		if (in_fileno > 0)
 			current_process->in_fileno = in_fileno;
@@ -101,22 +99,35 @@ int launch_command(Cmd *command, Shell *shell)
 			current_process->out_fileno = proc_pipes[1];
 		}
 
+		current_process->pgid = current_group->pgid;
+
 		// Forking.
-		DEBUG_SAY("Forking ...");
+		DEBUG_SAY("Forking ...\n");
 		child_id = fork();
 
-		if (child_id < 0) // Do it if fork failed.
+		// Do it if fork failed.
+		if (child_id < 0)
 		{
 			printf("Cannot create a fork.\n");
 			DEBUG_END("failed (fork failed).");
 			return CODE_FAIL;
 		}
-		else if (child_id > 0) // Do it in PARENT process.
+
+		// Do it in PARENT process.
+		else if (child_id > 0)
 		{
 			current_process->pid = child_id;
+
+			if (current_process->pgid == 0)
+				current_process->pgid = getpgid(child_id);
+
+			push_process_in_group(current_process, current_group);
+
 			waitpid(current_process->pid, &status, 0);
 		}
-		else // Do it in CHILD process.
+
+		// Do it in CHILD process.
+		else
 		{
 			current_process->pid = getpid();
 			launch_process(current_process, current_command->argv, shell->input_fileno);
@@ -127,11 +138,18 @@ int launch_command(Cmd *command, Shell *shell)
 			close(current_process->in_fileno);
 		if (current_process->out_fileno != STDOUT_FILENO)
 			close(current_process->out_fileno);
-
-		delete_process(current_process);
 	}
 
-	DEBUG_END("done (successfull launch).");
+	DEBUG_SAY("Command launched.\n");
+
+	if (!(shell->is_interactive))
+		wait_for_process_group(current_group, shell->processes);
+	else if (command->is_in_background)
+		put_process_in_background(current_group, 0);
+	else
+		put_process_in_foreground(current_group, 0, shell);
+
+	DEBUG_END("done.");
 	return CODE_SUCCESS;
 }
 

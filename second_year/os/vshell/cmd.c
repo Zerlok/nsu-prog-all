@@ -9,7 +9,7 @@ Cmd *create_empty_command(char *cmd_name)
 	if (cmd_name == NULL)
 		return NULL;
 
-	DEBUG_START("Creating the empty Cmd ...");
+	DEBUG_START("Creating an empty command ...");
 	
 	Cmd *command = (Cmd*)malloc(sizeof(Cmd));
 
@@ -47,7 +47,7 @@ Cmd *build_command(char *line)
 			|| (splitted_line->used_length == 0))
 	{
 		delete_string_array(splitted_line);
-		DEBUG_END("done (empty split).");
+		DEBUG_END("failed (empty split).");
 		return NULL;
 	}
 	DEBUG_SAY("After if-else condition\n");
@@ -162,7 +162,7 @@ void clear_command(Cmd *command)
 	if (command == NULL)
 		return;
 
-	DEBUG_START("Clearing the command call ...");
+	DEBUG_START("Clearing the command ...");
 
 	DEBUG_SAY("Removing origin ...\n");
 	free(command->origin);
@@ -174,7 +174,7 @@ void clear_command(Cmd *command)
 	free(command->appends);
 	DEBUG_SAY("Removing errs ...\n");
 	free(command->errs);
-	DEBUG_SAY("Removing pipe ...");
+	DEBUG_SAY("Removing pipe ...\n");
 	delete_command(command->pipe);
 
 	DEBUG_SAY("Removing argv ...\n");
@@ -203,7 +203,7 @@ void delete_command(Cmd *command)
 	if (command == NULL)
 		return;
 
-	DEBUG_START("Deleting the command call ...");
+	DEBUG_START("Deleting the command ...");
 
 	clear_command(command);
 	free(command);

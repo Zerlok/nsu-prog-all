@@ -11,7 +11,8 @@ HEADERS += main.h\
         proc.h\
         vshell.h\
     launcher.h \
-    streams.h
+    streams.h \
+    signals.h
 
 SOURCES += main.c\
         array.c\
@@ -20,4 +21,5 @@ SOURCES += main.c\
         proc.c\
         vshell.c \
     launcher.c \
-    streams.c
+    streams.c \
+    signals.c
