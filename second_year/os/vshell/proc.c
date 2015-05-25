@@ -9,9 +9,16 @@ Process *create_process(char *name)
 	DEBUG_START("Creating the process ...");
 
 	Process *proc = (Process*)malloc(sizeof(Process));
-	proc->name = NULL;
 	proc->next = NULL;
-	clear_process(proc);
+	proc->pid = 0;
+	proc->pgid = 0;
+	proc->in_fileno = STDIN_FILENO;
+	proc->out_fileno = STDOUT_FILENO;
+	proc->err_fileno = STDERR_FILENO;
+	proc->is_stopped = 0;
+	proc->is_completed = 0;
+	proc->is_in_bg = 0;
+	proc->status = 0;
 
 	// Assign the name.
 	proc->name = (char*)calloc(sizeof(char), strlen(name) + 1);

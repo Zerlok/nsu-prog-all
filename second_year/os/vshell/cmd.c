@@ -12,7 +12,6 @@ Cmd *create_empty_command(char *cmd_name)
 	DEBUG_START("Creating an empty command ...");
 	
 	Cmd *command = (Cmd*)malloc(sizeof(Cmd));
-
 	command->ins = NULL;
 	command->outs = NULL;
 	command->appends = NULL;
@@ -20,7 +19,8 @@ Cmd *create_empty_command(char *cmd_name)
 	command->pipe = NULL;
 	command->argv = NULL;
 	command->argc = 0;
-	clear_command(command);
+	command->is_valid = 0;
+	command->is_in_background = 0;
 
 	command->origin = (char*)calloc(sizeof(char), strlen(cmd_name) + 1);
 	strcpy(command->origin, cmd_name);
@@ -182,17 +182,6 @@ void clear_command(Cmd *command)
 	for (i = 0; i < command->argc; i++)
 		free(command->argv[i]);
 	free(command->argv);
-
-	command->origin = NULL;
-	command->ins = NULL;
-	command->outs = NULL;
-	command->appends = NULL;
-	command->errs = NULL;
-	command->pipe = NULL;
-	command->argv = NULL;
-	command->argc = 0;
-	command->is_valid = 0;
-	command->is_in_background = 0;
 
 	DEBUG_END("done.");
 }

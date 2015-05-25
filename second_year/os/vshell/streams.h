@@ -9,7 +9,7 @@
 
 
 int create_stream(char *filename, int flags);
-void redirect_stream(int old_stream, int new_stream);
+void redirect_stream(int from, int to);
 
 
 // __STREAMS_H__
