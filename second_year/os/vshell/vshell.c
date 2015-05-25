@@ -134,7 +134,7 @@ void put_process_in_background(ProcessGroup *group, int cont)
 
 int set_process_status(pid_t pid, int status, ProcessList *processes)
 {
-	DEBUG_START("Marking process status with pid %d", pid);
+	DEBUG_START("Setting up process status with pid %d", pid);
 
 	Process *proc;
 	if ((pid > 0)
@@ -168,8 +168,6 @@ int set_process_status(pid_t pid, int status, ProcessList *processes)
 
 		fprintf(stderr, "No child process %d.\n", pid);
 	}
-	else
-		perror("Empty list");
 
 	DEBUG_END("failed.");
 	return -1;

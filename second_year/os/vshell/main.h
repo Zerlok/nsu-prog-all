@@ -51,6 +51,7 @@
 
 
 extern char **environ;
+struct termios shell_term_modes;
 
 
 // __MAIN_H__

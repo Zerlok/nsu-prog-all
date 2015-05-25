@@ -46,9 +46,9 @@ void clear_process(Process *proc)
 	proc->next = NULL;
 	proc->pid = 0;
 	proc->pgid = 0;
-	proc->in_fileno = -1;
-	proc->out_fileno = -1;
-	proc->err_fileno = -1;
+	proc->in_fileno = STDIN_FILENO;
+	proc->out_fileno = STDOUT_FILENO;
+	proc->err_fileno = STDERR_FILENO;
 	proc->is_stopped = 0;
 	proc->is_completed = 0;
 	proc->is_in_bg = 0;
@@ -78,7 +78,7 @@ ProcessGroup *create_process_group(pid_t pgid)
 	ProcessGroup *group = (ProcessGroup*)malloc(sizeof(ProcessGroup));
 	group->head = NULL;
 	group->next_group = NULL;
-	group->term_modes = NULL;
+	group->term_modes = &shell_term_modes;
 	clear_process_group(group);
 
 	group->pgid = pgid;

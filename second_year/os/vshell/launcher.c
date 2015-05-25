@@ -7,27 +7,33 @@
 #include "launcher.h"
 
 
-void launch_process(Process *proc, char **argv, int termgrp)
+void launch_process(Process *proc, char **argv, Shell *shell)
 {
 	DEBUG_START("Launching the process (%s), pid %d", argv[0], proc->pid);
 
-	if (proc->pgid == 0)
-		proc->pgid = proc->pid;
+	if (shell->is_interactive)
+	{
+		if (proc->pgid == 0)
+			proc->pgid = proc->pid;
 
-	// Put process into process group.
-	setpgid(proc->pid, proc->pgid);
+		// Put process into process group.
+		setpgid(proc->pid, proc->pgid);
 
-	// Give process group the terminal.
-	if (!(proc->is_in_bg))
-		tcsetpgrp(termgrp, proc->pgid);
+		// Give process group the terminal.
+		if (!(proc->is_in_bg))
+			tcsetpgrp(shell->input_fileno, proc->pgid);
 
-	/* Set the handling for command control signals back to the default.  */
-	handle_signals();
+		/* Set the handling for command control signals back to the default.  */
+		handle_signals();
+	}
 
 	// Redirect inputs, if necessary.
-	redirect_stream(STDIN_FILENO, proc->in_fileno);
-	redirect_stream(STDOUT_FILENO, proc->out_fileno);
-	redirect_stream(STDERR_FILENO, proc->err_fileno);
+//	if (proc->in_fileno != STDIN_FILENO)
+//		redirect_stream(STDIN_FILENO, proc->in_fileno);
+//	if (proc->out_fileno != STDOUT_FILENO)
+//		redirect_stream(STDOUT_FILENO, proc->out_fileno);
+//	if (proc->err_fileno != STDERR_FILENO)
+//		redirect_stream(STDERR_FILENO, proc->err_fileno);
 
 	DEBUG_END("done (executing the child process).");
 
@@ -53,7 +59,8 @@ int launch_command(Cmd *command, Shell *shell)
 
 	pid_t child_id;
 	int status;
-	int in_fileno = -1;
+	int in_fileno = STDIN_FILENO;
+	int out_fileno = STDOUT_FILENO;
 	int proc_pipes[2];
 	Process *current_process;
 	ProcessGroup *current_group = create_process_group(0);
@@ -69,16 +76,16 @@ int launch_command(Cmd *command, Shell *shell)
 
 		// File input/output/append/error redirect setup.
 		DEBUG_SAY("Applying descriptors ...\n");
-		if (current_command->ins == NULL)
+		if (current_command->ins != NULL)
 			current_process->in_fileno = create_stream(current_command->ins, INPUT_STREAM_FLAGS);
 
-		if (current_command->outs == NULL)
+		if (current_command->outs != NULL)
 			current_process->out_fileno = create_stream(current_command->outs, OUTPUT_STREAM_FLAGS);
 
-		else if (current_command->appends == NULL)
+		else if (current_command->appends != NULL)
 			current_process->out_fileno = create_stream(current_command->appends, APPEND_STREAM_FLAGS);
 
-		if (current_command->errs == NULL)
+		if (current_command->errs != NULL)
 			current_process->err_fileno = create_stream(current_command->errs, ERROR_STREAM_FLAGS);
 
 		DEBUG_SAY("Applying pipes ...\n");
@@ -98,8 +105,8 @@ int launch_command(Cmd *command, Shell *shell)
 			in_fileno = proc_pipes[0]; // save pipe to the next process.
 			current_process->out_fileno = proc_pipes[1];
 		}
-
-		current_process->pgid = current_group->pgid;
+		else
+			current_process->out_fileno = out_fileno;
 
 		// Forking.
 		DEBUG_SAY("Forking ...\n");
@@ -117,9 +124,13 @@ int launch_command(Cmd *command, Shell *shell)
 		else if (child_id > 0)
 		{
 			current_process->pid = child_id;
+			if (shell->is_interactive)
+			{
+				if (current_group->pgid == 0)
+					current_group->pgid = child_id;
 
-			if (current_process->pgid == 0)
-				current_process->pgid = getpgid(child_id);
+				setpgid(child_id, current_group->pgid);
+			}
 
 			push_process_in_group(current_process, current_group);
 
@@ -130,7 +141,7 @@ int launch_command(Cmd *command, Shell *shell)
 		else
 		{
 			current_process->pid = getpid();
-			launch_process(current_process, current_command->argv, shell->input_fileno);
+			launch_process(current_process, current_command->argv, shell);
 		}
 
 		// Clearing pipes.

@@ -2,7 +2,7 @@
 #define __LAUNCHER_H__
 
 
-void launch_process(Process *proc, char **argv, int terminal);
+void launch_process(Process *proc, char **argv, Shell *shell);
 
 int is_builtin_command(Cmd *command);
 int launch_command(Cmd *command, Shell *shell);

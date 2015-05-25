@@ -5,7 +5,10 @@
 int create_stream(char *filename, int flags)
 {
 	if (filename == NULL)
+	{
+		DEBUG_SAY("NULLING");
 		return -2;
+	}
 
 	DEBUG_START("Creating the new stream ...");
 
@@ -25,26 +28,17 @@ int create_stream(char *filename, int flags)
 
 void redirect_stream(int old_stream, int new_stream)
 {
-	if (new_stream == -2)
-		return;
-
-	DEBUG_START("Redirecting the stream ...");
+	DEBUG_START("Redirecting the stream %d -> %d ...", old_stream, new_stream);
 
 	if (new_stream == -1)
 	{
-		perror(strerror(errno));
 		DEBUG_END("failed (new stream is invalid).");
 		return;
 	}
-	else if ((new_stream == STDIN_FILENO)
-			 || (new_stream == STDOUT_FILENO)
-			 || (new_stream == STDERR_FILENO))
-	{
-		DEBUG_END("failed (redirect to std stream '%d').", new_stream);
-		return;
-	}
 
+	DEBUG_SAY("Duplicating streams %d to %d ...\n", new_stream, old_stream);
 	dup2(new_stream, old_stream);
+	DEBUG_SAY("duplicated.\n");
 	close(new_stream);
 
 	DEBUG_END("done.");
