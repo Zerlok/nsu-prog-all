@@ -9,7 +9,7 @@
 
 void launch_process(Process *proc, char **argv, Shell *shell)
 {
-	DEBUG_START("Launching the process (%s), pid %d", argv[0], proc->pid);
+	DEBUG_START("Launching the process '%s', pid %d", argv[0], proc->pid);
 
 	if (shell->is_interactive)
 	{
@@ -24,8 +24,13 @@ void launch_process(Process *proc, char **argv, Shell *shell)
 			tcsetpgrp(shell->input_fileno, proc->pgid);
 
 		/* Set the handling for command control signals back to the default.  */
-		handle_signals();
+//		handle_signals();
 	}
+
+	show_process(proc);
+	DEBUG_SAY("IN: %d\n", proc->in_fileno);
+	DEBUG_SAY("OUT: %d\n", proc->out_fileno);
+	DEBUG_SAY("ERR: %d\n", proc->err_fileno);
 
 //	 Redirect inputs, if necessary.
 	if (proc->in_fileno != STDIN_FILENO)
@@ -37,7 +42,8 @@ void launch_process(Process *proc, char **argv, Shell *shell)
 
 	DEBUG_END("done (executing the child process).");
 
-	execvpe(argv[0], argv, environ);
+	execvp(argv[0], argv);
+
 	perror(argv[0]);
 	exit(CODE_FAIL);
 }
@@ -60,7 +66,7 @@ int launch_command(Cmd *command, Shell *shell)
 	pid_t child_id;
 	int status;
 	int in_fileno = STDIN_FILENO;
-	int proc_pipes[2];
+	int proc_pipes[2] = {-1, -1};
 	Process *proc;
 	ProcessGroup *group = create_process_group(0);
 	push_process_group_into_list(group, shell->processes);
@@ -128,7 +134,6 @@ int launch_command(Cmd *command, Shell *shell)
 				setpgid(child_id, group->pgid);
 			}
 
-
 			waitpid(proc->pid, &status, 0);
 		}
 
@@ -149,6 +154,8 @@ int launch_command(Cmd *command, Shell *shell)
 	}
 
 	DEBUG_SAY("Command launched.\n");
+
+	show_process_list(shell->processes);
 
 	if (!(shell->is_interactive))
 		wait_for_process_group(group, shell->processes);
