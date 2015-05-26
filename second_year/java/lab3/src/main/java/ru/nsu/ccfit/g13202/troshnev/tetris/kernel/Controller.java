@@ -1,7 +1,5 @@
 package ru.nsu.ccfit.g13202.troshnev.tetris.kernel;
 
-import ru.nsu.ccfit.g13202.troshnev.tetris.events.GamePausedEvent;
-import ru.nsu.ccfit.g13202.troshnev.tetris.events.GameStoppedEvent;
 import ru.nsu.ccfit.g13202.troshnev.tetris.figures.Figure;
 import ru.nsu.ccfit.g13202.troshnev.tetris.views.GameView;
 
@@ -21,14 +19,11 @@ public class Controller extends Observable implements Runnable {
     private Figure activeFigure;
     private Timer ticker;
     private boolean gamePaused;
-    private EventManager gameEvents;
-    private Thread eventListenerThread;
 
     public Controller() {
         activeFigure = null;
-        gameEvents = new EventManager();
-        gameField = new Field(10, 15, gameEvents);
-        gameView = new GameView(gameField, gameEvents);
+        gameField = new Field(10, 15);
+        gameView = new GameView(gameField);
         gamePaused = false;
 
         ticker = new Timer(600, new ActionListener() {
@@ -126,10 +121,6 @@ public class Controller extends Observable implements Runnable {
     public void run() {
         createNewFigure();
         gameView.run();
-
-        gameEvents.run();
-        eventListenerThread = new Thread(new EventListener(gameEvents));
-        eventListenerThread.start();
         ticker.start();
     }
 
@@ -140,7 +131,6 @@ public class Controller extends Observable implements Runnable {
 
         if (gameField.hasIntersectionWithFigure()) {
             activeFigure = null;
-            gameEvents.push(new GameStoppedEvent("Game over"));
         }
     }
 
@@ -214,7 +204,6 @@ public class Controller extends Observable implements Runnable {
         }
 
         gamePaused = !gamePaused;
-        gameEvents.push(new GamePausedEvent(gamePaused));
     }
 
     private void recalculateTickerDelay(int rowsNum) {
