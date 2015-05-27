@@ -9,12 +9,15 @@ import java.awt.*;
  * Created by zerlok on 4/29/15.
  */
 public class Field extends JPanel {
+    private boolean muteBlocks;
     private int fieldColumnsNum;
     private int fieldRowsNum;
+
     private Block[][] fieldBlocks;
     private Figure activeFigure;
 
     public Field(int w, int h) {
+        muteBlocks = false;
         fieldColumnsNum = w;
         fieldRowsNum = h;
         activeFigure = null;
@@ -114,30 +117,55 @@ public class Field extends JPanel {
         return fieldRowsNum;
     }
 
+    public void setMuteBlocks(boolean bool) {
+        muteBlocks = bool;
+    }
+
     @Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
         Graphics2D g2d = (Graphics2D) g;
 
+        Block mutedBlock = new Block(new Color(117, 117, 117));
+
 //        Draw figure fieldBlocks.
         if (activeFigure != null) {
-            Block[] figureBlocks = activeFigure.getBlocks();
-            Coordinate[] figureBlocksPositions = activeFigure.getBlocksGlobalPositions();
+            Block[] figureBlocks = null;
+            Coordinate[] figureBlocksPositions= activeFigure.getBlocksGlobalPositions();
 
-            for (int i = 0; i < figureBlocks.length; i++)
-                figureBlocks[i].draw(
-                        figureBlocksPositions[i].getCoY(), // rowNum
-                        figureBlocksPositions[i].getCoX(), // columnNum
-                        g2d);
+            if (!muteBlocks) {
+                figureBlocks = activeFigure.getBlocks();
+            }
+
+            for (int i = 0; i < figureBlocksPositions.length; i++) {
+                if (!muteBlocks) {
+                    figureBlocks[i].draw(
+                            figureBlocksPositions[i].getCoY(), // rowNum
+                            figureBlocksPositions[i].getCoX(), // columnNum
+                            g2d);
+                } else {
+                    mutedBlock.draw(
+                            figureBlocksPositions[i].getCoY(), // rowNum
+                            figureBlocksPositions[i].getCoX(), // columnNum
+                            g2d);
+                }
+            }
         }
 
 //        Draw the rest fieldBlocks.
         int columnNum;
         int rowNum;
 
-        for(rowNum = 0; rowNum < fieldRowsNum; rowNum++)
-            for (columnNum = 0; columnNum < fieldColumnsNum; columnNum++)
-                if (fieldBlocks[rowNum][columnNum] != null)
-                    fieldBlocks[rowNum][columnNum].draw(rowNum, columnNum, g2d);
+        for(rowNum = 0; rowNum < fieldRowsNum; rowNum++) {
+            for (columnNum = 0; columnNum < fieldColumnsNum; columnNum++) {
+                if (!muteBlocks) {
+                    if (fieldBlocks[rowNum][columnNum] != null) {
+                        fieldBlocks[rowNum][columnNum].draw(rowNum, columnNum, g2d);
+                    }
+                } else {
+                    mutedBlock.draw(rowNum, columnNum, g2d);
+                }
+            }
+        }
     }
 }

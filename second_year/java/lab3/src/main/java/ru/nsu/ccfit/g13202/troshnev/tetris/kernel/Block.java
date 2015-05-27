@@ -6,11 +6,12 @@ import java.awt.*;
  * Created by zerlok on 4/29/15.
  */
 public class Block {
-//    Block pixelWidth in pixels.
+    // Block pixelWidth in pixels.
     static private int pixelWidth = 100;
     static private int pixelPadding = 5;
     static private int pixelMargin = 1;
-//    The block color.
+
+    // The block color.
     private Color innerColor;
     private Color borderColor;
 

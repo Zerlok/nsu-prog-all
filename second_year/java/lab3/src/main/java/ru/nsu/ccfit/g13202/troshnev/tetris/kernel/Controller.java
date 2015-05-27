@@ -92,6 +92,7 @@ public class Controller extends Observable implements Runnable {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
                 togglePauseGame();
+                gameField.repaint();
             }
         };
 
@@ -196,14 +197,13 @@ public class Controller extends Observable implements Runnable {
     }
 
     private void togglePauseGame() {
-        if (gamePaused) {
+        if (gamePaused)
             ticker.start();
-
-        } else {
+        else
             ticker.stop();
-        }
 
         gamePaused = !gamePaused;
+        gameField.setMuteBlocks(gamePaused);
     }
 
     private void recalculateTickerDelay(int rowsNum) {
