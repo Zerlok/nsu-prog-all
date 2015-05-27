@@ -8,7 +8,7 @@ import java.awt.*;
 /**
  * Created by zerlok on 5/6/15.
  */
-public class MLFigure extends Figure {
+public class MLFigure extends AbstractFigure {
     public MLFigure() {
         rotation = 0;
         maxRotationsNum = 4;

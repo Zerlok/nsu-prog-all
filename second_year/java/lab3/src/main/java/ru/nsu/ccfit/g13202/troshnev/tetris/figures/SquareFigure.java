@@ -8,7 +8,7 @@ import java.awt.*;
 /**
  * Created by zerlok on 5/5/15.
  */
-public class SquareFigure extends Figure {
+public class SquareFigure extends AbstractFigure {
     public SquareFigure() {
         rotation = 0;
         maxRotationsNum = 1;

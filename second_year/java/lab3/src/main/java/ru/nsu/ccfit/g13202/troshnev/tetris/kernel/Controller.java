@@ -1,7 +1,9 @@
 package ru.nsu.ccfit.g13202.troshnev.tetris.kernel;
 
-import ru.nsu.ccfit.g13202.troshnev.tetris.figures.Figure;
+import ru.nsu.ccfit.g13202.troshnev.tetris.figures.AbstractFigure;
+import ru.nsu.ccfit.g13202.troshnev.tetris.views.GameFieldView;
 import ru.nsu.ccfit.g13202.troshnev.tetris.views.GameView;
+import ru.nsu.ccfit.g13202.troshnev.tetris.views.GameWindow;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -14,23 +16,24 @@ import java.util.Observable;
  */
 public class Controller extends Observable implements Runnable {
     private Field gameField;
-    private GameView gameView;
+    private GameWindow gameWindow;
+    private GameFieldView gameView;
     private FigureFactory figureFactory;
-    private Figure activeFigure;
+    private AbstractFigure activeFigure;
     private Timer ticker;
     private boolean gamePaused;
 
     public Controller() {
         activeFigure = null;
-        gameField = new Field(10, 15);
-        gameView = new GameView(gameField);
         gamePaused = false;
+        gameField = new Field(10, 15);
+        gameWindow = new GameWindow(gameField);
 
         ticker = new Timer(600, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
                 moveFigureDown();
-                gameField.repaint();
+                gameView.repaint();
             }
         });
         ticker.setRepeats(true);
@@ -52,7 +55,7 @@ public class Controller extends Observable implements Runnable {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
                 moveFigureRight();
-                gameField.repaint();
+                gameWindow.repaint();
             }
         };
 
@@ -60,7 +63,7 @@ public class Controller extends Observable implements Runnable {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
                 moveFigureLeft();
-                gameField.repaint();
+                gameWindow.repaint();
             }
         };
 
@@ -68,7 +71,7 @@ public class Controller extends Observable implements Runnable {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
                 moveFigureDown();
-                gameField.repaint();
+                gameWindow.repaint();
             }
         };
 
@@ -76,7 +79,7 @@ public class Controller extends Observable implements Runnable {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
                 rotateFigureRight();
-                gameField.repaint();
+                gameWindow.repaint();
             }
         };
 
@@ -84,7 +87,7 @@ public class Controller extends Observable implements Runnable {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
                 rotateFigureLeft();
-                gameField.repaint();
+                gameWindow.repaint();
             }
         };
 
@@ -92,12 +95,12 @@ public class Controller extends Observable implements Runnable {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
                 togglePauseGame();
-                gameField.repaint();
+                gameWindow.repaint();
             }
         };
 
-        InputMap inputMap = gameField.getInputMap(JPanel.WHEN_IN_FOCUSED_WINDOW);
-        ActionMap actionMap = gameField.getActionMap();
+        InputMap inputMap = gameWindow.getInputMap(JPanel.WHEN_IN_FOCUSED_WINDOW);
+        ActionMap actionMap = gameWindow.getActionMap();
 
         inputMap.put(KeyStroke.getKeyStroke("RIGHT"), "moveRightAction");
         actionMap.put("moveRightAction", moveRightAction);

@@ -8,7 +8,7 @@ import java.awt.*;
 /**
  * Created by zerlok on 4/29/15.
  */
-public abstract class Figure implements Cloneable {
+public abstract class AbstractFigure implements Cloneable {
     protected Coordinate figurePosition = new Coordinate(0, 0);
     protected int rotation;
     protected int maxRotationsNum;
@@ -18,8 +18,8 @@ public abstract class Figure implements Cloneable {
 
     protected abstract void applyFigureRotation();
 
-    public Figure clone() {
-        Figure figure = null;
+    public AbstractFigure clone() {
+        AbstractFigure figure = null;
 
         try {
             figure = getClass().newInstance();

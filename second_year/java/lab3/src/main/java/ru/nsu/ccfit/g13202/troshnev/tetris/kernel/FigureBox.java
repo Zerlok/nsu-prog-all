@@ -1,6 +1,6 @@
 package ru.nsu.ccfit.g13202.troshnev.tetris.kernel;
 
-import ru.nsu.ccfit.g13202.troshnev.tetris.figures.Figure;
+import ru.nsu.ccfit.g13202.troshnev.tetris.figures.AbstractFigure;
 
 import java.util.Random;
 import java.util.Vector;
@@ -9,25 +9,25 @@ import java.util.Vector;
  * Created by zerlok on 5/13/15.
  */
 public class FigureBox {
-    private Vector<Figure> figuresArray;
+    private Vector<AbstractFigure> figuresArray;
     private int index;
     private Random rnd;
 
     public FigureBox() {
-        figuresArray = new Vector<Figure>();
+        figuresArray = new Vector<AbstractFigure>();
         index = 0;
         rnd = new Random();
     }
 
-    public void push(Figure figure) {
+    public void push(AbstractFigure figure) {
         figuresArray.addElement(figure);
     }
 
-    public Figure pop() {
+    public AbstractFigure pop() {
         if (index == figuresArray.size())
             shuffle();
 
-        Figure figure = figuresArray.get(index).clone();
+        AbstractFigure figure = figuresArray.get(index).clone();
         ++index;
         figure.setRotation(rnd.nextInt());
         return figure;
@@ -35,8 +35,8 @@ public class FigureBox {
 
     public void shuffle() {
         int size = figuresArray.size();
-        Figure figurePrototype;
-        Vector<Figure> shuffledArray = new Vector<Figure>(size);
+        AbstractFigure figurePrototype;
+        Vector<AbstractFigure> shuffledArray = new Vector<AbstractFigure>(size);
 
         for (int i = 0; i < size; i++) {
             int randomIndex = rnd.nextInt(size - i);
@@ -51,7 +51,7 @@ public class FigureBox {
             figuresArray.removeElementAt(randomIndex);
         }
 
-        figuresArray = new Vector<Figure>(shuffledArray);
+        figuresArray = new Vector<AbstractFigure>(shuffledArray);
         index = 0;
     }
 }

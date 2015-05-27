@@ -8,7 +8,7 @@ import java.awt.*;
 /**
  * Created by zerlok on 4/29/15.
  */
-public class TFigure extends Figure {
+public class TFigure extends AbstractFigure {
     public TFigure() {
         rotation = 0;
         maxRotationsNum = 4;

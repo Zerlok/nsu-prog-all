@@ -8,7 +8,7 @@ import java.awt.*;
 /**
  * Created by zerlok on 5/6/15.
  */
-public class SFigure extends Figure {
+public class SFigure extends AbstractFigure {
     public SFigure() {
         rotation = 0;
         maxRotationsNum = 2;

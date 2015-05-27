@@ -8,7 +8,7 @@ import java.awt.*;
 /**
  * Created by zerlok on 5/6/15.
  */
-public class MSFigure extends Figure {
+public class MSFigure extends AbstractFigure {
     public MSFigure() {
         rotation = 0;
         maxRotationsNum = 2;

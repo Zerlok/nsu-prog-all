@@ -1,0 +1,168 @@
+package ru.nsu.ccfit.g13202.troshnev.tetris.kernel;
+
+import ru.nsu.ccfit.g13202.troshnev.tetris.figures.Figure;
+import ru.nsu.ccfit.g13202.troshnev.tetris.views.GameView;
+
+import javax.swing.*;
+import java.awt.event.ActionEvent;
+import java.io.IOException;
+
+/**
+ * Created by zerlok on 4/29/15.
+ */
+public class Controller {
+    private Field gameField;
+    private GameView gameView;
+    private FigureFactory figureFactory;
+    private Figure activeFigure;
+
+    public Controller() {
+        gameField = new Field(10, 15);
+        gameView = new GameView(gameField);
+        figureFactory = new FigureFactory();
+        activeFigure = null;
+
+        try {
+            figureFactory.configure();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        bindKeys();
+    }
+
+    private void bindKeys() {
+        Action moveRightAction = new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                moveFigureRight();
+                gameView.update();
+            }
+        };
+
+        Action moveLeftAction = new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                moveFigureLeft();
+                gameView.update();
+            }
+        };
+
+        Action moveDownAction = new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                moveFigureDown();
+                gameView.update();
+            }
+        };
+
+        Action rotateRightAction = new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                rotateFigureRight();
+                gameView.update();
+            }
+        };
+
+        Action rotateLeftAction = new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                rotateFigureLeft();
+                gameView.update();
+            }
+        };
+
+        InputMap inputMap = gameField.getInputMap(JPanel.WHEN_IN_FOCUSED_WINDOW);
+        ActionMap actionMap = gameField.getActionMap();
+
+        inputMap.put(KeyStroke.getKeyStroke("RIGHT"), "moveRightAction");
+        actionMap.put("moveRightAction", moveRightAction);
+
+        inputMap.put(KeyStroke.getKeyStroke("LEFT"), "moveLeftAction");
+        actionMap.put("moveLeftAction", moveLeftAction);
+
+        inputMap.put(KeyStroke.getKeyStroke("SPACE"), "moveDownAction");
+        actionMap.put("moveDownAction", moveDownAction);
+
+        inputMap.put(KeyStroke.getKeyStroke("UP"), "rotateLeftAction");
+        actionMap.put("rotateLeftAction", rotateLeftAction);
+
+        inputMap.put(KeyStroke.getKeyStroke("DOWN"), "rotateRightAction");
+        actionMap.put("rotateRightAction", rotateRightAction);
+    }
+
+    public void createNewFigure() {
+        activeFigure = figureFactory.createRandomFigure();
+        activeFigure.setPos(gameField.getFieldColumnsNum() / 2, 0);
+
+        if (gameField.hasIntersectionWithFigure(activeFigure)) {
+            activeFigure = null;
+            System.out.println("GAME OVER!");
+
+        } else {
+            gameView.updateFigure(activeFigure);
+        }
+    }
+
+    public void run() {
+        createNewFigure();
+        gameView.run();
+
+        System.out.println("Game running...");
+    }
+
+    public void moveFigureDown() {
+        if (activeFigure == null)
+            return;
+
+        activeFigure.moveDown();
+
+        if (gameField.hasIntersectionWithFigure(activeFigure)) {
+            activeFigure.moveUp();
+            gameField.saveFigure(activeFigure);
+            gameField.removeFullRows();
+            createNewFigure();
+        }
+    }
+
+    public void moveFigureLeft() {
+        if (activeFigure == null)
+            return;
+
+        activeFigure.moveLeft();
+
+        if (gameField.hasIntersectionWithFigure(activeFigure))
+            activeFigure.moveRight();
+    }
+
+    public void moveFigureRight() {
+        if (activeFigure == null)
+            return;
+
+        activeFigure.moveRight();
+
+        if (gameField.hasIntersectionWithFigure(activeFigure))
+            activeFigure.moveLeft();
+    }
+
+    public void rotateFigureLeft() {
+        if (activeFigure == null)
+            return;
+
+        activeFigure.rotateLeft();
+
+        if (gameField.hasIntersectionWithFigure(activeFigure))
+            activeFigure.rotateRight();
+    }
+
+    public void rotateFigureRight() {
+        if (activeFigure == null)
+            return;
+
+        activeFigure.rotateRight();
+
+        if (gameField.hasIntersectionWithFigure(activeFigure))
+            activeFigure.rotateLeft();
+    }
+}

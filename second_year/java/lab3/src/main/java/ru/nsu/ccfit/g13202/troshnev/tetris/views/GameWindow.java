@@ -1,13 +1,20 @@
 package ru.nsu.ccfit.g13202.troshnev.tetris.views;
 
+import ru.nsu.ccfit.g13202.troshnev.tetris.kernel.Field;
+
+import javax.swing.*;
+
 /**
  * Created by zerlok on 4/29/15.
  */
 
-public class GameWindow {
-    private String name;
+public class GameWindow extends JFrame {
+    private GameFieldView gameView;
 
-    public GameWindow(String name) {
-        System.out.println(name);
+    public GameWindow(Field field) {
+        gameView = new GameFieldView(field);
+
+        add(gameView);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     }
 }
