@@ -33,6 +33,10 @@ public class GameFieldView extends JComponent {
         );
     }
 
+    public void setMuteBlocks(boolean bool) {
+        muteBlocks = bool;
+    }
+
     @Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
