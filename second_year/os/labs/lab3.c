@@ -1,27 +1,26 @@
-#include <sys/types.h>
-#include <unistd.h>
 #include <stdio.h>
 #include <errno.h>
+#include <string.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 
 int main(int argc, char **argv)
 {
-	FILE *fp;				// real - who create process(same as UID). Usage:for control system resourses 
-	uid_t uid;				// effective - who run this process, if this information change. Usage: for determine permessions
-
 	if (argc < 2)
 	{
 		fprintf(stderr, "Usage: program name  %s [filename]\n", argv[0]);
-		exit(1);
+		return 1;
 	}
 
-	printf("First: uid=%ld and euid=%ld\n", getuid(), geteuid());
+	FILE *fp;		// real - who create process(same as UID). Usage: control system resourses 
+	uid_t uid;		// effective - who run this process, if this information change. Usage: determine permessions
+	printf("First: uid=%d and euid=%d\n", getuid(), geteuid());
 
 	if ((fp = fopen(argv[1], "r")) == NULL) 
 	{
-		perror(strerror(errno));
 		perror(argv[0]);
-		exit(2);
+		return 2;
 	}
 	else 
 	{
@@ -32,7 +31,7 @@ int main(int argc, char **argv)
 	uid = getuid();
 	setuid(uid);
 
-	printf("Second: setuid(%ld):\n   uid=%ld, euid=%ld\n",
+	printf("Second: setuid(%d):\n   uid=%d, euid=%d\n",
 			uid,
 			getuid(),
 			geteuid()
@@ -40,9 +39,8 @@ int main(int argc, char **argv)
 
 	if ((fp = fopen(argv[1], "r")) == NULL)
 	{
-		perror(strerror(errno));
-		// perror(argv[0]);
-		exit(3);
+		perror(argv[0]);
+		return 3;
 	}
 	else
 	{
