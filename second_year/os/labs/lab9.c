@@ -8,12 +8,6 @@
 
 int main(int argc, char **argv)
 {
-	if (argc < 2)
-	{
-		fprintf(stderr, "Usage: %s [bin]\n", argv[0]);
-		return 1;
-	}
-
 	pid_t id, pid;
 	int status;
 
@@ -25,9 +19,8 @@ int main(int argc, char **argv)
 	}
 	else if (id == 0)
 	{
-		char **args = &(argv[1]);
-		execvp(args[0], args);
-		perror(args[0]);
+		execlp("cat", "cat", "/home/zerlok/Downloads/netprint.ppd", (char*)NULL);
+		perror(argv[0]);
 		return 1;
 	}
 
