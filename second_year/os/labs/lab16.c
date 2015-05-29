@@ -1,59 +1,56 @@
+#include <fcntl.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <termios.h>
+#include <unistd.h>
 #include <signal.h>
 #include <errno.h>
 #include <sys/types.h>
-#include <sys/procset.h>
-#include <unistd.h>
 
 
-#define TIMEOUT 10
-
-
-static int pid;
+#define TIMEOUT 5
 
 
 void wait_terminal_input()
 {
-	signal(SIGTTIN, SIG_IGN);
+	int fd;
+	char ch;
+	struct termios tty, savtty;
 
-}
+	fd = open("/dev/tty", O_RDONLY);
+	tcgetattr(fd, &tty);
 
+	if (isatty(fileno(stdout)) == 0)
+	{
+		fprintf(stderr, "stdout not terminal\n");
+		exit(1);
+	}
 
-void sigalarm(int sig)
-{
-	sigsend(P_PID, pid, SIGQUIT);
+	savtty = tty;
+	tty.c_lflag &= ~(ISIG | ICANON | ECHO);
+	tty.c_cc[VTIME] = 0;
+	tty.c_cc[VMIN] = 0;
+	
+	tcsetattr(fd, TCSAFLUSH, &tty);
+	setbuf(stdout, (char *) NULL);
+	
+	printf("Are you OK? (y/n): ");
+	while ((ch != 'y') && (ch != 'n'))
+		read(fd, &ch, 1);
+
+	if (ch == 'y')
+		printf("\nMe too ^__^\n");
+
+	else
+		printf("\nOh :(\n");
+
+	tcsetattr(fd, TCSAFLUSH, &savtty);
 }
 
 
 int main(int argc, char **argv)
 {
-void sigalarm(int);
-	int status;
-	pid = fork();
-	
-	if (pid == 0)
-	{
-		wait_terminal_input();
-		perror(argv[1]);
-		exit(127);
-	}
-
-	signal(SIGALRM, sigalarm);
 	alarm(TIMEOUT);
-
-	while (wait(&status) == -1)
-	{
-		if (errno == EINTR)
-		{
-		errno = 0;
-		printf("%s: timed out\n", argv[1]);
-		}
-		else
-		{
-			perror(argv[0]);
-			break;
-		}
-	}
-
-	exit(WEXITSTATUS(status));
+	wait_terminal_input();
 }
