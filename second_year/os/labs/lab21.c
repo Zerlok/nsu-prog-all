@@ -3,13 +3,15 @@
 #include <signal.h>
 
 
+#define BEL '\07'
+
+
 int beep_cntr;
 
 
 void beep()
 {
-	printf("beep\n");
-
+	// printf("%c\n", BEL);
 	system("pacmd play-file /usr/share/sounds/KDE-Sys-App-Message.ogg alsa_output.pci-0000_00_1b.0.analog-stereo");
 	++beep_cntr;
 }
@@ -22,22 +24,6 @@ void finish()
 }
 
 
-
-void scan_symbols()
-{
-	int c;
-	for (;;)
-	{
-		c = getchar();
-		
-		if (c == EOF)
-			break;
-		
-		printf("%d ", c);
-	}
-}
-
-
 int main(int argc, char **argv)
 {
 	beep_cntr = 0;
@@ -45,7 +31,8 @@ int main(int argc, char **argv)
 	signal(SIGINT, finish);
 	signal(SIGQUIT, beep);
 
-	scan_symbols();
+	while (1);
+	// scan_symbols();
 
 	return 0;
 }
