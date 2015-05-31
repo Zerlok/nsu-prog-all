@@ -226,40 +226,40 @@ void* balancer(void* pool)
 		
 		pthread_mutex_unlock(&mutex_finish);
 
-		// MPI_Recv(&answer, 1, MPI_INT, MPI_ANY_SOURCE, TAG_QUERRY, MPI_COMM_WORLD, &status);
+		MPI_Recv(&answer, 1, MPI_INT, MPI_ANY_SOURCE, TAG_QUERRY, MPI_COMM_WORLD, &status);
 
-		// if (answer < 0)
-		// {
-		// 	finishedProcessRank = -answer - 1;
-		// 	pthread_mutex_lock(&mutex_f);
-		// 	processes[finishedProcessRank] = END;
-		// 	pthread_mutex_unlock(&mutex_f);
-		// 	MPI_Ssend(&(PROTOCOL[STATUS_OK]), 1, MPI_INT, finishedProcessRank, TAG_FINISHED, MPI_COMM_WORLD);
-		// 	finished_processes++;
+		if (answer < 0)
+		{
+			finishedProcessRank = -answer - 1;
+			pthread_mutex_lock(&mutex_f);
+			processes[finishedProcessRank] = END;
+			pthread_mutex_unlock(&mutex_f);
+			MPI_Ssend(&(PROTOCOL[STATUS_OK]), 1, MPI_INT, finishedProcessRank, TAG_FINISHED, MPI_COMM_WORLD);
+			finished_processes++;
 			
-		// 	if (finished_processes == mpi_size - 1)
-		// 		break;
+			if (finished_processes == mpi_size - 1)
+				break;
 
-		// 	continue;
-		// }
+			continue;
+		}
 
-		// fprintf(stderr, "balancer %d: querry from %d\n", mpi_rank, answer);
-		// pthread_mutex_lock(&mutex);
+		fprintf(stderr, "balancer %d: querry from %d\n", mpi_rank, answer);
+		pthread_mutex_lock(&mutex);
 		
-		// if (currentTask == SIZE)
-		// {
-		// 	MPI_Ssend(&(PROTOCOL[NEGATIVE_ANSWER]), 1, MPI_INT, answer, TAG_ANSWER, MPI_COMM_WORLD);
-		// 	fprintf(stderr, "balancer %d: negative answer\n", mpi_rank);
-		// }
-		// else
-		// {
-		// 	fprintf(stderr, "balancer %d: positive answer %d\n", mpi_rank, answer);
-		// 	MPI_Ssend(&(PROTOCOL[POSITIVE_ANSWER]), 1, MPI_INT, answer, TAG_ANSWER, MPI_COMM_WORLD);
-		// 	MPI_Ssend(&(((Task*)pool)[currentTask]), 1, MPI_INT, answer, TAG_TASK, MPI_COMM_WORLD);
-		// 	currentTask++;
-		// }
+		if (currentTask == SIZE)
+		{
+			MPI_Ssend(&(PROTOCOL[NEGATIVE_ANSWER]), 1, MPI_INT, answer, TAG_ANSWER, MPI_COMM_WORLD);
+			fprintf(stderr, "balancer %d: negative answer\n", mpi_rank);
+		}
+		else
+		{
+			fprintf(stderr, "balancer %d: positive answer %d\n", mpi_rank, answer);
+			MPI_Ssend(&(PROTOCOL[POSITIVE_ANSWER]), 1, MPI_INT, answer, TAG_ANSWER, MPI_COMM_WORLD);
+			MPI_Ssend(&(((Task*)pool)[currentTask]), 1, MPI_INT, answer, TAG_TASK, MPI_COMM_WORLD);
+			currentTask++;
+		}
 		
-		// pthread_mutex_unlock(&mutex);
+		pthread_mutex_unlock(&mutex);
 	}
 
 	pthread_mutex_unlock(&mutex_finish);
