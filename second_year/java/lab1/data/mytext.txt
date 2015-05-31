@@ -1,0 +1,28 @@
+Hello  world!!!
+This text   can see everyone    who want it to.
+My own mail is: denergytro@gmail.com, and you can write to me anytime you want!
+And what's yours?
+I think you - bullshit!
+
+My favorite quote is: "Screw it, let's do it!" (c) Richard Branson.
+
+Now i'm gonna write a lot of stupid symbols, which will brake my brilliant regexp. ;_(
+But... This is a real life. What else can i do? Only have a hope, that it works fine!
+Bye! Bye! =^.^=
+
+# Some bad-code on python...
+
+def get_my_name():
+    return 'Danil'
+
+if __name__ == '__main__':
+    print get_my_name()
+
+______
+
+Here
+we
+are
+gonna
+split lines by
+"new line" symbol.

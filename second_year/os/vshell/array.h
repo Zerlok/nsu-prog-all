@@ -14,6 +14,8 @@ StringArray *get_array(int length);
 void check_length_and_expand_array(StringArray *array);
 void push_into_array(char *string, StringArray *array);
 void show_array(StringArray *array);
+void clear_array(StringArray *array);
+void delete_array(StringArray *array);
 
 
 // __HISTORY_H__
