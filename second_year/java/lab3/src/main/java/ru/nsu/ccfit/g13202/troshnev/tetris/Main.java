@@ -1,12 +1,12 @@
 package ru.nsu.ccfit.g13202.troshnev.tetris;
 
-import ru.nsu.ccfit.g13202.troshnev.tetris.kernel.controllers.Controller;
+import ru.nsu.ccfit.g13202.troshnev.tetris.kernel.controllers.MainController;
 
 public class Main
 {
     public static void main(String[] args)
     {
-        Controller logic = new Controller();
+        MainController logic = new MainController();
         logic.run();
     }
 }

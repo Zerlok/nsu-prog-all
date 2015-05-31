@@ -11,12 +11,12 @@ import java.awt.*;
 /**
  * Created by zerlok on 5/4/15.
  */
-public class GameFieldView extends JComponent {
+public class FieldBlocksView extends JComponent {
     private static Block mutedBlock = new Block(new Color(117, 117, 117));
     private boolean muteBlocks;
     private Field gameField;
 
-    public GameFieldView(Field field) {
+    public FieldBlocksView(Field field) {
         Block.setSize(30, 4, 1);
         muteBlocks = false;
         gameField = field;

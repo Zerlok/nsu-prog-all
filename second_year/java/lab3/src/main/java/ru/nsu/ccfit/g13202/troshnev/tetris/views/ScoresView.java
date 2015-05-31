@@ -1,7 +1,7 @@
 package ru.nsu.ccfit.g13202.troshnev.tetris.views;
 
 /**
- * Created by zerlok on 4/29/15.
+ * Created by zerlok on 5/31/15.
  */
-public class ScoresWindow {
+public class ScoresView {
 }
