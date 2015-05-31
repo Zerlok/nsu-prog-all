@@ -17,20 +17,13 @@ public class FieldBlocksView extends JComponent {
     private Field gameField;
 
     public FieldBlocksView(Field field) {
-        Block.setSize(30, 4, 1);
         muteBlocks = false;
         gameField = field;
 
-        int blockMargin = Block.getPixelMargin();
-        int blockOffset = Block.getPixelOffset();
-        int rowsNum = gameField.getFieldRowsNum() + 1;
+        int rowsNum = gameField.getFieldRowsNum();
         int columnsNum = gameField.getFieldColumnsNum();
 
         setLayout(new GridLayout(rowsNum, columnsNum));
-        setSize(
-                blockOffset * columnsNum - blockMargin + 2,
-                blockOffset * (rowsNum) + 4
-        );
     }
 
     public void setMuteBlocks(boolean bool) {

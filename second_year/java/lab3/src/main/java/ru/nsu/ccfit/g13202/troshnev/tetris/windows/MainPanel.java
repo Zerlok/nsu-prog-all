@@ -2,8 +2,6 @@ package ru.nsu.ccfit.g13202.troshnev.tetris.windows;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionListener;
-import java.util.HashMap;
 
 /**
  * Created by zerlok on 4/29/15.

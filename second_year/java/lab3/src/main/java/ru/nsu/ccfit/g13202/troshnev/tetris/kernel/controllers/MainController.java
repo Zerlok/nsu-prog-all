@@ -1,6 +1,8 @@
 package ru.nsu.ccfit.g13202.troshnev.tetris.kernel.controllers;
 
+import ru.nsu.ccfit.g13202.troshnev.tetris.kernel.Field;
 import ru.nsu.ccfit.g13202.troshnev.tetris.windows.BaseWindow;
+import ru.nsu.ccfit.g13202.troshnev.tetris.windows.GamePanel;
 import ru.nsu.ccfit.g13202.troshnev.tetris.windows.MainPanel;
 
 import javax.swing.*;
@@ -11,6 +13,7 @@ import java.awt.event.ActionEvent;
 public class MainController implements Runnable {
     private ActionMap actionsMap;
     private BaseWindow baseWindow;
+    private Thread gameThread;
     private GameController gameLogic;
 
     public MainController() {
@@ -18,6 +21,7 @@ public class MainController implements Runnable {
         setupActions();
 
         baseWindow = new BaseWindow(actionsMap);
+        gameThread = null;
         gameLogic = null;
     }
 
@@ -57,21 +61,29 @@ public class MainController implements Runnable {
     @Override
     public void run() {
         initMainMenu();
-        baseWindow.centreWindow();
         baseWindow.setVisible(true);
     }
 
     private void initMainMenu() {
         baseWindow.setInnerWindow(new MainPanel(actionsMap));
+        baseWindow.centreWindow();
     }
 
     private void startNewGame() {
-//        activePanel = new GamePanel();
-        gameLogic = new GameController();
+        if (gameThread != null)
+            gameThread.interrupt();
+
+        gameLogic = new GameController(actionsMap);
+
+        baseWindow.setInnerWindow(gameLogic.getGamePanel());
+        baseWindow.centreWindow();
+
+        gameThread = new Thread(gameLogic);
+        gameThread.start();
     }
 
     private void showScoresTable() {
-        
+
     }
 
     private void showAbout() {

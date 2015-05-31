@@ -57,4 +57,8 @@ public class Level {
         if (makeFigureMovementEvents);
         if (makeFigureRotationEvents);
     }
+
+    public int getLevelNum() {
+        return levelNum;
+    }
 }

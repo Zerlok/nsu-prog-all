@@ -3,6 +3,7 @@ package ru.nsu.ccfit.g13202.troshnev.tetris.kernel.controllers;
 import ru.nsu.ccfit.g13202.troshnev.tetris.figures.AbstractFigure;
 import ru.nsu.ccfit.g13202.troshnev.tetris.kernel.Field;
 import ru.nsu.ccfit.g13202.troshnev.tetris.kernel.FigureFactory;
+import ru.nsu.ccfit.g13202.troshnev.tetris.player.Player;
 import ru.nsu.ccfit.g13202.troshnev.tetris.views.FieldBlocksView;
 import ru.nsu.ccfit.g13202.troshnev.tetris.views.FigureView;
 import ru.nsu.ccfit.g13202.troshnev.tetris.windows.GamePanel;
@@ -16,13 +17,13 @@ import java.io.IOException;
  * Created by zerlok on 4/29/15.
  */
 public class GameController implements Runnable {
-    private Field gameField;
-    private FieldBlocksView fieldView;
+    private Player currentPlayer;
 
     private FigureFactory figureFactory;
-
     private AbstractFigure currentFigure;
     private AbstractFigure nextFigure;
+
+    private Field gameField;
     private FigureView currentFigureView;
     private FigureView nextFigureView;
 
@@ -31,9 +32,8 @@ public class GameController implements Runnable {
     private Timer ticker;
     private boolean gamePaused;
 
-    public GameController() {
-        gameField = new Field(10, 15);
-        gamePanel = new GamePanel(gameField);
+    public GameController(ActionMap actionsMap) {
+        currentPlayer = new Player();
 
         figureFactory = new FigureFactory();
         try {
@@ -42,35 +42,46 @@ public class GameController implements Runnable {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
         currentFigure = null;
         nextFigure = null;
+
+        gameField = new Field(10, 15);
+        currentFigureView = new FigureView(
+                gameField.getFieldRowsNum(),
+                gameField.getFieldColumnsNum()
+        );
+        nextFigureView = new FigureView(6, 6);
 
         ticker = new Timer(600, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
                 moveFigureDown();
-                fieldView.repaint();
+                gamePanel.repaint();
             }
         });
         ticker.setRepeats(true);
         ticker.setCoalesce(false);
 
-        gamePaused = false;
+        gamePaused = true;
     }
 
     @Override
     public void run() {
         createNewFigure();
-        ticker.start();
+        togglePauseGame();
     }
 
     private void createNewFigure() {
-        currentFigure = figureFactory.createRandomFigure();
-        currentFigure.setPos(gameField.getFieldColumnsNum() / 2, 0);
-        gameField.setFigure(currentFigure);
+        if (nextFigure == null)
+            nextFigure = figureFactory.createRandomFigure();
 
-        if (gameField.hasIntersectionWithFigure()) {
+        currentFigure = nextFigure;
+        currentFigure.setPos(gameField.getFieldColumnsNum() / 2, 0);
+
+        gamePanel.setNextFigure(nextFigure);
+        gamePanel.setCurrentFigure(currentFigure);
+
+        if (gameField.hasIntersection(currentFigure.getBlocks())) {
             currentFigure = null;
         }
     }
@@ -81,12 +92,11 @@ public class GameController implements Runnable {
 
         currentFigure.moveDown();
 
-        if (gameField.hasIntersectionWithFigure()) {
+        if (gameField.hasIntersection(currentFigure.getBlocks())) {
             currentFigure.moveUp();
-            currentFigure = null;
 
             gameField.saveFigureBlocks();
-            System.out.println("Figure figurePosition fixed.");
+            System.out.println("Figure position locked.");
 
             int removedRowsNum = gameField.removeFullRows();
             if (removedRowsNum > 0)
@@ -102,7 +112,7 @@ public class GameController implements Runnable {
 
         currentFigure.moveLeft();
 
-        if (gameField.hasIntersectionWithFigure())
+        if (gameField.hasIntersection(currentFigure.getBlocks()))
             currentFigure.moveRight();
     }
 
@@ -112,7 +122,7 @@ public class GameController implements Runnable {
 
         currentFigure.moveRight();
 
-        if (gameField.hasIntersectionWithFigure())
+        if (gameField.hasIntersection(currentFigure.getBlocks()))
             currentFigure.moveLeft();
     }
 
@@ -122,7 +132,7 @@ public class GameController implements Runnable {
 
         currentFigure.rotateLeft();
 
-        if (gameField.hasIntersectionWithFigure())
+        if (gameField.hasIntersection(currentFigure.getBlocks()))
             currentFigure.rotateRight();
     }
 
@@ -132,23 +142,26 @@ public class GameController implements Runnable {
 
         currentFigure.rotateRight();
 
-        if (gameField.hasIntersectionWithFigure())
+        if (gameField.hasIntersection(currentFigure.getBlocks()))
             currentFigure.rotateLeft();
     }
 
     private void togglePauseGame() {
-        if (gamePaused)
-            ticker.start();
-        else
-            ticker.stop();
-
         gamePaused = !gamePaused;
-//        gameWindow.setMuteBlocks(gamePaused);
+
+        if (gamePaused)
+            ticker.stop();
+        else
+            ticker.start();
     }
 
     private void recalculateTickerDelay(int rowsNum) {
         ticker.setDelay(
                 ticker.getDelay() - 10
         );
+    }
+
+    public JPanel getGamePanel() {
+        return gamePanel;
     }
 }

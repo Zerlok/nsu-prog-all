@@ -12,7 +12,11 @@ public class Player {
         level = new Level(score);
     }
 
-    public long getPlayerScore() {
+    public long getScore() {
         return score.countCurrentScore();
+    }
+
+    public int getLevel() {
+        return level.getLevelNum();
     }
 }

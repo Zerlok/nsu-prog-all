@@ -2,8 +2,6 @@ package ru.nsu.ccfit.g13202.troshnev.tetris.windows;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionListener;
-import java.util.HashMap;
 
 /**
  * Created by zerlok on 5/31/15.
@@ -64,7 +62,7 @@ public class BaseWindow extends JFrame {
         add(window);
         setSize(
                 window.getWidth(),
-                window.getHeight() + windowHeader.getHeight()
+                window.getHeight()
         );
     }
 }
