@@ -13,8 +13,7 @@ public abstract class AbstractFigure implements Cloneable {
     protected int rotation;
     protected int maxRotationsNum;
     protected Color figureColor;
-    protected Block[] blocks;
-    protected Coordinate[] blocksPositions;
+    protected Block[] figureBlocks;
 
     protected abstract void applyFigureRotation();
 
@@ -27,12 +26,10 @@ public abstract class AbstractFigure implements Cloneable {
             figure.rotation = rotation;
             figure.maxRotationsNum = maxRotationsNum;
             figure.figureColor = figureColor;
-            figure.blocks = new Block[blocks.length];
-            figure.blocksPositions = new Coordinate[blocks.length];
+            figure.figureBlocks = new Block[figureBlocks.length];
 
-            for (int i = 0; i < blocks.length; i++) {
-                figure.blocks[i] = blocks[i];
-                figure.blocksPositions[i] = new Coordinate(blocksPositions[i]);
+            for (int i = 0; i < figureBlocks.length; i++) {
+                figure.figureBlocks[i] = new Block(figureBlocks[i]);
             }
 
         } catch (InstantiationException e) {
@@ -80,13 +77,18 @@ public abstract class AbstractFigure implements Cloneable {
     }
 
     public Block[] getBlocks() {
-        return blocks;
+        Block[] blocks = new Block[figureBlocks.length];
+
+        for (int i = 0; i < figureBlocks.length; i++)
+            blocks[i] = new Block(figureBlocks[i]);
+
+        return figureBlocks;
     }
 
     public Coordinate[] getBlocksGlobalPositions() {
-        Coordinate[] positions = new Coordinate[blocks.length];
+        Coordinate[] positions = new Coordinate[figureBlocks.length];
 
-        for (int i = 0; i < blocks.length; i++) {
+        for (int i = 0; i < figureBlocks.length; i++) {
             positions[i] = new Coordinate(blocksPositions[i]);
             positions[i].addCoordinate(figurePosition);
         }

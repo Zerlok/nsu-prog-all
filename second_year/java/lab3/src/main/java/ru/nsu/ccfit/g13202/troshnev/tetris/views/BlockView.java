@@ -29,34 +29,34 @@ public class BlockView extends JComponent {
         return pixelMargin;
     }
 
-    public BlockView(Block block) {
-        innerColor = block.getColor();
-        borderColor = clr.brighter();
-    }
-
-    public Block(Color inColor, Color brColor) {
-        innerColor = inColor;
-        borderColor = brColor;
-    }
-
-    public void draw(int rowNum, int columnNum, Graphics2D g) {
-        int offset = getPixelOffset();
-        int pixelX = columnNum * offset;
-        int pixelY = rowNum * offset;
-
-        g.setColor(borderColor);
-        g.fillRect(
-                pixelX,
-                pixelY,
-                pixelWidth,
-                pixelWidth
-        );
-        g.setColor(innerColor);
-        g.fillRect(
-                pixelX + pixelPadding,
-                pixelY + pixelPadding,
-                pixelWidth - (2*pixelPadding),
-                pixelWidth - (2*pixelPadding)
-        );
-    }
+//    public BlockView(Block block) {
+//        innerColor = block.getColor();
+//        borderColor = clr.brighter();
+//    }
+//
+////    public Block(Color inColor, Color brColor) {
+////        innerColor = inColor;
+////        borderColor = brColor;
+////    }
+////
+////    public void draw(int rowNum, int columnNum, Graphics2D g) {
+////        int offset = getPixelOffset();
+////        int pixelX = columnNum * offset;
+////        int pixelY = rowNum * offset;
+////
+////        g.setColor(borderColor);
+////        g.fillRect(
+////                pixelX,
+////                pixelY,
+////                pixelWidth,
+////                pixelWidth
+////        );
+////        g.setColor(innerColor);
+////        g.fillRect(
+////                pixelX + pixelPadding,
+////                pixelY + pixelPadding,
+////                pixelWidth - (2*pixelPadding),
+////                pixelWidth - (2*pixelPadding)
+////        );
+////    }
 }

@@ -21,9 +21,9 @@ public class TFigure extends AbstractFigure {
                 new Coordinate(0, 1)
         };
 
-        blocks = new Block[blocksPositions.length];
-        for (int i = 0; i < blocks.length; i++)
-            blocks[i] = new Block(figureColor);
+        figureBlocks = new Block[blocksPositions.length];
+        for (int i = 0; i < figureBlocks.length; i++)
+            figureBlocks[i] = new Block(figureColor);
 
         applyFigureRotation();
         System.out.println("TFigure created");

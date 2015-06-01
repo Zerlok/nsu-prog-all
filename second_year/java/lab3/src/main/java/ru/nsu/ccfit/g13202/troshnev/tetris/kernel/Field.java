@@ -1,63 +1,56 @@
 package ru.nsu.ccfit.g13202.troshnev.tetris.kernel;
 
-import ru.nsu.ccfit.g13202.troshnev.tetris.figures.AbstractFigure;
-
 /**
  * Created by zerlok on 4/29/15.
  */
 public class Field {
     private int fieldColumnsNum;
     private int fieldRowsNum;
+    private Block[][] fieldBlocks;
 
-    private Block[][] blocks;
-    private AbstractFigure activeFigure;
-
-    public Field(int w, int h) {
-        fieldColumnsNum = w;
-        fieldRowsNum = h;
-        activeFigure = null;
-        blocks = new Block[fieldRowsNum][fieldColumnsNum];
+    public Field(int rows, int columns) {
+        fieldRowsNum = rows;
+        fieldColumnsNum = columns;
+        fieldBlocks = new Block[fieldRowsNum][fieldColumnsNum];
     }
 
-    public void addBlock(int rowNum, int columnNum, Block b) {
-        if ((rowNum >= 0)
-                && (columnNum >= 0)
-                && (rowNum < fieldRowsNum)
-                && (columnNum < fieldColumnsNum))
-            blocks[rowNum][columnNum] = b;
-    }
-
-    public void saveFigureBlocks() {
-        System.out.println(String.format("Saving figure %1$s", activeFigure.getClass().getName()));
-        if (activeFigure == null)
+    public void addBlock(Block b) {
+        if (b == null)
             return;
 
-        Block[] figureBlocks = activeFigure.getBlocks();
-        Coordinate[] figureBlocksPositions = activeFigure.getBlocksGlobalPositions();
-
-        for (int i = 0; i < figureBlocks.length; i++)
-            addBlock(
-                    figureBlocksPositions[i].getCoY(), // rowNum
-                    figureBlocksPositions[i].getCoX(), // columnNum
-                    figureBlocks[i]
-            );
+        Coordinate blockPosition = b.getCoordinates();
+        // Y - rowNum, X - columnNum
+        fieldBlocks[blockPosition.getCoY()][blockPosition.getCoX()] = b;
     }
 
-    public boolean hasIntersectionWithFigure() {
-        if (activeFigure == null)
+    public void saveBlocks(Block[] blocks) {
+        if (blocks == null)
+            return;
+
+        for (int i = 0; i < blocks.length; i++)
+            addBlock(blocks[i]);
+    }
+
+    public boolean hasIntersection(Block[] blocks) {
+        if (blocks == null)
             return false;
 
-//        Cycle throw figure blocks.
-        for (Coordinate figureBlockPosition : activeFigure.getBlocksGlobalPositions()) {
-            int blockRowNum = figureBlockPosition.getCoY();
-            int blockColumnNum = figureBlockPosition.getCoX();
+        Coordinate blockPosition;
+        int blockRowNum;
+        int blockColumnNum;
 
-//            Check intersections with field borders and field blocks.
+//        Cycle throw figure figureBlocks.
+        for (Block block : blocks) {
+            blockPosition = block.getCoordinates();
+            blockRowNum = blockPosition.getCoY();
+            blockColumnNum = blockPosition.getCoX();
+
+//            Check intersections with field borders and field figureBlocks.
             if ((blockColumnNum < 0)
                     || (blockColumnNum >= fieldColumnsNum)
                     || (blockRowNum >= fieldRowsNum)
-                    || ((blockRowNum >= 0)
-                        && (blocks[blockRowNum][blockColumnNum] != null)))
+                    || (blockRowNum >= 0)
+                    || (fieldBlocks[blockRowNum][blockColumnNum] != null))
                 return true;
         }
 
@@ -73,12 +66,12 @@ public class Field {
         for (rowNum = 0; rowNum < fieldRowsNum; rowNum++) {
             blocksInRow = 0;
             for (columnNum = 0; columnNum < fieldColumnsNum; columnNum++)
-                if (blocks[rowNum][columnNum] != null)
-                    blocksInRow++;
+                if (fieldBlocks[rowNum][columnNum] != null)
+                    ++blocksInRow;
 
             if (blocksInRow == fieldColumnsNum) {
                 System.out.println(String.format("Removing row %1$d", rowNum));
-                shiftLinesDownFromRow(rowNum);
+                shiftRowsDown(rowNum);
                 ++fullRowsNum;
             }
         }
@@ -86,18 +79,23 @@ public class Field {
         return fullRowsNum;
     }
 
-    private void shiftLinesDownFromRow(int emptyRowNum) {
+    private void shiftRowsDown(int emptyRowNum) {
         int columnNum;
         int rowNum;
+        Block block;
 
 //        Cycle from empty row to top.
-        for (rowNum = emptyRowNum; rowNum > 0; rowNum--)
-            for (columnNum = 0; columnNum < fieldColumnsNum; columnNum++)
-                blocks[rowNum][columnNum] = blocks[rowNum - 1][columnNum];
+        for (rowNum = emptyRowNum; rowNum > 0; rowNum--) {
+            for (columnNum = 0; columnNum < fieldColumnsNum; columnNum++) {
+                block = fieldBlocks[rowNum - 1][columnNum];
+                block.
+                fieldBlocks[rowNum][columnNum] = block;
+            }
+        }
 
-//        Delete top blocks at 0 rowNum.
+//        Delete top fieldBlocks at 0 rowNum.
         for (columnNum = 0; columnNum < fieldColumnsNum; columnNum++)
-            blocks[0][columnNum] = null;
+            fieldBlocks[0][columnNum] = null;
     }
 
     public int getFieldColumnsNum() {
@@ -108,15 +106,7 @@ public class Field {
         return fieldRowsNum;
     }
 
-    public AbstractFigure getActiveFigure() {
-        return activeFigure;
-    }
-
-    public void setFigure(AbstractFigure figure) {
-        activeFigure = figure;
-    }
-
     public Block[][] getFieldBlocks() {
-        return blocks;
+        return fieldBlocks;
     }
 }

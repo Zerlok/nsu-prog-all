@@ -14,17 +14,16 @@ public class IFigure extends AbstractFigure {
         maxRotationsNum = 2;
         figureColor = new Color(42, 163, 139);
 
-        blocksPositions = new Coordinate[] {
+        Coordinate[] blocksPositions = new Coordinate[] {
                 new Coordinate(0, 0),
                 new Coordinate(-1, 0),
                 new Coordinate(1, 0),
                 new Coordinate(2, 0)
         };
 
-        blocks = new Block[blocksPositions.length];
-        for (int i = 0; i < blocks.length; i++)
-            blocks[i] = new Block(figureColor);
-
+        figureBlocks = new Block[blocksPositions.length];
+        for (int i = 0; i < figureBlocks.length; i++)
+            figureBlocks[i] = new Block(figureColor);
 
         System.out.println("IFigure created");
     }

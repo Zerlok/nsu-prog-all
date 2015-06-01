@@ -4,7 +4,6 @@ import ru.nsu.ccfit.g13202.troshnev.tetris.figures.AbstractFigure;
 import ru.nsu.ccfit.g13202.troshnev.tetris.kernel.Field;
 import ru.nsu.ccfit.g13202.troshnev.tetris.kernel.FigureFactory;
 import ru.nsu.ccfit.g13202.troshnev.tetris.player.Player;
-import ru.nsu.ccfit.g13202.troshnev.tetris.views.FieldBlocksView;
 import ru.nsu.ccfit.g13202.troshnev.tetris.views.FigureView;
 import ru.nsu.ccfit.g13202.troshnev.tetris.windows.GamePanel;
 
@@ -95,7 +94,7 @@ public class GameController implements Runnable {
         if (gameField.hasIntersection(currentFigure.getBlocks())) {
             currentFigure.moveUp();
 
-            gameField.saveFigureBlocks();
+            gameField.saveBlocks(currentFigure.getBlocks());
             System.out.println("Figure position locked.");
 
             int removedRowsNum = gameField.removeFullRows();

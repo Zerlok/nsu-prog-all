@@ -24,6 +24,11 @@ public class Block {
         position = new Coordinate(rowNum, columnNum);
     }
 
+    public Block(Block block) {
+        innerColor = block.innerColor;
+        position = new Coordinate(block.position);
+    }
+
     public Color getColor() {
         return innerColor;
     }

@@ -13,7 +13,6 @@ import java.awt.*;
 /**
  * Created by zerlok on 4/29/15.
  */
-
 public class GamePanel extends JPanel {
     private FieldBlocksView blocksView;
     private FigureView currentFigureView;
