@@ -25,9 +25,8 @@ int main(int argc, char **argv)
 	}
 	else if (id == 0)
 	{
-		char **args = &(argv[1]);
-		execvp(args[0], args);
-		perror(args[0]);
+		execvp(argv[1], &(argv[1]));
+		perror(argv[1]);
 		return 1;
 	}
 

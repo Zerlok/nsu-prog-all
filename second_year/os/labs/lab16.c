@@ -33,7 +33,7 @@ void wait_terminal_input()
 	tty.c_cc[VMIN] = 0;
 	
 	tcsetattr(fd, TCSAFLUSH, &tty);
-	setbuf(stdout, (char *) NULL);
+	setbuf(stdout, (char *)NULL);
 	
 	printf("Are you OK? (y/n): ");
 	while ((ch != 'y') && (ch != 'n'))

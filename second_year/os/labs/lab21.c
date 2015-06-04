@@ -32,7 +32,6 @@ int main(int argc, char **argv)
 	signal(SIGQUIT, beep);
 
 	while (1);
-	// scan_symbols();
 
 	return 0;
 }

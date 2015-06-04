@@ -10,16 +10,15 @@ int main(int argc, char **argv, char **env)
 	putenv("TZ=America/Los_Angeles");
 
 	time_t t = time(NULL);
-	struct tm lt;
+	struct tm local_time;
 
-	localtime_r(&t, &lt);
+	localtime_r(&t, &local_time);
 	printf("Current time in timezone '%s' is %02d:%02d:%02d.\n",
-		   lt.tm_zone,
-		   lt.tm_hour,
-		   lt.tm_min,
-		   lt.tm_sec
+		   local_time.tm_zone,
+		   local_time.tm_hour,
+		   local_time.tm_min,
+		   local_time.tm_sec
 	);
-
 
 	return 0;
 }
