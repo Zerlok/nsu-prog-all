@@ -2,8 +2,11 @@ syntax: glob
 *.o
 *.sh
 *.out
-*.orig
 *.gch
+*.csv
+*.txt
+*.zip
+*.tar.gz
 *.sublime-project
 *.sublime-workspace
 *.autosave
@@ -13,15 +16,7 @@ syntax: glob
 *.ods
 *.cvn
 *.textile
-*haffman
-*harc
-*Makefile
-
-syntax: regexp
-^_samples/.*$
-task\_\d+\/\w+$
-evm\/\w+$
-\/\w+$
-13202\-troshnev\/.*$
-^.*?\/(\_\w+\/).*?$
-^archivator\-debug\/.*
+*.idea
+*.jar
+*13202-troshnev*
+*_samples*
