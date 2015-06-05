@@ -16,7 +16,7 @@ public class PlayerInfoView extends JComponent {
 
     public PlayerInfoView(Player player) {
         currentPlayer = player;
-        highscoreValue = new JLabel("Unknown");
+        highscoreValue = new JLabel("0");
         currentScoreValue = new JLabel(String.valueOf(player.getScore()));
         currentLevelValue = new JLabel(String.valueOf(player.getLevel()));
 
@@ -27,7 +27,5 @@ public class PlayerInfoView extends JComponent {
         add(currentScoreValue);
         add(new JLabel("Level:"));
         add(currentLevelValue);
-
-        setSize(new Dimension(200, 500));
     }
 }

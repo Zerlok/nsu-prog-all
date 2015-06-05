@@ -12,7 +12,6 @@ import java.awt.event.ActionEvent;
 public class MainController implements Runnable {
     private ActionMap actionsMap;
     private BaseWindow baseWindow;
-    private Thread gameThread;
     private GameController gameLogic;
 
     public MainController() {
@@ -20,7 +19,6 @@ public class MainController implements Runnable {
         setupActions();
 
         baseWindow = new BaseWindow(actionsMap);
-        gameThread = null;
         gameLogic = null;
     }
 
@@ -69,16 +67,10 @@ public class MainController implements Runnable {
     }
 
     private void startNewGame() {
-        if (gameThread != null)
-            gameThread.interrupt();
-
         gameLogic = new GameController(actionsMap);
 
         baseWindow.setInnerWindow(gameLogic.getGamePanel());
         baseWindow.centreWindow();
-
-        gameThread = new Thread(gameLogic);
-        gameThread.start();
     }
 
     private void showScoresTable() {

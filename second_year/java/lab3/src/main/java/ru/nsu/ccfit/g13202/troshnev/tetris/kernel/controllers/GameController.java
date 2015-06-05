@@ -4,7 +4,6 @@ import ru.nsu.ccfit.g13202.troshnev.tetris.figures.AbstractFigure;
 import ru.nsu.ccfit.g13202.troshnev.tetris.kernel.Field;
 import ru.nsu.ccfit.g13202.troshnev.tetris.kernel.FigureFactory;
 import ru.nsu.ccfit.g13202.troshnev.tetris.player.Player;
-import ru.nsu.ccfit.g13202.troshnev.tetris.views.FigureView;
 import ru.nsu.ccfit.g13202.troshnev.tetris.windows.GamePanel;
 
 import javax.swing.*;
@@ -42,13 +41,14 @@ public class GameController implements Runnable {
         }
         currentFigure = null;
         nextFigure = null;
-        gameField = new Field(10, 18);
+        gameField = new Field(18, 10);
 
         ticker = new Timer(600, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
                 moveFigureDown();
                 gamePanel.repaint();
+                System.out.println("Timer action occurred.");
             }
         });
         ticker.setRepeats(true);
@@ -74,17 +74,21 @@ public class GameController implements Runnable {
         togglePauseGame();
     }
 
+    public void stop() {
+
+    }
+
     private void createNewFigure() {
         if (nextFigure == null)
             nextFigure = figureFactory.createRandomFigure();
 
         currentFigure = nextFigure;
-        currentFigure.setPos(gameField.getFieldColumnsNum() / 2, 0);
+        currentFigure.setPosition(0, gameField.getFieldColumnsNum() / 2);
 
         gamePanel.setNextFigure(nextFigure);
         gamePanel.setCurrentFigure(currentFigure);
 
-        if (gameField.hasIntersection(currentFigure.getBlocks())) {
+        if (gameField.hasIntersection(currentFigure.getGlobalBlocks())) {
             currentFigure = null;
         }
     }
@@ -95,10 +99,10 @@ public class GameController implements Runnable {
 
         currentFigure.moveDown();
 
-        if (gameField.hasIntersection(currentFigure.getBlocks())) {
+        if (gameField.hasIntersection(currentFigure.getGlobalBlocks())) {
             currentFigure.moveUp();
 
-            gameField.saveBlocks(currentFigure.getBlocks());
+            gameField.saveBlocks(currentFigure.getGlobalBlocks());
             System.out.println("Figure position locked.");
 
             int removedRowsNum = gameField.removeFullRows();
@@ -115,7 +119,7 @@ public class GameController implements Runnable {
 
         currentFigure.moveLeft();
 
-        if (gameField.hasIntersection(currentFigure.getBlocks()))
+        if (gameField.hasIntersection(currentFigure.getGlobalBlocks()))
             currentFigure.moveRight();
     }
 
@@ -125,7 +129,7 @@ public class GameController implements Runnable {
 
         currentFigure.moveRight();
 
-        if (gameField.hasIntersection(currentFigure.getBlocks()))
+        if (gameField.hasIntersection(currentFigure.getGlobalBlocks()))
             currentFigure.moveLeft();
     }
 
@@ -133,20 +137,20 @@ public class GameController implements Runnable {
         if (gamePaused || (currentFigure == null))
             return;
 
-        currentFigure.rotateLeft();
+        currentFigure.rotateOverClockwise();
 
-        if (gameField.hasIntersection(currentFigure.getBlocks()))
-            currentFigure.rotateRight();
+        if (gameField.hasIntersection(currentFigure.getGlobalBlocks()))
+            currentFigure.rotateClockwise();
     }
 
     private void rotateFigureRight() {
         if (gamePaused || (currentFigure == null))
             return;
 
-        currentFigure.rotateRight();
+        currentFigure.rotateClockwise();
 
-        if (gameField.hasIntersection(currentFigure.getBlocks()))
-            currentFigure.rotateLeft();
+        if (gameField.hasIntersection(currentFigure.getGlobalBlocks()))
+            currentFigure.rotateOverClockwise();
     }
 
     private void togglePauseGame() {

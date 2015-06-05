@@ -9,7 +9,7 @@ import java.awt.*;
 /**
  * Created by zerlok on 5/31/15.
  */
-public class FigureView extends JComponent {
+public class FigureView {
     private BlockView blockView;
     private AbstractFigure figure;
 

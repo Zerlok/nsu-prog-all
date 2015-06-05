@@ -46,43 +46,35 @@ public abstract class AbstractFigure implements Cloneable {
         applyFigureRotation();
     }
 
-    public void setPos(int x, int y) {
-        figurePosition.moveTo(x, y);
+    public void setPosition(int rowNum, int columnNum) {
+        figurePosition.moveTo(rowNum, columnNum);
+        System.out.println("Figure moved to " + rowNum + " " + columnNum);
     }
 
     public void moveUp() {
-        figurePosition.decrementColumnNum();
-    }
-
-    public void moveDown() {
-        figurePosition.incrementColumnNum();
-    }
-
-    public void moveLeft() {
         figurePosition.decrementRowNum();
     }
 
-    public void moveRight() {
+    public void moveDown() {
         figurePosition.incrementRowNum();
     }
 
-    public void rotateLeft() {
+    public void moveLeft() {
+        figurePosition.decrementColumnNum();
+    }
+
+    public void moveRight() {
+        figurePosition.incrementColumnNum();
+    }
+
+    public void rotateOverClockwise() {
         rotation = (rotation + maxRotationsNum - 1) % maxRotationsNum;
         applyFigureRotation();
     }
 
-    public void rotateRight() {
+    public void rotateClockwise() {
         rotation = (rotation + 1) % maxRotationsNum;
         applyFigureRotation();
-    }
-
-    public Block[] getBlocks() {
-        Block[] blocks = new Block[figureBlocks.length];
-
-        for (int i = 0; i < figureBlocks.length; i++)
-            blocks[i] = new Block(figureBlocks[i]);
-
-        return figureBlocks;
     }
 
     public Block[] getGlobalBlocks() {

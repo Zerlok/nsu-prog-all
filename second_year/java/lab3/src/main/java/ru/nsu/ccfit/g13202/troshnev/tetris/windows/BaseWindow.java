@@ -36,8 +36,11 @@ public class BaseWindow extends JFrame {
 
         setJMenuBar(windowHeader);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        getContentPane().setLayout(new BorderLayout());
 
         pack();
+        setLayout(new BorderLayout());
+        setVisible(true);
     }
 
     public void centreWindow() {
@@ -61,10 +64,12 @@ public class BaseWindow extends JFrame {
             remove(innerWindow);
 
         innerWindow = window;
-        add(window);
+
+        add(window, BorderLayout.CENTER);
         setSize(
                 window.getWidth(),
                 window.getHeight()
         );
+        pack();
     }
 }

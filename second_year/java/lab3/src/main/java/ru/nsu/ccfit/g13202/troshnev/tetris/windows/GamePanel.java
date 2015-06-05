@@ -1,5 +1,6 @@
 package ru.nsu.ccfit.g13202.troshnev.tetris.windows;
 
+import com.sun.org.apache.bcel.internal.generic.FLOAD;
 import ru.nsu.ccfit.g13202.troshnev.tetris.figures.AbstractFigure;
 import ru.nsu.ccfit.g13202.troshnev.tetris.kernel.Field;
 import ru.nsu.ccfit.g13202.troshnev.tetris.player.Player;
@@ -30,7 +31,6 @@ public class GamePanel extends JPanel {
 
         currentFigureView = new FigureView(blockView);
         gameFieldView = new FieldView(gameField, blockView, currentFigureView);
-        gameFieldView.setSize(new Dimension(400, 720));
         gameFieldView.setBorder(BorderFactory.createTitledBorder("Game Field"));
 
         nextFigureView = new FigureView(blockView);
@@ -42,11 +42,13 @@ public class GamePanel extends JPanel {
         infoView.setSize(new Dimension(240, 480));
         infoView.setBorder(BorderFactory.createTitledBorder("Info"));
 
-        setLayout(new FlowLayout(FlowLayout.LEADING));
-        add(gameFieldView);
-        add(infoView);
-        add(nextFigureView);
+        setLayout(new FlowLayout(FlowLayout.LEFT));
 
+        add(gameFieldView);
+        add(nextFigureFieldView);
+        add(infoView);
+
+        gameFieldView.setSize(new Dimension(400, 720));
         setSize(new Dimension(640, 720));
     }
 
