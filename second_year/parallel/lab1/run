@@ -1,7 +1,0 @@
-#!/bin/bash
-
-if [[ -n $1 ]]; then
-	mpirun -n $1 ./multiplyer
-else
-	mpirun -n 4 ./multiplyer
-fi
