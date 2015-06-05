@@ -56,7 +56,9 @@ public abstract class AbstractFigure implements Cloneable {
     }
 
     public void moveDown() {
+        System.out.println("decrementing figure position");
         figurePosition.incrementRowNum();
+        System.out.println(String.format("Figure moved down (%1$d, %2$d)", figurePosition.getRowNum(), figurePosition.getColumnNum()));
     }
 
     public void moveLeft() {

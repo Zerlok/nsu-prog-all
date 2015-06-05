@@ -28,8 +28,6 @@ public class GameController implements Runnable {
     private GamePanel gamePanel;
 
     public GameController(ActionMap actionsMap) {
-        setupActions(actionsMap);
-
         currentPlayer = new Player();
 
         figureFactory = new FigureFactory();
@@ -48,7 +46,6 @@ public class GameController implements Runnable {
             public void actionPerformed(ActionEvent actionEvent) {
                 moveFigureDown();
                 gamePanel.repaint();
-                System.out.println("Timer action occurred.");
             }
         });
         ticker.setRepeats(true);
@@ -57,15 +54,54 @@ public class GameController implements Runnable {
         gamePaused = true;
 
         gamePanel = new GamePanel(gameField);
+        setupActions(actionsMap);
     }
 
     private void setupActions(ActionMap actionsMap) {
-        actionsMap.put("GAME-PAUSE", new AbstractAction("Pause") {
+        ActionMap actionMap = gamePanel.getActionMap();
+
+        actionMap.put("GAME-PAUSE", new AbstractAction("Pause") {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
                 togglePauseGame();
             }
         });
+
+        actionMap.put("moveFigureLeftAction", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                moveFigureLeft();
+                gamePanel.repaint();
+            }
+        });
+        actionMap.put("moveFigureRightAction", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                moveFigureRight();
+                gamePanel.repaint();
+            }
+        });
+        actionMap.put("moveFigureDownAction", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                moveFigureDown();
+                gamePanel.repaint();
+            }
+        });
+        actionMap.put("rotateFigureClockwiseAction", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                rotateFigureClockwise();
+                gamePanel.repaint();
+            }
+        });
+
+        InputMap inputMap = gamePanel.getInputMap(JPanel.WHEN_IN_FOCUSED_WINDOW);
+        inputMap.put(KeyStroke.getKeyStroke("RIGHT"), "moveFigureRightAction");
+        inputMap.put(KeyStroke.getKeyStroke("LEFT"), "moveFigureLeftAction");
+        inputMap.put(KeyStroke.getKeyStroke("DOWN"), "moveFigureDownAction");
+        inputMap.put(KeyStroke.getKeyStroke("UP"), "rotateFigureClockwiseAction");
+        inputMap.put(KeyStroke.getKeyStroke("P"), "GAME-PAUSE");
     }
 
     @Override
@@ -79,11 +115,10 @@ public class GameController implements Runnable {
     }
 
     private void createNewFigure() {
-        if (nextFigure == null)
-            nextFigure = figureFactory.createRandomFigure();
+        currentFigure = (nextFigure != null) ? nextFigure : figureFactory.createRandomFigure();
+        nextFigure = figureFactory.createRandomFigure();
 
-        currentFigure = nextFigure;
-        currentFigure.setPosition(0, gameField.getFieldColumnsNum() / 2);
+        currentFigure.setPosition(2, gameField.getFieldColumnsNum() / 2);
 
         gamePanel.setNextFigure(nextFigure);
         gamePanel.setCurrentFigure(currentFigure);
@@ -133,17 +168,7 @@ public class GameController implements Runnable {
             currentFigure.moveLeft();
     }
 
-    private void rotateFigureLeft() {
-        if (gamePaused || (currentFigure == null))
-            return;
-
-        currentFigure.rotateOverClockwise();
-
-        if (gameField.hasIntersection(currentFigure.getGlobalBlocks()))
-            currentFigure.rotateClockwise();
-    }
-
-    private void rotateFigureRight() {
+    private void rotateFigureClockwise() {
         if (gamePaused || (currentFigure == null))
             return;
 
@@ -156,10 +181,10 @@ public class GameController implements Runnable {
     private void togglePauseGame() {
         gamePaused = !gamePaused;
 
-//        if (gamePaused)
-//            ticker.stop();
-//        else
-//            ticker.start();
+        if (gamePaused)
+            ticker.stop();
+        else
+            ticker.start();
 
         gamePanel.hideBlocks(gamePaused);
     }

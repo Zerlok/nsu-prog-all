@@ -41,11 +41,13 @@ public class Field {
             blockRowNum = blockPosition.getRowNum();
             blockColumnNum = blockPosition.getColumnNum();
 
+            System.out.println("B: " + blockColumnNum + " " + blockColumnNum);
+
 //            Check intersections with field borders and field blocks.
             if ((blockColumnNum < 0)
+                    || (blockRowNum < 0)
                     || (blockColumnNum >= fieldColumnsNum)
                     || (blockRowNum >= fieldRowsNum)
-                    || (blockRowNum >= 0)
                     || (fieldBlocks[blockRowNum][blockColumnNum] != null))
                 return true;
         }
@@ -84,7 +86,10 @@ public class Field {
         for (rowNum = emptyRowNum; rowNum > 0; rowNum--) {
             for (columnNum = 0; columnNum < fieldColumnsNum; columnNum++) {
                 block = fieldBlocks[rowNum - 1][columnNum];
-                block.moveTo(rowNum, columnNum);
+
+                if (block != null)
+                    block.moveTo(rowNum, columnNum);
+
                 fieldBlocks[rowNum][columnNum] = block;
             }
         }
