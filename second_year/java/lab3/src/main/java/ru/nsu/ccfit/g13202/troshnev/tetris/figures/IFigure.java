@@ -14,12 +14,9 @@ public class IFigure extends AbstractFigure {
         maxRotationsNum = 2;
         figureColor = new Color(42, 163, 139);
 
-        figureBlocks = new Block[] {
-                new Block(figureColor, 0, 0),
-                new Block(figureColor, -1, 0),
-                new Block(figureColor, 1, 0),
-                new Block(figureColor ,2, 0)
-        };
+        figureBlocks = new Block[4];
+        for (int i = 0; i < figureBlocks.length; i++)
+            figureBlocks[i] = new Block(figureColor);
 
         System.out.println("IFigure created");
     }

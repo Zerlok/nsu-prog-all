@@ -29,7 +29,7 @@ public class FigureBox {
 
         AbstractFigure figure = figuresArray.get(index).clone();
         ++index;
-        figure.setRotation(rnd.nextInt());
+        figure.setRotation(rnd.nextInt(4));
         return figure;
     }
 

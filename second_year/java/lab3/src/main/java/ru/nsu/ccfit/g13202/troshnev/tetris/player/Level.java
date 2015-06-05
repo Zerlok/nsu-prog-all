@@ -21,6 +21,9 @@ public class Level {
     private boolean makeFigureRotationEvents;
     private boolean makeFigureMovementEvents;
 
+    private int tickerInitDelay = 600;
+    private int tickerDelayDecrement = 10;
+
     private Score playerScore;
 
     public Level(Score score) {

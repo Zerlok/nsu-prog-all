@@ -13,13 +13,10 @@ public class MSFigure extends AbstractFigure {
         rotation = 0;
         maxRotationsNum = 2;
         figureColor = new Color(67, 122, 254);
-        
-        figureBlocks = new Block[] {
-                new Block(figureColor, 0, 0),
-                new Block(figureColor, -1, 0),
-                new Block(figureColor, 0, 1),
-                new Block(figureColor, 1, 1)
-        };
+
+        figureBlocks = new Block[4];
+        for (int i = 0; i < figureBlocks.length; i++)
+            figureBlocks[i] = new Block(figureColor);
 
         applyFigureRotation();
         System.out.println("Mirrored SFigure created");

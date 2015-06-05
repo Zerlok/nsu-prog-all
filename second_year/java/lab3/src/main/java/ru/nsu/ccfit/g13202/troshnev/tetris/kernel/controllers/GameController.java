@@ -64,6 +64,7 @@ public class GameController implements Runnable {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
                 togglePauseGame();
+                gamePanel.repaint();
             }
         });
 
@@ -118,7 +119,8 @@ public class GameController implements Runnable {
         currentFigure = (nextFigure != null) ? nextFigure : figureFactory.createRandomFigure();
         nextFigure = figureFactory.createRandomFigure();
 
-        currentFigure.setPosition(2, gameField.getFieldColumnsNum() / 2);
+        currentFigure.setPosition(0, gameField.getFieldColumnsNum() / 2);
+        nextFigure.setPosition(3, 3);
 
         gamePanel.setNextFigure(nextFigure);
         gamePanel.setCurrentFigure(currentFigure);
@@ -128,7 +130,7 @@ public class GameController implements Runnable {
         }
     }
 
-    private void moveFigureDown() {
+    public void moveFigureDown() {
         if (gamePaused || (currentFigure == null))
             return;
 
@@ -148,7 +150,7 @@ public class GameController implements Runnable {
         }
     }
 
-    private void moveFigureLeft() {
+    public void moveFigureLeft() {
         if (gamePaused || (currentFigure == null))
             return;
 
@@ -158,7 +160,7 @@ public class GameController implements Runnable {
             currentFigure.moveRight();
     }
 
-    private void moveFigureRight() {
+    public void moveFigureRight() {
         if (gamePaused || (currentFigure == null))
             return;
 
@@ -168,7 +170,7 @@ public class GameController implements Runnable {
             currentFigure.moveLeft();
     }
 
-    private void rotateFigureClockwise() {
+    public void rotateFigureClockwise() {
         if (gamePaused || (currentFigure == null))
             return;
 
@@ -178,7 +180,7 @@ public class GameController implements Runnable {
             currentFigure.rotateOverClockwise();
     }
 
-    private void togglePauseGame() {
+    public void togglePauseGame() {
         gamePaused = !gamePaused;
 
         if (gamePaused)

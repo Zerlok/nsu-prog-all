@@ -64,6 +64,7 @@ public class GamePanel extends JPanel {
     }
 
     public void hideBlocks(boolean bool) {
+        System.out.println("mutting blocks " + bool);
         blockView.setBlockMuting(bool);
     }
 }

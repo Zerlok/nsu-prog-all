@@ -16,7 +16,14 @@ public class Field {
 
     private void addBlock(Block b) {
         Coordinate blockPosition = b.getCoordinates();
-        fieldBlocks[blockPosition.getRowNum()][blockPosition.getColumnNum()] = b;
+        int blockRowNum = blockPosition.getRowNum();
+        int blockColumnNum = blockPosition.getColumnNum();
+
+        if ((blockRowNum >= 0)
+                && (blockColumnNum >= 0)
+                && (blockRowNum < fieldRowsNum)
+                && (blockColumnNum < fieldColumnsNum))
+            fieldBlocks[blockRowNum][blockColumnNum] = b;
     }
 
     public void saveBlocks(Block[] blocks) {
@@ -41,15 +48,14 @@ public class Field {
             blockRowNum = blockPosition.getRowNum();
             blockColumnNum = blockPosition.getColumnNum();
 
-            System.out.println("B: " + blockColumnNum + " " + blockColumnNum);
-
 //            Check intersections with field borders and field blocks.
             if ((blockColumnNum < 0)
-                    || (blockRowNum < 0)
                     || (blockColumnNum >= fieldColumnsNum)
                     || (blockRowNum >= fieldRowsNum)
-                    || (fieldBlocks[blockRowNum][blockColumnNum] != null))
+                    || ((blockRowNum > 0)
+                            && fieldBlocks[blockRowNum][blockColumnNum] != null)) {
                 return true;
+            }
         }
 
         return false;

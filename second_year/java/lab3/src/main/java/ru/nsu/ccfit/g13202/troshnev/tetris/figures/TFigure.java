@@ -14,12 +14,9 @@ public class TFigure extends AbstractFigure {
         maxRotationsNum = 4;
         figureColor = new Color(116, 161, 61);
 
-        figureBlocks = new Block[] {
-                new Block(figureColor, 0, 0),
-                new Block(figureColor, -1, 0),
-                new Block(figureColor, 1, 0),
-                new Block(figureColor, 0, 1)
-        };
+        figureBlocks = new Block[4];
+        for (int i = 0; i < figureBlocks.length; i++)
+            figureBlocks[i] = new Block(figureColor);
 
         applyFigureRotation();
         System.out.println("TFigure created");
@@ -28,25 +25,25 @@ public class TFigure extends AbstractFigure {
     @Override
     protected void applyFigureRotation() {
         switch (rotation) {
-            case 0: {
+            case 3: {
                 figureBlocks[1].moveTo(-1, 0);
                 figureBlocks[2].moveTo(1, 0);
                 figureBlocks[3].moveTo(0, 1);
                 break;
             }
-            case 1: {
+            case 2: {
                 figureBlocks[1].moveTo(0, -1);
                 figureBlocks[2].moveTo(0, 1);
                 figureBlocks[3].moveTo(-1, 0);
                 break;
             }
-            case 2: {
+            case 1: {
                 figureBlocks[1].moveTo(1, 0);
                 figureBlocks[2].moveTo(-1, 0);
                 figureBlocks[3].moveTo(0, -1);
                 break;
             }
-            case 3: {
+            case 0: {
                 figureBlocks[1].moveTo(0, 1);
                 figureBlocks[2].moveTo(0, -1);
                 figureBlocks[3].moveTo(1, 0);
