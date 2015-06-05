@@ -26,7 +26,7 @@ public class GamePanel extends JPanel {
 
     private PlayerInfoView infoView;
 
-    public GamePanel(Field gameField) {
+    public GamePanel(Field gameField, Field previewField) {
         blockView = new BlockView(25, 5, 1);
 
         currentFigureView = new FigureView(blockView);
@@ -34,8 +34,9 @@ public class GamePanel extends JPanel {
         gameFieldView.setPreferredSize(new Dimension(260, 18*26));
 //        gameFieldView.setBorder(BorderFactory.createTitledBorder("Game Field"));
 
-        nextFigureView = new FigureView(blockView);
-        nextFigureFieldView = new FieldView(new Field(6, 6), new BlockView(blockView), nextFigureView);
+        BlockView nextFigureBlockView = new BlockView(blockView);
+        nextFigureView = new FigureView(nextFigureBlockView);
+        nextFigureFieldView = new FieldView(previewField, nextFigureBlockView, nextFigureView);
         nextFigureFieldView.setPreferredSize(new Dimension(240, 240));
 //        nextFigureFieldView.setBorder(BorderFactory.createTitledBorder("Next Figure"));
 
@@ -64,7 +65,6 @@ public class GamePanel extends JPanel {
     }
 
     public void hideBlocks(boolean bool) {
-        System.out.println("mutting blocks " + bool);
         blockView.setBlockMuting(bool);
     }
 }

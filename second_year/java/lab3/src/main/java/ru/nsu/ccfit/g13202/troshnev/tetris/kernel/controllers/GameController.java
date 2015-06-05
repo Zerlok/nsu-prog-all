@@ -21,6 +21,7 @@ public class GameController implements Runnable {
     private AbstractFigure currentFigure;
     private AbstractFigure nextFigure;
     private Field gameField;
+    private Field previewField;
 
     private Timer ticker;
     private boolean gamePaused;
@@ -40,6 +41,7 @@ public class GameController implements Runnable {
         currentFigure = null;
         nextFigure = null;
         gameField = new Field(18, 10);
+        previewField = new Field(6, 6);
 
         ticker = new Timer(600, new ActionListener() {
             @Override
@@ -53,7 +55,7 @@ public class GameController implements Runnable {
 
         gamePaused = true;
 
-        gamePanel = new GamePanel(gameField);
+        gamePanel = new GamePanel(gameField, previewField);
         setupActions(actionsMap);
     }
 
