@@ -85,14 +85,15 @@ public abstract class AbstractFigure implements Cloneable {
         return figureBlocks;
     }
 
-    public Coordinate[] getBlocksGlobalPositions() {
-        Coordinate[] positions = new Coordinate[figureBlocks.length];
+    public Block[] getGlobalBlocks() {
+        Block[] globalBlocks = new Block[figureBlocks.length];
 
         for (int i = 0; i < figureBlocks.length; i++) {
-            positions[i] = new Coordinate(figureBlocks[i].getCoordinates());
-            positions[i].addCoordinateOffset(figurePosition);
+            Coordinate globalPosition = figureBlocks[i].getCoordinates();
+            globalPosition.addCoordinateOffset(figurePosition);
+            globalBlocks[i] = new Block(figureBlocks[i].getColor(), globalPosition);
         }
 
-        return positions;
+        return globalBlocks;
     }
 }
