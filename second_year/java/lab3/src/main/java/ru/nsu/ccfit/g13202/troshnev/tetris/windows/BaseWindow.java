@@ -36,6 +36,8 @@ public class BaseWindow extends JFrame {
 
         setJMenuBar(windowHeader);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+        pack();
     }
 
     public void centreWindow() {

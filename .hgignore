@@ -19,4 +19,5 @@ syntax: glob
 *.idea
 *.jar
 *13202-troshnev*
+*target/classes*
 *_samples*

@@ -39,11 +39,11 @@ public class GamePanel extends JPanel {
         add(nextFigureView);
 
         infoView = new PlayerInfoView(new Player());
-        infoView.setSize(new Dimension(150, 550));
+        infoView.setSize(new Dimension(240, 480));
         add(infoView);
 
         setLayout(new BorderLayout(10, 10));
-        setSize(new Dimension(500, 700));
+        setSize(new Dimension(640, 720));
     }
 
     public void setCurrentFigure(AbstractFigure f) {
@@ -52,5 +52,9 @@ public class GamePanel extends JPanel {
 
     public void setNextFigure(AbstractFigure f) {
         currentFigureView.setFigure(f);
+    }
+
+    public void hideBlocks(boolean bool) {
+        blockView.setBlockMuting(bool);
     }
 }

@@ -21,17 +21,16 @@ public class GameController implements Runnable {
     private FigureFactory figureFactory;
     private AbstractFigure currentFigure;
     private AbstractFigure nextFigure;
-
     private Field gameField;
-    private FigureView currentFigureView;
-    private FigureView nextFigureView;
-
-    private GamePanel gamePanel;
 
     private Timer ticker;
     private boolean gamePaused;
 
+    private GamePanel gamePanel;
+
     public GameController(ActionMap actionsMap) {
+        setupActions(actionsMap);
+
         currentPlayer = new Player();
 
         figureFactory = new FigureFactory();
@@ -43,13 +42,7 @@ public class GameController implements Runnable {
         }
         currentFigure = null;
         nextFigure = null;
-
-        gameField = new Field(10, 15);
-        currentFigureView = new FigureView(
-                gameField.getFieldRowsNum(),
-                gameField.getFieldColumnsNum()
-        );
-        nextFigureView = new FigureView(6, 6);
+        gameField = new Field(10, 18);
 
         ticker = new Timer(600, new ActionListener() {
             @Override
@@ -62,6 +55,17 @@ public class GameController implements Runnable {
         ticker.setCoalesce(false);
 
         gamePaused = true;
+
+        gamePanel = new GamePanel(gameField);
+    }
+
+    private void setupActions(ActionMap actionsMap) {
+        actionsMap.put("GAME-PAUSE", new AbstractAction("Pause") {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                togglePauseGame();
+            }
+        });
     }
 
     @Override
@@ -152,6 +156,8 @@ public class GameController implements Runnable {
             ticker.stop();
         else
             ticker.start();
+
+        gamePanel.hideBlocks(gamePaused);
     }
 
     private void recalculateTickerDelay(int rowsNum) {

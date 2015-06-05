@@ -1,8 +1,6 @@
 package ru.nsu.ccfit.g13202.troshnev.tetris.kernel.controllers;
 
-import ru.nsu.ccfit.g13202.troshnev.tetris.kernel.Field;
 import ru.nsu.ccfit.g13202.troshnev.tetris.windows.BaseWindow;
-import ru.nsu.ccfit.g13202.troshnev.tetris.windows.GamePanel;
 import ru.nsu.ccfit.g13202.troshnev.tetris.windows.MainPanel;
 
 import javax.swing.*;
@@ -83,11 +81,11 @@ public class MainController implements Runnable {
     }
 
     private void showScoresTable() {
-
+        System.out.println("Scores table is still in development.");
     }
 
     private void showAbout() {
-
+        System.out.println("About is still in development.");
     }
 
     private void exitTheGame() {
