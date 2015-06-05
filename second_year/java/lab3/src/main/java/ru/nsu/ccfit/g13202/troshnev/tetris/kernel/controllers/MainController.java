@@ -23,16 +23,16 @@ public class MainController implements Runnable {
     }
 
     private void setupActions() {
-        actionsMap.put("GAME-NEW", new AbstractAction("New Game") {
-            @Override
-            public void actionPerformed(ActionEvent actionEvent) {
-                startNewGame();
-            }
-        });
-        actionsMap.put("MAIN-HOME", new AbstractAction("Main Menu") {
+        actionsMap.put("MAIN-HOME", new AbstractAction("Menu") {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
                 initMainMenu();
+            }
+        });
+        actionsMap.put("GAME-NEW", new AbstractAction("New") {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                startNewGame();
             }
         });
         actionsMap.put("MAIN-SCORES", new AbstractAction("Highscores") {
@@ -57,32 +57,44 @@ public class MainController implements Runnable {
 
     @Override
     public void run() {
-        initMainMenu();
-        baseWindow.setVisible(true);
+//        initMainMenu();
+        startNewGame();
     }
 
     private void initMainMenu() {
+        stopTheGame();
         baseWindow.setInnerWindow(new MainPanel(actionsMap));
         baseWindow.centreWindow();
     }
 
     private void startNewGame() {
+        stopTheGame();
         gameLogic = new GameController(actionsMap);
 
         baseWindow.setInnerWindow(gameLogic.getGamePanel());
         baseWindow.centreWindow();
+
+        gameLogic.run();
     }
 
     private void showScoresTable() {
+        stopTheGame();
         baseWindow.setInnerWindow(new ScoresPanel());
         baseWindow.centreWindow();
     }
 
     private void showAbout() {
-        System.out.println("About is still in development.");
+    }
+
+    private void stopTheGame() {
+        if (gameLogic != null) {
+            gameLogic.stop();
+            gameLogic = null;
+        }
     }
 
     private void exitTheGame() {
+        stopTheGame();
         System.exit(0);
     }
 }

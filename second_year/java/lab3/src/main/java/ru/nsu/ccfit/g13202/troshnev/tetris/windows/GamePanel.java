@@ -31,15 +31,16 @@ public class GamePanel extends JPanel {
 
         currentFigureView = new FigureView(blockView);
         gameFieldView = new FieldView(gameField, blockView, currentFigureView);
+        gameFieldView.setPreferredSize(new Dimension(400, 720));
         gameFieldView.setBorder(BorderFactory.createTitledBorder("Game Field"));
 
         nextFigureView = new FigureView(blockView);
         nextFigureFieldView = new FieldView(new Field(6, 6), new BlockView(blockView), nextFigureView);
-        nextFigureFieldView.setSize(new Dimension(240, 240));
+        nextFigureFieldView.setPreferredSize(new Dimension(240, 240));
         nextFigureFieldView.setBorder(BorderFactory.createTitledBorder("Next Figure"));
 
         infoView = new PlayerInfoView(new Player());
-        infoView.setSize(new Dimension(240, 480));
+        infoView.setPreferredSize(new Dimension(240, 400));
         infoView.setBorder(BorderFactory.createTitledBorder("Info"));
 
         setLayout(new FlowLayout(FlowLayout.LEFT));
@@ -47,9 +48,6 @@ public class GamePanel extends JPanel {
         add(gameFieldView);
         add(nextFigureFieldView);
         add(infoView);
-
-        gameFieldView.setSize(new Dimension(400, 720));
-        setSize(new Dimension(640, 720));
     }
 
     public void setCurrentFigure(AbstractFigure f) {

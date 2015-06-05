@@ -7,38 +7,29 @@ import java.awt.*;
  * Created by zerlok on 5/31/15.
  */
 public class BaseWindow extends JFrame {
-    private JMenuBar windowHeader;
-    private JMenu windowMenu;
     private JPanel innerWindow;
 
     public BaseWindow(ActionMap actionsMap) {
+        JMenuItem menuMain = new JMenuItem();
+        menuMain.setAction(actionsMap.get("MAIN-HOME"));
+
         JMenuItem menuStart = new JMenuItem();
         menuStart.setAction(actionsMap.get("GAME-NEW"));
 
         JMenuItem menuPause = new JMenuItem();
         menuPause.setAction(actionsMap.get("GAME-PAUSE"));
 
-        JMenuItem menuMain = new JMenuItem();
-        menuMain.setAction(actionsMap.get("MAIN-HOME"));
-
-        JMenuItem menuExit = new JMenuItem();
-        menuExit.setAction(actionsMap.get("GAME-EXIT"));
-
-        windowMenu = new JMenu("Menu");
-        windowHeader = new JMenuBar();
+        JMenuBar windowHeader = new JMenuBar();
 
         setTitle("Tetris");
-        windowMenu.add(menuStart);
-        windowMenu.add(menuPause);
-        windowMenu.add(menuMain);
-        windowMenu.add(menuExit);
-        windowHeader.add(windowMenu);
+        windowHeader.add(menuMain);
+        windowHeader.add(menuStart);
+        windowHeader.add(menuPause);
 
         setJMenuBar(windowHeader);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         getContentPane().setLayout(new BorderLayout());
 
-        pack();
         setLayout(new BorderLayout());
         setVisible(true);
     }
@@ -66,10 +57,7 @@ public class BaseWindow extends JFrame {
         innerWindow = window;
 
         add(window, BorderLayout.CENTER);
-        setSize(
-                window.getWidth(),
-                window.getHeight()
-        );
+        setSize(window.getWidth(), window.getHeight());
         pack();
     }
 }

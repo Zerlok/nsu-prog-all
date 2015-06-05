@@ -75,7 +75,7 @@ public class GameController implements Runnable {
     }
 
     public void stop() {
-
+        ticker.stop();
     }
 
     private void createNewFigure() {
@@ -156,10 +156,10 @@ public class GameController implements Runnable {
     private void togglePauseGame() {
         gamePaused = !gamePaused;
 
-        if (gamePaused)
-            ticker.stop();
-        else
-            ticker.start();
+//        if (gamePaused)
+//            ticker.stop();
+//        else
+//            ticker.start();
 
         gamePanel.hideBlocks(gamePaused);
     }

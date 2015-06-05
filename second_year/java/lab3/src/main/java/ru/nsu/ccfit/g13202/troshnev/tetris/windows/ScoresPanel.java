@@ -11,7 +11,7 @@ public class ScoresPanel extends JPanel {
         setLayout(new FlowLayout(FlowLayout.LEFT));
 
         add(new JLabel("Blah Label"));
-        add(new JTextArea("TEXTAREA"));
+        add(new JTextArea("TEXT AREA"));
         add(new JButton("Ok"));
         
         setSize(new Dimension(500, 500));
