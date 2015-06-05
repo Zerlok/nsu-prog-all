@@ -52,13 +52,13 @@ public class FieldBlocksView extends JComponent {
             for (int i = 0; i < figureBlocksPositions.length; i++) {
                 if (!muteBlocks) {
                     figureBlocks[i].draw(
-                            figureBlocksPositions[i].getCoY(), // rowNum
-                            figureBlocksPositions[i].getCoX(), // columnNum
+                            figureBlocksPositions[i].getColumnNum(), // rowNum
+                            figureBlocksPositions[i].getRowNum(), // columnNum
                             g2d);
                 } else {
                     mutedBlock.draw(
-                            figureBlocksPositions[i].getCoY(), // rowNum
-                            figureBlocksPositions[i].getCoX(), // columnNum
+                            figureBlocksPositions[i].getColumnNum(), // rowNum
+                            figureBlocksPositions[i].getRowNum(), // columnNum
                             g2d);
                 }
             }

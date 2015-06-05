@@ -36,4 +36,8 @@ public class Block {
     public Coordinate getCoordinates() {
         return new Coordinate(position);
     }
+
+    public void moveTo(int rowNum, int columnNum) {
+        position = new Coordinate(rowNum, columnNum);
+    }
 }

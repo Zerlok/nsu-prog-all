@@ -14,16 +14,12 @@ public class IFigure extends AbstractFigure {
         maxRotationsNum = 2;
         figureColor = new Color(42, 163, 139);
 
-        Coordinate[] blocksPositions = new Coordinate[] {
-                new Coordinate(0, 0),
-                new Coordinate(-1, 0),
-                new Coordinate(1, 0),
-                new Coordinate(2, 0)
+        figureBlocks = new Block[] {
+                new Block(figureColor, 0, 0),
+                new Block(figureColor, -1, 0),
+                new Block(figureColor, 1, 0),
+                new Block(figureColor ,2, 0)
         };
-
-        figureBlocks = new Block[blocksPositions.length];
-        for (int i = 0; i < figureBlocks.length; i++)
-            figureBlocks[i] = new Block(figureColor);
 
         System.out.println("IFigure created");
     }
@@ -32,15 +28,15 @@ public class IFigure extends AbstractFigure {
     protected void applyFigureRotation() {
         switch (rotation) {
             case 0: {
-                blocksPositions[1].moveTo(-1, 0);
-                blocksPositions[2].moveTo(1, 0);
-                blocksPositions[3].moveTo(2, 0);
+                figureBlocks[1].moveTo(-1, 0);
+                figureBlocks[2].moveTo(1, 0);
+                figureBlocks[3].moveTo(2, 0);
                 break;
             }
             case 1: {
-                blocksPositions[1].moveTo(0, -1);
-                blocksPositions[2].moveTo(0, 1);
-                blocksPositions[3].moveTo(0, 2);
+                figureBlocks[1].moveTo(0, -1);
+                figureBlocks[2].moveTo(0, 1);
+                figureBlocks[3].moveTo(0, 2);
                 break;
             }
         }

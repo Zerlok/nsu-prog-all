@@ -20,7 +20,7 @@ public class Field {
 
         Coordinate blockPosition = b.getCoordinates();
         // Y - rowNum, X - columnNum
-        fieldBlocks[blockPosition.getCoY()][blockPosition.getCoX()] = b;
+        fieldBlocks[blockPosition.getColumnNum()][blockPosition.getRowNum()] = b;
     }
 
     public void saveBlocks(Block[] blocks) {
@@ -42,8 +42,8 @@ public class Field {
 //        Cycle throw figure figureBlocks.
         for (Block block : blocks) {
             blockPosition = block.getCoordinates();
-            blockRowNum = blockPosition.getCoY();
-            blockColumnNum = blockPosition.getCoX();
+            blockRowNum = blockPosition.getColumnNum();
+            blockColumnNum = blockPosition.getRowNum();
 
 //            Check intersections with field borders and field figureBlocks.
             if ((blockColumnNum < 0)

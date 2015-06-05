@@ -4,50 +4,50 @@ package ru.nsu.ccfit.g13202.troshnev.tetris.kernel;
  * Created by zerlok on 5/12/15.
  */
 public class Coordinate {
-    private int coX;
-    private int coY;
+    private int rowNum;
+    private int columnNum;
 
-    public Coordinate(int x, int y) {
-        coX = x;
-        coY = y;
+    public Coordinate(int row, int column) {
+        rowNum = row;
+        columnNum = column;
     }
 
     public Coordinate(Coordinate co) {
-        coX = co.coX;
-        coY = co.coY;
+        rowNum = co.rowNum;
+        columnNum = co.columnNum;
     }
 
-    public void moveTo(int x, int y) {
-        coX = x;
-        coY = y;
+    public void moveTo(int row, int column) {
+        rowNum = row;
+        columnNum = column;
     }
 
     public void addCoordinate(Coordinate co) {
-        coX += co.coX;
-        coY += co.coY;
+        rowNum += co.rowNum;
+        columnNum += co.columnNum;
     }
 
-    public void incrementCoX() {
-        coX++;
+    public void incrementRowNum() {
+        rowNum++;
     }
 
-    public void decrementCoX() {
-        coX--;
+    public void decrementRowNum() {
+        rowNum--;
     }
 
-    public void incrementCoY() {
-        coY++;
+    public void incrementColumnNum() {
+        columnNum++;
     }
 
-    public void decrementCoY() {
-        coY--;
+    public void decrementColumnNum() {
+        columnNum--;
     }
 
-    public int getCoX() {
-        return coX;
+    public int getRowNum() {
+        return rowNum;
     }
 
-    public int getCoY() {
-        return coY;
+    public int getColumnNum() {
+        return columnNum;
     }
 }

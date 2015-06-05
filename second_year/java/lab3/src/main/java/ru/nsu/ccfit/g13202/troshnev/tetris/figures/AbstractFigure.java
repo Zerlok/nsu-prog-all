@@ -51,19 +51,19 @@ public abstract class AbstractFigure implements Cloneable {
     }
 
     public void moveUp() {
-        figurePosition.decrementCoY();
+        figurePosition.decrementColumnNum();
     }
 
     public void moveDown() {
-        figurePosition.incrementCoY();
+        figurePosition.incrementColumnNum();
     }
 
     public void moveLeft() {
-        figurePosition.decrementCoX();
+        figurePosition.decrementRowNum();
     }
 
     public void moveRight() {
-        figurePosition.incrementCoX();
+        figurePosition.incrementRowNum();
     }
 
     public void rotateLeft() {
@@ -89,7 +89,7 @@ public abstract class AbstractFigure implements Cloneable {
         Coordinate[] positions = new Coordinate[figureBlocks.length];
 
         for (int i = 0; i < figureBlocks.length; i++) {
-            positions[i] = new Coordinate(blocksPositions[i]);
+            positions[i] = new Coordinate(figureBlocks[i].getCoordinates());
             positions[i].addCoordinate(figurePosition);
         }
 
