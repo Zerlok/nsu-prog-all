@@ -20,4 +20,5 @@ syntax: glob
 *.jar
 *13202-troshnev*
 *target/classes*
+*target/test*
 *_samples*
