@@ -3,7 +3,7 @@ package ru.nsu.ccfit.g13202.troshnev.tetris.windows;
 import ru.nsu.ccfit.g13202.troshnev.tetris.figures.AbstractFigure;
 import ru.nsu.ccfit.g13202.troshnev.tetris.kernel.Field;
 import ru.nsu.ccfit.g13202.troshnev.tetris.player.Player;
-import ru.nsu.ccfit.g13202.troshnev.tetris.views.FieldBlocksView;
+import ru.nsu.ccfit.g13202.troshnev.tetris.views.FieldView;
 import ru.nsu.ccfit.g13202.troshnev.tetris.views.FigureView;
 import ru.nsu.ccfit.g13202.troshnev.tetris.views.PlayerInfoView;
 
@@ -14,13 +14,13 @@ import java.awt.*;
  * Created by zerlok on 4/29/15.
  */
 public class GamePanel extends JPanel {
-    private FieldBlocksView blocksView;
+    private FieldView blocksView;
     private FigureView currentFigureView;
     private FigureView nextFigureView;
     private PlayerInfoView infoView;
 
     public GamePanel(Field gameField) {
-        blocksView = new FieldBlocksView(gameField);
+        blocksView = new FieldView(gameField);
         blocksView.setSize(new Dimension(550, 700));
         add(blocksView);
 

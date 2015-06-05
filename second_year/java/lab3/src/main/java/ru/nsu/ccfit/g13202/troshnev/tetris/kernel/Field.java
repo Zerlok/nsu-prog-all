@@ -14,13 +14,9 @@ public class Field {
         fieldBlocks = new Block[fieldRowsNum][fieldColumnsNum];
     }
 
-    public void addBlock(Block b) {
-        if (b == null)
-            return;
-
+    private void addBlock(Block b) {
         Coordinate blockPosition = b.getCoordinates();
-        // Y - rowNum, X - columnNum
-        fieldBlocks[blockPosition.getColumnNum()][blockPosition.getRowNum()] = b;
+        fieldBlocks[blockPosition.getRowNum()][blockPosition.getColumnNum()] = b;
     }
 
     public void saveBlocks(Block[] blocks) {
@@ -39,13 +35,13 @@ public class Field {
         int blockRowNum;
         int blockColumnNum;
 
-//        Cycle throw figure figureBlocks.
+//        Cycle throw figure blocks.
         for (Block block : blocks) {
             blockPosition = block.getCoordinates();
-            blockRowNum = blockPosition.getColumnNum();
-            blockColumnNum = blockPosition.getRowNum();
+            blockRowNum = blockPosition.getRowNum();
+            blockColumnNum = blockPosition.getColumnNum();
 
-//            Check intersections with field borders and field figureBlocks.
+//            Check intersections with field borders and field blocks.
             if ((blockColumnNum < 0)
                     || (blockColumnNum >= fieldColumnsNum)
                     || (blockRowNum >= fieldRowsNum)
@@ -84,16 +80,16 @@ public class Field {
         int rowNum;
         Block block;
 
-//        Cycle from empty row to top.
+//        Cycle upward from empty row.
         for (rowNum = emptyRowNum; rowNum > 0; rowNum--) {
             for (columnNum = 0; columnNum < fieldColumnsNum; columnNum++) {
                 block = fieldBlocks[rowNum - 1][columnNum];
-                block.
+                block.moveTo(rowNum, columnNum);
                 fieldBlocks[rowNum][columnNum] = block;
             }
         }
 
-//        Delete top fieldBlocks at 0 rowNum.
+//        Delete top blocks at 0 rowNum.
         for (columnNum = 0; columnNum < fieldColumnsNum; columnNum++)
             fieldBlocks[0][columnNum] = null;
     }

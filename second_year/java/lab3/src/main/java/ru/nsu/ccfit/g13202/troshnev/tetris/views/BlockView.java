@@ -1,62 +1,50 @@
 package ru.nsu.ccfit.g13202.troshnev.tetris.views;
 
 import ru.nsu.ccfit.g13202.troshnev.tetris.kernel.Block;
+import ru.nsu.ccfit.g13202.troshnev.tetris.kernel.Coordinate;
 
 import javax.swing.*;
+import java.awt.*;
 
 /**
  * Created by zerlok on 4/29/15.
  */
 
-public class BlockView extends JComponent {
-    // Block pixelWidth in pixels.
-    static private int pixelWidth = 100;
-    static private int pixelPadding = 5;
-    static private int pixelMargin = 1;
+public class BlockView {
+    private int pixelWidth;
+    private int pixelPadding;
+    private int pixelOffset;
 
-    // The block color.
-    static public void setSize(int w, int p, int m) {
-        pixelWidth = w > 0 ? w : pixelWidth;
-        pixelPadding = p >= 0 ? p : pixelPadding;
-        pixelMargin = m >= 0 ? m : pixelMargin;
+    public BlockView(int width, int padding, int margin) {
+        pixelWidth = width;
+        pixelPadding = padding;
+        pixelOffset = width + margin;
     }
 
-    public static int getPixelOffset() {
-        return pixelWidth + pixelMargin;
-    }
+    public void draw(Block block, Graphics2D g2d) {
+        if (block == null)
+            return;
 
-    public static int getPixelMargin() {
-        return pixelMargin;
-    }
+        Coordinate blockPosition = block.getCoordinates();
+        int pixelX = blockPosition.getColumnNum() * pixelOffset;
+        int pixelY = blockPosition.getRowNum() * pixelOffset;
 
-//    public BlockView(Block block) {
-//        innerColor = block.getColor();
-//        borderColor = clr.brighter();
-//    }
-//
-////    public Block(Color inColor, Color brColor) {
-////        innerColor = inColor;
-////        borderColor = brColor;
-////    }
-////
-////    public void draw(int rowNum, int columnNum, Graphics2D g) {
-////        int offset = getPixelOffset();
-////        int pixelX = columnNum * offset;
-////        int pixelY = rowNum * offset;
-////
-////        g.setColor(borderColor);
-////        g.fillRect(
-////                pixelX,
-////                pixelY,
-////                pixelWidth,
-////                pixelWidth
-////        );
-////        g.setColor(innerColor);
-////        g.fillRect(
-////                pixelX + pixelPadding,
-////                pixelY + pixelPadding,
-////                pixelWidth - (2*pixelPadding),
-////                pixelWidth - (2*pixelPadding)
-////        );
-////    }
+        Color innerColor = block.getColor();
+        Color borderColor = innerColor.brighter();
+
+        g2d.setColor(borderColor);
+        g2d.fillRect(
+                pixelX,
+                pixelY,
+                pixelWidth,
+                pixelWidth
+        );
+        g2d.setColor(innerColor);
+        g2d.fillRect(
+                pixelX + pixelPadding,
+                pixelY + pixelPadding,
+                pixelWidth - (2 * pixelPadding),
+                pixelWidth - (2 * pixelPadding)
+        );
+    }
 }
