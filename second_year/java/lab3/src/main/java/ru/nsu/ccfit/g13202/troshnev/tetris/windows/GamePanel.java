@@ -31,18 +31,22 @@ public class GamePanel extends JPanel {
         currentFigureView = new FigureView(blockView);
         gameFieldView = new FieldView(gameField, blockView, currentFigureView);
         gameFieldView.setSize(new Dimension(400, 720));
-        add(gameFieldView);
+        gameFieldView.setBorder(BorderFactory.createTitledBorder("Game Field"));
 
         nextFigureView = new FigureView(blockView);
         nextFigureFieldView = new FieldView(new Field(6, 6), new BlockView(blockView), nextFigureView);
         nextFigureFieldView.setSize(new Dimension(240, 240));
-        add(nextFigureView);
+        nextFigureFieldView.setBorder(BorderFactory.createTitledBorder("Next Figure"));
 
         infoView = new PlayerInfoView(new Player());
         infoView.setSize(new Dimension(240, 480));
-        add(infoView);
+        infoView.setBorder(BorderFactory.createTitledBorder("Info"));
 
-        setLayout(new BorderLayout(10, 10));
+        setLayout(new FlowLayout(FlowLayout.LEADING));
+        add(gameFieldView);
+        add(infoView);
+        add(nextFigureView);
+
         setSize(new Dimension(640, 720));
     }
 
