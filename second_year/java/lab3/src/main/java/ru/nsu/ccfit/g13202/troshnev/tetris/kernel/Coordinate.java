@@ -22,7 +22,7 @@ public class Coordinate {
         columnNum = column;
     }
 
-    public void addCoordinate(Coordinate co) {
+    public void addCoordinateOffset(Coordinate co) {
         rowNum += co.rowNum;
         columnNum += co.columnNum;
     }

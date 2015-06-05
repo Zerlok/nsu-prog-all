@@ -90,7 +90,7 @@ public abstract class AbstractFigure implements Cloneable {
 
         for (int i = 0; i < figureBlocks.length; i++) {
             positions[i] = new Coordinate(figureBlocks[i].getCoordinates());
-            positions[i].addCoordinate(figurePosition);
+            positions[i].addCoordinateOffset(figurePosition);
         }
 
         return positions;

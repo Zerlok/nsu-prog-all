@@ -14,16 +14,12 @@ public class SquareFigure extends AbstractFigure {
         maxRotationsNum = 1;
         figureColor = new Color(161, 40, 41);
 
-        blocksPositions = new Coordinate[] {
-                new Coordinate(0, 0),
-                new Coordinate(1, 0),
-                new Coordinate(0, 1),
-                new Coordinate(1, 1)
+        figureBlocks = new Block[] {
+                new Block(figureColor, 0, 0),
+                new Block(figureColor, 1, 0),
+                new Block(figureColor, 0, 1),
+                new Block(figureColor, 1, 1)
         };
-
-        figureBlocks = new Block[blocksPositions.length];
-        for (int i = 0; i < figureBlocks.length; i++)
-            figureBlocks[i] = new Block(figureColor);
 
         System.out.println("SquareFigure created");
     }

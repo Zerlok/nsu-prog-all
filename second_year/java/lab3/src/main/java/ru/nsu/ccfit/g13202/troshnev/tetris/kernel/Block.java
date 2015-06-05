@@ -38,6 +38,6 @@ public class Block {
     }
 
     public void moveTo(int rowNum, int columnNum) {
-        position = new Coordinate(rowNum, columnNum);
+        position.moveTo(rowNum, columnNum);
     }
 }
