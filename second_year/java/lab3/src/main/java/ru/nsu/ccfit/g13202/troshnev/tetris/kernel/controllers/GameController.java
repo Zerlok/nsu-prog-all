@@ -1,5 +1,6 @@
 package ru.nsu.ccfit.g13202.troshnev.tetris.kernel.controllers;
 
+import ru.nsu.ccfit.g13202.troshnev.tetris.events.TetrisEventController;
 import ru.nsu.ccfit.g13202.troshnev.tetris.figures.AbstractFigure;
 import ru.nsu.ccfit.g13202.troshnev.tetris.kernel.Field;
 import ru.nsu.ccfit.g13202.troshnev.tetris.kernel.FigureFactory;
@@ -28,8 +29,12 @@ public class GameController implements Runnable {
 
     private GamePanel gamePanel;
 
+    private TetrisEventController eventController;
+
     public GameController(ActionMap actionsMap) {
         currentPlayer = new Player();
+        eventController = new TetrisEventController();
+        eventController.addActionListener(currentPlayer);
 
         figureFactory = new FigureFactory();
         try {
@@ -47,6 +52,7 @@ public class GameController implements Runnable {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
                 moveFigureDown();
+                eventController.handleEvent();
                 gamePanel.repaint();
             }
         });
@@ -57,6 +63,7 @@ public class GameController implements Runnable {
 
         gamePanel = new GamePanel(gameField, previewField);
         setupActions(actionsMap);
+        gamePanel.registerListeners(eventController);
     }
 
     private void setupActions(ActionMap actionsMap) {
@@ -129,6 +136,9 @@ public class GameController implements Runnable {
 
         if (gameField.hasIntersection(currentFigure.getGlobalBlocks())) {
             currentFigure = null;
+
+        } else {
+            eventController.pushEvent(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, "TETRIS-FIGURE-NEW"));
         }
     }
 
@@ -145,8 +155,10 @@ public class GameController implements Runnable {
             System.out.println("Figure position locked.");
 
             int removedRowsNum = gameField.removeFullRows();
-            if (removedRowsNum > 0)
+            if (removedRowsNum > 0) {
                 recalculateTickerDelay(removedRowsNum);
+                currentPlayer.incrementRows(removedRowsNum);
+            }
 
             createNewFigure();
         }

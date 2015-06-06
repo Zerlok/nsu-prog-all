@@ -29,6 +29,10 @@ public class BlockView {
         blockMuting = blockView.blockMuting;
     }
 
+    public int getPixelOffset() {
+        return pixelOffset;
+    }
+
     public void draw(Block block, Graphics2D g2d) {
         if ((block == null)
                 || (blockMuting))

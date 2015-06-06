@@ -57,8 +57,8 @@ public class MainController implements Runnable {
 
     @Override
     public void run() {
-//        initMainMenu();
-        startNewGame();
+        initMainMenu();
+//        startNewGame();
     }
 
     private void initMainMenu() {

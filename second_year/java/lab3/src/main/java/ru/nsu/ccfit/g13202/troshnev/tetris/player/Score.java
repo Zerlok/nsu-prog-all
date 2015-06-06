@@ -17,8 +17,8 @@ public class Score {
         figuresNum = 0;
     }
 
-    public void incrementRows() {
-        ++rowsNum;
+    public void incrementRows(int n) {
+        rowsNum += n;
     }
 
     public void incrementFiguresNum() {

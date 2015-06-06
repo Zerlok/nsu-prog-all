@@ -28,19 +28,19 @@ public class Coordinate {
     }
 
     public void incrementRowNum() {
-        rowNum++;
+        ++rowNum;
     }
 
     public void decrementRowNum() {
-        rowNum--;
+        --rowNum;
     }
 
     public void incrementColumnNum() {
-        columnNum++;
+        ++columnNum;
     }
 
     public void decrementColumnNum() {
-        columnNum--;
+        --columnNum;
     }
 
     public int getRowNum() {
