@@ -12,29 +12,24 @@ import java.awt.event.ActionListener;
  */
 public class PlayerInfoView extends JComponent implements ActionListener {
     private Player currentPlayer;
-    private JLabel highscoreValue;
     private JLabel currentScoreValue;
     private JLabel currentLevelValue;
 
     public PlayerInfoView(Player player) {
         currentPlayer = player;
-        highscoreValue = new JLabel("0");
-        currentScoreValue = new JLabel(String.valueOf(player.getScorePoints()));
-        currentLevelValue = new JLabel(String.valueOf(player.getLevelNum()));
+        currentLevelValue = new JLabel("Level: " + String.valueOf(player.getLevelNum()));
+        currentScoreValue = new JLabel("Score: " + String.valueOf(player.getScorePoints()));
 
-        setLayout(new GridLayout(3, 2, 20, 20));
-        add(new JLabel("Highscore"));
-        add(highscoreValue);
-        add(new JLabel("Score:"));
-        add(currentScoreValue);
-        add(new JLabel("Level:"));
+        setLayout(new GridLayout(2, 1, 20, 20));
         add(currentLevelValue);
+        add(currentScoreValue);
     }
 
     @Override
     public void actionPerformed(ActionEvent actionEvent) {
-        currentLevelValue.setText(String.valueOf(currentPlayer.getLevelNum()));
-        currentScoreValue.setText(String.valueOf(currentPlayer.getScorePoints()));
-        repaint();
+        // TODO: Make updates for player statistics. (don't know why it won't work)
+        currentLevelValue.setText("Level: " + String.valueOf(currentPlayer.getLevelNum()));
+        currentScoreValue.setText("Score: " + String.valueOf(currentPlayer.getScorePoints()));
+        System.out.println("Player statistics: " + currentLevelValue.getText() + ", " + currentScoreValue.getText());
     }
 }

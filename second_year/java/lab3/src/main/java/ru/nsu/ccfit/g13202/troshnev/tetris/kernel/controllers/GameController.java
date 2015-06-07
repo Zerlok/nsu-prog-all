@@ -51,7 +51,6 @@ public class GameController implements Runnable {
         ticker = new Timer(600, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                moveFigureDown();
                 eventController.handleEvent();
                 gamePanel.repaint();
             }
@@ -129,7 +128,7 @@ public class GameController implements Runnable {
         nextFigure = figureFactory.createRandomFigure();
 
         currentFigure.setPosition(0, gameField.getFieldColumnsNum() / 2);
-        nextFigure.setPosition(3, 3);
+        nextFigure.setPosition(previewField.getFieldRowsNum() / 2, previewField.getFieldColumnsNum() / 2);
 
         gamePanel.setNextFigure(nextFigure);
         gamePanel.setCurrentFigure(currentFigure);
@@ -157,7 +156,8 @@ public class GameController implements Runnable {
             int removedRowsNum = gameField.removeFullRows();
             if (removedRowsNum > 0) {
                 recalculateTickerDelay(removedRowsNum);
-                currentPlayer.incrementRows(removedRowsNum);
+                eventController.pushEvent(new ActionEvent(this, ActionEvent.ACTION_PERFORMED,
+                        String.format("TETRIS-ROWS-REMOVED=%1$d", removedRowsNum)));
             }
 
             createNewFigure();

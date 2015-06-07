@@ -35,8 +35,16 @@ public class Player implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent actionEvent) {
-        if (actionEvent.getActionCommand() == "TETRIS-FIGURE-NEW") {
+        String cmd = actionEvent.getActionCommand();
+
+        if (cmd == "TETRIS-FIGURE-NEW") {
             incrementFigures();
+            System.out.println("Player get new score: " + getScorePoints());
+        }
+
+        if (cmd.startsWith("TETRIS-ROWS-REMOVED=")) {
+            incrementRows(Integer.valueOf(cmd.split("=")[1]));
+            System.out.println("Level: " + getLevelNum());
         }
     }
 }

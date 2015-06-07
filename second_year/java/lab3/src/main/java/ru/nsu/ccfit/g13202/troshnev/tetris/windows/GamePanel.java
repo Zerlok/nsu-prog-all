@@ -1,6 +1,5 @@
 package ru.nsu.ccfit.g13202.troshnev.tetris.windows;
 
-import com.sun.org.apache.bcel.internal.generic.FLOAD;
 import ru.nsu.ccfit.g13202.troshnev.tetris.events.TetrisEventController;
 import ru.nsu.ccfit.g13202.troshnev.tetris.figures.AbstractFigure;
 import ru.nsu.ccfit.g13202.troshnev.tetris.kernel.Field;
@@ -12,8 +11,6 @@ import ru.nsu.ccfit.g13202.troshnev.tetris.views.PlayerInfoView;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 /**
  * Created by zerlok on 4/29/15.

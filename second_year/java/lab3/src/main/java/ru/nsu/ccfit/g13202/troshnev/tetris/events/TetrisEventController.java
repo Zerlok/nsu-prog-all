@@ -30,17 +30,14 @@ public class TetrisEventController {
         }
     }
 
-    public ActionEvent handleEvent() {
-        ActionEvent event = eventQueue.poll();
+    public void handleEvent() {
+        ActionEvent event;
 
-        if (event == null)
-            return null;
-
-        System.out.println("Handling the event... " + event);
-        for (ActionListener listener : eventListeners) {
-            listener.actionPerformed(event);
+        while ((event = eventQueue.poll()) != null) {
+            System.out.println("Handling the event: " + event.getActionCommand());
+            for (ActionListener listener : eventListeners) {
+                listener.actionPerformed(event);
+            }
         }
-
-        return event;
     }
 }

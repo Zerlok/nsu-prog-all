@@ -7,8 +7,8 @@ import java.awt.event.ActionListener;
  * Created by zerlok on 5/13/15.
  */
 public class Score {
-    static private int rowPoints = 1000;
-    static private int figurePoints = 200;
+    static private int rowPoints = 100;
+    static private int figurePoints = 10;
     private int rowsNum;
     private int figuresNum;
 
@@ -27,8 +27,7 @@ public class Score {
 
     public long countCurrentScore() {
         return ((rowsNum * rowPoints)
-                + Math.round(Math.sqrt(figuresNum * figurePoints))
-                - figuresNum
+                + figuresNum * figurePoints
         );
     }
 }
