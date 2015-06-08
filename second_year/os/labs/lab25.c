@@ -19,43 +19,42 @@ int main(int argc, char **argv)
 		exit(1);
 	}
 
-// WRITER
-	cid_w = fork();
-	if (cid_w == 0)
-	{
-		int i;
-
-		dup2(my_pipe[1], STDOUT_FILENO);
-		close(my_pipe[1]);
-
-		for (i = 0; i < len; i++)
-			write(my_pipe[1], &(text[i]), 1);
-	}
-	else if (cid_w < 0)
-	{
-		perror("write child");
-		exit(1);
-	}
-
 // READER
 	cid_r = fork();
 	if (cid_w == 0)
 	{
-		char ch;
+		close(my_pipe[1]);
+		char ch = 0;
 		int status;
-
-		dup2(my_pipe[0], STDIN_FILENO);
-		close(my_pipe[0]);
 
 		do
 		{
 			read(my_pipe[0], &ch, 1);
 			printf("%c ", toupper(ch));
 		} while (ch != '#');
+
+		exit(0);
 	}
 	else if (cid_w < 0)
 	{
 		perror("read child");
+		exit(1);
+	}
+
+// WRITER
+	cid_w = fork();
+	if (cid_w == 0)
+	{
+		close(my_pipe[0]);
+		int i;
+
+		write(my_pipe[1], text, strlen(text));
+
+		exit(0);
+	}
+	else if (cid_w < 0)
+	{
+		perror("write child");
 		exit(1);
 	}
 
