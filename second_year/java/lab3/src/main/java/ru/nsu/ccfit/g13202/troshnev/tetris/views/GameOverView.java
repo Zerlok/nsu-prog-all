@@ -1,5 +1,7 @@
 package ru.nsu.ccfit.g13202.troshnev.tetris.views;
 
+import ru.nsu.ccfit.g13202.troshnev.tetris.kernel.HighscoreTable;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -10,12 +12,16 @@ import java.awt.event.ActionListener;
  */
 public class GameOverView extends JComponent implements ActionListener {
     private JTextField nameInput;
+    private long currentScore;
+    private HighscoreTable scoreTable;
 
-    public GameOverView(long score) {
+    public GameOverView(HighscoreTable table, long score) {
+        scoreTable = table;
+        currentScore = score;
         setLayout(new FlowLayout(FlowLayout.CENTER));
 
         JLabel gameOverMessage = new JLabel("GAME OVER");
-        JLabel scoreMessage = new JLabel(String.format("Your score: %1$d", score));
+        JLabel scoreMessage = new JLabel(String.format("Your score: %1$d", currentScore));
         nameInput = new JTextField("Name");
         nameInput.setPreferredSize(new Dimension(200, 20));
         JButton btn = new JButton("Enter");
@@ -29,7 +35,8 @@ public class GameOverView extends JComponent implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent actionEvent) {
-        if (actionEvent.getActionCommand() == "Enter")
-            System.out.println("Dat action!");
+        if (actionEvent.getActionCommand() == "Enter") {
+            scoreTable.addHighscore(nameInput.getText(), currentScore);
+        }
     }
 }

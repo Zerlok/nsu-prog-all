@@ -19,7 +19,7 @@ public class Player implements ActionListener {
     }
 
     public long getScorePoints() {
-        return score.countCurrentScore();
+        return score.getTotalScore();
     }
 
     public int getLevelNum() {

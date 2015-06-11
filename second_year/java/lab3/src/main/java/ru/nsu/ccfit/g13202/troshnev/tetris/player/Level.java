@@ -3,8 +3,6 @@ package ru.nsu.ccfit.g13202.troshnev.tetris.player;
 import ru.nsu.ccfit.g13202.troshnev.tetris.events.TetrisEventController;
 
 import javax.swing.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.Random;
 
 /**
@@ -83,7 +81,7 @@ public class Level {
     public void updateLevel() {
         levelNum = 1;
 
-        long currentScore = playerScore.countCurrentScore();
+        long currentScore = playerScore.getTotalScore();
         for (int i = 0; i < levelUpScores.length; i++)
             if (currentScore > levelUpScores[i])
                 ++levelNum;

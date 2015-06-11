@@ -9,25 +9,17 @@ import java.awt.event.ActionListener;
 public class Score {
     static private int rowPoints = 100;
     static private int figurePoints = 10;
-    private int rowsNum;
-    private int figuresNum;
-
-    public Score() {
-        rowsNum = 0;
-        figuresNum = 0;
-    }
+    private long totalScore;
 
     public void incrementRows(int n) {
-        rowsNum += n;
+        totalScore += (rowPoints * n) + (rowPoints * (n - 1) / 2);
     }
 
     public void incrementFiguresNum() {
-        ++figuresNum;
+        totalScore += figurePoints;
     }
 
-    public long countCurrentScore() {
-        return ((rowsNum * rowPoints)
-                + figuresNum * figurePoints
-        );
+    public long getTotalScore() {
+        return totalScore;
     }
 }

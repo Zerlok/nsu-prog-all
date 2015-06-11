@@ -69,13 +69,16 @@ public class GameController implements Runnable {
     private void setupActions(ActionMap actionsMap) {
         ActionMap actionMap = gamePanel.getActionMap();
 
-        actionMap.put("GAME-PAUSE", new AbstractAction("Pause") {
+        AbstractAction pauseAction = new AbstractAction("Pause") {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
                 togglePauseGame();
                 gamePanel.repaint();
             }
-        });
+        };
+
+        actionsMap.put("GAME-PAUSE", pauseAction);
+        actionMap.put("GAME-PAUSE", pauseAction);
 
         actionMap.put("moveFigureLeftAction", new AbstractAction() {
             @Override

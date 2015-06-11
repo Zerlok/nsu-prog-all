@@ -91,7 +91,7 @@ public class GamePanel extends JPanel implements ActionListener {
 
         if (cmd == "GAME-OVER") {
             remove(mainPane);
-            GameOverView gov = new GameOverView(currentPlayer.getScorePoints());
+            GameOverView gov = new GameOverView(scoresTable, currentPlayer.getScorePoints());
             gov.setPreferredSize(new Dimension(250, 400));
             add(gov, BorderLayout.CENTER);
         }
