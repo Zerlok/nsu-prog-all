@@ -39,9 +39,10 @@ public class Level {
     private int maxTickerDelayFigureRotation = 10;
 
     private Score playerScore;
+    private TetrisEventController eventController;
     private Random rand;
 
-    public Level(Score score) {
+    public Level(Score score, TetrisEventController controller) {
         rand = new Random();
 
         levelNum = 1;
@@ -53,7 +54,22 @@ public class Level {
         ExtraRowsTicker = new Timer(0, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-
+                eventController.pushEvent(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, "TETRIS-FIELD-PUSH-ROW"));
+                recalculateTicker(ExtraRowsTicker, maxTickerDelayExtraRows);
+            }
+        });
+        FigureRotationTicker = new Timer(0, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                eventController.pushEvent(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, "TETRIS-FIGURE-ROTATE"));
+                recalculateTicker(FigureRotationTicker, maxTickerDelayFigureRotation);
+            }
+        });
+        FigureMovementTicker = new Timer(0, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                eventController.pushEvent(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, String.format("TETRIS-FIGURE-MOVE=%1$d", rand.nextInt(3))));
+                recalculateTicker(FigureMovementTicker, maxTickerDelayFigureMovement);
             }
         });
 
@@ -75,24 +91,26 @@ public class Level {
         updateHardness();
     }
 
-    public void updateHardness() {
+    private void updateHardness() {
         makeFigureFallEvents = (levelNum > 0);
         makeExtraRowEvents = (levelNum > 2);
         makeFigureMovementEvents = (levelNum > 6);
         makeFigureRotationEvents = (levelNum > 8);
+
+        setupEvents();
     }
 
-    public void makeGameEvents(TetrisEventController eventController) {
+    private void setupEvents() {
         // TODO: Make level events
-//        if ((makeFigureFallEvents)
-//                && ())
-            eventController.pushEvent(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, "moveFigureDownAction"));
 
-        if (makeExtraRowEvents);
-        if (makeFigureMovementEvents);
+        if (makeExtraRowEvents && (!ExtraRowsTicker.isRunning()))
+            ExtraRowsTicker.start();
 
-        if (makeFigureRotationEvents)
-            eventController.pushEvent(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, "rotateFigureClockwiseAction"));
+        if (makeFigureRotationEvents && (!FigureRotationTicker.isRunning()))
+            FigureRotationTicker.start();
+
+        if (makeFigureMovementEvents && (!FigureMovementTicker.isRunning()))
+            FigureMovementTicker.start();
     }
 
     public int getLevelNum() {

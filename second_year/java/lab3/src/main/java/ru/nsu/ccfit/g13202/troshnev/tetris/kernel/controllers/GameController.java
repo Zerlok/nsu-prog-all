@@ -32,9 +32,8 @@ public class GameController implements Runnable {
     private TetrisEventController eventController;
 
     public GameController(ActionMap actionsMap) {
-        currentPlayer = new Player();
         eventController = new TetrisEventController();
-        eventController.addActionListener(currentPlayer);
+        currentPlayer = new Player(eventController);
 
         figureFactory = new FigureFactory();
         try {
@@ -60,7 +59,7 @@ public class GameController implements Runnable {
 
         gamePaused = true;
 
-        gamePanel = new GamePanel(gameField, previewField);
+        gamePanel = new GamePanel(gameField, previewField, currentPlayer);
         setupActions(actionsMap);
         gamePanel.registerListeners(eventController);
     }

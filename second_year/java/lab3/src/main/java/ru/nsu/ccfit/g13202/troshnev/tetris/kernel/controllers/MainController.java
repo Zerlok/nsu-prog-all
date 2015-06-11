@@ -1,5 +1,6 @@
 package ru.nsu.ccfit.g13202.troshnev.tetris.kernel.controllers;
 
+import ru.nsu.ccfit.g13202.troshnev.tetris.kernel.HighscoreTable;
 import ru.nsu.ccfit.g13202.troshnev.tetris.windows.BaseWindow;
 import ru.nsu.ccfit.g13202.troshnev.tetris.windows.MainPanel;
 import ru.nsu.ccfit.g13202.troshnev.tetris.windows.ScoresPanel;
@@ -79,7 +80,7 @@ public class MainController implements Runnable {
 
     private void showScoresTable() {
         stopTheGame();
-        baseWindow.setInnerWindow(new ScoresPanel());
+        baseWindow.setInnerWindow(new ScoresPanel(new HighscoreTable()));
         baseWindow.centreWindow();
     }
 

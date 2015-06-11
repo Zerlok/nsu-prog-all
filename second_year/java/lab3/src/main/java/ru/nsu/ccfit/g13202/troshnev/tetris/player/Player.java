@@ -1,5 +1,7 @@
 package ru.nsu.ccfit.g13202.troshnev.tetris.player;
 
+import ru.nsu.ccfit.g13202.troshnev.tetris.events.TetrisEventController;
+
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -10,9 +12,10 @@ public class Player implements ActionListener {
     private Level level;
     private Score score;
 
-    public Player() {
+    public Player(TetrisEventController eventController) {
         score = new Score();
-        level = new Level(score);
+        level = new Level(score, eventController);
+        eventController.addActionListener(this);
     }
 
     public long getScorePoints() {
@@ -23,12 +26,12 @@ public class Player implements ActionListener {
         return level.getLevelNum();
     }
 
-    public void incrementFigures() {
+    public void addFiguresNum() {
         score.incrementFiguresNum();
         level.updateLevel();
     }
 
-    public void incrementRows(int rowsNum) {
+    public void addRowsNum(int rowsNum) {
         score.incrementRows(rowsNum);
         level.updateLevel();
     }
@@ -38,12 +41,12 @@ public class Player implements ActionListener {
         String cmd = actionEvent.getActionCommand();
 
         if (cmd == "TETRIS-FIGURE-NEW") {
-            incrementFigures();
+            addFiguresNum();
             System.out.println("Player get new score: " + getScorePoints());
         }
 
         if (cmd.startsWith("TETRIS-ROWS-REMOVED=")) {
-            incrementRows(Integer.valueOf(cmd.split("=")[1]));
+            addRowsNum(Integer.valueOf(cmd.split("=")[1]));
             System.out.println("Level: " + getLevelNum());
         }
     }

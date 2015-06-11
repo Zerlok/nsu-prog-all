@@ -26,7 +26,7 @@ public class GamePanel extends JPanel {
 
     private PlayerInfoView infoView;
 
-    public GamePanel(Field gameField, Field previewField) {
+    public GamePanel(Field gameField, Field previewField, Player currentPlayer) {
         blockView = new BlockView(25, 5, 1);
         int blockPixelWidth = blockView.getPixelOffset();
 
@@ -44,7 +44,7 @@ public class GamePanel extends JPanel {
                 previewField.getFieldRowsNum() * blockPixelWidth
         ));
 
-        infoView = new PlayerInfoView(new Player());
+        infoView = new PlayerInfoView(currentPlayer);
 
         setLayout(new BorderLayout());
 
