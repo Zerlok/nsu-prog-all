@@ -53,9 +53,9 @@ public class BaseWindow extends JFrame {
             remove(innerWindow);
 
         innerWindow = window;
-
-        add(window, BorderLayout.CENTER);
-        setSize(window.getWidth(), window.getHeight());
+        Container content = getContentPane();
+        content.add(window, BorderLayout.CENTER);
+        content.setSize(window.getWidth(), window.getHeight());
         pack();
     }
 }
