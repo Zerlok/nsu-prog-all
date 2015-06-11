@@ -31,6 +31,5 @@ public class PlayerInfoView extends JComponent implements ActionListener {
         // TODO: Make updates for player statistics. (don't know why it won't work)
         currentLevelValue.setText("Level: " + String.valueOf(currentPlayer.getLevelNum()));
         currentScoreValue.setText("Score: " + String.valueOf(currentPlayer.getScorePoints()));
-        System.out.println("Player statistics: " + currentLevelValue.getText() + ", " + currentScoreValue.getText());
     }
 }

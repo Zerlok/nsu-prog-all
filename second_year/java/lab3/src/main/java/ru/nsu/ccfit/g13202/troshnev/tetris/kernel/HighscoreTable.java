@@ -67,7 +67,7 @@ public class HighscoreTable {
         BufferedWriter fileBuffer = new BufferedWriter(new FileWriter(tableFile));
 
         for (int i = 0; i < maxHighscoresNum; i++) {
-            fileBuffer.write(String.format("%1$s %2$d", players[i], scores[i]));
+            fileBuffer.write(String.format("%1$s %2$d\n", players[i], scores[i]));
         }
 
         fileBuffer.close();

@@ -5,10 +5,7 @@ import ru.nsu.ccfit.g13202.troshnev.tetris.figures.AbstractFigure;
 import ru.nsu.ccfit.g13202.troshnev.tetris.kernel.Field;
 import ru.nsu.ccfit.g13202.troshnev.tetris.kernel.HighscoreTable;
 import ru.nsu.ccfit.g13202.troshnev.tetris.player.Player;
-import ru.nsu.ccfit.g13202.troshnev.tetris.views.BlockView;
-import ru.nsu.ccfit.g13202.troshnev.tetris.views.FieldView;
-import ru.nsu.ccfit.g13202.troshnev.tetris.views.FigureView;
-import ru.nsu.ccfit.g13202.troshnev.tetris.views.PlayerInfoView;
+import ru.nsu.ccfit.g13202.troshnev.tetris.views.*;
 
 import javax.swing.*;
 import java.awt.*;
@@ -32,7 +29,8 @@ public class GamePanel extends JPanel implements ActionListener {
     private HighscoreTable scoresTable;
     private Player currentPlayer;
 
-    private JTextField nameInput;
+    private JSplitPane splitPane1;
+    private JSplitPane splitPane2;
 
     public GamePanel(Field gameField, Field previewField, Player player, HighscoreTable table) {
         scoresTable = table;
@@ -59,8 +57,8 @@ public class GamePanel extends JPanel implements ActionListener {
 
         setLayout(new BorderLayout());
 
-        JSplitPane splitPane2 = new JSplitPane(JSplitPane.VERTICAL_SPLIT, nextFigureFieldView, infoView);
-        JSplitPane splitPane1 = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, gameFieldView, splitPane2);
+        splitPane2 = new JSplitPane(JSplitPane.VERTICAL_SPLIT, nextFigureFieldView, infoView);
+        splitPane1 = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, gameFieldView, splitPane2);
 
         splitPane2.setDividerLocation(previewField.getFieldRowsNum() * blockPixelWidth);
         splitPane2.setDividerSize(4);
@@ -85,6 +83,7 @@ public class GamePanel extends JPanel implements ActionListener {
 
     public void registerListeners(TetrisEventController eventController) {
         eventController.addActionListener(infoView);
+        eventController.addActionListener(this);
     }
 
     @Override
@@ -92,21 +91,15 @@ public class GamePanel extends JPanel implements ActionListener {
         String cmd = actionEvent.getActionCommand();
 
         if (cmd == "GAME-OVER") {
-            remove(gameFieldView);
-            remove(nextFigureFieldView);
-            remove(infoView);
-
-            add(new JLabel("GAME OVER"));
-            add(new JLabel(String.format("Your score: %1$d", currentPlayer.getScorePoints())));
-
-            nameInput = new JTextField("Name");
-            nameInput.setActionCommand("PLAYER-NAME-ENTERED");
-            add(nameInput);
+            remove(splitPane1);
+            GameOverView gov = new GameOverView(currentPlayer.getScorePoints());
+            gov.setPreferredSize(new Dimension(250, 400));
+            add(gov, BorderLayout.CENTER);
         }
 
-        if (cmd == "PLAYER-NAME-ENTERED") {
+        if (cmd.startsWith("PLAYER-NAME=")) {
             scoresTable.addHighscore(
-                    nameInput.getText(),
+                    cmd.split("=")[1],
                     currentPlayer.getScorePoints()
             );
         }

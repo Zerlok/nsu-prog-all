@@ -12,14 +12,14 @@ import java.util.Random;
  */
 public class Level {
     private static long[] levelUpScores = {
-            10000, // 2
-            30000, // 3
-            70000, // 4
-            125000, // 5
-            200000, // 6
-            315000, // 7
-            500000, // 8
-            1000000 // 9
+            1000, // 2
+            3000, // 3
+            7000, // 4
+            12500, // 5
+            20000, // 6
+            31500, // 7
+            50000, // 8
+            100000 // 9
     };
 
     private int levelNum;
@@ -39,10 +39,10 @@ public class Level {
     private int maxTickerDelayFigureRotation = 10;
 
     private Score playerScore;
-    private TetrisEventController eventController;
+//    private TetrisEventController eventController;
     private Random rand;
 
-    public Level(Score score, TetrisEventController controller) {
+    public Level(Score score, final TetrisEventController eventController) {
         rand = new Random();
 
         levelNum = 1;
@@ -51,27 +51,27 @@ public class Level {
         makeFigureRotationEvents = false;
         makeFigureMovementEvents = false;
 
-        ExtraRowsTicker = new Timer(0, new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent actionEvent) {
-                eventController.pushEvent(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, "TETRIS-FIELD-PUSH-ROW"));
-                recalculateTicker(ExtraRowsTicker, maxTickerDelayExtraRows);
-            }
-        });
-        FigureRotationTicker = new Timer(0, new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent actionEvent) {
-                eventController.pushEvent(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, "TETRIS-FIGURE-ROTATE"));
-                recalculateTicker(FigureRotationTicker, maxTickerDelayFigureRotation);
-            }
-        });
-        FigureMovementTicker = new Timer(0, new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent actionEvent) {
-                eventController.pushEvent(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, String.format("TETRIS-FIGURE-MOVE=%1$d", rand.nextInt(3))));
-                recalculateTicker(FigureMovementTicker, maxTickerDelayFigureMovement);
-            }
-        });
+//        ExtraRowsTicker = new Timer(0, new ActionListener() {
+//            @Override
+//            public void actionPerformed(ActionEvent actionEvent) {
+//                eventController.pushEvent(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, "TETRIS-FIELD-PUSH-ROW"));
+//                recalculateTicker(ExtraRowsTicker, maxTickerDelayExtraRows);
+//            }
+//        });
+//        FigureRotationTicker = new Timer(0, new ActionListener() {
+//            @Override
+//            public void actionPerformed(ActionEvent actionEvent) {
+//                eventController.pushEvent(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, "TETRIS-FIGURE-ROTATE"));
+//                recalculateTicker(FigureRotationTicker, maxTickerDelayFigureRotation);
+//            }
+//        });
+//        FigureMovementTicker = new Timer(0, new ActionListener() {
+//            @Override
+//            public void actionPerformed(ActionEvent actionEvent) {
+//                eventController.pushEvent(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, String.format("TETRIS-FIGURE-MOVE=%1$d", rand.nextInt(3))));
+//                recalculateTicker(FigureMovementTicker, maxTickerDelayFigureMovement);
+//            }
+//        });
 
         playerScore = score;
     }

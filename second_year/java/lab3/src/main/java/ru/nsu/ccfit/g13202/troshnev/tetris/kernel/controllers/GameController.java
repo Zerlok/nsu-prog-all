@@ -51,8 +51,8 @@ public class GameController implements Runnable {
         ticker = new Timer(600, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                eventController.handleEvents();
                 moveFigureDown();
+                eventController.handleEvents();
                 gamePanel.repaint();
             }
         });
