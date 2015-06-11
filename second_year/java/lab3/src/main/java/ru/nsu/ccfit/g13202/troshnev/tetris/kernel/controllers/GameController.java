@@ -98,6 +98,13 @@ public class GameController implements Runnable {
                 gamePanel.repaint();
             }
         });
+        actionMap.put("smashFigureDownAction", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                smashFigureDown();
+                gamePanel.repaint();
+            }
+        });
         actionMap.put("rotateFigureClockwiseAction", new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
@@ -110,6 +117,7 @@ public class GameController implements Runnable {
         inputMap.put(KeyStroke.getKeyStroke("RIGHT"), "moveFigureRightAction");
         inputMap.put(KeyStroke.getKeyStroke("LEFT"), "moveFigureLeftAction");
         inputMap.put(KeyStroke.getKeyStroke("DOWN"), "moveFigureDownAction");
+        inputMap.put(KeyStroke.getKeyStroke("SPACE"), "smashFigureDownAction");
         inputMap.put(KeyStroke.getKeyStroke("UP"), "rotateFigureClockwiseAction");
         inputMap.put(KeyStroke.getKeyStroke("P"), "GAME-PAUSE");
     }
@@ -122,7 +130,9 @@ public class GameController implements Runnable {
 
     public void stop() {
         ticker.stop();
+        eventController.handleEvents();
         currentFigure = null;
+        gamePanel.repaint();
     }
 
     private void createNewFigure() {
@@ -144,6 +154,29 @@ public class GameController implements Runnable {
         }
     }
 
+    private void placeFigureToField() {
+        gameField.saveBlocks(currentFigure.getGlobalBlocks());
+
+        int removedRowsNum = gameField.removeFullRows();
+        if (removedRowsNum > 0) {
+            recalculateTickerDelay(removedRowsNum);
+            eventController.pushEvent(new ActionEvent(this, ActionEvent.ACTION_PERFORMED,
+                    String.format("TETRIS-ROWS-REMOVED=%1$d", removedRowsNum)));
+        }
+    }
+
+    public void smashFigureDown() {
+        if (gamePaused || (currentFigure == null))
+            return;
+
+        while (!gameField.hasIntersection(currentFigure.getGlobalBlocks()))
+            currentFigure.moveDown();
+
+        currentFigure.moveUp();
+        placeFigureToField();
+        createNewFigure();
+    }
+
     public void moveFigureDown() {
         if (gamePaused || (currentFigure == null))
             return;
@@ -153,16 +186,7 @@ public class GameController implements Runnable {
         if (gameField.hasIntersection(currentFigure.getGlobalBlocks())) {
             currentFigure.moveUp();
 
-            gameField.saveBlocks(currentFigure.getGlobalBlocks());
-            System.out.println("Figure position locked.");
-
-            int removedRowsNum = gameField.removeFullRows();
-            if (removedRowsNum > 0) {
-                recalculateTickerDelay(removedRowsNum);
-                eventController.pushEvent(new ActionEvent(this, ActionEvent.ACTION_PERFORMED,
-                        String.format("TETRIS-ROWS-REMOVED=%1$d", removedRowsNum)));
-            }
-
+            placeFigureToField();
             createNewFigure();
         }
     }

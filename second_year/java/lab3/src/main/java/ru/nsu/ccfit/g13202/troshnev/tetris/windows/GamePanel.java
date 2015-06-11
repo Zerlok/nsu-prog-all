@@ -29,8 +29,7 @@ public class GamePanel extends JPanel implements ActionListener {
     private HighscoreTable scoresTable;
     private Player currentPlayer;
 
-    private JSplitPane splitPane1;
-    private JSplitPane splitPane2;
+    private JSplitPane mainPane;
 
     public GamePanel(Field gameField, Field previewField, Player player, HighscoreTable table) {
         scoresTable = table;
@@ -55,18 +54,18 @@ public class GamePanel extends JPanel implements ActionListener {
 
         infoView = new PlayerInfoView(player, table);
 
+        JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, nextFigureFieldView, infoView);
+        mainPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, gameFieldView, splitPane);
+
+        splitPane.setDividerLocation(previewField.getFieldRowsNum() * blockPixelWidth);
+        splitPane.setDividerSize(5);
+        splitPane.setEnabled(false);
+        mainPane.setDividerLocation(gameField.getFieldColumnsNum() * blockPixelWidth);
+        mainPane.setDividerSize(5);
+        mainPane.setEnabled(false);
+
         setLayout(new BorderLayout());
-
-        splitPane2 = new JSplitPane(JSplitPane.VERTICAL_SPLIT, nextFigureFieldView, infoView);
-        splitPane1 = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, gameFieldView, splitPane2);
-
-        splitPane2.setDividerLocation(previewField.getFieldRowsNum() * blockPixelWidth);
-        splitPane2.setDividerSize(4);
-        splitPane2.setEnabled(false);
-        splitPane1.setDividerLocation(gameField.getFieldColumnsNum() * blockPixelWidth);
-        splitPane1.setDividerSize(4);
-        splitPane1.setEnabled(false);
-        add(splitPane1, BorderLayout.CENTER);
+        add(mainPane, BorderLayout.CENTER);
     }
 
     public void setCurrentFigure(AbstractFigure f) {
@@ -91,7 +90,7 @@ public class GamePanel extends JPanel implements ActionListener {
         String cmd = actionEvent.getActionCommand();
 
         if (cmd == "GAME-OVER") {
-            remove(splitPane1);
+            remove(mainPane);
             GameOverView gov = new GameOverView(currentPlayer.getScorePoints());
             gov.setPreferredSize(new Dimension(250, 400));
             add(gov, BorderLayout.CENTER);

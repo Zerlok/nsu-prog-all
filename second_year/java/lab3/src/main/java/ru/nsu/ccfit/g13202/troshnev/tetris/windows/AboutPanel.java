@@ -7,6 +7,6 @@ import javax.swing.*;
  */
 public class AboutPanel extends JPanel {
     public AboutPanel() {
-        add(new JTextArea("This is about text..."));
+        add(new JLabel("This game was developed by Danil Troshnev"));
     }
 }

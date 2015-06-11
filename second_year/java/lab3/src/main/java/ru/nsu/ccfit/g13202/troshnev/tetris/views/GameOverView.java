@@ -13,20 +13,17 @@ public class GameOverView extends JComponent implements ActionListener {
 
     public GameOverView(long score) {
         setLayout(new FlowLayout(FlowLayout.CENTER));
+
         JLabel gameOverMessage = new JLabel("GAME OVER");
-//        gameOverMessage.setPreferredSize(new Dimension(10, 100));
         JLabel scoreMessage = new JLabel(String.format("Your score: %1$d", score));
-//        scoreMessage.setPreferredSize(new Dimension(10, 100));
+        nameInput = new JTextField("Name");
+        nameInput.setPreferredSize(new Dimension(200, 20));
+        JButton btn = new JButton("Enter");
+        btn.addActionListener(this);
 
         add(gameOverMessage);
         add(scoreMessage);
-
-        nameInput = new JTextField("Name");
-        nameInput.setPreferredSize(new Dimension(200, 20));
-        add(nameInput, BorderLayout.CENTER);
-
-        JButton btn = new JButton("Enter");
-        btn.addActionListener(this);
+        add(nameInput);
         add(btn);
     }
 

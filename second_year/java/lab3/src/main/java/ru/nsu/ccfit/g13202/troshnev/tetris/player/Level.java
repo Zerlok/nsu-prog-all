@@ -103,14 +103,14 @@ public class Level {
     private void setupEvents() {
         // TODO: Make level events
 
-        if (makeExtraRowEvents && (!ExtraRowsTicker.isRunning()))
-            ExtraRowsTicker.start();
-
-        if (makeFigureRotationEvents && (!FigureRotationTicker.isRunning()))
-            FigureRotationTicker.start();
-
-        if (makeFigureMovementEvents && (!FigureMovementTicker.isRunning()))
-            FigureMovementTicker.start();
+//        if (makeExtraRowEvents && (!ExtraRowsTicker.isRunning()))
+//            ExtraRowsTicker.start();
+//
+//        if (makeFigureRotationEvents && (!FigureRotationTicker.isRunning()))
+//            FigureRotationTicker.start();
+//
+//        if (makeFigureMovementEvents && (!FigureMovementTicker.isRunning()))
+//            FigureMovementTicker.start();
     }
 
     public int getLevelNum() {

@@ -16,9 +16,9 @@ public class ScoresPanel extends JPanel {
         long[] scores = table.getScores();
 
         for (int i = 0; i < players.length; i++) {
-            add(new JLabel(String.format("%1$02d : %2$20s %3$10d",
+            add(new JLabel(String.format("%1$02d : %2$-16s %3$-10d",
                     (i+1),
-                    (players[i] != null) ? players[i] : "-",
+                    (players[i] != null) ? players[i] : "---",
                     scores[i]
             )));
         }

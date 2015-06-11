@@ -35,6 +35,7 @@ public class TetrisEventController {
 
         while ((event = eventQueue.poll()) != null) {
             System.out.println("Handling the event: " + event.getActionCommand());
+
             for (ActionListener listener : eventListeners) {
                 listener.actionPerformed(event);
             }

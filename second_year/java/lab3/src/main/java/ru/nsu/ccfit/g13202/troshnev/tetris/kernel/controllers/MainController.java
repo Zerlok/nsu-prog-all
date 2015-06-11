@@ -1,6 +1,7 @@
 package ru.nsu.ccfit.g13202.troshnev.tetris.kernel.controllers;
 
 import ru.nsu.ccfit.g13202.troshnev.tetris.kernel.HighscoreTable;
+import ru.nsu.ccfit.g13202.troshnev.tetris.windows.AboutPanel;
 import ru.nsu.ccfit.g13202.troshnev.tetris.windows.BaseWindow;
 import ru.nsu.ccfit.g13202.troshnev.tetris.windows.MainPanel;
 import ru.nsu.ccfit.g13202.troshnev.tetris.windows.ScoresPanel;
@@ -23,6 +24,13 @@ public class MainController implements Runnable {
         baseWindow = new BaseWindow(actionsMap);
         scoresTable = new HighscoreTable();
         gameLogic = null;
+
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                baseWindow.setVisible(true);
+            }
+        });
     }
 
     private void setupActions() {
@@ -66,7 +74,7 @@ public class MainController implements Runnable {
     private void initMainMenu() {
         stopTheGame();
         baseWindow.setInnerWindow(new MainPanel(actionsMap));
-        baseWindow.centreWindow();
+        baseWindow.centrateWindow();
     }
 
     private void startNewGame() {
@@ -74,7 +82,7 @@ public class MainController implements Runnable {
         gameLogic = new GameController(actionsMap, scoresTable);
 
         baseWindow.setInnerWindow(gameLogic.getGamePanel());
-        baseWindow.centreWindow();
+        baseWindow.centrateWindow();
 
         gameLogic.run();
     }
@@ -82,10 +90,13 @@ public class MainController implements Runnable {
     private void showScoresTable() {
         stopTheGame();
         baseWindow.setInnerWindow(new ScoresPanel(scoresTable));
-        baseWindow.centreWindow();
+        baseWindow.centrateWindow();
     }
 
     private void showAbout() {
+        stopTheGame();
+        baseWindow.setInnerWindow(new AboutPanel());
+        baseWindow.centrateWindow();
     }
 
     private void stopTheGame() {

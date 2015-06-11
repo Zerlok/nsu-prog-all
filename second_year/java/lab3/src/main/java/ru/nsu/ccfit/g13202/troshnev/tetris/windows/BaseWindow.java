@@ -28,13 +28,11 @@ public class BaseWindow extends JFrame {
 
         setJMenuBar(windowHeader);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        getContentPane().setLayout(new BorderLayout());
 
         setLayout(new BorderLayout());
-        setVisible(true);
     }
 
-    public void centreWindow() {
+    public void centrateWindow() {
         //Get the screen size
         Toolkit toolkit = Toolkit.getDefaultToolkit();
         Dimension screenSize = toolkit.getScreenSize();
