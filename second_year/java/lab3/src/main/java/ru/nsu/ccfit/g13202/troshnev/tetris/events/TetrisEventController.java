@@ -30,7 +30,7 @@ public class TetrisEventController {
         }
     }
 
-    public void handleEvent() {
+    public void handleEvents() {
         ActionEvent event;
 
         while ((event = eventQueue.poll()) != null) {

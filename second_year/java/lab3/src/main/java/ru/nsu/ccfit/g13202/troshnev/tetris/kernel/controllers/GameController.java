@@ -4,6 +4,7 @@ import ru.nsu.ccfit.g13202.troshnev.tetris.events.TetrisEventController;
 import ru.nsu.ccfit.g13202.troshnev.tetris.figures.AbstractFigure;
 import ru.nsu.ccfit.g13202.troshnev.tetris.kernel.Field;
 import ru.nsu.ccfit.g13202.troshnev.tetris.kernel.FigureFactory;
+import ru.nsu.ccfit.g13202.troshnev.tetris.kernel.HighscoreTable;
 import ru.nsu.ccfit.g13202.troshnev.tetris.player.Player;
 import ru.nsu.ccfit.g13202.troshnev.tetris.windows.GamePanel;
 
@@ -31,7 +32,7 @@ public class GameController implements Runnable {
 
     private TetrisEventController eventController;
 
-    public GameController(ActionMap actionsMap) {
+    public GameController(ActionMap actionsMap, HighscoreTable scoresTable) {
         eventController = new TetrisEventController();
         currentPlayer = new Player(eventController);
 
@@ -50,7 +51,8 @@ public class GameController implements Runnable {
         ticker = new Timer(600, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                eventController.handleEvent();
+                eventController.handleEvents();
+                moveFigureDown();
                 gamePanel.repaint();
             }
         });
@@ -59,7 +61,7 @@ public class GameController implements Runnable {
 
         gamePaused = true;
 
-        gamePanel = new GamePanel(gameField, previewField, currentPlayer);
+        gamePanel = new GamePanel(gameField, previewField, currentPlayer, scoresTable);
         setupActions(actionsMap);
         gamePanel.registerListeners(eventController);
     }
@@ -120,6 +122,7 @@ public class GameController implements Runnable {
 
     public void stop() {
         ticker.stop();
+        currentFigure = null;
     }
 
     private void createNewFigure() {
@@ -133,7 +136,8 @@ public class GameController implements Runnable {
         gamePanel.setCurrentFigure(currentFigure);
 
         if (gameField.hasIntersection(currentFigure.getGlobalBlocks())) {
-            currentFigure = null;
+            eventController.pushEvent(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, "GAME-OVER"));
+            stop();
 
         } else {
             eventController.pushEvent(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, "TETRIS-FIGURE-NEW"));

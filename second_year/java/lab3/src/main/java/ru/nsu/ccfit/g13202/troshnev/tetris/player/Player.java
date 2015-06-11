@@ -42,12 +42,12 @@ public class Player implements ActionListener {
 
         if (cmd == "TETRIS-FIGURE-NEW") {
             addFiguresNum();
-            System.out.println("Player get new score: " + getScorePoints());
+            return;
         }
 
         if (cmd.startsWith("TETRIS-ROWS-REMOVED=")) {
             addRowsNum(Integer.valueOf(cmd.split("=")[1]));
-            System.out.println("Level: " + getLevelNum());
+            return;
         }
     }
 }

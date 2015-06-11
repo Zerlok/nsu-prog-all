@@ -1,5 +1,6 @@
 package ru.nsu.ccfit.g13202.troshnev.tetris.views;
 
+import ru.nsu.ccfit.g13202.troshnev.tetris.kernel.HighscoreTable;
 import ru.nsu.ccfit.g13202.troshnev.tetris.player.Player;
 
 import javax.swing.*;
@@ -15,7 +16,7 @@ public class PlayerInfoView extends JComponent implements ActionListener {
     private JLabel currentScoreValue;
     private JLabel currentLevelValue;
 
-    public PlayerInfoView(Player player) {
+    public PlayerInfoView(Player player, HighscoreTable scoresTable) {
         currentPlayer = player;
         currentLevelValue = new JLabel("Level: " + String.valueOf(player.getLevelNum()));
         currentScoreValue = new JLabel("Score: " + String.valueOf(player.getScorePoints()));

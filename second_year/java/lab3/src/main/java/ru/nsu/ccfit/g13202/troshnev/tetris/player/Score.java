@@ -26,7 +26,6 @@ public class Score {
     }
 
     public long countCurrentScore() {
-        System.out.println(String.format("Counting current score... (%1$d %2$d)", figuresNum, rowsNum));
         return ((rowsNum * rowPoints)
                 + figuresNum * figurePoints
         );

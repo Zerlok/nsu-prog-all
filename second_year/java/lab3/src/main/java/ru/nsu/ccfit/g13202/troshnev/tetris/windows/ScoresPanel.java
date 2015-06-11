@@ -13,12 +13,12 @@ public class ScoresPanel extends JPanel {
         setLayout(new GridLayout(0, 1));
 
         String[] players = table.getPlayers();
-        int[] scores = table.getScores();
+        long[] scores = table.getScores();
 
         for (int i = 0; i < players.length; i++) {
             add(new JLabel(String.format("%1$d. %2$s %3$d",
                     (i+1),
-                    players[i],
+                    (players[i] != null) ? players[i] : "-",
                     scores[i]
             )));
         }

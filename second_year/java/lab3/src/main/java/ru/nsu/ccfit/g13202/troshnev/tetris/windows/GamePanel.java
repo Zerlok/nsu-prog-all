@@ -3,6 +3,7 @@ package ru.nsu.ccfit.g13202.troshnev.tetris.windows;
 import ru.nsu.ccfit.g13202.troshnev.tetris.events.TetrisEventController;
 import ru.nsu.ccfit.g13202.troshnev.tetris.figures.AbstractFigure;
 import ru.nsu.ccfit.g13202.troshnev.tetris.kernel.Field;
+import ru.nsu.ccfit.g13202.troshnev.tetris.kernel.HighscoreTable;
 import ru.nsu.ccfit.g13202.troshnev.tetris.player.Player;
 import ru.nsu.ccfit.g13202.troshnev.tetris.views.BlockView;
 import ru.nsu.ccfit.g13202.troshnev.tetris.views.FieldView;
@@ -11,11 +12,13 @@ import ru.nsu.ccfit.g13202.troshnev.tetris.views.PlayerInfoView;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 /**
  * Created by zerlok on 4/29/15.
  */
-public class GamePanel extends JPanel {
+public class GamePanel extends JPanel implements ActionListener {
     private BlockView blockView;
 
     private FigureView currentFigureView;
@@ -26,7 +29,15 @@ public class GamePanel extends JPanel {
 
     private PlayerInfoView infoView;
 
-    public GamePanel(Field gameField, Field previewField, Player currentPlayer) {
+    private HighscoreTable scoresTable;
+    private Player currentPlayer;
+
+    private JTextField nameInput;
+
+    public GamePanel(Field gameField, Field previewField, Player player, HighscoreTable table) {
+        scoresTable = table;
+        currentPlayer = player;
+
         blockView = new BlockView(25, 5, 1);
         int blockPixelWidth = blockView.getPixelOffset();
 
@@ -44,7 +55,7 @@ public class GamePanel extends JPanel {
                 previewField.getFieldRowsNum() * blockPixelWidth
         ));
 
-        infoView = new PlayerInfoView(currentPlayer);
+        infoView = new PlayerInfoView(player, table);
 
         setLayout(new BorderLayout());
 
@@ -74,5 +85,30 @@ public class GamePanel extends JPanel {
 
     public void registerListeners(TetrisEventController eventController) {
         eventController.addActionListener(infoView);
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent actionEvent) {
+        String cmd = actionEvent.getActionCommand();
+
+        if (cmd == "GAME-OVER") {
+            remove(gameFieldView);
+            remove(nextFigureFieldView);
+            remove(infoView);
+
+            add(new JLabel("GAME OVER"));
+            add(new JLabel(String.format("Your score: %1$d", currentPlayer.getScorePoints())));
+
+            nameInput = new JTextField("Name");
+            nameInput.setActionCommand("PLAYER-NAME-ENTERED");
+            add(nameInput);
+        }
+
+        if (cmd == "PLAYER-NAME-ENTERED") {
+            scoresTable.addHighscore(
+                    nameInput.getText(),
+                    currentPlayer.getScorePoints()
+            );
+        }
     }
 }
