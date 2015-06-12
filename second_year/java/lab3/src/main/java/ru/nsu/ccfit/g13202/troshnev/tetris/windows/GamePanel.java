@@ -1,6 +1,8 @@
 package ru.nsu.ccfit.g13202.troshnev.tetris.windows;
 
+import ru.nsu.ccfit.g13202.troshnev.tetris.events.TetrisEvent;
 import ru.nsu.ccfit.g13202.troshnev.tetris.events.TetrisEventController;
+import ru.nsu.ccfit.g13202.troshnev.tetris.events.TetrisEventListener;
 import ru.nsu.ccfit.g13202.troshnev.tetris.figures.AbstractFigure;
 import ru.nsu.ccfit.g13202.troshnev.tetris.kernel.Field;
 import ru.nsu.ccfit.g13202.troshnev.tetris.kernel.HighscoreTable;
@@ -15,7 +17,7 @@ import java.awt.event.ActionListener;
 /**
  * Created by zerlok on 4/29/15.
  */
-public class GamePanel extends JPanel implements ActionListener {
+public class GamePanel extends JPanel implements TetrisEventListener {
     private BlockView blockView;
 
     private FigureView currentFigureView;
@@ -81,26 +83,19 @@ public class GamePanel extends JPanel implements ActionListener {
     }
 
     public void registerListeners(TetrisEventController eventController) {
-        eventController.addActionListener(infoView);
-        eventController.addActionListener(this);
+        eventController.addListener(infoView);
+        eventController.addListener(this);
     }
 
     @Override
-    public void actionPerformed(ActionEvent actionEvent) {
-        String cmd = actionEvent.getActionCommand();
+    public void handleTetrisEvent(TetrisEvent event) {
+        String cmd = event.getEventCommand();
 
         if (cmd == "GAME-OVER") {
             remove(mainPane);
             GameOverView gov = new GameOverView(scoresTable, currentPlayer.getScorePoints());
             gov.setPreferredSize(new Dimension(250, 400));
             add(gov, BorderLayout.CENTER);
-        }
-
-        if (cmd.startsWith("PLAYER-NAME=")) {
-            scoresTable.addHighscore(
-                    cmd.split("=")[1],
-                    currentPlayer.getScorePoints()
-            );
         }
     }
 }

@@ -1,5 +1,6 @@
 package ru.nsu.ccfit.g13202.troshnev.tetris.kernel.controllers;
 
+import ru.nsu.ccfit.g13202.troshnev.tetris.events.TetrisEvent;
 import ru.nsu.ccfit.g13202.troshnev.tetris.events.TetrisEventController;
 import ru.nsu.ccfit.g13202.troshnev.tetris.figures.AbstractFigure;
 import ru.nsu.ccfit.g13202.troshnev.tetris.kernel.Field;
@@ -149,11 +150,11 @@ public class GameController implements Runnable {
         gamePanel.setCurrentFigure(currentFigure);
 
         if (gameField.hasIntersection(currentFigure.getGlobalBlocks())) {
-            eventController.pushEvent(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, "GAME-OVER"));
+            eventController.pushEvent(new TetrisEvent(this, "GAME-OVER"));
             stop();
 
         } else {
-            eventController.pushEvent(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, "TETRIS-FIGURE-NEW"));
+            eventController.pushEvent(new TetrisEvent(this, "TETRIS-FIGURE-NEW"));
         }
     }
 
@@ -163,8 +164,7 @@ public class GameController implements Runnable {
         int removedRowsNum = gameField.removeFullRows();
         if (removedRowsNum > 0) {
             recalculateTickerDelay(removedRowsNum);
-            eventController.pushEvent(new ActionEvent(this, ActionEvent.ACTION_PERFORMED,
-                    String.format("TETRIS-ROWS-REMOVED=%1$d", removedRowsNum)));
+            eventController.pushEvent(new TetrisEvent(this, "TETRIS-ROWS-REMOVED", removedRowsNum));
         }
     }
 

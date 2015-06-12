@@ -1,5 +1,7 @@
 package ru.nsu.ccfit.g13202.troshnev.tetris.views;
 
+import ru.nsu.ccfit.g13202.troshnev.tetris.events.TetrisEvent;
+import ru.nsu.ccfit.g13202.troshnev.tetris.events.TetrisEventListener;
 import ru.nsu.ccfit.g13202.troshnev.tetris.kernel.HighscoreTable;
 import ru.nsu.ccfit.g13202.troshnev.tetris.player.Player;
 
@@ -11,7 +13,7 @@ import java.awt.event.ActionListener;
 /**
  * Created by zerlok on 5/31/15.
  */
-public class PlayerInfoView extends JComponent implements ActionListener {
+public class PlayerInfoView extends JComponent implements TetrisEventListener {
     private Player currentPlayer;
     private JLabel currentScoreValue;
     private JLabel currentLevelValue;
@@ -27,7 +29,7 @@ public class PlayerInfoView extends JComponent implements ActionListener {
     }
 
     @Override
-    public void actionPerformed(ActionEvent actionEvent) {
+    public void handleTetrisEvent(TetrisEvent event) {
         // TODO: Make updates for player statistics. (don't know why it won't work)
         currentLevelValue.setText("Level: " + String.valueOf(currentPlayer.getLevelNum()));
         currentScoreValue.setText("Score: " + String.valueOf(currentPlayer.getScorePoints()));

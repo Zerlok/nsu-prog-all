@@ -11,12 +11,11 @@ public class BaseWindow extends JFrame {
 
     public BaseWindow(ActionMap actionsMap) {
         JMenuItem menuMain = new JMenuItem();
-        menuMain.setAction(actionsMap.get("MAIN-HOME"));
-
         JMenuItem menuStart = new JMenuItem();
-        menuStart.setAction(actionsMap.get("GAME-NEW"));
-
         JMenuItem menuPause = new JMenuItem();
+
+        menuMain.setAction(actionsMap.get("MAIN-HOME"));
+        menuStart.setAction(actionsMap.get("GAME-NEW"));
         menuPause.setAction(actionsMap.get("GAME-PAUSE"));
 
         JMenuBar windowHeader = new JMenuBar();

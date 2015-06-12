@@ -1,27 +1,29 @@
 package ru.nsu.ccfit.g13202.troshnev.tetris.events;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.util.Vector;
+import javax.swing.event.EventListenerList;
 import java.util.concurrent.LinkedBlockingQueue;
 
 /**
 * Created by zerlok on 6/6/15.
 */
 public class TetrisEventController {
-    private Vector<ActionListener> eventListeners;
-    private LinkedBlockingQueue<ActionEvent> eventQueue;
+    private EventListenerList eventListeners;
+    private LinkedBlockingQueue<TetrisEvent> eventQueue;
 
     public TetrisEventController() {
-        eventListeners = new Vector<ActionListener>();
-        eventQueue = new LinkedBlockingQueue<ActionEvent>();
+        eventListeners = new EventListenerList();
+        eventQueue = new LinkedBlockingQueue<TetrisEvent>();
     }
 
-    public void addActionListener(ActionListener listener) {
-        eventListeners.add(listener);
+    public void addListener(TetrisEventListener listener) {
+        eventListeners.add(TetrisEventListener.class, listener);
     }
 
-    public void pushEvent(ActionEvent event) {
+    public void removeListener(TetrisEventListener listener) {
+        eventListeners.remove(TetrisEventListener.class, listener);
+    }
+
+    public void pushEvent(TetrisEvent event) {
         try {
             eventQueue.put(event);
 
@@ -31,14 +33,16 @@ public class TetrisEventController {
     }
 
     public void handleEvents() {
-        ActionEvent event;
+        TetrisEvent event;
+        Object[] listenersList = eventListeners.getListenerList();
+        int i;
 
         while ((event = eventQueue.poll()) != null) {
-            System.out.println("Handling the event: " + event.getActionCommand());
+            System.out.println("Handling the event: " + event.getEventCommand());
 
-            for (ActionListener listener : eventListeners) {
-                listener.actionPerformed(event);
-            }
+            for (i = 0; i < listenersList.length; i += 2)
+                if (listenersList[i] == TetrisEventListener.class)
+                    ((TetrisEventListener)listenersList[i+1]).handleTetrisEvent(event);
         }
     }
 }
