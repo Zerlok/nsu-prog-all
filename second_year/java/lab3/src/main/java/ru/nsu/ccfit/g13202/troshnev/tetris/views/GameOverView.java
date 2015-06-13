@@ -19,12 +19,11 @@ public class GameOverView extends JComponent {
         scoreTable = table;
         currentScore = score;
 
-        setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
-
+        Dimension rowSize = new Dimension(100, 20);
         JLabel gameOverMessage = new JLabel("GAME OVER");
-        JLabel scoreMessage = new JLabel(String.format("Your score: %1$d", currentScore));
+        JLabel scoreMessage = new JLabel(String.format("Score: %1$d", currentScore));
         nameInput = new JTextField("Name");
-        nameInput.setPreferredSize(new Dimension(200, 20));
+        nameInput.setFocusable(true);
         JButton btn = new JButton("Enter");
         btn.addActionListener(new ActionListener() {
             @Override
@@ -34,6 +33,13 @@ public class GameOverView extends JComponent {
                 }
             }
         });
+
+        gameOverMessage.setPreferredSize(rowSize);
+        scoreMessage.setPreferredSize(rowSize);
+        nameInput.setPreferredSize(rowSize);
+        btn.setPreferredSize(rowSize);
+
+        setLayout(new GridLayout(8, 1, 20, 20));
 
         add(gameOverMessage);
         add(scoreMessage);

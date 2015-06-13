@@ -31,8 +31,6 @@ public class GamePanel extends JPanel implements TetrisEventListener {
     private HighscoreTable scoresTable;
     private Player currentPlayer;
 
-    private JSplitPane mainPane;
-
     public GamePanel(Field gameField, Field previewField, Player player, HighscoreTable table) {
         scoresTable = table;
         currentPlayer = player;
@@ -57,7 +55,7 @@ public class GamePanel extends JPanel implements TetrisEventListener {
         infoView = new PlayerInfoView(player, table);
 
         JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, nextFigureFieldView, infoView);
-        mainPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, gameFieldView, splitPane);
+        JSplitPane mainPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, gameFieldView, splitPane);
 
         splitPane.setDividerLocation(previewField.getFieldRowsNum() * blockPixelWidth);
         splitPane.setDividerSize(5);
@@ -89,16 +87,21 @@ public class GamePanel extends JPanel implements TetrisEventListener {
         eventController.addListener(this);
     }
 
+    private void setGameOverView() {
+        removeAll();
+        JPanel inner = new JPanel(new BorderLayout());
+        GameOverView gov = new GameOverView(scoresTable, currentPlayer.getScorePoints());
+        gov.setPreferredSize(new Dimension(100, 100));
+        inner.add(gov, BorderLayout.CENTER);
+        inner.setSize(new Dimension(100, 100));
+        inner.validate();
+        add(inner);
+        validate();
+    }
+
     @Override
     public void handleTetrisEvent(TetrisEvent event) {
-        String cmd = event.getEventCommand();
-
-        if (cmd == "GAME-OVER") {
-            remove(mainPane);
-            GameOverView gov = new GameOverView(scoresTable, currentPlayer.getScorePoints());
-            gov.setSize(new Dimension(250, 400));
-            add(gov, BorderLayout.CENTER);
-            validate();
-        }
+        if (event.getEventCommand() == "GAME-OVER")
+            setGameOverView();
     }
 }

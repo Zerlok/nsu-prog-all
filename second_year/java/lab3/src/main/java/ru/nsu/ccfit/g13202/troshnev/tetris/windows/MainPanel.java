@@ -8,44 +8,39 @@ import java.awt.*;
  */
 
 public class MainPanel extends JPanel {
-    private JPanel contentPanel;
-    private JButton startBtn;
-    private JButton highscoreBtn;
-    private JButton aboutBtn;
-    private JButton exitBtn;
-
-    private Dimension windowSize;
-    private Dimension btnDefaultSize;
 
     public MainPanel(ActionMap actionsMap) {
-        windowSize = new Dimension(180, 230);
-        btnDefaultSize = new Dimension(130, 30);
+        // setup sizes.
 
-        startBtn = new JButton();
-        highscoreBtn = new JButton();
-        aboutBtn = new JButton();
-        exitBtn = new JButton();
-        bindButtons(actionsMap);
+        // create buttons
+        JButton startBtn = new JButton();
+        JButton highscoreBtn = new JButton();
+        JButton aboutBtn = new JButton();
+        JButton exitBtn = new JButton();
 
-        contentPanel = new JPanel(new GridLayout(4, 1, 0, 10));
-        contentPanel.add(startBtn);
-        contentPanel.add(highscoreBtn);
-        contentPanel.add(aboutBtn);
-        contentPanel.add(exitBtn);
-
-        add(contentPanel);
-        setSize(windowSize);
-    }
-
-    private void bindButtons(ActionMap actionsMap) {
+        // bind actions to buttons.
         startBtn.setAction(actionsMap.get("GAME-NEW"));
         highscoreBtn.setAction(actionsMap.get("MAIN-SCORES"));
         aboutBtn.setAction(actionsMap.get("MAIN-ABOUT"));
         exitBtn.setAction(actionsMap.get("GAME-EXIT"));
 
+        // set buttons sizes
+        Dimension btnDefaultSize = new Dimension(130, 30);
         startBtn.setPreferredSize(btnDefaultSize);
         highscoreBtn.setPreferredSize(btnDefaultSize);
         aboutBtn.setPreferredSize(btnDefaultSize);
         exitBtn.setPreferredSize(btnDefaultSize);
+
+        // add buttons to pane.
+        JPanel contentPanel = new JPanel(new GridLayout(4, 1, 0, 10));
+        contentPanel.add(startBtn);
+        contentPanel.add(highscoreBtn);
+        contentPanel.add(aboutBtn);
+        contentPanel.add(exitBtn);
+        add(contentPanel);
+
+        // set window size
+        Dimension windowSize = new Dimension(180, 230);
+        setSize(windowSize);
     }
 }

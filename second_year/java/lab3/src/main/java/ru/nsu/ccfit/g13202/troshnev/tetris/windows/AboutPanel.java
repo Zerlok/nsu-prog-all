@@ -8,11 +8,12 @@ import java.awt.*;
  */
 public class AboutPanel extends JPanel {
     private String aboutText = "This simple tetris game was developed by zerlok.\n"
-            + "How to play:\n"
+            + "\nHow to play:\n"
             + "\tUse arrow keys to move the figure (left, right, down).\n"
             + "\tUse up arrow key to rotate the figure clockwise.\n"
             + "\tUse space key to smash down the figure (move down until it face field block).\n"
-            + "Contacts:\n"
+            + "\tUse 'p' key to pause the game.\n"
+            + "\nContacts:\n"
             + "\temail: denergytro@gmail.com\n";
 
     public AboutPanel() {
