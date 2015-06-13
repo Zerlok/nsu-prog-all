@@ -19,7 +19,7 @@ public class GameOverView extends JComponent {
         scoreTable = table;
         currentScore = score;
 
-        setLayout(new FlowLayout(FlowLayout.CENTER));
+        setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
 
         JLabel gameOverMessage = new JLabel("GAME OVER");
         JLabel scoreMessage = new JLabel(String.format("Your score: %1$d", currentScore));

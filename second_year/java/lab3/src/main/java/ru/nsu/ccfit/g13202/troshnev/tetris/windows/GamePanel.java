@@ -68,6 +68,8 @@ public class GamePanel extends JPanel implements TetrisEventListener {
 
         setLayout(new BorderLayout());
         add(mainPane, BorderLayout.CENTER);
+
+        validate();
     }
 
     public void setCurrentFigure(AbstractFigure f) {
@@ -94,8 +96,9 @@ public class GamePanel extends JPanel implements TetrisEventListener {
         if (cmd == "GAME-OVER") {
             remove(mainPane);
             GameOverView gov = new GameOverView(scoresTable, currentPlayer.getScorePoints());
-            gov.setPreferredSize(new Dimension(250, 400));
+            gov.setSize(new Dimension(250, 400));
             add(gov, BorderLayout.CENTER);
+            validate();
         }
     }
 }
