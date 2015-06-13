@@ -1,12 +1,9 @@
 package ru.nsu.ccfit.g13202.troshnev.tetris.windows;
 
 import ru.nsu.ccfit.g13202.troshnev.tetris.events.TetrisEvent;
-import ru.nsu.ccfit.g13202.troshnev.tetris.events.TetrisEventController;
 import ru.nsu.ccfit.g13202.troshnev.tetris.events.TetrisEventListener;
 import ru.nsu.ccfit.g13202.troshnev.tetris.figures.AbstractFigure;
 import ru.nsu.ccfit.g13202.troshnev.tetris.kernel.Field;
-import ru.nsu.ccfit.g13202.troshnev.tetris.kernel.HighscoreTable;
-import ru.nsu.ccfit.g13202.troshnev.tetris.player.Player;
 import ru.nsu.ccfit.g13202.troshnev.tetris.views.*;
 
 import javax.swing.*;

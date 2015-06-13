@@ -1,7 +1,6 @@
 package ru.nsu.ccfit.g13202.troshnev.tetris.figures;
 
 import ru.nsu.ccfit.g13202.troshnev.tetris.kernel.Block;
-import ru.nsu.ccfit.g13202.troshnev.tetris.kernel.Coordinate;
 
 import java.awt.*;
 

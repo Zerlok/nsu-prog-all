@@ -1,9 +1,7 @@
 package ru.nsu.ccfit.g13202.troshnev.tetris.controllers;
 
 import ru.nsu.ccfit.g13202.troshnev.tetris.kernel.HighscoreTable;
-import ru.nsu.ccfit.g13202.troshnev.tetris.player.Level;
 import ru.nsu.ccfit.g13202.troshnev.tetris.player.Player;
-import ru.nsu.ccfit.g13202.troshnev.tetris.player.Score;
 import ru.nsu.ccfit.g13202.troshnev.tetris.views.ScoresView;
 import ru.nsu.ccfit.g13202.troshnev.tetris.windows.AboutPanel;
 import ru.nsu.ccfit.g13202.troshnev.tetris.windows.BaseWindow;

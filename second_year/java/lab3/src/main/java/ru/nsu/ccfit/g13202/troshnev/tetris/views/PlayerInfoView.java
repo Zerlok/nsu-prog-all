@@ -1,14 +1,9 @@
 package ru.nsu.ccfit.g13202.troshnev.tetris.views;
 
-import ru.nsu.ccfit.g13202.troshnev.tetris.events.TetrisEvent;
-import ru.nsu.ccfit.g13202.troshnev.tetris.events.TetrisEventListener;
-import ru.nsu.ccfit.g13202.troshnev.tetris.kernel.HighscoreTable;
 import ru.nsu.ccfit.g13202.troshnev.tetris.player.Player;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 /**
  * Created by zerlok on 5/31/15.

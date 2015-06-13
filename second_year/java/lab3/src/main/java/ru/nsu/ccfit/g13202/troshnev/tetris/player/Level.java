@@ -1,7 +1,5 @@
 package ru.nsu.ccfit.g13202.troshnev.tetris.player;
 
-import ru.nsu.ccfit.g13202.troshnev.tetris.events.TetrisEventController;
-
 import javax.swing.*;
 import java.util.Random;
 

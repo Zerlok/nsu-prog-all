@@ -3,7 +3,6 @@ package ru.nsu.ccfit.g13202.troshnev.tetris.views;
 import ru.nsu.ccfit.g13202.troshnev.tetris.figures.AbstractFigure;
 import ru.nsu.ccfit.g13202.troshnev.tetris.kernel.Block;
 
-import javax.swing.*;
 import java.awt.*;
 
 /**
