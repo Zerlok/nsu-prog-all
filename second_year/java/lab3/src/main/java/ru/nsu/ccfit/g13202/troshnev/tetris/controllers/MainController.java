@@ -1,6 +1,10 @@
-package ru.nsu.ccfit.g13202.troshnev.tetris.kernel.controllers;
+package ru.nsu.ccfit.g13202.troshnev.tetris.controllers;
 
 import ru.nsu.ccfit.g13202.troshnev.tetris.kernel.HighscoreTable;
+import ru.nsu.ccfit.g13202.troshnev.tetris.player.Level;
+import ru.nsu.ccfit.g13202.troshnev.tetris.player.Player;
+import ru.nsu.ccfit.g13202.troshnev.tetris.player.Score;
+import ru.nsu.ccfit.g13202.troshnev.tetris.views.ScoresView;
 import ru.nsu.ccfit.g13202.troshnev.tetris.windows.AboutPanel;
 import ru.nsu.ccfit.g13202.troshnev.tetris.windows.BaseWindow;
 import ru.nsu.ccfit.g13202.troshnev.tetris.windows.MainPanel;
@@ -16,28 +20,21 @@ public class MainController implements Runnable {
     private BaseWindow baseWindow;
     private GameController gameLogic;
     private HighscoreTable scoresTable;
+    private Player player;
 
     public MainController() {
         actionsMap = new ActionMap();
         setupActions();
 
-        baseWindow = new BaseWindow(actionsMap);
         scoresTable = new HighscoreTable();
         gameLogic = null;
-
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                baseWindow.setVisible(true);
-            }
-        });
     }
 
     private void setupActions() {
         actionsMap.put("MAIN-HOME", new AbstractAction("Menu") {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                initMainMenu();
+                showMainMenu();
             }
         });
         actionsMap.put("GAME-NEW", new AbstractAction("New") {
@@ -68,19 +65,29 @@ public class MainController implements Runnable {
 
     @Override
     public void run() {
-        initMainMenu();
+        // run swing in another thread.
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                baseWindow = new BaseWindow(actionsMap);
+                baseWindow.setVisible(true);
+                showMainMenu();
+            }
+        });
     }
 
-    private void initMainMenu() {
-        stopTheGame();
+    private void showMainMenu() {
+        checkAndStopGame();
         baseWindow.setInnerWindow(new MainPanel(actionsMap));
         baseWindow.centrateWindow();
     }
 
     private void startNewGame() {
-        stopTheGame();
-        gameLogic = new GameController(actionsMap, scoresTable);
+        checkAndStopGame();
 
+        gameLogic = new GameController(scoresTable, actionsMap);
+
+        // change inner window.
         baseWindow.setInnerWindow(gameLogic.getGamePanel());
         baseWindow.centrateWindow();
 
@@ -88,18 +95,18 @@ public class MainController implements Runnable {
     }
 
     private void showScoresTable() {
-        stopTheGame();
-        baseWindow.setInnerWindow(new ScoresPanel(scoresTable));
+        checkAndStopGame();
+        baseWindow.setInnerWindow(new ScoresPanel(new ScoresView(scoresTable)));
         baseWindow.centrateWindow();
     }
 
     private void showAbout() {
-        stopTheGame();
+        checkAndStopGame();
         baseWindow.setInnerWindow(new AboutPanel());
         baseWindow.centrateWindow();
     }
 
-    private void stopTheGame() {
+    private void checkAndStopGame() {
         if (gameLogic != null) {
             gameLogic.stop();
             gameLogic = null;
@@ -107,7 +114,7 @@ public class MainController implements Runnable {
     }
 
     private void exitTheGame() {
-        stopTheGame();
+        checkAndStopGame();
         System.exit(0);
     }
 }

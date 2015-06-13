@@ -10,8 +10,6 @@ import java.awt.*;
 public class MainPanel extends JPanel {
 
     public MainPanel(ActionMap actionsMap) {
-        // setup sizes.
-
         // create buttons
         JButton startBtn = new JButton();
         JButton highscoreBtn = new JButton();

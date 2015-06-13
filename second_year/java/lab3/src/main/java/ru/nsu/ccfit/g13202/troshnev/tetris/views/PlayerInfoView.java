@@ -13,24 +13,23 @@ import java.awt.event.ActionListener;
 /**
  * Created by zerlok on 5/31/15.
  */
-public class PlayerInfoView extends JComponent implements TetrisEventListener {
+public class PlayerInfoView extends JComponent {
     private Player currentPlayer;
     private JLabel currentScoreValue;
     private JLabel currentLevelValue;
 
-    public PlayerInfoView(Player player, HighscoreTable scoresTable) {
+    public PlayerInfoView(Player player, long highscore) {
         currentPlayer = player;
         currentLevelValue = new JLabel("Level: " + String.valueOf(player.getLevelNum()));
         currentScoreValue = new JLabel("Score: " + String.valueOf(player.getScorePoints()));
 
-        setLayout(new GridLayout(2, 1, 20, 20));
+        setLayout(new GridLayout(4, 1, 20, 20));
+        add(new JLabel(String.format("Highscore: %1$d", highscore)));
         add(currentLevelValue);
         add(currentScoreValue);
     }
 
-    @Override
-    public void handleTetrisEvent(TetrisEvent event) {
-        // TODO: Make updates for player statistics. (don't know why it won't work)
+    public void updateStatistics() {
         currentLevelValue.setText("Level: " + String.valueOf(currentPlayer.getLevelNum()));
         currentScoreValue.setText("Score: " + String.valueOf(currentPlayer.getScorePoints()));
     }

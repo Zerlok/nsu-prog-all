@@ -40,7 +40,7 @@ public class Level {
 //    private TetrisEventController eventController;
     private Random rand;
 
-    public Level(Score score, final TetrisEventController eventController) {
+    public Level(Score score) {
         rand = new Random();
 
         levelNum = 1;

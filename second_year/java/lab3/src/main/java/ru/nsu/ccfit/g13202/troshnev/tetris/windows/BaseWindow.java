@@ -10,6 +10,15 @@ public class BaseWindow extends JFrame {
     private JPanel innerWindow;
 
     public BaseWindow(ActionMap actionsMap) {
+        setupMenu(actionsMap);
+
+        setTitle("Tetris");
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+        setLayout(new BorderLayout());
+    }
+
+    private void setupMenu(ActionMap actionsMap) {
         JMenuItem menuMain = new JMenuItem();
         JMenuItem menuStart = new JMenuItem();
         JMenuItem menuPause = new JMenuItem();
@@ -20,15 +29,11 @@ public class BaseWindow extends JFrame {
 
         JMenuBar windowHeader = new JMenuBar();
 
-        setTitle("Tetris");
         windowHeader.add(menuMain);
         windowHeader.add(menuStart);
         windowHeader.add(menuPause);
 
         setJMenuBar(windowHeader);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-        setLayout(new BorderLayout());
     }
 
     public void centrateWindow() {

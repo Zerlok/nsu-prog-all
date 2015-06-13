@@ -1,6 +1,6 @@
 package ru.nsu.ccfit.g13202.troshnev.tetris;
 
-import ru.nsu.ccfit.g13202.troshnev.tetris.kernel.controllers.MainController;
+import ru.nsu.ccfit.g13202.troshnev.tetris.controllers.MainController;
 
 public class Main
 {

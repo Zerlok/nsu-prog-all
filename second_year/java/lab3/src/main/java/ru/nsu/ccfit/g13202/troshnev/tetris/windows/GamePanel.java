@@ -11,8 +11,6 @@ import ru.nsu.ccfit.g13202.troshnev.tetris.views.*;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 /**
  * Created by zerlok on 4/29/15.
@@ -27,17 +25,13 @@ public class GamePanel extends JPanel implements TetrisEventListener {
     private FieldView nextFigureFieldView;
 
     private PlayerInfoView infoView;
+    private GameOverView gameOverView;
 
-    private HighscoreTable scoresTable;
-    private Player currentPlayer;
-
-    public GamePanel(Field gameField, Field previewField, Player player, HighscoreTable table) {
-        scoresTable = table;
-        currentPlayer = player;
-
+    public GamePanel(Field gameField, Field previewField, PlayerInfoView info, GameOverView endView) {
         blockView = new BlockView(25, 5, 1);
         int blockPixelWidth = blockView.getPixelOffset();
 
+        // setup main game view (current figure and field blocks).
         currentFigureView = new FigureView(blockView);
         gameFieldView = new FieldView(gameField, blockView, currentFigureView);
         gameFieldView.setPreferredSize(new Dimension(
@@ -45,6 +39,7 @@ public class GamePanel extends JPanel implements TetrisEventListener {
                 gameField.getFieldRowsNum() * blockPixelWidth
         ));
 
+        // setup next figure preview.
         nextFigureView = new FigureView(blockView);
         nextFigureFieldView = new FieldView(previewField, blockView, nextFigureView);
         nextFigureFieldView.setPreferredSize(new Dimension(
@@ -52,8 +47,11 @@ public class GamePanel extends JPanel implements TetrisEventListener {
                 previewField.getFieldRowsNum() * blockPixelWidth
         ));
 
-        infoView = new PlayerInfoView(player, table);
+        // create info and game over views.
+        infoView = info;
+        gameOverView = endView;
 
+        // create split panes for game view.
         JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, nextFigureFieldView, infoView);
         JSplitPane mainPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, gameFieldView, splitPane);
 
@@ -64,9 +62,16 @@ public class GamePanel extends JPanel implements TetrisEventListener {
         mainPane.setDividerSize(5);
         mainPane.setEnabled(false);
 
+        // setup layout.
         setLayout(new BorderLayout());
         add(mainPane, BorderLayout.CENTER);
 
+        validate();
+    }
+
+    private void switchToGameOverView() {
+        removeAll();
+        add(gameOverView);
         validate();
     }
 
@@ -82,26 +87,17 @@ public class GamePanel extends JPanel implements TetrisEventListener {
         blockView.setBlockMuting(bool);
     }
 
-    public void registerListeners(TetrisEventController eventController) {
-        eventController.addListener(infoView);
-        eventController.addListener(this);
-    }
-
-    private void setGameOverView() {
-        removeAll();
-        JPanel inner = new JPanel(new BorderLayout());
-        GameOverView gov = new GameOverView(scoresTable, currentPlayer.getScorePoints());
-        gov.setPreferredSize(new Dimension(100, 100));
-        inner.add(gov, BorderLayout.CENTER);
-        inner.setSize(new Dimension(100, 100));
-        inner.validate();
-        add(inner);
-        validate();
-    }
-
     @Override
     public void handleTetrisEvent(TetrisEvent event) {
-        if (event.getEventCommand() == "GAME-OVER")
-            setGameOverView();
+        String cmd = event.getEventCommand();
+
+        if ((cmd == "TETRIS-FIGURE-NEW")
+                || (cmd == "TETRIS-ROWS-REMOVED"))
+            infoView.updateStatistics();
+
+        if (cmd == "GAME-OVER") {
+            gameOverView.refreshMessage();
+            switchToGameOverView();
+        }
     }
 }

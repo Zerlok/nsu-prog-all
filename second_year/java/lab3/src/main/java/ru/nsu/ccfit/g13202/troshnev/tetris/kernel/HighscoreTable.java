@@ -6,7 +6,7 @@ import java.io.*;
  * Created by zerlok on 6/11/15.
  */
 public class HighscoreTable {
-    private int maxHighscoresNum = 15;
+    private int maxHighscoresNum = 20;
     private String filepath = "highscores.txt";
     private String[] players;
     private long[] scores;
@@ -67,7 +67,8 @@ public class HighscoreTable {
         BufferedWriter fileBuffer = new BufferedWriter(new FileWriter(tableFile));
 
         for (int i = 0; i < maxHighscoresNum; i++) {
-            fileBuffer.write(String.format("%1$s %2$d\n", players[i], scores[i]));
+            if (players[i] != null)
+                fileBuffer.write(String.format("%1$s %2$d\n", players[i], scores[i]));
         }
 
         fileBuffer.close();
