@@ -6,6 +6,7 @@ syntax: glob
 *.csv
 *.txt
 *.zip
+*.bin
 *.tar.gz
 *.sublime-project
 *.sublime-workspace
