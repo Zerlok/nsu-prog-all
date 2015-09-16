@@ -1,7 +1,7 @@
 CC=g++
 CFLAGS=-std=c++11
 OBJECT_BINARIES=object.cpp main.cpp
-TASK1_BINARIES=task1/longstring.c task1/main.c
+TASK1_BINARIES=task1/longstring.c task1/recordarray.c task1/main.c
 BINNAME=result.bin
 
 
