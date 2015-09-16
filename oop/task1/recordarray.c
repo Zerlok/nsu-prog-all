@@ -17,7 +17,7 @@ RecordArray *ra_create(size_t size, size_t record_size)
 	RecordArray *self = (RecordArray*)malloc(sizeof(RecordArray));
 	self->m_size = size;
 	self->m_record_size = record_size;
-	self->m_data = (void*)calloc(self->m_record_size, self->m_size);
+	self->m_data = (void*)calloc(self->m_size, self->m_record_size);
 
 	// Assigning methods.
 	self->f_element_printor = NULL;

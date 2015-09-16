@@ -9,7 +9,7 @@ t_longstring *get_longstring(char *data)
 		return NULL;
 
 	t_longstring *longstring = (t_longstring*)malloc(sizeof(t_longstring));
-	longstring->m_data = (char*)calloc(sizeof(char), _LONGSTRING_EXPAND_CRITERIA);
+	longstring->m_data = (char*)calloc(_LONGSTRING_EXPAND_CRITERIA, sizeof(char));
 	longstring->m_size = _LONGSTRING_EXPAND_CRITERIA;
 	longstring->m_index = 0;
 
