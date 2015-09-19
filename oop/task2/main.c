@@ -1,18 +1,17 @@
-#include "factory.h"
-
-
-Class Student
-{
-
-}
-
-
-void create_student(char *firstname, char *lastname, int age)
+#include "class.h"
+#include "shape.h"
 
 
 int main(int argc, char **argv)
 {
-	Student *me = new(Student, "Danil", "Troshnev", 20);
+	void *s = new(Shape, 12);
+	void *u = new(Shape, 13);
+
+	print(s);
+	print(u);
+
+	delete(s);
+	delete(u);
 
 	return 0;
 }
