@@ -2,6 +2,12 @@
 #define __SHAPE_H__
 
 
+#include <stdio.h>
+#include <stdarg.h>
+
+#include "class.h"
+
+
 typedef struct _Shape
 {
 	Class super;
@@ -10,12 +16,12 @@ typedef struct _Shape
 } ShapeStruct;
 
 
-void *Shape_constructor(void *_self, va_list *args);
+void *Shape_constructor(void *_self, ...);
 void Shape_destructor(void *_self);
 void Shape_printor(void *_self);
 
 
-extern const void *Shape;
+extern void *Shape;
 
 
 // __SHAPE_H__

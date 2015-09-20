@@ -1,13 +1,17 @@
 #include "shape.h"
 
 
-void *Shape_constructor(void *_self, va_list *args)
+void *Shape_constructor(void *_self, ...)
 {
 	printf("Constructor...\n");
 
 	ShapeStruct *self = _self;
-	self->id = va_list(args, int);
+	va_list args;
+	va_start(args, _self);
+	
+	self->id = va_arg(args, int);
 
+	va_end(args);
 	return self;
 }
 
@@ -20,11 +24,11 @@ void Shape_destructor(void *_self)
 
 void Shape_printor(void *_self)
 {
-	printf("[Shape: %s]\n", (*(ShapeStruct**)_self)->id);
+	printf("[Shape: %d]\n", (*(ShapeStruct**)_self)->id);
 }
 
 
-const Class ShapeClass = {
+Class ShapeClass = {
 	sizeof(ShapeStruct),
 	Shape_constructor,
 	Shape_destructor,
