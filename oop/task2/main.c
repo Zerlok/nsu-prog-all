@@ -4,8 +4,8 @@
 
 int main(int argc, char **argv)
 {
-	void *s = new(Shape, 12);
-	void *u = new(Shape, 13);
+	void *s = new(Shape, "asdfg");
+	void *u = new(Shape, "hello");
 
 	print(s);
 	print(u);

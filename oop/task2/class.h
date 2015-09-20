@@ -1,17 +1,14 @@
 #ifndef __CLASS_H__
 #define __CLASS_H__
 
-
 #include <stddef.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include <stdarg.h>
 
 
 typedef struct _Class {
 	size_t size;
 	
-	void *(*constructor)(void *_class, ...);
+	void *(*constructor)(void *_class, va_list *args);
 	void (*destructor)(void *_self);
 	void (*printor)(void *_self);
 } Class;

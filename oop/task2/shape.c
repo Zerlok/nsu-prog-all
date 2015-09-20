@@ -1,30 +1,37 @@
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+
+#include "class.h"
 #include "shape.h"
 
 
-void *Shape_constructor(void *_self, ...)
+void *Shape_constructor(void *_self, va_list *args)
 {
-	printf("Constructor...\n");
-
 	ShapeStruct *self = _self;
-	va_list args;
-	va_start(args, _self);
-	
-	self->id = va_arg(args, int);
 
-	va_end(args);
+	char *name = va_arg(*args, char*);
+	size_t name_len = strlen(name);
+	self->name = (char*)calloc(name_len + 1, sizeof(char));
+	memcpy(self->name, name, name_len);
+
 	return self;
 }
 
 
 void Shape_destructor(void *_self)
 {
-	printf("Destructor...\n");
+	ShapeStruct *self = _self;
+
+	free(self->name);
 }
 
 
 void Shape_printor(void *_self)
 {
-	printf("[Shape: %d]\n", (*(ShapeStruct**)_self)->id);
+	ShapeStruct *self = _self;
+
+	printf("[Shape: '%s']\n", self->name);
 }
 
 

@@ -1,11 +1,15 @@
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+
 #include "class.h"
 
 
 void *new(void *_class, ...)
 {
-	const Class *cls = _class;
+	Class *cls = _class;
 	void *ptr_obj = malloc(cls->size);
-	*(const Class**)ptr_obj = cls;
+	memcpy(ptr_obj, cls, sizeof(Class));
 
 	if (cls->constructor == NULL)
 		return ptr_obj;
@@ -13,6 +17,7 @@ void *new(void *_class, ...)
 	va_list args;
 	va_start(args, _class);
 
+	printf("### Constructor : %p ###\n", ptr_obj);
 	ptr_obj = cls->constructor(ptr_obj, &args);
 
 	va_end(args);
@@ -27,6 +32,7 @@ void delete(void *ptr_obj)
 
 	Class *cls = ptr_obj;
 
+	printf("### Destructor : %p ###\n", ptr_obj);
 	if (cls->destructor != NULL)
 		cls->destructor(ptr_obj);
 
