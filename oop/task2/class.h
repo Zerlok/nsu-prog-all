@@ -12,11 +12,13 @@ typedef struct _Class
 	
 	void *(*constructor)(void *_class, va_list *args);
 	void (*destructor)(void *_self);
+	void (*drawer)(void *_self);
 } Class;
 
 
 void *new_object(void *_class, ...);
 void delete_object(void *ptr_obj);
+void draw(void *ptr_obj);
 
 
 // __CLASS_H__

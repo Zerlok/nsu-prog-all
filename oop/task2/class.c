@@ -38,3 +38,13 @@ void delete_object(void *ptr_obj)
 
 	free(ptr_obj);
 }
+
+
+void draw(void *ptr_obj)
+{
+	if (ptr_obj == NULL)
+		return;
+
+	Class *cls = ptr_obj;
+	cls->drawer(ptr_obj);
+}

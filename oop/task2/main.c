@@ -1,26 +1,25 @@
 #include "class.h"
-#include "shape.h"
 #include "point.h"
+#include "circle.h"
+#include "rectangle.h"
 
 
 int main(int argc, char **argv)
 {
-	void *s = new_object(Shape, "asdfg");
-	void *u = new_object(Shape, "hello");
 	void *dot = new_object(Point, 10, 11);
+	void *rect = new_object(Rectangle, 0, 0, 3, 5);
+	void *circ = new_object(Circle, 1, 1, 4);
 
-	ShapeStruct *ss = s;
-	ShapeStruct *uu = u;
-	ShapeStruct *dd = dot;
-	PointStruct *ddd = dot;
-
-	draw(s);
-	draw(u);
 	draw(dot);
+	printf("\n");
+	draw(rect);
+	printf("\n");
+	draw(circ);
+	printf("\n");
 
-	delete_object(s);
-	delete_object(u);
 	delete_object(dot);
+	delete_object(rect);
+	delete_object(circ);
 
 	return 0;
 }
