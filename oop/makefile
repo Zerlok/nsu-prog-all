@@ -10,7 +10,7 @@ OBJECT_BINARIES=object.cpp main.cpp
 
 # By tasks.
 TASK1_BINARIES=task1/longstring.c task1/recordarray.c task1/main.c
-TASK2_BINARIES=task2/class.c task2/shape.c task2/factory.c task2/main.c
+TASK2_BINARIES=task2/class.c task2/shape.c task2/point.c task2/rectangle.c task2/circle.c task2/factory.c task2/main.c
 
 
 # Longstring and recordarray.

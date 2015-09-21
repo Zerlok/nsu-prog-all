@@ -5,10 +5,10 @@
 #include "class.h"
 
 
-void *new(void *_class, ...)
+void *new_object(void *_class, ...)
 {
 	Class *cls = _class;
-	void *ptr_obj = malloc(cls->size);
+	void *ptr_obj = calloc(1, cls->size);
 	memcpy(ptr_obj, cls, sizeof(Class));
 
 	if (cls->constructor == NULL)
@@ -25,7 +25,7 @@ void *new(void *_class, ...)
 }
 
 
-void delete(void *ptr_obj)
+void delete_object(void *ptr_obj)
 {
 	if (ptr_obj == NULL)
 		return;
@@ -37,22 +37,4 @@ void delete(void *ptr_obj)
 		cls->destructor(ptr_obj);
 
 	free(ptr_obj);
-}
-
-
-void print(void *ptr_obj)
-{
-	if (ptr_obj == NULL)
-	{
-		printf("%p\n", NULL);
-		return;
-	}
-
-	Class *cls = ptr_obj;
-
-	if (cls->printor != NULL)
-		cls->printor(ptr_obj);
-
-	else
-		printf("[Class: %p : %ld]\n", cls, cls->size);
 }

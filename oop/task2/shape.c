@@ -15,6 +15,8 @@ void *Shape_constructor(void *_self, va_list *args)
 	self->name = (char*)calloc(name_len + 1, sizeof(char));
 	memcpy(self->name, name, name_len);
 
+	self->drawer = Shape_drawer;
+
 	return self;
 }
 
@@ -22,16 +24,21 @@ void *Shape_constructor(void *_self, va_list *args)
 void Shape_destructor(void *_self)
 {
 	ShapeStruct *self = _self;
-
 	free(self->name);
 }
 
 
-void Shape_printor(void *_self)
+void Shape_drawer(void *_self)
 {
 	ShapeStruct *self = _self;
-
 	printf("[Shape: '%s']\n", self->name);
+}
+
+
+void draw(void *ptr_obj)
+{
+	ShapeStruct *obj = ptr_obj;
+	obj->drawer(ptr_obj);
 }
 
 
