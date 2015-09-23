@@ -17,7 +17,7 @@ void *new_object(void *_class, ...)
 	va_list args;
 	va_start(args, _class);
 
-	printf("### Constructor : %p ###\n", ptr_obj);
+	printf("### Constructor : %p ###\n", cls);
 	ptr_obj = cls->constructor(ptr_obj, &args);
 
 	va_end(args);
@@ -32,7 +32,7 @@ void delete_object(void *ptr_obj)
 
 	Class *cls = ptr_obj;
 
-	printf("### Destructor : %p ###\n", ptr_obj);
+	printf("### Destructor : %p ###\n", cls);
 	if (cls->destructor != NULL)
 		cls->destructor(ptr_obj);
 
@@ -40,11 +40,19 @@ void delete_object(void *ptr_obj)
 }
 
 
-void draw(void *ptr_obj)
+void print(void *ptr_obj)
 {
 	if (ptr_obj == NULL)
 		return;
 
 	Class *cls = ptr_obj;
-	cls->drawer(ptr_obj);
+
+	if (cls->printor != NULL)
+		cls->printor(ptr_obj);
+}
+
+
+void draw(void *ptr)
+{
+	print(ptr);
 }

@@ -19,7 +19,6 @@ void *Circle_constructor(void *_self, va_list *args)
 void Circle_destructor(void *_self)
 {
 	CircleStruct *self = _self;
-
 	delete_object(self->center);
 }
 

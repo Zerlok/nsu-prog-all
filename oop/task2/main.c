@@ -1,3 +1,5 @@
+#include <stdio.h>
+
 #include "class.h"
 #include "point.h"
 #include "circle.h"
@@ -10,11 +12,11 @@ int main(int argc, char **argv)
 	void *rect = new_object(Rectangle, 0, 0, 3, 5);
 	void *circ = new_object(Circle, 1, 1, 4);
 
-	draw(dot);
+	print(dot);
 	printf("\n");
-	draw(rect);
+	print(rect);
 	printf("\n");
-	draw(circ);
+	print(circ);
 	printf("\n");
 
 	delete_object(dot);
