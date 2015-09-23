@@ -27,7 +27,7 @@ void Circle_drawer(void *_self)
 {
 	CircleStruct *self = _self;
 
-	draw(self->center);
+	print(self->center);
 	printf(", r=%d", self->radius);
 }
 

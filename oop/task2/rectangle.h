@@ -7,7 +7,7 @@
 
 typedef struct _Rectangle
 {
-	Class cls;
+	Class *super;
 
 	void *begin;
 	void *end;

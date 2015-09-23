@@ -7,7 +7,7 @@
 
 typedef struct _Point
 {
-	Class cls;
+	Class *super;
 
 	int x;
 	int y;

@@ -7,7 +7,7 @@
 
 typedef struct _Circle
 {
-	Class cls;
+	Class *super;
 
 	void *center;
 	int radius;

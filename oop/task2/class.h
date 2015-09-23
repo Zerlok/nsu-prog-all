@@ -21,8 +21,5 @@ void delete_object(void *ptr_obj);
 void print(void *ptr_obj);
 
 
-void draw(void *ptr);
-
-
 // __CLASS_H__
 #endif

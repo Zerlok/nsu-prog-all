@@ -6,7 +6,8 @@ CONFIG -= qt
 HEADERS += class.h factory.h \
     point.h \
     rectangle.h \
-    circle.h
+    circle.h \
+    shape.h
 SOURCES += class.c factory.c main.c \
     point.c \
     rectangle.c \

@@ -29,9 +29,9 @@ void Rectangle_drawer(void *_self)
 {
 	RectangleStruct *self = _self;
 
-	draw(self->begin);
+	print(self->begin);
 	printf(", ");
-	draw(self->end);
+	print(self->end);
 }
 
 
