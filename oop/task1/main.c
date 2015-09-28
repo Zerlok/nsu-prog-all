@@ -13,6 +13,22 @@ void integer_printor(void *ptr)
 }
 
 
+void char_printor(void *ptr)
+{
+	printf("'%c' ", (
+			(ptr != NULL) ? *((char*)ptr) : '-'
+	));
+}
+
+
+void string_printor(void *ptr)
+{
+	printf("'%s' ", (
+			(ptr != NULL) ? (char*)ptr : ""
+	));
+}
+
+
 void recordarray_printor(void *ptr)
 {
 	ra_print((RecordArray*)ptr);
@@ -44,7 +60,9 @@ int run_subtask2()
 
 	RecordArray *arr1 = ra_create(10, sizeof(int));
 	RecordArray *arr2 = ra_create(10, sizeof(int));
-	
+	RecordArray *arr3 = ra_create(5, sizeof(char));
+	RecordArray *arr4 = ra_create(5, sizeof(char*));
+
 	int a[] = {33, 44, 55, 77, -1};
 	ra_set(arr1, 0, (a + 3));
 	ra_set(arr1, 1, (a + 2));
@@ -64,15 +82,35 @@ int run_subtask2()
 	arr2->f_element_printor = integer_printor;
 	ra_print(arr2);
 
-	RecordArray *array = ra_create(2, sizeof(RecordArray));
+	ra_set(arr3, 0, "hello");
+	ra_set(arr3, 1, "privet");
+	ra_set(arr3, 2, "bonjour");
+	ra_set(arr3, 3, "hi");
+
+	arr3->f_element_printor = char_printor;
+	ra_print(arr3);
+
+	ra_set(arr4, 0, "hello");
+	ra_set(arr4, 1, "privet");
+	ra_set(arr4, 2, "bonjour");
+	ra_set(arr4, 3, "hi");
+
+	arr4->f_element_printor = string_printor;
+	ra_print(arr4);
+
+	RecordArray *array = ra_create(4, sizeof(RecordArray));
 	ra_set(array, 0, arr1);
 	ra_set(array, 1, arr2);
+	ra_set(array, 2, arr3);
+	ra_set(array, 3, arr4);
 
 	array->f_element_printor = recordarray_printor;
 	ra_print(array);
 
 	ra_delete(arr1);
 	ra_delete(arr2);
+	ra_delete(arr3);
+	ra_delete(arr4);
 	ra_delete(array);
 
 	return 0;

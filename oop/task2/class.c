@@ -25,6 +25,23 @@ void *new_object(void *_class, ...)
 }
 
 
+void initialize_object(void *ptr_obj, String *args)
+{
+	if ((ptr_obj == NULL)
+			|| (args == NULL))
+		return;
+
+	Class **cls = ptr_obj;
+
+	if (((*cls) != NULL)
+			&& ((*cls)->initializer != NULL))
+	{
+		printf("### Initializer : %p ###\n", *cls);
+		(*cls)->initializer(ptr_obj, args);
+	}
+}
+
+
 void delete_object(void *ptr_obj)
 {
 	if (ptr_obj == NULL)
@@ -32,10 +49,12 @@ void delete_object(void *ptr_obj)
 
 	Class **cls = ptr_obj;
 
-	printf("### Destructor : %p ###\n", *cls);
-	if ((cls != NULL)
+	if (((*cls) != NULL)
 			&& ((*cls)->destructor != NULL))
+	{
+		printf("### Destructor : %p ###\n", *cls);
 		(*cls)->destructor(ptr_obj);
+	}
 
 	free(ptr_obj);
 }
@@ -48,6 +67,7 @@ void print(void *ptr_obj)
 
 	Class **cls = ptr_obj;
 
-	if ((cls != NULL) && (*cls)->printor != NULL)
+	if (((*cls) != NULL)
+			&& ((*cls)->printor != NULL))
 		(*cls)->printor(ptr_obj);
 }

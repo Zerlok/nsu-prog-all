@@ -7,39 +7,32 @@
 
 RecordArray *ra_create(size_t size, size_t record_size)
 {
-	printf("Creating the array of records...\n");
-
-	if ((size < 0)
-			|| (record_size <= 0))
+	if (((int)size < 0)
+			|| ((int)record_size <= 0))
 		return NULL;
 
-	// Assigning fields.
 	RecordArray *self = (RecordArray*)malloc(sizeof(RecordArray));
 	self->m_size = size;
 	self->m_record_size = record_size;
 	self->m_data = (void*)calloc(self->m_size, self->m_record_size);
-
-	// Assigning methods.
 	self->f_element_printor = NULL;
 
 	return self;
 }
 
 
-int ra_is_valid_index(RecordArray *self, int idx)
+int ra_is_valid_index(RecordArray *self, size_t idx)
 {
-	return ((idx >= 0)
+	return (((int)idx >= 0)
 		&& (idx < self->m_size));
 }
 
 
 void *ra_get(RecordArray *self, size_t idx)
 {
-	// printf("Getting record from array...\n");
-
 	if ((self == NULL)
 			|| !ra_is_valid_index(self, idx))
-		return;
+		return NULL;
 
 	return self->m_data + (idx * (self->m_record_size));
 }
@@ -47,8 +40,6 @@ void *ra_get(RecordArray *self, size_t idx)
 
 void ra_set(RecordArray *self, size_t idx, void *record)
 {
-	// printf("Adding record into array...\n");
-
 	void *data = ra_get(self, idx);
 	if (data == NULL)
 		return;
@@ -66,8 +57,12 @@ void ra_print(RecordArray *self)
 	printf("[");
 
 	size_t i;
+	void *element;
 	for (i = 0; i < self->m_size; i++)
-		self->f_element_printor(ra_get(self, i));
+	{
+		element = ra_get(self, i);
+		self->f_element_printor(element);
+	}
 
 	printf("]\n");
 }

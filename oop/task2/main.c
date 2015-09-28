@@ -4,24 +4,47 @@
 #include "point.h"
 #include "circle.h"
 #include "rectangle.h"
+#include "factory.h"
+#include "extrastring.h"
 
 
-int main(int argc, char **argv)
+int main(void)
 {
-	void *dot = new_object(Point, 10, 11);
-	void *rect = new_object(Rectangle, 0, 0, 3, 5);
-	void *circ = new_object(Circle, 1, 1, 4);
+	FactoryStruct *factory = new_object(Factory);
 
-	print(dot);
-	printf("\n");
-	print(rect);
-	printf("\n");
-	print(circ);
+	fct_register(factory, "point", Point);
+	fct_register(factory, "circle", Circle);
+	fct_register(factory, "rectangle", Rectangle);
+
+	printf("Registered objects: ");
+	print(factory->data);
 	printf("\n");
 
-	delete_object(dot);
-	delete_object(rect);
-	delete_object(circ);
+	void *obj;
+	size_t len;
+	char *line = NULL;
+	String *args;
+
+	while (getline(&line, &len, stdin) != EOF)
+	{
+		args = str_split(line, " \n");
+		obj = fct_create(factory, args);
+
+		if (obj == NULL)
+		{
+			printf("null object\n");
+		}
+
+		printf("Created object: ");
+		print(obj);
+		printf("\n");
+
+		delete_object(obj);
+		str_delete(args);
+	}
+
+	delete_object(factory);
+	str_delete(args);
 
 	return 0;
 }

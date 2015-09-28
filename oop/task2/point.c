@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "class.h"
 #include "point.h"
@@ -10,8 +11,15 @@ void *Point_constructor(void *_self, va_list *args)
 
 	self->x = va_arg(args, int);
 	self->y = va_arg(args, int);
+}
 
-	return self;
+
+void Point_initializer(void *_self, String *args)
+{
+	PointStruct *self = _self;
+
+	self->x = atoi(str_get(args, 1));
+	self->y = atoi(str_get(args, 2));
 }
 
 
@@ -32,7 +40,8 @@ void move_to(void *ptr_obj, int nx, int ny)
 
 Class PointClass = {
 	sizeof(PointStruct),
-	Point_constructor,
+	NULL,
+	Point_initializer,
 	NULL,
 	Point_drawer
 };

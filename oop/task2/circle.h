@@ -3,6 +3,7 @@
 
 
 #include <stdarg.h>
+#include "extrastring.h"
 
 
 typedef struct _Circle
@@ -14,7 +15,7 @@ typedef struct _Circle
 } CircleStruct;
 
 
-void *Circle_constructor(void *_self, va_list *args);
+void Circle_initializer(void *_self, String *args);
 void Circle_destructor(void *_self);
 void Circle_drawer(void *_self);
 

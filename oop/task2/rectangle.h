@@ -3,6 +3,7 @@
 
 
 #include <stdarg.h>
+#include "extrastring.h"
 
 
 typedef struct _Rectangle
@@ -14,7 +15,7 @@ typedef struct _Rectangle
 } RectangleStruct;
 
 
-void *Rectangle_constructor(void *_self, va_list *args);
+void Rectangle_initializer(void *_self, String *args);
 void Rectangle_destructor(void *_self);
 void Rectangle_drawer(void *_self);
 
