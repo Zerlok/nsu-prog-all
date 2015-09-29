@@ -11,16 +11,25 @@ void *Point_constructor(void *_self, va_list *args)
 
 	self->x = va_arg(args, int);
 	self->y = va_arg(args, int);
+
+	return self;
 }
 
 
-void Point_initializer(void *_self, String *args)
+void Point_initializer(void *_self, StringArray *args)
 {
+	if ((args == NULL)
+			|| (args->m_size < 3))
+		return;
+
 	PointStruct *self = _self;
 
-	self->x = atoi(str_get(args, 1));
-	self->y = atoi(str_get(args, 2));
+	self->x = atoi(sa_get(args, 1));
+	self->y = atoi(sa_get(args, 2));
 }
+
+
+void Point_destructor(void *_self) {}
 
 
 void Point_drawer(void *_self)
@@ -40,9 +49,9 @@ void move_to(void *ptr_obj, int nx, int ny)
 
 Class PointClass = {
 	sizeof(PointStruct),
-	NULL,
+	Point_constructor,
 	Point_initializer,
-	NULL,
+	Point_destructor,
 	Point_drawer
 };
 

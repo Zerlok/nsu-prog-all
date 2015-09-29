@@ -8,7 +8,6 @@ typedef struct _RecordArray {
 	void *m_data;
 
 	void (*f_element_printor)(void *ptr);
-//	void (*f_data_deleter)(void *ptr);
 } RecordArray;
 
 

@@ -23,7 +23,7 @@ int main(void)
 	void *obj;
 	size_t len;
 	char *line = NULL;
-	String *args;
+	StringArray *args;
 
 	while (getline(&line, &len, stdin) != EOF)
 	{
@@ -32,19 +32,18 @@ int main(void)
 
 		if (obj == NULL)
 		{
-			printf("null object\n");
+			printf("null\n");
+			continue;
 		}
 
-		printf("Created object: ");
 		print(obj);
 		printf("\n");
 
 		delete_object(obj);
-		str_delete(args);
+		sa_delete(args);
 	}
 
 	delete_object(factory);
-	str_delete(args);
 
 	return 0;
 }

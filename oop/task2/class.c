@@ -17,7 +17,7 @@ void *new_object(void *_class, ...)
 	va_list args;
 	va_start(args, _class);
 
-	printf("### Constructor : %p ###\n", cls);
+	printf("+++ Constructor : %p +++\n", cls);
 	ptr_obj = cls->constructor(ptr_obj, &args);
 
 	va_end(args);
@@ -25,7 +25,7 @@ void *new_object(void *_class, ...)
 }
 
 
-void initialize_object(void *ptr_obj, String *args)
+void initialize_object(void *ptr_obj, StringArray *args)
 {
 	if ((ptr_obj == NULL)
 			|| (args == NULL))
@@ -36,7 +36,7 @@ void initialize_object(void *ptr_obj, String *args)
 	if (((*cls) != NULL)
 			&& ((*cls)->initializer != NULL))
 	{
-		printf("### Initializer : %p ###\n", *cls);
+		printf("*** Initializer : %p ***\n", *cls);
 		(*cls)->initializer(ptr_obj, args);
 	}
 }
@@ -52,7 +52,7 @@ void delete_object(void *ptr_obj)
 	if (((*cls) != NULL)
 			&& ((*cls)->destructor != NULL))
 	{
-		printf("### Destructor : %p ###\n", *cls);
+		printf("--- Destructor : %p ---\n", *cls);
 		(*cls)->destructor(ptr_obj);
 	}
 

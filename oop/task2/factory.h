@@ -25,7 +25,7 @@ int Factory_registrator(void *_self, char *classname, Class *cls);
 void *Factory_creator(void *_self, char *classname);
 
 int fct_register(void *_self, char *key, Class *cls);
-void *fct_create(void *_self, String *args);
+void *fct_create(void *_self, StringArray *args);
 
 
 extern void *Factory;

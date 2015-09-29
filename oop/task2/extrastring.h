@@ -6,16 +6,18 @@
 #include "../task1/recordarray.h"
 
 
-typedef RecordArray String;
-
-void (*str_print)(RecordArray *strings);
-void (*str_delete)(RecordArray *strings);
-
-char *str_get(String *strings, size_t idx);
+typedef RecordArray StringArray;
 
 
-int str_count(char *string, char chr);
-String *str_split(char *string, char *chr);
+void (*sa_print)(StringArray *strings);
+void (*sa_delete)(StringArray *strings);
+
+StringArray *sa_create(size_t size);
+void sa_set(StringArray *strings, size_t idx, char *string);
+char *sa_get(StringArray *strings, size_t idx);
+
+
+StringArray *str_split(char *string, char *chr);
 
 
 //__EXTRASTRING_H__

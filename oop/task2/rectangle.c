@@ -6,12 +6,17 @@
 #include "rectangle.h"
 
 
-void Rectangle_initializer(void *_self, String *args)
+void Rectangle_initializer(void *_self, StringArray *args)
 {
+	if ((args == NULL)
+			|| (args->m_size < 5))
+		return;
+
 	RectangleStruct *self = _self;
 
-	self->begin = new_object(Point, atoi(str_get(args, 1)), atoi(str_get(args, 2)));
-	self->end = new_object(Point, atoi(str_get(args, 3)), atoi(str_get(args, 4)));
+	sa_print(args);
+	self->begin = new_object(Point, atoi(sa_get(args, 1)), atoi(sa_get(args, 2)));
+	self->end = new_object(Point, atoi(sa_get(args, 3)), atoi(sa_get(args, 4)));
 }
 
 

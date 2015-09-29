@@ -6,12 +6,16 @@
 #include "circle.h"
 
 
-void Circle_initializer(void *_self, String *args)
+void Circle_initializer(void *_self, StringArray *args)
 {
+	if ((args == NULL)
+			|| (args->m_size < 4))
+		return;
+
 	CircleStruct *self = _self;
 
-	self->center = new_object(Point, atoi(str_get(args, 1)), atoi(str_get(args, 2)));
-	self->radius = atoi(str_get(args, 3));
+	self->center = new_object(Point, atoi(sa_get(args, 1)), atoi(sa_get(args, 2)));
+	self->radius = atoi(sa_get(args, 3));
 }
 
 

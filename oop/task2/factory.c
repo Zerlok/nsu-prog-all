@@ -56,18 +56,14 @@ int fct_register(void *_self, char *classname, Class *cls)
 }
 
 
-void *fct_create(void *_self, String *args)
+void *fct_create(void *_self, StringArray *args)
 {
 	if (args == NULL)
 		return NULL;
 
 	FactoryStruct *fct = _self;
-	char *classname = ra_get(args, 0);
+	char *classname = sa_get(args, 0);
 	void *obj = fct->creator(_self, classname);
-
-	if (obj == NULL)
-		str_print(args);
-
 	initialize_object(obj, args);
 
 	return obj;

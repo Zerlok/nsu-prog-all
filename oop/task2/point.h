@@ -16,7 +16,8 @@ typedef struct _Point
 
 
 void *Point_constructor(void *_self, va_list *args);
-void Point_initializer(void *_self, String *args);
+void Point_destructor(void *_self);
+void Point_initializer(void *_self, StringArray *args);
 void Point_drawer(void *_self);
 
 void move_to(void *ptr_obj, int nx, int ny);
