@@ -6,22 +6,35 @@
 #include "rectangle.h"
 
 
-void Rectangle_initializer(void *_self, StringArray *args)
+void *Rectangle_constructor(void *_self, va_list *args)
 {
-	if ((args == NULL)
-			|| (args->m_size < 5))
+	printf("+++ Rectangle constructor : %p +++\n", _self);
+
+	RectangleStruct *self = _self;
+	self->begin = NULL;
+	self->end = NULL;
+
+	return self;
+}
+
+
+void Rectangle_initializer(void *_self, int argn, char **args)
+{
+	if ((argn < 4)
+			|| (args == NULL))
 		return;
 
 	RectangleStruct *self = _self;
 
-	sa_print(args);
-	self->begin = new_object(Point, atoi(sa_get(args, 1)), atoi(sa_get(args, 2)));
-	self->end = new_object(Point, atoi(sa_get(args, 3)), atoi(sa_get(args, 4)));
+	self->begin = new_object(Point, atoi(args[0]), atoi(args[1]));
+	self->end = new_object(Point, atoi(args[2]), atoi(args[3]));
 }
 
 
 void Rectangle_destructor(void *_self)
 {
+	printf("--- Rectangle destructor: %p ---\n", _self);
+
 	RectangleStruct *self = _self;
 
 	delete_object(self->begin);
@@ -41,7 +54,7 @@ void Rectangle_drawer(void *_self)
 
 Class RectangleClass = {
 	sizeof(RectangleStruct),
-	NULL,
+	Rectangle_constructor,
 	Rectangle_initializer,
 	Rectangle_destructor,
 	Rectangle_drawer

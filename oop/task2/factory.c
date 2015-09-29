@@ -4,12 +4,13 @@
 
 #include "class.h"
 #include "list.h"
-#include "extrastring.h"
 #include "factory.h"
 
 
 void *Factory_constructor(void *_self, va_list *args)
 {
+	printf("+++ Factory Constructor : %p +++\n", _self);
+
 	FactoryStruct *self = _self;
 	self->data = new_object(List, NULL, NULL);
 
@@ -22,6 +23,8 @@ void *Factory_constructor(void *_self, va_list *args)
 
 void Factory_destructor(void *_self)
 {
+	printf("--- Factory destructor: %p ---\n", _self);
+
 	FactoryStruct *self = _self;
 	delete_object(self->data);
 }
@@ -56,15 +59,14 @@ int fct_register(void *_self, char *classname, Class *cls)
 }
 
 
-void *fct_create(void *_self, StringArray *args)
+void *fct_create(void *_self, int argn, char **args)
 {
 	if (args == NULL)
 		return NULL;
 
 	FactoryStruct *fct = _self;
-	char *classname = sa_get(args, 0);
-	void *obj = fct->creator(_self, classname);
-	initialize_object(obj, args);
+	void *obj = fct->creator(_self, args[0]);
+	initialize_object(obj, argn-1, (args+1));
 
 	return obj;
 }

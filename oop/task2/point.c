@@ -7,6 +7,8 @@
 
 void *Point_constructor(void *_self, va_list *args)
 {
+	printf("+++ Point constructor: %p +++\n", _self);
+
 	PointStruct *self = _self;
 
 	self->x = va_arg(args, int);
@@ -16,20 +18,23 @@ void *Point_constructor(void *_self, va_list *args)
 }
 
 
-void Point_initializer(void *_self, StringArray *args)
+void Point_initializer(void *_self, int argn, char **args)
 {
-	if ((args == NULL)
-			|| (args->m_size < 3))
+	if ((argn < 2)
+			|| (args == NULL))
 		return;
 
 	PointStruct *self = _self;
 
-	self->x = atoi(sa_get(args, 1));
-	self->y = atoi(sa_get(args, 2));
+	self->x = atoi(args[0]);
+	self->y = atoi(args[1]);
 }
 
 
-void Point_destructor(void *_self) {}
+void Point_destructor(void *_self)
+{
+	printf("--- Point destructor: %p ---\n", _self);
+}
 
 
 void Point_drawer(void *_self)

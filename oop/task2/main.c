@@ -8,27 +8,22 @@
 #include "extrastring.h"
 
 
-int main(void)
+void run_from_file(FactoryStruct *factory, FILE *input)
 {
-	FactoryStruct *factory = new_object(Factory);
-
-	fct_register(factory, "point", Point);
-	fct_register(factory, "circle", Circle);
-	fct_register(factory, "rectangle", Rectangle);
-
-	printf("Registered objects: ");
-	print(factory->data);
-	printf("\n");
-
 	void *obj;
 	size_t len;
 	char *line = NULL;
-	StringArray *args;
+	int argn;
+	char **args;
 
-	while (getline(&line, &len, stdin) != EOF)
+	while (getline(&line, &len, input) != EOF)
 	{
-		args = str_split(line, " \n");
-		obj = fct_create(factory, args);
+		if (line[0] == '\n')
+			continue;
+
+		argn = count_chars(line, ' ') + 1;
+		args = str_to_args(line);
+		obj = fct_create(factory, argn, args);
 
 		if (obj == NULL)
 		{
@@ -40,10 +35,33 @@ int main(void)
 		printf("\n");
 
 		delete_object(obj);
-		sa_delete(args);
+		delete_args(argn, args);
+	}
+}
+
+
+int main(int argc, char **argv)
+{
+	FactoryStruct *factory = new_object(Factory);
+
+	fct_register(factory, "point", Point);
+	fct_register(factory, "circle", Circle);
+	fct_register(factory, "rectangle", Rectangle);
+
+	if (argc < 2)
+	{
+		printf("Registered objects: ");
+		print(factory->data);
+		printf("\n");
+		run_from_file(factory, stdin);
+	}
+	else
+	{
+		FILE *input = fopen(argv[1], "r");
+		run_from_file(factory, input);
+		fclose(input);
 	}
 
 	delete_object(factory);
-
 	return 0;
 }

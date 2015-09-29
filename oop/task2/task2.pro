@@ -9,12 +9,13 @@ HEADERS += class.h factory.h \
     circle.h \
 	shape.h \
 	list.h \
-	../task1/recordarray.h \
-    extrastring.h
+	extrastring.h
 SOURCES += class.c factory.c main.c \
     point.c \
     rectangle.c \
 	circle.c \
 	list.c \
-	../task1/recordarray.c \
-    extrastring.c
+	extrastring.c
+
+OTHER_FILES += \
+    ../build/task2/input.txt
