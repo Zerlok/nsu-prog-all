@@ -5,7 +5,8 @@
 #include <string>
 
 
-enum Direction {
+enum Direction
+{
 	vertical,
 	horizontal
 };

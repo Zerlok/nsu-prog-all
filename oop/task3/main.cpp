@@ -5,10 +5,12 @@
 
 int main(int argc, char **argv)
 {
-	// parse input argv.
+	// TODO: parse input argv.
 
-	Date dt(2015, 9, 30);
-	std::cout << dt << std::endl;
+	Date date1(2015, 9, 30);
+	Date date2(1995, 3, 1);
+
+	std::cout << date1 << " - " << date2 << " = " << date1 - date2 << std::endl;
 
 	return 0;
 }
