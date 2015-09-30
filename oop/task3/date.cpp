@@ -1,4 +1,6 @@
 #include <time.h>
+#include <stdexcept>
+#include <sstream>
 
 #include "date.h"
 
@@ -17,13 +19,38 @@ Date::Date()
 Date::Date(int year, int month, int day)
 	: _year(year), _month(month), _day(day)
 {
-
+	if (!is_valid())
+	{
+		std::ostringstream sstream;
+		sstream << "Invalid date: " << (*this);
+		throw std::invalid_argument(sstream.str());
+	}
 }
 
 
 Date::~Date()
 {
 
+}
+
+
+Date &Date::operator++(int)
+{
+	++_day;
+
+	if (is_valid())
+		return (*this);
+
+	_day = 1;
+	++_month;
+
+	if (is_valid())
+		return (*this);
+
+	_month = 1;
+	++_year;
+
+	return (*this);
 }
 
 
@@ -64,5 +91,32 @@ bool Date::is_leap_year() const
 	return (((_year % 4 == 0)
 				&& (_year % 100 != 0))
 			|| (_year % 400 == 0)
+	);
+}
+
+
+int Date::get_weekday_num() const
+{
+	return (count_days() % 7) + 1;
+}
+
+
+const std::string &Date::get_weekday() const
+{
+	return WEEK_DAYS[get_weekday_num() - 1];
+}
+
+
+bool Date::is_valid() const
+{
+	return ((_day > 0)
+			&& (_month > 0)
+			&& (_month <= 12)
+			&& ((_day <= DAYS_IN_MONTH[_month-1])
+				|| ((_month == 2)
+					&& is_leap_year()
+					&& (_day <= DAYS_IN_MONTH[1] + 1)
+				)
+			)
 	);
 }
