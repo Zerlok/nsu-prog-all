@@ -28,6 +28,8 @@ void delete_args(int argn, char **args)
 	int i;
 	for (i = argn-1; i >= 0; i--)
 		free(args[i]);
+
+	free(args);
 }
 
 

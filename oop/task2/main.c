@@ -37,6 +37,8 @@ void run_from_file(FactoryStruct *factory, FILE *input)
 		delete_object(obj);
 		delete_args(argn, args);
 	}
+
+	free(line);
 }
 
 
