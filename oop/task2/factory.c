@@ -9,8 +9,6 @@
 
 void *Factory_constructor(void *_self, va_list *args)
 {
-	printf("+++ Factory Constructor : %p +++\n", _self);
-
 	FactoryStruct *self = _self;
 	self->data = new_object(List, NULL, NULL);
 
@@ -23,8 +21,6 @@ void *Factory_constructor(void *_self, va_list *args)
 
 void Factory_destructor(void *_self)
 {
-	printf("--- Factory destructor: %p ---\n", _self);
-
 	FactoryStruct *self = _self;
 	delete_object(self->data);
 }

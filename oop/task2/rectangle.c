@@ -8,8 +8,6 @@
 
 void *Rectangle_constructor(void *_self, va_list *args)
 {
-	printf("+++ Rectangle constructor : %p +++\n", _self);
-
 	RectangleStruct *self = _self;
 	self->begin = NULL;
 	self->end = NULL;
@@ -33,8 +31,6 @@ void Rectangle_initializer(void *_self, int argn, char **args)
 
 void Rectangle_destructor(void *_self)
 {
-	printf("--- Rectangle destructor: %p ---\n", _self);
-
 	RectangleStruct *self = _self;
 
 	delete_object(self->begin);

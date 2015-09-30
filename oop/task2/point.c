@@ -7,8 +7,6 @@
 
 void *Point_constructor(void *_self, va_list *args)
 {
-	printf("+++ Point constructor: %p +++\n", _self);
-
 	PointStruct *self = _self;
 
 	self->x = va_arg(args, int);
@@ -31,10 +29,7 @@ void Point_initializer(void *_self, int argn, char **args)
 }
 
 
-void Point_destructor(void *_self)
-{
-	printf("--- Point destructor: %p ---\n", _self);
-}
+void Point_destructor(void *_self) {}
 
 
 void Point_drawer(void *_self)

@@ -8,8 +8,6 @@
 
 void *Circle_constructor(void *_self, va_list *args)
 {
-	printf("+++ Circle Constructor : %p +++\n", _self);
-
 	CircleStruct *self = _self;
 	self->center = NULL;
 	self->radius = 0;
@@ -33,8 +31,6 @@ void Circle_initializer(void *_self, int argn, char **args)
 
 void Circle_destructor(void *_self)
 {
-	printf("--- Circle destructor : %p ---\n", _self);
-
 	CircleStruct *self = _self;
 	delete_object(self->center);
 }

@@ -8,8 +8,6 @@
 
 void *List_constructor(void *_self, va_list *args)
 {
-	printf("+++ List constructor: %p +++\n", _self);
-
 	ListStruct *self = _self;
 
 	self->key = va_arg(args, char*);
@@ -25,8 +23,6 @@ void *List_constructor(void *_self, va_list *args)
 
 void List_destructor(void *_self)
 {
-	printf("--- List destructor: %p ---\n", _self);
-
 	ListStruct *lst = _self;
 	delete_object(lst->next);
 }
