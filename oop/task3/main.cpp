@@ -15,6 +15,31 @@ int main(int argc, char **argv)
 	std::cout << date1.get_weekday() << std::endl;
 	std::cout << date1++ << std::endl;
 
+	date1.add_week();
+	std::cout << date1 << std::endl;
+
+	date1.add_week();
+	std::cout << date1 << std::endl;
+
+	date1.add_week();
+	std::cout << date1 << std::endl;
+
+	date1.add_week();
+	std::cout << date1 << std::endl;
+
+	date1.add_week();
+	std::cout << date1 << std::endl;
+
+	date1.add_month();
+	std::cout << date1 << std::endl;
+
+	date1.add_month();
+	std::cout << date1 << std::endl;
+
+	date2 = date1 - 5;
+	date1.add_week();
+	std::cout << date1 - date2 << std::endl;
+
 	return 0;
 }
 

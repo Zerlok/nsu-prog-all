@@ -5,8 +5,16 @@
 #include <iostream>
 
 
-static const int DAYS_IN_MONTH[12] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
-static const std::string WEEK_DAYS[7] = {"Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"};
+static const int DAYS_IN_MONTH[12] = {
+	31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31
+};
+static const std::string MONTHS[12] = {
+	"January", "February", "Marh", "April", "May", "June", "July", "August",
+	"September", "October", "November", "December"
+};
+static const std::string WEEK_DAYS[7] = {
+	"Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"
+};
 
 
 class Date
@@ -17,6 +25,10 @@ class Date
 		~Date();
 
 		Date &operator++(int);
+		Date &operator--(int);
+
+		friend Date &operator+(const Date &date, int days);
+		friend Date &operator-(const Date &date, int days);
 		friend long long int operator-(const Date &date1, const Date &date2);
 		friend std::ostream &operator<<(std::ostream& out, const Date& date);
 
@@ -29,14 +41,24 @@ class Date
 		const std::string &get_weekday() const;
 		bool is_leap_year() const;
 
+		void add_week();
+		void add_month();
+		void sub_week();
+		void sub_month();
+
 	private:
 		int _year;
 		int _month;
 		int _day;
 
 		bool is_valid() const;
+		void validate();
+
+		int get_days_in_month(int diff = 0) const;
 };
 
+Date &operator+(const Date &date, int days);
+Date &operator-(const Date &date, int days);
 long long int operator-(const Date &date1, const Date &date2);
 std::ostream& operator<<(std::ostream &out, const Date &date);
 

@@ -3,6 +3,7 @@
 
 
 #include <string>
+#include "date.h"
 
 
 enum Direction
@@ -17,6 +18,9 @@ class CalendarFormat
 	public:
 		CalendarFormat(std::string &str_format);
 		CalendarFormat(const CalendarFormat &format);
+		~CalendarFormat();
+
+		std::ostream &view(std::ostream &out, const Date &date);
 
 	private:
 		Direction _direction;

@@ -38,19 +38,43 @@ Date &Date::operator++(int)
 {
 	++_day;
 
-	if (is_valid())
+	if (_day <= get_days_in_month())
 		return (*this);
 
-	_day = 1;
-	++_month;
-
-	if (is_valid())
-		return (*this);
-
-	_month = 1;
-	++_year;
-
+	add_month();
 	return (*this);
+}
+
+
+Date &Date::operator--(int)
+{
+	--_day;
+
+	if (_day > 0)
+		return (*this);
+
+	sub_month();
+	return (*this);
+}
+
+
+Date &operator+(Date &date, int days)
+{
+	Date d(date);
+	for (int i = 0; i < days; i++)
+		d++;
+
+	return d;
+}
+
+
+Date &operator-(const Date &date, int days)
+{
+	Date d(date);
+	for (int i = 0; i < days; i++)
+		d--;
+
+	return d;
 }
 
 
@@ -72,14 +96,8 @@ long long int Date::count_days() const
 	int year = _year - 1;
 	long long int total = (year * 365) + (year / 4) - (year / 100) + (year / 400);
 
-	for (int i = _month-1; i > 0; i--)
-	{
-		total += DAYS_IN_MONTH[i-1];
-
-		if ((i == 2)
-				&& (is_leap_year()))
-			total += 1;
-	}
+	for (int i = 1; i < _month; i++)
+		total += get_days_in_month(-i);
 
 	total += (_day - 1);
 	return total;
@@ -97,26 +115,82 @@ bool Date::is_leap_year() const
 
 int Date::get_weekday_num() const
 {
-	return (count_days() % 7) + 1;
+	return count_days() % 7;
 }
 
 
 const std::string &Date::get_weekday() const
 {
-	return WEEK_DAYS[get_weekday_num() - 1];
+	return WEEK_DAYS[get_weekday_num()];
+}
+
+
+void Date::add_week()
+{
+	int max_day = get_days_in_month();
+	_day += 7;
+
+	if (_day <= max_day)
+		return;
+
+	_day -= max_day;
+	add_month();
+}
+
+
+void Date::add_month()
+{
+	++_month;
+
+	if (_month <= 12)
+		return;
+
+	_month = 1;
+	++_year;
+}
+
+
+void Date::sub_week()
+{
+	_day -= 7;
+
+	if (_day > 0)
+		return;
+
+	_day += get_days_in_month(-1);
+	sub_month();
+}
+
+
+void Date::sub_month()
+{
+	--_month;
+
+	if (_month > 0)
+		return;
+
+	_month = 12;
+	--_year;
 }
 
 
 bool Date::is_valid() const
 {
 	return ((_day > 0)
+			&& (_day <= get_days_in_month())
 			&& (_month > 0)
 			&& (_month <= 12)
-			&& ((_day <= DAYS_IN_MONTH[_month-1])
-				|| ((_month == 2)
-					&& is_leap_year()
-					&& (_day <= DAYS_IN_MONTH[1] + 1)
-				)
-			)
 	);
+}
+
+
+int Date::get_days_in_month(int diff) const
+{
+	int month = (_month + diff) % 12;
+
+	if ((month == 2)
+			&& (is_leap_year()))
+		return DAYS_IN_MONTH[month-1] + 1;
+
+	return DAYS_IN_MONTH[month-1];
 }
