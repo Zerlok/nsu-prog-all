@@ -236,23 +236,74 @@ TEST(Date, MinusOperator)
 
 TEST(Week, Init)
 {
-	Date d1(1, 1, 1);
-	Date d2(1, 2, 1);
-	Date d3(1, 1, 8);
+	const int len = 5;
+	Date d[len] = {
+		Date(1, 1, 1),
+		Date(1, 2, 1),
+		Date(1, 1, 8),
+		Date(1, 1, 2),
+		Date(1, 2, 7)
+	};
 
 	ASSERT_NO_THROW({
-		Week w1(d1);
-		Week w2(d2);
-		Week w3(d3);
+		for (int i = 0; i < len; i++)
+			Week(d[i]);
 	});
+}
 
-	Date inv1(1, 1, 2);
-	Date inv2(1, 2, 2);
-	Date inv3(1, 1, 7);
 
-	ASSERT_THROW({ Week w(inv1); }, std::invalid_argument);
-	ASSERT_THROW({ Week w(inv2); }, std::invalid_argument);
-	ASSERT_THROW({ Week w(inv3); }, std::invalid_argument);
+TEST(Week, ComparingOperators)
+{
+	const int len = 8;
+	Date b[len] = {
+		Date(1, 1, 1),		// 0
+		Date(1, 1, 8),		// 1
+		Date(1, 1, 29),		// 2
+		Date(1, 2, 1),		// 3
+		Date(1, 2, 4),		// 4
+		Date(1, 2, 5),		// 5
+		Date(1, 12, 30),	// 6
+		Date(2, 1, 2)		// 7
+	};
+
+	Week w0(b[0]);
+	Week w1(b[1]);
+	Week w2(b[2]);
+	Week w3(b[3]);
+	Week w4(b[4]);
+	Week w5(b[5]);
+	Week w6(b[6]);
+	Week w7(b[7]);
+
+	Week w00 = w0;
+	Week w000 = Week(b[0]);
+	Week w0000 = Week(b[0] + 4);
+
+	EXPECT_EQ(w0, w00);
+	EXPECT_EQ(w0, w000);
+	EXPECT_EQ(w00, w000);
+	EXPECT_EQ(w0, w0000);
+	EXPECT_NE(w0, w1);
+
+	EXPECT_GT(w1, w0);
+	EXPECT_GT(w2, w0);
+	EXPECT_LT(w0, w3);
+	EXPECT_LT(w2, w3);
+
+	EXPECT_EQ(w3, w4);
+	EXPECT_GT(w5, w4);
+	EXPECT_LT(w3, w5);
+	EXPECT_GT(w7, w6);
+}
+
+
+TEST(Week, IncrementOperator)
+{
+}
+
+
+TEST(Week, DecrementOperator)
+{
 }
 
 

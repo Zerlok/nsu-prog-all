@@ -30,8 +30,8 @@ class Date
 		Date &operator=(const Date &date);
 		Date &operator++(int);
 		Date &operator--(int);
-		Date &operator+(int days) const;
-		Date &operator-(int days) const;
+		Date operator+(int days) const;
+		Date operator-(int days) const;
 
 		friend bool operator==(const Date &date1, const Date &date2) { return (date1._days_num == date2._days_num); }
 		friend bool operator!=(const Date &date1, const Date &date2) { return (date1._days_num != date2._days_num); }

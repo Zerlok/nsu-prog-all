@@ -96,23 +96,23 @@ Date &Date::operator--(int)
 }
 
 
-Date &Date::operator+(int days) const
+Date Date::operator+(int days) const
 {
-	Date *d = new Date(*this);
+	Date d = Date(*this);
 	for (int i = 0; i < days; i++)
-		(*d)++;
+		d++;
 
-	return (*d);
+	return d;
 }
 
 
-Date &Date::operator-(int days) const
+Date Date::operator-(int days) const
 {
-	Date *d = new Date(*this);
+	Date d = Date(*this);
 	for (int i = 0; i < days; i++)
-		(*d)--;
+		d--;
 
-	return (*d);
+	return d;
 }
 
 

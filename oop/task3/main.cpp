@@ -1,6 +1,7 @@
 #include <iostream>
 
 #include "date.h"
+#include "week.h"
 #include "calendar.h"
 
 
@@ -12,6 +13,8 @@ int main(int argc, char **argv)
 	Date today;
 
 	std::cout << today << " - " << birthday << " = " << today - birthday << std::endl;
+
+	std::cout << Week(today) << std::endl;
 
 	return 0;
 }
