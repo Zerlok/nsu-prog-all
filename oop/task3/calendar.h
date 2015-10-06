@@ -6,31 +6,30 @@
 #include <iomanip>
 
 #include "date.h"
-#include "calendarformat.h"
+
+
+enum Direction
+{
+	vertical,
+	horizontal
+};
 
 
 class Calendar
 {
 	public:
-		Calendar(
-				const Date& begin,
-				const Date& end,
-				const CalendarFormat& format
-		);
-		Calendar(
-				const int year,
-				const CalendarFormat &format
-		);
+		// Constructors / Destructor.
+		Calendar(const Date& begin, const Date& end);
+		Calendar(const int year);
 		~Calendar();
 
+		// Operators.
 		friend std::ostream &operator<<(std::ostream &out, const Calendar &cal);
 
-		void set_format(const CalendarFormat& format);
-
 	private:
+		// Fields.
 		Date _begin;
 		Date _end;
-		CalendarFormat _format;
 };
 
 std::ostream &operator<<(std::ostream &out, const Calendar &cal);

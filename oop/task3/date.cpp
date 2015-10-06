@@ -1,6 +1,7 @@
 #include <time.h>
-#include <stdexcept>
+#include <iomanip>
 #include <sstream>
+#include <stdexcept>
 
 #include "date.h"
 
@@ -13,6 +14,7 @@ Date::Date()
 	_year = today->tm_year + 1900;
 	_month = today->tm_mon + 1;
 	_day = today->tm_mday;
+
 	_days_num = count_days();
 }
 
@@ -63,7 +65,13 @@ Date &Date::operator++(int)
 		return (*this);
 
 	_day = 1;
-	add_month();
+	++_month;
+
+	if (_month <= 12)
+		return (*this);
+
+	_month = 1;
+	++_year;
 	return (*this);
 }
 
@@ -88,9 +96,9 @@ Date &Date::operator--(int)
 }
 
 
-Date &operator+(Date &date, int days)
+Date &Date::operator+(int days) const
 {
-	Date *d = new Date(date);
+	Date *d = new Date(*this);
 	for (int i = 0; i < days; i++)
 		(*d)++;
 
@@ -98,9 +106,9 @@ Date &operator+(Date &date, int days)
 }
 
 
-Date &operator-(const Date &date, int days)
+Date &Date::operator-(int days) const
 {
-	Date *d = new Date(date);
+	Date *d = new Date(*this);
 	for (int i = 0; i < days; i++)
 		(*d)--;
 
@@ -116,7 +124,10 @@ long long int operator-(const Date &date1, const Date &date2)
 
 std::ostream &operator<<(std::ostream &out, const Date &date)
 {
-	out << date._day << "." << date._month << "." << date._year;
+	out << std::setfill('0')
+		<< std::setw(2) << date._day << "."
+		<< std::setw(2) << date._month << "."
+		<< std::setw(4) << date._year;
 	return out;
 }
 
@@ -127,83 +138,6 @@ bool Date::is_leap_year() const
 				&& (_year % 100 != 0))
 			|| (_year % 400 == 0)
 	);
-}
-
-
-void Date::add_week()
-{
-	_days_num += 7;
-
-	int max_day = get_days_in_month();
-	_day += 7;
-
-	if (_day <= max_day)
-		return;
-
-	_day -= max_day;
-	++_month;
-
-	if (_month <= 12)
-		return;
-
-	_month = 1;
-	++_year;
-}
-
-
-void Date::add_month()
-{
-	_days_num += get_days_in_month();
-	++_month;
-
-	if (_month <= 12)
-		return;
-
-	_month = 1;
-	++_year;
-}
-
-
-void Date::sub_week()
-{
-	_days_num -= 7;
-	_day -= 7;
-
-	if (_day > 0)
-		return;
-
-	_day += get_days_in_month(-1);
-	--_month;
-
-	if (_month > 0)
-		return;
-
-	_month = 12;
-	--_year;
-}
-
-
-void Date::sub_month()
-{
-	//   Feb     |			  Mar          |    Apr
-	//         .---<------<-------,--,--,
-	// ... 27 28 | 01 02 ... 28 (29 30 31) | 01 ...
-	//      ^----------------^
-	int month_max_days = get_days_in_month(-1);
-	_days_num -= month_max_days;
-	--_month;
-
-	if (_month > 0)
-		return;
-
-	_month = 12;
-	--_year;
-
-	if (_day > month_max_days)
-	{
-		_days_num -= (_day - month_max_days);
-		_day = month_max_days;
-	}
 }
 
 
@@ -232,7 +166,7 @@ long long int Date::count_days() const
 
 int Date::get_days_in_month(int diff) const
 {
-	int i = (_month-1 + diff) % 12;
+	int i = (11 + _month + diff) % 12;
 
 	if ((i == 1)
 			&& (is_leap_year()))
