@@ -16,7 +16,7 @@ enum Direction
 class CalendarFormat
 {
 	public:
-		CalendarFormat(std::string &str_format);
+		CalendarFormat(const std::string &str_format);
 		CalendarFormat(const CalendarFormat &format);
 		~CalendarFormat();
 

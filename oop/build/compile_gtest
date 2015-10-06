@@ -1,0 +1,12 @@
+#!/bin/bash
+
+arr=(*.o)
+sources=()
+
+for f in "${arr[@]}"; do
+	if [ "$f" != "main.o" ]; then
+		sources+=($f)
+	fi
+done
+
+g++ $1 "${sources[@]}" -o gtest -lgtest -lpthread

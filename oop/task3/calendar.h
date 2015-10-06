@@ -3,6 +3,7 @@
 
 
 #include <iostream>
+#include <iomanip>
 
 #include "date.h"
 #include "calendarformat.h"
@@ -11,10 +12,6 @@
 class Calendar
 {
 	public:
-		Calendar(
-				const Date &begin,
-				const CalendarFormat &format
-		);
 		Calendar(
 				const Date& begin,
 				const Date& end,
@@ -26,7 +23,7 @@ class Calendar
 		);
 		~Calendar();
 
-		friend std::ostream& operator<<(std::iostream& out, Calendar& cal);
+		friend std::ostream &operator<<(std::ostream &out, const Calendar &cal);
 
 		void set_format(const CalendarFormat& format);
 
@@ -36,7 +33,7 @@ class Calendar
 		CalendarFormat _format;
 };
 
-std::ostream& operator<<(std::iostream& out, Calendar& cal);
+std::ostream &operator<<(std::ostream &out, const Calendar &cal);
 
 
 // __CALENDAR_H__

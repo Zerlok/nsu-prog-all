@@ -2,7 +2,7 @@
 #include "calendarformat.h"
 
 
-CalendarFormat::CalendarFormat(std::string &str_format)
+CalendarFormat::CalendarFormat(const std::string &str_format)
 {
 	_direction = vertical;
 	_print_year_once = true;
