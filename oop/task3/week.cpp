@@ -5,10 +5,7 @@
 #include "week.h"
 
 
-int Week::day_width = 4;
-
-
-std::ostream &Week::weekday_names(std::ostream &out)
+std::ostream &Week::header(std::ostream &out)
 {
 	for (int i = 0; i < 7; i++)
 		out << std::setfill(' ') << std::setw(Week::day_width)
@@ -108,7 +105,7 @@ Week &Week::operator++(int)
 	_begin = _end + 1;
 	_end = _begin + (6 - _begin.get_weekday());
 
-	while (_end.get_month() > _begin.get_month())
+	while (_end.get_month() != _begin.get_month())
 		_end--;
 
 	return (*this);

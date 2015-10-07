@@ -3,6 +3,7 @@
 
 #include "date.h"
 #include "week.h"
+#include "month.h"
 #include "calendar.h"
 
 
@@ -25,6 +26,31 @@ bool compare_week_begin_end(const Week &week, const Date &begin, const Date &end
 		return true;
 
 	std::cout << week << " : expected b(" << begin << ") e(" << end << ")" << std::endl;
+	return false;
+}
+
+
+bool compare_weeks(const Week &w1, const Week &w2)
+{
+	if ((w1.get_begin() == w2.get_begin())
+			&& (w1.get_end() == w2.get_end()))
+		return true;
+
+	std::cout << "[Weeks !=] ("
+			  << w1.get_begin() << ", " << w1.get_end() << ") : ("
+			  << w2.get_begin() << ", " << w2.get_end() << ")"
+			  << std::endl;
+	return false;
+}
+
+
+bool compare_month_begin_end(const Month &month, const Date &begin, const Date &end)
+{
+	if ((month.get_begin() == begin)
+			&& (month.get_end() == end))
+		return true;
+
+	std::cout << month << " : expected b(" << begin << ") e(" << end << ")" << std::endl;
 	return false;
 }
 
@@ -98,7 +124,7 @@ TEST(Date, DaysCounting)
 }
 
 
-TEST(Date, ComparingOperators)
+TEST(Date, CompareOperators)
 {
 	Date d1(1, 1, 1);
 	Date d10 = d1;
@@ -283,11 +309,11 @@ TEST(Week, Init)
 	};
 
 	for (int i = 0; i < len; i++)
-		EXPECT_TRUE(compare_week_begin_end(Week(c[i]), b[i], e[i]));
+		ASSERT_TRUE(compare_week_begin_end(Week(c[i]), b[i], e[i]));
 }
 
 
-TEST(Week, ComparingOperators)
+TEST(Week, CompareOperators)
 {
 	const int len = 8;
 	Date c[len] = {
@@ -322,27 +348,29 @@ TEST(Week, ComparingOperators)
 
 TEST(Week, IncrementOperator)
 {
-	const int len = 5;
+	const int len = 6;
 	Week a[len] = {
 		Week(Date(1, 1, 1)),
 		Week(Date(1, 1, 30)),
 		Week(Date(1, 2, 28)),
 		Week(Date(1, 12, 31)),
-		Week(Date(1999, 12, 31))
+		Week(Date(1999, 12, 31)),
+		Week(Date(2015, 12, 21))
 	};
 	Week b[len] = {
 		Week(Date(1, 1, 10)),
 		Week(Date(1, 2, 1)),
 		Week(Date(1, 3, 1)),
 		Week(Date(2, 1, 1)),
-		Week(Date(2000, 1, 1))
+		Week(Date(2000, 1, 1)),
+		Week(Date(2015, 12, 28))
 	};
 
 	Week r;
 	for (int i = 0; i < len; i++)
 	{
 		r = a[i];
-		EXPECT_EQ(b[i], r++) << a[i] << std::endl << b[i] << std::endl << r;
+		EXPECT_TRUE(compare_weeks(b[i], r++));
 	}
 }
 
@@ -369,7 +397,126 @@ TEST(Week, DecrementOperator)
 	for (int i = 0; i < len; i++)
 	{
 		r = b[i];
-		EXPECT_EQ(a[i], r--) << a[i] << std::endl << b[i] << std::endl << r;
+		EXPECT_TRUE(compare_weeks(a[i], r--));
+	}
+}
+
+
+TEST(Month, Init)
+{
+	const int len = 7;
+	Date b[len] = {
+		Date(1, 1, 1),
+		Date(1, 2, 1),
+		Date(1, 3, 1),
+		Date(1, 12, 1),
+		Date(2, 1, 1),
+		Date(1999, 12, 1),
+		Date(2000, 1, 1)
+	};
+	Date e[len] = {
+		Date(1, 1, 31),
+		Date(1, 2, 28),
+		Date(1, 3, 31),
+		Date(1, 12, 31),
+		Date(2, 1, 31),
+		Date(1999, 12, 31),
+		Date(2000, 1, 31)
+	};
+	Date c[len] = {
+		Date(1, 1, 1),
+		Date(1, 2, 28),
+		Date(1, 3, 8),
+		Date(1, 12, 31),
+		Date(2, 1, 1),
+		Date(1999, 12, 12),
+		Date(2000, 1, 7)
+	};
+
+	for (int i = 0; i < len; i++)
+		ASSERT_TRUE(compare_month_begin_end(Month(c[i]), b[i], e[i]));
+}
+
+
+TEST(Month, CompareOperators)
+{
+	const int len = 7;
+	Date c[len] = {
+		Date(1, 1, 1),
+		Date(1, 2, 28),
+		Date(1, 3, 8),
+		Date(1, 12, 31),
+		Date(2, 1, 1),
+		Date(1999, 12, 12),
+		Date(2000, 1, 7)
+	};
+
+	Month m[len];
+	for (int i = 0; i < len; i++)
+		m[i] = Month(c[i]);
+
+	Month m00 = m[0];
+	Month m000(Date(1, 1, 20));
+	EXPECT_EQ(m[0], m00);
+	EXPECT_EQ(m[0], m000);
+	EXPECT_EQ(m00, m000);
+	EXPECT_NE(m[0], m[1]);
+
+	for (int i = 0; i < len-1; i++)
+		EXPECT_LT(m[i], m[i+1]);
+}
+
+
+TEST(Month, IncrementOperator)
+{
+	const int len = 5;
+	Month a[len] = {
+		Month(Date(1, 1, 1)),
+		Month(Date(1, 2, 10)),
+		Month(Date(1, 12, 31)),
+		Month(Date(1995, 3, 1)),
+		Month(Date(1999, 12, 1))
+	};
+	Month b[len] = {
+		Month(Date(1, 2, 1)),
+		Month(Date(1, 3, 10)),
+		Month(Date(2, 1, 1)),
+		Month(Date(1995, 4, 1)),
+		Month(Date(2000, 1, 1))
+	};
+
+	Month r;
+	for (int i = 0; i < len; i++)
+	{
+		r = Month(a[i]);
+		EXPECT_EQ(b[i], r++);
+	}
+}
+
+
+TEST(Month, DecrementOperator)
+{
+	const int len = 5;
+	Month a[len] = {
+		Month(Date(1, 1, 1)),
+		Month(Date(1, 2, 10)),
+		Month(Date(1, 12, 31)),
+		Month(Date(1995, 3, 1)),
+		Month(Date(1999, 12, 1))
+	};
+	Month b[len] = {
+		Month(Date(1, 2, 1)),
+		Month(Date(1, 3, 10)),
+		Month(Date(2, 1, 1)),
+		Month(Date(1995, 4, 1)),
+		Month(Date(2000, 1, 1))
+	};
+
+	Month r;
+	for (int i = 0; i < len; i++)
+	{
+		r = Month(b[i]);
+		EXPECT_EQ(a[i], r--);
 	}
 }
 
@@ -388,4 +535,3 @@ int main(int argc, char **argv)
 	::testing::InitGoogleTest(&argc, argv);
 	return RUN_ALL_TESTS();
 }
-

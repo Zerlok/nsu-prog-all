@@ -7,11 +7,13 @@ CONFIG -= qt
 SOURCES += main.cpp \
     calendar.cpp \
     date.cpp \
-    week.cpp
+    week.cpp \
+    month.cpp
 
 HEADERS += \
     calendar.h \
     date.h \
-    week.h
+    week.h \
+    month.h
 
 OTHER_FILES += gtest.cpp

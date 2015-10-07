@@ -3,6 +3,7 @@
 
 #include "date.h"
 #include "week.h"
+#include "month.h"
 #include "calendar.h"
 
 
@@ -15,16 +16,15 @@ int main(int argc, char **argv)
 
 	std::cout << today << " - " << birthday << " = " << today - birthday << std::endl;
 
-	std::ostringstream ostr;
-	Week week(Date(2015, 10, 1));
-	ostr << Week::weekday_names << std::endl << week << std::endl;
-	ostr << week++ << std::endl;
-	ostr << week++ << std::endl;
-	ostr << week++ << std::endl;
-	ostr << week++ << std::endl;
-	ostr << week++ << std::endl;
-	ostr << week++ << std::endl;
-	std::cout << ostr.str();
+	Month month;
+	std::cout << month.get_header() << month << std::endl;
+	month++;
+	std::cout << month.get_header() << month << std::endl;
+	month++;
+	std::cout << month.get_header();
+	std::cout << month << std::endl;
+	month++;
+	std::cout << month.get_header() << month << std::endl;
 
 	return 0;
 }
