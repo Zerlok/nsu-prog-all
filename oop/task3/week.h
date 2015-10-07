@@ -10,6 +10,8 @@
 class Week
 {
 	public:
+		static std::ostream &weekday_names(std::ostream &out);
+
 		// Constructors / Destructor.
 		Week();
 		Week(const Date &date);
@@ -45,6 +47,8 @@ class Week
 		// Fields.
 		Date _begin;
 		Date _end;
+
+		static int day_width;
 };
 
 std::ostream &operator<<(std::ostream &out, const Week &week);

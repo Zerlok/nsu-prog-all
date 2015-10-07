@@ -1,4 +1,5 @@
 #include <iostream>
+#include <sstream>
 
 #include "date.h"
 #include "week.h"
@@ -14,7 +15,16 @@ int main(int argc, char **argv)
 
 	std::cout << today << " - " << birthday << " = " << today - birthday << std::endl;
 
-	std::cout << Week(today) << std::endl;
+	std::ostringstream ostr;
+	Week week(Date(2015, 10, 1));
+	ostr << Week::weekday_names << std::endl << week << std::endl;
+	ostr << week++ << std::endl;
+	ostr << week++ << std::endl;
+	ostr << week++ << std::endl;
+	ostr << week++ << std::endl;
+	ostr << week++ << std::endl;
+	ostr << week++ << std::endl;
+	std::cout << ostr.str();
 
 	return 0;
 }

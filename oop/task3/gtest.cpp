@@ -18,6 +18,17 @@ bool compare_dates(const Date &d1, const Date &d2)
 }
 
 
+bool compare_week_begin_end(const Week &week, const Date &begin, const Date &end)
+{
+	if ((week.get_begin() == begin)
+			&& (week.get_end() == end))
+		return true;
+
+	std::cout << week << " : expected b(" << begin << ") e(" << end << ")" << std::endl;
+	return false;
+}
+
+
 TEST(Date, Init)
 {
 	ASSERT_NO_THROW({
@@ -236,74 +247,130 @@ TEST(Date, MinusOperator)
 
 TEST(Week, Init)
 {
-	const int len = 5;
-	Date d[len] = {
+	const int len = 9;
+	Date c[len] = {
 		Date(1, 1, 1),
-		Date(1, 2, 1),
 		Date(1, 1, 8),
-		Date(1, 1, 2),
-		Date(1, 2, 7)
+		Date(1, 1, 29),
+		Date(1, 2, 1),
+		Date(1, 2, 4),
+		Date(1, 2, 5),
+		Date(1, 12, 30),
+		Date(1, 12, 31),
+		Date(2, 1, 2)
+	};
+	Date b[len] = {
+		Date(1, 1, 1),
+		Date(1, 1, 8),
+		Date(1, 1, 29),
+		Date(1, 2, 1),
+		Date(1, 2, 1),
+		Date(1, 2, 5),
+		Date(1, 12, 24),
+		Date(1, 12, 31),
+		Date(2, 1, 1)
+	};
+	Date e[len] = {
+		Date(1, 1, 7),
+		Date(1, 1, 14),
+		Date(1, 1, 31),
+		Date(1, 2, 4),
+		Date(1, 2, 4),
+		Date(1, 2, 11),
+		Date(1, 12, 30),
+		Date(1, 12, 31),
+		Date(2, 1, 6)
 	};
 
-	ASSERT_NO_THROW({
-		for (int i = 0; i < len; i++)
-			Week(d[i]);
-	});
+	for (int i = 0; i < len; i++)
+		EXPECT_TRUE(compare_week_begin_end(Week(c[i]), b[i], e[i]));
 }
 
 
 TEST(Week, ComparingOperators)
 {
 	const int len = 8;
-	Date b[len] = {
-		Date(1, 1, 1),		// 0
-		Date(1, 1, 8),		// 1
-		Date(1, 1, 29),		// 2
-		Date(1, 2, 1),		// 3
-		Date(1, 2, 4),		// 4
-		Date(1, 2, 5),		// 5
-		Date(1, 12, 30),	// 6
-		Date(2, 1, 2)		// 7
+	Date c[len] = {
+		Date(1, 1, 1),
+		Date(1, 1, 8),
+		Date(1, 1, 29),
+		Date(1, 2, 1),
+		Date(1, 2, 5),
+		Date(1, 12, 31),
+		Date(2, 1, 2),
+		Date(2, 1, 10)
 	};
 
-	Week w0(b[0]);
-	Week w1(b[1]);
-	Week w2(b[2]);
-	Week w3(b[3]);
-	Week w4(b[4]);
-	Week w5(b[5]);
-	Week w6(b[6]);
-	Week w7(b[7]);
+	Week w[len];
+	for (int i = 0; i < len; i++)
+		w[i] = Week(c[i]);
 
-	Week w00 = w0;
-	Week w000 = Week(b[0]);
-	Week w0000 = Week(b[0] + 4);
+	Week w00 = w[0];
+	Week w000 = Week(c[0]);
+	Week w0000 = Week(c[0] + 4);
 
-	EXPECT_EQ(w0, w00);
-	EXPECT_EQ(w0, w000);
-	EXPECT_EQ(w00, w000);
-	EXPECT_EQ(w0, w0000);
-	EXPECT_NE(w0, w1);
+	EXPECT_EQ(w[0], w00);
+	EXPECT_EQ(w[0], w000);
+	EXPECT_EQ(w[0], w000);
+	EXPECT_EQ(w[0], w0000);
+	EXPECT_NE(w[0], w[1]);
 
-	EXPECT_GT(w1, w0);
-	EXPECT_GT(w2, w0);
-	EXPECT_LT(w0, w3);
-	EXPECT_LT(w2, w3);
-
-	EXPECT_EQ(w3, w4);
-	EXPECT_GT(w5, w4);
-	EXPECT_LT(w3, w5);
-	EXPECT_GT(w7, w6);
+	for (int i = 0; i < len-1; i++)
+		EXPECT_LT(w[i], w[i+1]);
 }
 
 
 TEST(Week, IncrementOperator)
 {
+	const int len = 5;
+	Week a[len] = {
+		Week(Date(1, 1, 1)),
+		Week(Date(1, 1, 30)),
+		Week(Date(1, 2, 28)),
+		Week(Date(1, 12, 31)),
+		Week(Date(1999, 12, 31))
+	};
+	Week b[len] = {
+		Week(Date(1, 1, 10)),
+		Week(Date(1, 2, 1)),
+		Week(Date(1, 3, 1)),
+		Week(Date(2, 1, 1)),
+		Week(Date(2000, 1, 1))
+	};
+
+	Week r;
+	for (int i = 0; i < len; i++)
+	{
+		r = a[i];
+		EXPECT_EQ(b[i], r++) << a[i] << std::endl << b[i] << std::endl << r;
+	}
 }
 
 
 TEST(Week, DecrementOperator)
 {
+	const int len = 5;
+	Week a[len] = {
+		Week(Date(1, 1, 1)),
+		Week(Date(1, 1, 30)),
+		Week(Date(1, 2, 28)),
+		Week(Date(1, 12, 31)),
+		Week(Date(1999, 12, 31))
+	};
+	Week b[len] = {
+		Week(Date(1, 1, 10)),
+		Week(Date(1, 2, 1)),
+		Week(Date(1, 3, 1)),
+		Week(Date(2, 1, 1)),
+		Week(Date(2000, 1, 1))
+	};
+
+	Week r;
+	for (int i = 0; i < len; i++)
+	{
+		r = b[i];
+		EXPECT_EQ(a[i], r--) << a[i] << std::endl << b[i] << std::endl << r;
+	}
 }
 
 
