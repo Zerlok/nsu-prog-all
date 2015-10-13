@@ -124,16 +124,27 @@ Week &Week::operator--(int)
 }
 
 
+Week Week::operator+(int n)
+{
+	Week w(*this);
+
+	for (int i = 0; i < n; i++)
+		w++;
+
+	return w;
+}
+
+
 std::ostream &operator<<(std::ostream &out, const Week &week)
 {
 	for (int i = 0; i < week._begin.get_weekday(); i++)
-		out << std::setfill(' ') << std::setw(Week::day_width) << " ";
+		out << ' ';
 
 	for (Date d = week._begin; d <= week._end; d++)
-		out << std::setfill(' ') << std::setw(Week::day_width) << d.get_day();
+		out << d.get_day();
 
 	for (int i = week._end.get_weekday() + 1; i < 7; i++)
-		out << std::setfill(' ') << std::setw(Week::day_width) <<	" ";
+		out << ' ';
 
 	return out;
 }

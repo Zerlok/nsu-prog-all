@@ -8,12 +8,14 @@ SOURCES += main.cpp \
     calendar.cpp \
     date.cpp \
     week.cpp \
-    month.cpp
+    month.cpp \
+    calendarformat.cpp
 
 HEADERS += \
     calendar.h \
     date.h \
     week.h \
-    month.h
+    month.h \
+    calendarformat.h
 
 OTHER_FILES += gtest.cpp

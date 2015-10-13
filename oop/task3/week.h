@@ -27,6 +27,13 @@ class Week
 		Week &operator++(int);
 		Week &operator--(int);
 
+		Week operator+(int num);
+
+		bool operator<(const Date &date) { return (_end < date); }
+		bool operator>(const Date &date) { return (_begin > date); }
+		bool operator<=(const Date &date) { return (_end <= date); }
+		bool operator>=(const Date &date) { return (_begin >= date); }
+
 		friend bool operator==(const Week &week1, const Week &week2) { return (week1._begin == week2._begin); }
 		friend bool operator!=(const Week &week1, const Week &week2) { return (week1._begin != week2._begin); }
 		friend bool operator<(const Week &week1, const Week &week2) { return (week1._begin < week2._begin); }
@@ -42,8 +49,8 @@ class Week
 
 		bool is_begin(const Date &date) const { return (_begin == date); }
 		bool is_end(const Date &date) const	{ return (_end == date);}
-		bool is_in(const Date &date) const { return ((_begin <= date)
-													 && (date <= _end)); }
+		bool is_contain(const Date &date) const { return ((_begin <= date)
+														  && (date <= _end)); }
 
 	private:
 		// Fields.
@@ -51,6 +58,8 @@ class Week
 		Date _end;
 };
 
+
+// Friends.
 std::ostream &operator<<(std::ostream &out, const Week &week);
 
 

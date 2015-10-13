@@ -20,6 +20,19 @@ class Month
 		Month &operator=(const Month &month);
 		Month &operator++(int);
 		Month &operator--(int);
+		Month operator+(int num);
+		Month &operator+=(int num);
+
+		bool operator<(int month_num) { return (_begin.get_month() < month_num); }
+		bool operator>(int month_num) { return (_begin.get_month() > month_num); }
+		bool operator<(const Date &date) { return (_end < date); }
+		bool operator>(const Date &date) { return (_begin > date); }
+		bool operator<=(const Date &date) { return (_end <= date); }
+		bool operator>=(const Date &date) { return (_begin >= date); }
+		bool operator<(const Week &week) { return (_end < week); }
+		bool operator>(const Week &week) { return (_begin > week); }
+		bool operator<=(const Week &week) { return (_end <= week); }
+		bool operator>=(const Week &week) { return (_begin >= week); }
 
 		friend bool operator==(const Month &month1, const Month &month2) { return (month1._begin == month2._begin); }
 		friend bool operator!=(const Month &month1, const Month &month2) { return (month1._begin != month2._begin); }
@@ -34,8 +47,14 @@ class Month
 		const Date &get_begin() const { return _begin; }
 		const Date &get_end() const { return _end; }
 		const std::string &get_name() const { return _begin.get_month_name(); }
+
+		int get_year() const { return _begin.get_year(); }
 		std::string get_header() const;
-//		std::string &get_header() const; // : invalid
+
+		bool is_contain(const Date &date) { return ((_begin <= date)
+													&& (date <= _end)); }
+		bool is_contain(const Week &week) { return ((_begin <= week)
+													&& (week <= _end)); }
 
 	private:
 		// Fields.
@@ -46,6 +65,8 @@ class Month
 		const Date &get_month_end(const Date &date) const;
 };
 
+
+// Friends.
 std::ostream &operator<<(std::ostream &out, const Month &month);
 
 

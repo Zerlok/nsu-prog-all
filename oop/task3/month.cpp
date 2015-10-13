@@ -58,12 +58,32 @@ Month &Month::operator--(int)
 }
 
 
+Month Month::operator+(int num)
+{
+	Month m(*this);
+	for (int i = 0; i < num; i++)
+		m++;
+
+	return m;
+}
+
+
+Month &Month::operator+=(int num)
+{
+	for (int i = 0; i < num; i++)
+		(*this)++;
+
+	return (*this);
+}
+
+
 std::ostream &operator<<(std::ostream &out, const Month &month)
 {
-	for (Week w(month._begin); w <= Week(month._end); w++)
+	Week w;
+	for (w = Week(month._begin); w < Week(month._end); w++)
 		out << w << std::endl;
 
-	return out;
+	return out << w;
 }
 
 
@@ -72,16 +92,17 @@ std::string Month::get_header() const
 	std::ostringstream out;
 	const int width = Week::day_width * 7;
 	std::string month_name = get_name().substr(0, width);
-	const int diff = width - month_name.size();
 
-	if (diff > 0)
-	{
-		std::string s;
-		s.resize((diff/2), ' ');
-		s.append(month_name);
-		s.resize(width, ' ');
-		month_name = s;
-	}
+//	const int diff = width - month_name.size();
+
+//	if (diff > 0)
+//	{
+//		std::string s;
+//		s.resize((diff/2), ' ');
+//		s.append(month_name);
+//		s.resize(width, ' ');
+//		month_name = s;
+//	}
 
 	out << std::setfill(' ') << std::setw(width) << month_name << std::endl;
 	out << Week::header << std::endl;

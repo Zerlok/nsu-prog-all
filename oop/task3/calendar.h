@@ -3,16 +3,8 @@
 
 
 #include <iostream>
-#include <iomanip>
 
 #include "date.h"
-
-
-enum Direction
-{
-	vertical,
-	horizontal
-};
 
 
 class Calendar
@@ -26,12 +18,21 @@ class Calendar
 		// Operators.
 		friend std::ostream &operator<<(std::ostream &out, const Calendar &cal);
 
+		// Getters.
+		const Date &get_begin() const { return _begin; }
+		const Date &get_end() const { return _end; }
+		int get_width() const { return _width; }
+
 	private:
 		// Fields.
 		Date _begin;
 		Date _end;
+
+		int _width;
 };
 
+
+// Friends.
 std::ostream &operator<<(std::ostream &out, const Calendar &cal);
 
 

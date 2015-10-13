@@ -5,26 +5,15 @@
 #include "week.h"
 #include "month.h"
 #include "calendar.h"
+#include "calendarformat.h"
 
 
 int main(int argc, char **argv)
 {
 	// TODO: parse input argv.
 
-	Date birthday(1995, 3, 1);
-	Date today;
-
-	std::cout << today << " - " << birthday << " = " << today - birthday << std::endl;
-
-	Month month;
-	std::cout << month.get_header() << month << std::endl;
-	month++;
-	std::cout << month.get_header() << month << std::endl;
-	month++;
-	std::cout << month.get_header();
-	std::cout << month << std::endl;
-	month++;
-	std::cout << month.get_header() << month << std::endl;
+//	std::cout << init_format << display_day << Date() << std::endl;
+	std::cout << init_format << Month(Date(2015, 1, 1)) << std::endl;
 
 	return 0;
 }

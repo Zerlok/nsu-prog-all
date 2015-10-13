@@ -68,6 +68,8 @@ class Date
 		long long int count_days() const;
 };
 
+
+// Friends.
 long long int operator-(const Date &date1, const Date &date2);
 std::ostream &operator<<(std::ostream &out, const Date &date);
 
