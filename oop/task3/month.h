@@ -23,16 +23,16 @@ class Month
 		Month operator+(int num);
 		Month &operator+=(int num);
 
-		bool operator<(int month_num) { return (_begin.get_month() < month_num); }
-		bool operator>(int month_num) { return (_begin.get_month() > month_num); }
-		bool operator<(const Date &date) { return (_end < date); }
-		bool operator>(const Date &date) { return (_begin > date); }
-		bool operator<=(const Date &date) { return (_end <= date); }
-		bool operator>=(const Date &date) { return (_begin >= date); }
-		bool operator<(const Week &week) { return (_end < week); }
-		bool operator>(const Week &week) { return (_begin > week); }
-		bool operator<=(const Week &week) { return (_end <= week); }
-		bool operator>=(const Week &week) { return (_begin >= week); }
+		bool operator<(int month_num) const { return (_begin.get_month() < month_num); }
+		bool operator>(int month_num) const { return (_begin.get_month() > month_num); }
+		bool operator<(const Date &date) const { return (_end < date); }
+		bool operator>(const Date &date) const { return (_begin > date); }
+		bool operator<=(const Date &date) const { return (_end <= date); }
+		bool operator>=(const Date &date) const { return (_begin >= date); }
+		bool operator<(const Week &week) const { return (_end < week); }
+		bool operator>(const Week &week) const { return (_begin > week); }
+		bool operator<=(const Week &week) const { return (_end <= week); }
+		bool operator>=(const Week &week) const { return (_begin >= week); }
 
 		friend bool operator==(const Month &month1, const Month &month2) { return (month1._begin == month2._begin); }
 		friend bool operator!=(const Month &month1, const Month &month2) { return (month1._begin != month2._begin); }
@@ -49,7 +49,6 @@ class Month
 		const std::string &get_name() const { return _begin.get_month_name(); }
 
 		int get_year() const { return _begin.get_year(); }
-		std::string get_header() const;
 
 		bool is_contain(const Date &date) { return ((_begin <= date)
 													&& (date <= _end)); }

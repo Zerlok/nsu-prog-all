@@ -10,10 +10,6 @@
 class Week
 {
 	public:
-		// Static.
-		static const int day_width = 4;
-		static std::ostream &header(std::ostream &out);
-
 		// Constructors / Destructor.
 		Week();
 		Week(const Date &date);
@@ -29,10 +25,10 @@ class Week
 
 		Week operator+(int num);
 
-		bool operator<(const Date &date) { return (_end < date); }
-		bool operator>(const Date &date) { return (_begin > date); }
-		bool operator<=(const Date &date) { return (_end <= date); }
-		bool operator>=(const Date &date) { return (_begin >= date); }
+		bool operator<(const Date &date) const { return (_end < date); }
+		bool operator>(const Date &date) const { return (_begin > date); }
+		bool operator<=(const Date &date) const { return (_end <= date); }
+		bool operator>=(const Date &date) const { return (_begin >= date); }
 
 		friend bool operator==(const Week &week1, const Week &week2) { return (week1._begin == week2._begin); }
 		friend bool operator!=(const Week &week1, const Week &week2) { return (week1._begin != week2._begin); }

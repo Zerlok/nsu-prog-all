@@ -241,7 +241,7 @@ TEST(Date, PlusOperator)
 TEST(Date, MinusOperator)
 {
 	int diff;
-	const int len = 6;
+	const int len = 7;
 
 	Date a[len] = {
 		Date(1, 1, 1),
@@ -249,6 +249,7 @@ TEST(Date, MinusOperator)
 		Date(1, 12, 12),
 		Date(1996, 2, 20),
 		Date(1999, 12, 21),
+		Date(2015, 9, 29),
 		Date(1995, 3, 1)
 	};
 	Date b[len] = {
@@ -257,6 +258,7 @@ TEST(Date, MinusOperator)
 		Date(2, 1, 12),
 		Date(1996, 3, 1),
 		Date(2000, 1, 12),
+		Date(2015, 10, 1),
 		Date()
 	};
 

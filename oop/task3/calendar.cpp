@@ -6,9 +6,26 @@
 #include "calendarformat.h"
 
 
-Calendar::Calendar(const Date &begin, const Date &end)
-	: _begin(begin), _end(end), _width(3)
+Calendar::Calendar(const Date &date)
+	: _width(3)
 {
+	Month m = Month(date);
+	_begin = m.get_begin();
+	_end = m.get_end();
+}
+
+
+Calendar::Calendar(const Date &begin, const Date &end)
+	: _width(3)
+{
+	Month mb = Month(begin);
+	_begin = mb.get_begin();
+
+	if (mb.is_contain(_end))
+		_end = mb.get_end();
+
+	else
+		_end = Month(end).get_end();
 }
 
 

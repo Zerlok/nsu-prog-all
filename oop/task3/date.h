@@ -5,16 +5,21 @@
 #include <iostream>
 
 
-static const int DAYS_IN_MONTH[12] = {
+static const int DAYS_IN_YEAR_NUM = 365;
+static const int MONTHS_IN_YEAR_NUM = 12;
+static const int WEEKS_IN_MONTH_NUM = 6;
+static const int DAYS_IN_WEEK_NUM = 7;
+
+static const int DAYS_IN_MONTH[MONTHS_IN_YEAR_NUM] = {
 	31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31
 };
 
-static const std::string MONTH_NAMES[12] = {
+static const std::string MONTH_NAMES[MONTHS_IN_YEAR_NUM] = {
 	"January", "February", "March", "April", "May", "June", "July", "August",
 	"September", "October", "November", "December"
 };
 
-static const std::string WEEKDAY_NAMES[7] = {
+static const std::string WEEKDAY_NAMES[DAYS_IN_WEEK_NUM] = {
 	"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"
 };
 
@@ -49,7 +54,7 @@ class Date
 		int get_year() const { return _year; }
 		int get_month() const { return _month; }
 		int get_day() const { return _day; }
-		int get_weekday() const { return _days_num % 7; }
+		int get_weekday() const { return _days_num % DAYS_IN_WEEK_NUM; }
 		long long int to_days() const { return _days_num; }
 
 		bool is_leap_year() const;

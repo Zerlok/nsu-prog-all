@@ -11,6 +11,7 @@ class Calendar
 {
 	public:
 		// Constructors / Destructor.
+		Calendar(const Date &date);
 		Calendar(const Date& begin, const Date& end);
 		Calendar(const int year);
 		~Calendar();

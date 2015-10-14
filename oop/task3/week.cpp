@@ -5,16 +5,6 @@
 #include "week.h"
 
 
-std::ostream &Week::header(std::ostream &out)
-{
-	for (int i = 0; i < 7; i++)
-		out << std::setfill(' ') << std::setw(Week::day_width)
-			<< WEEKDAY_NAMES[i].substr(0, Week::day_width-1);
-
-	return out;
-}
-
-
 Week::Week()
 	: _begin(), _end()
 {
@@ -22,7 +12,7 @@ Week::Week()
 			  && (_begin.get_weekday() > 0))
 		_begin = _begin - _begin.get_weekday();
 
-	_end = _begin + (6 - _begin.get_weekday());
+	_end = _begin + (DAYS_IN_WEEK_NUM - _begin.get_weekday() - 1);
 
 	while ((_end.get_month() > _begin.get_month())
 		   || (_end.get_year() > _begin.get_year()))
@@ -40,7 +30,7 @@ Week::Week(const Date &date)
 			&& (_begin.get_weekday() > 0))
 		_begin = _begin - _begin.get_weekday();
 
-	_end = _begin + (6 - _begin.get_weekday());
+	_end = _begin + (DAYS_IN_WEEK_NUM - _begin.get_weekday() - 1);
 
 	while ((_end.get_month() > _begin.get_month())
 		   || (_end.get_year() > _begin.get_year()))
@@ -68,11 +58,11 @@ Week::Week(const Date &from, const Date &to)
 		throw std::invalid_argument(sstream.str());
 	}
 
-	if ((to.get_weekday() < 6)
+	if ((to.get_weekday() < DAYS_IN_WEEK_NUM - 1)
 			&& ((to+1).get_day() > 1)) // is not the end of month (next day is not the begin of month).
 	{
 		std::ostringstream sstream;
-		sstream << "The date is not a " << WEEKDAY_NAMES[6]
+		sstream << "The date is not a " << WEEKDAY_NAMES[DAYS_IN_WEEK_NUM - 1]
 				<< " or the end of month: " << to
 				<< " " << to.get_weekday_name().substr(0, 3);
 		throw std::invalid_argument(sstream.str());
@@ -103,7 +93,7 @@ Week &Week::operator=(const Week &week)
 Week &Week::operator++(int)
 {
 	_begin = _end + 1;
-	_end = _begin + (6 - _begin.get_weekday());
+	_end = _begin + (DAYS_IN_WEEK_NUM - _begin.get_weekday() - 1);
 
 	while (_end.get_month() != _begin.get_month())
 		_end--;

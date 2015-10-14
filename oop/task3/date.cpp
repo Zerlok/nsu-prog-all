@@ -11,8 +11,8 @@ Date::Date()
 	time_t t = time(NULL);
 	struct tm *today = localtime(&t);
 
-	_year = today->tm_year + 1900;
-	_month = today->tm_mon + 1;
+	_year = today->tm_year + 1900;	// counts from 1900 year.
+	_month = today->tm_mon + 1;		// month number from [1..12]
 	_day = today->tm_mday;
 
 	_days_num = count_days();
@@ -67,7 +67,7 @@ Date &Date::operator++(int)
 	_day = 1;
 	++_month;
 
-	if (_month <= 12)
+	if (_month <= MONTHS_IN_YEAR_NUM)
 		return (*this);
 
 	_month = 1;
@@ -98,6 +98,9 @@ Date &Date::operator--(int)
 
 Date Date::operator+(int days) const
 {
+	if (days < 0)
+		return this->operator-(-days);
+
 	Date d = Date(*this);
 	for (int i = 0; i < days; i++)
 		d++;
@@ -108,6 +111,9 @@ Date Date::operator+(int days) const
 
 Date Date::operator-(int days) const
 {
+	if (days < 0)
+		return this->operator+(-days);
+
 	Date d = Date(*this);
 	for (int i = 0; i < days; i++)
 		d--;
@@ -147,7 +153,7 @@ bool Date::is_valid() const
 	return ((_day > 0)
 			&& (_day <= get_days_in_month())
 			&& (_month > 0)
-			&& (_month <= 12)
+			&& (_month <= MONTHS_IN_YEAR_NUM)
 	);
 }
 
@@ -155,7 +161,7 @@ bool Date::is_valid() const
 long long int Date::count_days() const
 {
 	int year = _year - 1;
-	long long int total = (year * 365) + (year / 4) - (year / 100) + (year / 400);
+	long long int total = (year * DAYS_IN_YEAR_NUM) + (year / 4) - (year / 100) + (year / 400);
 
 	for (int i = 1; i < _month; i++)
 		total += get_days_in_month(-i);
@@ -167,7 +173,7 @@ long long int Date::count_days() const
 
 int Date::get_days_in_month(int diff) const
 {
-	int i = (11 + _month + diff) % 12;
+	int i = (11 + _month + diff) % MONTHS_IN_YEAR_NUM;
 
 	if ((i == 1)
 			&& (is_leap_year()))

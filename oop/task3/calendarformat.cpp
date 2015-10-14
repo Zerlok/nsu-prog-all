@@ -5,6 +5,7 @@
 #include "calendarformat.h"
 
 
+const int CalendarFormat::DEFAULT_DAY_WIDTH = 3;
 const char CalendarFormat::SPACE_SYMBOL = ' ';
 
 
@@ -20,39 +21,39 @@ CalendarFormat cf::format(std::ostream &out)
 }
 
 
-CalendarFormat &horiz(CalendarFormat &format)
+CalendarFormat &cf::horizontal(CalendarFormat &format)
 {
-	format._calendar_direction = horizontal;
+	format._calendar_direction = Direction::horizontal;
 	return format;
 }
 
 
-CalendarFormat &vertic(CalendarFormat &format)
+CalendarFormat &cf::vertical(CalendarFormat &format)
 {
-	format._calendar_direction = vertical;
+	format._calendar_direction = Direction::vertical;
 	return format;
 }
 
 
-CalendarFormat &display_day(CalendarFormat &format)
+CalendarFormat &cf::day_number(CalendarFormat &format)
 {
-	format._day_display = true;
+	format._display = Display::day_num;
 	format._out << std::setfill(format._space_symbol) << std::setw(format._day_width);
 
 	return format;
 }
 
 
-CalendarFormat &display_month_name(CalendarFormat &format)
+CalendarFormat &cf::month_name(CalendarFormat &format)
 {
-	format._month_name_display = true;
+	format._display = Display::month_name;
 	format._out << std::setfill(format._space_symbol) << std::setw(format._week_width);
 
 	return format;
 }
 
 
-CalendarFormat &display_week_header(CalendarFormat &format)
+CalendarFormat &cf::week_header(CalendarFormat &format)
 {
 	format._out << std::setfill(format._space_symbol);
 
@@ -65,7 +66,7 @@ CalendarFormat &display_week_header(CalendarFormat &format)
 }
 
 
-CalendarFormat &empty_week_fill(CalendarFormat &format)
+CalendarFormat &cf::fill_empty_week_horizontal(CalendarFormat &format)
 {
 	format._out << std::setfill(format._space_symbol)
 			<< std::setw(format._week_width)
@@ -75,18 +76,18 @@ CalendarFormat &empty_week_fill(CalendarFormat &format)
 }
 
 
-CalendarFormat &fill_week_begin(CalendarFormat &format)
+CalendarFormat &cf::fill_week_begin(CalendarFormat &format)
 {
-	format._week_begin_fill = true;
+	format._display = Display::week_begin;
 	format._out << std::setfill(format._space_symbol);
 
 	return format;
 }
 
 
-CalendarFormat &fill_week_end(CalendarFormat &format)
+CalendarFormat &cf::fill_week_end(CalendarFormat &format)
 {
-	format._week_end_fill = true;
+	format._display = Display::week_end;
 	format._out << std::setfill(format._space_symbol);
 
 	return format;
@@ -114,20 +115,10 @@ CalendarFormat::~CalendarFormat()
 
 void CalendarFormat::init()
 {
-	turn_flags_false();
-	_day_width = 4;
-	_week_width = _day_width * 7;
-	_calendar_direction = horizontal;
+	_display = Display::none;
+	set_day_width(CalendarFormat::DEFAULT_DAY_WIDTH);
+	_calendar_direction = Direction::horizontal;
 	_space_symbol = CalendarFormat::SPACE_SYMBOL;
-}
-
-
-void CalendarFormat::turn_flags_false()
-{
-	_day_display		= false;
-	_month_name_display	= false;
-	_week_begin_fill	= false;
-	_week_end_fill		= false;
 }
 
 
@@ -146,21 +137,21 @@ CalendarFormat &CalendarFormat::operator<<(const char chr)
 
 CalendarFormat &CalendarFormat::operator<<(const Date &date)
 {
-	if (_day_display)
+	if (_display == Display::day_num)
 		_out << date.get_day();
 
-	else if (_month_name_display)
+	else if (_display == Display::month_name)
 		_out << date.get_month_name() << _space_symbol;
 
-	else if (_week_begin_fill)
+	else if (_display == Display::week_begin)
 		for (int i = 0; i < date.get_weekday(); i++)
 			_out << std::setw(_day_width) << _space_symbol;
 
-	else if (_week_end_fill)
-		for (int i = date.get_weekday(); i < 6; i++)
+	else if (_display == Display::week_end)
+		for (int i = date.get_weekday(); i < DAYS_IN_WEEK_NUM - 1; i++)
 			_out << std::setw(_day_width) << _space_symbol;
 
-	else
+	else if (_display == Display::none)
 		_out << "["
 				<< date.get_weekday_name().substr(0, _day_width) << ' '
 				<< date.get_day() << ' '
@@ -168,7 +159,7 @@ CalendarFormat &CalendarFormat::operator<<(const Date &date)
 				<< date.get_year()
 				<< "]";
 
-	turn_flags_false();
+	_display = Display::none;
 	return (*this);
 }
 
@@ -190,13 +181,23 @@ CalendarFormat &CalendarFormat::operator<<(const Calendar &cal)
 {
 	std::cout << cal << std::endl;
 
-	if (_calendar_direction == horizontal)
+	if (_calendar_direction == Direction::horizontal)
 		horizontal_display(cal);
 
 	else
 		vertical_display(cal);
 
 	return (*this);
+}
+
+
+void CalendarFormat::set_day_width(int n)
+{
+	if (n < 2)
+		return;
+
+	_day_width = n;
+	_week_width = _day_width * DAYS_IN_WEEK_NUM;
 }
 
 
@@ -209,26 +210,26 @@ void CalendarFormat::horizontal_display(const Calendar &cal)
 	Date d;
 
 	// Display line of months.
-	for (line_start = Month(cal.get_begin()); line_start < Month(cal.get_end()); line_start += cal.get_width())
+	for (line_start = Month(cal.get_begin()); line_start <= Month(cal.get_end()); line_start += cal.get_width())
 	{
 		line_end = line_start + cal.get_width();
 
 		if (line_end > cal.get_end())
-			line_end = Month(cal.get_end()) + 1;
+			line_end = (Month(cal.get_end()) + 1).get_end();
 
 		// Display month name.
 		for (month = Month(line_start); month < line_end; month++)
-			(*this) << display_month_name << month;
+			(*this) << cf::month_name << month;
 		_out << std::endl;
 
 		// Display names of days in the week.
 		_out << std::right;
 		for (month = Month(line_start); month < line_end; month++)
-			(*this) << display_week_header;
+			(*this) << cf::week_header;
 		_out << std::endl;
 
 		// Display by each week of each month in line.
-		for (int week_num = 0; week_num < 6; week_num++)
+		for (int week_num = 0; week_num < DAYS_IN_WEEK_NUM - 1; week_num++)
 		{
 			for (month = Month(line_start); month < line_end; month++)
 			{
@@ -236,15 +237,15 @@ void CalendarFormat::horizontal_display(const Calendar &cal)
 
 				if (week.get_begin() <= month.get_end())
 				{
-					(*this) << fill_week_begin << week.get_begin();
+					(*this) << cf::fill_week_begin << week.get_begin();
 
 					for (d = week.get_begin(); d <= week.get_end(); d++)
-						(*this) << display_day << d;
+						(*this) << cf::day_number << d;
 
-					(*this) << fill_week_end << week.get_end();
+					(*this) << cf::fill_week_end << week.get_end();
 				}
 				else
-					(*this) << empty_week_fill;
+					(*this) << cf::fill_empty_week_horizontal;
 
 				_out << _space_symbol;
 			} // endfor months in line.
@@ -262,6 +263,7 @@ void CalendarFormat::vertical_display(const Calendar &cal)
 	Month line_end;
 	Month month;
 	Week week;
+	Date week_begin;
 	Date d;
 
 	// Display line of months.
@@ -270,39 +272,43 @@ void CalendarFormat::vertical_display(const Calendar &cal)
 		line_end = line_start + cal.get_width();
 
 		if (line_end > cal.get_end())
-			line_end = cal.get_end();
+			line_end = (Month(cal.get_end()) + 1).get_end();
 
 		// Display month name.
 		for (month = Month(line_start); month < line_end; month++)
-			(*this) << display_month_name << month << _space_symbol;
+			(*this) << cf::month_name << month << _space_symbol;
 		_out << std::endl;
 		_out << std::right;
 
 		// For each weekday.
-		for (int weekday_num = 0; weekday_num < 7; weekday_num++)
+		for (int weekday_num = 0; weekday_num < DAYS_IN_WEEK_NUM; weekday_num++)
 		{
 			// Display by each week of each month in line.
 			for (month = Month(line_start); month < line_end; month++)
 			{
 				if (month == line_start)
-					_out << WEEKDAY_NAMES[weekday_num].substr(0, _day_width-1) << _space_symbol;
+					_out << WEEKDAY_NAMES[weekday_num].substr(0, _day_width);
 
 				for (week = Week(month.get_begin()); week <= month.get_end(); week++)
 				{
-					d = week.get_begin();
-					if ((d.get_weekday() <= weekday_num)
-							&& (week.get_end() >= weekday_num))
-						(*this) << display_day << d + (weekday_num - d.get_weekday());
+					week_begin = week.get_begin();
+					d = week_begin + (weekday_num - week_begin.get_weekday());
+
+					if (week.is_contain(d))
+						(*this) << cf::day_number << d;
 
 					else
-						(*this) << display_day << _space_symbol;
+						(*this) << cf::day_number << _space_symbol;
 
 					_out << _space_symbol;
 				} // endfor weeks.
 
-				_out << std::endl;
+				_out << _space_symbol;
 			} // endfor months in line.
+
+			_out << std::endl;
 		}
 
+		_out << std::endl;
 	} // endfor month line.
 }

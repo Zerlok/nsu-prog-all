@@ -83,35 +83,11 @@ std::ostream &operator<<(std::ostream &out, const Month &month)
 }
 
 
-std::string Month::get_header() const
-{
-	std::ostringstream out;
-	const int width = Week::day_width * 7;
-	std::string month_name = get_name().substr(0, width);
-
-	const int diff = width - month_name.size();
-
-	if (diff > 0)
-	{
-		std::string s;
-		s.resize((diff/2), ' ');
-		s.append(month_name);
-		s.resize(width, ' ');
-		month_name = s;
-	}
-
-	out << std::setfill(' ') << std::setw(width) << month_name << std::endl;
-	out << Week::header << std::endl;
-
-	return out.str();
-}
-
-
 const Date &Month::get_month_end(const Date &date) const
 {
 	Date month_end;
 
-	if (date.get_month() == 12)
+	if (date.get_month() == MONTHS_IN_YEAR_NUM)
 		month_end = Date(
 				date.get_year() + 1,
 				1,
