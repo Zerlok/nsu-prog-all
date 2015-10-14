@@ -12,8 +12,8 @@
 
 enum Direction
 {
-	horizontal,
-	vertical,
+	horizontal = 0,
+	vertical = 1,
 };
 
 
@@ -23,6 +23,8 @@ class CalendarFormat
 		// ???
 		friend CalendarFormat init_format(std::ostream &out);
 
+		friend CalendarFormat &horiz(CalendarFormat &format);
+		friend CalendarFormat &vertic(CalendarFormat &format);
 		friend CalendarFormat &display_day(CalendarFormat &format);
 		friend CalendarFormat &display_month_name(CalendarFormat &format);
 		friend CalendarFormat &display_week_header(CalendarFormat &format);
@@ -40,6 +42,7 @@ class CalendarFormat
 		CalendarFormat &operator<<(CalendarFormat& (*func)(CalendarFormat&)) { return func(*this); }
 
 		// Operators.
+		CalendarFormat &operator<<(const char chr);
 		CalendarFormat &operator<<(const Date &date);
 		CalendarFormat &operator<<(const Week &week);
 		CalendarFormat &operator<<(const Month &month);
@@ -67,10 +70,19 @@ class CalendarFormat
 		// Methods.
 		void init();
 		void turn_flags_false();
+
+		void horizontal_display(const Calendar &cal);
+		void vertical_display(const Calendar &cal);
 };
 
 // Friends.
-CalendarFormat init_format(std::ostream &out);
+namespace cf {
+	CalendarFormat format();
+	CalendarFormat format(std::ostream &out);
+}
+
+CalendarFormat &horiz(CalendarFormat &format);
+CalendarFormat &vertic(CalendarFormat &format);
 CalendarFormat &display_day(std::ostream &out);
 CalendarFormat &display_month_name(std::ostream &out);
 CalendarFormat &display_week_header(std::ostream &out);

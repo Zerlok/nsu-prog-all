@@ -12,8 +12,8 @@ int main(int argc, char **argv)
 {
 	// TODO: parse input argv.
 
-//	std::cout << init_format << display_day << Date() << std::endl;
-	std::cout << init_format << Month(Date(2015, 1, 1)) << std::endl;
+	cf::format() << Date() << std::endl;
+	cf::format() << horiz << Calendar(Date(2015, 3, 1), Date()) << std::endl;
 
 	return 0;
 }

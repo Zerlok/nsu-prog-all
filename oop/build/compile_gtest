@@ -1,4 +1,6 @@
 #!/bin/bash
+# Compile project *.o files with custom code with Google Test.
+# It uses other 'int main(...)', that's why main.o file is skipped.
 
 arr=(*.o)
 sources=()

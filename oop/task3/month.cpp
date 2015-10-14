@@ -79,11 +79,7 @@ Month &Month::operator+=(int num)
 
 std::ostream &operator<<(std::ostream &out, const Month &month)
 {
-	Week w;
-	for (w = Week(month._begin); w < Week(month._end); w++)
-		out << w << std::endl;
-
-	return out << w;
+	return out << "<Month: " << month._begin << " - " << month._end << ">";
 }
 
 
@@ -93,16 +89,16 @@ std::string Month::get_header() const
 	const int width = Week::day_width * 7;
 	std::string month_name = get_name().substr(0, width);
 
-//	const int diff = width - month_name.size();
+	const int diff = width - month_name.size();
 
-//	if (diff > 0)
-//	{
-//		std::string s;
-//		s.resize((diff/2), ' ');
-//		s.append(month_name);
-//		s.resize(width, ' ');
-//		month_name = s;
-//	}
+	if (diff > 0)
+	{
+		std::string s;
+		s.resize((diff/2), ' ');
+		s.append(month_name);
+		s.resize(width, ' ');
+		month_name = s;
+	}
 
 	out << std::setfill(' ') << std::setw(width) << month_name << std::endl;
 	out << Week::header << std::endl;

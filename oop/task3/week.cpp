@@ -137,14 +137,5 @@ Week Week::operator+(int n)
 
 std::ostream &operator<<(std::ostream &out, const Week &week)
 {
-	for (int i = 0; i < week._begin.get_weekday(); i++)
-		out << ' ';
-
-	for (Date d = week._begin; d <= week._end; d++)
-		out << d.get_day();
-
-	for (int i = week._end.get_weekday() + 1; i < 7; i++)
-		out << ' ';
-
-	return out;
+	return out << "<Week: " << week._begin << " - " << week._end << ">";
 }

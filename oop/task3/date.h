@@ -8,10 +8,12 @@
 static const int DAYS_IN_MONTH[12] = {
 	31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31
 };
+
 static const std::string MONTH_NAMES[12] = {
 	"January", "February", "March", "April", "May", "June", "July", "August",
 	"September", "October", "November", "December"
 };
+
 static const std::string WEEKDAY_NAMES[7] = {
 	"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"
 };

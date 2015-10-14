@@ -128,6 +128,7 @@ std::ostream &operator<<(std::ostream &out, const Date &date)
 		<< std::setw(2) << date._day << "."
 		<< std::setw(2) << date._month << "."
 		<< std::setw(4) << date._year;
+
 	return out;
 }
 
