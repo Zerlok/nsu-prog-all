@@ -7,7 +7,7 @@
 
 static const int DAYS_IN_YEAR_NUM = 365;
 static const int MONTHS_IN_YEAR_NUM = 12;
-static const int WEEKS_IN_MONTH_NUM = 6;
+static const int MAX_WEEKS_IN_MONTH_NUM = 6;
 static const int DAYS_IN_WEEK_NUM = 7;
 
 static const int DAYS_IN_MONTH[MONTHS_IN_YEAR_NUM] = {

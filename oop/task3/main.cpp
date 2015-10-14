@@ -12,7 +12,7 @@ int main(int argc, char **argv)
 {
 	// TODO: parse input argv.
 
-	cf::format() << cf::vertical << Calendar(2015) << std::endl;
+	 std::cout << cf::vertical << Calendar(Date(2015, 3, 1), Date(2015, 11, 1)) << std::endl;
 
 	return 0;
 }

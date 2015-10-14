@@ -18,11 +18,11 @@ Calendar::Calendar(const Date &date)
 Calendar::Calendar(const Date &begin, const Date &end)
 	: _width(3)
 {
-	Month mb = Month(begin);
-	_begin = mb.get_begin();
+	Month m = Month(begin);
+	_begin = m.get_begin();
 
-	if (mb.is_contain(_end))
-		_end = mb.get_end();
+	if (m.is_contain(end))
+		_end = m.get_end();
 
 	else
 		_end = Month(end).get_end();

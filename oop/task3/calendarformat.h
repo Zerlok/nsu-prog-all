@@ -33,8 +33,6 @@ class CalendarFormat;
 // CalendarFormat manipulators.
 namespace cf
 {
-	CalendarFormat format();
-	CalendarFormat format(std::ostream &out);
 	CalendarFormat &horizontal(CalendarFormat &format);
 	CalendarFormat &vertical(CalendarFormat &format);
 	CalendarFormat &day_number(CalendarFormat &format);
@@ -62,6 +60,7 @@ class CalendarFormat
 		// Constructors / Destructor.
 		CalendarFormat();
 		CalendarFormat(std::ostream &out);
+		CalendarFormat(const CalendarFormat &format);
 		~CalendarFormat();
 
 		// Operators.
@@ -77,22 +76,29 @@ class CalendarFormat
 
 		// Modifiers.
 		void set_day_width(int n);
+		void set_calendar_width(int n);
+		void set_space_symbol(char chr) { _space_symbol = chr; }
+		void set_zero_day_symbol(char chr) { _zero_day_symbol = chr; }
 
 	private:
 		// Static.
+		static const int DEFAULT_CALENDAR_WIDTH;
 		static const int DEFAULT_DAY_WIDTH;
-		static const char SPACE_SYMBOL;
+		static const char DEFAULT_SPACE_SYMBOL;
+		static const char DEFAULT_ZERO_DAY_SYMBOL;
 
 		// Fields.
+		std::ostream &_out;
+
 		Direction _calendar_direction;
 		Display _display;
 
-		char _space_symbol;
-
 		int _day_width;
 		int _week_width;
+		int _calendar_width;
 
-		std::ostream &_out;
+		char _space_symbol;
+		char _zero_day_symbol;
 
 		// Methods.
 		void init();
@@ -104,7 +110,7 @@ class CalendarFormat
 
 
 // For format init.
-CalendarFormat operator<<(std::ostream &out, CalendarFormat (*func)(std::ostream&));
+CalendarFormat operator<<(std::ostream &out, CalendarFormat& (*func)(CalendarFormat&));
 
 // __CALENDARFORMAT_H__
 #endif

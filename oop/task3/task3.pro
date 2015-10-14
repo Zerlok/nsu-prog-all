@@ -18,4 +18,5 @@ HEADERS += \
     month.h \
     calendarformat.h
 
-OTHER_FILES += gtest.cpp
+OTHER_FILES += gtest.cpp \
+    ../build/task3/calendar_sep_nov.txt
