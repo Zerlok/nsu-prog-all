@@ -31,7 +31,7 @@ CalendarFormat &cf::vertical(CalendarFormat &format)
 
 CalendarFormat &cf::day_number(CalendarFormat &format)
 {
-	format._display = Display::day_num;
+	format._date_display = DateDisplay::day_num;
 	format._out << std::setfill(format._space_symbol) << std::setw(format._day_width);
 
 	return format;
@@ -40,7 +40,7 @@ CalendarFormat &cf::day_number(CalendarFormat &format)
 
 CalendarFormat &cf::month_name(CalendarFormat &format)
 {
-	format._display = Display::month_name;
+	format._date_display = DateDisplay::month_name;
 	format._out << std::setfill(format._space_symbol) << std::setw(format._week_width);
 
 	return format;
@@ -71,7 +71,7 @@ CalendarFormat &cf::fill_empty_week_horizontal(CalendarFormat &format)
 
 CalendarFormat &cf::fill_week_begin(CalendarFormat &format)
 {
-	format._display = Display::week_begin;
+	format._date_display = DateDisplay::week_begin;
 	format._out << std::setfill(format._space_symbol);
 
 	return format;
@@ -80,9 +80,23 @@ CalendarFormat &cf::fill_week_begin(CalendarFormat &format)
 
 CalendarFormat &cf::fill_week_end(CalendarFormat &format)
 {
-	format._display = Display::week_end;
+	format._date_display = DateDisplay::week_end;
 	format._out << std::setfill(format._space_symbol);
 
+	return format;
+}
+
+
+CalendarFormat &cf::display_year_once(CalendarFormat &format)
+{
+	format._month_display = MonthDisplay::year_once;
+	return format;
+}
+
+
+CalendarFormat &cf::display_year_for_each_month(CalendarFormat &format)
+{
+	format._month_display = MonthDisplay::year_for_each_month;
 	return format;
 }
 
@@ -106,7 +120,7 @@ CalendarFormat::CalendarFormat(std::ostream &out)
 CalendarFormat::CalendarFormat(const CalendarFormat &format)
 	: _out(format._out)
 {
-	_display = format._display;
+	_date_display = format._date_display;
 	_calendar_direction = format._calendar_direction;
 
 	_day_width = format._day_width;
@@ -124,8 +138,10 @@ CalendarFormat::~CalendarFormat()
 
 void CalendarFormat::init()
 {
-	_display = Display::none;
 	_calendar_direction = Direction::horizontal;
+	_date_display = DateDisplay::none;
+	_month_display = MonthDisplay::year_once;
+
 	set_day_width(CalendarFormat::DEFAULT_DAY_WIDTH);
 	set_calendar_width(CalendarFormat::DEFAULT_CALENDAR_WIDTH);
 	set_space_symbol(CalendarFormat::DEFAULT_SPACE_SYMBOL);
@@ -142,8 +158,8 @@ CalendarFormat operator<<(std::ostream &out, CalendarFormat& (*func)(CalendarFor
 
 CalendarFormat &CalendarFormat::operator<<(const char chr)
 {
-	if (_display == Display::day_num)
-		_display = Display::none;
+	if (_date_display == DateDisplay::day_num)
+		_date_display = DateDisplay::none;
 
 	_out << chr;
 	return (*this);
@@ -152,21 +168,21 @@ CalendarFormat &CalendarFormat::operator<<(const char chr)
 
 CalendarFormat &CalendarFormat::operator<<(const Date &date)
 {
-	if (_display == Display::day_num)
+	if (_date_display == DateDisplay::day_num)
 		_out << date.get_day();
 
-	else if (_display == Display::month_name)
+	else if (_date_display == DateDisplay::month_name)
 		_out << date.get_month_name();
 
-	else if (_display == Display::week_begin)
+	else if (_date_display == DateDisplay::week_begin)
 		for (int i = 0; i < date.get_weekday(); i++)
 			_out << std::setw(_day_width) << _space_symbol;
 
-	else if (_display == Display::week_end)
+	else if (_date_display == DateDisplay::week_end)
 		for (int i = date.get_weekday(); i < DAYS_IN_WEEK_NUM - 1; i++)
 			_out << std::setw(_day_width) << _space_symbol;
 
-	else if (_display == Display::none)
+	else if (_date_display == DateDisplay::none)
 		_out << "["
 				<< date.get_weekday_name().substr(0, _day_width) << ' '
 				<< date.get_day() << ' '
@@ -174,7 +190,7 @@ CalendarFormat &CalendarFormat::operator<<(const Date &date)
 				<< date.get_year()
 				<< "]";
 
-	_display = Display::none;
+	_date_display = DateDisplay::none;
 	return (*this);
 }
 
@@ -194,7 +210,6 @@ CalendarFormat &CalendarFormat::operator<<(const Month &month)
 
 CalendarFormat &CalendarFormat::operator<<(const Calendar &cal)
 {
-	_out << "Printing " << cal << " ..." << std::endl;
 	_out << std::right;
 
 	if (_calendar_direction == Direction::horizontal)

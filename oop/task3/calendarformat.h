@@ -17,7 +17,7 @@ enum class Direction
 };
 
 
-enum class Display
+enum class DateDisplay
 {
 	none = 0,
 	day_num = 1,
@@ -27,10 +27,15 @@ enum class Display
 };
 
 
-class CalendarFormat;
+enum class MonthDisplay
+{
+	year_once = 0,
+	year_for_each_month = 1,
+};
 
 
 // CalendarFormat manipulators.
+class CalendarFormat;
 namespace cf
 {
 	CalendarFormat &horizontal(CalendarFormat &format);
@@ -41,22 +46,14 @@ namespace cf
 	CalendarFormat &fill_empty_week_horizontal(CalendarFormat &format);
 	CalendarFormat &fill_week_begin(CalendarFormat &format);
 	CalendarFormat &fill_week_end(CalendarFormat &format);
+	CalendarFormat &display_year_once(CalendarFormat &format);
+	CalendarFormat &display_year_for_each_month(CalendarFormat &format);
 }
 
 
 class CalendarFormat
 {
 	public:
-		// Manipulators.
-		friend CalendarFormat &cf::horizontal(CalendarFormat &format);
-		friend CalendarFormat &cf::vertical(CalendarFormat &format);
-		friend CalendarFormat &cf::day_number(CalendarFormat &format);
-		friend CalendarFormat &cf::month_name(CalendarFormat &format);
-		friend CalendarFormat &cf::week_header(CalendarFormat &format);
-		friend CalendarFormat &cf::fill_empty_week_horizontal(CalendarFormat &format);
-		friend CalendarFormat &cf::fill_week_begin(CalendarFormat &format);
-		friend CalendarFormat &cf::fill_week_end(CalendarFormat &format);
-
 		// Constructors / Destructor.
 		CalendarFormat();
 		CalendarFormat(std::ostream &out);
@@ -70,15 +67,27 @@ class CalendarFormat
 		CalendarFormat &operator<<(const Month &month);
 		CalendarFormat &operator<<(const Calendar &calendar);
 
-		// Operators for Manipulators.
-		CalendarFormat &operator<<(std::ostream& (*func)(std::ostream&)) { _out << func; return (*this); }
-		CalendarFormat &operator<<(CalendarFormat& (*func)(CalendarFormat&)) { return func(*this); }
-
-		// Modifiers.
+		// Setters.
 		void set_day_width(int n);
 		void set_calendar_width(int n);
 		void set_space_symbol(char chr) { _space_symbol = chr; }
 		void set_zero_day_symbol(char chr) { _zero_day_symbol = chr; }
+
+		// Operators for Manipulators.
+		CalendarFormat &operator<<(std::ostream& (*func)(std::ostream&)) { _out << func; return (*this); }
+		CalendarFormat &operator<<(CalendarFormat& (*func)(CalendarFormat&)) { return func(*this); }
+
+		// Manipulators (friends).
+		friend CalendarFormat &cf::horizontal(CalendarFormat &format);
+		friend CalendarFormat &cf::vertical(CalendarFormat &format);
+		friend CalendarFormat &cf::day_number(CalendarFormat &format);
+		friend CalendarFormat &cf::month_name(CalendarFormat &format);
+		friend CalendarFormat &cf::week_header(CalendarFormat &format);
+		friend CalendarFormat &cf::fill_empty_week_horizontal(CalendarFormat &format);
+		friend CalendarFormat &cf::fill_week_begin(CalendarFormat &format);
+		friend CalendarFormat &cf::fill_week_end(CalendarFormat &format);
+		friend CalendarFormat &cf::display_year_once(CalendarFormat &format);
+		friend CalendarFormat &cf::display_year_for_each_month(CalendarFormat &format);
 
 	private:
 		// Static.
@@ -91,7 +100,8 @@ class CalendarFormat
 		std::ostream &_out;
 
 		Direction _calendar_direction;
-		Display _display;
+		DateDisplay _date_display;
+		MonthDisplay _month_display;
 
 		int _day_width;
 		int _week_width;
@@ -102,14 +112,13 @@ class CalendarFormat
 
 		// Methods.
 		void init();
-		void turn_flags_false();
 
 		void horizontal_display(const Calendar &cal);
 		void vertical_display(const Calendar &cal);
 };
 
 
-// For format init.
+// For format init (each manipulator call with '<<' operator creates CalendarFormat).
 CalendarFormat operator<<(std::ostream &out, CalendarFormat& (*func)(CalendarFormat&));
 
 // __CALENDARFORMAT_H__

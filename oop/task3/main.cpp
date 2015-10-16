@@ -6,13 +6,14 @@
 #include "month.h"
 #include "calendar.h"
 #include "calendarformat.h"
+#include "calendarparser.h"
 
 
 int main(int argc, char **argv)
 {
-	// TODO: parse input argv.
+	CalendarParser parser(argc, argv);
 
-	 std::cout << cf::vertical << Calendar(Date(2015, 3, 1), Date(2015, 11, 1)) << std::endl;
+	parser.get_calendar_format() << Calendar(parser.get_calendar_begin(), parser.get_calendar_end()) << std::endl;
 
 	return 0;
 }
