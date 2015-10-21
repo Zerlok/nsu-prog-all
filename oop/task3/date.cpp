@@ -33,7 +33,8 @@ Date Date::create_month_end(int year, int month)
 	int m = ((MONTHS_IN_YEAR_NUM + month - 1) % MONTHS_IN_YEAR_NUM) + 1;
 	Date d =Date(year, m, DAYS_IN_MONTH[m-1]);
 
-	if (d.is_leap_year())
+	if ((m == 2)
+			&& d.is_leap_year())
 		d++;
 
 	return d;
