@@ -23,7 +23,7 @@ class Week
 		Week &operator++(int);
 		Week &operator--(int);
 
-		Week operator+(int num);
+		Week operator+(int num) const;
 
 		bool operator<(const Date &date) const { return (_end < date); }
 		bool operator>(const Date &date) const { return (_begin > date); }

@@ -25,6 +25,9 @@ class Calendar
 		int get_width() const { return _width; }
 
 	private:
+		// Static.
+		static const int DEFAULT_WIDTH;
+
 		// Fields.
 		Date _begin;
 		Date _end;

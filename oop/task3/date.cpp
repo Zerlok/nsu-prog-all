@@ -6,13 +6,47 @@
 #include "date.h"
 
 
+const int Date::TM_STRUCT_ZERO_YEAR = 1900;
+
+
+Date Date::create_year_begin(int year)
+{
+	return Date(year, 1, 1);
+}
+
+
+Date Date::create_year_end(int year)
+{
+	return Date(year, MONTHS_IN_YEAR_NUM, DAYS_IN_MONTH[MONTHS_IN_YEAR_NUM-1]);
+}
+
+
+Date Date::create_month_begin(int year, int month)
+{
+	int m = ((MONTHS_IN_YEAR_NUM + month - 1) % MONTHS_IN_YEAR_NUM) + 1;
+	return Date(year, m, 1);
+}
+
+
+Date Date::create_month_end(int year, int month)
+{
+	int m = ((MONTHS_IN_YEAR_NUM + month - 1) % MONTHS_IN_YEAR_NUM) + 1;
+	Date d =Date(year, m, DAYS_IN_MONTH[m-1]);
+
+	if (d.is_leap_year())
+		d++;
+
+	return d;
+}
+
+
 Date::Date()
 {
 	time_t t = time(NULL);
 	struct tm *today = localtime(&t);
 
-	_year = today->tm_year + 1900;	// counts from 1900 year.
-	_month = today->tm_mon + 1;		// month number from [1..12]
+	_year = today->tm_year + Date::TM_STRUCT_ZERO_YEAR;
+	_month = today->tm_mon + 1;
 	_day = today->tm_mday;
 
 	_days_num = count_days();

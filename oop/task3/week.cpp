@@ -114,7 +114,7 @@ Week &Week::operator--(int)
 }
 
 
-Week Week::operator+(int n)
+Week Week::operator+(int n) const
 {
 	Week w(*this);
 

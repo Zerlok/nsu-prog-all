@@ -27,6 +27,12 @@ static const std::string WEEKDAY_NAMES[DAYS_IN_WEEK_NUM] = {
 class Date
 {
 	public:
+		// Static.
+		static Date create_year_begin(int year);
+		static Date create_year_end(int year);
+		static Date create_month_begin(int year, int month);
+		static Date create_month_end(int year, int month);
+
 		// Constructors / Destructor.
 		Date();
 		Date(const Date &date);
@@ -63,6 +69,9 @@ class Date
 		const std::string &get_weekday_name() const { return WEEKDAY_NAMES[get_weekday()]; }
 
 	private:
+		// Static.
+		static const int TM_STRUCT_ZERO_YEAR;
+
 		// Fields.
 		int _year;
 		int _month;

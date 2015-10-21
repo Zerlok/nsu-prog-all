@@ -6,8 +6,11 @@
 #include "calendarformat.h"
 
 
+const int Calendar::DEFAULT_WIDTH = 3;
+
+
 Calendar::Calendar(const Date &date)
-	: _width(3)
+	: _width(Calendar::DEFAULT_WIDTH)
 {
 	Month m = Month(date);
 	_begin = m.get_begin();
@@ -16,21 +19,23 @@ Calendar::Calendar(const Date &date)
 
 
 Calendar::Calendar(const Date &begin, const Date &end)
-	: _width(3)
+	: _width(Calendar::DEFAULT_WIDTH)
 {
-	Month m = Month(begin);
+	Month m(begin);
 	_begin = m.get_begin();
 
 	if (m.is_contain(end))
 		_end = m.get_end();
 
 	else
-		_end = Month(end).get_end();
+		_end = Date::create_month_end(end.get_year(), end.get_month());
 }
 
 
 Calendar::Calendar(const int year)
-	: _begin(year, 1, 1), _end(year, 12, 31), _width(3)
+	: _begin(Date::create_year_begin(year)),
+	  _end(Date::create_year_end(year)),
+	  _width(Calendar::DEFAULT_WIDTH)
 {
 }
 

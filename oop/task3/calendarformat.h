@@ -17,17 +17,18 @@ enum class Direction
 };
 
 
-enum class DateDisplay
+enum class Display
 {
 	none = 0,
-	day_num = 1,
-	month_name = 2,
+	day = 1,
+	year = 2,
 	week_begin = 3,
 	week_end = 4,
+	month_header = 5,
 };
 
 
-enum class MonthDisplay
+enum class MonthHeader
 {
 	year_once = 0,
 	year_for_each_month = 1,
@@ -40,7 +41,8 @@ namespace cf
 {
 	CalendarFormat &horizontal(CalendarFormat &format);
 	CalendarFormat &vertical(CalendarFormat &format);
-	CalendarFormat &day_number(CalendarFormat &format);
+	CalendarFormat &day(CalendarFormat &format);
+	CalendarFormat &year(CalendarFormat &format);
 	CalendarFormat &month_name(CalendarFormat &format);
 	CalendarFormat &week_header(CalendarFormat &format);
 	CalendarFormat &fill_empty_week_horizontal(CalendarFormat &format);
@@ -80,7 +82,8 @@ class CalendarFormat
 		// Manipulators (friends).
 		friend CalendarFormat &cf::horizontal(CalendarFormat &format);
 		friend CalendarFormat &cf::vertical(CalendarFormat &format);
-		friend CalendarFormat &cf::day_number(CalendarFormat &format);
+		friend CalendarFormat &cf::day(CalendarFormat &format);
+		friend CalendarFormat &cf::year(CalendarFormat &format);
 		friend CalendarFormat &cf::month_name(CalendarFormat &format);
 		friend CalendarFormat &cf::week_header(CalendarFormat &format);
 		friend CalendarFormat &cf::fill_empty_week_horizontal(CalendarFormat &format);
@@ -100,8 +103,8 @@ class CalendarFormat
 		std::ostream &_out;
 
 		Direction _calendar_direction;
-		DateDisplay _date_display;
-		MonthDisplay _month_display;
+		Display _display;
+		MonthHeader _month_header;
 
 		int _day_width;
 		int _week_width;
@@ -115,6 +118,9 @@ class CalendarFormat
 
 		void horizontal_display(const Calendar &cal);
 		void vertical_display(const Calendar &cal);
+		void increment_line_start(Month &line_start, int width);
+		void increment_line_end(Month &line_end, const Month &line_start, const Date &cal_end, int width);
+		void line_header_display(const Month &start, const Month &end, const Date &cal_begin);
 };
 
 

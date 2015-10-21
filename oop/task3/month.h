@@ -14,13 +14,14 @@ class Month
 	public:
 		// Constructors / Destructor.
 		Month();
+		Month(const Month &month);
 		Month(const Date &date);
 
 		// Operators.
 		Month &operator=(const Month &month);
 		Month &operator++(int);
 		Month &operator--(int);
-		Month operator+(int num);
+		Month operator+(int num) const;
 		Month &operator+=(int num);
 
 		bool operator<(int month_num) const { return (_begin.get_month() < month_num); }
@@ -46,6 +47,7 @@ class Month
 		// Getters.
 		const Date &get_begin() const { return _begin; }
 		const Date &get_end() const { return _end; }
+		int	get_number() const { return _begin.get_month(); }
 		const std::string &get_name() const { return _begin.get_month_name(); }
 
 		int get_year() const { return _begin.get_year(); }

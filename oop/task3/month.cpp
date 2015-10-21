@@ -7,23 +7,22 @@
 Month::Month()
 {
 	Date today;
-	_begin = Date(
-			today.get_year(),
-			today.get_month(),
-			1
-	);
-	_end = get_month_end(today);
+	_begin = Date::create_month_begin(today.get_year(), today.get_month());
+	_end = Date::create_month_end(today.get_year(), today.get_month());
 }
 
 
 Month::Month(const Date& date)
 {
-	_begin = Date(
-			date.get_year(),
-			date.get_month(),
-			1
-	);
-	_end = get_month_end(date);
+	_begin = Date::create_month_begin(date.get_year(), date.get_month());
+	_end = Date::create_month_end(date.get_year(), date.get_month());
+}
+
+
+Month::Month(const Month &month)
+{
+	_begin = month._begin;
+	_end = month._end;
 }
 
 
@@ -39,7 +38,7 @@ Month &Month::operator=(const Month &month)
 Month &Month::operator++(int)
 {
 	_begin = _end + 1;
-	_end = get_month_end(_begin);
+	_end = Date::create_month_end(_begin.get_year(), _begin.get_month());
 
 	return (*this);
 }
@@ -48,17 +47,13 @@ Month &Month::operator++(int)
 Month &Month::operator--(int)
 {
 	_end = _begin - 1;
-	_begin = Date(
-			_end.get_year(),
-			_end.get_month(),
-			1
-	);
+	_begin = Date::create_month_begin(_end.get_year(), _end.get_month());
 
 	return (*this);
 }
 
 
-Month Month::operator+(int num)
+Month Month::operator+(int num) const
 {
 	Month m(*this);
 	for (int i = 0; i < num; i++)
@@ -80,26 +75,4 @@ Month &Month::operator+=(int num)
 std::ostream &operator<<(std::ostream &out, const Month &month)
 {
 	return out << "<Month: " << month._begin << " - " << month._end << ">";
-}
-
-
-const Date &Month::get_month_end(const Date &date) const
-{
-	Date month_end;
-
-	if (date.get_month() == MONTHS_IN_YEAR_NUM)
-		month_end = Date(
-				date.get_year() + 1,
-				1,
-				1
-		);
-
-	else
-		month_end = Date(
-				date.get_year(),
-				date.get_month() + 1,
-				1
-		);
-
-	return month_end--;
 }

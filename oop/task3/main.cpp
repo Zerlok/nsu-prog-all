@@ -1,4 +1,5 @@
 #include <iostream>
+#include <iomanip>
 #include <sstream>
 
 #include "date.h"
@@ -12,7 +13,6 @@
 int main(int argc, char **argv)
 {
 	CalendarParser parser(argc, argv);
-
 	parser.get_calendar_format() << Calendar(parser.get_calendar_begin(), parser.get_calendar_end()) << std::endl;
 
 	return 0;
