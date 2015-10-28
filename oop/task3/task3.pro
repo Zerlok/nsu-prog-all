@@ -9,16 +9,14 @@ SOURCES += main.cpp \
     date.cpp \
     week.cpp \
     month.cpp \
-    calendarformat.cpp \
-    calendarparser.cpp
+    calendarformat.cpp
 
 HEADERS += \
     calendar.h \
     date.h \
     week.h \
     month.h \
-    calendarformat.h \
-    calendarparser.h
+    calendarformat.h
 
 OTHER_FILES += gtest.cpp \
     ../build/task3/calendar_sep_nov.txt

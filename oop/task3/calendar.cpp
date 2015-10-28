@@ -9,6 +9,15 @@
 const int Calendar::DEFAULT_WIDTH = 3;
 
 
+Calendar::Calendar()
+	: _width(Calendar::DEFAULT_WIDTH)
+{
+	Date today;
+	_begin = Date::create_month_begin(today.get_year(), today.get_month());
+	_end = Date::create_month_end(today.get_year(), today.get_month());
+}
+
+
 Calendar::Calendar(const Date &date)
 	: _width(Calendar::DEFAULT_WIDTH)
 {
