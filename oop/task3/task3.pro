@@ -16,7 +16,8 @@ HEADERS += \
     date.h \
     week.h \
     month.h \
-    calendarformat.h
+	calendarformat.h
 
 OTHER_FILES += gtest.cpp \
-    ../build/task3/calendar_sep_nov.txt
+	../build/task3/calendar_sep_nov.txt \
+	../argvparser.h

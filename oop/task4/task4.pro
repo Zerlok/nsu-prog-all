@@ -6,6 +6,6 @@ CONFIG -= qt
 SOURCES += main.cpp \
 	graph.cpp
 
-HEADERS += \
-	../argvparser.h \
-	graph.h
+HEADERS += graph.h
+
+OTHER_FILES += gtest.cpp

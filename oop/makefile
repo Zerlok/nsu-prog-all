@@ -9,18 +9,24 @@ BINNAME=result.bin
 OBJECT_BINARIES=object.cpp main.cpp
 
 # By tasks.
-TASK1_BINARIES=task1/longstring.c task1/recordarray.c task1/main.c
-TASK2_BINARIES=task2/class.c task2/shape.c task2/point.c task2/rectangle.c task2/circle.c task2/factory.c task2/main.c
+TASK1_SOURCES=task1/longstring.c task1/recordarray.c task1/main.c
+TASK2_SOURCES=task2/class.c task2/shape.c task2/point.c task2/rectangle.c task2/circle.c task2/factory.c task2/main.c
+TASK3_SOURCES=task3/date.cpp task3/week.cpp task3/month.cpp task3/calendar.cpp task3/calendarformat.cpp task3/main.cpp
 
 
 # Longstring and recordarray.
 first:
-	$(CC) $(TASK1_BINARIES) -o $(BINNAME)
+	$(CC) $(TASK1_SOURCES) -o $(BINNAME)
 
 
 # Factory (Object Oriented C).
 second:
-	$(CC) $(TASK2_BINARIES) -o $(BINNAME)
+	$(CC) $(TASK2_SOURCES) -o $(BINNAME)
+
+
+# A simple calendar on c++
+third:
+	$(CCPP) $(CPPFLAGS) $(TASK3_SOURCES) -o $(BINNAME)
 
 
 # Just a little experiment.

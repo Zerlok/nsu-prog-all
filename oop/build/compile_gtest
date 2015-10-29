@@ -11,4 +11,4 @@ for f in "${arr[@]}"; do
 	fi
 done
 
-g++ $1 "${sources[@]}" -o gtest -lgtest -lpthread
+g++ $1 "${sources[@]}" -o gtest -std=c++11 -lgtest -lpthread

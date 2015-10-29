@@ -24,3 +24,4 @@ syntax: glob
 *target/test*
 *_samples*
 *oop/build*
+oop/task3/argvparser.h

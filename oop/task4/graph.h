@@ -2,130 +2,164 @@
 #define __GRAPH_H__
 
 
+#include <iostream>
 #include <vector>
-#include <list>
 #include <set>
+#include <unordered_map>
 #include <math.h>
 using namespace std;
 
 
+// --------------------- VERTEX --------------------- //
 class Vertex
 {
 	public:
+		// Static.
+		static const Vertex none;
+
 		// Constructors / Destructor.
 		Vertex()
 			: x(0),
 			  y(0),
-			  number(0) {}
+			  number(0),
+			  color(none.color) {}
 		Vertex(const Vertex &v)
 			: x(v.x),
 			  y(v.y),
-			  number(v.number) {}
-		Vertex(int x, int y, int number=0)
+			  number(v.number),
+			  color(v.color) {}
+		Vertex(int x, int y, int number=none.number+1, int color=none.color+1)
 			: x(x),
 			  y(y),
-			  number(number) {}
+			  number(number),
+			  color(color) {}
 		~Vertex() {}
 
 		// Operators.
-		bool operator==(const Vertex &v) const { return ((number == v.number)
-														 && (x == v.x)
-														 && (y == v.y)); }
-		bool operator!=(const Vertex &v) const { return !(this->operator==(v)); }
+		bool operator==(const Vertex &v) const { return (number == v.number); }
+		bool operator!=(const Vertex &v) const { return (number != v.number); }
+		bool operator<(const Vertex &v) const { return (number < v.number); }
+		bool operator>(const Vertex &v) const { return (number > v.number); }
 
 		// Methods.
-		double count_distance_to(const Vertex &v) const { return sqrt(pow((x - v.x), 2) + pow((y - v.y), 2)); }
+		void swap(Vertex &v);
+
+		// Friends.
+		friend double distance(const Vertex &v, const Vertex &u);
+		friend ostream &operator<<(ostream &out, const Vertex &v);
 
 		// Fields.
 		const int x;
 		const int y;
-		const int number;
+		int number;
+		int color;
 };
 
+double distance(const Vertex &v, const Vertex &u);
+ostream &operator<<(ostream &out, const Vertex &v);
 
+
+// --------------------- EDGE --------------------- //
 class Edge
 {
 	public:
+		// Static.
+		static const double zero_length;
+
 		// Constructors / Destructor.
+		Edge(Vertex *v, Vertex *u);
+		Edge(const Vertex *v, const Vertex *u);
 		Edge(const Edge &edge)
 			: _begin(edge._begin),
 			  _end(edge._end),
 			  _length(edge._length) {}
-		Edge(const Vertex &v1, const Vertex &v2)
-			: _begin(v1),
-			  _end(v2),
-			  _length(_begin.count_distance_to(_end)) {}
-		~Edge();
+		~Edge() {}
 
-		// Getters.
-		const Vertex &get_begin() const { return _begin; }
-		const Vertex &get_end() const { return _end; }
+		// Operators.
+		bool operator==(const Edge &e) const { return ((_begin == e._begin)
+													   && (_end == e._end)
+													   && (_length == e._length)); }
+
+		// Friends.
+		friend ostream &operator<<(ostream &out, const Edge &e);
+
+		// Fields.
+		const Vertex &get_begin() const { return (*_begin); }
+		const Vertex &get_end() const { return (*_end); }
 		double get_length() const { return _length; }
 
 	private:
-		// Fields.
-		const Vertex _begin;
-		const Vertex _end;
+		Vertex *_begin;
+		Vertex *_end;
 		const double _length;
 };
+
+
+// --------------------- GRAPH --------------------- //
+
+// For edge hash-table (key is a pair <int, int>).
+typedef pair<int, int> t_vpair;
+namespace std
+{
+	template<>
+	class hash<t_vpair>
+	{
+		public:
+			size_t operator()(const t_vpair& key) const
+			{
+				return (((hash<int>()(key.first)) << key.second)
+						^ ((hash<int>()(key.second)) << key.first));
+			}
+	};
+}
+
+ostream &operator<<(ostream &out, const Edge &e);
 
 
 class Graph
 {
 	public:
-		// Static.
-		static const Vertex null_vertex;
-		static const double null_length;
-
 		// Constructors / Destructor.
 		Graph()
 			: _vertices(),
-			  _matrix() { init_matrix(); }
+			  _edges() {}
 		Graph(const Graph &graph)
 			: _vertices(graph._vertices),
-			  _matrix(graph._matrix) { init_matrix(); }
-		Graph(const vector<Vertex> &vertices)
-			: _vertices(vertices),
-			  _matrix() { init_matrix(); }
+			  _edges(graph._edges) {}
+		Graph(const vector<Vertex> &vertices);
 		~Graph() {}
 
-		// Getters.
-		int get_vertices() const;
-		int get_edges() const;
+		// Operators.
 		const Vertex& operator[](int v) const;
 
 		// Methods.
-		bool add_edge(const Vertex &v, const Vertex &u);
+		const Vertex &add_vertex(int x, int y);
+		bool connect(const Vertex &v, const Vertex &u);
 		bool add_edge(const Edge &e);
+
 		bool has_vertex(int v) const;
 		bool has_vertex(const Vertex &v) const;
+
 		bool has_edge(const Vertex &v, const Vertex &u) const;
 		bool has_edge(const Edge &e) const;
+
 		bool is_isolated(const Vertex &v) const;
 		bool is_linked(const Vertex &v, const Vertex &u) const;
-		set<Vertex> get_friends(int v) const;
 
-		// Iterators.
-		class VertexIterator
-		{
-			public:
-				VertexIterator(int v);
-				VertexIterator(const VertexIterator &vit);
+		set<Vertex> get_friends(const Vertex &v) const;
 
-			private:
-				set<Vertex> _visited;
-		};
-
-		class EdgeIterator;
+		// Friends.
+		friend ostream &operator<<(ostream &out, const Graph &g);
 
 	private:
 		// Fields.
 		vector<Vertex> _vertices;
-		vector<vector<double>> _matrix;
+		unordered_map<t_vpair, Edge> _edges;
 
-		// Methods.
-		void init_matrix();
+		void repaint_linked_vertices(Vertex &v, int color);
 };
+
+ostream &operator<<(ostream &out, const Graph &g);
 
 
 // __GRAPH_H__

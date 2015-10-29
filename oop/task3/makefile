@@ -6,7 +6,7 @@ GTESTFLAGS=-lgtest -lpthread
 GTESTFILE=gtest.cpp
 GTESTBINNAME=test-calendr
 
-SOURCES=date.cpp week.cpp month.cpp calendar.cpp calendarformat.cpp calendarparser.cpp
+SOURCES=date.cpp week.cpp month.cpp calendar.cpp calendarformat.cpp
 MAINFILE=main.cpp
 BINNAME=calendr
 

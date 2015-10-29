@@ -1,51 +1,29 @@
 #include <iostream>
-#include <set>
 using namespace std;
 
-#include "../argvparser.h"
-
-
-class Vertex
-{
-	public:
-		Vertex(int x, int y) : _x(x), _y(y) {}
-		Vertex(const Vertex &v) : _x(v._x), _y(v._y) {}
-
-		bool operator==(const Vertex &v) { return ((_x == v._x)
-												   && (_y == v._y)); }
-
-		Vertex &operator=(const Vertex &v)
-		{
-			_x = v._x;
-			_y = v._y;
-
-			return (*this);
-		}
-
-		int _x;
-		int _y;
-};
+#include "graph.h"
 
 
 int main(int argc, char *argv[])
 {
-	Vertex v1 =	Vertex(100, 100);
-	set<Vertex*> vertices = {
-		new Vertex(0, 1),
-		new Vertex(2, 3),
-		new Vertex(-1, -1)
-	};
+	// TODO: open file, read by lines (number, x, y)
+	// TODO: count smallest edges
+	// TODO: add edge to tree (graph), if not a cycle, repeat unitl |E| - 1 < |V|
+	// TODO: print the result tree (graph)
 
-	for (auto const v : vertices)
-		cout << "(" << v->_x << " " << v->_y << ")" << endl;
+	Graph g({
+			Vertex(0, 1),
+			Vertex(1, 1),
+			Vertex(10, 1),
+			Vertex(-5, 3),
+			Vertex(17, 7),
+			Vertex(13, -13)
+	});
+	g.connect(g[0], g[1]);
+	g.connect(g[3], g[4]);
+	g.connect(g[2], g[1]);
+	g.connect(g[2], g[3]);
 
-	vertices.insert(&v1);
-
-	v1._x = -100;
-
-	for (auto const v : vertices)
-		cout << "(" << v->_x << " " << v->_y << ")" << endl;
-
-	return 0;
+	cout << g << endl;
 }
 
