@@ -4,7 +4,6 @@
 
 #include <iostream>
 #include <vector>
-#include <set>
 #include <unordered_map>
 #include <math.h>
 using namespace std;
@@ -14,6 +13,9 @@ using namespace std;
 class Vertex
 {
 	public:
+		// Types.
+		typedef pair<int, int> t_num_pair;
+
 		// Static.
 		static const Vertex none;
 
@@ -57,6 +59,18 @@ class Vertex
 
 double distance(const Vertex &v, const Vertex &u);
 ostream &operator<<(ostream &out, const Vertex &v);
+template<typename T> T* ptr_to_min(T *a, T *b)
+{
+	return (*a < *b)
+			? a
+			: b;
+}
+template<typename T> T* ptr_to_max(T *a, T *b)
+{
+	return (*a < *b)
+			? b
+			: a;
+}
 
 
 // --------------------- EDGE --------------------- //
@@ -67,45 +81,55 @@ class Edge
 		static const double zero_length;
 
 		// Constructors / Destructor.
-		Edge(Vertex *v, Vertex *u);
-		Edge(const Vertex *v, const Vertex *u);
+		Edge(Vertex *v, Vertex *u)
+			: _begin(ptr_to_min<Vertex>(v, u)),
+			  _end(ptr_to_max<Vertex>(v, u)),
+			  _length(distance(*_begin, *_end)) {}
 		Edge(const Edge &edge)
 			: _begin(edge._begin),
 			  _end(edge._end),
 			  _length(edge._length) {}
 		~Edge() {}
 
+		// Getters.
+		Vertex &get_begin() { return (*_begin); }
+		Vertex &get_end() { return (*_end); }
+		Vertex *get_begin_ptr() { return _begin; }
+		Vertex *get_end_ptr() { return _end; }
+		const Vertex &get_begin() const { return (*_begin); }
+		const Vertex &get_end() const { return (*_end); }
+		const Vertex *get_begin_ptr() const { return _begin; }
+		const Vertex *get_end_ptr() const { return _end; }
+		double get_length() const { return _length; }
+
 		// Operators.
-		bool operator==(const Edge &e) const { return ((_begin == e._begin)
-													   && (_end == e._end)
-													   && (_length == e._length)); }
+		Edge &operator=(const Edge &e);
+		bool operator<(const Edge &e) const { return (_length < e._length); }
+		bool operator==(const Edge &e) const { return (_length == e._length); }
 
 		// Friends.
 		friend ostream &operator<<(ostream &out, const Edge &e);
 
-		// Fields.
-		const Vertex &get_begin() const { return (*_begin); }
-		const Vertex &get_end() const { return (*_end); }
-		double get_length() const { return _length; }
-
 	private:
+		// Fields.
 		Vertex *_begin;
 		Vertex *_end;
-		const double _length;
+		double _length;
 };
+
+ostream &operator<<(ostream &out, const Edge &e);
 
 
 // --------------------- GRAPH --------------------- //
 
 // For edge hash-table (key is a pair <int, int>).
-typedef pair<int, int> t_vpair;
 namespace std
 {
 	template<>
-	class hash<t_vpair>
+	class hash<Vertex::t_num_pair>
 	{
 		public:
-			size_t operator()(const t_vpair& key) const
+			size_t operator()(const Vertex::t_num_pair& key) const
 			{
 				return (((hash<int>()(key.first)) << key.second)
 						^ ((hash<int>()(key.second)) << key.first));
@@ -113,12 +137,14 @@ namespace std
 	};
 }
 
-ostream &operator<<(ostream &out, const Edge &e);
-
 
 class Graph
 {
 	public:
+		// Types.
+		typedef vector<Vertex> t_vertices;
+		typedef unordered_map<Vertex::t_num_pair, Edge> t_edges;
+
 		// Constructors / Destructor.
 		Graph()
 			: _vertices(),
@@ -130,12 +156,12 @@ class Graph
 		~Graph() {}
 
 		// Operators.
+		Vertex& operator[](int v);
 		const Vertex& operator[](int v) const;
 
-		// Methods.
-		const Vertex &add_vertex(int x, int y);
-		bool connect(const Vertex &v, const Vertex &u);
-		bool add_edge(const Edge &e);
+		// Getters.
+		t_vertices &get_vertices() { return _vertices; }
+		t_edges &get_edges() { return _edges; }
 
 		bool has_vertex(int v) const;
 		bool has_vertex(const Vertex &v) const;
@@ -146,15 +172,21 @@ class Graph
 		bool is_isolated(const Vertex &v) const;
 		bool is_linked(const Vertex &v, const Vertex &u) const;
 
-		set<Vertex> get_friends(const Vertex &v) const;
+		// Methods.
+		const Vertex &add_vertex(int x, int y);
+		bool connect(Vertex &v, Vertex &u);
+		bool add_edge(Edge &e);
+
+		ostream &print_xml(ostream &out) const;
+		ostream &print_edges_list(ostream &out) const;
 
 		// Friends.
 		friend ostream &operator<<(ostream &out, const Graph &g);
 
 	private:
 		// Fields.
-		vector<Vertex> _vertices;
-		unordered_map<t_vpair, Edge> _edges;
+		t_vertices _vertices;
+		t_edges _edges;
 
 		void repaint_linked_vertices(Vertex &v, int color);
 };

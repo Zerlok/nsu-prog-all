@@ -6,6 +6,7 @@ using namespace std;
 
 const Vertex Vertex::none = Vertex(0.0, 0.0, -1, -1);
 const double Edge::zero_length = 0.0;
+Vertex none_vertex = Vertex(Vertex::none);
 
 
 void Vertex::swap(Vertex &v)
@@ -39,36 +40,20 @@ ostream &operator<<(ostream &out, const Edge &e)
 }
 
 
+Vertex& Graph::operator[](int v)
+{
+	return (has_vertex(v))
+			? _vertices[v]
+			: none_vertex;
+}
+
+
 const Vertex& Graph::operator[](int v) const
 {
 	return (has_vertex(v))
 			? _vertices[v]
 			: Vertex::none;
 }
-
-
-Edge::Edge(Vertex *v, Vertex *u)
-	: _begin(v),
-	_end(u),
-	_length(distance(*v, *u))
-{
-	if ((*_begin) > (*_end))
-		swap<Vertex*>(_begin, _end);
-
-	_end->color = _begin->color;
-}
-
-
-//Edge::Edge(const Vertex *v, const Vertex *u)
-//	: _begin(v),
-//	  _end(u),
-//	  _length(distance(*v, *u))
-//{
-//	if ((*_begin) > (*_end))
-//		swap<Vertex*>(_begin, _end);
-
-//	_end->color = _begin->color;
-//}
 
 
 const Vertex &Graph::add_vertex(int x, int y)
@@ -78,28 +63,38 @@ const Vertex &Graph::add_vertex(int x, int y)
 }
 
 
-bool Graph::connect(const Vertex &v, const Vertex &u)
+Edge &Edge::operator=(const Edge &e)
+{
+	_begin = e._begin;
+	_end = e._end;
+	_length = e._length;
+
+	return (*this);
+}
+
+
+bool Graph::connect(Vertex &v, Vertex &u)
 {
 	if (has_edge(v, u)
 			|| (v == u))
 		return false;
 
-	Vertex &first = _vertices[(min<Vertex>(v, u)).number];
-	Vertex &second = _vertices[(max<Vertex>(v, u)).number];
+	if (v > u)
+		v.swap(u);
 
 	// Repaint linked vertices.
-	if (first.color != second.color)
-		repaint_linked_vertices(second, first.color);
+	if (v.color != u.color)
+		repaint_linked_vertices(u, v.color);
 
-	_edges.insert(make_pair(make_pair(first.number, second.number), Edge(&first, &second)));
+	_edges.insert(make_pair(make_pair(v.number, u.number), Edge(&v, &u)));
 	return true;
 }
 
 
-bool Graph::add_edge(const Edge &e)
+bool Graph::add_edge(Edge &e)
 {
-	Vertex &v = _vertices[e.get_begin().number];
-	Vertex &u = _vertices[e.get_end().number];
+	Vertex &v = e.get_begin();
+	Vertex &u = e.get_end();
 
 	if (has_edge(e)
 			|| (v == u)
@@ -180,21 +175,6 @@ bool Graph::has_vertex(const Vertex &v) const
 }
 
 
-set<Vertex> Graph::get_friends(const Vertex &v) const
-{
-	set<Vertex> vset = set<Vertex>();
-
-	if (!has_vertex(v))
-		return vset;
-
-	for (const Vertex &u : _vertices)
-		if (has_edge(v, u))
-			vset.insert(u);
-
-	return vset;
-}
-
-
 Graph::Graph(const vector<Vertex> &vertices)
 	: _vertices(vertices),
 	  _edges()
@@ -211,22 +191,38 @@ void Graph::repaint_linked_vertices(Vertex &v, int color)
 		if ((u.color == v.color)
 				&& (u != v))
 			u.color = color;
+
 	v.color = color;
 }
 
 
 ostream &operator<<(ostream &out, const Graph &g)
 {
+	return g.print_xml(out);
+}
+
+
+ostream &Graph::print_edges_list(ostream &out) const
+{
+	for (auto const it : _edges)
+		out << it.first.first << " - " << it.first.second<< endl;
+
+	return out;
+}
+
+
+ostream &Graph::print_xml(ostream &out) const
+{
 	out << "<Graph>" << endl;
 	out << "\t<Vertices>" << endl;
 
-	for (const Vertex &v : g._vertices)
+	for (const Vertex &v : _vertices)
 		out << "\t\t" << v << endl;
 
 	out << "\t</Vertices>" << endl;
 	out << "\t<Edges>" << endl;
 
-	for (auto const it : g._edges)
+	for (auto const it : _edges)
 		out << "\t\t" << it.second << endl;
 
 	out << "\t</Edges>" << endl;
