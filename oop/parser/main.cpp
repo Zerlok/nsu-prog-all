@@ -4,28 +4,32 @@ using namespace std;
 #include "argvparser.h"
 
 
-typedef struct Data
-{
-	int i;
-	int t;
-	string s;
-} Data;
-
-
-class D
+class DataStruct
 {
 	public:
-		D() {}
+		DataStruct() {}
+		int i;
+		int t;
+		string s;
 };
+
+
+//ParserAction helpmsg(const ArgvFlag&, DataStruct&)
+//{
+//	cout << "Help message" << endl;
+//}
 
 
 int main(int argc, char **argv)
 {
-	ArgvParser<D> parser;
+	ArgvParser<DataStruct> parser;
 
+//	parser.register_flag_parser("--help", helpmsg);
 	parser.set_arguments(argc, argv);
+	parser.parse_input();
 
-	cout << "Hello World!" << endl;
+	DataStruct input = parser.get_parsed_data();
+	cout << parser.is_input_valid() << endl;
 	return 0;
 }
 

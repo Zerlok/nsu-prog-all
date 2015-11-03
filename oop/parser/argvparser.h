@@ -16,9 +16,19 @@ class ArgvArgument
 {
 	public:
 		// Constructors / Destructor.
-		ArgvArgument(char *value) : _value(value) {}
-		ArgvArgument(const string &value) : _value(value) {}
+		ArgvArgument()
+			: _value() {}
+		ArgvArgument(char *value)
+			: _value(value) {}
+		ArgvArgument(const string &value)
+			: _value(value) {}
 		virtual ~ArgvArgument() {}
+
+		// Operators.
+		bool operator==(const char *value) const { return !(_value.compare(value)); }
+		bool operator==(const string &value) const { return !(_value.compare(value)); }
+		bool operator!=(const char *value) const { return !(this->operator==(value)); }
+		bool operator!=(const string &value) const { return !(this->operator==(value)); }
 
 		// Getters.
 		const string &get_value() const { return _value; }
@@ -36,13 +46,18 @@ class ArgvFlag : public ArgvArgument
 		// Static fields.
 		static const string short_flag_start;
 		static const string long_flag_start;
+		static const string short_help_flag;
+		static const string long_help_flag;
 		static const ArgvArgument empty_argument;
 
 		// Static methods.
-		static bool is_flag(const string &value);
 		static bool is_flag(const ArgvArgument &arg);
+		static bool is_help_flag(const ArgvArgument &arg);
 
 		// Constructors / Destructor.
+		ArgvFlag()
+			: ArgvArgument(),
+			  _params() {}
 		ArgvFlag(char *name)
 			: ArgvArgument(name),
 			  _params() {}
@@ -85,25 +100,41 @@ class ArgvFlag : public ArgvArgument
 
 const string ArgvFlag::short_flag_start = "-";
 const string ArgvFlag::long_flag_start = "--";
+const string ArgvFlag::short_help_flag = "-h";
+const string ArgvFlag::long_help_flag = "--help";
 const ArgvArgument ArgvFlag::empty_argument = ArgvArgument(string(""));
-bool ArgvFlag::is_flag(const string &value)
+bool ArgvFlag::is_flag(const ArgvArgument &arg)
 {
+	const string &value = arg.get_value();
 	return ((value.find(long_flag_start) == 0)
 			|| (value.find(short_flag_start) == 0));
 }
-bool ArgvFlag::is_flag(const ArgvArgument &arg) { return is_flag(arg.get_value()); }
+bool ArgvFlag::is_help_flag(const ArgvArgument &arg)
+{
+	const string &value = arg.get_value();
+	return ((value.find(short_help_flag) == 0)
+			|| (value.find(long_help_flag) == 0));
+}
 
 
 // ----------------------- ArgvParser----------------------- //
 namespace parsing_messages
 {
 	// Messages.
-	static const string msg_help_default = "*** DEFAULT HELP MESSAGE ***\n";
-	static const string msg_usage = "Usage: ";
+	static const string msg_help_by_default = "*** GENERATED HELP MESSAGE (enabled by deafult) ***";
+	static const string msg_known_flags = "Flags:";
+	static const string msg_program_usage = "Usage: ";
 
 	// Errors.
-	static const string err_unknown_flag = "(unknown flag): ";
+	static const string err_unknown_flag = "Unknown flag ";
 }
+
+enum class ParserAction
+{
+	continue_parsing = 0,
+	stop_parsing_with_ok = 1,
+	stop_parsing_with_err = 2,
+};
 
 template <class Data>
 class ArgvParser : public AbstractParser<Data>
@@ -116,30 +147,53 @@ class ArgvParser : public AbstractParser<Data>
 		 * regestered to has been read.
 		 * pointer to function signature: void parser_fp(const ArgvFlag&, Data&);
 		 */
-		typedef	void (*parser_fp)(const ArgvFlag&, Data&);
+		typedef	ParserAction(*t_flag_parser_func_ptr)(const ArgvFlag&, Data&);
+
 		/*
 		 * Flag parsers map type.
 		 * Key: flag name, Value: pointer to flag parser function.
 		 */
-		typedef unordered_map<string, parser_fp> t_parsers;
+		typedef unordered_map<string, t_flag_parser_func_ptr> t_parsers;
 
 		// Constructors / Destructor.
 		ArgvParser(int argc=0, char *argv[]=nullptr)
 			: AbstractParser<Data>(),
-			  _parsers(),
+			  _flag_parsers(),
 			  _flags(),
-			  _args() { set_arguments(argc, argv); }
+			  _args(),
+			  _main_flag_parser(nullptr),
+			  _main_flag(nullptr),
+			  _is_help_flag_read(false)
+		{
+			set_arguments(argc, argv);
+		}
 		ArgvParser(const t_parsers &parsers)
 			: AbstractParser<Data>(),
-			  _parsers(parsers),
+			  _flag_parsers(parsers),
 			  _flags(),
-			  _args() {}
-		~ArgvParser() {}
+			  _args(),
+			  _main_flag_parser(nullptr),
+			  _main_flag(nullptr),
+			  _is_help_flag_read(false) {}
+		~ArgvParser()
+		{
+			delete _main_flag;
+		}
+
+		// Getters.
+		const string &get_main_name() const { return _main_name; }
+		const t_parsers &get_flag_parsers() const { return _flag_parsers; }
 
 		// Methods.
-		void register_flag_parser(const string &flagname, parser_fp parser_func)
+		bool register_flag_parser(const string &flagname, t_flag_parser_func_ptr parser_func)
 		{
-			_parsers.insert(make_pair(flagname, parser_func));
+			if (!(ArgvFlag::is_flag(flagname))
+					|| (parser_func == nullptr))
+				return false;
+
+			this->_is_input_valid = false;
+			_flag_parsers.insert(make_pair(flagname, parser_func));
+			return true;
 		}
 
 		bool set_arguments(int argc, char *argv[])
@@ -150,67 +204,83 @@ class ArgvParser : public AbstractParser<Data>
 
 			_args.clear();
 			this->_is_input_valid = false;
-			this->_is_input_validated = false;
 
-			_main = argv[0];
+			_main_name = argv[0];
 			for (int i = 0; i < argc; ++i)
 				_args.push_back(ArgvArgument(argv[i]));
 
 			return true;
 		}
 
-		void print_help() const
+		bool set_main_flag_parser(t_flag_parser_func_ptr main_flag_parser)
 		{
-			cout << parsing_messages::msg_help_default << endl;
-			cout << parsing_messages::msg_usage << _main << "[PARAMS] [FLAGS]" << endl;
-			cout << "Flags:" << endl;
+			if (_main_flag_parser != nullptr)
+				return false;
 
-			for (auto const pair : _parsers)
-				cout << "   " << pair.first << endl;
+			_main_flag_parser = main_flag_parser;
+			return true;
+		}
+
+		ParserAction helpper() const
+		{
+			cout << parsing_messages::msg_help_by_default << endl;
+			cout << parsing_messages::msg_program_usage << _main_name << endl;
+
+			if (_flag_parsers.empty())
+				return ParserAction::stop_parsing_with_ok;
+
+			cout << parsing_messages::msg_known_flags << endl;
+			for (auto const &it : _flag_parsers)
+				cout << "\t" << it.first << endl;
+
+			return ParserAction::stop_parsing_with_ok;
 		}
 
 		// Overriden methods.
 		bool parse_input() override
 		{
-			if (validate_input())
+			// Check for input validation.
+			if (!validate_input())
 				return false;
 
-			ArgvFlag flag = ArgvFlag(_args[0]);
-			_main = flag.get_value();
+			// Check for help flag by default.
+			if (_is_help_flag_read)
+				switch (helpper())
+				{
+					case (ParserAction::stop_parsing_with_ok):
+						return true;
+					case (ParserAction::stop_parsing_with_err):
+						return false;
+					default:
+						break;
+				}
 
-			for (const ArgvArgument &arg : _args)
+			// Parse main flag firstly.
+			if ((_main_flag != nullptr)
+					&& (_main_flag_parser != nullptr))
+				switch (_main_flag_parser(*_main_flag, this->_parsed_data))
+				{
+					case (ParserAction::stop_parsing_with_ok):
+						return true;
+					case (ParserAction::stop_parsing_with_err):
+						return false;
+					default:
+						break;
+				}
+
+			// Parse through rest flags.
+			for (const ArgvFlag &flag : _flags)
 			{
-				if (ArgvFlag::is_flag(arg))
+				t_flag_parser_func_ptr flag_parser = (_flag_parsers.find(flag.get_value()))->second;
+				// Call flag parser for current flag.
+				switch (flag_parser(flag, this->_parsed_data))
 				{
-					_flags.push_back(flag);
-					flag = ArgvFlag(arg);
-				}
-				else
-					flag.push_param(arg);
-			}
-			_flags.push_back(flag);
-
-			for (const ArgvFlag flag : _flags)
-			{
-				auto const pair = _parsers.find(flag.get_value());
-
-				if (pair != _parsers.end())
-				{
-					pair->second(flag, this->_parsed_data);
-				}
-				else if (!flag.get_value().compare("--help"))
-				{
-					print_help();
-					return false;
-				}
-				else
-				{
-					cerr << parsing_messages::err_header_validating
-						 << parsing_messages::err_unknown_flag
-						 << flag.get_value()
-						 << endl;
-
-					return false;
+					case (ParserAction::stop_parsing_with_ok):
+						return true;
+					case (ParserAction::stop_parsing_with_err):
+						return false;
+					default:
+						break;
 				}
 			}
 
@@ -219,18 +289,93 @@ class ArgvParser : public AbstractParser<Data>
 
 		bool validate_input() override
 		{
-			if (this->_is_input_validated)
-				return this->_is_input_valid;
+			// Save name of called program.
+			_main_flag = new ArgvFlag(_args[0]);
+			_main_name = _main_flag->get_value();
 
-			return this->_is_input_valid;
+			// Cycle through all arguments.
+			ArgvFlag *flag = nullptr;
+			for (int i = 1; i < _args.size(); ++i)
+			{
+				const ArgvArgument &arg = _args[i];
+
+				// Is current argument a flag.
+				if (ArgvFlag::is_flag(arg))
+				{
+					// Save current flag.
+					if (flag != nullptr)
+					{
+						_flags.push_back(*flag);
+						delete flag;
+					}
+
+					// Check for parser for new flag (arg).
+					if (_flag_parsers.find(arg.get_value()) == _flag_parsers.end())
+					{
+						// Is help flag.
+						if (ArgvFlag::is_help_flag(arg))
+						{
+							_is_help_flag_read = true;
+							this->_is_input_valid = true;
+
+							return true;
+						}
+
+						// Unknown flag.
+						cerr << parsing_messages::err_header_validating
+								<< parsing_messages::err_unknown_flag
+								<< arg.get_value()
+								<< endl;
+						return false;
+					}
+
+					// Set current argument as a new flag.
+					flag = new ArgvFlag(arg);
+				}
+				// If current flag was not created yet - add current argument to main flag.
+				else if (flag == nullptr)
+				{
+					// Check for main flag parser.
+					if (_main_flag_parser == nullptr)
+					{
+						cerr << parsing_messages::err_header_validating
+								<< parsing_messages::err_too_many_parameters
+								<< parsing_messages::msg_no_parameters_required
+								<< endl;
+						return false;
+					}
+
+					_main_flag->push_param(arg);
+				}
+
+				// Push argument to current flag.
+				else
+					flag->push_param(arg);
+			}
+
+			// Push last flag.
+			if (flag != nullptr)
+			{
+				_flags.push_back(*flag);
+				delete flag;
+			}
+
+			// Input is valid - ok.
+			this->_is_input_valid = true;
+			return true;
 		}
 
 	private:
 		// Fields.
-		t_parsers _parsers;
+		t_parsers _flag_parsers;
 		vector<ArgvFlag> _flags;
 		vector<ArgvArgument> _args;
-		string _main;
+
+		t_flag_parser_func_ptr _main_flag_parser;
+		ArgvFlag *_main_flag;
+		string _main_name;
+
+		bool _is_help_flag_read;
 };
 
 

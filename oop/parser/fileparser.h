@@ -23,22 +23,8 @@ class FileParser : public AbstractParser
 		~FileParser() {}
 
 		// Overriden methods.
-		bool parse_input() override
-		{
-			if (!((this->AbstractParser).parse_input()))
-				return false;
-
-			return true;
-		}
-
-		bool validate_input() override
-		{
-			if (!((this->AbstractParser).validate_input()))
-				return false;
-
-			_is_input_valid = true;
-			return true;
-		}
+		bool parse_input() override { return true; }
+		bool validate_input() override { return true; }
 
 	private:
 		ifstream &_instream;
