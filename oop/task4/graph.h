@@ -81,9 +81,9 @@ class Edge
 		static const double zero_length;
 
 		// Constructors / Destructor.
-		Edge(Vertex *v, Vertex *u)
-			: _begin(ptr_to_min<Vertex>(v, u)),
-			  _end(ptr_to_max<Vertex>(v, u)),
+		Edge(const Vertex *v, const Vertex *u)
+			: _begin(ptr_to_min<const Vertex>(v, u)),
+			  _end(ptr_to_max<const Vertex>(v, u)),
 			  _length(distance(*_begin, *_end)) {}
 		Edge(const Edge &edge)
 			: _begin(edge._begin),
@@ -92,10 +92,10 @@ class Edge
 		~Edge() {}
 
 		// Getters.
-		Vertex &get_begin() { return (*_begin); }
-		Vertex &get_end() { return (*_end); }
-		Vertex *get_begin_ptr() { return _begin; }
-		Vertex *get_end_ptr() { return _end; }
+//		Vertex &get_begin() { return (*_begin); }
+//		Vertex &get_end() { return (*_end); }
+//		Vertex *get_begin_ptr() { return _begin; }
+//		Vertex *get_end_ptr() { return _end; }
 		const Vertex &get_begin() const { return (*_begin); }
 		const Vertex &get_end() const { return (*_end); }
 		const Vertex *get_begin_ptr() const { return _begin; }
@@ -112,8 +112,8 @@ class Edge
 
 	private:
 		// Fields.
-		Vertex *_begin;
-		Vertex *_end;
+		const Vertex *_begin;
+		const Vertex *_end;
 		double _length;
 };
 
@@ -160,8 +160,9 @@ class Graph
 		const Vertex& operator[](int v) const;
 
 		// Getters.
-		t_vertices &get_vertices() { return _vertices; }
-		t_edges &get_edges() { return _edges; }
+		const t_vertices &get_vertices() { return _vertices; }
+		const t_edges &get_edges() { return _edges; }
+		const vector<Vertex::t_num_pair> get_connections() const;
 
 		bool has_vertex(int v) const;
 		bool has_vertex(const Vertex &v) const;
@@ -174,8 +175,8 @@ class Graph
 
 		// Methods.
 		const Vertex &add_vertex(int x, int y);
-		bool connect(Vertex &v, Vertex &u);
-		bool add_edge(Edge &e);
+		bool connect(const Vertex &cv, const Vertex &cu);
+		bool add_edge(const Edge &e);
 
 		ostream &print_xml(ostream &out) const;
 		ostream &print_edges_list(ostream &out) const;

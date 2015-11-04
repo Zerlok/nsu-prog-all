@@ -6,6 +6,7 @@ CONFIG -= qt
 SOURCES += main.cpp \
 	graph.cpp
 
-HEADERS += graph.h
+HEADERS += graph.h \
+    treebuilder.h
 
 OTHER_FILES += gtest.cpp

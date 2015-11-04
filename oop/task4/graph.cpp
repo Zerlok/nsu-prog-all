@@ -73,16 +73,15 @@ Edge &Edge::operator=(const Edge &e)
 }
 
 
-bool Graph::connect(Vertex &v, Vertex &u)
+bool Graph::connect(const Vertex &cv, const Vertex &cu)
 {
-	if (has_edge(v, u)
-			|| (v == u))
+	if (has_edge(cv, cu)
+			|| (cv == cu))
 		return false;
 
-	if (v > u)
-		v.swap(u);
+	Vertex &v = this->operator[](min<Vertex>(cv, cu).number);
+	Vertex &u = this->operator[](max<Vertex>(cv, cu).number);
 
-	// Repaint linked vertices.
 	if (v.color != u.color)
 		repaint_linked_vertices(u, v.color);
 
@@ -91,15 +90,15 @@ bool Graph::connect(Vertex &v, Vertex &u)
 }
 
 
-bool Graph::add_edge(Edge &e)
+bool Graph::add_edge(const Edge &e)
 {
-	Vertex &v = e.get_begin();
-	Vertex &u = e.get_end();
-
 	if (has_edge(e)
-			|| (v == u)
-			|| (e.get_length() <= Edge::zero_length))
+			|| (e.get_begin() == e.get_end())
+			|| (e.get_length() == Edge::zero_length))
 		return false;
+
+	Vertex &v = this->operator[](e.get_begin().number);
+	Vertex &u = this->operator[](e.get_end().number);
 
 	if (v.color != u.color)
 		repaint_linked_vertices(u, v.color);
@@ -157,6 +156,17 @@ bool Graph::is_isolated(const Vertex &v) const
 			return false;
 
 	return true;
+}
+
+
+const vector<Vertex::t_num_pair> Graph::get_connections() const
+{
+	vector<Vertex::t_num_pair> connections;
+
+	for (auto const it : _edges)
+		connections.push_back(it.first);
+
+	return connections;
 }
 
 

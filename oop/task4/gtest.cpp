@@ -2,6 +2,7 @@
 #include <gtest/gtest.h>
 
 #include "graph.h"
+#include "treebuilder.h"
 
 
 TEST(Vertex, Init)
@@ -31,7 +32,10 @@ TEST(Vertex, Distance)
 	};
 
 	for (int i = 0; i < n; ++i)
+	{
 		EXPECT_EQ(distances[i], distance(center, vertices[i]));
+		EXPECT_EQ(distances[i], distance(vertices[i], center));
+	}
 }
 
 
@@ -193,6 +197,58 @@ TEST(Graph, AddVertex)
 
 	// with 2
 	EXPECT_TRUE(g.connect(g[2], g[3]));
+}
+
+
+TEST(Graph, EmptyGraph)
+{
+	Graph g = Graph();
+
+	EXPECT_EQ(Vertex::none, g[0]);
+	EXPECT_EQ(0, g.get_vertices().size());
+	EXPECT_EQ(0, g.get_edges().size());
+
+	EXPECT_FALSE(g.has_vertex(0));
+	EXPECT_FALSE(g.has_vertex(g[0]));
+	EXPECT_FALSE(g.has_edge(g[0], g[1]));
+}
+
+
+TEST(Graph, IsolatedGraph)
+{
+	const int num = 10;
+	Graph g = Graph(Graph::t_vertices(num));
+
+	for (int i = 0; i < num; ++i)
+		EXPECT_NE(Vertex::none, g[i]);
+
+	EXPECT_EQ(Vertex::none, g[num]);
+	EXPECT_EQ(10, g.get_vertices().size());
+	EXPECT_EQ(0, g.get_edges().size());
+
+	EXPECT_FALSE(g.has_vertex(num));
+	EXPECT_FALSE(g.has_vertex(g[num]));
+
+	for (const Vertex &v : g.get_vertices())
+		for (const Vertex &u : g.get_vertices())
+			EXPECT_FALSE(g.has_edge(v, u));
+}
+
+
+TEST(Algorythm, Case1)
+{
+	Graph g({
+		Vertex(7, 5),
+		Vertex(3, -11),
+		Vertex(2, -2),
+		Vertex(-1, -8),
+		Vertex(14, -14)
+	});
+	vector<Vertex::t_num_pair> connections = {{0, 2}, {1, 3}, {1, 4}, {2, 3}};
+
+	build_tree(g);
+
+	EXPECT_TRUE(equals_as_sets(g.get_connections(), connections));
 }
 
 
