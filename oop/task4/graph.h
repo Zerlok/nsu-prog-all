@@ -20,21 +20,16 @@ class Vertex
 		static const Vertex none;
 
 		// Constructors / Destructor.
-		Vertex()
-			: x(0),
-			  y(0),
-			  number(0),
-			  color(none.color) {}
+		Vertex(int x=none.x, int y=none.y, int number=none.number, int color=none.color)
+			: x(x),
+			  y(y),
+			  number(number),
+			  color(color) {}
 		Vertex(const Vertex &v)
 			: x(v.x),
 			  y(v.y),
 			  number(v.number),
 			  color(v.color) {}
-		Vertex(int x, int y, int number=none.number+1, int color=none.color+1)
-			: x(x),
-			  y(y),
-			  number(number),
-			  color(color) {}
 		~Vertex() {}
 
 		// Operators.
@@ -48,16 +43,18 @@ class Vertex
 
 		// Friends.
 		friend double distance(const Vertex &v, const Vertex &u);
+		friend istream &operator>>(istream &in, Vertex &v);
 		friend ostream &operator<<(ostream &out, const Vertex &v);
 
 		// Fields.
-		const int x;
-		const int y;
+		int x;
+		int y;
 		int number;
 		int color;
 };
 
 double distance(const Vertex &v, const Vertex &u);
+istream &operator>>(istream &in, Vertex &v);
 ostream &operator<<(ostream &out, const Vertex &v);
 template<typename T> T* ptr_to_min(T *a, T *b)
 {
@@ -92,10 +89,6 @@ class Edge
 		~Edge() {}
 
 		// Getters.
-//		Vertex &get_begin() { return (*_begin); }
-//		Vertex &get_end() { return (*_end); }
-//		Vertex *get_begin_ptr() { return _begin; }
-//		Vertex *get_end_ptr() { return _end; }
 		const Vertex &get_begin() const { return (*_begin); }
 		const Vertex &get_end() const { return (*_end); }
 		const Vertex *get_begin_ptr() const { return _begin; }
@@ -160,6 +153,7 @@ class Graph
 		const Vertex& operator[](int v) const;
 
 		// Getters.
+		size_t get_size() const { return _vertices.size(); }
 		const t_vertices &get_vertices() { return _vertices; }
 		const t_edges &get_edges() { return _edges; }
 		const vector<Vertex::t_num_pair> get_connections() const;

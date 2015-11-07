@@ -28,6 +28,13 @@ double distance(const Vertex &v, const Vertex &u)
 }
 
 
+istream &operator>>(istream &in, Vertex &v)
+{
+	in >> v.x >> v.y;
+	return in;
+}
+
+
 ostream &operator<<(ostream &out, const Vertex &v)
 {
 	return out << "<Vertex id=" << v.number << " co=[" << v.x << " " << v.y << "] clr=" << v.color << ">";

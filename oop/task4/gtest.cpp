@@ -1,9 +1,18 @@
 #include <iostream>
+#include <string>
 #include <gtest/gtest.h>
 
 #include "graph.h"
 #include "treebuilder.h"
 
+
+// ------------------------- EXTRA ------------------------- //
+
+static const std::string INPUT_TEST_FILE_TAIL = "-input.txt";
+static const std::string OUTPUT_TEST_FILE_TAIL = "-output.txt";
+
+
+// ------------------------- TEST CASES ------------------------- //
 
 TEST(Vertex, Init)
 {
@@ -49,7 +58,7 @@ TEST(Vertex, OperatorEqEq)
 		Vertex(0, 1, -2, -10)
 	};
 	const vector<Vertex> b = {
-		Vertex(1, 1, 0),
+		Vertex(1, 1, -1),
 		Vertex(10, 11, -1),
 		Vertex(-1, 0, 1),
 		Vertex(1, 3, 3, 4),
@@ -71,7 +80,7 @@ TEST(Vertex, OperatorNeq)
 		Vertex(0, 1, 2)
 	};
 	const vector<Vertex> b = {
-		Vertex(0, 0, -1),
+		Vertex(0, 0, 0),
 		Vertex(0, 1, 10),
 		Vertex(1, 0, 1),
 		Vertex(1, 1, 2),
@@ -86,14 +95,14 @@ TEST(Vertex, OperatorNeq)
 TEST(Vertex, OperatorLt)
 {
 	const vector<Vertex> a = {
-		Vertex(0, 100, -1),
+		Vertex(0, 100),
 		Vertex(10, 11),
 		Vertex(1, 0, 2),
 		Vertex(1, 1, -5),
 		Vertex(0, 1, -2)
 	};
 	const vector<Vertex> b = {
-		Vertex(0, 0),
+		Vertex(0, 0, 0),
 		Vertex(0, 1, 1),
 		Vertex(1, 0, 10),
 		Vertex(0, 0, -3),
@@ -115,18 +124,18 @@ TEST(Vertex, Swap)
 		Vertex(0, 1, 2)
 	};
 	vector<Vertex> b = {
-		Vertex(0, 0, -1),
+		Vertex(0, 0, 0),
 		Vertex(0, 1, 10),
 		Vertex(1, 0, 1),
 		Vertex(1, 1, 2),
-		Vertex(0, -1, 0)
+		Vertex(0, -1)
 	};
 	const vector<Vertex> c = {
-		Vertex(0, 0, -1),
+		Vertex(0, 0, 0),
 		Vertex(0, -1, 10),
 		Vertex(1, 100, 1),
 		Vertex(-6, 5, 2),
-		Vertex(0, 1)
+		Vertex(0, 1, -1)
 	};
 
 	for (int i = 0; i < a.size(); ++i)
@@ -156,7 +165,7 @@ TEST(Graph, Init)
 TEST(Graph, BracketsOperator)
 {
 	const vector<Vertex> vertices = {
-		Vertex(0, 0),
+		Vertex(0, 0, 0, 0),
 		Vertex(0, 1),
 		Vertex(1, 0),
 		Vertex(1, 1)
@@ -166,7 +175,10 @@ TEST(Graph, BracketsOperator)
 	EXPECT_EQ(vertices[0], g[0]);
 
 	for (int i = 1; i < vertices.size(); ++i)
+	{
+		EXPECT_EQ(i, g[i].number);
 		EXPECT_NE(vertices[i], g[i]);
+	}
 
 	EXPECT_EQ(Vertex::none, g[-12]);
 	EXPECT_EQ(Vertex::none, g[1000]);
@@ -235,20 +247,28 @@ TEST(Graph, IsolatedGraph)
 }
 
 
-TEST(Algorythm, Case1)
+TEST(Algorythm, Test)
 {
-	Graph g({
-		Vertex(7, 5),
-		Vertex(3, -11),
-		Vertex(2, -2),
-		Vertex(-1, -8),
-		Vertex(14, -14)
-	});
-	vector<Vertex::t_num_pair> connections = {{0, 2}, {1, 3}, {1, 4}, {2, 3}};
+	std::vector<std::string> cases = {
+		"test01",
+		"test02",
+		"test03",
+		"test04"
+	};
 
-	build_tree(g);
+	for (const string &casename : cases)
+	{
+		string input(casename);
+		string output(casename);
+		input.append(INPUT_TEST_FILE_TAIL);
+		output.append(OUTPUT_TEST_FILE_TAIL);
 
-	EXPECT_TRUE(equals_as_sets(g.get_connections(), connections));
+		Graph g(read_vertices(input));
+		vector<Vertex::t_num_pair> file_connections = read_pairs(output);
+		build_tree(g);
+
+		EXPECT_EQ(file_connections, g.get_connections()) << "*** At test case: " << casename << " ***";
+	}
 }
 
 
