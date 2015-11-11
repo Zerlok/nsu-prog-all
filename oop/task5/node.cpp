@@ -76,19 +76,19 @@ Node::Iterator Node::end()
 }
 
 
-//const Node::Iterator Node::begin() const
-//{
-//	if (_previous == nullptr)
-//		return Iterator(this);
+const Node::Iterator Node::begin() const
+{
+	if (_previous == nullptr)
+		return Iterator(this);
 
-//	Iterator b;
-//	for (Iterator it = Iterator(_previous);
-//		  it != Iterator::none;
-//		 --it)
-//		b = it;
+	Iterator b;
+	for (Iterator it = Iterator(_previous);
+		  it != Iterator::none;
+		 --it)
+		b = it;
 
-//	return b;
-//}
+	return b;
+}
 
 
 //const Node::Iterator Node::end()

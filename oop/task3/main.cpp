@@ -45,7 +45,7 @@ void show_year_once(const ArgvFlag &flag, InputData &data)
 
 void calendar_for_year(const ArgvFlag &flag, InputData &data)
 {
-	if (flag.get_params_num() != 4)
+	if (flag.get_params_num() != 1)
 		throw std::invalid_argument("1 argument required (year)!");
 
 	data.calendar = Calendar(stoi(flag[0]));

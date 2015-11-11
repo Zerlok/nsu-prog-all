@@ -4,6 +4,7 @@
 
 #include <iostream>
 #include <vector>
+#include <list>
 #include <string>
 using namespace std;
 
@@ -30,7 +31,7 @@ class Node
 				// Constructors / Destructor.
 				Iterator()
 					: _ptr(nullptr) {}
-				Iterator(Node *node)
+				Iterator(const Node *node)
 					: _ptr(node) {}
 				Iterator(const Iterator &it)
 					: _ptr(it._ptr) {}
@@ -87,18 +88,20 @@ class Node
 				Node *_ptr;
 		};
 
+		
+
 		// Getters.
 		const string &get_data() const { return _data; }
 
 		Iterator begin();
 		Iterator end();
-//		const Iterator begin() const;
-//		const Iterator end() const;
+		const ConstIterator begin() const;
+		const ConstIterator end() const;
 
 		Node &head() { return begin().reference(); }
 		Node &tail() { return end().reference(); }
-//		const Node &head() const { return begin().reference(); }
-//		const Node &tail() const { return end().reference(); }
+		const Node &head() const { return begin().reference(); }
+		const Node &tail() const { return end().reference(); }
 
 		// Methods.
 		Iterator find(const Node &subnode);
