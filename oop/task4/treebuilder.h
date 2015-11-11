@@ -135,6 +135,5 @@ const vector<Vertex> read_vertices(const string &filename)
 }
 
 
-
 // __TREEBUILDER_H__
 #endif
