@@ -1,0 +1,22 @@
+#!/bin/bash
+
+cpp="g++"
+cppflags="-std=c++11"
+declare -a sources
+
+pro=${1##*/}
+currdir=`pwd`
+dir="${currdir}/${1%%/*}"
+
+while read line
+do
+    if [[ $line == "SOURCES += "* ]]
+    then
+        sources=(${line##*+= })
+    fi
+done < "$1"
+
+cd $dir
+echo "g++ ${cppflags} ${sources[@]} -o ${currdir}/result.bin"
+g++ ${cppflags} ${sources[@]} -o "${currdir}/result.bin"
+cd $currdir
