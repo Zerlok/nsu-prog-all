@@ -9,4 +9,5 @@ SOURCES += main.cpp \
 HEADERS += \
     node.h
 
-OTHER_FILES += gtest.cpp
+OTHER_FILES += gtest.cpp \
+    ../build/task5/test01-input.txt
