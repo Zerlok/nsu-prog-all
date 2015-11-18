@@ -3,124 +3,55 @@
 
 
 #include <iostream>
-#include <vector>
 #include <string>
+#include <vector>
+#include <list>
 using namespace std;
 
 
-class Node
+static const string DEFINITION_SYMBOL = " = ";
+static const string DEFINITION_SEPARATOR = ", ";
+
+
+// Class //
+
+class Node : public list<string>
 {
 	public:
-		// Static.
-		static const Node none;
-
-		// Constructor / Destructor.
-		Node();
-		Node(const string &data);
-		Node(const vector<string> &data);
-		~Node();
-
-		// Iterators.
-		class Iterator
-		{
-			public:
-				// Static.
-				static const Iterator none;
-
-				// Constructors / Destructor.
-				Iterator()
-					: _ptr(nullptr) {}
-				Iterator(Node *node)
-					: _ptr(node) {}
-				Iterator(const Iterator &it)
-					: _ptr(it._ptr) {}
-				~Iterator() {}
-
-				// Getters.
-				bool is_null() const { return (_ptr == nullptr); }
-				Node &reference() { return (*_ptr); }
-				Node *pointer() { return _ptr; }
-				const Node &reference() const { return (*_ptr); }
-				const Node *pointer() const { return _ptr; }
-
-				// Operators.
-				Node &operator*() { return reference(); }
-				Node *operator->() { return pointer(); }
-				const Node &operator*() const { return reference(); }
-				const Node *operator->() const { return pointer(); }
-
-				Iterator &operator=(const Iterator &it)
-				{
-					_ptr = it._ptr;
-					return (*this);
-				}
-
-				Iterator &operator++()
-				{
-					_ptr = _ptr->_next;
-					return (*this);
-				}
-				Iterator &operator++(int)
-				{
-					Iterator curr = Iterator(*this);
-					++_ptr;
-					return curr;
-				}
-
-				Iterator &operator--()
-				{
-					_ptr = _ptr->_previous;
-					return (*this);
-				}
-				Iterator &operator--(int)
-				{
-					Iterator curr = Iterator(*this);
-					--_ptr;
-					return curr;
-				}
-
-				bool operator==(const Iterator &it) const { return (_ptr == it._ptr); }
-				bool operator!=(const Iterator &it) const { return (_ptr != it._ptr); }
-
-			private:
-				// Fields.
-				Node *_ptr;
-		};
-
-		// Getters.
-		const string &get_data() const { return _data; }
-
-		Iterator begin();
-		Iterator end();
-//		const Iterator begin() const;
-//		const Iterator end() const;
-
-		Node &head() { return begin().reference(); }
-		Node &tail() { return end().reference(); }
-//		const Node &head() const { return begin().reference(); }
-//		const Node &tail() const { return end().reference(); }
+		// Constructors / Destructor.
+		Node()
+			: list<string>() {}
+		Node(const list<string> &node)
+			: list<string>(node) {}
 
 		// Methods.
-		Iterator find(const Node &subnode);
-		const Iterator find(const Node &subnode) const;
-		bool insert(Iterator &it, Node *node);
+		iterator find(const string &data);
+		const_iterator find(const string &data) const;
+		bool replace(const iterator &pos, const Node &node);
+		bool has_subnode(const Node &node) const;
+		bool is_looped() const { return false; }
+		bool is_head_equals(const Node &node) const { return (front() == node.front()); }
 
 		// Operators.
-		bool operator==(const Node &node) const { return _data == node._data; }
-		bool operator!=(const Node &node) const { return _data != node._data; }
-		friend istream &operator>>(istream &in, Node &node);
-		friend ostream &operator<<(ostream &out, Node &node);
+		bool operator==(const Node &node) const;
+		bool operator!=(const Node &node) const;
 
-	private:
-		// Fields.
-		Node *_next;
-		Node *_previous;
-
-		string _data;
+		// Friend.
+		friend ostream &operator<<(ostream &out, const Node &node);
 };
 
+ostream &operator<<(ostream &out, const Node &node);
 
-istream &operator>>(istream &in, Node &node);
+
+// Functions //
+Node subconnect_nodes(const vector<Node> &nodes);
+bool compare_nodes(const Node &node, const Node &subnode);
+
+
+// Extra functions //
+Node read_node_from_file(const string &filename);
+vector<Node> read_definitions_from_file(const string &filename);
+list<string> split(const string &s, const string &separator);
 
 
 // __NODE_H__

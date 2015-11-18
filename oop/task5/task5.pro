@@ -10,4 +10,9 @@ HEADERS += \
     node.h
 
 OTHER_FILES += gtest.cpp \
-    ../build/task5/test01-input.txt
+	../build/task5/test01-input.txt \
+	../build/task5/test02-input.txt \
+	../build/task5/test01-output.txt \
+	../build/task5/test02-output.txt \
+	../build/task5/test03-input.txt \
+	../build/task5/test03-output.txt

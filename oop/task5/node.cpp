@@ -1,156 +1,226 @@
+#include <fstream>
+#include <sstream>
+#include <exception>
+#include <algorithm>
+#include <iterator>
+using namespace std;
+
 #include "node.h"
 
 
-const Node Node::none = Node();
-const Node::Iterator Node::Iterator::none = Iterator(nullptr);
+// -------------------------- CLASS NODE --------------------------//
 
-
-Node::Node()
-	: _next(nullptr),
-	  _previous(nullptr),
-	  _data()
+Node::iterator Node::find(const string &data)
 {
-}
+	Node::iterator it;
 
-
-Node::Node(const string &data)
-	: _next(nullptr),
-	  _previous(nullptr),
-	  _data(data)
-{
-}
-
-
-Node::Node(const vector<string> &data)
-	: _next(nullptr),
-	  _previous(nullptr),
-	  _data(data[0])
-{
-	vector<Node *> nodes;
-
-	for (const string &d : data)
-		nodes.push_back(new Node(d));
-
-	for (size_t i = 1; i < nodes.size(); ++i)
-	{
-		Node *node_i = nodes[i];
-		node_i->_previous = nodes[i-1];
-		node_i->_previous->_next = node_i;
-	}
-}
-
-
-Node::~Node()
-{
-	delete _next;
-}
-
-
-Node::Iterator Node::begin()
-{
-	if (_previous == nullptr)
-		return Iterator(this);
-
-	Iterator b;
-	for (Iterator it = Iterator(this->_previous);
-		  it != Iterator::none;
-		 --it)
-		b = it;
-
-	return b;
-}
-
-
-Node::Iterator Node::end()
-{
-	if (_next == nullptr)
-		return Iterator(this);
-
-	Iterator e;
-	for (Iterator it = Iterator(_next);
-		  it != Iterator::none;
+	for (it = begin();
+		 it != end();
 		 ++it)
-		e = it;
+		if (data.compare(*it) == 0)
+			break;
 
-	return e;
+	return it;
 }
 
 
-//const Node::Iterator Node::begin() const
-//{
-//	if (_previous == nullptr)
-//		return Iterator(this);
-
-//	Iterator b;
-//	for (Iterator it = Iterator(_previous);
-//		  it != Iterator::none;
-//		 --it)
-//		b = it;
-
-//	return b;
-//}
-
-
-//const Node::Iterator Node::end()
-//{
-//	if (_next == nullptr)
-//		return Iterator(this);
-
-//	Iterator e;
-//	for (const Iterator it = Iterator(_next);
-//		  it != Iterator::none;
-//		 ++it)
-//		e = it;
-
-//	return e;
-//}
-
-
-Node::Iterator Node::find(const Node &subnode)
+Node::const_iterator Node::find(const string &data) const
 {
-	for (Iterator it = begin();
-		 it != Iterator::none;
-		 ++it)
-		if (it.reference() == subnode)
-			return it;
+	Node::const_iterator cit;
 
-	return Iterator::none;
+	for (cit = cbegin();
+		 cit != cend();
+		 ++cit)
+		if (data.compare(*cit) == 0)
+			break;
+
+	return cit;
 }
 
 
-bool Node::insert(Iterator &it, Node *node)
+bool Node::replace(const Node::iterator &pos, const Node &node)
 {
-	if (it == Iterator::none)
-		return false;
+	this->insert(
+			pos,
+			++(node.begin()),
+			node.end()
+	);
 
-	Node *first = node->begin().pointer();
-	Node *last = node->end().pointer();
-
-	it->_previous = first;
-	last->_next = it->_next;
-	last->_next->_previous = last;
+	if (pos != end())
+		this->erase(pos);
 
 	return true;
 }
 
 
-istream &operator>>(istream &in, Node &node)
+bool Node::has_subnode(const Node &node) const
 {
-	in >> node._data;
-	return in;
+	if (node.empty())
+		return true;
+
+	if (empty())
+		return false;
+
+	return (find(node.front()) != end());
 }
 
 
-ostream &operator<<(ostream &out, Node &node)
+bool Node::operator==(const Node &node) const
+{
+	Node::const_iterator it = cbegin();
+	Node::const_iterator node_it = node.cbegin();
+
+	while ((it != cend())
+		   && (node_it != node.cend()))
+	{
+		if ((*it).compare(*node_it) != 0)
+			return false;
+
+		++it;
+		++node_it;
+	}
+
+	return ((it == cend())
+			&& (node_it == node.cend()));
+}
+
+
+bool Node::operator!=(const Node &node) const
+{
+	return !(this->operator==(node));
+}
+
+
+ostream &operator<<(ostream &out, const Node &node)
 {
 	out << "[";
 
-	for (Node::Iterator it = node.begin();
-		 it != Node::Iterator::none;
-		 ++it)
-		out << "'" << (*it)._data << "' ";
+	for (const string &data : node)
+		out << "'" << data << "' ";
 
-	out << "]" << endl;
+	out << "]";
 
 	return out;
+}
+
+
+
+// -------------------------- FUNCTIONS --------------------------//
+
+Node subconnect_nodes(const vector<Node> &nodes)
+{
+	Node sorted;
+	sorted.push_back(nodes.front().front());
+
+	Node::iterator node_head_pos;
+
+	for (const Node &node : nodes)
+	{
+		for (node_head_pos = sorted.find(node.front());
+			 node_head_pos != sorted.end();
+			 node_head_pos = sorted.find(node.front()))
+			sorted.replace(node_head_pos, node);
+	}
+
+	return sorted;
+}
+
+
+bool compare_nodes(const Node &node, const Node &subnode)
+{
+	return node.has_subnode(subnode);
+}
+
+
+Node read_node_from_file(const string &filename)
+{
+	ifstream input(filename);
+
+	if (!input.is_open())
+	{
+		stringstream ss;
+		ss << "Cannot read the file: " << filename;
+		throw invalid_argument(ss.str());
+	}
+
+	string line;
+	Node node;
+
+	input >> noskipws;
+	while (getline(input, line))
+		node.push_back(line);
+
+	input.close();
+
+	return node;
+}
+
+
+vector<Node> read_definitions_from_file(const string &filename)
+{
+	ifstream input(filename);
+
+	if (!input.is_open())
+	{
+		stringstream ss;
+		ss << "Cannot read the file: " << filename;
+		throw invalid_argument(ss.str());
+	}
+
+	string line;
+	string::size_type def_pos;
+	vector<Node> data;
+
+	while (getline(input, line))
+	{
+		if (line.empty())
+			continue;
+
+		Node node;
+		Node definition;
+
+		def_pos = line.find(DEFINITION_SYMBOL);
+		definition = split(
+				line.substr(def_pos + DEFINITION_SYMBOL.length()),
+				DEFINITION_SEPARATOR
+		);
+		node.push_back(line.substr(0, def_pos));
+		node.insert(
+				node.end(),
+				definition.begin(),
+				definition.end()
+		);
+
+		if (node.is_looped())
+		{
+			stringstream ss;
+			ss << "Looped definition found: " << node;
+			throw invalid_argument(ss.str());
+		}
+
+		data.push_back(node);
+	}
+
+	input.close();
+
+	return data;
+}
+
+
+list<string> split(const string &s, const string &separator)
+{
+	string data(s);
+	list<string> splitted_string;
+
+	for (string::size_type separator_pos = data.find(separator);
+		 separator_pos != string::npos;
+		 separator_pos = data.find(separator))
+	{
+		splitted_string.push_back(data.substr(0, separator_pos));
+		data = data.substr(separator_pos + separator.length());
+	}
+
+	splitted_string.push_back(data);
+
+	return splitted_string;
 }
