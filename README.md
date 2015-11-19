@@ -1,4 +1,4 @@
-# NSU Programming Course #
+# **NSU Programming Course** #
 
 This is just a wide branch of my programs which were created due my studying at [NSU](http://nsu.ru/).
 
