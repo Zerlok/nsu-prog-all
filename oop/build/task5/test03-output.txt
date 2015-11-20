@@ -1,3 +1,22 @@
-b
-b
-b
+wake up
+make exersises
+make breakfast
+go to university
+study at university
+get good marks
+go home
+make homework
+open IDE
+pull commits
+update to the last commit
+think a lot
+type letters on keyboard
+compile
+check for changes
+create a new commit
+pull commits
+update to the last commit
+merge with new updates
+push
+play games
+go to bed

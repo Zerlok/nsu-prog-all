@@ -38,7 +38,35 @@ Node::const_iterator Node::find(const string &data) const
 }
 
 
-bool Node::replace(const Node::iterator &pos, const Node &node)
+Node::iterator Node::rfind(const string &data)
+{
+	Node::iterator it;
+
+	for (it = end();
+		 it != begin();
+		 --it)
+		if (data.compare(*it) == 0)
+			break;
+
+	return it;
+}
+
+
+Node::const_iterator Node::rfind(const string &data) const
+{
+	Node::const_iterator it;
+
+	for (it = cend();
+		 it != cbegin();
+		 --it)
+		if (data.compare(*it) == 0)
+			break;
+
+	return it;
+}
+
+
+bool Node::subinsert(const Node::iterator &pos, const Node &node)
 {
 	this->insert(
 			pos,
@@ -62,6 +90,12 @@ bool Node::has_subnode(const Node &node) const
 		return false;
 
 	return (find(node.front()) != end());
+}
+
+
+bool Node::is_looped() const
+{
+	return (rfind(front()) != begin());
 }
 
 
@@ -109,20 +143,35 @@ ostream &operator<<(ostream &out, const Node &node)
 
 Node subconnect_nodes(const vector<Node> &nodes)
 {
-	Node sorted;
-	sorted.push_back(nodes.front().front());
+	Node linked;
+	if (nodes.empty()
+			|| nodes.front().empty())
+		return linked;
 
-	Node::iterator node_head_pos;
+	const string &main_head = nodes.front().front();
+	linked.push_back(main_head);
 
 	for (const Node &node : nodes)
 	{
-		for (node_head_pos = sorted.find(node.front());
-			 node_head_pos != sorted.end();
-			 node_head_pos = sorted.find(node.front()))
-			sorted.replace(node_head_pos, node);
+		if (node.empty())
+			continue;
+
+		const string &node_head = node.front();
+		for (Node::iterator node_head_pos = linked.find(node_head);
+			 node_head_pos != linked.end();
+			 node_head_pos = linked.find(node_head))
+			linked.subinsert(node_head_pos, node);
+
+		if (linked.find(main_head) != linked.cend())
+		{
+			stringstream ss;
+			ss << "Looped definition found during node subconnecting: " << linked
+			   << " (value: '" << main_head << "'), execution stopped.";
+			throw invalid_argument(ss.str());
+		}
 	}
 
-	return sorted;
+	return linked;
 }
 
 
@@ -194,7 +243,8 @@ vector<Node> read_definitions_from_file(const string &filename)
 		if (node.is_looped())
 		{
 			stringstream ss;
-			ss << "Looped definition found: " << node;
+			ss << "Looped definition found: " << node
+			   << " (value: '" << node.front() << "'), execution stopped.";
 			throw invalid_argument(ss.str());
 		}
 

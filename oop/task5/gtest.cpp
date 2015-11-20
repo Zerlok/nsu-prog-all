@@ -104,14 +104,14 @@ TEST(Node, EmptyNode)
 	EXPECT_EQ(empty_node.end(), empty_node.begin());
 	EXPECT_EQ(empty_node.end(), empty_node.find("*"));
 
-	EXPECT_TRUE(empty_node.replace(empty_node.begin(), node));
+	EXPECT_TRUE(empty_node.subinsert(empty_node.begin(), node));
 	EXPECT_FALSE(empty_node.empty());
 	EXPECT_NE(empty_node.end(), empty_node.find("*"));
 	EXPECT_TRUE(empty_node.has_subnode(Node()));
 }
 
 
-TEST(Node, Replace)
+TEST(Node, Subinsert)
 {
 	vector<Node> a = {
 		Node({"*"}),
@@ -135,7 +135,7 @@ TEST(Node, Replace)
 	for (size_t i = 0; i < a.size(); ++i)
 	{
 		Node::iterator it = a[i].find(b[i].front());
-		a[i].replace(it, b[i]);
+		a[i].subinsert(it, b[i]);
 		EXPECT_EQ(c[i], a[i]);
 	}
 }
@@ -182,7 +182,21 @@ TEST(Node, Subnode)
 
 TEST(Node, Subconnecting)
 {
+	vector< vector<Node> > nodes = {
+		{ Node(), Node(), Node() },
+		{ Node({"A", "a"}), Node({"B", "b"}), Node({"C", "c"}) },
+		{ Node({"digits", "1", "two"}), Node(), Node({"two", "2", "3", "4"}), Node() },
+	};
+	vector<Node> results = {
+		Node(),
+		Node({"a"}),
+		Node({"1", "2", "3", "4"}),
+	};
 
+	for (size_t i = 0; i < nodes.size(); ++i)
+	{
+		EXPECT_EQ(results[i], subconnect_nodes(nodes[i]));
+	}
 }
 
 
@@ -193,7 +207,7 @@ TEST(Algorythm, TestFiles)
 		"test01",
 		"test02",
 		"test03",
-//		"test04"
+		"test04",
 	};
 
 	for (const std::string &casename : casenames)

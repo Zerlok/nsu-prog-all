@@ -24,13 +24,19 @@ class Node : public list<string>
 		Node(const list<string> &node)
 			: list<string>(node) {}
 
-		// Methods.
+		// Getters.
 		iterator find(const string &data);
 		const_iterator find(const string &data) const;
-		bool replace(const iterator &pos, const Node &node);
+
+		iterator rfind(const string &data);
+		const_iterator rfind(const string &data) const;
+
 		bool has_subnode(const Node &node) const;
-		bool is_looped() const { return false; }
+		bool is_looped() const;
 		bool is_head_equals(const Node &node) const { return (front() == node.front()); }
+
+		// Methods.
+		bool subinsert(const iterator &pos, const Node &node);
 
 		// Operators.
 		bool operator==(const Node &node) const;
