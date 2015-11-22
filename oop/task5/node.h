@@ -51,7 +51,7 @@ ostream &operator<<(ostream &out, const Node &node);
 
 // Functions //
 Node subconnect_nodes(const vector<Node> &nodes);
-bool compare_nodes(const Node &node, const Node &subnode);
+void bubble_sort_nodes(vector<Node> &nodes);
 
 
 // Extra functions //

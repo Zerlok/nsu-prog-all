@@ -20,7 +20,7 @@ int main(int argc, char **argv)
 
 	vector<Node> nodes = read_definitions_from_file(argv[1]);
 
-	sort(nodes.begin(), nodes.end(), compare_nodes);
+	bubble_sort_nodes(nodes);
 
 	Node result = subconnect_nodes(nodes);
 	copy(result.begin(), result.end(), ostream_iterator<Node::value_type>(cout, NODE_SEPARATOR));

@@ -175,9 +175,13 @@ Node subconnect_nodes(const vector<Node> &nodes)
 }
 
 
-bool compare_nodes(const Node &node, const Node &subnode)
+void bubble_sort_nodes(vector<Node> &nodes)
 {
-	return node.has_subnode(subnode);
+	size_t len = nodes.size();
+	for (size_t i = 0; i < len; ++i)
+		for (size_t j = i + 1; j < len; ++j)
+			if (nodes[j].has_subnode(nodes[i]))
+				nodes[j].swap(nodes[i]);
 }
 
 

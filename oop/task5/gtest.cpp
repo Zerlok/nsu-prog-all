@@ -218,7 +218,7 @@ TEST(Algorythm, TestFiles)
 		output_name += OUTPUT_FILE_TAIL;
 
 		std::vector<Node> nodes = read_definitions_from_file(input_name);
-		std::sort(nodes.begin(), nodes.end(), compare_nodes);
+		bubble_sort_nodes(nodes);
 		Node algorythm_result = subconnect_nodes(nodes);
 
 		EXPECT_EQ(read_node_from_file(output_name), algorythm_result);
