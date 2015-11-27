@@ -1,5 +1,6 @@
 #include <vector>
 #include "lifeobject.h"
+#include "populationmap.h"
 
 
 const int LifeObject::min_ttl_to_live = 1;
@@ -13,8 +14,14 @@ const int LifeObject::max_weight = 6;
 const int LifeObject::min_ttl_to_reproducing = 2;
 const int LifeObject::weight_ratio_at_reproducing = 2;
 const int LifeObject::hp_for_murder = 2;
+const Point LifeObject::view_radius = Point(1, 1);
 
-const LifeObject LifeObject::empty = LifeObject(Point::zero, 0, LifeObject::min_damage, LifeObject::min_weight);
+const LifeObject LifeObject::empty = LifeObject(
+		Point(-1, -1),
+		0,
+		LifeObject::min_damage,
+		LifeObject::min_weight
+);
 
 
 LifeObject::LifeObject(const Point &pos, int hp, int dp, int weight)
@@ -22,7 +29,7 @@ LifeObject::LifeObject(const Point &pos, int hp, int dp, int weight)
 	  _ttl(hp),
 	  _damage(dp),
 	  _weight(weight),
-	  _state(State::sleeping),
+	  _state(State::resting),
 	  _type(Type::none)
 {
 	if (_ttl > max_ttl_to_live)
@@ -89,46 +96,46 @@ const Point &LifeObject::get_position() const
 }
 
 
-bool LifeObject::attack(LifeObject &target)
-{
-	if (!target.is_alive())
-		return false;
+//bool LifeObject::attack(LifeObject &target)
+//{
+//	if (!target.is_alive())
+//		return false;
 
-	_state = State::fighting;
-	target.deal_damage(_damage);
+//	_state = State::fighting;
+//	target.deal_damage(_damage);
 
-	return true;
-}
-
-
-bool LifeObject::eat(int hp)
-{
-	if (!is_alive())
-		return false;
-
-	_ttl += hp;
-	_state = State::eating;
-	return true;
-}
+//	return true;
+//}
 
 
-LifeObject LifeObject::reproduce()
-{
-	if (_ttl < min_ttl_to_reproducing)
-		return empty;
+//bool LifeObject::eat(int hp)
+//{
+//	if (!is_alive())
+//		return false;
 
-	LifeObject child = LifeObject(
-			(_ttl / min_ttl_to_reproducing),
-			_damage,
-			(_weight / weight_ratio_at_reproducing)
-	);
-	_ttl -= child._ttl;
+//	_ttl += hp;
+//	_state = State::eating;
+//	return true;
+//}
 
-	_state = State::reproducing;
-	child._state = State::reproducing;
 
-	return child;
-}
+//LifeObject LifeObject::reproduce()
+//{
+//	if (_ttl < min_ttl_to_reproducing)
+//		return empty;
+
+//	LifeObject child = LifeObject(
+//			(_ttl / min_ttl_to_reproducing),
+//			_damage,
+//			(_weight / weight_ratio_at_reproducing)
+//	);
+//	_ttl -= child._ttl;
+
+//	_state = State::reproducing;
+//	child._state = State::reproducing;
+
+//	return child;
+//}
 
 
 bool LifeObject::move_to(const Point &point)
@@ -157,7 +164,7 @@ void LifeObject::reset_state()
 	{
 		case (State::reproducing):
 		{
-			_state = State::sleeping;
+			_state = State::resting;
 			break;
 		}
 
@@ -166,16 +173,18 @@ void LifeObject::reset_state()
 }
 
 
-LifeObject::Action LifeObject::make_action(const std::list<LifeObject*> &neighbours)
+LifeObject::Action LifeObject::make_action(const PopulationMap &map)
 {
+	const PopulationMap::object_ptr_list &neighbours = map.get_neighbours(_position);
 	std::vector<Point> free_positions;
-	free_positions.push_back(_position);
 
 	for (const LifeObject *obj : neighbours)
 		if (obj->get_type() == Type::none)
 			free_positions.push_back(obj->get_position());
 
-	return Action(this, Action::Type::move, free_positions[(rand() % free_positions.size())]);
+	free_positions.push_back(_position);
+
+	return Action(this, free_positions[(rand() % free_positions.size())], Action::Type::move);
 }
 
 

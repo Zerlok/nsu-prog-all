@@ -6,30 +6,31 @@
 #include "point.h"
 
 
+class PopulationMap;
+
+
 class LifeObject
 {
 	public:
 		// Static.
 		static const int min_ttl_to_live;
 		static const int max_ttl_to_live;
-
 		static const int min_damage;
 		static const int default_damage;
 		static const int max_damage;
-
 		static const int min_weight;
 		static const int default_weight;
 		static const int max_weight;
-
 		static const int min_ttl_to_reproducing;
 		static const int weight_ratio_at_reproducing;
 		static const int hp_for_murder;
+		static const Point view_radius;
 
 		static const LifeObject empty;
 
 		enum class State
 		{
-			sleeping = 0,
+			resting = 0,
 			fighting = 1,
 			reproducing = 2,
 			eating = 3,
@@ -45,85 +46,36 @@ class LifeObject
 		};
 
 		// Subclass.
-		class Action
-		{
-			public:
-				// Static.
-				enum class Type
-				{
-					sleep = 0,
-					fight = 1,
-					reproduce = 2,
-					eat = 3,
-					die = 4,
-					move = 5,
-				};
-
-				// Constructors / Destructor.
-				Action()
-					: _source(nullptr),
-					  _type(Type::sleep),
-					  _local_position(0, 0) {}
-				Action(LifeObject *source, const Type &type, const Point &local_pos)
-					: _source(source),
-					  _type(type),
-					  _local_position(local_pos) {}
-				Action(const Action &action)
-					: _source(action._source),
-					  _type(action._type),
-					  _local_position(action._local_position) {}
-				~Action() {}
-
-				// Getters.
-				bool is_null() const { return (_source == nullptr); }
-				LifeObject &get_source() { return (*_source); }
-				const LifeObject &get_source() const { return (*_source); }
-
-				const Type &get_type() const { return _type; }
-
-				const Point &get_local_position() const { return _local_position; }
-
-				// Operators.
-				Action &operator=(const Action &action)
-				{
-					_source = action._source;
-					_type = action._type;
-					_local_position = action._local_position;
-
-					return (*this);
-				}
-
-			protected:
-				// Fields.
-				LifeObject *_source;
-				Type _type;
-				Point _local_position;
-		};
+		class Action;
 
 		// Constructors / Destructor.
-		LifeObject(const Point &pos, int hp=min_ttl_to_live, int dp=default_damage, int weight=default_weight);
+		LifeObject(
+				const Point &pos=Point(),
+				int hp=min_ttl_to_live,
+				int dp=default_damage,
+				int weight=default_weight
+		);
 		LifeObject(const LifeObject &obj);
-		~LifeObject();
+		virtual ~LifeObject();
 
 		// Getters.
 		bool is_alive() const;
 		int get_health() const;
 		int get_weight() const;
+		const Point &get_position() const;
 		const State &get_state() const;
 		const Type &get_type() const;
-		const Point &get_position() const;
 
 		// Methods.
-		bool attack(LifeObject &target);
-		bool eat(int hp);
-		LifeObject reproduce();
 		bool move_to(const Point &point);
 		bool make_older();
-
 		void reset_state();
 
 		// Virtual methods.
-		virtual Action make_action(const std::list<LifeObject *> &neighbours);
+		virtual Action make_action(const PopulationMap &map);
+		virtual bool attack(LifeObject &target) { return false; }
+		virtual bool eat(LifeObject &target) { return false; }
+		virtual LifeObject reproduce() { return LifeObject(LifeObject::empty); }
 
 		// Operators.
 		LifeObject &operator=(const LifeObject &obj);
@@ -141,6 +93,74 @@ class LifeObject
 		// Methods.
 		void deal_damage(int dmg);
 		void kill();
+};
+
+
+class LifeObject::Action
+{
+	public:
+		// Static.
+		enum class Type
+		{
+			move = 0,
+			fight = 1,
+			reproduce = 2,
+			eat = 3,
+			die = 4,
+		};
+
+		// Constructors / Destructor.
+		Action()
+			: _source(nullptr),
+			  _target(nullptr),
+			  _target_position(Point::zero),
+			  _type(Type::move) {}
+		Action(LifeObject *source, LifeObject *target, const Type &type)
+			: _source(source),
+			  _target(target),
+			  _target_position(target->get_position()),
+			  _type(type) {}
+		Action(LifeObject *source, const Point &local_pos, const Type &type)
+			: _source(source),
+			  _target(nullptr),
+			  _target_position(local_pos),
+			  _type(type) {}
+		Action(const Action &action)
+			: _source(action._source),
+			  _target(action._target),
+			  _target_position(action._target_position),
+			  _type(action._type) {}
+		virtual ~Action() {}
+
+		// Getters.
+		bool is_source_null() const { return (_source == nullptr); }
+		bool is_target_null() const { return (_target == nullptr); }
+
+		LifeObject &get_source() { return (*_source); }
+		LifeObject &get_target() { return (*_target); }
+
+		const LifeObject &get_source() const { return (*_source); }
+		const LifeObject &get_target() const { return (*_target); }
+		const Point &get_target_position() const { return _target_position; }
+		const Type &get_type() const { return _type; }
+
+		// Operators.
+		Action &operator=(const Action &action)
+		{
+			_source = action._source;
+			_target = action._target;
+			_target_position = action._target_position;
+			_type = action._type;
+
+			return (*this);
+		}
+
+	protected:
+		// Fields.
+		LifeObject *_source;
+		LifeObject *_target;
+		Point _target_position;
+		Type _type;
 };
 
 

@@ -2,7 +2,7 @@
 #define __POPULATIONMAPVIEW_H__
 
 
-#include "console.h"
+#include <string>
 #include "populationmap.h"
 
 
@@ -32,6 +32,7 @@ class PopulationMapView
 		~PopulationMapView();
 
 		// Methods.
+		void initial_view(const PopulationMap &map) const;
 		void render(const PopulationMap &map) const;
 		void render(const LifeObject &obj) const;
 
@@ -44,6 +45,8 @@ class PopulationMapView
 		char _plant_view;
 		char _herbivorous_view;
 		char _predator_view;
+
+		std::string _term_name;
 };
 
 

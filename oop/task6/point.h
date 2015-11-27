@@ -13,17 +13,19 @@ class Point
 		Point(int x=0, int y=0);
 		Point(int coordinates[2]);
 		Point(const Point &point);
-		~Point();
+		virtual ~Point();
 
 		int get_x() const;
 		int get_y() const;
 
-		double distance(const Point &point) const;
+		double distance_to(const Point &point) const;
 
 		Point &operator=(const Point &point);
 
 		bool operator==(const Point &point) const;
 		bool operator!=(const Point &point) const;
+		bool operator==(int coordinates[2]) const;
+		bool operator!=(int coordinates[2]) const;
 
 		bool operator<(const Point &point) const;
 		bool operator>(const Point &point) const;

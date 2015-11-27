@@ -40,7 +40,7 @@ int Point::get_y() const
 }
 
 
-double Point::distance(const Point &point) const
+double Point::distance_to(const Point &point) const
 {
 	return sqrt(pow((_x - point._x), 2) + pow((_y - point._y), 2));
 }
@@ -65,6 +65,19 @@ bool Point::operator==(const Point &point) const
 bool Point::operator!=(const Point &point) const
 {
 	return !(this->operator==(point));
+}
+
+
+bool Point::operator==(int coordinates[2]) const
+{
+	return ((_x == coordinates[0])
+			&& (_y == coordinates[2]));
+}
+
+
+bool Point::operator!=(int coordinates[2]) const
+{
+	return !((*this) == coordinates);
 }
 
 
@@ -98,29 +111,29 @@ bool Point::operator>(int coordinates[2]) const
 
 bool Point::operator<=(const Point &point) const
 {
-	return ((_x <= point._x)
-			&& (_y <= point._y));
+	return (((*this) < point)
+			|| ((*this) == point));
 }
 
 
 bool Point::operator>=(const Point &point) const
 {
-	return ((_x >= point._x)
-			&& (_y >= point._y));
+	return (((*this) > point)
+			|| ((*this) == point));
 }
 
 
 bool Point::operator<=(int coordinates[2]) const
 {
-	return ((_x <= coordinates[0])
-			&& (_y <= coordinates[1]));
+	return (((*this) < coordinates)
+			|| ((*this) == coordinates));
 }
 
 
 bool Point::operator>=(int coordinates[2]) const
 {
-	return ((_x >= coordinates[0])
-			&& (_y >= coordinates[1]));
+	return (((*this) > coordinates)
+			|| ((*this) == coordinates));
 }
 
 
