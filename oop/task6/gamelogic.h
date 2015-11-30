@@ -17,6 +17,7 @@ class GameLogic
 		virtual ~GameLogic();
 
 		// Methods.
+		void init_game(int plants_num, int herbivorous_num, int predators_num);
 		void run();
 		void tick(int ticks_num=1);
 

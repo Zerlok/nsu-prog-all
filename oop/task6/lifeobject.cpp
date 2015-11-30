@@ -90,22 +90,19 @@ const Point &LifeObject::get_position() const
 }
 
 
-//bool LifeObject::make_older()
-//{
-//	if (!is_alive())
-//		return false;
+bool LifeObject::make_older()
+{
+	if (!is_alive())
+		return false;
 
-//	--_ttl;
-//	return is_alive();
-//}
+	--_ttl;
+	return is_alive();
+}
 
 
 LifeObject::Action *LifeObject::create_action(const PopulationMap &map)
 {
-	std::vector<Point> free_positions = map.get_free_positions(_position);
-	free_positions.push_back(_position);
-
-	return new MoveAction(this, free_positions[(rand() % free_positions.size())]);
+	return nullptr;
 }
 
 

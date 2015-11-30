@@ -53,15 +53,30 @@ void ConsoleView::initial_view() const
 void ConsoleView::render_object(const LifeObject &obj) const
 {
 	const Point &obj_pos = obj.get_position();
+
+	char chr;
+	switch (obj.get_type())
+	{
+		case LifeObject::Type::none:
+			chr = empty_view;
+
+		case LifeObject::Type::plant:
+			chr = plant_view;
+
+		case LifeObject::Type::herbivorous:
+			chr = herbivorous_view;
+
+		case LifeObject::Type::predator:
+			chr = predator_view;
+	}
+
 	paint(
 			obj_pos['x'],
 			obj_pos['y'],
-			(obj.is_alive()
-				? predator_view
-				: empty_view),
-			(obj.is_alive()
-				? Palette::predator_color
-				: Palette::field_color)
+			chr,
+			((obj.get_type() == LifeObject::Type::none)
+			 ? Palette::field_color
+			 : Palette::predator_color)
 	);
 }
 

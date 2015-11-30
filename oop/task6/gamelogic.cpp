@@ -5,6 +5,10 @@
 
 #include "console.h"
 #include "action.h"
+#include "plant.h"
+#include "herbivorous.h"
+#include "predator.h"
+
 #include "gamelogic.h"
 
 
@@ -21,9 +25,6 @@ GameLogic::GameLogic()
 	con_hideCursor();
 
 	_view = new ConsoleView(*_current_map);
-
-	for (int i = 0; i < (rand() + 5) % 10; ++i)
-		_current_map->push_object(LifeObject(Point(rand() % map_size['x'], rand() % map_size['y']), 10));
 }
 
 
@@ -33,6 +34,40 @@ GameLogic::~GameLogic()
 	delete _view;
 
 	con_deinit();
+}
+
+
+void GameLogic::init_game(int plants_num, int herbivorous_num, int predators_num)
+{
+	for (int i = 0; i < plants_num; ++i)
+		_current_map->push_object(
+				Plant(
+					Point(rand() % map_size['x'], rand() % map_size['y']),
+					10,
+					1,
+					8
+				)
+		);
+
+	for (int i = 0; i < plants_num; ++i)
+		_current_map->push_object(
+				Herbivorous(
+					Point(rand() % map_size['x'], rand() % map_size['y']),
+					15,
+					1,
+					10
+				)
+		);
+
+	for (int i = 0; i < plants_num; ++i)
+		_current_map->push_object(
+				Predator(
+					Point(rand() % map_size['x'], rand() % map_size['y']),
+					15,
+					3,
+					15
+				)
+		);
 }
 
 
@@ -74,8 +109,11 @@ void GameLogic::tick(int ticks_num)
 	sort(actions.begin(), actions.end());
 	for (LifeObject::Action *action : actions)
 	{
-		action->execute(*_current_map);
-		delete action;
+		if (action != nullptr)
+		{
+			action->execute(*_current_map);
+			delete action;
+		}
 	}
 
 	_view->render_map();

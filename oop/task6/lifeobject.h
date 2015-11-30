@@ -60,6 +60,8 @@ class LifeObject
 		const Point &get_position() const;
 		const Type &get_type() const;
 
+		// Methods.
+
 		// Virtual methods.
 		virtual Action *create_action(const PopulationMap &map);
 
@@ -74,8 +76,8 @@ class LifeObject
 		int _weight;
 		Type _type;
 
-	private:
 		// Methods.
+		bool make_older();
 		void deal_damage(int dmg);
 		void kill();
 };

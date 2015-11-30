@@ -45,8 +45,6 @@ std::vector<Point> PopulationMap::get_free_positions(const Point &point) const
 	if (right_bottom_corner >= _corner_position)
 		right_bottom_corner = _corner_position;
 
-//	std::cout << left_top_corner << "->" << right_bottom_corner << std::endl;
-
 	for (int y = left_top_corner['y'];
 		 y <= right_bottom_corner['y'];
 		 ++y)

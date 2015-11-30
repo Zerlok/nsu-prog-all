@@ -10,7 +10,10 @@ SOURCES += console.c \
 	populationmap.cpp \
 	populationmapview.cpp \
 	gamelogic.cpp \
-    action.cpp
+    action.cpp \
+    plant.cpp \
+    herbivorous.cpp \
+    predator.cpp
 
 HEADERS += console.h \
 	point.h \
@@ -18,7 +21,10 @@ HEADERS += console.h \
     populationmap.h \
 	populationmapview.h \
 	gamelogic.h \
-    action.h
+    action.h \
+    plant.h \
+    herbivorous.h \
+    predator.h
 
 OTHER_FILES += gtest.cpp
 
