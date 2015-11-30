@@ -1,3 +1,4 @@
+#include <iostream>
 #include "populationmap.h"
 
 
@@ -35,21 +36,23 @@ std::vector<Point> PopulationMap::get_free_positions(const Point &point) const
 {
 	std::vector<Point> positions;
 
-	Point left_bottom_corner = point - LifeObject::view_radius;
-	Point right_top_corner = point + LifeObject::view_radius;
+	Point left_top_corner = point - LifeObject::view_radius;
+	Point right_bottom_corner = point + LifeObject::view_radius;
 
-	if (!(left_bottom_corner >= Point::zero))
-		left_bottom_corner = Point::zero;
+	if (left_top_corner < Point::zero)
+		left_top_corner = Point::zero;
 
-	if (!(right_top_corner <= _corner_position))
-		right_top_corner = _corner_position;
+	if (right_bottom_corner >= _corner_position)
+		right_bottom_corner = _corner_position;
 
-	for (int y = left_bottom_corner['y'];
-		 y <= right_top_corner['y'];
+//	std::cout << left_top_corner << "->" << right_bottom_corner << std::endl;
+
+	for (int y = left_top_corner['y'];
+		 y <= right_bottom_corner['y'];
 		 ++y)
 	{
-		for (int x = left_bottom_corner['x'];
-			 x <= right_top_corner['x'];
+		for (int x = left_top_corner['x'];
+			 x <= right_bottom_corner['x'];
 			 ++x)
 		{
 			positions.push_back({x, y});

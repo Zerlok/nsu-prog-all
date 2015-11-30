@@ -14,15 +14,16 @@ class GameLogic
 
 		// Constructors / Destructor.
 		GameLogic();
-		~GameLogic();
+		virtual ~GameLogic();
 
 		// Methods.
-		void run(int ticks_num=1);
+		void run();
+		void tick(int ticks_num=1);
 
 	private:
 		// Fileds.
 		PopulationMap *_current_map;
-		PopulationMapView *_view;
+		AbstractView *_view;
 };
 
 

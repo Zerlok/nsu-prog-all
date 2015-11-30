@@ -6,14 +6,29 @@
 #include "populationmap.h"
 
 
-class PopulationMapView
+class AbstractView
+{
+	public:
+		AbstractView(const PopulationMap& map);
+		virtual ~AbstractView();
+
+		virtual void render_map() const;
+		virtual void initial_view() const = 0;
+		virtual void render_object(const LifeObject &obj) const = 0;
+
+	protected:
+		const PopulationMap &_map;
+};
+
+
+class ConsoleView : public AbstractView
 {
 	public:
 		// Static.
-		static const char default_empty_view = ' ';
-		static const char default_plant_view = 'l';
-		static const char default_predator_view = 'p';
-		static const char default_herbivorous_view = 'h';
+		static const char empty_view = ' ';
+		static const char plant_view = 'l';
+		static const char predator_view = 'p';
+		static const char herbivorous_view = 'h';
 
 		enum class Palette
 		{
@@ -25,28 +40,31 @@ class PopulationMapView
 		};
 
 		// Constructors / Destructor.
-		PopulationMapView(char empty_view=default_empty_view,
-				char plant_view=default_plant_view,
-				char herbivorous_view=default_herbivorous_view,
-				char predator_view=default_predator_view);
-		~PopulationMapView();
+		ConsoleView(const PopulationMap &map);
+		virtual ~ConsoleView();
 
 		// Methods.
-		void initial_view(const PopulationMap &map) const;
-		void render_map(const PopulationMap &map) const;
-		void render_object(const LifeObject &obj) const;
+		virtual void initial_view() const override;
+		virtual void render_object(const LifeObject &obj) const override;
 
 		void clear() const;
 
 	private:
 		// Fileds.
-		char _empty_view;
-		char _plant_view;
-		char _herbivorous_view;
-		char _predator_view;
 		std::string _term_name;
 
 		void paint(int x, int y, char chr, const Palette &clr) const;
+};
+
+
+class TextView : public AbstractView
+{
+	public:
+		TextView(const PopulationMap &map);
+		virtual ~TextView();
+
+		virtual void initial_view() const override;
+		virtual void render_object(const LifeObject &obj) const override;
 };
 
 
