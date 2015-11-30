@@ -22,6 +22,9 @@ class PopulationMap
 		int get_width() const;
 		int get_height() const;
 
+		bool is_valid_position(const Point &position) const;
+		std::vector<Point> get_free_positions(const Point &point) const;
+
 //		LifeObject &get(const Point &point);
 //		const LifeObject &get(const Point &point) const;
 

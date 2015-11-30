@@ -17,7 +17,7 @@ PopulationMapView::PopulationMapView(char empty_view,
 	con_hideCursor();
 
 	con_initPair(short(Palette::border_color), CON_COLOR_WHITE, CON_COLOR_BLUE);
-	con_initPair(short(Palette::field_color), CON_COLOR_WHITE, CON_COLOR_GREEN);
+	con_initPair(short(Palette::field_color), CON_COLOR_GREEN, CON_COLOR_GREEN);
 	con_initPair(short(Palette::plant_color), CON_COLOR_RED, CON_COLOR_GREEN);
 }
 
@@ -40,22 +40,22 @@ void PopulationMapView::initial_view(const PopulationMap &map) const
 }
 
 
-void PopulationMapView::render(const PopulationMap &map) const
+void PopulationMapView::render_map(const PopulationMap &map) const
 {
 	for (const LifeObject &obj : map.get_objects())
-		render(obj);
+		render_object(obj);
 }
 
 
-void PopulationMapView::render(const LifeObject &obj) const
+void PopulationMapView::render_object(const LifeObject &obj) const
 {
 	const Point &obj_pos = obj.get_position();
 	paint(
 			obj_pos['x'],
 			obj_pos['y'],
 			(obj.is_alive()
-				? 'o'
-				: '.'),
+				? _predator_view
+				: _empty_view),
 			(obj.is_alive()
 				? Palette::plant_color
 				: Palette::field_color)
@@ -67,7 +67,7 @@ void PopulationMapView::paint(int x, int y, char chr, const Palette &clr) const
 {
 	con_gotoXY(x, y);
 	con_setColor(short(clr));
-	con_outTxt(" %c", chr);
+	con_outTxt("%c", chr);
 }
 
 

@@ -11,7 +11,7 @@ int main()
 //	GameLogic game(argv[1]);
 	GameLogic game;
 
-	game.run();
+	game.run(5);
 
 	return 0;
 }

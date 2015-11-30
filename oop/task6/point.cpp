@@ -23,6 +23,12 @@ Point::Point(const Point &point)
 }
 
 
+Point::Point(Point &&point)
+	: _x(std::move(point._x)), _y(std::move(point._y))
+{
+}
+
+
 Point::~Point()
 {
 }

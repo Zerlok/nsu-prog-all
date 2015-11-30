@@ -22,11 +22,7 @@ class GameLogic
 	private:
 		// Fileds.
 		PopulationMap *_current_map;
-		PopulationMap *_next_map;
 		PopulationMapView *_view;
-
-		// Methods.
-		void tick_object(const LifeObject &current_obj);
 };
 
 

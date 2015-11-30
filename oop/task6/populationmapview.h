@@ -10,7 +10,7 @@ class PopulationMapView
 {
 	public:
 		// Static.
-		static const char default_empty_view = '.';
+		static const char default_empty_view = ' ';
 		static const char default_plant_view = 'l';
 		static const char default_predator_view = 'p';
 		static const char default_herbivorous_view = 'h';
@@ -33,10 +33,9 @@ class PopulationMapView
 
 		// Methods.
 		void initial_view(const PopulationMap &map) const;
-		void render(const PopulationMap &map) const;
-		void render(const LifeObject &obj) const;
+		void render_map(const PopulationMap &map) const;
+		void render_object(const LifeObject &obj) const;
 
-		void paint(int x, int y, char chr, const Palette &clr) const;
 		void clear() const;
 
 	private:
@@ -45,8 +44,9 @@ class PopulationMapView
 		char _plant_view;
 		char _herbivorous_view;
 		char _predator_view;
-
 		std::string _term_name;
+
+		void paint(int x, int y, char chr, const Palette &clr) const;
 };
 
 

@@ -13,6 +13,7 @@ class Point
 		Point(int x=0, int y=0);
 		Point(int coordinates[2]);
 		Point(const Point &point);
+		Point(Point &&point);
 		virtual ~Point();
 
 		int get_x() const;

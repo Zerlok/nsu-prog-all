@@ -24,24 +24,48 @@ int PopulationMap::get_width() const
 }
 
 
-//LifeObject &PopulationMap::get(const Point &point)
-//{
-//	for (LifeObject obj : _objects)
-//		if (obj.get_position() == point)
-//			return obj;
-
-//	return LifeObject(LifeObject::empty);
-//}
+bool PopulationMap::is_valid_position(const Point &position) const
+{
+	return ((position >= Point::zero)
+			&& (position < _corner_position));
+}
 
 
-//const LifeObject &PopulationMap::get(const Point &point) const
-//{
-//	for (const LifeObject obj : _objects)
-//		if (obj.get_position() == point)
-//			return obj;
+std::vector<Point> PopulationMap::get_free_positions(const Point &point) const
+{
+	std::vector<Point> positions;
 
-//	return LifeObject::empty;
-//}
+	Point left_bottom_corner = point - LifeObject::view_radius;
+	Point right_top_corner = point + LifeObject::view_radius;
+
+	if (!(left_bottom_corner >= Point::zero))
+		left_bottom_corner = Point::zero;
+
+	if (!(right_top_corner <= _corner_position))
+		right_top_corner = _corner_position;
+
+	for (int y = left_bottom_corner['y'];
+		 y <= right_top_corner['y'];
+		 ++y)
+	{
+		for (int x = left_bottom_corner['x'];
+			 x <= right_top_corner['x'];
+			 ++x)
+		{
+			positions.push_back({x, y});
+			for (const LifeObject &obj : _objects)
+			{
+				if (obj.get_position() == positions.back())
+				{
+					positions.pop_back();
+					break;
+				}
+			}
+		}
+	}
+
+	return positions;
+}
 
 
 PopulationMap::object_ptr_list PopulationMap::get_neighbours(const Point &point)
@@ -56,7 +80,7 @@ PopulationMap::object_ptr_list PopulationMap::get_neighbours(const Point &point)
 	if (!(right_top_corner <= _corner_position))
 		right_top_corner = _corner_position;
 
-	for (LifeObject obj : _objects)
+	for (LifeObject &obj : _objects)
 	{
 		const Point &obj_pos = obj.get_position();
 

@@ -28,15 +28,6 @@ class LifeObject
 
 		static const LifeObject empty;
 
-		enum class State
-		{
-			resting = 0,
-			fighting = 1,
-			reproducing = 2,
-			eating = 3,
-			dying = 4
-		};
-
 		enum class Type
 		{
 			none = 0,
@@ -45,8 +36,12 @@ class LifeObject
 			predator = 3
 		};
 
-		// Subclass.
+		// LifeObject Available Actions.
 		class Action;
+		class MoveAction;
+		class EatAction;
+		class AttackAction;
+		class ReproduceAction;
 
 		// Constructors / Destructor.
 		LifeObject(
@@ -63,19 +58,10 @@ class LifeObject
 		int get_health() const;
 		int get_weight() const;
 		const Point &get_position() const;
-		const State &get_state() const;
 		const Type &get_type() const;
 
-		// Methods.
-		bool move_to(const Point &point);
-		bool make_older();
-		void reset_state();
-
 		// Virtual methods.
-		virtual Action make_action(const PopulationMap &map);
-		virtual bool attack(LifeObject &target) { return false; }
-		virtual bool eat(LifeObject &target) { return false; }
-		virtual LifeObject reproduce() { return LifeObject(LifeObject::empty); }
+		virtual Action *create_action(const PopulationMap &map);
 
 		// Operators.
 		LifeObject &operator=(const LifeObject &obj);
@@ -86,81 +72,12 @@ class LifeObject
 		int _ttl; // Ticks To Live - health.
 		int _damage;
 		int _weight;
-		State _state;
 		Type _type;
 
 	private:
 		// Methods.
 		void deal_damage(int dmg);
 		void kill();
-};
-
-
-class LifeObject::Action
-{
-	public:
-		// Static.
-		enum class Type
-		{
-			move = 0,
-			fight = 1,
-			reproduce = 2,
-			eat = 3,
-			die = 4,
-		};
-
-		// Constructors / Destructor.
-		Action()
-			: _source(nullptr),
-			  _target(nullptr),
-			  _target_position(Point::zero),
-			  _type(Type::move) {}
-		Action(LifeObject *source, LifeObject *target, const Type &type)
-			: _source(source),
-			  _target(target),
-			  _target_position(target->get_position()),
-			  _type(type) {}
-		Action(LifeObject *source, const Point &local_pos, const Type &type)
-			: _source(source),
-			  _target(nullptr),
-			  _target_position(local_pos),
-			  _type(type) {}
-		Action(const Action &action)
-			: _source(action._source),
-			  _target(action._target),
-			  _target_position(action._target_position),
-			  _type(action._type) {}
-		virtual ~Action() {}
-
-		// Getters.
-		bool is_source_null() const { return (_source == nullptr); }
-		bool is_target_null() const { return (_target == nullptr); }
-
-		LifeObject &get_source() { return (*_source); }
-		LifeObject &get_target() { return (*_target); }
-
-		const LifeObject &get_source() const { return (*_source); }
-		const LifeObject &get_target() const { return (*_target); }
-		const Point &get_target_position() const { return _target_position; }
-		const Type &get_type() const { return _type; }
-
-		// Operators.
-		Action &operator=(const Action &action)
-		{
-			_source = action._source;
-			_target = action._target;
-			_target_position = action._target_position;
-			_type = action._type;
-
-			return (*this);
-		}
-
-	protected:
-		// Fields.
-		LifeObject *_source;
-		LifeObject *_target;
-		Point _target_position;
-		Type _type;
 };
 
 
