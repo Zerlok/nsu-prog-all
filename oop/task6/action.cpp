@@ -106,11 +106,12 @@ LifeObject::EatAction::~EatAction()
 
 void LifeObject::EatAction::execute(PopulationMap &map)
 {
+	// TODO: invalid read of size 4 (valgrind)
 	if (_target->_weight > 0)
 	{
 		_target->_weight -= 1;
 		_source->_weight += 1;
-		_source->_ttl += 4;
+		_source->_ttl += 2;
 	}
 }
 
@@ -138,8 +139,14 @@ LifeObject::AttackAction::~AttackAction()
 
 void LifeObject::AttackAction::execute(PopulationMap &map)
 {
-	if (_target->is_alive())
-		_target->_ttl -= _source->_damage;
+	if (!(_source->is_alive()
+		  && _target->is_alive()))
+		return;
+
+	if (_source->_position != _target->_position)
+		_source->_position = _target->_position;
+
+	_target->_ttl -= _source->_damage;
 }
 
 // ---------------------------- REPRODUCE ACTION ---------------------------- //

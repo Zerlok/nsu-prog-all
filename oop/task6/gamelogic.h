@@ -19,11 +19,11 @@ class GameLogic
 		// Methods.
 		void init_game(int plants_num, int herbivorous_num, int predators_num);
 		void run();
-		void tick(int ticks_num=1);
+		void tick();
 
 	private:
 		// Fileds.
-		PopulationMap *_current_map;
+		PopulationMap *_map;
 		AbstractView *_view;
 };
 

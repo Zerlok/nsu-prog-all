@@ -98,21 +98,21 @@ PopulationMap::object_list PopulationMap::get_neighbours(const Point &point)
 const PopulationMap::object_list PopulationMap::get_neighbours(const Point &point) const
 {
 	object_list lst;
-	Point left_bottom_corner = point - LifeObject::view_radius;
-	Point right_top_corner = point + LifeObject::view_radius;
+	Point left_top_corner = point - LifeObject::view_radius;
+	Point right_bottom_corner = point + LifeObject::view_radius;
 
-	if (!(left_bottom_corner >= Point::zero))
-		left_bottom_corner = Point::zero;
+	if (!(left_top_corner >= Point::zero))
+		left_top_corner = Point::zero;
 
-	if (!(right_top_corner <= _corner_position))
-		right_top_corner = _corner_position;
+	if (!(right_bottom_corner <= _corner_position))
+		right_bottom_corner = _corner_position;
 
 	for (LifeObject *obj : _objects)
 	{
 		const Point &obj_pos = obj->get_position();
 
-		if ((obj_pos >= left_bottom_corner)
-				&& (obj_pos <= right_top_corner))
+		if ((obj_pos >= left_top_corner)
+				&& (obj_pos <= right_bottom_corner))
 			lst.push_back(obj);
 	}
 
@@ -134,6 +134,9 @@ const PopulationMap::object_list &PopulationMap::get_objects() const
 
 void PopulationMap::push_object(LifeObject *obj)
 {
+	if (obj == nullptr)
+		return;
+
 	_objects.push_back(obj);
 }
 

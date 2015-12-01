@@ -2,7 +2,9 @@
 #define __PREDATOR_H__
 
 
+#include "point.h"
 #include "lifeobject.h"
+#include "populationmap.h"
 
 
 class Predator : public LifeObject
@@ -19,6 +21,16 @@ class Predator : public LifeObject
 
 		virtual LifeObject *clone() const override;
 		virtual LifeObject::Action *create_action(const PopulationMap &map) override;
+
+	private:
+		bool is_hungry() const;
+		bool find_food(const PopulationMap::object_list &neighbours);
+		bool find_victim(const PopulationMap::object_list &neighbours);
+
+		void move_to(const Point &pos);
+
+		LifeObject *food;
+		LifeObject *victim;
 };
 
 

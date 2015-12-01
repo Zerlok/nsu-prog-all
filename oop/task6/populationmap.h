@@ -24,9 +24,6 @@ class PopulationMap
 		bool is_valid_position(const Point &position) const;
 		std::vector<Point> get_free_positions(const Point &point) const;
 
-//		LifeObject &get(const Point &point);
-//		const LifeObject &get(const Point &point) const;
-
 		object_list get_neighbours(const Point &point);
 		const object_list get_neighbours(const Point &point) const;
 
