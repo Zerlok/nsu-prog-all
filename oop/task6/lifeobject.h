@@ -60,9 +60,8 @@ class LifeObject
 		const Point &get_position() const;
 		const Type &get_type() const;
 
-		// Methods.
-
 		// Virtual methods.
+		virtual LifeObject *clone() const;
 		virtual Action *create_action(const PopulationMap &map);
 
 		// Operators.

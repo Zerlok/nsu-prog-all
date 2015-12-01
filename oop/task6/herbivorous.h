@@ -14,8 +14,10 @@ class Herbivorous : public LifeObject
 				int dp=default_damage,
 				int weight=default_weight
 		);
+		Herbivorous(const Herbivorous &herbivorous);
 		virtual ~Herbivorous();
 
+		virtual LifeObject *clone() const override;
 		virtual LifeObject::Action *create_action(const PopulationMap &map) override;
 };
 

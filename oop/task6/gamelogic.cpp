@@ -41,7 +41,7 @@ void GameLogic::init_game(int plants_num, int herbivorous_num, int predators_num
 {
 	for (int i = 0; i < plants_num; ++i)
 		_current_map->push_object(
-				Plant(
+				new Plant(
 					Point(rand() % map_size['x'], rand() % map_size['y']),
 					10,
 					1,
@@ -49,9 +49,9 @@ void GameLogic::init_game(int plants_num, int herbivorous_num, int predators_num
 				)
 		);
 
-	for (int i = 0; i < plants_num; ++i)
+	for (int i = 0; i < herbivorous_num; ++i)
 		_current_map->push_object(
-				Herbivorous(
+				new Herbivorous(
 					Point(rand() % map_size['x'], rand() % map_size['y']),
 					15,
 					1,
@@ -59,9 +59,9 @@ void GameLogic::init_game(int plants_num, int herbivorous_num, int predators_num
 				)
 		);
 
-	for (int i = 0; i < plants_num; ++i)
+	for (int i = 0; i < predators_num; ++i)
 		_current_map->push_object(
-				Predator(
+				new Predator(
 					Point(rand() % map_size['x'], rand() % map_size['y']),
 					15,
 					3,
@@ -74,7 +74,7 @@ void GameLogic::init_game(int plants_num, int herbivorous_num, int predators_num
 void GameLogic::run()
 {
 	bool is_finished = false;
-	bool is_paused = false;
+	bool is_paused = true;
 
 	while (!is_finished)
 	{
@@ -83,7 +83,8 @@ void GameLogic::run()
 			switch (con_getKey())
 			{
 				case ' ':
-					is_paused = !is_paused;
+					tick();
+//					is_paused = !is_paused;
 					break;
 				case CON_KEY_ESCAPE:
 					is_finished = true;
@@ -103,8 +104,11 @@ void GameLogic::tick(int ticks_num)
 
 	std::vector<LifeObject::Action*> actions;
 
-	for (LifeObject &obj : _current_map->get_objects())
-		actions.push_back(obj.create_action(*_current_map));
+	for (LifeObject *obj : _current_map->get_objects())
+	{
+		if (obj->is_alive())
+			actions.push_back(obj->create_action(*_current_map));
+	}
 
 	sort(actions.begin(), actions.end());
 	for (LifeObject::Action *action : actions)

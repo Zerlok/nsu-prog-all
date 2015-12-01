@@ -13,14 +13,30 @@ Plant::Plant(const Point &pos, int hp, int dp, int weight)
 }
 
 
+Plant::Plant(const Plant &plant)
+	: LifeObject(plant._position, plant._ttl, plant._damage, plant._weight)
+{
+	this->_type = plant._type;
+}
+
+
 Plant::~Plant()
 {
 }
 
 
+LifeObject *Plant::clone() const
+{
+	return new Plant(*this);
+}
+
+
 Plant::Action *Plant::create_action(const PopulationMap &map)
 {
-	if (rand() % 5)
+	if (!is_alive())
+		return nullptr;
+
+	if (!(rand() % 10))
 		return new ReproduceAction(this);
 
 	return nullptr;

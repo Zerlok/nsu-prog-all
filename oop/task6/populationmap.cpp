@@ -10,6 +10,7 @@ PopulationMap::PopulationMap(const Point &corner_position)
 
 PopulationMap::~PopulationMap()
 {
+	clear_objects();
 }
 
 
@@ -54,9 +55,9 @@ std::vector<Point> PopulationMap::get_free_positions(const Point &point) const
 			 ++x)
 		{
 			positions.push_back({x, y});
-			for (const LifeObject &obj : _objects)
+			for (const LifeObject *obj : _objects)
 			{
-				if (obj.get_position() == positions.back())
+				if (obj->get_position() == positions.back())
 				{
 					positions.pop_back();
 					break;
@@ -69,9 +70,9 @@ std::vector<Point> PopulationMap::get_free_positions(const Point &point) const
 }
 
 
-PopulationMap::object_ptr_list PopulationMap::get_neighbours(const Point &point)
+PopulationMap::object_list PopulationMap::get_neighbours(const Point &point)
 {
-	object_ptr_list lst;
+	object_list lst;
 	Point left_bottom_corner = point - LifeObject::view_radius;
 	Point right_top_corner = point + LifeObject::view_radius;
 
@@ -81,22 +82,22 @@ PopulationMap::object_ptr_list PopulationMap::get_neighbours(const Point &point)
 	if (!(right_top_corner <= _corner_position))
 		right_top_corner = _corner_position;
 
-	for (LifeObject &obj : _objects)
+	for (LifeObject *obj : _objects)
 	{
-		const Point &obj_pos = obj.get_position();
+		const Point &obj_pos = obj->get_position();
 
 		if ((obj_pos >= left_bottom_corner)
 				&& (obj_pos <= right_top_corner))
-			lst.push_back(&obj);
+			lst.push_back(obj);
 	}
 
 	return lst;
 }
 
 
-const PopulationMap::object_ptr_list PopulationMap::get_neighbours(const Point &point) const
+const PopulationMap::object_list PopulationMap::get_neighbours(const Point &point) const
 {
-	object_ptr_list lst;
+	object_list lst;
 	Point left_bottom_corner = point - LifeObject::view_radius;
 	Point right_top_corner = point + LifeObject::view_radius;
 
@@ -106,13 +107,13 @@ const PopulationMap::object_ptr_list PopulationMap::get_neighbours(const Point &
 	if (!(right_top_corner <= _corner_position))
 		right_top_corner = _corner_position;
 
-	for (LifeObject obj : _objects)
+	for (LifeObject *obj : _objects)
 	{
-		const Point &obj_pos = obj.get_position();
+		const Point &obj_pos = obj->get_position();
 
 		if ((obj_pos >= left_bottom_corner)
 				&& (obj_pos <= right_top_corner))
-			lst.push_back(&obj);
+			lst.push_back(obj);
 	}
 
 	return lst;
@@ -131,7 +132,7 @@ const PopulationMap::object_list &PopulationMap::get_objects() const
 }
 
 
-void PopulationMap::push_object(const LifeObject &obj)
+void PopulationMap::push_object(LifeObject *obj)
 {
 	_objects.push_back(obj);
 }
@@ -139,5 +140,6 @@ void PopulationMap::push_object(const LifeObject &obj)
 
 void PopulationMap::clear_objects()
 {
-	_objects.clear();
+	for (LifeObject *obj : _objects)
+		delete obj;
 }

@@ -11,8 +11,8 @@ int main()
 //	GameLogic game(argv[1]);
 	GameLogic game;
 
+	game.init_game(5, 3, 2);
 //	game.tick(1);
-	game.init_game(15, 8, 4);
 	game.run();
 
 	return 0;

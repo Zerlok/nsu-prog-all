@@ -14,8 +14,10 @@ class Plant : public LifeObject
 				int dp=default_damage,
 				int weight=default_weight
 		);
+		Plant(const Plant &plant);
 		virtual ~Plant();
 
+		virtual LifeObject *clone() const override;
 		virtual LifeObject::Action *create_action(const PopulationMap &map) override;
 };
 

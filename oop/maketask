@@ -4,19 +4,22 @@ cpp="g++"
 cppflags="-std=c++11"
 declare -a sources
 
-pro=${1##*/}
+pro="${1##*/}"
+pro="${pro%%.pro}"
 currdir=`pwd`
-dir="${currdir}/${1%%/*}"
+dir="${1%%/*}"
 
 while read line
 do
     if [[ $line == "SOURCES += "* ]]
     then
-        sources=(${line##*+= })
+        linesources=(${line##*+= })
+	for source in ${linesources[@]}
+	do
+		sources+=("$dir/$source")
+	done
     fi
 done < "$1"
 
-cd $dir
-echo "g++ ${cppflags} ${sources[@]} -o ${currdir}/result.bin"
-g++ ${cppflags} ${sources[@]} -o "${currdir}/result.bin"
-cd $currdir
+echo "g++ ${cppflags} ${sources[@]} -o ${pro}"
+#g++ ${cppflags} ${sources[@]} -o "${currdir}/result.bin"

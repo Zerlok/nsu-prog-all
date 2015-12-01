@@ -171,12 +171,17 @@ LifeObject::ReproduceAction::~ReproduceAction()
 
 void LifeObject::ReproduceAction::execute(PopulationMap &map)
 {
-	LifeObject child = LifeObject(
-			(_source->_ttl / LifeObject::min_ttl_to_reproducing),
-			(_source->_damage),
-			(_source->_weight / LifeObject::weight_ratio_at_reproducing)
-	);
-	_source->_ttl -= child._ttl;
+	std::vector<Point> free_positions = map.get_free_positions(_source->_position);
+
+	if (free_positions.empty())
+		return;
+
+	LifeObject *child = _source->clone();
+	child->_position = free_positions[(rand() % free_positions.size())];
+	child->_ttl = _source->_ttl / LifeObject::min_ttl_to_reproducing;
+	child->_weight = _source->_weight / LifeObject::weight_ratio_at_reproducing;
+
+	_source->_ttl -= child->_ttl;
 
 	map.push_object(child);
 }

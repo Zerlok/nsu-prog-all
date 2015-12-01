@@ -100,6 +100,12 @@ bool LifeObject::make_older()
 }
 
 
+LifeObject *LifeObject::clone() const
+{
+	return new LifeObject(*this);
+}
+
+
 LifeObject::Action *LifeObject::create_action(const PopulationMap &map)
 {
 	return nullptr;

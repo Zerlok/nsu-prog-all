@@ -14,20 +14,36 @@ Predator::Predator(const Point &pos, int hp, int dp, int weight)
 }
 
 
+Predator::Predator(const Predator &predator)
+	: LifeObject(predator._position, predator._ttl, predator._damage, predator._weight)
+{
+	this->_type = predator._type;
+}
+
+
 Predator::~Predator()
 {
 }
 
 
+LifeObject *Predator::clone() const
+{
+	return new Predator(*this);
+}
+
+
 Predator::Action *Predator::create_action(const PopulationMap &map)
 {
+	if (!is_alive())
+		return nullptr;
+
 	make_older();
-	const PopulationMap::object_ptr_list &neighbours = map.get_neighbours(_position);
+	const PopulationMap::object_list &neighbours = map.get_neighbours(_position);
 
 	switch (rand() % 4)
 	{
 		case 0:
-			if (rand() % 2)
+			if (!(rand() % 2))
 				return new ReproduceAction(this);
 			break;
 

@@ -14,8 +14,10 @@ class Predator : public LifeObject
 				int dp=default_damage,
 				int weight=default_weight
 		);
+		Predator(const Predator &predator);
 		virtual ~Predator();
 
+		virtual LifeObject *clone() const override;
 		virtual LifeObject::Action *create_action(const PopulationMap &map) override;
 };
 

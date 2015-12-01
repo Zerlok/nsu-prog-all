@@ -11,8 +11,7 @@ class PopulationMap
 {
 	public:
 		// Types.
-		using object_list = std::list<LifeObject>;
-		using object_ptr_list = std::list<LifeObject*>;
+		using object_list = std::list<LifeObject*>;
 
 		// Constructors / Destructor.
 		PopulationMap(const Point &corner_position);
@@ -28,14 +27,14 @@ class PopulationMap
 //		LifeObject &get(const Point &point);
 //		const LifeObject &get(const Point &point) const;
 
-		object_ptr_list get_neighbours(const Point &point);
-		const object_ptr_list get_neighbours(const Point &point) const;
+		object_list get_neighbours(const Point &point);
+		const object_list get_neighbours(const Point &point) const;
 
 		object_list &get_objects();
 		const object_list &get_objects() const;
 
 		// Methods.
-		void push_object(const LifeObject &obj);
+		void push_object(LifeObject *obj);
 		void clear_objects();
 
 	private:

@@ -18,8 +18,8 @@ AbstractView::~AbstractView()
 
 void AbstractView::render_map() const
 {
-	for (const LifeObject &obj : this->_map.get_objects())
-		render_object(obj);
+	for (const LifeObject *obj : this->_map.get_objects())
+		render_object(*obj);
 }
 
 
@@ -35,7 +35,7 @@ ConsoleView::ConsoleView(const PopulationMap &map)
 
 ConsoleView::~ConsoleView()
 {
-//	con_clearScr();
+	con_clearScr();
 }
 
 
@@ -55,29 +55,40 @@ void ConsoleView::render_object(const LifeObject &obj) const
 	const Point &obj_pos = obj.get_position();
 
 	char chr;
-	switch (obj.get_type())
+	Palette clr;
+
+	if (obj.is_alive())
 	{
-		case LifeObject::Type::none:
-			chr = empty_view;
+		switch (obj.get_type())
+		{
+			case LifeObject::Type::plant:
+				chr = plant_view;
+				clr = Palette::plant_color;
+				break;
 
-		case LifeObject::Type::plant:
-			chr = plant_view;
+			case LifeObject::Type::herbivorous:
+				chr = herbivorous_view;
+				clr = Palette::herbivorous_color;
+				break;
 
-		case LifeObject::Type::herbivorous:
-			chr = herbivorous_view;
+			case LifeObject::Type::predator:
+				chr = predator_view;
+				clr = Palette::predator_color;
 
-		case LifeObject::Type::predator:
-			chr = predator_view;
+			default:
+			case LifeObject::Type::none:
+				chr = empty_view;
+				clr = Palette::field_color;
+				break;
+		}
+	}
+	else
+	{
+		chr = 'x';
+		clr = Palette::border_color;
 	}
 
-	paint(
-			obj_pos['x'],
-			obj_pos['y'],
-			chr,
-			((obj.get_type() == LifeObject::Type::none)
-			 ? Palette::field_color
-			 : Palette::predator_color)
-	);
+	paint(obj_pos['x'], obj_pos['y'], chr, clr);
 }
 
 
@@ -116,7 +127,28 @@ void TextView::initial_view() const
 
 void TextView::render_object(const LifeObject &obj) const
 {
+	char type;
+	switch (obj.get_type())
+	{
+		case LifeObject::Type::plant:
+			type = 'p';
+			break;
+
+		case LifeObject::Type::herbivorous:
+			type = 'h';
+			break;
+
+		case LifeObject::Type::predator:
+			type = 'p';
+			break;
+
+		default:
+		case LifeObject::Type::none:
+			type = ' ';
+			break;
+	}
+
 	std::stringstream ss;
-	ss << obj.get_position();
+	ss << type << " at " << obj.get_position();
 	con_outTxt("%s\n", ss.str().c_str());
 }
