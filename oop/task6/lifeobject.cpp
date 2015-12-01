@@ -62,7 +62,7 @@ LifeObject::~LifeObject()
 
 bool LifeObject::is_alive() const
 {
-	return (_ttl > min_ttl_to_live);
+	return (_ttl >= min_ttl_to_live);
 }
 
 

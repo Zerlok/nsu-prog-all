@@ -26,10 +26,11 @@ void AbstractView::render_map() const
 ConsoleView::ConsoleView(const PopulationMap &map)
 	: AbstractView(map)
 {
+	con_initPair(short(Palette::border_color), CON_COLOR_WHITE, CON_COLOR_BLACK);
 	con_initPair(short(Palette::field_color), CON_COLOR_GREEN, CON_COLOR_GREEN);
-	con_initPair(short(Palette::border_color), CON_COLOR_WHITE, CON_COLOR_BLUE);
-    con_initPair(short(Palette::plant_color), CON_COLOR_RED, CON_COLOR_RED);
-	con_initPair(short(Palette::predator_color), CON_COLOR_CYAN, CON_COLOR_RED);
+	con_initPair(short(Palette::plant_color), CON_COLOR_BLACK, CON_COLOR_GREEN);
+	con_initPair(short(Palette::herbivorous_color), CON_COLOR_WHITE, CON_COLOR_GREEN);
+	con_initPair(short(Palette::predator_color), CON_COLOR_RED, CON_COLOR_GREEN);
 }
 
 
@@ -74,6 +75,7 @@ void ConsoleView::render_object(const LifeObject &obj) const
 			case LifeObject::Type::predator:
 				chr = predator_view;
 				clr = Palette::predator_color;
+				break;
 
 			default:
 			case LifeObject::Type::none:
@@ -127,28 +129,28 @@ void TextView::initial_view() const
 
 void TextView::render_object(const LifeObject &obj) const
 {
-	char type;
+	std::string type;
 	switch (obj.get_type())
 	{
 		case LifeObject::Type::plant:
-			type = 'p';
+			type = "Plant";
 			break;
 
 		case LifeObject::Type::herbivorous:
-			type = 'h';
+			type = "Herbivorous";
 			break;
 
 		case LifeObject::Type::predator:
-			type = 'p';
+			type = "Predator";
 			break;
 
 		default:
 		case LifeObject::Type::none:
-			type = ' ';
+			type = "None";
 			break;
 	}
 
 	std::stringstream ss;
-	ss << type << " at " << obj.get_position();
+	ss << type << ": " << obj.get_health() << " " << obj.get_position();
 	con_outTxt("%s\n", ss.str().c_str());
 }

@@ -26,9 +26,9 @@ class ConsoleView : public AbstractView
 	public:
 		// Static.
 		static const char empty_view = ' ';
-		static const char plant_view = 'l';
-		static const char predator_view = 'p';
-		static const char herbivorous_view = 'h';
+		static const char plant_view = '*';
+		static const char herbivorous_view = '#';
+		static const char predator_view = '@';
 
 		enum class Palette
 		{

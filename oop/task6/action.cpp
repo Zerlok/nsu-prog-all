@@ -15,13 +15,6 @@ LifeObject::Action::Action(LifeObject *source, const Type &type)
 }
 
 
-//LifeObject::Action::Action(const Action &action)
-//	: _source(action._source),
-//	  _type(action._type)
-//{
-//}
-
-
 LifeObject::Action::~Action()
 {
 }
@@ -115,9 +108,9 @@ void LifeObject::EatAction::execute(PopulationMap &map)
 {
 	if (_target->_weight > 0)
 	{
-		--_target->_weight;
-		++_source->_weight;
-		++_source->_ttl;
+		_target->_weight -= 1;
+		_source->_weight += 1;
+		_source->_ttl += 4;
 	}
 }
 
@@ -171,8 +164,10 @@ LifeObject::ReproduceAction::~ReproduceAction()
 
 void LifeObject::ReproduceAction::execute(PopulationMap &map)
 {
-	std::vector<Point> free_positions = map.get_free_positions(_source->_position);
+	if (!(_source->is_alive()))
+		return;
 
+	std::vector<Point> free_positions = map.get_free_positions(_source->_position);
 	if (free_positions.empty())
 		return;
 
@@ -181,7 +176,11 @@ void LifeObject::ReproduceAction::execute(PopulationMap &map)
 	child->_ttl = _source->_ttl / LifeObject::min_ttl_to_reproducing;
 	child->_weight = _source->_weight / LifeObject::weight_ratio_at_reproducing;
 
-	_source->_ttl -= child->_ttl;
-
-	map.push_object(child);
+	if (child->is_alive())
+	{
+		_source->_ttl -= child->_ttl;
+		map.push_object(child);
+	}
+	else
+		delete child;
 }

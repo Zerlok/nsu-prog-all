@@ -40,7 +40,7 @@ Predator::Action *Predator::create_action(const PopulationMap &map)
 	make_older();
 	const PopulationMap::object_list &neighbours = map.get_neighbours(_position);
 
-	switch (rand() % 4)
+	switch (rand() % 3)
 	{
 		case 0:
 			if (!(rand() % 2))

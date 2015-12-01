@@ -43,9 +43,9 @@ void GameLogic::init_game(int plants_num, int herbivorous_num, int predators_num
 		_current_map->push_object(
 				new Plant(
 					Point(rand() % map_size['x'], rand() % map_size['y']),
-					10,
+					5,
 					1,
-					8
+					5
 				)
 		);
 
@@ -53,9 +53,9 @@ void GameLogic::init_game(int plants_num, int herbivorous_num, int predators_num
 		_current_map->push_object(
 				new Herbivorous(
 					Point(rand() % map_size['x'], rand() % map_size['y']),
-					15,
+					8,
 					1,
-					10
+					8
 				)
 		);
 
@@ -63,9 +63,9 @@ void GameLogic::init_game(int plants_num, int herbivorous_num, int predators_num
 		_current_map->push_object(
 				new Predator(
 					Point(rand() % map_size['x'], rand() % map_size['y']),
-					15,
-					3,
-					15
+					12,
+					4,
+					10
 				)
 		);
 }
@@ -74,7 +74,10 @@ void GameLogic::init_game(int plants_num, int herbivorous_num, int predators_num
 void GameLogic::run()
 {
 	bool is_finished = false;
-	bool is_paused = true;
+	bool is_paused = false;
+
+	_view->initial_view();
+	_view->render_map();
 
 	while (!is_finished)
 	{
@@ -83,8 +86,7 @@ void GameLogic::run()
 			switch (con_getKey())
 			{
 				case ' ':
-					tick();
-//					is_paused = !is_paused;
+					is_paused = !is_paused;
 					break;
 				case CON_KEY_ESCAPE:
 					is_finished = true;
@@ -102,22 +104,34 @@ void GameLogic::tick(int ticks_num)
 {
 	_view->initial_view();
 
-	std::vector<LifeObject::Action*> actions;
+	PopulationMap::object_list &objects = _current_map->get_objects();
+	std::vector<LifeObject::Action*> objects_actions;
 
-	for (LifeObject *obj : _current_map->get_objects())
+	for (PopulationMap::object_list::iterator it = objects.begin();
+		 it != objects.end();
+		 ++it)
 	{
-		if (obj->is_alive())
-			actions.push_back(obj->create_action(*_current_map));
+		LifeObject *obj = (*it);
+		if ((obj == nullptr)
+				|| (!(obj->is_alive())))
+		{
+			it = objects.erase(it);
+			--it;
+			delete obj;
+		}
+		else
+		{
+			LifeObject::Action *action = obj->create_action(*_current_map);
+			if (action != nullptr)
+				objects_actions.push_back(action);
+		}
 	}
 
-	sort(actions.begin(), actions.end());
-	for (LifeObject::Action *action : actions)
+	sort(objects_actions.begin(), objects_actions.end());
+	for (LifeObject::Action *action : objects_actions)
 	{
-		if (action != nullptr)
-		{
-			action->execute(*_current_map);
-			delete action;
-		}
+		action->execute(*_current_map);
+		delete action;
 	}
 
 	_view->render_map();
