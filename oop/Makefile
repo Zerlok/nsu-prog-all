@@ -6,7 +6,7 @@ CCPP=g++
 CPPFLAGS=-std=c++11
 
 BINNAME=result.bin
-OBJECT_BINARIES=object.cpp main.cpp
+OBJECT_BINARIES=samples/object.cpp samples/main.cpp
 
 # By tasks.
 TASK1_SOURCES=task1/longstring.c task1/recordarray.c task1/main.c

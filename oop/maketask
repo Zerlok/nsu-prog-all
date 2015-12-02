@@ -1,14 +1,18 @@
 #!/bin/bash
 
-cpp="g++"
+ccpp="g++"
 cppflags="-std=c++11"
-declare -a sources
+libs=()
 
 pro="${1##*/}"
 pro="${pro%%.pro}"
-currdir=`pwd`
+
 dir="${1%%/*}"
 
+#
+# Compile task itself with main.cpp
+#
+sources=()
 while read line
 do
     if [[ $line == "SOURCES += "* ]]
@@ -19,7 +23,28 @@ do
 		sources+=("$dir/$source")
 	done
     fi
+
+    if [[ $line == "LIBS += "* ]]
+    then
+        libs+=(${line##*+= })
+    fi
 done < "$1"
 
-echo "g++ ${cppflags} ${sources[@]} -o ${pro}"
-#g++ ${cppflags} ${sources[@]} -o "${currdir}/result.bin"
+echo "${ccpp} ${cppflags} ${sources[@]} -o main-${pro} ${libs[@]}"
+${ccpp} ${cppflags} ${sources[@]} -o main-${pro} ${libs[@]}
+
+
+#
+# Compile task with google test
+#
+gtestsources=("${dir}/gtest.cpp")
+for src in ${sources[@]}
+do
+	if [[ "$src" != *"main.cpp" ]]
+	then
+		gtestsources+=("$src")
+	fi
+done
+
+echo "${ccpp} ${cppflags} ${gtestsources[@]} -o gtest-${pro} ${libs[@]} -lgtest -lpthread"
+${ccpp} ${cppflags} ${gtestsources[@]} -o gtest-${pro} ${libs[@]} -lgtest -lpthread
