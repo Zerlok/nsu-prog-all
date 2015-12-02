@@ -37,14 +37,11 @@ std::vector<Point> PopulationMap::get_free_positions(const Point &point) const
 {
 	std::vector<Point> positions;
 
-	Point left_top_corner = point - LifeObject::view_radius;
-	Point right_bottom_corner = point + LifeObject::view_radius;
+	if (!is_valid_position(point))
+		return positions;
 
-	if (left_top_corner < Point::zero)
-		left_top_corner = Point::zero;
-
-	if (right_bottom_corner >= _corner_position)
-		right_bottom_corner = _corner_position;
+	Point left_top_corner = validate_position(point - LifeObject::view_radius);
+	Point right_bottom_corner = validate_position(point + LifeObject::view_radius);
 
 	for (int y = left_top_corner['y'];
 		 y <= right_bottom_corner['y'];
@@ -57,7 +54,8 @@ std::vector<Point> PopulationMap::get_free_positions(const Point &point) const
 			positions.push_back({x, y});
 			for (const LifeObject *obj : _objects)
 			{
-				if (obj->get_position() == positions.back())
+				if ((obj->get_type() != LifeObject::Type::plant)
+						&& (obj->get_position() == positions.back()))
 				{
 					positions.pop_back();
 					break;
@@ -73,21 +71,15 @@ std::vector<Point> PopulationMap::get_free_positions(const Point &point) const
 PopulationMap::object_list PopulationMap::get_neighbours(const Point &point)
 {
 	object_list lst;
-	Point left_bottom_corner = point - LifeObject::view_radius;
-	Point right_top_corner = point + LifeObject::view_radius;
-
-	if (!(left_bottom_corner >= Point::zero))
-		left_bottom_corner = Point::zero;
-
-	if (!(right_top_corner <= _corner_position))
-		right_top_corner = _corner_position;
+	Point left_top_corner = validate_position(point - LifeObject::view_radius);
+	Point right_bottom_corner = validate_position(point + LifeObject::view_radius);
 
 	for (LifeObject *obj : _objects)
 	{
 		const Point &obj_pos = obj->get_position();
 
-		if ((obj_pos >= left_bottom_corner)
-				&& (obj_pos <= right_top_corner))
+		if ((obj_pos >= left_top_corner)
+				&& (obj_pos <= right_bottom_corner))
 			lst.push_back(obj);
 	}
 
@@ -98,14 +90,8 @@ PopulationMap::object_list PopulationMap::get_neighbours(const Point &point)
 const PopulationMap::object_list PopulationMap::get_neighbours(const Point &point) const
 {
 	object_list lst;
-	Point left_top_corner = point - LifeObject::view_radius;
-	Point right_bottom_corner = point + LifeObject::view_radius;
-
-	if (!(left_top_corner >= Point::zero))
-		left_top_corner = Point::zero;
-
-	if (!(right_bottom_corner <= _corner_position))
-		right_bottom_corner = _corner_position;
+	Point left_top_corner = validate_position(point - LifeObject::view_radius);
+	Point right_bottom_corner = validate_position(point + LifeObject::view_radius);
 
 	for (LifeObject *obj : _objects)
 	{
@@ -145,4 +131,25 @@ void PopulationMap::clear_objects()
 {
 	for (LifeObject *obj : _objects)
 		delete obj;
+}
+
+
+Point PopulationMap::validate_position(const Point &position) const
+{
+	int valid_x = position['x'];
+	int valid_y = position['y'];
+
+	if (valid_x >= _corner_position['x'])
+		valid_x = _corner_position['x'] - 1;
+
+	if (valid_y >= _corner_position['y'])
+		valid_y = _corner_position['y'] - 1;
+
+	if (valid_x < Point::zero['x'])
+		valid_x = Point::zero['x'];
+
+	if (valid_y < Point::zero['y'])
+		valid_y = Point::zero['y'];
+
+	return Point(valid_x, valid_y);
 }

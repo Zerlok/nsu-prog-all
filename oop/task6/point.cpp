@@ -61,6 +61,16 @@ Point &Point::operator=(const Point &point)
 }
 
 
+Point &Point::operator=(int coordinates[2])
+{
+	_x = coordinates[0];
+	_y = coordinates[1];
+
+	return (*this);
+}
+
+
+
 bool Point::operator==(const Point &point) const
 {
 	return ((_x == point._x)
@@ -117,29 +127,29 @@ bool Point::operator>(int coordinates[2]) const
 
 bool Point::operator<=(const Point &point) const
 {
-	return (((*this) < point)
-			|| ((*this) == point));
+	return ((_x <= point._x)
+			&& (_y <= point._y));
 }
 
 
 bool Point::operator>=(const Point &point) const
 {
-	return (((*this) > point)
-			|| ((*this) == point));
+	return ((_x >= point._x)
+			&& (_y >= point._y));
 }
 
 
 bool Point::operator<=(int coordinates[2]) const
 {
-	return (((*this) < coordinates)
-			|| ((*this) == coordinates));
+	return ((_x <= coordinates[0])
+			&& (_y <= coordinates[1]));
 }
 
 
 bool Point::operator>=(int coordinates[2]) const
 {
-	return (((*this) > coordinates)
-			|| ((*this) == coordinates));
+	return ((_x >= coordinates[0])
+			&& (_y >= coordinates[1]));
 }
 
 

@@ -1,50 +1,189 @@
 #!/bin/bash
 
-ccpp="g++"
-cppflags="-std=c++11"
-libs=()
+#
+# Main constants.
+#
+CCPP="g++"
+CCPP_FLAGS="-std=c++11"
+CCPP_LIBS=()
 
-pro="${1##*/}"
-pro="${pro%%.pro}"
+GTEST_ENABLED=true
+MAIN_ENABLED=true
+USE_OBJECTS=false
+TARGET_DIR="."
+SOURCES_DIR=
+OBJECTS_DIR=
+PRO_FILE=
+PRO=
 
-dir="${1%%/*}"
+
+function help_message()
+{
+	echo "Usage:"
+	echo "   -p, --pro [FILE]        - specify *.pro file (required)"
+	echo "   -g, --gtest-only        - compile google test only"
+	echo "   -m, --main-only         - compile main only"
+	echo "   -t, --traget [DIR]      - target dir (for shadow compilation)"
+	echo
+	echo "   --gtest-objects [DIR]   - compile google test using *.o project compiled files from specified dir"
+}
+
 
 #
-# Compile task itself with main.cpp
+# Parse bash-script input arguments.
 #
-sources=()
-while read line
-do
-    if [[ $line == "SOURCES += "* ]]
-    then
-        linesources=(${line##*+= })
-	for source in ${linesources[@]}
+function parse_input_arguments()
+{
+	while [[ $# -gt 0 ]]
 	do
-		sources+=("$dir/$source")
+		case "$1" in
+			-h|--help)
+				help_message
+				exit 0
+				;;
+			-g|--gtest-only)
+				GTEST_ENABLED=true
+				MAIN_ENABLED=false
+				;;
+			-m|--main-only)
+				GTEST_ENABLED=false
+				MAIN_ENABLED=true
+				;;
+			-p|--pro) 
+				PRO_FILE="$2"
+				shift
+				;;
+			-t|--target)
+				TARGET_DIR="${2%%/}"
+				shift
+				;;
+			--gtest-objects)
+				GTEST_ENABLED=true
+				USE_OBJECTS=true
+				MAIN_ENABLED=false
+				OBJECTS_DIR="${2%%/}"
+				shift
+				;;
+			*)
+				echo "Unknown argument: $1"
+				exit 0
+				;;
+		esac
+		shift
 	done
-    fi
 
-    if [[ $line == "LIBS += "* ]]
-    then
-        libs+=(${line##*+= })
-    fi
-done < "$1"
+	if [ ! -f $PRO_FILE ]
+	then
+		echo "${PRO_FILE} does not exists or is not a file!"
+		exit 1
+	elif [[ "${PRO_FILE}" != *".pro" ]]
+	then
+		echo "${PRO_FILE} is not a .pro file!"
+		exit 1
+	fi
 
-echo "${ccpp} ${cppflags} ${sources[@]} -o main-${pro} ${libs[@]}"
-${ccpp} ${cppflags} ${sources[@]} -o main-${pro} ${libs[@]}
+	SOURCES_DIR=$(dirname ${PRO_FILE})
+	PRO="${PRO_FILE##*/}"
+	PRO="${PRO%%.pro}"
+}
+
+
+#
+# Parse *.pro file.
+#
+function parse_pro_file()
+{
+	while read line
+	do
+		if [[ $line == "SOURCES += "* ]]
+		then
+		    linesources=(${line##*+= })
+			for src in ${linesources[@]}
+			do
+				sources+=("$SOURCES_DIR/$src")
+			done
+		fi
+
+		if [[ $line == "LIBS += "* ]]
+		then
+		    CCPP_LIBS+=(${line##*+= })
+		fi
+	done < "$1"
+}
+
+
+#
+# Get sources for Google Unit test.
+#
+function get_gtest_sources()
+{
+	gsources=("${SOURCES_DIR}/gtest.cpp")
+	for src in ${sources[@]}
+	do
+		if [[ "$src" != *"main.cpp" ]]
+		then
+			gsources+=("$src")
+		fi
+	done
+}
+
+
+function get_gtest_objects()
+{
+	gsources=("${SOURCES_DIR}/gtest.cpp")
+	objects=("${OBJECTS_DIR}/*.o")
+	for obj in ${objects[@]}
+	do
+		if [[ "$obj" != *"main.o" ]]
+		then
+			gsources+=("$obj")
+		fi
+	done
+}
+
+
+#
+# Compile main task (main.cpp)
+#
+function compile_main()
+{
+	echo "${CCPP} ${CCPP_FLAGS} ${sources[@]} -o ${TARGET_DIR}/main-${PRO} ${CCPP_LIBS[@]}"
+	${CCPP} ${CCPP_FLAGS} ${sources[@]} -o ${TARGET_DIR}/main-${PRO} ${CCPP_LIBS[@]}
+}
 
 
 #
 # Compile task with google test
 #
-gtestsources=("${dir}/gtest.cpp")
-for src in ${sources[@]}
-do
-	if [[ "$src" != *"main.cpp" ]]
-	then
-		gtestsources+=("$src")
-	fi
-done
+function compile_gtest()
+{
+	echo "${CCPP} ${CCPP_FLAGS} ${gsources[@]} -o ${TARGET_DIR}/gtest-${PRO} ${CCPP_LIBS[@]} -lgtest -lpthread"
+	${CCPP} ${CCPP_FLAGS} ${gsources[@]} -o ${TARGET_DIR}/gtest-${PRO} ${CCPP_LIBS[@]} -lgtest -lpthread
+}
 
-echo "${ccpp} ${cppflags} ${gtestsources[@]} -o gtest-${pro} ${libs[@]} -lgtest -lpthread"
-${ccpp} ${cppflags} ${gtestsources[@]} -o gtest-${pro} ${libs[@]} -lgtest -lpthread
+
+#
+# Initial step - get sources, libs, etc.
+#
+parse_input_arguments $@
+
+sources=()
+gsources=()
+parse_pro_file $PRO_FILE
+
+if $GTEST_ENABLED
+then
+	if $USE_OBJECTS
+	then
+		get_gtest_objects
+	else
+		get_gtest_sources
+	fi
+
+	compile_gtest
+fi
+
+if $MAIN_ENABLED
+then
+	compile_main
+fi

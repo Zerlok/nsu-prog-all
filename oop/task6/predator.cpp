@@ -14,7 +14,7 @@ Predator::Predator(const Point &pos, int hp, int dp, int weight)
 
 
 Predator::Predator(const Predator &predator)
-	: LifeObject(predator._position, predator._ttl, predator._damage, predator._weight),
+	: LifeObject(predator._position, predator._ttl, predator._damage, predator._mass),
 	  food(nullptr),
 	  victim(nullptr)
 {

@@ -26,10 +26,10 @@ void AbstractView::render_map() const
 ConsoleView::ConsoleView(const PopulationMap &map)
 	: AbstractView(map)
 {
-	con_initPair(short(Palette::border_color), CON_COLOR_WHITE, CON_COLOR_BLACK);
 	con_initPair(short(Palette::field_color), CON_COLOR_GREEN, CON_COLOR_GREEN);
-	con_initPair(short(Palette::plant_color), CON_COLOR_BLACK, CON_COLOR_GREEN);
-	con_initPair(short(Palette::herbivorous_color), CON_COLOR_WHITE, CON_COLOR_GREEN);
+	con_initPair(short(Palette::dead_color), CON_COLOR_BLACK, CON_COLOR_GREEN);
+	con_initPair(short(Palette::plant_color), CON_COLOR_WHITE, CON_COLOR_GREEN);
+	con_initPair(short(Palette::herbivorous_color), CON_COLOR_BLUE, CON_COLOR_GREEN);
 	con_initPair(short(Palette::predator_color), CON_COLOR_RED, CON_COLOR_GREEN);
 }
 
@@ -86,8 +86,8 @@ void ConsoleView::render_object(const LifeObject &obj) const
 	}
 	else
 	{
-		chr = 'x';
-		clr = Palette::border_color;
+		chr = dead_view;
+		clr = Palette::dead_color;
 	}
 
 	paint(obj_pos['x'], obj_pos['y'], chr, clr);

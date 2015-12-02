@@ -13,7 +13,7 @@
 
 
 const int height = 20;
-Point GameLogic::map_size = Point(2*height, height);
+Point GameLogic::map_size = Point(2 * height, height);
 
 
 GameLogic::GameLogic()
@@ -38,7 +38,7 @@ GameLogic::~GameLogic()
 }
 
 
-void GameLogic::init_game(int plants_num, int herbivorous_num, int predators_num)
+void GameLogic::init_life(int plants_num, int herbivorous_num, int predators_num)
 {
 	for (int i = 0; i < plants_num; ++i)
 		_map->push_object(
@@ -75,7 +75,7 @@ void GameLogic::init_game(int plants_num, int herbivorous_num, int predators_num
 void GameLogic::run()
 {
 	bool is_finished = false;
-	bool is_paused = false;
+	bool is_paused = true;
 
 	_view->initial_view();
 	_view->render_map();
@@ -86,7 +86,10 @@ void GameLogic::run()
 		{
 			switch (con_getKey())
 			{
-				case ' ':
+				case 't':
+					tick();
+					break;
+				case 'p':
 					is_paused = !is_paused;
 					break;
 				case CON_KEY_ESCAPE:
@@ -94,9 +97,11 @@ void GameLogic::run()
 					break;
 			}
 		}
-
-		if (!is_paused)
+		else if (!is_paused)
+		{
 			tick();
+			usleep(180000);
+		}
 	}
 }
 
@@ -135,5 +140,4 @@ void GameLogic::tick()
 	}
 
 	_view->render_map();
-//	sleep(1);
 }

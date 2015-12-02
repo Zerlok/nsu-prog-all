@@ -21,6 +21,7 @@ extern "C" {
 #define CON_KEY_END         -79
 #define CON_KEY_PAGEUP      -73
 #define CON_KEY_PAGEDOWN    -81
+#define CON_KEY_SPACE		' '
 
 #define CON_COLOR_BLACK     0x0000
 #define CON_COLOR_BLUE      0x0001
@@ -50,6 +51,7 @@ extern "C" {
 #define CON_KEY_END         KEY_END
 #define CON_KEY_PAGEUP      KEY_PPAGE
 #define CON_KEY_PAGEDOWN    KEY_NPAGE
+#define CON_KEY_SPACE		' '
 
 #define CON_COLOR_BLACK     COLOR_BLACK
 #define CON_COLOR_GREEN     COLOR_GREEN

@@ -13,7 +13,7 @@ const int LifeObject::min_weight = 0;
 const int LifeObject::default_weight = 1;
 const int LifeObject::max_weight = 6;
 const int LifeObject::min_ttl_to_reproducing = 2;
-const int LifeObject::weight_ratio_at_reproducing = 2;
+const int LifeObject::mass_ratio_at_reproducing = 2;
 const int LifeObject::hp_for_murder = 2;
 const Point LifeObject::view_radius = Point(1, 1);
 
@@ -29,7 +29,7 @@ LifeObject::LifeObject(const Point &pos, int hp, int dp, int weight)
 	: _position(pos),
 	  _ttl(hp),
 	  _damage(dp),
-	  _weight(weight),
+	  _mass(weight),
 	  _type(Type::none)
 {
 	if (_ttl > max_ttl_to_live)
@@ -40,8 +40,8 @@ LifeObject::LifeObject(const Point &pos, int hp, int dp, int weight)
 	else if (_damage < min_damage)
 		_damage = default_damage;
 
-	if (_weight < min_weight)
-		_weight = default_weight;
+	if (_mass < min_weight)
+		_mass = default_weight;
 }
 
 
@@ -49,7 +49,7 @@ LifeObject::LifeObject(const LifeObject &obj)
 	: _position(obj._position),
 	  _ttl(obj._ttl),
 	  _damage(obj._damage),
-	  _weight(obj._weight),
+	  _mass(obj._mass),
 	  _type(obj._type)
 {
 }
@@ -74,7 +74,7 @@ int LifeObject::get_health() const
 
 int LifeObject::get_weight() const
 {
-	return _weight;
+	return _mass;
 }
 
 
@@ -109,17 +109,6 @@ LifeObject *LifeObject::clone() const
 LifeObject::Action *LifeObject::create_action(const PopulationMap &map)
 {
 	return nullptr;
-}
-
-
-LifeObject &LifeObject::operator=(const LifeObject &obj)
-{
-	_ttl = obj._ttl;
-	_damage = obj._damage;
-	_weight = obj._weight;
-	_type = obj._type;
-
-	return (*this);
 }
 
 

@@ -6,15 +6,15 @@
 #include "plant.h"
 
 
-Plant::Plant(const Point &pos, int hp, int dp, int weight)
-	: LifeObject(pos, hp, dp, weight)
+Plant::Plant(const Point &pos, int hp, int dp, int m)
+	: LifeObject(pos, hp, dp, m)
 {
 	this->_type = Type::plant;
 }
 
 
 Plant::Plant(const Plant &plant)
-	: LifeObject(plant._position, plant._ttl, plant._damage, plant._weight)
+	: LifeObject(plant._position, plant._ttl, plant._damage, plant._mass)
 {
 	this->_type = plant._type;
 }
@@ -36,7 +36,8 @@ Plant::Action *Plant::create_action(const PopulationMap &map)
 	if (!is_alive())
 		return nullptr;
 
-	if (!(rand() % 5))
+	_ttl = _mass + 1;
+	if (!(rand() % 4))
 		return new ReproduceAction(this);
 
 	return nullptr;

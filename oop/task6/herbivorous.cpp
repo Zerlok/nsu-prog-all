@@ -15,7 +15,7 @@ Herbivorous::Herbivorous(const Point &pos, int hp, int dp, int weight)
 
 
 Herbivorous::Herbivorous(const Herbivorous &herbivorous)
-	: LifeObject(herbivorous._position, herbivorous._ttl, herbivorous._damage, herbivorous._weight),
+	: LifeObject(herbivorous._position, herbivorous._ttl, herbivorous._damage, herbivorous._mass),
 	  food(nullptr)
 {
 	this->_type = herbivorous._type;

@@ -22,7 +22,7 @@ class LifeObject
 		static const int default_weight;
 		static const int max_weight;
 		static const int min_ttl_to_reproducing;
-		static const int weight_ratio_at_reproducing;
+		static const int mass_ratio_at_reproducing;
 		static const int hp_for_murder;
 		static const Point view_radius;
 
@@ -64,15 +64,12 @@ class LifeObject
 		virtual LifeObject *clone() const;
 		virtual Action *create_action(const PopulationMap &map);
 
-		// Operators.
-		LifeObject &operator=(const LifeObject &obj);
-
 	protected:
 		// Fields.
 		Point _position;
 		int _ttl; // Ticks To Live - health.
 		int _damage;
-		int _weight;
+		int _mass;
 		Type _type;
 
 		// Methods.

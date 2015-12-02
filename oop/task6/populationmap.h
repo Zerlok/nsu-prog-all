@@ -34,9 +34,11 @@ class PopulationMap
 		void push_object(LifeObject *obj);
 		void clear_objects();
 
+		Point validate_position(const Point &position) const;
+
 	private:
 		// Fields.
-		const Point &_corner_position;
+		const Point _corner_position;
 		object_list _objects;
 };
 

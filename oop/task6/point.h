@@ -22,6 +22,7 @@ class Point
 		double distance_to(const Point &point) const;
 
 		Point &operator=(const Point &point);
+		Point &operator=(int coordinates[2]);
 
 		bool operator==(const Point &point) const;
 		bool operator!=(const Point &point) const;

@@ -2,7 +2,6 @@
 #define __POPULATIONMAPVIEW_H__
 
 
-#include <string>
 #include "populationmap.h"
 
 
@@ -25,14 +24,15 @@ class ConsoleView : public AbstractView
 {
 	public:
 		// Static.
+		static const char dead_view = '*';
 		static const char empty_view = ' ';
-		static const char plant_view = '*';
-		static const char herbivorous_view = '#';
+		static const char plant_view = '!';
+		static const char herbivorous_view = '&';
 		static const char predator_view = '@';
 
 		enum class Palette
 		{
-			border_color = 1,
+			dead_color = 1,
 			field_color = 2,
 			plant_color = 3,
 			predator_color = 4,
@@ -50,9 +50,6 @@ class ConsoleView : public AbstractView
 		void clear() const;
 
 	private:
-		// Fileds.
-		std::string _term_name;
-
 		void paint(int x, int y, char chr, const Palette &clr) const;
 };
 
