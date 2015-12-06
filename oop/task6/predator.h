@@ -24,8 +24,8 @@ class Predator : public LifeObject
 
 	private:
 		bool is_hungry() const;
-		bool find_food(const PopulationMap::object_list &neighbours);
-		bool find_victim(const PopulationMap::object_list &neighbours);
+		bool find_food(const PopulationMap::objects_list &neighbours);
+		bool find_victim(const PopulationMap::objects_list &neighbours);
 
 		void move_to(const Point &pos);
 

@@ -46,22 +46,17 @@ Predator::Action *Predator::create_action(const PopulationMap &map)
 
 	if (is_hungry())
 	{
-		const PopulationMap::object_list &neighbours = map.get_neighbours(_position);
+		const PopulationMap::objects_list &neighbours = map.get_neighbours(_position);
 		if (find_food(neighbours))
-		{
-//			move_to(food->_position);
 			return new EatAction(this, food);
-		}
+
 		else if (find_victim(neighbours))
-		{
-//			move_to(victim->_position);
 			return new AttackAction(this, victim);
-		}
 	}
 
-	std::vector<Point> free_positions = map.get_free_positions(_position);
-	free_positions.push_back(_position);
-	return new MoveAction(this, free_positions[(rand() % free_positions.size())]);
+	std::vector<Point> available_moves = map.get_move_positions(_position);
+	available_moves.push_back(_position);
+	return new MoveAction(this, available_moves[(rand() % available_moves.size())]);
 }
 
 
@@ -71,7 +66,7 @@ bool Predator::is_hungry() const
 }
 
 
-bool Predator::find_food(const PopulationMap::object_list &neighbours)
+bool Predator::find_food(const PopulationMap::objects_list &neighbours)
 {
 	food = nullptr;
 	for (LifeObject *obj : neighbours)
@@ -85,7 +80,7 @@ bool Predator::find_food(const PopulationMap::object_list &neighbours)
 }
 
 
-bool Predator::find_victim(const PopulationMap::object_list &neighbours)
+bool Predator::find_victim(const PopulationMap::objects_list &neighbours)
 {
 	victim = nullptr;
 	for (LifeObject *obj : neighbours)

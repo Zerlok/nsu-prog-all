@@ -46,7 +46,7 @@ Herbivorous::Action *Herbivorous::create_action(const PopulationMap &map)
 
 	if (is_hungry())
 	{
-		const PopulationMap::object_list &neighbours = map.get_neighbours(_position);
+		const PopulationMap::objects_list &neighbours = map.get_neighbours(_position);
 		if (find_food(neighbours))
 		{
 	//			move_to(food->_position);
@@ -66,7 +66,7 @@ bool Herbivorous::is_hungry() const
 }
 
 
-bool Herbivorous::find_food(const PopulationMap::object_list &neighbours)
+bool Herbivorous::find_food(const PopulationMap::objects_list &neighbours)
 {
 	food = nullptr;
 	for (LifeObject *obj : neighbours)

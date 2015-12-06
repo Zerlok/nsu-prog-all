@@ -64,6 +64,9 @@ class LifeObject
 		virtual LifeObject *clone() const;
 		virtual Action *create_action(const PopulationMap &map);
 
+		bool operator<(const LifeObject &obj) const;
+		bool operator>(const LifeObject &obj) const;
+
 	protected:
 		// Fields.
 		Point _position;

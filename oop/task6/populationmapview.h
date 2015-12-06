@@ -11,9 +11,10 @@ class AbstractView
 		AbstractView(const PopulationMap& map);
 		virtual ~AbstractView();
 
+		virtual void initialize_map_view() const = 0;
 		virtual void render_map() const;
-		virtual void initial_view() const = 0;
 		virtual void render_object(const LifeObject &obj) const = 0;
+		virtual void clear_map() const = 0;
 
 	protected:
 		const PopulationMap &_map;
@@ -32,11 +33,12 @@ class ConsoleView : public AbstractView
 
 		enum class Palette
 		{
-			dead_color = 1,
-			field_color = 2,
-			plant_color = 3,
-			predator_color = 4,
-			herbivorous_color = 5
+			text = 1,
+			field,
+			dead,
+			plant,
+			herbivorous,
+			predator,
 		};
 
 		// Constructors / Destructor.
@@ -44,10 +46,12 @@ class ConsoleView : public AbstractView
 		virtual ~ConsoleView();
 
 		// Methods.
-		virtual void initial_view() const override;
-		virtual void render_object(const LifeObject &obj) const override;
+		void clear_object(const LifeObject &obj) const;
 
-		void clear() const;
+		virtual void initialize_map_view() const override;
+		virtual void render_map() const override;
+		virtual void render_object(const LifeObject &obj) const override;
+		virtual void clear_map() const override;
 
 	private:
 		void paint(int x, int y, char chr, const Palette &clr) const;
@@ -60,8 +64,9 @@ class TextView : public AbstractView
 		TextView(const PopulationMap &map);
 		virtual ~TextView();
 
-		virtual void initial_view() const override;
+		virtual void initialize_map_view() const override;
 		virtual void render_object(const LifeObject &obj) const override;
+		virtual void clear_map() const override;
 };
 
 

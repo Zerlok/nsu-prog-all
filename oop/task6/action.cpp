@@ -20,36 +20,15 @@ LifeObject::Action::~Action()
 }
 
 
-bool LifeObject::Action::is_source_null() const
+bool LifeObject::Action::operator<(const LifeObject::Action &action) const
 {
-	return (_source == nullptr);
+	return (_type < action._type);
 }
 
 
-LifeObject &LifeObject::Action::get_source()
+bool LifeObject::Action::operator>(const LifeObject::Action &action) const
 {
-	return (*_source);
-}
-
-
-const LifeObject &LifeObject::Action::get_source() const
-{
-	return (*_source);
-}
-
-
-const LifeObject::Action::Type &LifeObject::Action::get_type() const
-{
-	return _type;
-}
-
-
-LifeObject::Action &LifeObject::Action::operator=(const Action &action)
-{
-	_source = action._source;
-	_type = action._type;
-
-	return (*this);
+	return (_type > action._type);
 }
 
 
@@ -106,10 +85,15 @@ LifeObject::EatAction::~EatAction()
 
 void LifeObject::EatAction::execute(PopulationMap &map)
 {
+	if (!(_source->is_alive()))
+		return;
+
+	if (_source->_position != _target->_position)
+		_source->_position = _target->_position;
+
 	if (_target->_mass > 0)
 	{
 		_target->_mass -= 1;
-		_source->_mass += 1;
 		_source->_ttl += 2;
 	}
 }
@@ -180,12 +164,12 @@ void LifeObject::ReproduceAction::execute(PopulationMap &map)
 	LifeObject *child = _source->clone();
 	child->_position = free_positions[(rand() % free_positions.size())];
 	child->_ttl = _source->_ttl / LifeObject::min_ttl_to_reproducing;
-	child->_mass = _source->_mass / LifeObject::mass_ratio_at_reproducing;
+	child->_mass = _source->_mass;
 
 	if (child->is_alive())
 	{
 		_source->_ttl -= child->_ttl;
-		map.push_object(child);
+		map.insert_object(child);
 	}
 	else
 		delete child;

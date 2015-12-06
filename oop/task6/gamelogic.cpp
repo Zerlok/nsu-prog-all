@@ -12,7 +12,7 @@
 #include "gamelogic.h"
 
 
-const int height = 20;
+const int height = 30;
 Point GameLogic::map_size = Point(2 * height, height);
 
 
@@ -41,7 +41,7 @@ GameLogic::~GameLogic()
 void GameLogic::init_life(int plants_num, int herbivorous_num, int predators_num)
 {
 	for (int i = 0; i < plants_num; ++i)
-		_map->push_object(
+		_map->insert_object(
 				new Plant(
 					Point(rand() % map_size['x'], rand() % map_size['y']),
 					5,
@@ -51,7 +51,7 @@ void GameLogic::init_life(int plants_num, int herbivorous_num, int predators_num
 		);
 
 	for (int i = 0; i < herbivorous_num; ++i)
-		_map->push_object(
+		_map->insert_object(
 				new Herbivorous(
 					Point(rand() % map_size['x'], rand() % map_size['y']),
 					8,
@@ -61,7 +61,7 @@ void GameLogic::init_life(int plants_num, int herbivorous_num, int predators_num
 		);
 
 	for (int i = 0; i < predators_num; ++i)
-		_map->push_object(
+		_map->insert_object(
 				new Predator(
 					Point(rand() % map_size['x'], rand() % map_size['y']),
 					12,
@@ -77,7 +77,7 @@ void GameLogic::run()
 	bool is_finished = false;
 	bool is_paused = true;
 
-	_view->initial_view();
+	_view->initialize_map_view();
 	_view->render_map();
 
 	while (!is_finished)
@@ -106,14 +106,27 @@ void GameLogic::run()
 }
 
 
+void GameLogic::run(int n)
+{
+	_view->initialize_map_view();
+	_view->render_map();
+
+	for (int i = 0; i < n; ++i)
+	{
+		tick();
+		sleep(1);
+	}
+}
+
+
 void GameLogic::tick()
 {
-	_view->initial_view();
+	_view->clear_map();
 
-	PopulationMap::object_list &objects = _map->get_objects();
+	PopulationMap::objects_list &objects = _map->get_objects();
 	std::vector<LifeObject::Action*> objects_actions;
 
-	for (PopulationMap::object_list::iterator it = objects.begin();
+	for (PopulationMap::objects_list::iterator it = objects.begin();
 		 it != objects.end();
 		 ++it)
 	{
@@ -124,15 +137,15 @@ void GameLogic::tick()
 			if (action != nullptr)
 				objects_actions.push_back(action);
 		}
-		else if (obj->get_weight() == 0)
+		else if ((obj->get_weight() <= 0)
+				 || (obj->get_health() <= 0))
 		{
-			it = objects.erase(it);
+			it = _map->erase_object(it);
 			--it;
-			delete obj;
 		}
 	}
 
-	sort(objects_actions.begin(), objects_actions.end());
+	std::sort(objects_actions.begin(), objects_actions.end(), action_ptr_comparator);
 	for (LifeObject::Action *action : objects_actions)
 	{
 		action->execute(*_map);
@@ -140,4 +153,10 @@ void GameLogic::tick()
 	}
 
 	_view->render_map();
+}
+
+
+bool action_ptr_comparator(const LifeObject::Action *a1, const LifeObject::Action *a2)
+{
+	return (*a1 > *a2);
 }

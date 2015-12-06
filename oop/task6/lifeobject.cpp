@@ -112,6 +112,18 @@ LifeObject::Action *LifeObject::create_action(const PopulationMap &map)
 }
 
 
+bool LifeObject::operator<(const LifeObject &obj) const
+{
+	return (_type < obj._type);
+}
+
+
+bool LifeObject::operator>(const LifeObject &obj) const
+{
+	return (_type > obj._type);
+}
+
+
 void LifeObject::deal_damage(int dmg)
 {
 	_ttl -= dmg;

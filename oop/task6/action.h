@@ -22,20 +22,14 @@ class LifeObject::Action
 		// Constructors / Destructor.
 		Action();
 		Action(LifeObject *source, const Type &type);
-//		Action(const Action &action);
 		virtual ~Action();
-
-		// Getters.
-		bool is_source_null() const;
-		LifeObject &get_source();
-		const LifeObject &get_source() const;
-		const Type &get_type() const;
 
 		// Virtual methods.
 		virtual void execute(PopulationMap &map) = 0;
 
 		// Operators.
-		Action &operator=(const Action &action);
+		bool operator<(const LifeObject::Action &action) const;
+		bool operator>(const LifeObject::Action &action) const;
 
 	protected:
 		// Fields.

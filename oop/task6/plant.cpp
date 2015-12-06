@@ -36,7 +36,7 @@ Plant::Action *Plant::create_action(const PopulationMap &map)
 	if (!is_alive())
 		return nullptr;
 
-	_ttl = _mass + 1;
+	_ttl = 4;
 	if (!(rand() % 4))
 		return new ReproduceAction(this);
 
