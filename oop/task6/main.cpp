@@ -1,8 +1,6 @@
 #include <iostream>
 using namespace std;
 
-
-#include "predator.h"
 #include "gamelogic.h"
 
 

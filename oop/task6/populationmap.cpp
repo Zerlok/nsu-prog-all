@@ -193,13 +193,30 @@ void PopulationMap::insert_object(LifeObject *obj)
 			break;
 	}
 
-	objects_list::iterator it = _objects.begin();
-	while ((it != _objects.end())
-		   && ((*obj) > (*(*it))))
-		++it;
+	if (_objects.empty())
+	{
+		_objects.push_back(obj);
+		return;
+	}
+	else if (obj->operator<(*(_objects.front())))
+	{
+		_objects.insert(_objects.begin(), obj);
+		return;
+	}
 
-	--it;
-	_objects.insert(it, obj);
+	for (objects_list::iterator it = _objects.begin();
+		 it != _objects.end();
+		 ++it)
+	{
+		LifeObject &o = *(*it);
+		if (obj->operator<=(o))
+		{
+			_objects.insert(it, obj);
+			return;
+		}
+	}
+
+	_objects.push_back(obj);
 }
 
 

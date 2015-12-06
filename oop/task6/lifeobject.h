@@ -2,6 +2,7 @@
 #define __LIFEOBJECT_H__
 
 
+#include <iostream>
 #include <list>
 #include "point.h"
 
@@ -64,8 +65,12 @@ class LifeObject
 		virtual LifeObject *clone() const;
 		virtual Action *create_action(const PopulationMap &map);
 
+		bool operator==(const LifeObject &obj) const;
+		bool operator!=(const LifeObject &obj) const;
 		bool operator<(const LifeObject &obj) const;
 		bool operator>(const LifeObject &obj) const;
+		bool operator<=(const LifeObject &obj) const;
+		bool operator>=(const LifeObject &obj) const;
 
 	protected:
 		// Fields.
@@ -80,6 +85,9 @@ class LifeObject
 		void deal_damage(int dmg);
 		void kill();
 };
+
+
+std::ostream &operator<<(std::ostream &out, const LifeObject::Type &type);
 
 
 // __LIFEOBJECT_H__

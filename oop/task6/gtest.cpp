@@ -1,8 +1,11 @@
 #include <gtest/gtest.h>
 
 #include "point.h"
-#include "lifeobject.h"
 #include "populationmap.h"
+#include "lifeobject.h"
+#include "plant.h"
+#include "herbivorous.h"
+#include "predator.h"
 
 
 std::ostream &operator<<(std::ostream &out, const std::vector<Point> &points)
@@ -36,6 +39,39 @@ TEST(Point, Comparing)
 
 	EXPECT_GE(p3, p1);
 	EXPECT_GE(p4, p2);
+}
+
+
+TEST(PopulationMap, ObjectsInsert)
+{
+	PopulationMap map({4, 4});
+	std::vector<LifeObject*> objects = {
+		new Herbivorous(Point(2, 1)),
+		new Plant(Point(1, 1)),
+		new Predator(Point(3, 3)),
+		new Herbivorous(Point(1, 2)),
+		new Herbivorous(Point(0, 2)),
+		new Predator(Point(3, 2)),
+		new Plant(Point(2, 2)),
+	};
+
+	for (LifeObject *obj : objects)
+		map.insert_object(obj);
+
+	const PopulationMap::objects_list &map_objects = map.get_objects();
+	PopulationMap::objects_list::const_iterator it = map_objects.cbegin();
+	PopulationMap::objects_list::const_iterator nit = it;
+	++nit;
+
+	while (nit != map_objects.cend())
+	{
+		LifeObject &obj = *(*it);
+		LifeObject &next_obj = *(*nit);
+		EXPECT_LE(obj, next_obj) << obj.get_type() << " vs " << next_obj.get_type();
+
+		++it;
+		++nit;
+	}
 }
 
 

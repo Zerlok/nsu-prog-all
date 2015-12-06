@@ -112,6 +112,18 @@ LifeObject::Action *LifeObject::create_action(const PopulationMap &map)
 }
 
 
+bool LifeObject::operator==(const LifeObject &obj) const
+{
+	return (_type == obj._type);
+}
+
+
+bool LifeObject::operator!=(const LifeObject &obj) const
+{
+	return !((*this) == obj);
+}
+
+
 bool LifeObject::operator<(const LifeObject &obj) const
 {
 	return (_type < obj._type);
@@ -120,7 +132,20 @@ bool LifeObject::operator<(const LifeObject &obj) const
 
 bool LifeObject::operator>(const LifeObject &obj) const
 {
-	return (_type > obj._type);
+	return (obj < (*this));
+}
+
+
+bool LifeObject::operator<=(const LifeObject &obj) const
+{
+	return (((*this) < obj)
+			|| ((*this) == obj));
+}
+
+
+bool LifeObject::operator>=(const LifeObject &obj) const
+{
+	return (obj <= (*this));
 }
 
 
@@ -136,4 +161,28 @@ void LifeObject::deal_damage(int dmg)
 void LifeObject::kill()
 {
 	_ttl = 0;
+}
+
+
+std::ostream &operator<<(std::ostream &out, const LifeObject::Type &type)
+{
+	switch (type)
+	{
+		case LifeObject::Type::plant:
+			out << "Plant";
+			break;
+		case LifeObject::Type::herbivorous:
+			out << "Herbivorous";
+			break;
+		case LifeObject::Type::predator:
+			out << "Predator";
+			break;
+
+		default:
+		case LifeObject::Type::none:
+			out << "None";
+			break;
+	}
+
+	return out;
 }
