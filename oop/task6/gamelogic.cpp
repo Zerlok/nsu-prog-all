@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <set>
 #include <vector>
 #include <unistd.h>
 #include <time.h>
@@ -10,10 +11,7 @@
 #include "predator.h"
 
 #include "gamelogic.h"
-
-
-const int height = 30;
-Point GameLogic::map_size = Point(2 * height, height);
+#include "config.h"
 
 
 GameLogic::GameLogic()
@@ -24,7 +22,7 @@ GameLogic::GameLogic()
 	con_init();
 	con_hideCursor();
 
-	_map = new PopulationMap(map_size);
+	_map = new PopulationMap(Config::map_width, Config::map_height);
 	_view = new ConsoleView(*_map);
 }
 
@@ -38,36 +36,23 @@ GameLogic::~GameLogic()
 }
 
 
-void GameLogic::init_life(int plants_num, int herbivorous_num, int predators_num)
+void GameLogic::add_objects(int plants_num, int herbivorous_num, int predators_num)
 {
+	int width = _map->get_width();
+	int height = _map->get_height();
 	for (int i = 0; i < plants_num; ++i)
 		_map->insert_object(
-				new Plant(
-					Point(rand() % map_size['x'], rand() % map_size['y']),
-					5,
-					1,
-					5
-				)
+				new Plant(Point(rand() % width, rand() % height))
 		);
 
 	for (int i = 0; i < herbivorous_num; ++i)
 		_map->insert_object(
-				new Herbivorous(
-					Point(rand() % map_size['x'], rand() % map_size['y']),
-					8,
-					1,
-					8
-				)
+				new Herbivorous(Point(rand() % width, rand() % height))
 		);
 
 	for (int i = 0; i < predators_num; ++i)
 		_map->insert_object(
-				new Predator(
-					Point(rand() % map_size['x'], rand() % map_size['y']),
-					12,
-					4,
-					10
-				)
+				new Predator(Point(rand() % width, rand() % height))
 		);
 }
 
@@ -100,7 +85,7 @@ void GameLogic::run()
 		else if (!is_paused)
 		{
 			tick();
-			usleep(180000);
+			sleep(Config::game_ticking_interval);
 		}
 	}
 }
@@ -137,8 +122,7 @@ void GameLogic::tick()
 			if (action != nullptr)
 				objects_actions.push_back(action);
 		}
-		else if ((obj->get_weight() <= 0)
-				 || (obj->get_health() <= 0))
+		else if (obj->get_mass() <= 0)
 		{
 			it = _map->erase_object(it);
 			--it;
@@ -158,5 +142,5 @@ void GameLogic::tick()
 
 bool action_ptr_comparator(const LifeObject::Action *a1, const LifeObject::Action *a2)
 {
-	return (*a1 > *a2);
+	return ((*a1) > (*a2));
 }

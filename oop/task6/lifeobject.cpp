@@ -4,44 +4,18 @@
 #include "populationmap.h"
 
 
-const int LifeObject::min_ttl_to_live = 1;
-const int LifeObject::max_ttl_to_live = 8;
-const int LifeObject::min_damage = 0;
-const int LifeObject::default_damage = 1;
-const int LifeObject::max_damage = 6;
-const int LifeObject::min_weight = 0;
-const int LifeObject::default_weight = 1;
-const int LifeObject::max_weight = 6;
-const int LifeObject::min_ttl_to_reproducing = 2;
-const int LifeObject::mass_ratio_at_reproducing = 2;
-const int LifeObject::hp_for_murder = 2;
-const Point LifeObject::view_radius = Point(1, 1);
-
-const LifeObject LifeObject::empty = LifeObject(
-		Point(-1, -1),
-		0,
-		LifeObject::min_damage,
-		LifeObject::min_weight
-);
-
-
-LifeObject::LifeObject(const Point &pos, int hp, int dp, int weight)
+LifeObject::LifeObject(const Point &pos, int health, int damage, int mass)
 	: _position(pos),
-	  _ttl(hp),
-	  _damage(dp),
-	  _mass(weight),
+	  _ttl(health),
+	  _damage(damage),
+	  _mass(mass),
 	  _type(Type::none)
 {
-	if (_ttl > max_ttl_to_live)
-		_ttl = max_ttl_to_live;
+	if (_damage < Config::object_min_damage)
+		_damage = Config::object_min_damage;
 
-	if (_damage > max_damage)
-		_damage = max_damage;
-	else if (_damage < min_damage)
-		_damage = default_damage;
-
-	if (_mass < min_weight)
-		_mass = default_weight;
+	if (_mass < Config::object_min_weight)
+		_mass = Config::object_min_weight;
 }
 
 
@@ -62,7 +36,7 @@ LifeObject::~LifeObject()
 
 bool LifeObject::is_alive() const
 {
-	return (_ttl >= min_ttl_to_live);
+	return (_ttl > Config::object_dead_ttl);
 }
 
 
@@ -72,7 +46,7 @@ int LifeObject::get_health() const
 }
 
 
-int LifeObject::get_weight() const
+int LifeObject::get_mass() const
 {
 	return _mass;
 }
@@ -160,7 +134,7 @@ void LifeObject::deal_damage(int dmg)
 
 void LifeObject::kill()
 {
-	_ttl = 0;
+	_ttl = Config::object_dead_ttl;
 }
 
 

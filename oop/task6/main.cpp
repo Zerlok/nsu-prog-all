@@ -8,7 +8,7 @@ int main(int argc, char *argv[])
 {
 //	Game from file
 	GameLogic game;
-	game.init_life(15, 10, 12);
+	game.add_objects(15, 10, 12);
 
 	if (argc > 1)
 		game.run(stoi(argv[1]));

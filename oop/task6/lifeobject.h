@@ -5,6 +5,7 @@
 #include <iostream>
 #include <list>
 #include "point.h"
+#include "config.h"
 
 
 class PopulationMap;
@@ -13,22 +14,6 @@ class PopulationMap;
 class LifeObject
 {
 	public:
-		// Static.
-		static const int min_ttl_to_live;
-		static const int max_ttl_to_live;
-		static const int min_damage;
-		static const int default_damage;
-		static const int max_damage;
-		static const int min_weight;
-		static const int default_weight;
-		static const int max_weight;
-		static const int min_ttl_to_reproducing;
-		static const int mass_ratio_at_reproducing;
-		static const int hp_for_murder;
-		static const Point view_radius;
-
-		static const LifeObject empty;
-
 		enum class Type
 		{
 			none = 0,
@@ -45,20 +30,16 @@ class LifeObject
 		class ReproduceAction;
 
 		// Constructors / Destructor.
-		LifeObject(
-				const Point &pos=Point(),
-				int hp=min_ttl_to_live,
-				int dp=default_damage,
-				int weight=default_weight
-		);
+		LifeObject(const Point &pos, int health, int damage, int mass);
 		LifeObject(const LifeObject &obj);
 		virtual ~LifeObject();
 
 		// Getters.
 		bool is_alive() const;
-		int get_health() const;
-		int get_weight() const;
+
 		const Point &get_position() const;
+		int get_health() const;
+		int get_mass() const;
 		const Type &get_type() const;
 
 		// Virtual methods.

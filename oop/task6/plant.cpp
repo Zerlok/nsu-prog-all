@@ -6,8 +6,8 @@
 #include "plant.h"
 
 
-Plant::Plant(const Point &pos, int hp, int dp, int m)
-	: LifeObject(pos, hp, dp, m)
+Plant::Plant(const Point &pos, int health, int damage, int mass)
+	: LifeObject(pos, health, damage, mass)
 {
 	this->_type = Type::plant;
 }
@@ -36,8 +36,8 @@ Plant::Action *Plant::create_action(const PopulationMap &map)
 	if (!is_alive())
 		return nullptr;
 
-	_ttl = 4;
-	if (!(rand() % 4))
+	_ttl = Config::plant_born_ttl;
+	if (!(rand() % Config::plant_reproduction_ratio))
 		return new ReproduceAction(this);
 
 	return nullptr;

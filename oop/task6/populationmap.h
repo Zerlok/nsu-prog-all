@@ -14,7 +14,7 @@ class PopulationMap
 		using objects_list = std::list<LifeObject*>;
 
 		// Constructors / Destructor.
-		PopulationMap(const Point &corner_position);
+		PopulationMap(int width, int height);
 		virtual ~PopulationMap();
 
 		// Getters.

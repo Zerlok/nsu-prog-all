@@ -20,6 +20,30 @@ LifeObject::Action::~Action()
 }
 
 
+const LifeObject *LifeObject::Action::get_source() const
+{
+	return _source;
+}
+
+
+const LifeObject::Action::Type &LifeObject::Action::get_type() const
+{
+	return _type;
+}
+
+
+bool LifeObject::Action::operator==(const LifeObject::Action &action) const
+{
+	return (_type == action._type);
+}
+
+
+bool LifeObject::Action::operator!=(const LifeObject::Action &action) const
+{
+	return !((*this) == action);
+}
+
+
 bool LifeObject::Action::operator<(const LifeObject::Action &action) const
 {
 	return (_type < action._type);
@@ -28,7 +52,43 @@ bool LifeObject::Action::operator<(const LifeObject::Action &action) const
 
 bool LifeObject::Action::operator>(const LifeObject::Action &action) const
 {
-	return (_type > action._type);
+	return (action < (*this));
+}
+
+
+bool LifeObject::Action::operator<=(const LifeObject::Action &action) const
+{
+	return (((*this) < action)
+			|| ((*this) == action));
+}
+
+
+bool LifeObject::Action::operator>=(const LifeObject::Action &action) const
+{
+	return (action <= (*this));
+}
+
+
+std::ostream &operator<<(std::ostream &out, const LifeObject::Action::Type &type)
+{
+	switch (type)
+	{
+		case LifeObject::Action::Type::reproduce:
+			out << "reproduce";
+			break;
+		case LifeObject::Action::Type::attack:
+			out << "attack";
+			break;
+		case LifeObject::Action::Type::eat:
+			out << "eat";
+			break;
+		default:
+		case LifeObject::Action::Type::move:
+			out << "move";
+			break;
+	}
+
+	return out;
 }
 
 
@@ -102,14 +162,14 @@ void LifeObject::EatAction::execute(PopulationMap &map)
 // ---------------------------- ATTACK ACTION ---------------------------- //
 
 LifeObject::AttackAction::AttackAction()
-	: LifeObject::Action(nullptr, LifeObject::Action::Type::fight),
+	: LifeObject::Action(nullptr, LifeObject::Action::Type::attack),
 	  _target(nullptr)
 {
 }
 
 
 LifeObject::AttackAction::AttackAction(LifeObject *source, LifeObject *target)
-	: LifeObject::Action(source, LifeObject::Action::Type::fight),
+	: LifeObject::Action(source, LifeObject::Action::Type::attack),
 	  _target(target)
 {
 }
@@ -163,7 +223,7 @@ void LifeObject::ReproduceAction::execute(PopulationMap &map)
 
 	LifeObject *child = _source->clone();
 	child->_position = free_positions[(rand() % free_positions.size())];
-	child->_ttl = _source->_ttl / LifeObject::min_ttl_to_reproducing;
+	child->_ttl = _source->_ttl / Config::object_min_ttl_for_reproducing;
 	child->_mass = _source->_mass;
 
 	if (child->is_alive())

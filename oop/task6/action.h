@@ -2,6 +2,7 @@
 #define __LIFEOBJECT_ACTION_H__
 
 
+#include <iostream>
 #include "point.h"
 #include "lifeobject.h"
 #include "populationmap.h"
@@ -15,7 +16,7 @@ class LifeObject::Action
 		{
 			move = 0,
 			eat,
-			fight,
+			attack,
 			reproduce,
 		};
 
@@ -24,18 +25,29 @@ class LifeObject::Action
 		Action(LifeObject *source, const Type &type);
 		virtual ~Action();
 
+		// Methods.
+		const LifeObject *get_source() const;
+		const Type &get_type() const;
+
 		// Virtual methods.
 		virtual void execute(PopulationMap &map) = 0;
 
 		// Operators.
+		bool operator==(const LifeObject::Action &action) const;
+		bool operator!=(const LifeObject::Action &action) const;
 		bool operator<(const LifeObject::Action &action) const;
 		bool operator>(const LifeObject::Action &action) const;
+		bool operator<=(const LifeObject::Action &action) const;
+		bool operator>=(const LifeObject::Action &action) const;
 
 	protected:
 		// Fields.
 		LifeObject *_source;
 		Type _type;
 };
+
+
+std::ostream &operator<<(std::ostream &out, const LifeObject::Action::Type &type);
 
 
 class LifeObject::MoveAction : public LifeObject::Action

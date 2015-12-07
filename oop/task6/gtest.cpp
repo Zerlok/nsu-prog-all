@@ -107,7 +107,7 @@ TEST(PopulationMap, IsValidPosition)
 
 TEST(PopulationMap, FreePositions)
 {
-	PopulationMap map(Point(10, 10));
+	PopulationMap map(10, 10);
 
 	std::vector<Point> points = {
 		{0, 0},

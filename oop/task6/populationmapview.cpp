@@ -28,9 +28,9 @@ ConsoleView::ConsoleView(const PopulationMap &map)
 {
 	con_initPair(short(Palette::text), CON_COLOR_WHITE, CON_COLOR_BLACK);
 	con_initPair(short(Palette::field), CON_COLOR_GREEN, CON_COLOR_GREEN);
-	con_initPair(short(Palette::dead), CON_COLOR_WHITE, CON_COLOR_BLACK);
+	con_initPair(short(Palette::dead), CON_COLOR_WHITE, CON_COLOR_GREEN);
 	con_initPair(short(Palette::plant), CON_COLOR_WHITE, CON_COLOR_GREEN);
-	con_initPair(short(Palette::herbivorous), CON_COLOR_BLUE, CON_COLOR_GREEN);
+	con_initPair(short(Palette::herbivorous), CON_COLOR_BLACK, CON_COLOR_GREEN);
 	con_initPair(short(Palette::predator), CON_COLOR_RED, CON_COLOR_GREEN);
 }
 
@@ -185,7 +185,7 @@ void TextView::render_object(const LifeObject &obj) const
 	std::stringstream ss;
 	ss << type << ": "
 	   << obj.get_health() << " hp "
-	   << obj.get_weight() << "m "
+	   << obj.get_mass() << "m "
 	   << obj.get_position();
 	con_outTxt("%s\n", ss.str().c_str());
 }

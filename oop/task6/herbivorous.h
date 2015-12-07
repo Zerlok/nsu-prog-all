@@ -2,6 +2,7 @@
 #define __HERBIVOROUS_H__
 
 
+#include "config.h"
 #include "point.h"
 #include "lifeobject.h"
 #include "populationmap.h"
@@ -11,10 +12,10 @@ class Herbivorous : public LifeObject
 {
 	public:
 		Herbivorous(
-				const Point &pos=Point(),
-				int hp=min_ttl_to_live,
-				int dp=default_damage,
-				int weight=default_weight
+				const Point &pos,
+				int health = Config::herbivorous_born_ttl,
+				int damage = Config::herbivorous_damage,
+				int mass = Config::herbivorous_mass
 		);
 		Herbivorous(const Herbivorous &herbivorous);
 		virtual ~Herbivorous();

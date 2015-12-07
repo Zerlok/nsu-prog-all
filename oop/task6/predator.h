@@ -2,6 +2,7 @@
 #define __PREDATOR_H__
 
 
+#include "config.h"
 #include "point.h"
 #include "lifeobject.h"
 #include "populationmap.h"
@@ -11,10 +12,10 @@ class Predator : public LifeObject
 {
 	public:
 		Predator(
-				const Point &pos=Point(),
-				int hp=min_ttl_to_live,
-				int dp=default_damage,
-				int weight=default_weight
+				const Point &pos,
+				int health = Config::predator_born_ttl,
+				int damage = Config::predator_damage,
+				int mass = Config::herbivorous_mass
 		);
 		Predator(const Predator &predator);
 		virtual ~Predator();

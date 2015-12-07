@@ -6,11 +6,11 @@
 #include "herbivorous.h"
 
 
-Herbivorous::Herbivorous(const Point &pos, int hp, int dp, int weight)
-	: LifeObject(pos, hp, dp, weight),
+Herbivorous::Herbivorous(const Point &pos, int health, int damage, int mass)
+	: LifeObject(pos, health, damage, mass),
 	  food(nullptr)
 {
-	this->_type = Type::herbivorous;
+	_type = Type::herbivorous;
 }
 
 
@@ -18,7 +18,7 @@ Herbivorous::Herbivorous(const Herbivorous &herbivorous)
 	: LifeObject(herbivorous._position, herbivorous._ttl, herbivorous._damage, herbivorous._mass),
 	  food(nullptr)
 {
-	this->_type = herbivorous._type;
+	_type = herbivorous._type;
 }
 
 
@@ -41,17 +41,14 @@ Herbivorous::Action *Herbivorous::create_action(const PopulationMap &map)
 	make_older();
 
 	if (!is_hungry()
-			&& (rand() % 2))
+			&& (rand() % Config::herbivorous_reproduction_ratio))
 		return new ReproduceAction(this);
 
 	if (is_hungry())
 	{
 		const PopulationMap::objects_list &neighbours = map.get_neighbours(_position);
 		if (find_food(neighbours))
-		{
-	//			move_to(food->_position);
 			return new EatAction(this, food);
-		}
 	}
 
 	std::vector<Point> free_positions = map.get_free_positions(_position);
@@ -62,7 +59,7 @@ Herbivorous::Action *Herbivorous::create_action(const PopulationMap &map)
 
 bool Herbivorous::is_hungry() const
 {
-	return (this->_ttl <= 5);
+	return (_ttl <= Config::herbivorous_hungry_ttl);
 }
 
 
@@ -72,7 +69,7 @@ bool Herbivorous::find_food(const PopulationMap::objects_list &neighbours)
 	for (LifeObject *obj : neighbours)
 		if ((obj->get_type() == Type::plant)
 				&& ((food == nullptr)
-					|| (obj->get_weight() > food->get_weight())))
+					|| (obj->get_mass() > food->get_mass())))
 			food = obj;
 
 	return (food != nullptr);

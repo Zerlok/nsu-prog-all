@@ -24,7 +24,8 @@ HEADERS += console.h \
     action.h \
     plant.h \
     herbivorous.h \
-    predator.h
+    predator.h \
+    config.h
 
 OTHER_FILES += gtest.cpp
 

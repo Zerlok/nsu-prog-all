@@ -4,12 +4,12 @@
 
 
 
-Predator::Predator(const Point &pos, int hp, int dp, int weight)
-	: LifeObject(pos, hp, dp, weight),
+Predator::Predator(const Point &pos, int health, int damage, int mass)
+	: LifeObject(pos, health, damage, mass),
 	  food(nullptr),
 	  victim(nullptr)
 {
-	this->_type = Type::predator;
+	_type = Type::predator;
 }
 
 
@@ -18,7 +18,7 @@ Predator::Predator(const Predator &predator)
 	  food(nullptr),
 	  victim(nullptr)
 {
-	this->_type = predator._type;
+	_type = predator._type;
 }
 
 
@@ -41,7 +41,7 @@ Predator::Action *Predator::create_action(const PopulationMap &map)
 	make_older();
 
 	if (!is_hungry()
-			&& (rand() % 2))
+			&& (rand() % Config::predator_reproduction_ratio))
 		return new ReproduceAction(this);
 
 	if (is_hungry())
@@ -62,7 +62,7 @@ Predator::Action *Predator::create_action(const PopulationMap &map)
 
 bool Predator::is_hungry() const
 {
-	return (this->_ttl <= 5);
+	return (_ttl <= Config::predator_hungry_ttl);
 }
 
 
@@ -73,7 +73,7 @@ bool Predator::find_food(const PopulationMap::objects_list &neighbours)
 		if ((obj->get_type() == Type::herbivorous)
 				&& !(obj->is_alive())
 				&& ((food == nullptr)
-					|| (obj->get_weight() > food->get_weight())))
+					|| (obj->get_mass() > food->get_mass())))
 			food = obj;
 
 	return (food != nullptr);

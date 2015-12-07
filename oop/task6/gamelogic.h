@@ -14,18 +14,24 @@ class GameLogic
 
 		// Constructors / Destructor.
 		GameLogic();
+		GameLogic(const std::string &filename);
 		virtual ~GameLogic();
 
 		// Methods.
-		void init_life(int plants_num, int herbivorous_num, int predators_num);
+		void add_objects(int plants_num, int herbivorous_num, int predators_num);
 		void run();
 		void run(int n);
-		void tick();
 
 	private:
+		// Copy-constructor.
+		GameLogic(const GameLogic&) {}
+
 		// Fileds.
 		PopulationMap *_map;
 		AbstractView *_view;
+
+		// Methods.
+		void tick();
 };
 
 
