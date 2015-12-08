@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 
+#include "config.h"
 #include "point.h"
 #include "populationmap.h"
 #include "lifeobject.h"
@@ -39,6 +40,33 @@ TEST(Point, Comparing)
 
 	EXPECT_GE(p3, p1);
 	EXPECT_GE(p4, p2);
+}
+
+
+TEST(LifeObjects, Logic)
+{
+	int ttl = 30;
+
+	PopulationMap m(0, 0);
+
+	Plant t(Point(0, 0), ttl, 0, 0);
+	Herbivorous h(Point(0, 0), ttl, 0, 0);
+	Predator p(Point(0, 0), ttl, 0, 0);
+
+	EXPECT_TRUE(t.is_alive());
+	EXPECT_TRUE(h.is_alive());
+	EXPECT_TRUE(p.is_alive());
+
+	for (int i = 0; i < ttl; ++i)
+	{
+		t.create_action(m);
+		h.create_action(m);
+		p.create_action(m);
+	}
+
+	EXPECT_EQ(!(Config::plant_is_dieable), t.is_alive());
+	EXPECT_FALSE(h.is_alive());
+	EXPECT_FALSE(p.is_alive());
 }
 
 

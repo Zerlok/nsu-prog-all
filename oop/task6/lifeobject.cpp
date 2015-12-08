@@ -14,8 +14,8 @@ LifeObject::LifeObject(const Point &pos, int health, int damage, int mass)
 	if (_damage < Config::object_min_damage)
 		_damage = Config::object_min_damage;
 
-	if (_mass < Config::object_min_weight)
-		_mass = Config::object_min_weight;
+	if (_mass < Config::object_min_mass)
+		_mass = Config::object_min_mass;
 }
 
 
@@ -46,6 +46,12 @@ int LifeObject::get_health() const
 }
 
 
+int LifeObject::get_damage() const
+{
+	return _damage;
+}
+
+
 int LifeObject::get_mass() const
 {
 	return _mass;
@@ -70,7 +76,14 @@ bool LifeObject::make_older()
 		return false;
 
 	--_ttl;
-	return is_alive();
+
+	if (!is_alive())
+	{
+		kill();
+		return false;
+	}
+
+	return true;
 }
 
 

@@ -23,11 +23,16 @@ class PopulationMap
 		int get_plants_num() const;
 		int get_herbivorous_num() const;
 		int get_predators_num() const;
+		int get_total_objects_num() const;
 
 		bool is_valid_position(const Point &position) const;
 
-		std::vector<Point> get_free_positions(const Point &point) const;
-		std::vector<Point> get_move_positions(const Point &point) const;
+		std::vector<Point> get_free_positions(
+				const Point &point,
+				bool except_plants = true,
+				bool except_herbivorous = true,
+				bool except_preadators = true
+		) const;
 
 		objects_list get_neighbours(const Point &point);
 		const objects_list get_neighbours(const Point &point) const;

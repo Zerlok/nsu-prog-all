@@ -40,9 +40,6 @@ Herbivorous::Action *Herbivorous::create_action(const PopulationMap &map)
 
 	make_older();
 
-	if (!is_hungry()
-			&& (rand() % Config::herbivorous_reproduction_ratio))
-		return new ReproduceAction(this);
 
 	if (is_hungry())
 	{
@@ -51,7 +48,13 @@ Herbivorous::Action *Herbivorous::create_action(const PopulationMap &map)
 			return new EatAction(this, food);
 	}
 
-	std::vector<Point> free_positions = map.get_free_positions(_position);
+	std::vector<Point> free_positions = map.get_free_positions(_position, false, true, true);
+
+	if (!is_hungry()
+			&& !(rand() % Config::herbivorous_reproduction_ratio)
+			&& (!free_positions.empty()))
+		return new ReproduceAction(this, free_positions[(rand() % free_positions.size())]);
+
 	free_positions.push_back(_position);
 	return new MoveAction(this, free_positions[(rand() % free_positions.size())]);
 }

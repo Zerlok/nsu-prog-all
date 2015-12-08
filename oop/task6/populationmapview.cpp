@@ -75,37 +75,32 @@ void ConsoleView::render_object(const LifeObject &obj) const
 	char chr;
 	Palette clr;
 
-	if (obj.is_alive())
+	switch (obj.get_type())
 	{
-		switch (obj.get_type())
-		{
-			case LifeObject::Type::plant:
-				chr = plant_view;
-				clr = Palette::plant;
-				break;
+		case LifeObject::Type::plant:
+			chr = plant_view;
+			clr = Palette::plant;
+			break;
 
-			case LifeObject::Type::herbivorous:
-				chr = herbivorous_view;
-				clr = Palette::herbivorous;
-				break;
+		case LifeObject::Type::herbivorous:
+			chr = herbivorous_view;
+			clr = Palette::herbivorous;
+			break;
 
-			case LifeObject::Type::predator:
-				chr = predator_view;
-				clr = Palette::predator;
-				break;
+		case LifeObject::Type::predator:
+			chr = predator_view;
+			clr = Palette::predator;
+			break;
 
-			default:
-			case LifeObject::Type::none:
-				chr = empty_view;
-				clr = Palette::field;
-				break;
-		}
+		default:
+		case LifeObject::Type::none:
+			chr = empty_view;
+			clr = Palette::field;
+			break;
 	}
-	else
-	{
+
+	if (!obj.is_alive())
 		chr = dead_view;
-		clr = Palette::dead;
-	}
 
 	paint(obj_pos['x'], obj_pos['y'], chr, clr);
 }
@@ -161,32 +156,11 @@ void TextView::initialize_map_view() const
 
 void TextView::render_object(const LifeObject &obj) const
 {
-	std::string type;
-	switch (obj.get_type())
-	{
-		case LifeObject::Type::plant:
-			type = "Plnt";
-			break;
-
-		case LifeObject::Type::herbivorous:
-			type = "Herb";
-			break;
-
-		case LifeObject::Type::predator:
-			type = "Pred";
-			break;
-
-		default:
-		case LifeObject::Type::none:
-			type = "None";
-			break;
-	}
-
 	std::stringstream ss;
-	ss << type << ": "
-	   << obj.get_health() << " hp "
-	   << obj.get_mass() << "m "
-	   << obj.get_position();
+	ss << obj.get_type()
+	   << "|" << obj.get_health()
+	   << "|" << obj.get_mass()
+	   << "|" << obj.get_position();
 	con_outTxt("%s\n", ss.str().c_str());
 }
 

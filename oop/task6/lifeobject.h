@@ -39,6 +39,7 @@ class LifeObject
 
 		const Point &get_position() const;
 		int get_health() const;
+		int get_damage() const;
 		int get_mass() const;
 		const Type &get_type() const;
 
@@ -64,7 +65,7 @@ class LifeObject
 		// Methods.
 		bool make_older();
 		void deal_damage(int dmg);
-		void kill();
+		virtual void kill();
 };
 
 

@@ -47,6 +47,12 @@ int PopulationMap::get_predators_num() const
 }
 
 
+int PopulationMap::get_total_objects_num() const
+{
+	return (_plants_num + _herbivorous_num + _predators_num);
+}
+
+
 bool PopulationMap::is_valid_position(const Point &position) const
 {
 	return ((position >= Point::zero)
@@ -54,15 +60,20 @@ bool PopulationMap::is_valid_position(const Point &position) const
 }
 
 
-std::vector<Point> PopulationMap::get_free_positions(const Point &point) const
+std::vector<Point> PopulationMap::get_free_positions(
+		const Point &point,
+		bool except_plants,
+		bool except_herbivorous,
+		bool except_preadators) const
 {
 	std::vector<Point> positions;
 
 	if (!is_valid_position(point))
 		return positions;
 
-	Point left_top_corner = validate_position(point - Config::object_view_radius);
-	Point right_bottom_corner = validate_position(point + Config::object_view_radius);
+	const Point left_top_corner = validate_position(point - Config::object_walk_radius);
+	const Point right_bottom_corner = validate_position(point + Config::object_walk_radius);
+	const objects_list &neighbours = get_neighbours(point);
 
 	for (int y = left_top_corner['y'];
 		 y <= right_bottom_corner['y'];
@@ -72,48 +83,32 @@ std::vector<Point> PopulationMap::get_free_positions(const Point &point) const
 			 x <= right_bottom_corner['x'];
 			 ++x)
 		{
+			bool valid_position = true;
 			positions.push_back({x, y});
-			for (const LifeObject *obj : _objects)
+			for (const LifeObject *obj : neighbours)
 			{
 				if (obj->get_position() == positions.back())
 				{
-					positions.pop_back();
-					break;
-				}
-			}
-		}
-	}
+					switch (obj->get_type())
+					{
+						case LifeObject::Type::plant:
+							valid_position = valid_position && !except_plants;
+							break;
+						case LifeObject::Type::herbivorous:
+							valid_position = valid_position && !except_herbivorous;
+							break;
+						case LifeObject::Type::predator:
+							valid_position = valid_position && !except_preadators;
+							break;
+						default:
+							break;
+					}
 
-	return positions;
-}
-
-
-std::vector<Point> PopulationMap::get_move_positions(const Point &point) const
-{
-	std::vector<Point> positions;
-
-	if (!is_valid_position(point))
-		return positions;
-
-	Point left_top_corner = validate_position(point - Config::object_view_radius);
-	Point right_bottom_corner = validate_position(point + Config::object_view_radius);
-
-	for (int y = left_top_corner['y'];
-		 y <= right_bottom_corner['y'];
-		 ++y)
-	{
-		for (int x = left_top_corner['x'];
-			 x <= right_bottom_corner['x'];
-			 ++x)
-		{
-			positions.push_back({x, y});
-			for (const LifeObject *obj : _objects)
-			{
-				if ((obj->get_type() != LifeObject::Type::plant)
-						&& (obj->get_position() == positions.back()))
-				{
-					positions.pop_back();
-					break;
+					if (!valid_position)
+					{
+						positions.pop_back();
+						break;
+					}
 				}
 			}
 		}
@@ -126,8 +121,8 @@ std::vector<Point> PopulationMap::get_move_positions(const Point &point) const
 PopulationMap::objects_list PopulationMap::get_neighbours(const Point &point)
 {
 	objects_list lst;
-	Point left_top_corner = validate_position(point - Config::object_view_radius);
-	Point right_bottom_corner = validate_position(point + Config::object_view_radius);
+	Point left_top_corner = validate_position(point - Config::object_walk_radius);
+	Point right_bottom_corner = validate_position(point + Config::object_walk_radius);
 
 	for (LifeObject *obj : _objects)
 	{
@@ -145,8 +140,8 @@ PopulationMap::objects_list PopulationMap::get_neighbours(const Point &point)
 const PopulationMap::objects_list PopulationMap::get_neighbours(const Point &point) const
 {
 	objects_list lst;
-	Point left_top_corner = validate_position(point - Config::object_view_radius);
-	Point right_bottom_corner = validate_position(point + Config::object_view_radius);
+	Point left_top_corner = validate_position(point - Config::object_walk_radius);
+	Point right_bottom_corner = validate_position(point + Config::object_walk_radius);
 
 	for (LifeObject *obj : _objects)
 	{

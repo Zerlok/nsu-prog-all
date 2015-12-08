@@ -151,10 +151,10 @@ void LifeObject::EatAction::execute(PopulationMap &map)
 	if (_source->_position != _target->_position)
 		_source->_position = _target->_position;
 
-	if (_target->_mass > 0)
+	if (_target->_mass > Config::object_min_mass)
 	{
-		_target->_mass -= 1;
-		_source->_ttl += 2;
+		--_target->_mass;
+		_source->_ttl += Config::object_ttl_for_eating;
 	}
 }
 
@@ -182,8 +182,8 @@ LifeObject::AttackAction::~AttackAction()
 
 void LifeObject::AttackAction::execute(PopulationMap &map)
 {
-	if (!(_source->is_alive()
-		  && _target->is_alive()))
+	if (!(_source->is_alive())
+			|| !(_target->is_alive()))
 		return;
 
 	if (_source->_position != _target->_position)
@@ -196,13 +196,15 @@ void LifeObject::AttackAction::execute(PopulationMap &map)
 // ---------------------------- REPRODUCE ACTION ---------------------------- //
 
 LifeObject::ReproduceAction::ReproduceAction()
-	: LifeObject::Action(nullptr, LifeObject::Action::Type::reproduce)
+	: LifeObject::Action(nullptr, LifeObject::Action::Type::reproduce),
+	  _position(Point::zero)
 {
 }
 
 
-LifeObject::ReproduceAction::ReproduceAction(LifeObject *source)
-	: LifeObject::Action(source, LifeObject::Action::Type::reproduce)
+LifeObject::ReproduceAction::ReproduceAction(LifeObject *source, const Point &position)
+	: LifeObject::Action(source, LifeObject::Action::Type::reproduce),
+	  _position(position)
 {
 }
 
@@ -214,23 +216,28 @@ LifeObject::ReproduceAction::~ReproduceAction()
 
 void LifeObject::ReproduceAction::execute(PopulationMap &map)
 {
-	if (!(_source->is_alive()))
+	if (!(_source->is_alive())
+			|| !(map.is_valid_position(_position))
+			|| (_source->_ttl < Config::object_min_ttl_for_reproducing))
 		return;
 
-	std::vector<Point> free_positions = map.get_free_positions(_source->_position);
-	if (free_positions.empty())
-		return;
-
-	LifeObject *child = _source->clone();
-	child->_position = free_positions[(rand() % free_positions.size())];
-	child->_ttl = _source->_ttl / Config::object_min_ttl_for_reproducing;
-	child->_mass = _source->_mass;
+	LifeObject *child = create_child();
 
 	if (child->is_alive())
 	{
-		_source->_ttl -= child->_ttl;
+		_source->_ttl -= Config::object_parent_ttl_reproduction_ratio;
 		map.insert_object(child);
 	}
 	else
 		delete child;
+}
+
+
+LifeObject *LifeObject::ReproduceAction::create_child()
+{
+	LifeObject *child = _source->clone();
+	child->_position = _position;
+	child->_ttl = _source->_ttl / Config::object_child_ttl_reproduction_ratio;
+
+	return child;
 }

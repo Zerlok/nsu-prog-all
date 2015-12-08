@@ -59,7 +59,7 @@ class LifeObject::MoveAction : public LifeObject::Action
 
 		virtual void execute(PopulationMap &map) override;
 
-	private:
+	protected:
 		Point _position;
 };
 
@@ -73,7 +73,7 @@ class LifeObject::EatAction : public LifeObject::Action
 
 		virtual void execute(PopulationMap &map) override;
 
-	private:
+	protected:
 		LifeObject *_target;
 };
 
@@ -87,7 +87,7 @@ class LifeObject::AttackAction : public LifeObject::Action
 
 		virtual void execute(PopulationMap &map) override;
 
-	private:
+	protected:
 		LifeObject *_target;
 };
 
@@ -96,10 +96,15 @@ class LifeObject::ReproduceAction : public LifeObject::Action
 {
 	public:
 		ReproduceAction();
-		ReproduceAction(LifeObject *source);
+		ReproduceAction(LifeObject *source, const Point &position);
 		virtual ~ReproduceAction();
 
 		virtual void execute(PopulationMap &map) override;
+
+		virtual LifeObject *create_child();
+
+	protected:
+		Point _position;
 };
 
 

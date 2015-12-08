@@ -3,6 +3,7 @@
 
 
 #include "config.h"
+#include "action.h"
 #include "lifeobject.h"
 
 
@@ -20,6 +21,18 @@ class Plant : public LifeObject
 
 		virtual LifeObject *clone() const override;
 		virtual LifeObject::Action *create_action(const PopulationMap &map) override;
+		virtual void kill() override;
+};
+
+
+class PlantReproduceAction : public LifeObject::ReproduceAction
+{
+	public:
+		PlantReproduceAction();
+		PlantReproduceAction(LifeObject *source, const Point &position);
+		virtual ~PlantReproduceAction();
+
+		virtual LifeObject *create_child() override;
 };
 
 

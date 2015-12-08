@@ -40,10 +40,6 @@ Predator::Action *Predator::create_action(const PopulationMap &map)
 
 	make_older();
 
-	if (!is_hungry()
-			&& (rand() % Config::predator_reproduction_ratio))
-		return new ReproduceAction(this);
-
 	if (is_hungry())
 	{
 		const PopulationMap::objects_list &neighbours = map.get_neighbours(_position);
@@ -54,9 +50,15 @@ Predator::Action *Predator::create_action(const PopulationMap &map)
 			return new AttackAction(this, victim);
 	}
 
-	std::vector<Point> available_moves = map.get_move_positions(_position);
-	available_moves.push_back(_position);
-	return new MoveAction(this, available_moves[(rand() % available_moves.size())]);
+	std::vector<Point> free_positions = map.get_free_positions(_position, false, true, true);
+
+	if (!is_hungry()
+			&& !(rand() % Config::predator_reproduction_ratio)
+			&& (!free_positions.empty()))
+		return new ReproduceAction(this, free_positions[rand() % free_positions.size()]);
+
+	free_positions.push_back(_position);
+	return new MoveAction(this, free_positions[(rand() % free_positions.size())]);
 }
 
 

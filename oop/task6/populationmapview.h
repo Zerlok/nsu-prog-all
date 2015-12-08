@@ -27,7 +27,7 @@ class ConsoleView : public AbstractView
 		// Static.
 		static const char dead_view = '*';
 		static const char empty_view = ' ';
-		static const char plant_view = '!';
+		static const char plant_view = '`';
 		static const char herbivorous_view = '&';
 		static const char predator_view = '@';
 
