@@ -13,6 +13,7 @@ HEADERS += \
 	datapackage.h \
     sender.h \
     receiver.h \
-	media.h
+	media.h \
+	xprotocol.h
 
 OTHER_FILES += gtest.cpp

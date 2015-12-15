@@ -233,6 +233,12 @@ function main()
 
 	parse_pro_file $PRO_PATH
 
+	if $VERBOSE
+	then
+		echo "Sources: ${sources[@]}"
+		echo "Libs:    ${CCPP_LIBS[@]}"
+	fi
+
 	if $GTEST_ENABLED
 	then
 		compile_gtest
@@ -252,4 +258,4 @@ then
 	show_parsed_input
 fi
 
-main $@
+main

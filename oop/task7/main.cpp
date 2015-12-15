@@ -9,7 +9,7 @@ int main(int argc, char **argv)
 		return 1;
 
 	for (int i = 1; i < argc; ++i)
-		cout << argv[i] << " : " << DataPackage(argv[i]) << endl;
+		cout << DataPackage(argv[i]) << endl;
 
 	return 0;
 }
