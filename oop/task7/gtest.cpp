@@ -1,15 +1,13 @@
 #include <gtest/gtest.h>
+#include <fstream>
 #include <string>
 #include <vector>
+
 #include "datapackage.h"
 #include "sender.h"
 #include "receiver.h"
-
-
-bool operator==(const std::string &s1, const std::string &s2)
-{
-	return (!(s1.compare(s2)));
-}
+#include "media.h"
+#include "xprotocol.h"
 
 
 TEST(DataPackage, Init)
@@ -59,28 +57,41 @@ TEST(DataPackage, SinglePackageTransmission)
 }
 
 
-TEST(Transmission, Simple)
+TEST(Transferring, Manual)
 {
-	const std::string &message = "Hello, world! This is a simple message for data transmission test. And doubled (Hello, world! This is a simple message for data transmission test).";
+	const std::string &message = xmodem_utils::read_all_input("normal-media-test.txt");
 	Sender s(message);
 	Receiver r;
 
 	DataPackage package;
-	while (s.get_left_packages_num() > 0)
+	while (!s.is_stopped())
 	{
-		package = s.give_outgoing_package();
-		EXPECT_TRUE(package.is_valid());
-		r.take_incoming_package(package);
-
 		package = r.give_outgoing_package();
 		EXPECT_TRUE(package.is_valid());
 		s.take_incoming_package(package);
+
+		package = s.give_outgoing_package();
+		EXPECT_TRUE(package.is_valid());
+		r.take_incoming_package(package);
 	}
 
-	EXPECT_EQ(Sender::Status::data_transmission_finished, s.get_status());
-	EXPECT_EQ(Receiver::Status::data_transmission_finished, r.get_status());
-	EXPECT_EQ(r.get_total_packages_num(), r.get_received_packages_num());
-	EXPECT_EQ(message, r.get_data());
+	EXPECT_EQ(Sender::Status::data_transmission_finished, s.get_status()) << package;
+	EXPECT_EQ(Receiver::Status::data_transmission_finished, r.get_status()) << package;
+	EXPECT_EQ(r.get_total_packages_num(), r.get_received_packages_num()) << package;
+	EXPECT_EQ(message, r.get_received_data()) << package;
+}
+
+
+TEST(Transferring, NormalMedia)
+{
+	const std::string &message = xmodem_utils::read_all_input("normal-media-test.txt");
+	Sender s(message);
+	Receiver r;
+	NormalMedia media(s, r);
+
+	EXPECT_TRUE(media.emulate_transmission());
+	EXPECT_TRUE(s.is_stopped()) << s.give_outgoing_package();
+	EXPECT_TRUE(r.is_stopped());
 }
 
 

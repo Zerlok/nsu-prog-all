@@ -1,0 +1,5 @@
+Hello, world! This is a simple message for data transmission test.
+And doubled (Hello, world! This is a simple message for data transmission test).
+Just another one simple part of text to normal media.
+I hope, test case will be passed without any errors. :)
+Otherwise, I will eat my pants!

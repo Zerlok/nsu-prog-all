@@ -2,14 +2,18 @@
 #define __FACTORY_H__
 
 
+#include <vector>
 #include <string>
 #include <unordered_map>
 
 
-template<class Id, class AbstractClass>
+template<class Key, class ValueAbstractClass>
 class Factory
 {
 	public:
+		using Id = Key;
+		using AbstractClass = ValueAbstractClass;
+
 		class AbstractClassCreator
 		{
 			public:
@@ -53,6 +57,16 @@ class Factory
 			return *(_class_map.at(id).second);
 		}
 
+		const std::vector<Id> get_registrated() const
+		{
+			std::vector<Id> vctr;
+
+			for (const auto pair : _class_map)
+				vctr.push_back(pair.first);
+
+			return vctr;
+		}
+
 		// Methods.
 		template<class Class>
 		bool register_class(const Id &id)
@@ -77,8 +91,8 @@ class Factory
 
 		void clear()
 		{
-			for (const auto c : _class_map)
-				delete c.second;
+			for (const auto pair : _class_map)
+				delete pair.second;
 
 			_class_map.clear();
 		}

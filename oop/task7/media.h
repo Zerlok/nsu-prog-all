@@ -11,13 +11,16 @@ class AbstractMedia
 	public:
 		AbstractMedia(Sender &sender, Receiver &receiver)
 			: _sender(sender),
-			  _receiver(receiver) {}
+			  _receiver(receiver),
+			  _result(false) {}
 		virtual ~AbstractMedia() {}
-		virtual void emulate_transmission() = 0;
+		virtual bool emulate_transmission() = 0;
+		bool get_result() const { return _result; }
 
 	protected:
 		Sender &_sender;
 		Receiver &_receiver;
+		bool _result;
 };
 
 
@@ -27,7 +30,7 @@ class NormalMedia : public AbstractMedia
 		NormalMedia(Sender &sender, Receiver &receiver);
 		~NormalMedia();
 
-		void emulate_transmission() override;
+		bool emulate_transmission() override;
 };
 
 
@@ -37,7 +40,7 @@ class BitFailingMedia : public AbstractMedia
 		BitFailingMedia(Sender &sender, Receiver &receiver);
 		~BitFailingMedia();
 
-		void emulate_transmission() override;
+		bool emulate_transmission() override;
 };
 
 
@@ -47,7 +50,7 @@ class DisconnectionMedia : public AbstractMedia
 		DisconnectionMedia(Sender &sender, Receiver &receiver);
 		~DisconnectionMedia();
 
-		void emulate_transmission() override;
+		bool emulate_transmission() override;
 };
 
 

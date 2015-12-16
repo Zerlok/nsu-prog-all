@@ -6,8 +6,9 @@ const DataPackage Sender::fail_cmd_pckg = DataPackage(xmodem_protocol::failed_tr
 
 
 Sender::Sender(const std::string &data)
-	: _packages(),
-	  _fails_in_row_counter(0),
+	: _sending_data(data),
+	  _packages(),
+	  _tries_counter(0),
 	  _status(Status::disconnected)
 {
 	int blocks_num = int(data.size()) / DataPackage::max_data_len;
@@ -51,41 +52,62 @@ const Sender::Status &Sender::get_status() const
 }
 
 
-bool Sender::is_stopped() const
+bool Sender::is_connected() const
 {
 	switch (_status)
 	{
 		case Status::disconnected:
 		case Status::data_transmission_finished:
 		case Status::connection_lost:
-			return true;
+			return false;
 
-		case Status::package_sending_succeessful:
+		case Status::package_sending_successful:
 		case Status::package_sending_failed:
 		case Status::incoming_package_receiving_failed:
-		case Status::incoming_command_unpacking_failed:
+		case Status::incoming_command_invalid:
+		default:
+			return true;
+	}
+}
+
+
+bool Sender::is_stopped() const
+{
+	switch (_status)
+	{
+		case Status::data_transmission_finished:
+		case Status::connection_lost:
+			return true;
+
+		case Status::disconnected:
+		case Status::package_sending_successful:
+		case Status::package_sending_failed:
+		case Status::incoming_package_receiving_failed:
+		case Status::incoming_command_invalid:
 		default:
 			return false;
 	}
 }
 
 
-const DataPackage &Sender::give_outgoing_package() const
+const DataPackage &Sender::give_outgoing_package()
 {
 	switch (_status)
 	{
 		case Status::disconnected:
-		case Status::package_sending_succeessful:
+		case Status::package_sending_successful:
 		case Status::package_sending_failed:
+			++_tries_counter;
 			return _packages.front();
 
 		case Status::data_transmission_finished:
 			return success_cmd_pckg;
 
 		case Status::incoming_package_receiving_failed:
-		case Status::incoming_command_unpacking_failed:
+		case Status::incoming_command_invalid:
 		case Status::connection_lost:
 		default:
+			++_tries_counter;
 			return fail_cmd_pckg;
 	}
 }
@@ -93,10 +115,12 @@ const DataPackage &Sender::give_outgoing_package() const
 
 void Sender::take_incoming_package(const DataPackage &package)
 {
+	if (is_stopped())
+		return;
+
 	if (!package.is_valid())
 	{
-		++_fails_in_row_counter;
-		_status = ((_fails_in_row_counter < xmodem_protocol::max_fails_in_row_num)
+		_status = ((_tries_counter < xmodem_protocol::max_tries)
 				   ? Status::incoming_package_receiving_failed
 				   : Status::connection_lost);
 		return;
@@ -109,26 +133,27 @@ void Sender::take_incoming_package(const DataPackage &package)
 
 	if (success_cmd_pos != std::string::npos)
 	{
-		_fails_in_row_counter = 0;
+		_tries_counter = 0;
 		_packages.erase(_packages.begin());
 		_status = ((!_packages.empty())
-					? Status::package_sending_succeessful
+					? Status::package_sending_successful
 					: Status::data_transmission_finished);
 	}
 	else if (fail_cmd_pos != std::string::npos)
-	{
-		++_fails_in_row_counter;
 		_status = Status::package_sending_failed;
-	}
-	else
-	{
-		++_fails_in_row_counter;
-		_status = Status::incoming_command_unpacking_failed;
-	}
+
+	else // incoming comand is invalid.
+		_status = Status::incoming_command_invalid;
 
 	// Update status using fails and left packages.
-	if (_fails_in_row_counter >= xmodem_protocol::max_fails_in_row_num)
+	if (_tries_counter >= xmodem_protocol::max_tries)
 		_status = Status::connection_lost;
+}
+
+
+const std::string &Sender::get_sending_data() const
+{
+	return _sending_data;
 }
 
 
@@ -136,3 +161,42 @@ int Sender::get_left_packages_num() const
 {
 	return _packages.size();
 }
+
+
+std::ostream &operator<<(std::ostream &out, const Sender::Status &status)
+{
+	switch (status)
+	{
+		case Sender::Status::disconnected:
+			out << "[disconnected]";
+			break;
+
+		case Sender::Status::data_transmission_finished:
+			out << "[data transmission finished]";
+			break;
+
+		case Sender::Status::package_sending_successful:
+			out << "[package sending successful]";
+			break;
+
+		case Sender::Status::package_sending_failed:
+			out << "[package sending failed]";
+			break;
+
+		case Sender::Status::incoming_package_receiving_failed:
+			out << "[incoming package receiving failed]";
+			break;
+
+		case Sender::Status::incoming_command_invalid:
+			out << "[incoming command invalid]";
+			break;
+
+		case Sender::Status::connection_lost:
+		default:
+			out << "[connection lost]";
+			break;
+	}
+
+	return out;
+}
+

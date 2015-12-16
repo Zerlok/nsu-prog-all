@@ -25,12 +25,13 @@ class Receiver
 		};
 
 		const Status &get_status() const;
+		bool is_connected() const;
 		bool is_stopped() const;
 
 		const DataPackage &give_outgoing_package();
 		void take_incoming_package(const DataPackage &package);
 
-		std::string get_data() const;
+		std::string get_received_data() const;
 		int get_received_packages_num() const;
 		int get_total_packages_num() const;
 
@@ -39,11 +40,14 @@ class Receiver
 		static const DataPackage fail_cmd_pckg;
 
 		std::vector<DataPackage> _packages;
-		int _fails_in_row_counter;
+		int _tries_counter;
 		int _total_packages_num;
 		DataPackage _outgoing_cmd;
 		Status _status;
 };
+
+
+std::ostream &operator<<(std::ostream &out, const Receiver::Status &status);
 
 
 // __RECEIVER_H__

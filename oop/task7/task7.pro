@@ -7,13 +7,16 @@ SOURCES += main.cpp \
 	datapackage.cpp \
     sender.cpp \
     receiver.cpp \
-	media.cpp
+	media.cpp \
+    xprotocol.cpp
 
 HEADERS += \
 	datapackage.h \
     sender.h \
     receiver.h \
 	media.h \
-	xprotocol.h
+	xprotocol.h \
+    factory.h
 
-OTHER_FILES += gtest.cpp
+OTHER_FILES += gtest.cpp \
+    ../build/task7/normal-media-test.txt
