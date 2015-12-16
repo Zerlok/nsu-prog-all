@@ -18,6 +18,8 @@ namespace xmodem_protocol
 
 namespace xmodem_utils
 {
+	static const std::string eol_symbol = "\n";
+
 	bool operator==(const std::string &s1, const std::string &s2);
 	std::string read_all_input(const std::string &filename);
 }

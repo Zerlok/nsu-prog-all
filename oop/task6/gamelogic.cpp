@@ -26,7 +26,6 @@ GameLogic::GameLogic()
 
 GameLogic::GameLogic(const std::string &filename)
 {
-
 	TextReader reader(filename);
 	_map = new PopulationMap(reader.read_map());
 

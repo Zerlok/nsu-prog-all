@@ -25,10 +25,9 @@ std::string xmodem_utils::read_all_input(const std::string &filename)
 
 	while (std::getline(input, line))
 	{
-		line.append("\n");
+		line.append(xmodem_utils::eol_symbol);
 		read_data.append(line);
 	}
 
-//	read_data.append(xmodem_protocol::data_end);
 	return read_data;
 }

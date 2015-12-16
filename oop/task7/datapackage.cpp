@@ -1,6 +1,7 @@
 #include <ios>
 #include <iomanip>
 #include <sstream>
+#include <stdexcept>
 #include "datapackage.h"
 
 
@@ -151,7 +152,16 @@ std::istream &operator>>(std::istream &in, DataPackage &package)
 		in >> chr;
 		tmp << chr;
 	}
-	package._crc = std::stoi(tmp.str());
+
+	try
+	{
+		package._crc = std::stoi(tmp.str());
+	}
+	catch (std::invalid_argument)
+	{
+		package = DataPackage();
+		return in >> std::skipws;
+	}
 
 	// Read Data length.
 	tmp.str("");
@@ -160,7 +170,17 @@ std::istream &operator>>(std::istream &in, DataPackage &package)
 		in >> chr;
 		tmp << chr;
 	}
-	int data_len = std::stoi(tmp.str());
+
+	int data_len = 0;
+	try
+	{
+		data_len = std::stoi(tmp.str());
+	}
+	catch (std::invalid_argument)
+	{
+		package = DataPackage();
+		return in >> std::skipws;
+	}
 
 	// Read Data itself.
 	tmp.str("");

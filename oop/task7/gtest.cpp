@@ -89,9 +89,22 @@ TEST(Transferring, NormalMedia)
 	Receiver r;
 	NormalMedia media(s, r);
 
-	EXPECT_TRUE(media.emulate_transmission());
-	EXPECT_TRUE(s.is_stopped()) << s.give_outgoing_package();
-	EXPECT_TRUE(r.is_stopped());
+	EXPECT_TRUE(media.simulate_transmission());
+	EXPECT_TRUE(s.is_stopped()) << s.give_outgoing_package() << " " << s.get_status();
+	EXPECT_TRUE(r.is_stopped()) << r.give_outgoing_package() << " " << r.get_status();
+}
+
+
+TEST(Transferring, BitFailingMedia)
+{
+	const std::string &message = xmodem_utils::read_all_input("normal-media-test.txt");
+	Sender s(message);
+	Receiver r;
+	BitFailingMedia media(s, r);
+
+	EXPECT_TRUE(media.simulate_transmission());
+	EXPECT_TRUE(s.is_stopped()) << s.give_outgoing_package() << " " << s.get_status();
+	EXPECT_TRUE(r.is_stopped()) << r.give_outgoing_package() << " " << r.get_status();
 }
 
 
