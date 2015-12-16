@@ -3,6 +3,7 @@
 
 
 #include <iostream>
+#include <string>
 #include <list>
 #include "point.h"
 #include "config.h"
@@ -36,6 +37,7 @@ class LifeObject
 
 		// Getters.
 		bool is_alive() const;
+		bool is_eatable() const;
 
 		const Point &get_position() const;
 		int get_health() const;
@@ -47,6 +49,10 @@ class LifeObject
 		virtual LifeObject *clone() const;
 		virtual Action *create_action(const PopulationMap &map);
 
+		// Methods.
+		void decrement_mass();
+
+		// Operators.
 		bool operator==(const LifeObject &obj) const;
 		bool operator!=(const LifeObject &obj) const;
 		bool operator<(const LifeObject &obj) const;
@@ -69,6 +75,7 @@ class LifeObject
 };
 
 
+LifeObject::Type get_type_by_name(const std::string &name);
 std::ostream &operator<<(std::ostream &out, const LifeObject::Type &type);
 
 

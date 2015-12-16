@@ -151,7 +151,7 @@ void LifeObject::EatAction::execute(PopulationMap &map)
 	if (_source->_position != _target->_position)
 		_source->_position = _target->_position;
 
-	if (_target->_mass > Config::object_min_mass)
+	if (_target->is_eatable())
 	{
 		--_target->_mass;
 		_source->_ttl += Config::object_ttl_for_eating;

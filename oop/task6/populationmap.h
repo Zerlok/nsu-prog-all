@@ -15,6 +15,7 @@ class PopulationMap
 
 		// Constructors / Destructor.
 		PopulationMap(int width, int height);
+		PopulationMap(const PopulationMap &&map);
 		virtual ~PopulationMap();
 
 		// Getters.
@@ -50,11 +51,12 @@ class PopulationMap
 	private:
 		// Fields.
 		const Point _corner_position;
-		objects_list _objects;
 
 		int _plants_num;
 		int _herbivorous_num;
 		int _predators_num;
+
+		objects_list _objects;
 };
 
 

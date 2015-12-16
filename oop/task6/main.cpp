@@ -6,14 +6,18 @@ using namespace std;
 
 int main(int argc, char *argv[])
 {
-//	Game from file
-	GameLogic game;
-	game.add_objects(15, 10, 12);
-
-	if (argc > 1)
-		game.run(stoi(argv[1]));
-	else
+	if (argc == 2)
+	{
+		GameLogic game(argv[1]);
 		game.run();
+	}
+	else
+	{
+		cout << "Save file was not given, running the default game." << endl;
+		GameLogic game;
+		game.add_objects(15, 10, 12);
+		game.run();
+	}
 
 	return 0;
 }

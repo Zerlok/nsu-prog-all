@@ -40,7 +40,6 @@ Herbivorous::Action *Herbivorous::create_action(const PopulationMap &map)
 
 	make_older();
 
-
 	if (is_hungry())
 	{
 		const PopulationMap::objects_list &neighbours = map.get_neighbours(_position);

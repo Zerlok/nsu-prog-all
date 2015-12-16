@@ -32,4 +32,4 @@ OTHER_FILES += gtest.cpp
 
 LIBS += -lncurses
 QMAKE_CFLAGS += -lncurses
-
+QMAKE_CFLAGS_RELEASE += -O3

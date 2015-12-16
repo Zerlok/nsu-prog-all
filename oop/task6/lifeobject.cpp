@@ -40,6 +40,12 @@ bool LifeObject::is_alive() const
 }
 
 
+bool LifeObject::is_eatable() const
+{
+	return (_mass > Config::object_min_mass);
+}
+
+
 int LifeObject::get_health() const
 {
 	return _ttl;
@@ -99,6 +105,12 @@ LifeObject::Action *LifeObject::create_action(const PopulationMap &map)
 }
 
 
+void LifeObject::decrement_mass()
+{
+	--_mass;
+}
+
+
 bool LifeObject::operator==(const LifeObject &obj) const
 {
 	return (_type == obj._type);
@@ -151,6 +163,19 @@ void LifeObject::kill()
 }
 
 
+LifeObject::Type get_type_by_name(const std::string &name)
+{
+	if (!name.compare("Plant"))
+		return LifeObject::Type::plant;
+	else if (!name.compare("Herbivorous"))
+		return LifeObject::Type::herbivorous;
+	else if (!name.compare("Predator"))
+		return LifeObject::Type::predator;
+
+	return LifeObject::Type::none;
+}
+
+
 std::ostream &operator<<(std::ostream &out, const LifeObject::Type &type)
 {
 	switch (type)
@@ -172,4 +197,14 @@ std::ostream &operator<<(std::ostream &out, const LifeObject::Type &type)
 	}
 
 	return out;
+}
+
+
+std::istream &operator>>(std::istream &in, LifeObject::Type &type)
+{
+	std::string str;
+	in >> str;
+	type = get_type_by_name(str);
+
+	return in;
 }

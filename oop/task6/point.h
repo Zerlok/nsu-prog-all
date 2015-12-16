@@ -49,13 +49,16 @@ class Point
 		int operator[](char axis) const;
 
 		friend std::ostream &operator<<(std::ostream &out, const Point &point);
+		friend std::istream &operator>>(std::istream &in, Point &point);
 
 	private:
 		int _x;
 		int _y;
 };
 
+
 std::ostream &operator<<(std::ostream &out, const Point &point);
+std::istream &operator>>(std::istream &in, Point &point);
 
 
 // __POINT_H__

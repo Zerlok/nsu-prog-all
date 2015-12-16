@@ -11,6 +11,16 @@ PopulationMap::PopulationMap(int width, int height)
 }
 
 
+PopulationMap::PopulationMap(const PopulationMap &&map)
+	: _corner_position(std::move(map._corner_position)),
+	  _plants_num(std::move(map._plants_num)),
+	  _herbivorous_num(std::move(map._herbivorous_num)),
+	  _predators_num(std::move(map._predators_num)),
+	  _objects(std::move(map._objects))
+{
+}
+
+
 PopulationMap::~PopulationMap()
 {
 	clear_objects();
@@ -229,6 +239,10 @@ PopulationMap::objects_list::iterator PopulationMap::erase_object(objects_list::
 			break;
 		case LifeObject::Type::predator:
 			--_predators_num;
+			break;
+
+		case LifeObject::Type::none:
+		default:
 			break;
 	}
 

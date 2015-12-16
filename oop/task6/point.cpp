@@ -207,3 +207,11 @@ std::ostream &operator<<(std::ostream &out, const Point &point)
 {
 	return out << "[" << point._x << ", " << point._y << "]";
 }
+
+
+std::istream &operator>>(std::istream &in, Point &point)
+{
+	char c;
+	in >> c >> point._x >> c >> c >> point._y >> c;
+	return in;
+}

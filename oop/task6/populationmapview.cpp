@@ -1,5 +1,6 @@
 #include <iostream>
 #include <sstream>
+#include <cstdint>
 #include "console.h"
 
 #include "populationmapview.h"
@@ -18,8 +19,8 @@ AbstractView::~AbstractView()
 
 void AbstractView::render_map() const
 {
-	for (const LifeObject *obj : this->_map.get_objects())
-		render_object(*obj);
+	for (const LifeObject *obj : _map.get_objects())
+		render_object(obj);
 }
 
 
@@ -43,8 +44,8 @@ ConsoleView::~ConsoleView()
 
 void ConsoleView::initialize_map_view() const
 {
-	int width = this->_map.get_width();
-	int height = this->_map.get_height();
+	int width = _map.get_width();
+	int height = _map.get_height();
 
 	for (int y = 0; y < height; ++y)
 		for (int x = 0; x < width; ++x)
@@ -63,22 +64,25 @@ void ConsoleView::render_map() const
 	con_gotoXY(header_x_pos, 3);
 	con_outTxt("Predators: %d", _map.get_predators_num());
 
-	for (const LifeObject *obj : this->_map.get_objects())
-		render_object(*obj);
+	for (const LifeObject *obj : _map.get_objects())
+		render_object(obj);
 }
 
 
-void ConsoleView::render_object(const LifeObject &obj) const
+void ConsoleView::render_object(const LifeObject *obj) const
 {
-	const Point &obj_pos = obj.get_position();
+	const Point &obj_pos = obj->get_position();
 
 	char chr;
 	Palette clr;
 
-	switch (obj.get_type())
+	switch (obj->get_type())
 	{
 		case LifeObject::Type::plant:
-			chr = plant_view;
+			if (!(obj->is_alive()))
+				return;
+
+			chr = get_plant_view(obj);
 			clr = Palette::plant;
 			break;
 
@@ -99,7 +103,7 @@ void ConsoleView::render_object(const LifeObject &obj) const
 			break;
 	}
 
-	if (!obj.is_alive())
+	if (!(obj->is_alive()))
 		chr = dead_view;
 
 	paint(obj_pos['x'], obj_pos['y'], chr, clr);
@@ -126,19 +130,42 @@ void ConsoleView::clear_map() const
 	}
 
 	for (const LifeObject *obj : _map.get_objects())
-		clear_object(*obj);
+		clear_object(obj);
 }
 
 
-void ConsoleView::clear_object(const LifeObject &obj) const
+char ConsoleView::get_plant_view(const LifeObject *plant) const
 {
-	const Point &obj_pos = obj.get_position();
+	uintptr_t id = reinterpret_cast<uintptr_t>(plant);
+
+	switch (id % 5)
+	{
+		case 0:
+			return ';';
+		case 1:
+			return ',';
+		case 2:
+			return '\'';
+		case 3:
+			return '"';
+
+		default:
+		case 4:
+			return '`';
+	}
+}
+
+
+void ConsoleView::clear_object(const LifeObject *obj) const
+{
+	const Point &obj_pos = obj->get_position();
 	paint(obj_pos['x'], obj_pos['y'], empty_view, Palette::field);
 }
 
 
-TextView::TextView(const PopulationMap &map)
-	: AbstractView(map)
+TextView::TextView(const PopulationMap &map, std::ostream &out)
+	: AbstractView(map),
+	  _out(out)
 {
 }
 
@@ -150,22 +177,24 @@ TextView::~TextView()
 
 void TextView::initialize_map_view() const
 {
-	con_clearScr();
+	_out << _map.get_width() << "|" << _map.get_height() << std::endl;
 }
 
 
-void TextView::render_object(const LifeObject &obj) const
+void TextView::render_object(const LifeObject *obj) const
 {
-	std::stringstream ss;
-	ss << obj.get_type()
-	   << "|" << obj.get_health()
-	   << "|" << obj.get_mass()
-	   << "|" << obj.get_position();
-	con_outTxt("%s\n", ss.str().c_str());
+	if (!(obj->is_eatable()))
+		return;
+
+	_out << obj->get_type()
+	   << Config::file_data_separator << obj->get_health()
+	   << Config::file_data_separator << obj->get_damage()
+	   << Config::file_data_separator << obj->get_mass()
+	   << Config::file_data_separator << obj->get_position()
+	   << std::endl;
 }
 
 
 void TextView::clear_map() const
 {
-	con_clearScr();
 }

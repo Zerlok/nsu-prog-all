@@ -1,6 +1,7 @@
 #include <algorithm>
-#include <set>
 #include <vector>
+#include <fstream>
+#include <sstream>
 #include <unistd.h>
 #include <time.h>
 
@@ -16,23 +17,32 @@
 
 GameLogic::GameLogic()
 {
-	srand(time(NULL));
-
-	setenv("TERM", "xterm", 1);
-	con_init();
-	con_hideCursor();
-
 	_map = new PopulationMap(Config::map_width, Config::map_height);
+
+	init_console_graphics();
+	_view = new ConsoleView(*_map);
+}
+
+
+GameLogic::GameLogic(const std::string &filename)
+{
+
+	TextReader reader(filename);
+	_map = new PopulationMap(reader.read_map());
+
+	init_console_graphics();
 	_view = new ConsoleView(*_map);
 }
 
 
 GameLogic::~GameLogic()
 {
-	delete _map;
+	con_deinit();
 	delete _view;
 
-	con_deinit();
+	save(Config::game_default_savefile);
+
+	delete _map;
 }
 
 
@@ -85,6 +95,9 @@ void GameLogic::run()
 		else if (!is_paused)
 		{
 			tick();
+			_view->initialize_map_view();
+			_view->render_map();
+
 			sleep(Config::game_ticking_interval);
 		}
 	}
@@ -97,17 +110,28 @@ void GameLogic::run(int n)
 	_view->render_map();
 
 	for (int i = 0; i < n; ++i)
-	{
 		tick();
-		sleep(1);
-	}
+
+	_view->initialize_map_view();
+	_view->render_map();
+	while (!con_keyPressed());
+}
+
+
+void GameLogic::save(const std::string &filename)
+{
+	std::ofstream output(filename);
+	TextView view(*_map, output);
+
+	view.initialize_map_view();
+	view.render_map();
+
+	output.close();
 }
 
 
 void GameLogic::tick()
 {
-	_view->clear_map();
-
 	PopulationMap::objects_list &objects = _map->get_objects();
 	std::vector<LifeObject::Action*> objects_actions;
 
@@ -122,7 +146,11 @@ void GameLogic::tick()
 			if (action != nullptr)
 				objects_actions.push_back(action);
 		}
-		else if (obj->get_mass() <= 0)
+		else if (obj->is_eatable())
+		{
+			obj->decrement_mass();
+		}
+		else
 		{
 			it = _map->erase_object(it);
 			--it;
@@ -135,8 +163,84 @@ void GameLogic::tick()
 		action->execute(*_map);
 		delete action;
 	}
+}
 
-	_view->render_map();
+
+void GameLogic::init_console_graphics()
+{
+	srand(time(NULL));
+
+	setenv("TERM", "xterm", 1);
+	con_init();
+	con_hideCursor();
+}
+
+
+TextReader::TextReader(const std::string &filename)
+	: _in(filename)
+{
+}
+
+
+TextReader::~TextReader()
+{
+	_in.close();
+}
+
+
+PopulationMap TextReader::read_map()
+{
+	int width;
+	int height;
+	char tmp;
+	std::stringstream ss;
+	std::string line;
+
+	_in >> width >> tmp >> height;
+	PopulationMap map(width, height);
+
+	while (getline(_in, line))
+		map.insert_object(read_object(line));
+
+	return map;
+}
+
+
+LifeObject *TextReader::read_object(const std::string &line)
+{
+	if (line.empty())
+		return nullptr;
+
+	char tmp;
+	std::stringstream ss;
+	size_t sep_pos;
+
+	LifeObject::Type type;
+	int ttl;
+	int dmg;
+	int mass;
+	Point pos;
+
+	sep_pos = line.find(Config::file_data_separator);
+	type = get_type_by_name(line.substr(0, sep_pos));
+	ss.str(line.substr(sep_pos + 1));
+
+	ss >> ttl >> tmp >> dmg >> tmp >> mass >> tmp >> pos;
+
+	switch (type)
+	{
+		case LifeObject::Type::plant:
+			return new Plant(pos, ttl, dmg, mass);
+
+		case LifeObject::Type::herbivorous:
+			return new Herbivorous(pos, ttl, dmg, mass);
+
+		case LifeObject::Type::predator:
+			return new Predator(pos, ttl, dmg, mass);
+
+		default:
+			return nullptr;
+	}
 }
 
 
