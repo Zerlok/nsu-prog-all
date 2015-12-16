@@ -1,3 +1,4 @@
+#include <iomanip>
 #include "math.h"
 #include "point.h"
 
@@ -211,7 +212,34 @@ std::ostream &operator<<(std::ostream &out, const Point &point)
 
 std::istream &operator>>(std::istream &in, Point &point)
 {
+	in >> std::noskipws;
 	char c;
-	in >> c >> point._x >> c >> c >> point._y >> c;
-	return in;
+
+	in >> c;
+	if (c != '[')
+		return in >> std::skipws;
+
+	in >> point._x;
+
+	in >> c;
+	if (c != ',')
+	{
+		point = Point::zero;
+		return in >> std::skipws;
+	}
+
+	in >> c;
+	if (c != ' ')
+	{
+		point = Point::zero;
+		return in >> std::skipws;
+	}
+
+	in >> point._y;
+
+	in >> c;
+	if (c != ']')
+		point = Point::zero;
+
+	return in >> std::skipws;
 }

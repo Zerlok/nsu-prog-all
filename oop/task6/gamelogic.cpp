@@ -37,11 +37,10 @@ GameLogic::GameLogic(const std::string &filename)
 
 GameLogic::~GameLogic()
 {
-	con_deinit();
 	delete _view;
+	con_deinit();
 
 	save(Config::game_default_savefile);
-
 	delete _map;
 }
 
@@ -89,6 +88,8 @@ void GameLogic::run()
 					break;
 				case CON_KEY_ESCAPE:
 					is_finished = true;
+					break;
+				default:
 					break;
 			}
 		}
@@ -211,9 +212,12 @@ LifeObject *TextReader::read_object(const std::string &line)
 	if (line.empty())
 		return nullptr;
 
-	char tmp;
+	size_t sep_pos = line.find(Config::file_data_separator);
+	if (sep_pos == std::string::npos)
+		return nullptr;
+
 	std::stringstream ss;
-	size_t sep_pos;
+	char tmp;
 
 	LifeObject::Type type;
 	int ttl;
@@ -221,10 +225,8 @@ LifeObject *TextReader::read_object(const std::string &line)
 	int mass;
 	Point pos;
 
-	sep_pos = line.find(Config::file_data_separator);
 	type = get_type_by_name(line.substr(0, sep_pos));
 	ss.str(line.substr(sep_pos + 1));
-
 	ss >> ttl >> tmp >> dmg >> tmp >> mass >> tmp >> pos;
 
 	switch (type)

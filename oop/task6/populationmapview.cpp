@@ -177,7 +177,7 @@ TextView::~TextView()
 
 void TextView::initialize_map_view() const
 {
-	_out << _map.get_width() << "|" << _map.get_height() << std::endl;
+	_out << _map.get_width() << Config::file_data_separator << _map.get_height() << std::endl;
 }
 
 
