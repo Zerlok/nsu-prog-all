@@ -1,7 +1,10 @@
 #include <iostream>
+#include <string>
+#include <sstream>
 using namespace std;
 
 #include "imagepng.h"
+#include "utils.h"
 
 
 int main(int argc, char *argv[])
@@ -9,17 +12,13 @@ int main(int argc, char *argv[])
 	if (argc < 2)
 		return 1;
 
-	ImagePNG img(argv[1]);
-	cout << "Opened image size: " << img.get_width() << "x" << img.get_height() << endl;
+	ImagePNG src(argv[1]);
+	cout << "Opened image size: " << src.get_width() << "x" << src.get_height() << " WxH"
+		 << " = " << src.get_width() * src.get_height() << " pixels in total"
+		 << endl;
+	cout << "End: " << src.end() << endl;
 
-	ImagePNG::row_type &row = img[0];
-
-	for (const auto row : img)
-		cout << row << endl;
-
-	ImagePNG::pixel p = img.get_pixel(0, 0);
-
-	cout << "Pixel [0][0]: " << p << endl;
-
+	ImagePNG img = pngfilters::get_grayscaled(src);
+	img.write("output.png");
 	return 0;
 }

@@ -5,7 +5,8 @@ CONFIG -= qt
 
 
 SOURCES += main.cpp \
-    imagepng.cpp
+    imagepng.cpp \
+    utils.cpp
 
 
 LIBS += -lpng
@@ -13,4 +14,5 @@ QMAKE_CFLAGS+=-lpng
 INCLUDEPATH += /usr/include/libpng12
 
 HEADERS += \
-    imagepng.h
+    imagepng.h \
+    utils.h
