@@ -4,13 +4,14 @@
 
 #include <iostream>
 #include <string>
-#include <png++/png.hpp>
+#include <png++/image.hpp>
+#include <png++/rgb_pixel.hpp>
 
 
 class ImagePNG : public png::image<png::rgb_pixel>
 {
 	public:
-		using pixel = png::rgb_pixel;
+		using pixel_t = png::rgb_pixel;
 
 		ImagePNG(const std::string &filename);
 		ImagePNG(int width, int height);
@@ -28,8 +29,10 @@ class ImagePNG : public png::image<png::rgb_pixel>
 		const_iterator cbegin() const;
 		const_iterator cend() const;
 
+		size_t get_size() const;
+
 	private:
-		using super = png::image<pixel>;
+		using super = png::image<pixel_t>;
 };
 
 class ImagePNG::iterator
@@ -44,10 +47,10 @@ class ImagePNG::iterator
 		bool operator==(const iterator &it) const;
 		bool operator!=(const iterator &it) const;
 
-		pixel operator*();
+		ImagePNG::pixel_t operator*();
 
 		iterator &operator=(const iterator &it);
-		iterator &operator=(const pixel &p);
+		iterator &operator=(const ImagePNG::pixel_t &p);
 
 		iterator &operator++();
 		iterator operator++(int);
@@ -78,7 +81,7 @@ class ImagePNG::const_iterator
 		bool operator==(const const_iterator &it) const;
 		bool operator!=(const const_iterator &it) const;
 
-		const pixel operator*() const;
+		const ImagePNG::pixel_t operator*() const;
 
 		const_iterator &operator=(const const_iterator &it);
 

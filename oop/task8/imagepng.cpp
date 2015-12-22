@@ -18,7 +18,7 @@ ImagePNG::ImagePNG(const ImagePNG &img)
 	: super(img.get_width(), img.get_height())
 {
 	this->m_info = img.m_info;
-	this->m_pixbuf = img.m_pibuf;
+	this->m_pixbuf = img.m_pixbuf;
 
 	std::cout << "Image Copy-constructor." << std::endl;
 }
@@ -75,6 +75,12 @@ ImagePNG::const_iterator ImagePNG::cend() const
 }
 
 
+size_t ImagePNG::get_size() const
+{
+	return (get_width() * get_height());
+}
+
+
 ImagePNG::iterator::iterator()
 	: _num(0),
 	  _container(nullptr)
@@ -120,7 +126,7 @@ bool ImagePNG::iterator::operator!=(const ImagePNG::iterator &it) const
 }
 
 
-ImagePNG::pixel ImagePNG::iterator::operator*()
+ImagePNG::pixel_t ImagePNG::iterator::operator*()
 {
 	return _container->get_pixel(get_x(), get_y());
 }
@@ -135,7 +141,7 @@ ImagePNG::iterator &ImagePNG::iterator::operator=(const ImagePNG::iterator &it)
 }
 
 
-ImagePNG::iterator &ImagePNG::iterator::operator=(const ImagePNG::pixel &p)
+ImagePNG::iterator &ImagePNG::iterator::operator=(const ImagePNG::pixel_t &p)
 {
 	_container->set_pixel(get_x(), get_y(), p);
 	return (*this);
@@ -251,7 +257,7 @@ bool ImagePNG::const_iterator::operator!=(const ImagePNG::const_iterator &it) co
 }
 
 
-const ImagePNG::pixel ImagePNG::const_iterator::operator*() const
+const ImagePNG::pixel_t ImagePNG::const_iterator::operator*() const
 {
 	return _container->get_pixel(get_x(), get_y());
 }

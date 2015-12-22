@@ -14,11 +14,11 @@ int main(int argc, char *argv[])
 
 	ImagePNG src(argv[1]);
 	cout << "Opened image size: " << src.get_width() << "x" << src.get_height() << " WxH"
-		 << " = " << src.get_width() * src.get_height() << " pixels in total"
+		 << " = " << src.get_size() << " pixels in total" << endl
+		 << "End: " << src.end()
 		 << endl;
-	cout << "End: " << src.end() << endl;
 
-	ImagePNG img = pngfilters::get_grayscaled(src);
+	ImagePNG img = pngfilters::build_histogram_image(src);
 	img.write("output.png");
 	return 0;
 }
