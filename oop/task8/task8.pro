@@ -8,11 +8,10 @@ SOURCES += main.cpp \
     imagepng.cpp \
     utils.cpp
 
-
-LIBS += -lpng
-QMAKE_CFLAGS+=-lpng
-INCLUDEPATH += /usr/include/libpng12
-
 HEADERS += \
     imagepng.h \
     utils.h
+
+LIBS += -lpng
+QMAKE_CFLAGS +=-lpng
+INCLUDEPATH += /usr/include/libpng12

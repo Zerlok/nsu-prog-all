@@ -14,11 +14,23 @@ ImagePNG::ImagePNG(int width, int height)
 }
 
 
+ImagePNG::ImagePNG(const ImagePNG &img)
+	: super(img.get_width(), img.get_height())
+{
+	this->m_info = img.m_info;
+	this->m_pixbuf = img.m_pibuf;
+
+	std::cout << "Image Copy-constructor." << std::endl;
+}
+
+
 ImagePNG::ImagePNG(const ImagePNG &&img)
 	: super(img.get_width(), img.get_height())
 {
 	this->m_info = std::move(img.m_info);
 	this->m_pixbuf = std::move(img.m_pixbuf);
+
+	std::cout << "Image Move-constructor." << std::endl;
 }
 
 
@@ -182,6 +194,18 @@ size_t ImagePNG::iterator::get_num() const
 }
 
 
+ImagePNG &ImagePNG::iterator::get_container()
+{
+	return (*_container);
+}
+
+
+const ImagePNG &ImagePNG::iterator::get_container() const
+{
+	return (*_container);
+}
+
+
 ImagePNG::const_iterator::const_iterator()
 	: _num(0),
 	  _container(nullptr)
@@ -291,6 +315,12 @@ int ImagePNG::const_iterator::get_y() const
 size_t ImagePNG::const_iterator::get_num() const
 {
 	return _num;
+}
+
+
+const ImagePNG &ImagePNG::const_iterator::get_container() const
+{
+	return (*_container);
 }
 
 

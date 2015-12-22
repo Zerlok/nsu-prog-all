@@ -6,6 +6,8 @@
 CCPP="g++"
 CCPP_FLAGS="-std=c++11"
 CCPP_LIBS=()
+CCPP_INCLUDES=()
+GTEST_FLAGS="-lgtest -lpthread"
 VERBOSE=false
 DO_COMPILATION=true
 
@@ -123,7 +125,7 @@ function parse_input_arguments()
 	then
 		echo "${PRO_PATH} does not exists or is not a file!"
 		exit 1
-	elif [[ "${PRO_PATH}" != *".pro" ]]
+	elif [[ $PRO_PATH != *".pro" ]]
 	then
 		echo "${PRO_PATH} is not a .pro file!"
 		exit 1
@@ -142,18 +144,23 @@ function parse_pro_file()
 {
 	while read line
 	do
-		if [[ $line == "SOURCES += "* ]]
+		if [[ $line == "SOURCES"* ]]
 		then
-		    linesources=(${line##*+= })
+		    linesources=(${line##*= })
 			for src in ${linesources[@]}
 			do
 				sources+=("$SOURCES_DIR/$src")
 			done
 		fi
 
-		if [[ $line == "LIBS += "* ]]
+		if [[ $line == "LIBS"* ]]
 		then
-		    CCPP_LIBS+=(${line##*+= })
+			CCPP_LIBS+=(${line##*= })
+		fi
+
+		if [[ $line == "INCLUDEPATH"* ]]
+		then
+			CCPP_INCLUDES+=(${line##*= })
 		fi
 	done < "$1"
 }
@@ -186,11 +193,25 @@ function compile_main()
 		name="main-${TASK}"
 	fi
 
-	echo "${CCPP} ${CCPP_FLAGS} ${sources[@]} -o ${TARGET_DIR}/${name} ${CCPP_LIBS[@]}"
+	exec_line="${CCPP} ${CCPP_FLAGS}"
+
+	if [[ ! -z ${CCPP_INCLUDES} ]]
+	then
+		exec_line="${exec_line} -I${CCPP_INCLUDES[@]}"
+	fi
+
+	exec_line="${exec_line} ${sources[@]} -o ${TARGET_DIR}/${name}"
+
+	if [[ ! -z ${CCPP_LIBS} ]]
+	then
+		exec_line="${exec_line} ${CCPP_LIBS[@]}"
+	fi
+
+	echo $exec_line
 
 	if $DO_COMPILATION
 	then
-		${CCPP} ${CCPP_FLAGS} ${sources[@]} -o ${TARGET_DIR}/${name} ${CCPP_LIBS[@]}
+		$exec_line
 	fi
 }
 
@@ -217,11 +238,25 @@ function compile_gtest()
 		name="gtest-${name}"
 	fi
 
-	echo "${CCPP} ${CCPP_FLAGS} ${gsources[@]} -o ${TARGET_DIR}/${name} ${CCPP_LIBS[@]} -lgtest -lpthread"
+	exec_line="${CCPP} ${CCPP_FLAGS} ${gsources[@]} -o ${TARGET_DIR}/${name}"
+
+	if [[ ! -z ${CCPP_LIBS} ]]
+	then
+		exec_line="${exec_line} ${CCPP_LIBS[@]}"
+	fi
+
+	if [[ ! -z ${CCPP_INCLUDES} ]]
+	then
+		exec_line="${exec_line} -I${CCPP_INCLUDES[@]}"
+	fi
+
+	exec_line="${exec_line} ${GTEST_FLAGS}"
+
+	echo $exec_line
 
 	if $DO_COMPILATION
 	then
-		${CCPP} ${CCPP_FLAGS} ${gsources[@]} -o ${TARGET_DIR}/${name} ${CCPP_LIBS[@]} -lgtest -lpthread
+		${exec_line}
 	fi
 }
 
@@ -235,8 +270,9 @@ function main()
 
 	if $VERBOSE
 	then
-		echo "Sources: ${sources[@]}"
-		echo "Libs:    ${CCPP_LIBS[@]}"
+		echo "Sources:   ${sources[@]}"
+		echo "Libs:      ${CCPP_LIBS[@]}"
+		echo "Includes:  ${CCPP_INCLUDES[@]}"
 	fi
 
 	if $GTEST_ENABLED

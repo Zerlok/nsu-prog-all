@@ -12,17 +12,17 @@ class ImagePNG : public png::image<png::rgb_pixel>
 	public:
 		using pixel = png::rgb_pixel;
 
-		class iterator;
-		class const_iterator;
-
 		ImagePNG(const std::string &filename);
 		ImagePNG(int width, int height);
-//		ImagePNG(const ImagePNG &img);
+		ImagePNG(const ImagePNG &img);
 		ImagePNG(const ImagePNG &&img);
 		~ImagePNG();
 
+		class iterator;
 		iterator begin();
 		iterator end();
+
+		class const_iterator;
 		const_iterator begin() const;
 		const_iterator end() const;
 		const_iterator cbegin() const;
@@ -58,11 +58,14 @@ class ImagePNG::iterator
 		int get_x() const;
 		int get_y() const;
 		size_t get_num() const;
+		ImagePNG &get_container();
+		const ImagePNG &get_container() const;
 
 	private:
 		size_t _num;
 		ImagePNG *_container;
 };
+
 class ImagePNG::const_iterator
 {
 	public:
@@ -88,6 +91,7 @@ class ImagePNG::const_iterator
 		int get_x() const;
 		int get_y() const;
 		size_t get_num() const;
+		const ImagePNG &get_container() const;
 
 	private:
 		size_t _num;
