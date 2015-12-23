@@ -58,6 +58,7 @@ class ImagePNG::iterator
 		iterator &operator--();
 		iterator operator--(int);
 
+		bool is_valid() const;
 		int get_x() const;
 		int get_y() const;
 		size_t get_num() const;
@@ -91,6 +92,7 @@ class ImagePNG::const_iterator
 		const_iterator &operator--();
 		const_iterator operator--(int);
 
+		bool is_valid() const;
 		int get_x() const;
 		int get_y() const;
 		size_t get_num() const;

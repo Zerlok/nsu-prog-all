@@ -33,8 +33,9 @@ namespace pngutils
 
 namespace pngfilters
 {
-	ImagePNG build_grayscale_image(const ImagePNG &img);
-	ImagePNG build_histogram_image(const ImagePNG &img);
+	ImagePNG build_image_histogram(const ImagePNG &img);
+	ImagePNG build_grayscaled_image(const ImagePNG &img);
+	ImagePNG build_rotated_image(const ImagePNG &img, const int x0, const int y0, const int angle);
 }
 
 

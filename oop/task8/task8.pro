@@ -6,11 +6,13 @@ CONFIG -= qt
 
 SOURCES += main.cpp \
     imagepng.cpp \
-    utils.cpp
+    utils.cpp \
+    affinetransformation.cpp
 
 HEADERS += \
     imagepng.h \
-    utils.h
+    utils.h \
+    affinetransformation.h
 
 LIBS += -lpng
 QMAKE_CFLAGS +=-lpng

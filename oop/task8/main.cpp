@@ -9,7 +9,7 @@ using namespace std;
 
 int main(int argc, char *argv[])
 {
-	if (argc < 2)
+	if (argc < 3)
 		return 1;
 
 	ImagePNG src(argv[1]);
@@ -18,7 +18,7 @@ int main(int argc, char *argv[])
 		 << "End: " << src.end()
 		 << endl;
 
-	ImagePNG img = pngfilters::build_histogram_image(src);
+	ImagePNG img = pngfilters::build_rotated_image(src, src.get_width()/2, src.get_height()/2, stoi(argv[2]));
 	img.write("output.png");
 	return 0;
 }

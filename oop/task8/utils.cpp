@@ -1,6 +1,8 @@
 #include <iostream>
 #include <vector>
 #include <png++/palette.hpp>
+#include <math.h>
+
 #include "utils.h"
 
 
@@ -8,6 +10,13 @@ template<typename T>
 T count_percent(const T &a, const T &b)
 {
 	return ((a * 100) / b);
+}
+
+
+double get_radians(const int deg)
+{
+	static const double radian = M_PI / 180;
+	return (deg * radian);
 }
 
 
@@ -25,7 +34,7 @@ int pngutils::count_average(const ImagePNG::pixel_t &p)
 }
 
 
-ImagePNG pngfilters::build_grayscale_image(const ImagePNG &img)
+ImagePNG pngfilters::build_grayscaled_image(const ImagePNG &img)
 {
 	ImagePNG graysclaed(img.get_width(), img.get_height());
 
@@ -67,7 +76,7 @@ std::vector<int> pngutils::get_histogram(const ImagePNG &img)
 }
 
 
-ImagePNG pngfilters::build_histogram_image(const ImagePNG &img)
+ImagePNG pngfilters::build_image_histogram(const ImagePNG &img)
 {
 	ImagePNG histogram_img(pngconsts::palette_size, pngconsts::histogram_height);
 	std::vector<int> histogram = pngutils::get_histogram(img);
@@ -79,4 +88,36 @@ ImagePNG pngfilters::build_histogram_image(const ImagePNG &img)
 			histogram_img.set_pixel(x, y, pngconsts::white_pixel);
 
 	return histogram_img;
+}
+
+
+ImagePNG pngfilters::build_rotated_image(
+		const ImagePNG &img,
+		const int x0,
+		const int y0,
+		const int angle)
+{
+	const double alpha = get_radians(angle);
+	const double sin_a = roundl(sin(alpha) * 1000.0) / 1000.0;
+	const double cos_a = roundl(cos(alpha) * 1000.0) / 1000.0;
+
+	size_t width = img.get_width();
+	size_t height = img.get_height();
+	ImagePNG rotated_img(width, height);
+
+	for (ImagePNG::const_iterator pit = img.cbegin();
+		 pit != img.cend();
+		 ++pit)
+	{
+		const int dx = pit.get_x() - x0;
+		const int dy = pit.get_y() - y0;
+		const int x = (cos_a * dx - sin_a * dy) + x0;
+		const int y = (sin_a * dx + cos_a * dy) + y0;
+
+		ImagePNG::iterator it(x, y, &rotated_img);
+		if (it.is_valid())
+			it = (*pit);
+	}
+
+	return rotated_img;
 }

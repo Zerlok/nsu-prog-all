@@ -180,6 +180,18 @@ ImagePNG::iterator ImagePNG::iterator::operator--(int)
 }
 
 
+bool ImagePNG::iterator::is_valid() const
+{
+	int x = get_x();
+	int y = get_y();
+
+	return ((x >= 0)
+			&& (y >= 0)
+			&& (x < int(_container->get_width()))
+			&& (y < int(_container->get_height())));
+}
+
+
 int ImagePNG::iterator::get_x() const
 {
 	// Returns column's num.
@@ -301,6 +313,13 @@ ImagePNG::const_iterator ImagePNG::const_iterator::operator--(int)
 	this->operator--();
 
 	return it;
+}
+
+
+bool ImagePNG::const_iterator::is_valid() const
+{
+	return ((get_x() < int(_container->get_width()))
+			&& (get_y() < int(_container->get_height())));
 }
 
 
