@@ -1,8 +1,8 @@
 #include <iostream>
 #include <vector>
 #include <png++/palette.hpp>
-#include <math.h>
 
+#include "affinetransformation.h"
 #include "utils.h"
 
 
@@ -10,13 +10,6 @@ template<typename T>
 T count_percent(const T &a, const T &b)
 {
 	return ((a * 100) / b);
-}
-
-
-double get_radians(const int deg)
-{
-	static const double radian = M_PI / 180;
-	return (deg * radian);
 }
 
 
@@ -97,22 +90,20 @@ ImagePNG pngfilters::build_rotated_image(
 		const int y0,
 		const int angle)
 {
-	const double alpha = get_radians(angle);
-	const double sin_a = roundl(sin(alpha) * 1000.0) / 1000.0;
-	const double cos_a = roundl(cos(alpha) * 1000.0) / 1000.0;
-
 	size_t width = img.get_width();
 	size_t height = img.get_height();
 	ImagePNG rotated_img(width, height);
+
+	RotationTransformation rot(angle);
+	rot += TranslationTransformation(x0, y0);
 
 	for (ImagePNG::const_iterator pit = img.cbegin();
 		 pit != img.cend();
 		 ++pit)
 	{
-		const int dx = pit.get_x() - x0;
-		const int dy = pit.get_y() - y0;
-		const int x = (cos_a * dx - sin_a * dy) + x0;
-		const int y = (sin_a * dx + cos_a * dy) + y0;
+		double x = pit.get_x() - x0;
+		double y = pit.get_y() - y0;
+		rot.transform(x, y);
 
 		ImagePNG::iterator it(x, y, &rotated_img);
 		if (it.is_valid())
