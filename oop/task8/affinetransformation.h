@@ -22,6 +22,12 @@ class AffineTransformation
 
 		// Methods.
 		void transform(double &x, double &y) const;
+		void transform(double &x, const double &y) const;
+		void transform(const double &x, double &y) const;
+
+		void transform(int &x, int &y) const;
+		void transform(int &x, const int &y) const;
+		void transform(const int &x, int &y) const;
 
 		// Operators.
 		AffineTransformation &operator=(const AffineTransformation &tr);

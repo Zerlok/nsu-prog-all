@@ -20,5 +20,6 @@ int main(int argc, char *argv[])
 
 	ImagePNG img = pngfilters::build_rotated_image(src, src.get_width()/2, src.get_height()/2, stoi(argv[2]));
 	img.write("output.png");
+
 	return 0;
 }

@@ -7,12 +7,17 @@ CONFIG -= qt
 SOURCES += main.cpp \
     imagepng.cpp \
     utils.cpp \
-    affinetransformation.cpp
+	affinetransformation.cpp
+
 
 HEADERS += \
     imagepng.h \
     utils.h \
     affinetransformation.h
+
+
+OTHER_FILES += gtest.cpp
+
 
 LIBS += -lpng
 QMAKE_CFLAGS +=-lpng

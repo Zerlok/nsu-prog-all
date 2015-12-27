@@ -90,13 +90,30 @@ ImagePNG pngfilters::build_rotated_image(
 		const int y0,
 		const int angle)
 {
-	size_t width = img.get_width();
-	size_t height = img.get_height();
-	ImagePNG rotated_img(width, height);
-
+	// Create affine transformation matrix.
 	RotationTransformation rot(angle);
 	rot += TranslationTransformation(x0, y0);
 
+	const size_t width = img.get_width();
+	const size_t height = img.get_height();
+
+	// Count image size.
+	double a = -y0;
+	double c = -x0;
+	double b = width - x0;
+	double d = height - y0;
+
+	rot.transform(-x0, a);
+	rot.transform(c, -y0);
+	rot.transform(b, height - y0);
+	rot.transform(width - x0, d);
+	const double dx = (b - a) / 2;
+	const double dy = (d - c) / 2;
+
+	rot += TranslationTransformation(dx / 2, dy / 2);
+	ImagePNG rotated_img(dx + width, dy + height);
+
+	// Do affine transformation for each pixel;
 	for (ImagePNG::const_iterator pit = img.cbegin();
 		 pit != img.cend();
 		 ++pit)

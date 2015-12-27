@@ -44,6 +44,40 @@ void AffineTransformation::transform(double &x, double &y) const
 }
 
 
+void AffineTransformation::transform(double &x, const double &y) const
+{
+	x = (_a00 * x + _a01 * y) + _b0;
+}
+
+
+void AffineTransformation::transform(const double &x, double &y) const
+{
+	y = (_a10 * x + _a11 * y) + _b1;
+}
+
+
+void AffineTransformation::transform(int &x, int &y) const
+{
+	const int transformed_x = (_a00 * x + _a01 * y) + _b0;
+	const int transformed_y = (_a10 * x + _a11 * y) + _b1;
+
+	x = transformed_x;
+	y = transformed_y;
+}
+
+
+void AffineTransformation::transform(int &x, const int &y) const
+{
+	x = (_a00 * x + _a01 * y) + _b0;
+}
+
+
+void AffineTransformation::transform(const int &x, int &y) const
+{
+	y = (_a10 * x + _a11 * y) + _b1;
+}
+
+
 AffineTransformation &AffineTransformation::operator=(const AffineTransformation &tr)
 {
 	_a00 = tr._a00;
