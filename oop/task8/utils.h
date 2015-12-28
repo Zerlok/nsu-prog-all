@@ -6,6 +6,11 @@
 #include "imagepng.h"
 
 
+using HistogramBin = std::pair<int, int>;
+using Histogram = std::vector<HistogramBin>;
+//using
+
+
 namespace pngconsts
 {
 	static const float red_color_brightness_ratio = 0.30;
@@ -26,17 +31,21 @@ namespace pngconsts
 
 namespace pngutils
 {
-	short count_brightness(const ImagePNG::pixel_t &pixel);
+	short count_intensity(const ImagePNG::pixel_t &pixel);
 	int count_average_color(const ImagePNG::pixel_t &p);
-	std::vector<int> get_histogram(const ImagePNG &img);
+	Histogram get_histogram(const ImagePNG &img);
+	Histogram differentiate_histogram(const Histogram &histogram);
+	size_t count_intensity_leaps(const ImagePNG::const_iterator &it, const int degrees);
 }
 
 
 namespace pngfilters
 {
-	ImagePNG build_image_histogram(const ImagePNG &img);
+	ImagePNG build_histogram(const Histogram &histogram);
 	ImagePNG build_grayscaled_image(const ImagePNG &img);
+	ImagePNG build_thresholded_image(const ImagePNG &img, const double threshold);
 	ImagePNG build_rotated_image(const ImagePNG &img, const int x0, const int y0, const int angle);
+	ImagePNG build_normalized_image(const ImagePNG &img);
 }
 
 

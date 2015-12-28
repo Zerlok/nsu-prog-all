@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 
 #include "affinetransformation.h"
+#include "imagepng.h"
 
 
 TEST(AffineTransformation, Translation)
@@ -73,6 +74,53 @@ TEST(AffineTransformation, Complex)
 	aff.transform(x, y);
 	EXPECT_EQ(0, x);
 	EXPECT_EQ(0, y);
+}
+
+
+TEST(ImageIterator, Initialization)
+{
+	ImagePNG img(20, 10);
+
+	ImagePNG::iterator b = img.begin();
+	EXPECT_EQ(0, b.get_num()) << b;
+	EXPECT_EQ(0, b.get_x()) << b;
+	EXPECT_EQ(0, b.get_y()) << b;
+
+	ImagePNG::iterator e = img.end();
+	EXPECT_EQ(img.get_width() * img.get_height(), e.get_num()) << e;
+	EXPECT_EQ(0, e.get_x()) << e;
+	EXPECT_EQ(img.get_height(), e.get_y()) << e;
+
+	ImagePNG::iterator it = ImagePNG::iterator(20, 5, &img);
+	EXPECT_EQ(120, it.get_num()) << it;
+	EXPECT_EQ(0, it.get_x());
+	EXPECT_EQ(6, it.get_y());
+}
+
+
+TEST(ImageIterator, Increment)
+{
+	ImagePNG img(20, 10);
+
+	ImagePNG::iterator b = img.begin();
+	++b;
+	EXPECT_EQ(1, b.get_num());
+	EXPECT_EQ(1, b.get_x());
+	EXPECT_EQ(0, b.get_y());
+
+	ImagePNG::iterator e = img.end();
+	--e;
+	EXPECT_EQ(img.get_width() * img.get_height() - 1, e.get_num());
+	EXPECT_EQ(img.get_width() - 1, e.get_x());
+	EXPECT_EQ(img.get_height() - 1, e.get_y());
+
+	ImagePNG::iterator it = ImagePNG::iterator(19, 5, &img);
+	++it;
+	EXPECT_EQ(0, it.get_x());
+	EXPECT_EQ(6, it.get_y());
+	--it;
+	EXPECT_EQ(19, it.get_x());
+	EXPECT_EQ(5, it.get_y());
 }
 
 

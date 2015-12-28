@@ -13,7 +13,7 @@ T count_percent(const T &a, const T &b)
 }
 
 
-short pngutils::count_brightness(const ImagePNG::pixel_t &pixel)
+short pngutils::count_intensity(const ImagePNG::pixel_t &pixel)
 {
 	return (pngconsts::red_color_brightness_ratio * pixel.red
 			+ pngconsts::green_color_brightness_ratio * pixel.green
@@ -47,40 +47,108 @@ ImagePNG pngfilters::build_grayscaled_image(const ImagePNG &img)
 }
 
 
-std::vector<int> pngutils::get_histogram(const ImagePNG &img)
+Histogram pngutils::get_histogram(const ImagePNG &img)
 {
 	std::vector<size_t> bins = std::vector<size_t>(pngconsts::palette_size, 0);
-	std::vector<int> histogram;
+	Histogram histogram;
 	size_t max = 0;
 
 	for (const ImagePNG::pixel_t pixel : img)
 	{
-		size_t i = pngutils::count_brightness(pixel);
+		size_t i = pngutils::count_intensity(pixel);
 		++bins[i];
 
 		if (bins[i] > max)
 			max = bins[i];
 	}
 
-	for (const size_t bin : bins)
-		histogram.push_back(count_percent(bin, max));
+	for (size_t i = 0; i < bins.size(); ++i)
+		histogram.push_back({count_percent(bins[i], max), i});
 
 	return histogram;
 }
 
 
-ImagePNG pngfilters::build_image_histogram(const ImagePNG &img)
+Histogram pngutils::differentiate_histogram(const Histogram &histogram)
 {
-	ImagePNG histogram_img(pngconsts::palette_size, pngconsts::histogram_height);
-	std::vector<int> histogram = pngutils::get_histogram(img);
+	Histogram differentiated;
+	HistogramBin max = {0, 0};
 
-	for (size_t x = 0; x < histogram.size(); ++x)
+	for (size_t i = 1; i < histogram.size(); ++i)
+	{
+		HistogramBin bin = {(histogram[i].first - histogram[i-1].first), i-1};
+		differentiated.push_back(bin);
+
+		if (bin > max)
+			max = bin;
+	}
+
+	for (HistogramBin &bin : differentiated)
+		bin.first = count_percent(bin.first, max.first);
+
+	return differentiated;
+}
+
+
+size_t pngutils::count_intensity_leaps(const ImagePNG::const_iterator &it, const int degrees)
+{
+	static const int intensity_threshold = pngconsts::palette_size / 2;
+
+	const ImagePNG::const_iterator last_pixel = it.get_container().cend();
+	ImagePNG::const_iterator current_pixel = it;
+	ImagePNG::const_iterator next_pixel = it;
+	++next_pixel;
+
+	size_t leaps_counter = 0;
+	while (next_pixel != last_pixel)
+	{
+		bool current_intensity = (count_intensity(*current_pixel) > intensity_threshold);
+		bool next_intensity = (count_intensity(*next_pixel) > intensity_threshold);
+
+		if (!(current_intensity == next_intensity))
+			++leaps_counter;
+
+		++current_pixel;
+		++next_pixel;
+	}
+
+	return leaps_counter;
+}
+
+
+ImagePNG pngfilters::build_histogram(const Histogram &histogram)
+{
+	ImagePNG histogram_img(histogram.size(), pngconsts::histogram_height);
+
+	for (const HistogramBin &bin : histogram)
 		for (int y = (pngconsts::histogram_height - 1);
-			 y >= int(pngconsts::histogram_height - histogram[x]);
+			 y >= int(pngconsts::histogram_height - bin.first);
 			 --y)
-			histogram_img.set_pixel(x, y, pngconsts::white_pixel);
+			histogram_img.set_pixel(bin.second, y, pngconsts::white_pixel);
 
 	return histogram_img;
+}
+
+
+ImagePNG pngfilters::build_thresholded_image(const ImagePNG &img, const double threshold)
+{
+	ImagePNG thresholded_img(img.get_width(), img.get_height());
+
+	for (ImagePNG::const_iterator it = img.cbegin();
+		 it != img.cend();
+		 ++it)
+	{
+		thresholded_img.set_pixel(
+				it.get_x(),
+				it.get_y(),
+				(((pngutils::count_intensity(*it) / 255.0) > threshold)
+					? pngconsts::white_pixel
+					: pngconsts::black_pixel
+				)
+		);
+	}
+
+	return thresholded_img;
 }
 
 
@@ -91,17 +159,22 @@ ImagePNG pngfilters::build_rotated_image(
 		const int angle)
 {
 	ImagePNG rotated_img(img.get_width(), img.get_height());
-	RotationTransformation back_rot = RotationTransformation(-angle);
-	back_rot += TranslationTransformation(x0, y0);
+
+	// Create affine transformation.
+	RotationTransformation rotated_coordinates = RotationTransformation(-angle);
+	rotated_coordinates += TranslationTransformation(x0, y0);
+	TranslationTransformation local_coordinates(-x0, -y0);
 
 	// Do affine transformation for each pixel;
 	for (ImagePNG::iterator pit = rotated_img.begin();
 		 pit != rotated_img.end();
 		 ++pit)
 	{
-		double x = pit.get_x() - x0;
-		double y = pit.get_y() - y0;
-		back_rot.transform(x, y);
+		double x = pit.get_x();
+		double y = pit.get_y();
+
+		local_coordinates.transform(x, y);
+		rotated_coordinates.transform(x, y);
 
 		ImagePNG::const_iterator it(x, y, &img);
 		if (it.is_valid())
