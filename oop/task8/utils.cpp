@@ -1,4 +1,5 @@
 #include <iostream>
+#include <algorithm>
 #include <vector>
 #include <png++/palette.hpp>
 
@@ -13,7 +14,7 @@ T count_percent(const T &a, const T &b)
 }
 
 
-short pngutils::count_intensity(const ImagePNG::pixel_t &pixel)
+short pngutils::count_pixel_intensity(const ImagePNG::pixel_t &pixel)
 {
 	return (pngconsts::red_color_brightness_ratio * pixel.red
 			+ pngconsts::green_color_brightness_ratio * pixel.green
@@ -21,29 +22,9 @@ short pngutils::count_intensity(const ImagePNG::pixel_t &pixel)
 }
 
 
-int pngutils::count_average_color(const ImagePNG::pixel_t &p)
+int pngutils::count_pixel_average_color(const ImagePNG::pixel_t &p)
 {
 	return (p.red + p.green + p.blue) / 3;
-}
-
-
-ImagePNG pngfilters::build_grayscaled_image(const ImagePNG &img)
-{
-	ImagePNG graysclaed(img.get_width(), img.get_height());
-
-	for (ImagePNG::const_iterator pit = img.cbegin();
-		 pit != img.cend();
-		 ++pit)
-	{
-		int average = pngutils::count_average_color(*pit);
-		graysclaed.set_pixel(
-				pit.get_x(),
-				pit.get_y(),
-				ImagePNG::pixel_t(average, average, average)
-		);
-	}
-
-	return graysclaed;
 }
 
 
@@ -55,7 +36,7 @@ Histogram pngutils::get_histogram(const ImagePNG &img)
 
 	for (const ImagePNG::pixel_t pixel : img)
 	{
-		size_t i = pngutils::count_intensity(pixel);
+		size_t i = pngutils::count_pixel_intensity(pixel);
 		++bins[i];
 
 		if (bins[i] > max)
@@ -90,29 +71,160 @@ Histogram pngutils::differentiate_histogram(const Histogram &histogram)
 }
 
 
-size_t pngutils::count_intensity_leaps(const ImagePNG::const_iterator &it, const int degrees)
+size_t pngutils::count_intensity_leaps_in_rows(const ImagePNG &img, const int degrees)
 {
 	static const int intensity_threshold = pngconsts::palette_size / 2;
-
-	const ImagePNG::const_iterator last_pixel = it.get_container().cend();
-	ImagePNG::const_iterator current_pixel = it;
-	ImagePNG::const_iterator next_pixel = it;
-	++next_pixel;
-
 	size_t leaps_counter = 0;
-	while (next_pixel != last_pixel)
+
+	const size_t width = img.get_width();
+	const size_t height = img.get_height();
+	double dx = 1.0;
+	double dy = 0.0;
+	RotationTransformation(degrees).transform(dx, dy);
+
+	double curr_x;
+	double curr_y;
+	double next_x;
+	double next_y;
+
+	// Rows from top edge.
+	for (size_t row_begin_x = width - 1; int(row_begin_x) >= 0; --row_begin_x)
 	{
-		bool current_intensity = (count_intensity(*current_pixel) > intensity_threshold);
-		bool next_intensity = (count_intensity(*next_pixel) > intensity_threshold);
+		curr_x = row_begin_x;
+		curr_y = 0.0;
+		next_x = curr_x + dx;
+		next_y = curr_y + dy;
 
-		if (!(current_intensity == next_intensity))
-			++leaps_counter;
+		while ((int(curr_x) >= 0)
+			   && (int(curr_y) >= 0)
+			   && (int(next_x) >= 0)
+			   && (int(next_y) >= 0)
+			   && (int(curr_x) < int(width))
+			   && (int(curr_y) < int(height))
+			   && (int(next_x) < int(width))
+			   && (int(next_y) < int(height)))
+		{
+			bool current_intensity = (count_pixel_intensity(img.get_pixel(curr_x, curr_y)) > intensity_threshold);
+			bool next_intensity = (count_pixel_intensity(img.get_pixel(next_x, next_y)) > intensity_threshold);
 
-		++current_pixel;
-		++next_pixel;
+			if (!(current_intensity == next_intensity))
+				++leaps_counter;
+
+			curr_x = next_x;
+			curr_y = next_y;
+			next_x += dx;
+			next_y += dy;
+		}
+	}
+
+	// Rows from left edge.
+	for (size_t row_begin_y = 0; row_begin_y <= height; ++row_begin_y)
+	{
+		curr_x = 0.0;
+		curr_y = row_begin_y;
+		next_x = curr_x + dx;
+		next_y = curr_y + dy;
+
+		while ((int(curr_x) >= 0)
+			   && (int(curr_y) >= 0)
+			   && (int(next_x) >= 0)
+			   && (int(next_y) >= 0)
+			   && (int(curr_x) < int(width))
+			   && (int(curr_y) < int(height))
+			   && (int(next_x) < int(width))
+			   && (int(next_y) < int(height)))
+		{
+			bool current_intensity = (count_pixel_intensity(img.get_pixel(curr_x, curr_y)) > intensity_threshold);
+			bool next_intensity = (count_pixel_intensity(img.get_pixel(next_x, next_y)) > intensity_threshold);
+
+			if (!(current_intensity == next_intensity))
+				++leaps_counter;
+
+			curr_x = next_x;
+			curr_y = next_y;
+			next_x += dx;
+			next_y += dy;
+		}
+	}
+
+	// Rows from bottom edge.
+	for (size_t row_begin_x = 0; row_begin_x < width; ++row_begin_x)
+	{
+		curr_x = row_begin_x;
+		curr_y = height;
+		next_x = curr_x + dx;
+		next_y = curr_y + dy;
+
+		while ((int(curr_x) >= 0)
+			   && (int(curr_y) >= 0)
+			   && (int(next_x) >= 0)
+			   && (int(next_y) >= 0)
+			   && (int(curr_x) < int(width))
+			   && (int(curr_y) < int(height))
+			   && (int(next_x) < int(width))
+			   && (int(next_y) < int(height)))
+		{
+			bool current_intensity = (count_pixel_intensity(img.get_pixel(curr_x, curr_y)) > intensity_threshold);
+			bool next_intensity = (count_pixel_intensity(img.get_pixel(next_x, next_y)) > intensity_threshold);
+
+			if (!(current_intensity == next_intensity))
+				++leaps_counter;
+
+			curr_x = next_x;
+			curr_y = next_y;
+			next_x += dx;
+			next_y += dy;
+		}
 	}
 
 	return leaps_counter;
+}
+
+
+int pngutils::get_angle_of_horizontal(const ImagePNG &img, const int degrees_step)
+{
+	ImagePNG grayscaled_img = pngfilters::build_grayscaled_image(img);
+	Histogram histogram = pngutils::get_histogram(grayscaled_img);
+	pngfilters::build_histogram(histogram).write("histogram.out.png");
+
+	Histogram diff_histogram = pngutils::differentiate_histogram(histogram);
+	sort(diff_histogram.begin(), diff_histogram.end());
+
+	ImagePNG bin_img = pngfilters::build_thresholded_image(
+			grayscaled_img,
+			double(diff_histogram.back().second) / pngconsts::palette_size
+	);
+	bin_img.write("binary.out.png");
+
+	std::vector<std::pair<size_t, int> > leaps;
+	for (int alpha = -90; alpha <= 90; alpha += degrees_step)
+	{
+		leaps.push_back({pngutils::count_intensity_leaps_in_rows(bin_img, alpha), alpha});
+		std::cout << "Angle: " << leaps.back().second << " degrees, " << leaps.back().first << " leaps." << std::endl;
+	}
+
+	std::sort(leaps.begin(), leaps.end());
+	return leaps.back().second;
+}
+
+
+ImagePNG pngfilters::build_grayscaled_image(const ImagePNG &img)
+{
+	ImagePNG graysclaed(img.get_width(), img.get_height());
+
+	for (ImagePNG::const_iterator pit = img.cbegin();
+		 pit != img.cend();
+		 ++pit)
+	{
+		int average = pngutils::count_pixel_average_color(*pit);
+		graysclaed.set_pixel(
+				pit.get_x(),
+				pit.get_y(),
+				ImagePNG::pixel_t(average, average, average)
+		);
+	}
+
+	return graysclaed;
 }
 
 
@@ -141,7 +253,7 @@ ImagePNG pngfilters::build_thresholded_image(const ImagePNG &img, const double t
 		thresholded_img.set_pixel(
 				it.get_x(),
 				it.get_y(),
-				(((pngutils::count_intensity(*it) / 255.0) > threshold)
+				(((pngutils::count_pixel_intensity(*it) / 255.0) > threshold)
 					? pngconsts::white_pixel
 					: pngconsts::black_pixel
 				)
@@ -183,4 +295,3 @@ ImagePNG pngfilters::build_rotated_image(
 
 	return rotated_img;
 }
-

@@ -318,8 +318,12 @@ ImagePNG::const_iterator ImagePNG::const_iterator::operator--(int)
 
 bool ImagePNG::const_iterator::is_valid() const
 {
-	return ((get_x() < int(_container->get_width()))
-			&& (get_y() < int(_container->get_height())));
+	const size_t width = _container->get_width();
+	const size_t height = _container->get_height();
+
+	return ((_num < (width * height))
+			&& (get_x() < int(width))
+			&& (get_y() < int(height)));
 }
 
 

@@ -31,11 +31,12 @@ namespace pngconsts
 
 namespace pngutils
 {
-	short count_intensity(const ImagePNG::pixel_t &pixel);
-	int count_average_color(const ImagePNG::pixel_t &p);
+	short count_pixel_intensity(const ImagePNG::pixel_t &pixel);
+	int count_pixel_average_color(const ImagePNG::pixel_t &p);
 	Histogram get_histogram(const ImagePNG &img);
 	Histogram differentiate_histogram(const Histogram &histogram);
-	size_t count_intensity_leaps(const ImagePNG::const_iterator &it, const int degrees);
+	size_t count_intensity_leaps_in_rows(const ImagePNG &img, const int degrees);
+	int get_angle_of_horizontal(const ImagePNG &img, const int degrees_step = 10);
 }
 
 
@@ -45,7 +46,6 @@ namespace pngfilters
 	ImagePNG build_grayscaled_image(const ImagePNG &img);
 	ImagePNG build_thresholded_image(const ImagePNG &img, const double threshold);
 	ImagePNG build_rotated_image(const ImagePNG &img, const int x0, const int y0, const int angle);
-	ImagePNG build_normalized_image(const ImagePNG &img);
 }
 
 
