@@ -49,7 +49,7 @@ class TranslationTransformation : public AffineTransformation
 	public:
 		TranslationTransformation(const int dx, const int dy);
 		TranslationTransformation(const double dx, const double dy);
-		TranslationTransformation(const TranslationTransformation &tr);
+		TranslationTransformation(const AffineTransformation &tr);
 		~TranslationTransformation() {}
 };
 
@@ -61,7 +61,7 @@ class RotationTransformation : public AffineTransformation
 
 		RotationTransformation(const int degrees);
 		RotationTransformation(const double radians);
-		RotationTransformation(const RotationTransformation &tr);
+		RotationTransformation(const AffineTransformation &tr);
 		~RotationTransformation() {}
 
 	private:
@@ -75,7 +75,7 @@ class ScalingTransformation : public AffineTransformation
 	public:
 		ScalingTransformation(const int sx, const int sy);
 		ScalingTransformation(const double sx, const double sy);
-		ScalingTransformation(const ScalingTransformation &tr);
+		ScalingTransformation(const AffineTransformation &tr);
 		~ScalingTransformation() {}
 };
 

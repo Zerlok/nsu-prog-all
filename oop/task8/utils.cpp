@@ -21,7 +21,7 @@ short pngutils::count_brightness(const ImagePNG::pixel_t &pixel)
 }
 
 
-int pngutils::count_average(const ImagePNG::pixel_t &p)
+int pngutils::count_average_color(const ImagePNG::pixel_t &p)
 {
 	return (p.red + p.green + p.blue) / 3;
 }
@@ -35,7 +35,7 @@ ImagePNG pngfilters::build_grayscaled_image(const ImagePNG &img)
 		 pit != img.cend();
 		 ++pit)
 	{
-		int average = pngutils::count_average(*pit);
+		int average = pngutils::count_average_color(*pit);
 		graysclaed.set_pixel(
 				pit.get_x(),
 				pit.get_y(),
@@ -90,42 +90,24 @@ ImagePNG pngfilters::build_rotated_image(
 		const int y0,
 		const int angle)
 {
-	// Create affine transformation matrix.
-	RotationTransformation rot(angle);
-	rot += TranslationTransformation(x0, y0);
-
-	const size_t width = img.get_width();
-	const size_t height = img.get_height();
-
-	// Count image size.
-	double a = -y0;
-	double c = -x0;
-	double b = width - x0;
-	double d = height - y0;
-
-	rot.transform(-x0, a);
-	rot.transform(c, -y0);
-	rot.transform(b, height - y0);
-	rot.transform(width - x0, d);
-	const double dx = (b - a) / 2;
-	const double dy = (d - c) / 2;
-
-	rot += TranslationTransformation(dx / 2, dy / 2);
-	ImagePNG rotated_img(dx + width, dy + height);
+	ImagePNG rotated_img(img.get_width(), img.get_height());
+	RotationTransformation back_rot = RotationTransformation(-angle);
+	back_rot += TranslationTransformation(x0, y0);
 
 	// Do affine transformation for each pixel;
-	for (ImagePNG::const_iterator pit = img.cbegin();
-		 pit != img.cend();
+	for (ImagePNG::iterator pit = rotated_img.begin();
+		 pit != rotated_img.end();
 		 ++pit)
 	{
 		double x = pit.get_x() - x0;
 		double y = pit.get_y() - y0;
-		rot.transform(x, y);
+		back_rot.transform(x, y);
 
-		ImagePNG::iterator it(x, y, &rotated_img);
+		ImagePNG::const_iterator it(x, y, &img);
 		if (it.is_valid())
-			it = (*pit);
+			pit = (*it);
 	}
 
 	return rotated_img;
 }
+

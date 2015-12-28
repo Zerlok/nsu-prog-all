@@ -2,6 +2,7 @@
 #define __IMAGEPNG_UTILS_H__
 
 
+#include <vector>
 #include "imagepng.h"
 
 
@@ -26,7 +27,7 @@ namespace pngconsts
 namespace pngutils
 {
 	short count_brightness(const ImagePNG::pixel_t &pixel);
-	int count_average(const ImagePNG::pixel_t &p);
+	int count_average_color(const ImagePNG::pixel_t &p);
 	std::vector<int> get_histogram(const ImagePNG &img);
 }
 

@@ -131,7 +131,7 @@ TranslationTransformation::TranslationTransformation(const double dx, const doub
 }
 
 
-TranslationTransformation::TranslationTransformation(const TranslationTransformation &tr)
+TranslationTransformation::TranslationTransformation(const AffineTransformation &tr)
 	: AffineTransformation(tr)
 {
 }
@@ -166,7 +166,7 @@ RotationTransformation::RotationTransformation(const double radians)
 }
 
 
-RotationTransformation::RotationTransformation(const RotationTransformation &tr)
+RotationTransformation::RotationTransformation(const AffineTransformation &tr)
 	: AffineTransformation(tr)
 {
 }
@@ -184,7 +184,7 @@ ScalingTransformation::ScalingTransformation(const double sx, const double sy)
 }
 
 
-ScalingTransformation::ScalingTransformation(const ScalingTransformation &tr)
+ScalingTransformation::ScalingTransformation(const AffineTransformation &tr)
 	: AffineTransformation(tr)
 {
 }
