@@ -183,15 +183,14 @@ size_t pngutils::count_intensity_leaps_in_rows(const ImagePNG &img, const int de
 
 int pngutils::get_angle_of_horizontal(const ImagePNG &img, const int degrees_step)
 {
-	ImagePNG grayscaled_img = pngfilters::build_grayscaled_image(img);
-	Histogram histogram = pngutils::get_histogram(grayscaled_img);
+	Histogram histogram = pngutils::get_histogram(img);
 	pngfilters::build_histogram(histogram).write("histogram.out.png");
 
 	Histogram diff_histogram = pngutils::differentiate_histogram(histogram);
 	sort(diff_histogram.begin(), diff_histogram.end());
 
 	ImagePNG bin_img = pngfilters::build_thresholded_image(
-			grayscaled_img,
+			img,
 			double(diff_histogram.back().second) / pngconsts::palette_size
 	);
 	bin_img.write("binary.out.png");
@@ -199,12 +198,17 @@ int pngutils::get_angle_of_horizontal(const ImagePNG &img, const int degrees_ste
 	std::vector<std::pair<size_t, int> > leaps;
 	for (int alpha = -90; alpha <= 90; alpha += degrees_step)
 	{
-		leaps.push_back({pngutils::count_intensity_leaps_in_rows(bin_img, alpha), alpha});
-		std::cout << "Angle: " << leaps.back().second << " degrees, " << leaps.back().first << " leaps." << std::endl;
+		size_t row_leaps = pngutils::count_intensity_leaps_in_rows(bin_img, alpha);
+
+		if (row_leaps > 0)
+		{
+			leaps.push_back({row_leaps, alpha});
+			std::cout << "Angle: " << leaps.back().second << " degrees, " << leaps.back().first << " leaps." << std::endl;
+		}
 	}
 
 	std::sort(leaps.begin(), leaps.end());
-	return leaps.back().second;
+	return leaps.front().second;
 }
 
 
@@ -293,5 +297,5 @@ ImagePNG pngfilters::build_rotated_image(
 			pit = (*it);
 	}
 
-	return rotated_img;
+	return std::move(rotated_img);
 }
