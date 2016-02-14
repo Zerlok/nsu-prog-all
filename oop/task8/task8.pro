@@ -7,13 +7,16 @@ CONFIG -= qt
 SOURCES += main.cpp \
     imagepng.cpp \
     utils.cpp \
-	affinetransformation.cpp
+	affinetransformation.cpp \
+    imageleapscounter.cpp
 
 
 HEADERS += \
     imagepng.h \
     utils.h \
-    affinetransformation.h
+    affinetransformation.h \
+    imageleapscounter.h \
+    histogram.h
 
 
 OTHER_FILES += gtest.cpp
