@@ -8,7 +8,8 @@ CCPP_FLAGS="-std=c++11"
 CCPP_LIBS=()
 CCPP_INCLUDES=()
 GTEST_FLAGS="-lgtest -lpthread"
-VERBOSE=false
+VERBOSE_ALL=false
+VERBOSE_PARSED_PRO=false
 DO_COMPILATION=true
 
 
@@ -24,6 +25,7 @@ SOURCES_DIR=
 OBJECTS_DIR=
 PRO_PATH=
 TASK=
+TASK_NAME=
 
 
 #
@@ -35,13 +37,14 @@ function help_message()
 	echo "   FILE - is a QT *.pro file"
 	echo
 	echo "Available options:"
+	echo "   -p, --parse-only           - parse *.pro file and show it's data"
 	echo "   -g, --gtest-only           - compile google test only"
 	echo "   -m, --main-only            - compile main only"
 	echo "   -t, --traget [DIR]         - target dir (for shadow compilation)"
 	echo "   -n, --name [NAME]          - name of compiled program (use when gtest or main compilation specified)"
 	echo "   -G, --gtest-objects [DIR]  - compile google test only by using *.o project compiled files from specified dir"
 	echo "   --no-compile               - avoid ${CCPP} compilation"
-	echo "   -v, --verbose              - show debug messages"
+	echo "   -v, --VERBOSE_ALL              - show debug messages"
 }
 
 
@@ -51,15 +54,41 @@ function help_message()
 function show_parsed_input()
 {
 	echo "Parsed input:"
-	echo "   Task:          $TASK"
-	echo "   Pro file:      $PRO_PATH"
-	echo "   Gtest enabled: $GTEST_ENABLED"
-	echo "   Using objects: $USE_OBJECTS"
-	echo "   Main enabled:  $MAIN_ENABLED"
-	echo "   Target name:   $TARGET_NAME"
-	echo "   Target dir:    $TARGET_DIR"
-	echo "   Objects dir:   $OBJECTS_DIR"
-	echo "   Sources dir:   $SOURCES_DIR"
+	echo "   Task:          ${TASK}"
+	echo "   Pro file:      ${PRO_PATH}"
+	echo "   Gtest enabled: ${GTEST_ENABLED}"
+	echo "   Using objects: ${USE_OBJECTS}"
+	echo "   Main enabled:  ${MAIN_ENABLED}"
+	echo "   Target name:   ${TARGET_NAME}"
+	echo "   Target dir:    ${TARGET_DIR}"
+	echo "   Objects dir:   ${OBJECTS_DIR}"
+	echo "   Sources dir:   ${SOURCES_DIR}"
+}
+
+
+#
+# Show parsed arguments for compiler.
+#
+function show_compiler_arguments
+{
+	echo "${CCPP} arguments:"
+	echo "   Sources:"
+	for src in ${sources[@]}
+	do
+		echo "      $src"
+	done
+	
+	echo "   Libs:"
+	for lib in ${CCPP_LIBS[@]}
+	do
+		echo "      $lib"
+	done
+	
+	echo "   Includes:"
+	for inc in ${CCPP_INCLUDES[@]}
+	do
+		echo "      $inc"
+	done
 }
 
 
@@ -74,6 +103,12 @@ function parse_input_arguments()
 			-h|--help)
 				help_message
 				exit 0
+				;;
+			-p|--parse-only)
+				DO_COMPILATION=false
+				GTEST_ENABLED=false
+				MAIN_ENABLED=false
+				VERBOSE_PARSED_PRO=true
 				;;
 			-g|--gtest-only)
 				GTEST_ENABLED=true
@@ -98,8 +133,8 @@ function parse_input_arguments()
 				OBJECTS_DIR="${2%%/}"
 				shift
 				;;
-			-v|--verbose)
-				VERBOSE=true
+			-v|--VERBOSE_ALL)
+				VERBOSE_ALL=true
 				;;
 			--no-compile)
 				DO_COMPILATION=false
@@ -144,24 +179,27 @@ function parse_pro_file()
 {
 	while read line
 	do
-		if [[ $line == "SOURCES"* ]]
-		then
-		    linesources=(${line##*= })
-			for src in ${linesources[@]}
-			do
-				sources+=("$SOURCES_DIR/$src")
-			done
-		fi
+		case "$line" in
+			"SOURCES"*)
+				linesources=(${line##*= })
+				for src in ${linesources[@]}
+				do
+					sources+=("$SOURCES_DIR/$src")
+				done
+				;;
 
-		if [[ $line == "LIBS"* ]]
-		then
-			CCPP_LIBS+=(${line##*= })
-		fi
+			"LIBS"*)
+				CCPP_LIBS+=(${line##*= })
+				;;
 
-		if [[ $line == "INCLUDEPATH"* ]]
-		then
-			CCPP_INCLUDES+=(${line##*= })
-		fi
+			"INCLUDEPATH"*)
+				CCPP_INCLUDES+=(${line##*= })
+				;;
+				
+			"TASKNAME"*)
+				TASK_NAME=${line##*= }
+				;;
+		esac
 	done < "$1"
 }
 
@@ -266,13 +304,18 @@ function main()
 	sources=()
 	gsources=()
 
-	parse_pro_file $PRO_PATH
-
-	if $VERBOSE
+	if $VERBOSE_ALL
 	then
-		echo "Sources:   ${sources[@]}"
-		echo "Libs:      ${CCPP_LIBS[@]}"
-		echo "Includes:  ${CCPP_INCLUDES[@]}"
+		show_parsed_input
+		echo
+	fi
+	
+	parse_pro_file $PRO_PATH
+	echo "Task: ${TASK_NAME}"
+	
+	if $VERBOSE_ALL || $VERBOSE_PARSED_PRO
+	then
+		show_compiler_arguments
 	fi
 
 	if $GTEST_ENABLED
@@ -288,10 +331,4 @@ function main()
 
 
 parse_input_arguments $@
-
-if $VERBOSE
-then
-	show_parsed_input
-fi
-
 main
