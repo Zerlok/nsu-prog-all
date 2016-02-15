@@ -5,27 +5,36 @@
 #include "filteriterator.h"
 
 
-class Pred
+class Greater
 {
 	public:
-		bool operator()(int x) const { return x > 0; }
+		Greater(const int val = 0)
+			: _val(val) {}
+		bool operator()(int x) const { return x > _val; }
+
+	private:
+		const int _val;
 };
 
 
 int main()
 {
-	std::vector<int> numbers = {0, 1, 2, -4, 4, -1, -2, -4};
-	std::vector<int> filtered;
+	std::vector<int> values = {0, 1, 2, -4, 4, -1, -2, -4, 3};
 
-	std::copy(numbers.begin(), numbers.end(), std::ostream_iterator<int>(std::cout, ", "));
-	std::cout << std::endl;
+	std::vector<int> vRes;
 
-	for (auto it = FilterIterator<std::vector<int>::iterator, Pred>(numbers.begin(), numbers.end(), Pred());
-		 it != numbers.end();
-		 ++it)
-		filtered.push_back(*it);
+//	std::copy(
+//				make_filter_iterator(values.begin(), values.end(), Greater()),
+//				make_filter_iterator(values.end(), values.end(), Greater()),
+//				std::back_inserter(vRes)
+//				);
 
-	std::copy(filtered.begin(), filtered.end(), std::ostream_iterator<int>(std::cout, ", "));
+//	std::copy(
+//			make_filter_iterator(values.begin(), values.end(), Greater()),
+//			make_filter_iterator(values.end(), values.end(), Greater()),
+//			std::ostream_iterator<int>(std::cout, ", ")
+//	);
+
 	std::cout << std::endl;
 
 	return 0;
