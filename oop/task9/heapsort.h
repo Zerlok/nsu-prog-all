@@ -17,31 +17,38 @@ class Less
 };
 
 
-template<class Container, class Comparator>
+template<class Iterator, class Comparator>
 void shift_down(
-		Container& values,
-		int root,
-		int end,
+		const Iterator& begin,
+		Iterator it,
+		const Iterator& end,
 		const Comparator& comparator)
 {
-	typedef typename Container::value_type container_value_t;
-	container_value_t max_child;
+	Iterator pre_last = end - 1;
+	Iterator root = begin + ((it - begin) * 2);
+	Iterator left_child;
+	Iterator right_child;
+	Iterator max_child;
 	bool is_done = false;
 
-	while ((root * 2 + 1 < end)
+	while (((root + 1) <= pre_last)
 		   && (!is_done))
 	{
-		if (root * 2 + 1 == end - 1)
-			max_child = root * 2 + 1;
-		else if (comparator(values[root * 2 + 1], values[root * 2 + 2]))
-			max_child = root * 2 + 2;
-		else
-			max_child = root * 2 + 1;
+		left_child = root + 1;
+		right_child = left_child + 1;
 
-		if (comparator(values[root], values[max_child]))
+		if (left_child == pre_last)
+			max_child = left_child;
+		else if (comparator(*left_child, *right_child))
+			max_child = right_child;
+		else
+			max_child = left_child;
+
+		if (comparator(*it, *max_child))
 		{
-			std::swap(values[root], values[max_child]);
-			root = max_child;
+			std::swap(*it, *max_child);
+			it = max_child;
+			root = begin + ((it - begin) * 2);
 		}
 		else
 			is_done = true;
@@ -49,23 +56,31 @@ void shift_down(
 }
 
 
-template<class Container, class Comparator=Less >
-void heap_sort(Container& values, const Comparator& comparator = Comparator())
+template<class Iterator, class Comparator=Less >
+void heap_sort(
+		const Iterator& begin,
+		const Iterator& end,
+		const Comparator& comparator = Comparator())
 {
-	int root;
-	int size = values.size();
+	typedef typename std::iterator_traits<Iterator>::difference_type diff_t;
+	diff_t size = (end - begin);
 
-	for (root = size / 2 - 1;
-		 root >= 0;
-		 --root)
-		shift_down(values, root, size, comparator);
+	if (size <= 1)
+		return;
 
-	for (root = size - 1;
-		 root >= 1;
+	for (Iterator root = begin + (size / 2 - 1);
+		 root != begin;
 		 --root)
+		shift_down(begin, root, end, comparator);
+
+	shift_down(begin, begin, end, comparator);
+
+	for (Iterator it = begin + (size - 1);
+		 it != begin;
+		 --it)
 	{
-		std::swap(values[0], values[root]);
-		shift_down(values, 0, root, comparator);
+		std::swap(*begin, *it);
+		shift_down(begin, begin, it, comparator);
 	}
 }
 

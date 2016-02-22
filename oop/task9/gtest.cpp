@@ -10,8 +10,8 @@ TEST(HeapSort, Empty)
 	std::vector<size_t> one = {0};
 
 	ASSERT_NO_THROW({
-						heap_sort(empty);
-						heap_sort(one);
+						heap_sort(empty.begin(), empty.end());
+						heap_sort(one.begin(), one.end());
 					});
 
 	EXPECT_TRUE(empty.empty());
@@ -28,7 +28,7 @@ TEST(HeapSort, Tripples)
 		std::cout << x << " ";
 	std::cout << std::endl;
 
-	heap_sort(values);
+	heap_sort(values.begin(), values.end());
 
 	for (size_t i = 1; i < values.size(); ++i)
 		EXPECT_LE(values[i-1], values[i]);
@@ -47,7 +47,7 @@ TEST(HeapSort, WorstInput)
 		std::cout << x << " ";
 	std::cout << std::endl;
 
-	heap_sort(values);
+	heap_sort(values.begin(), values.end());
 
 	for (size_t i = 1; i < values.size(); ++i)
 		EXPECT_LE(values[i-1], values[i]);
@@ -66,7 +66,7 @@ TEST(HeapSort, BestInput)
 		std::cout << v << " ";
 	std::cout << std::endl;
 
-	heap_sort(values);
+	heap_sort(values.begin(), values.end());
 
 	for (const int& v : values)
 		std::cout << v << " ";
@@ -82,7 +82,7 @@ TEST(HeapSort, RepeatingData)
 		std::cout << v << " ";
 	std::cout << std::endl;
 
-	heap_sort(values);
+	heap_sort(values.begin(), values.end());
 
 	for (const int& v : values)
 		std::cout << v << " ";
