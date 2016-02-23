@@ -3,9 +3,9 @@
 #include "sharedpointer.h"
 
 
-struct Data
+struct Checker
 {
-	Data(int a, double b, size_t c)
+	Checker(int a, double b, size_t c)
 		: x(a), y(b), z(c) {}
 
 	int x;
@@ -16,11 +16,11 @@ struct Data
 
 int total()
 {
-	SharedPointer<Data> p1 = make_shared_pointer(new Data(1, 2.0, 3));
-	SharedPointer<Data> p2;
-	SharedPointer<Data> p3 = p2;
-	SharedPointer<Data> p4;
-	SharedPointer<Data> p5(p1);
+	SharedPointer<Checker> p1 = make_shared_pointer(new Checker(1, 2.0, 3));
+	SharedPointer<Checker> p2;
+	SharedPointer<Checker> p3 = p2;
+	SharedPointer<Checker> p4;
+	SharedPointer<Checker> p5(p1);
 
 	p3 = p2 = p1;
 
@@ -34,7 +34,7 @@ int total()
 
 int main()
 {
-	SharedPointer<Data> p;
+	SharedPointer<Checker> p;
 
 	std::cout << p.is_null() << std::endl;
 	return 0;

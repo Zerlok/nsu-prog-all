@@ -24,13 +24,14 @@ class SharedPointer
 		bool operator==(const SharedPointer& sptr) const;
 
 		// Getters.
-		pointer_t& get_pointer();
-		const pointer_t& get_pointer() const;
+		pointer_t get_pointer();
+		const pointer_t get_pointer() const;
 
 		reference_t get_reference();
 		const reference_t get_reference() const;
 
 		bool is_null() const;
+		size_t get_shares_num() const;
 
 		// Methods.
 		void release();
@@ -124,10 +125,51 @@ bool SharedPointer<Type>::operator==(const SharedPointer& sptr) const
 
 
 template<class Type>
+typename SharedPointer<Type>::pointer_t SharedPointer<Type>::get_pointer()
+{
+	return (!is_null()
+			? (_ptr_destructor->pointer)
+			: nullptr);
+}
+
+
+template<class Type>
+const typename SharedPointer<Type>::pointer_t SharedPointer<Type>::get_pointer() const
+{
+	return (!is_null()
+			? (_ptr_destructor->pointer)
+			: nullptr);
+}
+
+
+template<class Type>
+typename SharedPointer<Type>::reference_t SharedPointer<Type>::get_reference()
+{
+	return *(_ptr_destructor->pointer);
+}
+
+
+//template<class Type>
+//const typename SharedPointer<Type>::reference_t SharedPointer<Type>::get_reference() const
+//{
+//	return *(_ptr_destructor->pointer);
+//}
+
+
+template<class Type>
 bool SharedPointer<Type>::is_null() const
 {
 	return ((_ptr_destructor == nullptr)
 			|| (_ptr_destructor->pointer == nullptr));
+}
+
+
+template<class Type>
+size_t SharedPointer<Type>::get_shares_num() const
+{
+	return (!is_null()
+			? (_ptr_destructor->shares_num)
+			: 0);
 }
 
 
