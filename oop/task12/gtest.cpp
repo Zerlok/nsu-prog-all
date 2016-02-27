@@ -2,6 +2,12 @@
 #include "pool.h"
 
 
+TEST()
+{
+
+}
+
+
 int main(int argc, char *argv[])
 {
 	::testing::InitGoogleTest(&argc, argv);

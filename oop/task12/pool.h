@@ -2,15 +2,8 @@
 #define __OBJECT_POOL_H__
 
 
-#include <stdarg.h>
+#include <memory>
 #include <array>
-
-
-template<class Type>
-class PoolTriats
-{
-	typedef void constructor_args;
-};
 
 
 template<class Type, int Num>
@@ -18,9 +11,9 @@ class Pool
 {
 	public:
 		typedef Type Cls;
-		typedef std::pair<Cls, bool> ObjPair;
+		typedef std::allocator<Cls> ObjAllocator;
+		typedef std::pair<typename ObjAllocator::pointer, bool> ObjPair;
 		typedef std::array<ObjPair, Num> ObjArray;
-		typedef typename PoolTriats<Cls>::constructor_args first_arg_t;
 
 		// Constructors / Destructor.
 		Pool();
@@ -33,64 +26,105 @@ class Pool
 		Pool& operator=(Pool&&) = delete;
 
 		// Methods.
-		Cls& allocate(first_arg_t arg0, ...);
-		void free(Cls& instance);
+		template<class ... Args>
+		Cls& create(Args&&... args)
+		{
+			for (ObjPair& pair : _objects)
+			{
+				if (pair.second == false) // object is not constructed.
+				{
+					pair.second = true;
+					_object_allocator.construct(pair.first, std::forward<Args>(args)...);
+					return *(pair.first);
+				}
+			}
+
+			// TODO: throw exception (no free objects in pool).
+			throw 1;
+		}
+
+		void clear(Cls& instance);
+		void clear();
 
 	private:
+		typename ObjAllocator::pointer _objects_front;
+		ObjAllocator _object_allocator;
 		ObjArray _objects;
 };
 
 
 template<class T, int N>
 Pool<T, N>::Pool()
-	: _objects(N, {Cls(), false})
 {
+	_objects_front = _object_allocator.allocate(N);
+
+	if (_objects_front == nullptr)
+		throw 2;
+
+	for (size_t i = 0;
+		 i < _objects.max_size();
+		 ++i)
+	{
+		_objects[i].second = false;
+		_objects[i].first = _objects_front + i;
+	}
 }
 
 
 template<class T, int N>
 Pool<T, N>::~Pool()
 {
+	clear();
+	_object_allocator.deallocate(_objects_front, N);
 }
 
 
-template<class T, int N>
-typename Pool<T, N>::Cls& Pool<T, N>::allocate(Pool<T, N>::first_arg_t arg0, ...)
-{
-	for (ObjPair& pair : _objects)
-	{
-		if (pair.second == false) // object is not allocated.
-		{
-			pair.second = true;
+//template<class T, int N, class ... Args>
+//typename Pool<T, N>::Cls& Pool<T, N>::create(Args&&... args)
+//{
+//	for (ObjPair& pair : _objects)
+//	{
+//		if (pair.second == false) // object is not constructed.
+//		{
+//			pair.second = true;
+//			_class_allocator.construct(pair.first, std::forward<Args>(args)...);
+//			return pair.first;
+//		}
+//	}
 
-			va_list args;
-			va_start(args, arg0);
-			pair.first = Cls(args);
-			va_end(args);
-			return pair.first;
-		}
-	}
+//	// TODO: throw exception (no free objects in pool).
+//	throw 1;
+//}
 
-	// TODO: throw exception (no free objects in pool).
-	throw 1;
-}
 
 
 template<class T, int N>
-void Pool<T, N>::free(Pool<T, N>::Cls& instance)
+void Pool<T, N>::clear(Pool<T, N>::Cls& instance)
 {
 	for (ObjPair& pair : _objects)
 	{
-		if ((&(pair.first) == &instance)
+		if ((pair.first == &instance)
 				&& pair.second)
 		{
-			pair.first = Cls();
+			pair.second = false;
+			_object_allocator.destroy(pair.first);
 			return;
 		}
 	}
 
 	// TODO: throw exception (objects is not from pool).
 	throw 1;
+}
+
+
+template<class T, int N>
+void Pool<T, N>::clear()
+{
+	for (ObjPair& pair : _objects)
+	{
+		pair.second = false;
+		_object_allocator.destroy(pair.first);
+	}
 }
 
 
