@@ -5,13 +5,12 @@ CONFIG += console gnu++11
 CONFIG -= app_bundle
 CONFIG -= qt
 
-QMAKE_CXXFLAGS += -std=gnu++11
+QMAKE_CXXFLAGS += -std=gnu++11 -lpthread -lgtest
 
-SOURCES += main.cpp
+SOURCES += gtest.cpp
 
 HEADERS += \
     pool.h
 
-
-OTHER_FILES += \
-	gtest.cpp
+LIBS += -lpthread -lgtest
+INCLUDEPATH += /usr/include/gtest

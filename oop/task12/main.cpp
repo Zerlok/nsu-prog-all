@@ -1,19 +1,16 @@
 #include <iostream>
+#include <vector>
 #include "pool.h"
 
 
 int main()
 {
-	Pool<int, 10> ints;
+	Pool<std::vector<int>, 5> ints;
 
-	int& i = ints.create(100);
+	std::vector<int> &vec = ints.create({0, 1, 1, 2});
 
-	for (int i = 1; i < 10; ++i)
-		std::cout << ints.create(i) << std::endl;
-
-	ints.clear(i);
-
-	std::cout << ints.create(10) << std::endl;
+	for (auto i : vec)
+		std::cout << i << std::endl;
 
 	return 0;
 }

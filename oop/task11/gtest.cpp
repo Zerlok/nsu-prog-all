@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
-#include "sharedpointer.h"
 #include <vector>
+#include "sharedpointer.h"
 
 
 enum class Boolean
@@ -15,14 +15,14 @@ class Checker
 {
 	public:
 		Checker(Boolean& b)
-			: _(b),
-			  x(1) { _ = Boolean::TRUE; }
-		~Checker() { _ = Boolean::FALSE; }
+			: is_created(b),
+			  x(1) { is_created = Boolean::TRUE; }
+		~Checker() { is_created = Boolean::FALSE; }
 
 		int x;
 
 	private:
-		Boolean& _;
+		Boolean& is_created;
 };
 
 
@@ -56,7 +56,7 @@ TEST(SharedPointer, VectorEmpty)
 
 	for (SharedPointer<Empty> p : empties)
 	{
-		p.release();
+		p.reset();
 		EXPECT_TRUE(p.is_null());
 	}
 }
@@ -99,21 +99,17 @@ TEST(SharedPointer, Copy)
 		for (size_t i = 1; i < pointers.size(); ++i)
 			pointers[i] = pointers[i-1];
 
-		EXPECT_FALSE(pointers.front().is_null());
-		EXPECT_FALSE(pointers.back().is_null());
 		EXPECT_EQ(Boolean::TRUE, is_good);
-		EXPECT_EQ(pointers.size(), pointers.front().get_shares_num());
-
-		for (size_t i = pointers.size() / 2; i < pointers.size(); ++i)
-			pointers[i].release();
-
-		EXPECT_FALSE(pointers.front().is_null());
-		EXPECT_TRUE(pointers.back().is_null());
-		EXPECT_EQ(Boolean::TRUE, is_good);
-		EXPECT_EQ(pointers.size() / 2, pointers.front().get_shares_num());
+		EXPECT_EQ(pointers.size(), pointers.front().get_references_counter());
 	}
 
 	EXPECT_EQ(Boolean::FALSE, is_good);
+}
+
+
+TEST(SharedPointer, Move)
+{
+
 }
 
 

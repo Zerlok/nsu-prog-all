@@ -15,7 +15,8 @@ class FilterIterator
 		typedef typename std::iterator_traits<Iterator>::value_type value_type;
 		typedef typename std::iterator_traits<Iterator>::pointer pointer;
 		typedef typename std::iterator_traits<Iterator>::reference reference;
-		typedef typename std::iterator_traits<Iterator>::iterator_category iterator_category;
+		typedef typename std::iterator_traits<Iterator>::difference_type difference_type;
+		typedef std::forward_iterator_tag iterator_category;
 
 		FilterIterator() {}
 		FilterIterator(
@@ -26,7 +27,8 @@ class FilterIterator
 			  _end(end),
 			  _pred(pred)
 		{
-			if (!is_predicate())
+			if ((_curr != _end)
+					&& !is_predicate())
 				this->operator++();
 		}
 		FilterIterator(const FilterIterator<Iterator, Predicate>& iterator)
@@ -117,10 +119,19 @@ class FilterIterator
 template<class IteratorCls, class PredicateCls>
 FilterIterator<IteratorCls, PredicateCls> make_filter_iterator(
 		const IteratorCls& it,
-		const IteratorCls& end = IteratorCls(),
+		const IteratorCls& end,
 		const PredicateCls& pred = PredicateCls())
 {
 	return std::move(FilterIterator<IteratorCls, PredicateCls>(it, end, pred));
+}
+
+
+template<class IteratorCls, class PredicateCls>
+FilterIterator<IteratorCls, PredicateCls> make_filter_iterator(
+		const IteratorCls &it = IteratorCls(),
+		const PredicateCls& pred = PredicateCls())
+{
+	return std::move(FilterIterator<IteratorCls, PredicateCls>(it, it, pred));
 }
 
 

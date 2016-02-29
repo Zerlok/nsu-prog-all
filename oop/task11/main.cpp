@@ -16,7 +16,7 @@ struct Checker
 
 int total()
 {
-	SharedPointer<Checker> p1 = make_shared_pointer(new Checker(1, 2.0, 3));
+	SharedPointer<Checker> p1 = shared_pointer(new Checker(1, 2.0, 3));
 	SharedPointer<Checker> p2;
 	SharedPointer<Checker> p3 = p2;
 	SharedPointer<Checker> p4;
