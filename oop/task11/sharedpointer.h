@@ -2,33 +2,12 @@
 #define __SHAREDPOINTER_H__
 
 
-struct DefaultDestroyer
-{
-	template<class Type>
-	void operator()(Type* ptr) { delete ptr; }
-};
-
-
-struct ArrayDestroyer
-{
-	template<class Type>
-	void operator()(Type* ptr) { delete[] ptr; }
-};
-
-
-struct VoidDestroyer
-{
-	template<class Type>
-	void operator()(Type*) { }
-};
-
-
-template<class Type, class Destroyer = DefaultDestroyer>
+template<class Type, bool do_copy_on_write = false>
 class SharedPointer
 {
 	public:
 		typedef Type* pointer_t;
-		typedef Type& reference;
+		typedef Type& reference_t;
 
 		// Constructors / Destructor.
 		SharedPointer(pointer_t ptr = nullptr)
@@ -97,9 +76,30 @@ class SharedPointer
 			return (_ptr_destructor == sptr._ptr_destructor);
 		}
 
+		const reference_t operator*() const
+		{
+			return get_reference();
+		}
+
+		reference_t operator*()
+		{
+			return get_reference();
+		}
+
+		const pointer_t operator->() const
+		{
+			return get_pointer();
+		}
+
+		pointer_t operator->()
+		{
+			return get_pointer();
+		}
+
 		// Getters.
 		pointer_t get_pointer()
 		{
+			_copy_on_write();
 			return (!is_null()
 					? (_ptr_destructor->pure_pointer)
 					: nullptr);
@@ -107,17 +107,28 @@ class SharedPointer
 
 		const pointer_t get_pointer() const
 		{
+			return get_const_pointer();
+		}
+
+		const pointer_t get_const_pointer() const
+		{
 			return (!is_null()
 					? (_ptr_destructor->pure_pointer)
 					: nullptr);
 		}
 
-		reference get_reference()
+		reference_t get_reference()
 		{
+			_copy_on_write();
 			return *(_ptr_destructor->pure_pointer);
 		}
 
-		const reference get_reference() const
+		const reference_t get_reference() const
+		{
+			return get_const_reference();
+		}
+
+		const reference_t get_const_reference() const
 		{
 			return *(_ptr_destructor->pure_pointer);
 		}
@@ -158,21 +169,31 @@ class SharedPointer
 			PointerDestructor(pointer_t ptr, size_t num = 1)
 				: pure_pointer(ptr),
 				  refs_counter(num) {}
-			PointerDestructor(const PointerDestructor& ps)
-				: pure_pointer(ps.pure_pointer),
-				  refs_counter(ps.refs_counter) {}
 			~PointerDestructor()
 			{
-				destroyer(pure_pointer);
+				delete pure_pointer;
 			}
 
 			pointer_t pure_pointer;
 			size_t refs_counter;
-			Destroyer destroyer;
 		};
 
 		// Fileds.
 		PointerDestructor* _ptr_destructor;
+
+		// Methods.
+		void _copy_on_write()
+		{
+			if (!do_copy_on_write
+					|| is_null()
+					|| (_ptr_destructor->refs_counter <= 1))
+				return;
+
+			--(_ptr_destructor->refs_counter);
+
+			Type* ptr_copy = new Type(*(_ptr_destructor->pure_pointer));
+			_ptr_destructor = new PointerDestructor(ptr_copy);
+		}
 };
 
 

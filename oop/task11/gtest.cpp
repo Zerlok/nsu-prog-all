@@ -133,6 +133,22 @@ TEST(SharedPointer, Move)
 }
 
 
+TEST(SharedPointer, CopyOnWrite)
+{
+	SharedPointer<Empty, true> p1, p2;
+	p1 = p2 = new Empty();
+	const SharedPointer<Empty, true> p3 = p1;
+	EXPECT_EQ(3, p3.get_references_counter());
+
+	*(p3);
+	EXPECT_EQ(3, p3.get_references_counter());
+
+	*(p1);
+	EXPECT_EQ(1, p1.get_references_counter());
+	EXPECT_EQ(2, p2.get_references_counter());
+}
+
+
 int main(int argc, char *argv[])
 {
 	::testing::InitGoogleTest(&argc, argv);
