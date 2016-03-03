@@ -26,54 +26,53 @@ class Checker
 };
 
 
-TEST(SharedPointer, Null)
+TEST(SharedPointer, InitRelease)
 {
-	SharedPointer<int> p1;
-	EXPECT_TRUE(p1.is_null());
+	Boolean is_created = Boolean::FALSE;
 
-	p1 = nullptr;
-	EXPECT_EQ(nullptr, p1.get_pointer());
+	SharedPointer<Checker> p(new Checker(is_created));
+	EXPECT_EQ(Boolean::TRUE, is_created);
 
-	SharedPointer<int> p2 = p1;
-
-	EXPECT_TRUE(p1.is_null());
-	EXPECT_TRUE(p2.is_null());
-	EXPECT_EQ(nullptr, p1.get_pointer());
-	EXPECT_EQ(nullptr, p2.get_pointer());
+	p.release();
+	EXPECT_EQ(Boolean::FALSE, is_created);
 }
 
 
-TEST(SharedPointer, VectorEmpty)
+TEST(SharedPointer, Nullpointer)
 {
-	std::vector<SharedPointer<Empty> > empties(10);
+	SharedPointer<Empty> p1;
+	EXPECT_TRUE(p1.is_null());
 
-	for (SharedPointer<Empty>& p : empties)
-	{
-		EXPECT_TRUE(p.is_null());
-		p = new Empty();
-		EXPECT_FALSE(p.is_null());
-	}
+	p1 = nullptr;
+	EXPECT_TRUE(p1.is_null());
+	EXPECT_EQ(nullptr, p1.get_pointer());
 
-	for (SharedPointer<Empty> p : empties)
-	{
-		p.reset();
-		EXPECT_TRUE(p.is_null());
-	}
+	SharedPointer<Empty> p2 = p1;
+	EXPECT_TRUE(p2.is_null());
+	EXPECT_EQ(nullptr, p2.get_pointer());
+
+	EXPECT_EQ(0, p1.get_references_counter());
+	EXPECT_EQ(0, p2.get_references_counter());
+
+	p2 = new Empty();
+	EXPECT_FALSE(p2.is_null());
+	EXPECT_EQ(1, p2.get_references_counter());
 }
 
 
 TEST(SharedPointer, VectorData)
 {
-	std::vector<Boolean> booleans(10, Boolean::FALSE);
-
-	for (const Boolean& b : booleans)
-		EXPECT_EQ(Boolean::FALSE, b);
+	std::vector<Boolean> booleans(5, Boolean::FALSE);
 
 	{
 		std::vector<SharedPointer<Checker> > values(booleans.size());
 
 		for (size_t i = 0; i < values.size(); ++i)
+		{
+			EXPECT_TRUE(values[i].is_null());
 			values[i] = new Checker(booleans[i]);
+			EXPECT_FALSE(values[i].is_null());
+		}
 
 		for (const Boolean& b : booleans)
 			EXPECT_EQ(Boolean::TRUE, b);
@@ -84,32 +83,53 @@ TEST(SharedPointer, VectorData)
 }
 
 
-TEST(SharedPointer, Copy)
+TEST(SharedPointer, CopyEq)
 {
-	Boolean is_good = Boolean::FALSE;
+	Boolean is_created1 = Boolean::FALSE;
+	Boolean is_created2 = Boolean::FALSE;
 
 	{
-		std::vector<SharedPointer<Checker> > pointers(10);
-		pointers.front() = new Checker(is_good);
-		EXPECT_EQ(Boolean::TRUE, is_good);
+		SharedPointer<Checker> p1, p2, p;
+		p1 = new Checker(is_created1);
+		EXPECT_EQ(Boolean::TRUE, is_created1);
+		EXPECT_EQ(1, p1.get_references_counter());
 
-		EXPECT_FALSE(pointers.front().is_null());
-		EXPECT_TRUE(pointers.back().is_null());
+		p = p1;
+		EXPECT_EQ(Boolean::TRUE, is_created1);
+		EXPECT_EQ(2, p1.get_references_counter());
 
-		for (size_t i = 1; i < pointers.size(); ++i)
-			pointers[i] = pointers[i-1];
+		p2 = new Checker(is_created2);
+		EXPECT_EQ(Boolean::TRUE, is_created2);
+		EXPECT_EQ(1, p2.get_references_counter());
 
-		EXPECT_EQ(Boolean::TRUE, is_good);
-		EXPECT_EQ(pointers.size(), pointers.front().get_references_counter());
+		p = p2;
+		EXPECT_EQ(Boolean::TRUE, is_created1);
+		EXPECT_EQ(1, p1.get_references_counter());
+		EXPECT_EQ(2, p2.get_references_counter());
+
+		p1 = p;
+		EXPECT_EQ(Boolean::FALSE, is_created1);
+		EXPECT_EQ(3, p1.get_references_counter());
 	}
 
-	EXPECT_EQ(Boolean::FALSE, is_good);
+	EXPECT_EQ(Boolean::FALSE, is_created1);
 }
 
 
 TEST(SharedPointer, Move)
 {
+	Boolean is_created = Boolean::FALSE;
 
+	SharedPointer<Checker> p1(new Checker(is_created));
+	SharedPointer<Checker> p2;
+	EXPECT_EQ(Boolean::TRUE, is_created);
+	EXPECT_FALSE(p1.is_null());
+	EXPECT_TRUE(p2.is_null());
+
+	p2 = std::move(p1);
+	EXPECT_EQ(Boolean::TRUE, is_created);
+	EXPECT_TRUE(p1.is_null());
+	EXPECT_FALSE(p2.is_null());
 }
 
 

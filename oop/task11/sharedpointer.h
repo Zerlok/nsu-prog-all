@@ -150,7 +150,9 @@ class SharedPointer
 
 
 	private:
-		// Inner class.
+		/**
+		 * @brief The struct with references num and pure pointer destructor.
+		 */
 		struct PointerDestructor
 		{
 			PointerDestructor(pointer_t ptr, size_t num = 1)
@@ -170,7 +172,6 @@ class SharedPointer
 		};
 
 		// Fileds.
-		// pointer to struct with references num and pure pointer destructor.
 		PointerDestructor* _ptr_destructor;
 };
 
@@ -178,7 +179,7 @@ class SharedPointer
 template<class Type>
 SharedPointer<Type> shared_pointer(Type* ptr)
 {
-	return SharedPointer<Type>(ptr);
+	return std::move(SharedPointer<Type>(ptr));
 }
 
 

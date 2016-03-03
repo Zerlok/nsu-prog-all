@@ -11,8 +11,8 @@ HEADERS += \
     sharedpointer.h
 
 SOURCES += \
-	main.cpp
-
-OTHER_FILES += \
 	gtest.cpp
 
+
+LIBS += -lpthread -lgtest
+INCLUDEPATH += /usr/include/gtest
