@@ -17,4 +17,4 @@ LIBS += -lpthread -lgtest
 INCLUDEPATH += /usr/include/gtest
 
 DISTFILES += \
-    ../build/task13/data.ser
+	../build/task13/data.ser

@@ -48,6 +48,7 @@ class BigVector
 		// Fields.
 		std::fstream _dump_stream;
 		size_t _dump_size;
+
 		size_t _total_size;
 		size_t _window_offset;
 		size_t _window_width;
@@ -55,7 +56,7 @@ class BigVector
 		bool _is_dirty_window;
 
 		// Getters.
-		size_t _count_window_pos(const size_t& idx) const;
+		size_t _count_window_offset(const size_t& idx) const;
 		size_t _count_max_window_pos() const;
 
 		bool _is_in_window(const size_t& idx) const;
@@ -77,9 +78,30 @@ BigVector<T>::BigVector(const std::string& dump_filename, const size_t& window_w
 	  _data_window(0),
 	  _is_dirty_window(false)
 {
-	// TODO: check for empty and not exsting file.
-	deserialize(_dump_stream, _total_size);
-	_dump_size = _total_size;
+	// TODO: fix this stupid reopening.
+	if (!_dump_stream.is_open())
+	{
+		// close current stream.
+		_dump_stream.close();
+		// create nonexistent file.
+		std::ofstream ofs(dump_filename);
+		// save it.
+		ofs.close();
+		// and open stream again.
+		_dump_stream.open(dump_filename, std::ios::in | std::ios::out | std::ios::binary);
+	}
+
+	/*
+	 * IF file is not empty
+	 * THAN read the amount of elements in it.
+	 */
+	_dump_stream.seekg(0, std::ios::end);
+	if (_dump_stream.tellg() > 0)
+	{
+		_dump_stream.seekg(0);
+		deserialize(_dump_stream, _total_size);
+		_dump_size = _total_size;
+	}
 }
 
 
@@ -97,7 +119,7 @@ T& BigVector<T>::operator[](const size_t& idx)
 	if (!_is_in_window(idx))
 	{
 		_update_dumpfile();
-		_update_data_window(_count_window_pos(idx));
+		_update_data_window(_count_window_offset(idx));
 	}
 
 	_is_dirty_window = true;
@@ -166,10 +188,11 @@ void BigVector<T>::push_back(const T& obj)
 
 
 template<class T>
-size_t BigVector<T>::_count_window_pos(const size_t& idx) const
+size_t BigVector<T>::_count_window_offset(const size_t& idx) const
 {
 	const size_t half_window_size = _window_width / 2;
 
+	// Count offset so the element at 'idx' position will be at center of the window.
 	if (idx <= half_window_size)
 		return 0;
 
@@ -192,7 +215,8 @@ bool BigVector<T>::_is_in_window(const size_t& idx) const
 template<class T>
 void BigVector<T>::_update_data_window(const size_t& pos)
 {
-	if (_is_dirty_window)
+	if (_is_dirty_window
+			|| (_dump_size == 0))
 		return;
 
 	_window_offset = pos;
