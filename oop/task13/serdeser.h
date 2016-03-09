@@ -87,7 +87,7 @@ class Deserializer<std::vector<Type> >
 		static std::vector<Type>& Apply(std::istream &in, std::vector<Type> &val)
 		{
 			size_t size;
-			Type tmp;
+			Type tmp {};
 
 			Deserializer<size_t>::Apply(in, size);
 			for (size_t i = 0; i < size; ++i)
