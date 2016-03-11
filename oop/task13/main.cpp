@@ -30,15 +30,18 @@ void fillfine(const std::string& filename, const size_t& size)
 TEST(Serializer, UnsignedInteger)
 {
 	const size_t expected = 37373;
-	std::fstream fs("test.ser", std::ios::in | std::ios::out | std::ios::binary);
-	serialize(fs, expected);
+	std::ofstream ofs("test.ser", std::ios::out | std::ios::binary);
+	serialize(ofs, expected);
+	ofs.close();
 
+	std::ifstream ifs("test.ser", std::ios::in | std::ios::binary);
 	size_t actual;
-	fs.seekp(0);
-	deserialize(fs, actual);
-	fs.close();
+	deserialize(ifs, actual);
+	ifs.close();
 
 	EXPECT_EQ(expected, actual);
+
+	std::remove("test.ser");
 }
 
 
@@ -75,17 +78,33 @@ TEST(BigVector, Init)
 
 TEST(BigVector, PushBack)
 {
-	BigVector<int> values("data2.ser", 10);
+	const size_t width = 10;
+	const size_t size = width*5;
+	BigVector<int> values("data2.ser", width);
 
-	for (size_t i = 0; i < 20; ++i)
+	for (size_t i = 0; i < size; ++i)
 		values.push_back(i);
 
-	EXPECT_EQ(20, values.size());
+	EXPECT_EQ(size, values.size());
 
-	for (size_t i = 0; i < 20; ++i)
+	for (size_t i = 0; i < size; ++i)
 		EXPECT_EQ(i, values[i]);
 
 	std::remove("data2.ser");
+}
+
+
+TEST(BigVector, Iterator)
+{
+	fillfine("test.ser", 1000);
+	BigVector<int> values("test.ser", 100);
+//	const BigVector<int>& cvalues = values;
+
+	for (int& x : values)
+		x += 10;
+
+	for (size_t i = 0; i < values.size(); ++i)
+		EXPECT_EQ(i+10, values[i]);
 }
 
 

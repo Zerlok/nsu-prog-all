@@ -9,8 +9,9 @@
 #include "serdeser.h"
 
 
-static const std::string DEFAULT_DUMP_FILENAME = "a.dump";
-static const size_t DEFAULT_WINDOW_SIZE = 1000;
+static const std::string DEFAULT_DUMP_FILENAME	= "a.dump";
+static const size_t DEFAULT_WINDOW_SIZE			= 1000;
+static const std::ios::openmode dump_mode		= (std::ios::in | std::ios::out | std::ios::binary);
 
 
 template<class Type>
@@ -23,8 +24,8 @@ class BigVector
 
 		// Constructors / Destructor.
 		BigVector(
-				const std::string& dump_filename = DEFAULT_DUMP_FILENAME,
-				const size_t& window_width = DEFAULT_WINDOW_SIZE
+				const std::string& dump_filename	= DEFAULT_DUMP_FILENAME,
+				const size_t& window_width			= DEFAULT_WINDOW_SIZE
 		);
 		BigVector(const BigVector&) = delete;
 		BigVector(BigVector&& vector);
@@ -39,6 +40,14 @@ class BigVector
 
 		// Getters.
 		size_t size() const;
+
+		iterator begin();
+		iterator end();
+
+		const_iterator begin() const;
+		const_iterator end() const;
+		const_iterator cbegin() const;
+		const_iterator cend() const;
 
 		// Methods.
 		void push_back(Type&& obj);
@@ -70,7 +79,7 @@ class BigVector
 
 template<class T>
 BigVector<T>::BigVector(const std::string& dump_filename, const size_t& window_width)
-	: _dump_stream(dump_filename, std::ios::in | std::ios::out | std::ios::binary),
+	: _dump_stream(dump_filename, dump_mode),
 	  _dump_size(0),
 	  _total_size(0),
 	  _window_offset(0),
@@ -88,7 +97,7 @@ BigVector<T>::BigVector(const std::string& dump_filename, const size_t& window_w
 		// save it.
 		ofs.close();
 		// and open stream again.
-		_dump_stream.open(dump_filename, std::ios::in | std::ios::out | std::ios::binary);
+		_dump_stream.open(dump_filename, dump_mode);
 	}
 
 	/*
@@ -106,10 +115,38 @@ BigVector<T>::BigVector(const std::string& dump_filename, const size_t& window_w
 
 
 template<class T>
+BigVector<T>::BigVector(BigVector&& vector)
+	: _dump_stream(std::move(vector._dump_stream)),
+	  _dump_size(std::move(vector._dump_size)),
+	  _total_size(std::move(vector._total_size)),
+	  _window_offset(std::move(vector._window_offset)),
+	  _window_width(std::move(vector._window_width)),
+	  _data_window(std::move(vector._data_window)),
+	  _is_dirty_window(std::move(vector._is_dirty_window))
+{
+}
+
+
+template<class T>
 BigVector<T>::~BigVector()
 {
 	_update_dumpfile();
 	_dump_stream.close();
+}
+
+
+template<class T>
+BigVector<T>& BigVector<T>::operator=(BigVector&& vector)
+{
+	_dump_stream = std::move(vector._dump_stream);
+	_dump_size = std::move(vector._dump_size);
+	_total_size = std::move(vector._total_size);
+	_window_offset = std::move(vector._window_offset);
+	_window_width = std::move(vector._window_width);
+	_data_window = std::move(vector._data_window);
+	_is_dirty_window = std::move(vector._is_dirty_window);
+
+	return (*this);
 }
 
 
@@ -140,6 +177,20 @@ template<class T>
 size_t BigVector<T>::size() const
 {
 	return _total_size;
+}
+
+
+template<class T>
+typename BigVector<T>::iterator BigVector<T>::begin()
+{
+	return std::move(iterator(this, 0));
+}
+
+
+template<class T>
+typename BigVector<T>::iterator BigVector<T>::end()
+{
+	return std::move(iterator(this, _total_size));
 }
 
 
@@ -248,6 +299,114 @@ void BigVector<T>::_update_dumpfile()
 
 	_is_dirty_window = false;
 }
+
+
+template<class T>
+class BigVector<T>::iterator
+{
+	public:
+		// Typedefs.
+		typedef typename std::vector<T>::iterator							Iterator;
+		typedef typename std::iterator_traits<Iterator>::value_type			value_type;
+		typedef typename std::iterator_traits<Iterator>::pointer			pointer;
+		typedef typename std::iterator_traits<Iterator>::reference			reference;
+		typedef typename std::iterator_traits<Iterator>::difference_type	difference_type;
+		typedef std::random_access_iterator_tag								iterator_category;
+
+		// Constructors / Destructor.
+		iterator(BigVector<T>* container, const size_t& offset)
+			: _container(container),
+			  _offset(offset) {}
+		iterator(const iterator& it)
+			: _container(it._container),
+			  _offset(it._offset) {}
+		iterator(iterator&& it)
+			: _container(it._container),
+			  _offset(it._offset) {}
+		~iterator() {}
+
+		// Operators.
+		bool operator==(const iterator& it)
+		{
+			return (_offset == it._offset);
+		}
+
+		bool operator!=(const iterator& it)
+		{
+			return !(this->operator==(it));
+		}
+
+		iterator& operator++()
+		{
+			++_offset;
+			return (*this);
+		}
+
+		iterator operator++(int)
+		{
+			iterator tmp(*this);
+			this->operator++();
+
+			return tmp;
+		}
+
+		iterator& operator--()
+		{
+			--_offset;
+			return (*this);
+		}
+
+		iterator operator--(int)
+		{
+			iterator tmp(*this);
+			this->operator--();
+
+			return tmp;
+		}
+
+		iterator operator+(const size_t& x)
+		{
+			iterator tmp(*this);
+			tmp._offset += x;
+
+			return tmp;
+		}
+
+		iterator operator-(const size_t& x)
+		{
+			iterator tmp(*this);
+			tmp._offset -= x;
+
+			return tmp;
+		}
+
+		T& operator*()
+		{
+			return _container->operator[](_offset);
+		}
+
+		T* operator->()
+		{
+			return &(_container->operator[](_offset));
+		}
+
+	private:
+		BigVector<T>* _container;
+		size_t _offset;
+};
+
+
+template<class T>
+class BigVector<T>::const_iterator
+{
+		// Typedefs.
+		typedef typename std::vector<T>::const_iterator						Iterator;
+		typedef typename std::iterator_traits<Iterator>::value_type			value_type;
+		typedef typename std::iterator_traits<Iterator>::pointer			pointer;
+		typedef typename std::iterator_traits<Iterator>::reference			reference;
+		typedef typename std::iterator_traits<Iterator>::difference_type	difference_type;
+		typedef std::forward_iterator_tag									iterator_category;
+};
 
 
 // __BIGVECTOR_H__
