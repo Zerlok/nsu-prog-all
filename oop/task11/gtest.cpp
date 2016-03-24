@@ -15,8 +15,8 @@ class Checker
 {
 	public:
 		Checker(Boolean& b)
-			: is_created(b),
-			  x(1) { is_created = Boolean::TRUE; }
+			: x(1),
+			  is_created(b) { is_created = Boolean::TRUE; }
 		~Checker() { is_created = Boolean::FALSE; }
 
 		int x;
@@ -51,12 +51,12 @@ TEST(SharedPointer, Nullpointer)
 	EXPECT_TRUE(p2.is_null());
 	EXPECT_EQ(nullptr, p2.get_pointer());
 
-	EXPECT_EQ(0, p1.get_references_counter());
-	EXPECT_EQ(0, p2.get_references_counter());
+	EXPECT_EQ(0, p1.get_shares_num());
+	EXPECT_EQ(0, p2.get_shares_num());
 
 	p2 = new Empty();
 	EXPECT_FALSE(p2.is_null());
-	EXPECT_EQ(1, p2.get_references_counter());
+	EXPECT_EQ(1, p2.get_shares_num());
 }
 
 
@@ -92,24 +92,24 @@ TEST(SharedPointer, CopyEq)
 		SharedPointer<Checker> p1, p2, p;
 		p1 = new Checker(is_created1);
 		EXPECT_EQ(Boolean::TRUE, is_created1);
-		EXPECT_EQ(1, p1.get_references_counter());
+		EXPECT_EQ(1, p1.get_shares_num());
 
 		p = p1;
 		EXPECT_EQ(Boolean::TRUE, is_created1);
-		EXPECT_EQ(2, p1.get_references_counter());
+		EXPECT_EQ(2, p1.get_shares_num());
 
 		p2 = new Checker(is_created2);
 		EXPECT_EQ(Boolean::TRUE, is_created2);
-		EXPECT_EQ(1, p2.get_references_counter());
+		EXPECT_EQ(1, p2.get_shares_num());
 
 		p = p2;
 		EXPECT_EQ(Boolean::TRUE, is_created1);
-		EXPECT_EQ(1, p1.get_references_counter());
-		EXPECT_EQ(2, p2.get_references_counter());
+		EXPECT_EQ(1, p1.get_shares_num());
+		EXPECT_EQ(2, p2.get_shares_num());
 
 		p1 = p;
 		EXPECT_EQ(Boolean::FALSE, is_created1);
-		EXPECT_EQ(3, p1.get_references_counter());
+		EXPECT_EQ(3, p1.get_shares_num());
 	}
 
 	EXPECT_EQ(Boolean::FALSE, is_created1);
@@ -138,14 +138,14 @@ TEST(SharedPointer, CopyOnWrite)
 	SharedPointer<Empty, true> p1, p2;
 	p1 = p2 = new Empty();
 	const SharedPointer<Empty, true> p3 = p1;
-	EXPECT_EQ(3, p3.get_references_counter());
+	EXPECT_EQ(3, p3.get_shares_num());
 
 	*(p3);
-	EXPECT_EQ(3, p3.get_references_counter());
+	EXPECT_EQ(3, p3.get_shares_num());
 
-	*(p1);
-	EXPECT_EQ(1, p1.get_references_counter());
-	EXPECT_EQ(2, p2.get_references_counter());
+	*(p1); // calls nonconst operator!
+	EXPECT_EQ(1, p1.get_shares_num());
+	EXPECT_EQ(2, p2.get_shares_num());
 }
 
 
