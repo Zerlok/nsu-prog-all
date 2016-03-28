@@ -96,12 +96,12 @@ TEST(BigVector, PushBack)
 
 TEST(BigVector, Iterator)
 {
-	fillfine("test.ser", 1000);
+	fillvalue("test.ser", 1000, 47);
 	BigVector<int> values("test.ser", 100);
-	BigVector<int>& vals = values;
+	const BigVector<int>& vals = values;
 
-	for (int& x : vals)
-		x += 10;
+	for (const int& x : vals)
+		EXPECT_EQ(47, x);
 }
 
 
