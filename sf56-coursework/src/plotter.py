@@ -11,12 +11,22 @@ from pyqtgraph.Qt import QtGui, QtCore
 
 
 WINDOW_TITLE = "SF-56 Spectrums View"
+DEFAULT_PALETTE = (
+		(247, 158, 80),
+		(188, 122, 255),
+		(87, 87, 255),
+# 		(247, 241, 80),
+		(169, 247, 80),
+# 		(80, 247, 158),
+		(85, 247, 80),
+		(80, 247, 241),
+)
 
 
 def generate_palettes(n):
 	'''Generates n RGB palettes.'''
-	if not n:
-		return []
+	if n <= len(DEFAULT_PALETTE):
+		return DEFAULT_PALETTE[:n]
 	
 	p_size = 256
 	p_max = 250
