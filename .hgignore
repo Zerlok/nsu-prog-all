@@ -25,3 +25,6 @@ syntax: glob
 *_samples*
 *oop/build*
 oop/task3/argvparser.h
+*.metadata
+*.settings
+*.pyc
