@@ -4,15 +4,8 @@
 
 #include <string>
 #include <vector>
-using Arguments = std::vector<std::string>;
-
-
-#include <sstream>
-#include <stdexcept>
 #include <unordered_map>
-
-
-static const std::string ERR_KEY_NOT_FOUND = "The key is not registered: ";
+using Strings = std::vector<std::string>;
 
 
 template<class BaseCls>
@@ -21,8 +14,7 @@ class AbstractClassCreator
 	public:
 		AbstractClassCreator() {}
 		virtual ~AbstractClassCreator() {}
-		virtual BaseCls* create() = 0;
-		virtual BaseCls* create(const Arguments& args) = 0;
+		virtual BaseCls* create(const Strings& args) = 0;
 };
 
 
@@ -33,12 +25,7 @@ class DerivedClassCreator : public AbstractClassCreator<BaseCls>
 		DerivedClassCreator() {}
 		virtual ~DerivedClassCreator() {}
 
-		BaseCls* create()
-		{
-			return new DerivedCls();
-		}
-
-		BaseCls* create(const Arguments& args)
+		BaseCls* create(const Strings& args)
 		{
 			return new DerivedCls(args);
 		}
@@ -77,31 +64,28 @@ class Factory
 			typename CreatorsMap::iterator it = _creators.find(key);
 
 			if (it == _creators.end())
-			{
-				std::stringstream ss;
-				ss << ERR_KEY_NOT_FOUND << key;
-				throw std::invalid_argument(ss.str());
-			}
+				return nullptr;
 
 			return ((it->second)->create());
 		}
 
-		BaseCls* create(const Key &key, const Arguments& args)
+		BaseCls* create(const Key &key, const Strings& args)
 		{
 			typename CreatorsMap::iterator it = _creators.find(key);
 
 			if (it == _creators.end())
-			{
-				std::stringstream ss;
-				ss << ERR_KEY_NOT_FOUND << key;
-				throw std::invalid_argument(ss.str());
-			}
+				return nullptr;
 
-			if (args.empty())
-				return ((it->second)->create());
+			return ((it->second)->create(args));
+		}
 
-			else
-				return ((it->second)->create(args));
+		const std::vector<Key> get_registred() const
+		{
+			std::vector<Key> keys;
+			for (auto const kv_pair : _creators)
+				keys.push_back(kv_pair.first);
+
+			return std::move(keys);
 		}
 
 	private:

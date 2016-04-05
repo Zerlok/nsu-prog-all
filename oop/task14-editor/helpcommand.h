@@ -2,14 +2,27 @@
 #define __HELP_COMMAND_H__
 
 
+#include <iostream>
 #include "command.h"
 
 
-class HelpCommand : public HelpCommand
+class HelpCommand : public Command
 {
 	public:
-		HelpCommand();
-		~HelpCommand();
+		HelpCommand()
+			: Command(Command::Type::help) {}
+		HelpCommand(const Strings&)
+			: Command(Command::Type::help) {}
+		~HelpCommand() {}
+
+		void execute(std::ostream& out, const std::vector<std::string>& cmd_names)
+		{
+			out << "Help message: Available commands:" << std::endl;
+			for (const std::string& name : cmd_names)
+				out << "  * " << name << std::endl;
+		}
 };
 
-#endif // __HELP_COMMAND_H__
+
+// __HELP_COMMAND_H__
+#endif
