@@ -5,7 +5,7 @@ from re import compile as reg_compile, split as reg_split
 from bisect import bisect
 
 from spectrummath import Polinom
-from operator import __mul__, __div__
+from operator import __add__, __sub__, __mul__, __div__
 
 
 SF_COMMENT='//'
@@ -27,9 +27,31 @@ class Spectrum:
 		self.axis_y = y or []
 		self.length = len(self.axis_x)
 
+	def __add__(self, s):
+		add_spectrum = Spectrum(
+				name = "{} + {}".format(self.name, s),
+				x = list(self.axis_x),
+		)
+		
+		if isinstance(s, int):
+			add_spectrum.axis_y = [y + s for y in self.axis_y]
+			return add_spectrum
+		
+		if not isinstance(s, Spectrum):
+			return None
+		
+		if (len(self) != len(s)):
+			raise SpectrumsDifferentLengths({
+					'a': len(self),
+					'b': len(s),
+			})
+		
+		add_spectrum.axis_y = map(__add__, self.axis_y, s.axis_y)
+		return add_spectrum
+
 	def __div__(self, s):
 		div_spectrum = Spectrum(
-				name = "{}-div-{}".format(self.name, s),
+				name = "{} div {}".format(self.name, s),
 				x = list(self.axis_x),
 		)
 		
@@ -75,7 +97,29 @@ class Spectrum:
 	
 	def __str__(self):
 		return self.name
-	
+
+	def __sub__(self, s):
+		sub_spectrum = Spectrum(
+				name = "{} - {}".format(self, s),
+				x = list(self.x),
+		)
+		
+		if isinstance(s, int):
+			sub_spectrum.axis_y = [y - s for y in self.axis_y]
+			return sub_spectrum
+		
+		if not isinstance(s, Spectrum):
+			return None
+		
+		if (len(self) != len(s)):
+			raise SpectrumsDifferentLengths({
+					'a': len(self),
+					'b': len(s),
+			})
+		
+		sub_spectrum.axis_y = map(__sub__, self.axis_y, s.axis_y)
+		return sub_spectrum
+
 	def append(self, x, y):
 		'''Adds x and y back to spectrum.
 		NOTE: x must be greater than all other x in spectrum!'''
@@ -156,7 +200,7 @@ def get_x_range_intersection(*spectrums):
 		
 		return (total_min_x, total_max_x) if (total_max_x >= total_min_x) else None
 
-	min_x, max_x = _get_begin_and_end_of_x_range_intersection(spectrums) or (0, 0)
+	min_x, max_x = _get_begin_and_end_of_x_range_intersection(*spectrums) or (0, 0)
 	x_range = set(spectrums[0].axis_x)
 
 	for spectrum in spectrums[1:]:

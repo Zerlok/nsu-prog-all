@@ -1,17 +1,16 @@
-from sf56spectrum import read_sf, write_sf
-from plotter import show_spectrums
+from sf56spectrum import *
+from plotter import *
+from optics import *
 
 
-# s0 = read_sf('data/si_ref_09deg.sf')
-s = read_sf('data/si_ref_09deg.sf')
-p = read_sf('data/ITO_R1_09deg.sf')
+tr = read_sf('data/ITO_tr_69om.sf')
+ref = read_sf('data/ITO_ref_69om_09deg_real.sf')
+ref45 = read_sf('data/ITO_ref_69om_45deg_real.sf')
+summ = tr + ref
 
-s1 = s.copy()
-s1.set_x_range(p.axis_x)
-s1.name = "%s-smooth" % s.name
+tr.name = "Transmit"
+ref.name = "Reflect 9 degrees"
+ref45.name = "Reflect 45 degrees"
+summ.name = "Sum"
 
-p1 = p * s1 / 100
-p1.name = "%s-real" % p.name
-
-show_spectrums(s, s1, p, p1)
-# write_sf(p1, 'data/ITO_R1_09deg_real.sf')
+show_spectrums(tr, ref, summ, title="ITO 69 Om")

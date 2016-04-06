@@ -15,11 +15,11 @@ DEFAULT_PALETTE = (
 		(247, 158, 80),
 		(188, 122, 255),
 		(87, 87, 255),
-# 		(247, 241, 80),
 		(169, 247, 80),
-# 		(80, 247, 158),
 		(85, 247, 80),
 		(80, 247, 241),
+# 		(247, 241, 80),
+# 		(80, 247, 158),
 )
 
 
@@ -37,8 +37,8 @@ def generate_palettes(n):
 			for x in xrange(p_min, p_max, p_step)]
 
 
-def create_plot(window):
-	plot = window.addPlot(title="Spectrums")
+def create_plot(window, title):
+	plot = window.addPlot(title=title)
 	plot.showGrid(x=True, y=True)
 	plot.setLabel('left', "Intensity", units="%")
 	plot.setLabel('bottom', "Wave Length (nm)")
@@ -47,7 +47,7 @@ def create_plot(window):
 	return plot
 
 
-def show_spectrums(*spectrums):
+def show_spectrums(*spectrums, **kwargs):
 	# Create a Qt application and show the spectrums.
 	app = QtGui.QApplication([])
 	window = pyg.GraphicsWindow(title=WINDOW_TITLE)
@@ -55,7 +55,7 @@ def show_spectrums(*spectrums):
 	pyg.setConfigOptions(antialias=True)
 	
 	palette = generate_palettes(len(spectrums))
-	plot_view = create_plot(window)
+	plot_view = create_plot(window, kwargs.get('title') or "Spectrums")
 
 	# Add each spectrum to plot view.
 	for i in xrange(len(spectrums)):
