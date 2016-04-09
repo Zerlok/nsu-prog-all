@@ -4,7 +4,7 @@ reflected spectrums."""
 
 from sys import argv
 from sf56spectrum import get_x_range_intersection, read_sf, Spectrum
-from src.plotter import show_spectrums
+from plotter import show_spectrums
 
 
 def get_absorption_spectrum(transmit, reflect):
@@ -31,3 +31,4 @@ if __name__ == '__main__':
 	
 	tr = read_sf(argv[1])
 	ref = read_sf(argv[2])
+	show_spectrums(tr, ref, get_absorption_spectrum(tr, ref))

@@ -10,16 +10,19 @@ import pyqtgraph as pyg
 from pyqtgraph.Qt import QtGui, QtCore
 
 
+
 WINDOW_TITLE = "SF-56 Spectrums View"
 DEFAULT_PALETTE = (
-		(247, 158, 80),
-		(188, 122, 255),
-		(87, 87, 255),
-		(169, 247, 80),
-		(85, 247, 80),
-		(80, 247, 241),
-# 		(247, 241, 80),
-# 		(80, 247, 158),
+		(45, 0, 173),
+		(173, 31, 0),
+		(56, 173, 0),
+		(0, 173, 60),
+		(133, 127, 0),
+		(173, 0, 30),
+		(0, 133, 61),
+		(50, 133, 0),
+		(0, 116, 133),
+		(173, 147, 0),
 )
 
 
@@ -50,12 +53,19 @@ def create_plot(window, title):
 def show_spectrums(*spectrums, **kwargs):
 	# Create a Qt application and show the spectrums.
 	app = QtGui.QApplication([])
+	
+	# Pyqtgraph setup.
+	pyg.setConfigOptions(antialias=True)
+	pyg.setConfigOption('background', 'w')
+	pyg.setConfigOption('foreground', 'k')
+	
+	# Create the plot window.
 	window = pyg.GraphicsWindow(title=WINDOW_TITLE)
 	window.resize(1000, 600)
-	pyg.setConfigOptions(antialias=True)
 	
 	palette = generate_palettes(len(spectrums))
 	plot_view = create_plot(window, kwargs.get('title') or "Spectrums")
+	plot_view.setYRange(0, 100, padding=0)
 
 	# Add each spectrum to plot view.
 	for i in xrange(len(spectrums)):
@@ -63,7 +73,7 @@ def show_spectrums(*spectrums, **kwargs):
 				name = spectrums[i].name,
 				x = spectrums[i].axis_x,
 				y = spectrums[i].axis_y,
-				pen = palette[i],
+				pen = pyg.mkPen(palette[i], width=2),
 		)
 
 	# Run Qt app.
