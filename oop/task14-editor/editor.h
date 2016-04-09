@@ -17,7 +17,7 @@ class Editor
 		Editor(std::istream& input, std::ostream& output);
 		~Editor();
 
-		const std::string& execute_command(Command* cmd);
+		const std::string& execute_command(Command& cmd);
 		void run();
 
 	private:
@@ -25,8 +25,10 @@ class Editor
 		std::string _buffer;
 		std::istream& _commands_stream;
 		std::ostream& _output_stream;
-		CommandFactory _commands_factory;
+		CommandsPrototypes _commands_prototypes;
 		History _data_history;
+
+		void _yield(const std::string& s);
 };
 
 

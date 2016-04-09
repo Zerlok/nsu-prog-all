@@ -7,10 +7,7 @@
 #include <vector>
 #include "factory.h"
 #include "history.h"
-
-
-class Command;
-using CommandFactory = Factory<std::string, Command>;
+#include "editorerrors.h"
 
 
 class Command
@@ -26,19 +23,6 @@ class Command
 
 		// Inner classes.
 		class AbstractPrototype;
-
-		struct Error
-		{
-			Error(const std::string& err, const std::string& msg = "")
-				: error(err),
-				  message(msg) {}
-			Error(const Error&) = default;
-			Error(Error&&) = default;
-
-			std::string error;
-			std::string message;
-		};
-		using Errors = std::vector<Error>;
 		struct Result
 		{
 			// Constructors / Destructor.
@@ -59,8 +43,6 @@ class Command
 			std::string data;
 			Errors errors;
 		};
-
-		// Typedefs.
 
 		// Constructors / Destructor.
 		Command(const Type& type)
@@ -90,30 +72,47 @@ class Command
 };
 
 
+using CommandsPrototypes = PrototypeFactory<std::string, Command>;
+
+
 class Command::AbstractPrototype
 {
 	public:
-		AbstractPrototype(const Type& type, const size_t n)
-			: _type(type),
-			  _argn(n) {}
-		virtual ~AbstractPrototype() {}
+		struct Result
+		{
+			// Constructors / Destructor.
+			Result(Command* p = nullptr, const Errors& e = Errors())
+				: ptr(p), errors(e) {}
+			Result(const Result&) = default;
+			Result(Result&&) = default;
 
-		virtual Command* construct(const Strings& args) = 0;
+			// Operators.
+			Result& operator=(const Result&) = default;
+			Result& operator=(Result&&) = default;
+
+			bool is_valid() const { return errors.empty(); }
+			operator bool() const { return is_valid(); }
+			bool operator!() const { return !(this->operator bool()); }
+
+			Command *ptr = nullptr;
+			Errors errors;
+		};
+
+		AbstractPrototype()
+			: arguments() {}
+		AbstractPrototype(const Strings& args)
+			: arguments(args) {}
+		virtual ~AbstractPrototype() = default;
+		virtual Result construct() const = 0;
+
+		void set_arguments(const Strings& args)
+		{
+			arguments = args;
+		}
 
 	protected:
-		Type _type;
-		size_t _argn;
+		Strings arguments;
 };
-
-
-inline std::ostream& operator<<(std::ostream& out, const Command::Error& e)
-{
-	out << "# COMMAND ERROR: " << e.error << std::endl;
-	if (!e.message.empty())
-		out << "# ERROR MESSAGE: " << e.message << std::endl;
-
-	return out;
-}
 
 
 // __COMMAND_H__

@@ -9,32 +9,34 @@
 class InsertCommand : public Command
 {
 	public:
+		class Prototype;
+
 		InsertCommand(const int& pos)
 			: Command(Type::data_manipulation),
 			  _pos(pos) {}
-		InsertCommand(const Strings& args)
-			: Command(Type::data_manipulation),
-			  _pos(std::stoi(args[0])) {}
 		~InsertCommand() {}
+
+		size_t count_pos(const int& p, const std::string& data) const
+		{
+			const size_t& size = data.size();
+			size_t pos = (size + p) % size;
+			if (p < 0)
+				pos += 1;
+
+			return pos;
+		}
 
 		Errors validate(const std::string &data, const std::string &buffer) const override
 		{
-			std::stringstream ss;
 			Errors errs;
-			const int size = data.size();
+			const size_t size = data.size();
+			const size_t pos = count_pos(_pos, data);
 
-			if (_pos < -size)
+			if (pos > size)
 			{
-				ss << _pos << " must be greater than or equal to " << -size << std::endl;
+				std::stringstream ss;
+				ss << pos << " must be less than " << size << std::endl;
 				errs.push_back(Error("Insert position out of range!", ss.str()));
-				ss.str("");
-			}
-
-			if (size <= _pos)
-			{
-				ss << _pos << " must be less than " << size << std::endl;
-				errs.push_back(Error("Insert position out of range!", ss.str()));
-				ss.str("");
 			}
 
 			if (buffer.empty())
@@ -47,16 +49,48 @@ class InsertCommand : public Command
 		{
 			Result res(data, validate(data, buffer));
 
-			if (!res)
-				return std::move(res);
-
-			res.data.insert(_pos, buffer);
+			if (res)
+				res.data.insert(count_pos(_pos, data), buffer);
 
 			return std::move(res);
 		}
 
 	private:
 		int _pos;
+};
+
+
+class InsertCommand::Prototype : public AbstractPrototype
+{
+	public:
+		Prototype()
+			: AbstractPrototype() {}
+		Prototype(const Strings& args)
+			: AbstractPrototype(args) {}
+		~Prototype() {}
+
+		Result construct() const override
+		{
+			Result res;
+
+			if (arguments.size() == 1)
+			{
+				int pos;
+				try
+				{
+					pos = std::stoi(arguments[0]);
+					res.ptr = new InsertCommand(pos);
+				}
+				catch (const std::invalid_argument&)
+				{
+					res.errors.push_back(Error(Error::type::invalid_argument_type, "Insert argument must be an integer: insert_pos."));
+				}
+			}
+			else
+				res.errors.push_back(Error("Invalid number of arguments!", "Only one argument is required: insert_pos."));
+
+			return std::move(res);
+		}
 };
 
 

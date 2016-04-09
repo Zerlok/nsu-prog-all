@@ -9,9 +9,9 @@
 class UndoCommand : public Command
 {
 	public:
+		class Prototype;
+
 		UndoCommand()
-			: Command(Type::history_manipulation) {}
-		UndoCommand(const Strings&)
 			: Command(Type::history_manipulation) {}
 		~UndoCommand() {}
 
@@ -35,6 +35,22 @@ class UndoCommand : public Command
 			res.data = cmd_history.previous();
 
 			return std::move(res);
+		}
+};
+
+
+class UndoCommand::Prototype : public AbstractPrototype
+{
+	public:
+		Prototype()
+			: AbstractPrototype() {}
+		Prototype(const Strings& args)
+			: AbstractPrototype(args) {}
+		~Prototype() {}
+
+		Result construct() const override
+		{
+			return std::move(Result(new UndoCommand()));
 		}
 };
 

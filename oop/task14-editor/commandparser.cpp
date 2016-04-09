@@ -37,8 +37,8 @@ Strings CommandParser::split_string(const std::string& data)
 }
 
 
-CommandParser::CommandParser(CommandFactory& cmd_factory, const char& separator)
-	: _cmd_factory(cmd_factory),
+CommandParser::CommandParser(CommandsPrototypes& cmd_prototypes, const char& separator)
+	: _cmd_prototypes(cmd_prototypes),
 	  _separator(separator)
 {
 }
@@ -49,12 +49,17 @@ CommandParser::~CommandParser()
 }
 
 
-Command* CommandParser::parse(const std::string& line)
+const Command::AbstractPrototype* CommandParser::parse(const std::string& line)
 {
 	Strings args = split_string(line);
 	const std::string cmd_name = args[0];
 	args.erase(args.begin());
 
-	return _cmd_factory.create(cmd_name, args);
+	Command::AbstractPrototype* cmd_proto = _cmd_prototypes.get(cmd_name);
+
+	if (cmd_proto != nullptr)
+		cmd_proto->set_arguments(args);
+
+	return cmd_proto;
 }
 

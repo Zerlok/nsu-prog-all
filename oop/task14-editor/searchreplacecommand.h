@@ -8,14 +8,18 @@
 class SearchReplaceCommand : public Command
 {
 	public:
+		class Prototype;
+
+		SearchReplaceCommand(const std::string& substr)
+			: Command(Type::data_manipulation),
+			  _substr(substr),
+			  _repl(),
+			  _use_buffer_repl(true) {}
 		SearchReplaceCommand(const std::string& substr, const std::string& repl)
 			: Command(Type::data_manipulation),
 			  _substr(substr),
-			  _repl(repl) {}
-		SearchReplaceCommand(const Strings& args)
-			: Command(Type::data_manipulation),
-			  _substr(args[0]),
-			  _repl(args[1]) {}
+			  _repl(repl),
+			  _use_buffer_repl(false) {}
 		~SearchReplaceCommand() {}
 
 		size_t subfind(const std::string& data, const std::string& substr) const
@@ -40,15 +44,17 @@ class SearchReplaceCommand : public Command
 
 		Errors validate(const std::string& data, const std::string&) const override
 		{
+			Errors errs;
+
 			if ((data.size() < _substr.size())
 					|| (data.find(_substr) == std::string::npos))
 			{
 				std::stringstream ss;
-				ss << "'" << _substr << "' is not a substring of '" << data << "'" << std::endl;
-				return std::move(Errors({Error("Substring not found!", ss.str())}));
+				ss << "'" << _substr << "' is not a substring of '" << data << "'";
+				errs.push_back(Error("Substring not found!", ss.str()));
 			}
 
-			return std::move(Errors());
+			return std::move(errs);
 		}
 
 		Result execute(const std::string& data, std::string& buffer) override
@@ -60,7 +66,12 @@ class SearchReplaceCommand : public Command
 
 			const size_t pos = data.find(_substr);
 			res.data.erase(pos, _substr.size());
-			res.data.insert(pos, _repl);
+
+			if (_use_buffer_repl)
+				res.data.insert(pos, buffer);
+
+			else
+				res.data.insert(pos, _repl);
 
 			return std::move(res);
 		}
@@ -68,6 +79,41 @@ class SearchReplaceCommand : public Command
 	private:
 		std::string _substr;
 		std::string _repl;
+		bool _use_buffer_repl;
+};
+
+
+class SearchReplaceCommand::Prototype : public AbstractPrototype
+{
+	public:
+		Prototype()
+			: AbstractPrototype() {}
+		Prototype(const Strings& args)
+			: AbstractPrototype(args) {}
+		~Prototype() {}
+
+		Result construct() const override
+		{
+			Result res;
+
+			switch (arguments.size())
+			{
+				case 2:
+					res.ptr = new SearchReplaceCommand(arguments[0], arguments[1]);
+					break;
+
+				case 1:
+					res.ptr = new SearchReplaceCommand(arguments[0]);
+					break;
+
+				case 0:
+				default:
+					res.errors.push_back(Error(Error::type::invalid_arguments_num, "At least one argument is required."));
+					break;
+			}
+
+			return std::move(res);
+		}
 };
 
 

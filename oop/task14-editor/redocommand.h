@@ -9,9 +9,9 @@
 class RedoCommand : public Command
 {
 	public:
+		class Prototype;
+
 		RedoCommand()
-			: Command(Type::history_manipulation) {}
-		RedoCommand(const Strings&)
 			: Command(Type::history_manipulation) {}
 		~RedoCommand() {}
 
@@ -35,6 +35,22 @@ class RedoCommand : public Command
 			res.data = cmd_history.next();
 
 			return std::move(res);
+		}
+};
+
+
+class RedoCommand::Prototype : public AbstractPrototype
+{
+	public:
+		Prototype()
+			: AbstractPrototype() {}
+		Prototype(const Strings& args)
+			: AbstractPrototype(args) {}
+		~Prototype() {}
+
+		Result construct() const override
+		{
+			return std::move(Result(new RedoCommand()));
 		}
 };
 

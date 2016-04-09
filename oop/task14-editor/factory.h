@@ -8,45 +8,21 @@
 using Strings = std::vector<std::string>;
 
 
-template<class BaseCls>
-class AbstractClassCreator
-{
-	public:
-		AbstractClassCreator() {}
-		virtual ~AbstractClassCreator() {}
-		virtual BaseCls* create(const Strings& args) = 0;
-};
-
-
-template<class BaseCls, class DerivedCls>
-class DerivedClassCreator : public AbstractClassCreator<BaseCls>
-{
-	public:
-		DerivedClassCreator() {}
-		virtual ~DerivedClassCreator() {}
-
-		BaseCls* create(const Strings& args)
-		{
-			return new DerivedCls(args);
-		}
-};
-
-
 template<class K, class B>
-class Factory
+class PrototypeFactory
 {
 	public:
 		using Key = K;
 		using BaseCls = B;
-		using BaseCreator = AbstractClassCreator<BaseCls>;
+		using BaseCreator = typename BaseCls::AbstractPrototype;
 		using CreatorsMap = std::unordered_map<Key, BaseCreator*>;
 
-		Factory() {}
-		Factory(const Factory<Key, BaseCls>& factory) = delete;
-		~Factory()
+		PrototypeFactory() {}
+		PrototypeFactory(const PrototypeFactory<Key, BaseCls>&) = delete;
+		~PrototypeFactory()
 		{
-			for (std::pair<Key, BaseCreator*> p : _creators)
-				delete p.second;
+			for (const std::pair<Key, BaseCreator*>& kv_pair : _creators)
+				delete kv_pair.second;
 		}
 
 		template<class DerivedCls>
@@ -55,34 +31,23 @@ class Factory
 			if (_creators.find(key) != _creators.end())
 				return false;
 
-			_creators.insert({key, new DerivedClassCreator<BaseCls, DerivedCls>()});
+			using DerivedPrototype = typename DerivedCls::Prototype;
+			_creators.insert({key, new DerivedPrototype() });
 			return true;
 		}
 
-		BaseCls* create(const Key& key)
+		BaseCreator* get(const Key& key)
 		{
 			typename CreatorsMap::iterator it = _creators.find(key);
-
-			if (it == _creators.end())
-				return nullptr;
-
-			return ((it->second)->create());
+			return ((it != _creators.end())
+					? (it->second)
+					: nullptr);
 		}
 
-		BaseCls* create(const Key &key, const Strings& args)
-		{
-			typename CreatorsMap::iterator it = _creators.find(key);
-
-			if (it == _creators.end())
-				return nullptr;
-
-			return ((it->second)->create(args));
-		}
-
-		const std::vector<Key> get_registred() const
+		std::vector<Key> get_registred() const
 		{
 			std::vector<Key> keys;
-			for (auto const kv_pair : _creators)
+			for (const std::pair<Key, BaseCreator*>& kv_pair : _creators)
 				keys.push_back(kv_pair.first);
 
 			return std::move(keys);

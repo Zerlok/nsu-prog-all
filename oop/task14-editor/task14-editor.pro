@@ -14,7 +14,8 @@ INCLUDEPATH += /usr/include/gtest
 SOURCES += main.cpp \
     editor.cpp \
     commandparser.cpp \
-	history.cpp
+	history.cpp \
+    editorerrors.cpp
 
 HEADERS += \
 	bigvector.h \
@@ -30,6 +31,7 @@ HEADERS += \
     factory.h \
     helpcommand.h \
     setcommand.h \
-    history.h
+    history.h \
+    editorerrors.h
 
 OTHER_FILES += gtest.cpp

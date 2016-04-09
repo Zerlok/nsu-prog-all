@@ -10,74 +10,64 @@
 class CopyCommand : public Command
 {
 	public:
-		class Prototype : public AbstractPrototype
-		{
-			Prototype()
-				: AbstractPrototype(Type::data_manipulation, 2) {}
-			~Prototype() {}
-
-			CopyCommand* construct(const Strings& args) override;
-		};
+		class Prototype;
 
 		CopyCommand(const int& begin = 0, const int& end = -1)
 			: Command(Type::data_manipulation),
 			  _begin(begin),
 			  _end(end) {}
-		CopyCommand(const Strings& args)
-			: Command(Type::data_manipulation),
-			  _begin(std::stoi(args[0])),
-			  _end(std::stoi(args[1])) {}
 		~CopyCommand() {}
+
+		size_t count_pos(const int& p, const std::string& data) const
+		{
+			const size_t& size = data.size();
+			size_t pos = (size + p) % size;
+			if (p < 0)
+				pos += 1;
+
+			return pos;
+		}
 
 		Errors validate(const std::string& data, const std::string&) const override
 		{
-			const int size = int(data.size());
 			std::stringstream ss;
 			Errors errs;
+			const size_t size = data.size();
 
-			if (_begin < -size)
+			if (size == 0)
+			{
+				errs.push_back(Error("Data is empty", ss.str()));
+				return std::move(errs);
+			}
+
+			const size_t b = count_pos(_begin, data);
+			const size_t e = count_pos(_end, data);
+
+			if (b >= size)
 			{
 				ss.str("");
 				ss << "Invalid begin position: "
-				   << _begin << " must be greater than or equal to " << -size << "!"
+				   << b << " must less than " << size << "!"
 				   << std::endl;
-				errs.push_back(Error(ss.str()));
+				errs.push_back(Error("Invalid copy range", ss.str()));
 			}
 
-			if (_begin >= size)
-			{
-				ss.str("");
-				ss << "Invalid begin position: "
-				   << _begin << " must be less than " << size << "!"
-				   << std::endl;
-				errs.push_back(Error(ss.str()));
-			}
-
-			if (_end < size)
+			if (e > size)
 			{
 				ss.str("");
 				ss << "Invalid end position: "
-				   << _begin << " must be greater than or equal to " << -size << "!"
+				   << e << " must be less than " << size << "!"
 				   << std::endl;
-				errs.push_back(Error(ss.str()));
+				errs.push_back(Error("Invalid copy range", ss.str()));
 			}
 
-			if (_end >= size)
-			{
-				ss.str("");
-				ss << "Invalid end position: "
-				   << _end << " must be less than " << size << "!"
-				   << std::endl;
-				errs.push_back(Error(ss.str()));
-			}
-
-			if (_begin > _end)
+			if (b > e)
 			{
 				ss.str("");
 				ss << "Invalid begin and end position: "
-				   << _begin << " must be less than " << _end << "!"
+				   << b << " must be less than " << e << "!"
 				   << std::endl;
-				errs.push_back(Error(ss.str()));
+				errs.push_back(Error("Invalid copy range", ss.str()));
 			}
 
 			return std::move(errs);
@@ -90,8 +80,8 @@ class CopyCommand : public Command
 			if (!res)
 				return res;
 
-			const size_t b = (_begin >= 0) ? _begin : data.size() + _begin;
-			const size_t e = (_end >= 0) ? _end : data.size() + _end;
+			const size_t b = count_pos(_begin, data);
+			const size_t e = count_pos(_end, data);
 			buffer = res.data.substr(b, (e - b));
 
 			return res;
@@ -100,6 +90,56 @@ class CopyCommand : public Command
 	private:
 		int _begin;
 		int _end;
+};
+
+class CopyCommand::Prototype : public AbstractPrototype
+{
+	public:
+		Prototype()
+			: AbstractPrototype() {}
+		Prototype(const Strings& args)
+			: AbstractPrototype(args) {}
+		~Prototype() {}
+
+	Result construct() const override
+	{
+		Result res;
+
+		if (arguments.empty())
+			res.ptr = new CopyCommand();
+
+		else if (arguments.size() != 2)
+			res.errors.push_back(Error(Error::type::invalid_arguments_num, "Only 2 arguments required: start_pos, end_pos"));
+
+		else // valid number of arguments received.
+		{
+			int b;
+			int e;
+
+			try
+			{
+				b = std::stoi(arguments[0]);
+			}
+			catch (const std::invalid_argument&)
+			{
+				res.errors.push_back(Error(Error::type::invalid_argument_type, "Copy begin position must be an integer!"));
+			}
+
+			try
+			{
+				e = std::stoi(arguments[1]);
+			}
+			catch (const std::invalid_argument&)
+			{
+				res.errors.push_back(Error(Error::type::invalid_argument_type, "Copy end position must be an integer!"));
+			}
+
+			if (res)
+				res.ptr = new CopyCommand(b, e);
+		}
+
+		return std::move(res);
+	}
 };
 
 
