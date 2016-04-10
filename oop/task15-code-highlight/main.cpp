@@ -6,13 +6,13 @@
 int main(int argc, char *argv[])
 {
 	std::ifstream in(argv[1]);
+	std::ofstream out(argv[2]);
 
 	Decorator* main = new HTMLDecorator(
-			new LineNumbersDecorator(
-			new KeywordsHighlightDecorator()));
+			new KeywordsHighlightDecorator(
+			new LineNumbersDecorator()));
 
-	main->execute(in, std::cout);
-	std::cout << std::endl;
+	main->execute(in, out);
 
 	delete main;
 	return 0;

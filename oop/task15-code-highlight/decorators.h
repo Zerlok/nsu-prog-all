@@ -30,6 +30,7 @@ class HTMLDecorator : public Decorator
 			: Decorator(inner) {}
 		~HTMLDecorator() {}
 
+		void search_replace(std::string& data, const std::string& sub, const std::string& repl);
 		void execute(std::istream& in, std::ostream& out) override;
 };
 
@@ -56,11 +57,28 @@ class KeywordsHighlightDecorator : public Decorator
 			: Decorator(inner) {}
 		~KeywordsHighlightDecorator() {}
 
+		bool highlight(std::string& data,
+					   const std::string& word,
+					   const std::string& left_tag,
+					   const std::string& right_tag = "");
 		void execute(std::istream& in, std::ostream& out) override;
 
 	private:
+		static const WordsSet _macroses;
 		static const WordsSet _basetypes;
 		static const WordsSet _basewords;
+};
+
+
+class StringHighlightDecorator : public Decorator
+{
+	public:
+		StringHighlightDecorator() {}
+		StringHighlightDecorator(Decorator* inner)
+			: Decorator(inner) {}
+		~StringHighlightDecorator() {}
+
+		void execute(std::istream& in, std::ostream& out) override;
 };
 
 
