@@ -16,21 +16,21 @@ size_t get_non_alpha_pos(const std::string& data, const char& s)
 
 
 using Strings = std::vector<std::string>;
-Strings split_to_words(const std::string& data)
+Strings split_to_words(const std::string& data, const char& separator)
 {
 	std::vector<std::string> strings;
 
 	if (data.empty())
 		return std::move(strings);
 
-	std::string str = data + _separator;
+	std::string str = data + separator;
 	const size_t max_len = str.length();
 	std::string value;
 
 	size_t separator_pos;
 	while (!str.empty())
 	{
-		separator_pos = get_non_alpha_pos(str);
+		separator_pos = get_non_alpha_pos(str, separator);
 		value = str.substr(0, separator_pos);
 
 		if (!value.empty())
@@ -43,7 +43,7 @@ Strings split_to_words(const std::string& data)
 }
 
 
-using StringPositions = std::vector<std::string::iterator>;
+using StringPositions = std::vector<size_t>;
 StringPositions find_all(const std::string& data, const std::string& substr)
 {
 	StringPositions posis;
@@ -54,22 +54,23 @@ StringPositions find_all(const std::string& data, const std::string& substr)
 		return std::move(posis);
 
 	std::string tmp;
-	size_t pos;
-	for (size_t i = 0; i < data.size();)
+	size_t pos = 0;
+	for (size_t i = 0; i < data.size(); i = pos + sub_len)
 	{
+		// Skip previous data.
 		tmp = data.substr(i, data_len);
-		pos = data.find(substr) + i;
+		// Find next match with substr.
+		pos = tmp.find(substr);
 
-		if (((pos > 0) && (!std::isalpha(data[pos-1])))
-				&& (!std::isalpha()))
-
-		if (pos != std::string::npos)
-		{
-			posis.push_back(pos);
-			i += sub_len;
-		}
-		else
+		// If substr not found - exit.
+		if (pos == std::string::npos)
 			break;
+
+		pos += i;
+		// If substr found - check for exact match and save position of substr.
+		if (((pos == 0) || (!std::isalpha(data[pos - 1])))
+				&& ((pos + sub_len == data_len) || (!std::isalpha(data[pos + sub_len]))))
+			posis.push_back(pos);
 	}
 
 	return std::move(posis);
@@ -104,7 +105,9 @@ void LineNumbersDecorator::execute(std::istream& in, std::ostream& out)
 
 	while (getline(in, line))
 	{
-		out << num << " | " << line << std::endl;
+		out << num << " | ";
+		Decorator::execute(in, out);
+		out << std::endl;
 		++num;
 	}
 }
@@ -136,15 +139,28 @@ const KeywordsHighlightDecorator::WordsSet KeywordsHighlightDecorator::_baseword
 
 void KeywordsHighlightDecorator::execute(std::istream& in, std::ostream& out)
 {
+	static const std::string bold_begin = "<b>";
+	static const std::string bold_end = "</b>";
+	static const size_t bold_begin_len = bold_begin.size();
+	static const size_t bold_end_len = bold_end.size();
+
 	std::string line;
+	StringPositions posis;
 
 	while (getline(in, line))
 	{
-		for (const std::string& word : words)
+		for (const std::string& word : _basetypes)
 		{
-			const std::string::iterator pos = line.find
-			const WordsSet::const_iterator it = _basetypes.find(word);
-			if ()
+			const size_t word_size = word.size();
+			posis = find_all(line, word);
+
+			for (size_t i = 0; i < posis.size(); ++i)
+			{
+				line.insert(posis[i] + i*(bold_begin_len + bold_end_len) + word_size, bold_end);
+				line.insert(posis[i] + i*(bold_begin_len + bold_end_len), bold_begin);
+			}
 		}
+
+		out << line << std::endl;
 	}
 }

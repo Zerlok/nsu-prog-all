@@ -7,9 +7,9 @@ int main(int argc, char *argv[])
 {
 	std::ifstream in(argv[1]);
 
-	AbstractDecorator* main = new HTMLDecorator(
+	Decorator* main = new HTMLDecorator(
 			new LineNumbersDecorator(
-			new CodeHighlightDecorator()));
+			new KeywordsHighlightDecorator()));
 
 	main->execute(in, std::cout);
 	std::cout << std::endl;

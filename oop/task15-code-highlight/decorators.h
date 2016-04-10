@@ -60,6 +60,7 @@ class KeywordsHighlightDecorator : public Decorator
 
 	private:
 		static const WordsSet _basetypes;
+		static const WordsSet _basewords;
 };
 
 
