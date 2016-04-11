@@ -4,62 +4,6 @@
 #include "decorators.h"
 
 
-size_t get_non_alpha_pos(const std::string& data)
-{
-	size_t i;
-
-	for (i = 0; i < data.size(); ++i)
-		if (!std::isalpha(data[i]))
-			break;
-
-	return i;
-}
-
-
-using Strings = std::vector<std::string>;
-Strings split_to_words(const std::string& data, const char& separator)
-{
-	std::vector<std::string> strings;
-
-	if (data.empty())
-		return std::move(strings);
-
-	std::string str = data + separator;
-	const size_t max_len = str.length();
-	std::string value;
-
-	size_t separator_pos;
-	while (!str.empty())
-	{
-		separator_pos = get_non_alpha_pos(str);
-		value = str.substr(0, separator_pos);
-
-		if (!value.empty())
-			strings.push_back(value);
-
-		str = str.substr(separator_pos+1, max_len);
-	}
-
-	return std::move(strings);
-}
-
-
-bool is_inside_string(const std::string& data, const size_t& pos)
-{
-	bool is_string = false;
-	for (size_t i = 0; i < data.size(); ++i)
-	{
-		if (i == pos)
-			return is_string;
-
-		if (data[i] == '"')
-			is_string = !is_string;
-	}
-
-	return is_string;
-}
-
-
 using StringPositions = std::vector<size_t>;
 StringPositions find_all(const std::string& data, const std::string& substr)
 {
@@ -72,26 +16,50 @@ StringPositions find_all(const std::string& data, const std::string& substr)
 
 	std::string tmp;
 	size_t pos = 0;
-	for (size_t i = 0; i < data.size(); i = pos + sub_len)
+	for (size_t offset = 0; offset < data.size(); offset = pos + sub_len)
 	{
 		// Skip previous data.
-		tmp = data.substr(i, data_len);
-		// Find next match with substr.
+		tmp = data.substr(offset, data_len);
+		// Find next match with substr in tmp string.
 		pos = tmp.find(substr);
 
 		// If substr not found - exit.
 		if (pos == std::string::npos)
 			break;
 
-		pos += i;
-		// If substr found - check for exact match and save position of substr.
-		if (((pos == 0) || (!std::isalpha(data[pos - 1])))
-				&& ((pos + sub_len == data_len) || (!std::isalpha(data[pos + sub_len])))
-				&& (!is_inside_string(data, pos)))
-			posis.push_back(pos);
+		pos += offset;
+		posis.push_back(pos);
 	}
 
 	return std::move(posis);
+}
+
+
+// Returns the depth of position. Depth counts on left and right strings appearence.
+// If left and right string are the same, than value of depth is 1 or 0 (as with string brackets).
+// Otherwise when left string appeares, depth increases, when right string appeares, depth decreases.
+int get_insidence(const std::string& data, const size_t& pos, const std::string& left, std::string right = "")
+{
+	if (right.empty())
+		right = left;
+
+	StringPositions positions = find_all(data, left);
+	int depth = 0;
+	for (const size_t& left_pos : positions)
+		if ((left_pos < pos)
+				&& !((left_pos > 0) && (data[left_pos - 1] == '\\')))
+			++depth;
+
+	if (left.compare(right) == 0)
+		return (depth % 2);
+
+	positions = find_all(data, right);
+	for (const size_t& right_pos : positions)
+		if ((right_pos < pos)
+				&& !((right_pos > 0) && (data[right_pos - 1] == '\\')))
+			--depth;
+
+	return depth;
 }
 
 
@@ -134,6 +102,7 @@ void HTMLDecorator::execute(std::istream& in, std::ostream& out)
 	std::string line;
 	std::stringstream ss;
 
+	// TODO: load from css file.
 	out << "<!DOCTYPE html>" << std::endl
 		<< "<html>" << std::endl
 		<< "<head>" << std::endl
@@ -158,7 +127,7 @@ void HTMLDecorator::execute(std::istream& in, std::ostream& out)
 	{
 		search_replace(line, "<", "&lt;");
 		search_replace(line, ">", "&gt;");
-//		search_replace(line, "\"", "&quot;");
+		search_replace(line, "\"", "&quot;");
 		ss << line << std::endl;
 	}
 
@@ -227,11 +196,9 @@ const KeywordsHighlightDecorator::WordsSet KeywordsHighlightDecorator::_baseword
 	"auto",
 	"bitand",
 	"bitor",
-	"bool",
 	"break",
 	"case",
 	"catch",
-	"char",
 //	"class",
 	"compl",
 	"concept",
@@ -272,7 +239,6 @@ const KeywordsHighlightDecorator::WordsSet KeywordsHighlightDecorator::_baseword
 	"requires",
 	"return",
 	"sizeof",
-	"static",
 	"static_assert",
 	"static_cast",
 	"struct",
@@ -297,51 +263,72 @@ const KeywordsHighlightDecorator::WordsSet KeywordsHighlightDecorator::_baseword
 };
 
 
-bool KeywordsHighlightDecorator::highlight(
+size_t KeywordsHighlightDecorator::highlight(
 		std::string& data,
 		const std::string& word,
 		const std::string& left_tag,
 		const std::string& right_tag)
 {
-	const size_t tags_len = left_tag.size() + right_tag.size();
+	size_t highlights_num = 0;
 	const size_t word_size = word.size();
 	StringPositions positions = find_all(data, word);
 
-	for (size_t i = 0; i < positions.size(); ++i)
+	for (int i = positions.size() - 1; i >= 0; --i)
 	{
-		if (!right_tag.empty())
-			data.insert(positions[i] + i*tags_len + word_size, right_tag);
+		const size_t& pos = positions[i];
+		// Check keyword is located in usual code space,
+		// skip it if keyword is inside string or comment or subword.
+		if (get_insidence(data, pos, "&quot;")				// skip string
+				|| get_insidence(data, pos, "//")			// skip comment
+				|| ((pos > 0)
+					&& (std::isalnum(data[pos - 1])
+						|| (data[pos - 1] == '_')))
+				|| ((pos + word_size < data.size())
+					&& (std::isalnum(data[pos + word_size])
+						|| (data[pos + word_size] == '_'))))
+			continue;
 
-		data.insert(positions[i] + i*tags_len, left_tag);
+		if (!right_tag.empty())
+			data.insert(positions[i] + word_size, right_tag);
+
+		data.insert(positions[i], left_tag);
+		++highlights_num;
 	}
 
-	return (!positions.empty());
+	return highlights_num;
 }
 
 
 void KeywordsHighlightDecorator::execute(std::istream& in, std::ostream& out)
 {
+	static const std::string macros_tag = "<font class='macros'>";
+	static const std::string baseword_tag = "<font class='baseword'>";
+	static const std::string basetype_tag = "<font class='basetype'>";
+	static const std::string comment_tag = "<font class='comment'>";
+	static const std::string close_tag = "</font>";
+
 	std::string line;
 	std::stringstream ss;
 
 	while (std::getline(in, line))
 	{
-		if (highlight(line, "//", "<font class='comment'>"))
-		{
-			ss << line << "</font>" << std::endl;
-			continue;
-		}
-
-//		highlight(line, "class", "<font class='baseword'>", "</font>");
+		highlight(line, "class", baseword_tag, close_tag);
 
 		for (const std::string& word : _macroses)
-			highlight(line, word, "<font class='macros'>", "</font>");
+			highlight(line, word, macros_tag, close_tag);
 
 		for (const std::string& word : _basewords)
-			highlight(line, word, "<font class='baseword'>", "</font>");
+			highlight(line, word, baseword_tag, close_tag);
 
 		for (const std::string& word : _basetypes)
-			highlight(line, word, "<font class='basetype'>", "</font>");
+			highlight(line, word, basetype_tag, close_tag);
+
+		// TODO: Create CommentHighlitDecorator.
+		if (highlight(line, "//", comment_tag))
+		{
+			ss << line << close_tag << std::endl;
+			continue;
+		}
 
 		ss << line << std::endl;
 	}

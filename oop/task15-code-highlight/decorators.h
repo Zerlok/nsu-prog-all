@@ -57,7 +57,7 @@ class KeywordsHighlightDecorator : public Decorator
 			: Decorator(inner) {}
 		~KeywordsHighlightDecorator() {}
 
-		bool highlight(std::string& data,
+		size_t highlight(std::string& data,
 					   const std::string& word,
 					   const std::string& left_tag,
 					   const std::string& right_tag = "");
