@@ -8,10 +8,10 @@ int main(int argc, char *argv[])
 	std::ifstream in;
 	std::ofstream out;
 
-//	Decorator* main = new HTMLDecorator(new StringHighlightDecorator());
 	Decorator* main = new HTMLDecorator(
 			new KeywordsHighlightDecorator(
-			new LineNumbersDecorator()));
+			new LineNumbersDecorator(
+			new StringHighlightDecorator())));
 
 	if (argc < 2)
 		std::cerr << "At least one argument is required: file for parsing." << std::endl

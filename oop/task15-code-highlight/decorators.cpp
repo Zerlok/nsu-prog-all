@@ -341,23 +341,45 @@ void StringHighlightDecorator::execute(std::istream& in, std::ostream& out)
 {
 	static const std::string left_tag = "<font class='string'>";
 	static const std::string right_tag = "</font>";
-	static const size_t left_tag_size = left_tag.size();
-	static const size_t tags_len = left_tag_size + right_tag.size();
+	static const size_t left_tag_len = left_tag.size();
+	static const size_t tags_len = left_tag_len + right_tag.size();
+	static const std::string quot = "&quot;";
+	static const size_t quout_size = quot.size();
 
 	std::string line;
 	std::stringstream ss;
 	StringPositions positions;
+	size_t quot_num;
+	size_t insert_pos;
+	size_t checking_pos;
+	const std::string* tag;
 
 	while (std::getline(in, line))
 	{
-		positions = find_all(line, "\"");
+		quot_num = 0;
+		positions = find_all(line, quot);
 
 		for (size_t i = 0; i < positions.size(); ++i)
 		{
-			if ((i % 2) == 0)
-				line.insert(positions[i] + i*tags_len, left_tag);
+			if (quot_num % 2 == 0)
+			{
+				insert_pos = positions[i] + quot_num*tags_len;
+				checking_pos = insert_pos - 1;
+				tag = &left_tag;
+			}
 			else
-				line.insert(positions[i] + 1 + left_tag_size + i*tags_len, right_tag);
+			{
+				checking_pos = positions[i] + (quot_num - 1) * tags_len + left_tag_len - 1;
+				insert_pos = checking_pos + 1 + quout_size;
+				tag = &right_tag;
+			}
+
+			if ((checking_pos < line.size())
+					&& (line[checking_pos] == '\\'))
+				continue;
+
+			line.insert(insert_pos, *tag);
+			++quot_num;
 		}
 
 		ss << line << std::endl;
