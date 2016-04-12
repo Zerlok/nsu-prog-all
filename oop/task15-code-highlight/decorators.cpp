@@ -1,71 +1,78 @@
-#include <sstream>
-#include <string>
-#include <vector>
+#include "stringutils.h"
 #include "decorators.h"
 
 
-using StringPositions = std::vector<size_t>;
-StringPositions find_all(const std::string& data, const std::string& substr)
+Component::Component()
+	: _text_stream()
 {
-	StringPositions posis;
-	const size_t data_len = data.size();
-	const size_t sub_len = substr.size();
-
-	if (sub_len > data_len)
-		return std::move(posis);
-
-	std::string tmp;
-	size_t pos = 0;
-	for (size_t offset = 0; offset < data.size(); offset = pos + sub_len)
-	{
-		// Skip previous data.
-		tmp = data.substr(offset, data_len);
-		// Find next match with substr in tmp string.
-		pos = tmp.find(substr);
-
-		// If substr not found - exit.
-		if (pos == std::string::npos)
-			break;
-
-		pos += offset;
-		posis.push_back(pos);
-	}
-
-	return std::move(posis);
 }
 
 
-// Returns the depth of position. Depth counts on left and right strings appearence.
-// If left and right string are the same, than value of depth is 1 or 0 (as with string brackets).
-// Otherwise when left string appeares, depth increases, when right string appeares, depth decreases.
-int get_insidence(const std::string& data, const size_t& pos, const std::string& left, std::string right = "")
+Component::Component(std::istream &in)
+	: _text_stream()
 {
-	if (right.empty())
-		right = left;
+	std::string line;
+	while (std::getline(in, line))
+		_text_stream << line << std::endl;
+}
 
-	StringPositions positions = find_all(data, left);
-	int depth = 0;
-	for (const size_t& left_pos : positions)
-		if ((left_pos < pos)
-				&& !((left_pos > 0) && (data[left_pos - 1] == '\\')))
-			++depth;
 
-	if (left.compare(right) == 0)
-		return (depth % 2);
+std::string Component::get_line()
+{
+	std::string line;
+	_input_pos = _text_stream.tellp();
+//	_output_pos = _text_stream;
+	std::getline(_text_stream, line);
 
-	positions = find_all(data, right);
-	for (const size_t& right_pos : positions)
-		if ((right_pos < pos)
-				&& !((right_pos > 0) && (data[right_pos - 1] == '\\')))
-			--depth;
+	return std::move(line);
+}
 
-	return depth;
+/*
+ostringstream& insert( ostringstream& oss, const string& s )
+{
+streamsize pos = oss.tellp();
+oss.str( s + oss.str() );
+oss.seekp( pos + s.length() );
+return oss;
+}
+*/
+
+void Component::reset_line(const std::string& line)
+{
+	_text_stream.seekg(_input_pos);
+	_text_stream << line << std::endl;
+}
+
+
+std::istream& operator>>(std::istream& in, Component& component)
+{
+	std::string line;
+	while (std::getline(in, line))
+		component._text_stream << line << std::endl;
+
+	return in;
+}
+
+
+std::ostream& operator<<(std::ostream& out, Component& component)
+{
+	std::string line;
+	while (std::getline(component._text_stream, line))
+		out << line << std::endl;
+
+	return out;
 }
 
 
 Decorator::~Decorator()
 {
 	delete _inner;
+}
+
+
+void Decorator::wrap(Decorator& inner)
+{
+	// none.
 }
 
 
@@ -80,20 +87,6 @@ void Decorator::execute(std::istream& in, std::ostream& out)
 	std::string line;
 	while (std::getline(in, line))
 		out << line << std::endl;
-}
-
-
-void HTMLDecorator::search_replace(std::string& data, const std::string& sub, const std::string& repl)
-{
-	const size_t sub_len = sub.size();
-
-	size_t pos = data.find(sub);
-	while (pos != std::string::npos)
-	{
-		data.erase(pos, sub_len);
-		data.insert(pos, repl);
-		pos = data.find(sub);
-	}
 }
 
 
@@ -125,9 +118,9 @@ void HTMLDecorator::execute(std::istream& in, std::ostream& out)
 
 	while (std::getline(in, line))
 	{
-		search_replace(line, "<", "&lt;");
-		search_replace(line, ">", "&gt;");
-		search_replace(line, "\"", "&quot;");
+		stringutils::search_replace_all(line, "<", "&lt;");
+		stringutils::search_replace_all(line, ">", "&gt;");
+		stringutils::search_replace_all(line, "\"", "&quot;");
 		ss << line << std::endl;
 	}
 
@@ -199,7 +192,7 @@ const KeywordsHighlightDecorator::WordsSet KeywordsHighlightDecorator::_baseword
 	"break",
 	"case",
 	"catch",
-//	"class",
+	"class",
 	"compl",
 	"concept",
 	"constexpr",
@@ -270,26 +263,30 @@ size_t KeywordsHighlightDecorator::highlight(
 		const std::string& right_tag)
 {
 	size_t highlights_num = 0;
-	const size_t word_size = word.size();
-	StringPositions positions = find_all(data, word);
+	const size_t word_len = word.size();
+	StringPositions positions = stringutils::find_all(data, word);
 
 	for (int i = positions.size() - 1; i >= 0; --i)
 	{
 		const size_t& pos = positions[i];
+		const size_t& data_len = data.size();
 		// Check keyword is located in usual code space,
 		// skip it if keyword is inside string or comment or subword.
-		if (get_insidence(data, pos, "&quot;")				// skip string
-				|| get_insidence(data, pos, "//")			// skip comment
+		if (stringutils::get_insidence(data, pos, "&quot;")		// skip string
+				|| stringutils::get_insidence(data, pos, "//")	// skip comment
+				|| (stringutils::get_insidence(data, pos, "<", ">") // skip html attributes
+					&& (pos + word_len < data_len)
+					&& (data[pos + word_len] == '='))
 				|| ((pos > 0)
 					&& (std::isalnum(data[pos - 1])
 						|| (data[pos - 1] == '_')))
-				|| ((pos + word_size < data.size())
-					&& (std::isalnum(data[pos + word_size])
-						|| (data[pos + word_size] == '_'))))
+				|| ((pos + word_len < data.size())
+					&& (std::isalnum(data[pos + word_len])
+						|| (data[pos + word_len] == '_'))))
 			continue;
 
 		if (!right_tag.empty())
-			data.insert(positions[i] + word_size, right_tag);
+			data.insert(positions[i] + word_len, right_tag);
 
 		data.insert(positions[i], left_tag);
 		++highlights_num;
@@ -312,8 +309,6 @@ void KeywordsHighlightDecorator::execute(std::istream& in, std::ostream& out)
 
 	while (std::getline(in, line))
 	{
-		highlight(line, "class", baseword_tag, close_tag);
-
 		for (const std::string& word : _macroses)
 			highlight(line, word, macros_tag, close_tag);
 
@@ -357,25 +352,28 @@ void StringHighlightDecorator::execute(std::istream& in, std::ostream& out)
 	while (std::getline(in, line))
 	{
 		quot_num = 0;
-		positions = find_all(line, quot);
+		positions = stringutils::find_all(line, quot);
 
 		for (size_t i = 0; i < positions.size(); ++i)
 		{
+			// For quot begin.
 			if (quot_num % 2 == 0)
 			{
-				insert_pos = positions[i] + quot_num*tags_len;
+				insert_pos = positions[i] + (quot_num / 2) * tags_len;
 				checking_pos = insert_pos - 1;
 				tag = &left_tag;
 			}
+
+			// For quot end.
 			else
 			{
-				checking_pos = positions[i] + (quot_num - 1) * tags_len + left_tag_len - 1;
+				checking_pos = positions[i] + ((quot_num - 1) / 2) * tags_len + left_tag_len - 1;
 				insert_pos = checking_pos + 1 + quout_size;
 				tag = &right_tag;
 			}
 
 			if ((checking_pos < line.size())
-					&& (line[checking_pos] == '\\'))
+					&& (line[checking_pos] == stringutils::backslash))
 				continue;
 
 			line.insert(insert_pos, *tag);

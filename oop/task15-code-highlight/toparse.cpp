@@ -1,3 +1,5 @@
+stringutils::search_replace_all(line, "<", "&lt;");
+
 #include <iostream>
 #include <fstream>
 #include "decorators.h"

@@ -3,7 +3,44 @@
 
 
 #include <iostream>
-#include <unordered_set>
+#include <string>
+#include <sstream>
+#include <vector>
+
+
+class Component
+{
+	public:
+		Component();
+		Component(std::istream& in);
+		~Component() {}
+
+		std::string get_line();
+		void reset_line(const std::string& line);
+
+		friend std::istream& operator>>(std::istream&, Component&);
+		friend std::ostream& operator<<(std::ostream&, Component&);
+
+	protected:
+		std::stringstream _text_stream;
+
+	private:
+		std::stringstream::pos_type _input_pos;
+		std::stringstream::pos_type _output_pos;
+};
+
+
+std::istream& operator>>(std::istream&, Component&);
+std::ostream& operator<<(std::ostream&, Component&);
+
+
+class HTMLComponent : public Component
+{
+	public:
+		HTMLComponent();
+		HTMLComponent(const HTMLComponent&);
+		~HTMLComponent();
+};
 
 
 class Decorator
@@ -15,6 +52,7 @@ class Decorator
 			: _inner(inner) {}
 		virtual ~Decorator();
 
+		void wrap(Decorator& inner);
 		virtual void execute(std::istream& in, std::ostream& out);
 
 	protected:
@@ -30,7 +68,6 @@ class HTMLDecorator : public Decorator
 			: Decorator(inner) {}
 		~HTMLDecorator() {}
 
-		void search_replace(std::string& data, const std::string& sub, const std::string& repl);
 		void execute(std::istream& in, std::ostream& out) override;
 };
 
@@ -50,7 +87,7 @@ class LineNumbersDecorator : public Decorator
 class KeywordsHighlightDecorator : public Decorator
 {
 	public:
-		using WordsSet = std::unordered_set<std::string>;
+		using WordsSet = std::vector<std::string>;
 
 		KeywordsHighlightDecorator() {}
 		KeywordsHighlightDecorator(Decorator* inner)
