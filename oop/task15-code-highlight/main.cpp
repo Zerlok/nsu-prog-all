@@ -10,28 +10,33 @@ int main(int argc, char *argv[])
 
 	HTMLComponent data;
 	data.add_style("\
-			pre {-moz-tab-size: 4; tab-size: 4;} \
-			div, font {font-family: Ubuntu Mono, Monospace; } \
-			div {display: inline-block; } \
-			div.line {width: 100%; } \
-			div.line:hover {background: #EAEAEA; } \
-			div.linenum {text-align: right; width: 35px; color: #808080; margin-right: 10px; } \
+			font, pre { font-family: Ubuntu Mono, Monospace; } \
+			pre { -moz-tab-size: 4; tab-size: 4;} \
+			\
+			div { display: inline-block; } \
+			div.line { width: 100%; } \
+			div.line:hover { background: #EAEAEA; } \
+			div.linenum { text-align: right; width: 35px; color: #808080; margin-right: 10px; } \
+			\
 			font.macros, font.basetype, font.baseword {font-weight: bold; } \
 			font.macros {color: #909090; } \
 			font.basetype {font-style: italic; } \
 			font.comment {color: #A0A0A0; font-style: italic; } \
-			font.string {color: #A0A050; } \
+			\
+			font.string {color: #858540; } \
 	");
 
+	HTMLDecorator decorator;
 	CodeToHTMLDecorator code_to_html;
 	KeywordsHighlightDecorator keywords_highlighter;
 	LineNumbersDecorator line_numerator;
 	StringHighlightDecorator string_highlighter;
 
-	code_to_html
+	decorator
+			<< code_to_html
+			<< line_numerator
 			<< string_highlighter
-			<< keywords_highlighter
-			<< line_numerator;
+			<< keywords_highlighter;
 
 	if (argc < 2)
 		std::cerr << "At least one argument is required: file for parsing." << std::endl
@@ -41,7 +46,7 @@ int main(int argc, char *argv[])
 	{
 		in.open(argv[1]);
 		in >> data;
-		code_to_html.execute(data);
+		decorator.execute(data);
 		std::cout << data << std::endl;
 	}
 
@@ -49,7 +54,7 @@ int main(int argc, char *argv[])
 	{
 		in.open(argv[1]);
 		in >> data;
-		code_to_html.execute(data);
+		decorator.execute(data);
 		out.open(argv[2]);
 		out << data << std::endl;
 	}

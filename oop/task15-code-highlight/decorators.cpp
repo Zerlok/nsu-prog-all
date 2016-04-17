@@ -31,7 +31,9 @@ std::ostream& operator<<(std::ostream& out, const HTMLComponent& component)
 	// Add component data.
 	std::string line;
 	out << htmltags::b_body << std::endl
-		<< ((StreamComponent&)component) << std::endl
+		<< htmltags::b_code << std::endl
+		<< ((StreamComponent&)component)
+		<< htmltags::e_code << std::endl
 		<< htmltags::e_body << std::endl
 		<< htmltags::e_html << std::endl;
 
@@ -48,16 +50,17 @@ HTMLDecorator& HTMLDecorator::operator<<(HTMLDecorator& inner)
 
 void CodeToHTMLDecorator::execute(HTMLComponent& component)
 {
-	component << htmltags::b_code << std::endl;
+	std::string line;
 	while (!component.is_ended())
 	{
-		std::string& line = component.get_string();
+		component >> line;
 
 		stringutils::search_replace_all(line, symbols::code::lt, symbols::html::lt);
 		stringutils::search_replace_all(line, symbols::code::gt, symbols::html::gt);
 		stringutils::search_replace_all(line, symbols::code::quot, symbols::html::quot);
+
+		component << line << Component::endl;
 	}
-	component << htmltags::e_code << std::endl;
 
 	component.update();
 	HTMLDecorator::execute(component);
@@ -72,19 +75,15 @@ void LineNumbersDecorator::execute(HTMLComponent& component)
 	static const std::string close_tag = "</div>";
 
 	size_t num = 1;
-	std::stringstream ss;
+	std::string line;
 	while (!component.is_ended())
 	{
-		std::string& line = component.get_string();
-		ss << div_line
-		   << div_num << num << close_tag
-		   << div_code << line << close_tag
-		   << close_tag << std::endl;
-
-		line = ss.str();
-
-		ss.str("");
-		ss.clear();
+		component >> line;
+		component << div_line
+				  << div_num << num << close_tag
+				  << div_code << line << close_tag
+				  << close_tag
+				  << Component::endl;
 		++num;
 	}
 
@@ -250,9 +249,10 @@ void KeywordsHighlightDecorator::execute(HTMLComponent& component)
 	static const std::string comment_tag = "<font class='comment'>";
 	static const std::string close_tag = "</font>";
 
+	std::string line;
 	while (!component.is_ended())
 	{
-		std::string& line = component.get_string();
+		component >> line;
 
 		for (const std::string& word : _macroses)
 			highlight(line, word, macros_tag, close_tag);
@@ -264,10 +264,11 @@ void KeywordsHighlightDecorator::execute(HTMLComponent& component)
 			highlight(line, word, basetype_tag, close_tag);
 
 		// TODO: Create CommentHighlitDecorator.
-//		if (highlight(line, symbols::code::comment, comment_tag))
-//		{
-//			ss << line << close_tag << std::endl;
-//		}
+		if (highlight(line, symbols::code::comment, comment_tag))
+			component << line << close_tag << Component::endl;
+
+		else
+			component << line << Component::endl;
 	}
 
 	component.update();
@@ -281,7 +282,8 @@ void StringHighlightDecorator::execute(HTMLComponent& component)
 	static const std::string right_tag = "</font>";
 	static const size_t left_tag_len = left_tag.size();
 	static const size_t tags_len = left_tag_len + right_tag.size();
-	static const size_t quout_size = symbols::code::quot.size();
+	static const std::string& quot = symbols::html::quot;
+	static const size_t quout_size = quot.size();
 
 	StringPositions positions;
 	size_t quot_num;
@@ -289,11 +291,12 @@ void StringHighlightDecorator::execute(HTMLComponent& component)
 	size_t checking_pos;
 	const std::string* tag;
 
+	std::string line;
 	while (!component.is_ended())
 	{
+		component >> line;
 		quot_num = 0;
-		std::string& line = component.get_string();
-		positions = stringutils::find_all(line, symbols::code::quot);
+		positions = stringutils::find_all(line, quot);
 
 		for (size_t i = 0; i < positions.size(); ++i)
 		{
@@ -320,6 +323,8 @@ void StringHighlightDecorator::execute(HTMLComponent& component)
 			line.insert(insert_pos, *tag);
 			++quot_num;
 		}
+
+		component << line << Component::endl;
 	}
 
 	component.update();

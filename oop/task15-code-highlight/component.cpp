@@ -4,6 +4,48 @@
 #include "component.h"
 
 
+static const std::string empty = "";
+
+
+// ----------------- COMPONENT ----------------- //
+
+Component& Component::endl(Component& c)
+{
+	c._push_line_end();
+	return c;
+}
+
+
+Component&Component::operator<<(const bool& b)
+{
+	static const std::string str_true = "true";
+	static const std::string str_false = "false";
+
+	push_string(b ? str_true : str_false);
+	return (*this);
+}
+
+
+Component& Component::operator<<(const std::string& s)
+{
+	push_string(s);
+	return (*this);
+}
+
+
+Component& Component::operator<<(Component::manipulator_func_ptr manipulator)
+{
+	return manipulator(*this);
+}
+
+
+Component&Component::operator>>(std::string& s)
+{
+	s = get_string();
+	return (*this);
+}
+
+
 // ----------------- STRING COMPONENT ----------------- //
 
 StringComponent::StringComponent(const std::string &s)
@@ -13,7 +55,7 @@ StringComponent::StringComponent(const std::string &s)
 }
 
 
-std::string& StringComponent::get_string()
+std::string StringComponent::get_string()
 {
 	_is_clear = false;
 	_is_ended = true;
@@ -22,12 +64,29 @@ std::string& StringComponent::get_string()
 }
 
 
+void StringComponent::push_string(const std::string& s)
+{
+	_buffer << s;
+}
+
+
 bool StringComponent::update()
 {
 	_is_clear = true;
 	_is_ended = false;
 
+	_data = _buffer.str();
+
+	_buffer.str(empty);
+	_buffer.clear();
+
 	return true;
+}
+
+
+void StringComponent::_push_line_end()
+{
+	_buffer << std::endl;
 }
 
 
@@ -64,31 +123,37 @@ StreamComponent& StreamComponent::operator=(const StreamComponent& sc)
 	_stream.clear();
 	_buffer.clear();
 
-	_last_string = sc._last_string;
 	_next_string = sc._next_string;
 
 	return (*this);
 }
 
 
-std::string& StreamComponent::get_string()
+std::string StreamComponent::get_string()
 {
+	std::string current_string;
+
 	if (!_is_clear) // not the first call.
 	{
-		_buffer << _last_string << std::endl;
-		_last_string = _next_string;
+		current_string = _next_string;
 	}
 	else // first call.
 	{
 		_is_clear = false;
-		std::getline(_stream, _last_string);
+		std::getline(_stream, current_string);
 	}
 
 	std::getline(_stream, _next_string);
 	if (_stream.eof())
 		_is_ended = true;
 
-	return _last_string;
+	return std::move(current_string);
+}
+
+
+void StreamComponent::push_string(const std::string& s)
+{
+	_buffer << s;
 }
 
 
@@ -97,10 +162,8 @@ bool StreamComponent::update()
 	if (!_is_ended)
 		return false;
 
-	_buffer << _last_string << std::endl;
-
 	_stream.swap(_buffer);
-	_buffer.str("");
+	_buffer.str(empty);
 	_buffer.clear();
 
 	_is_clear = true;
@@ -110,19 +173,9 @@ bool StreamComponent::update()
 }
 
 
-StreamComponent& StreamComponent::operator<<(const std::string& s)
+void StreamComponent::_push_line_end()
 {
-	_buffer << s;
-
-	return (*this);
-}
-
-
-StreamComponent& StreamComponent::operator<<(StreamComponent::std_endl manipulator)
-{
-	manipulator(_buffer);
-
-	return (*this);
+	_buffer << std::endl;
 }
 
 
@@ -159,7 +212,7 @@ LinearComponent::LinearComponent(std::istream& in)
 }
 
 
-std::string& LinearComponent::get_string()
+std::string LinearComponent::get_string()
 {
 	if (_idx == 0)
 		_is_clear = false;
@@ -169,6 +222,12 @@ std::string& LinearComponent::get_string()
 		_is_ended = true;
 
 	return _lines[_idx - 1];
+}
+
+
+void LinearComponent::push_string(const std::string& s)
+{
+	_lines[_idx] = s;
 }
 
 
@@ -182,6 +241,13 @@ bool LinearComponent::update()
 	_is_ended = false;
 
 	return true;
+}
+
+
+void LinearComponent::_push_line_end()
+{
+	_lines.insert((_lines.begin() + _idx), empty);
+	++_idx;
 }
 
 

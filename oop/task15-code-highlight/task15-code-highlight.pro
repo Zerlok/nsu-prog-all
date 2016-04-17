@@ -14,7 +14,7 @@ INCLUDEPATH += /usr/include/gtest
 SOURCES += main.cpp \
 	decorators.cpp \
     stringutils.cpp \
-    component.cpp
+	component.cpp
 
 HEADERS += \
     decorators.h \
@@ -22,4 +22,5 @@ HEADERS += \
     component.h
 
 OTHER_FILES += \
-	toparse.cpp
+	toparse.cpp \
+	test.cpp
