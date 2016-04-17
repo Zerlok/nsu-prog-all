@@ -3,33 +3,35 @@
 #include "decorators.h"
 
 
-//void insert(std::stringstream& ss, const size_t& pos, const std::string& s)
-//{
-//	const size_t size = s.size();
-//	char tmp[size];
-//	std::streampos out_pos = ss.tellp();
-//	ss.seekg(pos);
-//	ss.get(tmp, size);
-
-//	ss.seekp(pos);
-//	ss << s;
-//	ss.seekg(pos + s.size());
-//	std::cout << "ss: '" << ss.str() << std::endl;
-////	ss.seekp(out_pos + s.size());
-//	ss.seekp(out_pos);
-//}
-
-
 int main(int argc, char *argv[])
 {
 	std::ifstream in;
 	std::ofstream out;
 
-	Decorator* main = new HTMLDecorator(
-			new StringHighlightDecorator(
-			new KeywordsHighlightDecorator(
-			new LineNumbersDecorator(
-	))));
+	HTMLComponent data;
+	data.add_style("\
+			pre {-moz-tab-size: 4; tab-size: 4;} \
+			div, font {font-family: Ubuntu Mono, Monospace; } \
+			div {display: inline-block; } \
+			div.line {width: 100%; } \
+			div.line:hover {background: #EAEAEA; } \
+			div.linenum {text-align: right; width: 35px; color: #808080; margin-right: 10px; } \
+			font.macros, font.basetype, font.baseword {font-weight: bold; } \
+			font.macros {color: #909090; } \
+			font.basetype {font-style: italic; } \
+			font.comment {color: #A0A0A0; font-style: italic; } \
+			font.string {color: #A0A050; } \
+	");
+
+	CodeToHTMLDecorator code_to_html;
+	KeywordsHighlightDecorator keywords_highlighter;
+	LineNumbersDecorator line_numerator;
+	StringHighlightDecorator string_highlighter;
+
+	code_to_html
+			<< string_highlighter
+			<< keywords_highlighter
+			<< line_numerator;
 
 	if (argc < 2)
 		std::cerr << "At least one argument is required: file for parsing." << std::endl
@@ -38,17 +40,19 @@ int main(int argc, char *argv[])
 	else if (argc == 2)
 	{
 		in.open(argv[1]);
-		main->execute(in, std::cout);
+		in >> data;
+		code_to_html.execute(data);
+		std::cout << data << std::endl;
 	}
 
 	else if (argc == 3)
 	{
 		in.open(argv[1]);
+		in >> data;
+		code_to_html.execute(data);
 		out.open(argv[2]);
-		main->execute(in, out);
+		out << data << std::endl;
 	}
-
-	delete main;
 
 	return 0;
 }

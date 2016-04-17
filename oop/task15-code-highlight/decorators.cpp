@@ -2,150 +2,94 @@
 #include "decorators.h"
 
 
-Component::Component()
-	: _text_stream()
+HTMLComponent::HTMLComponent(std::istream& in)
+	: StreamComponent(in)
 {
 }
 
 
-Component::Component(std::istream &in)
-	: _text_stream()
+void HTMLComponent::add_style(const std::string& style)
 {
+	_styles << style << std::endl;
+}
+
+
+std::ostream& operator<<(std::ostream& out, const HTMLComponent& component)
+{
+	out << htmltags::doctype << std::endl
+		<< htmltags::b_html << std::endl;
+
+	// Add CSS styles to header.
+	const std::string styles = component._styles.str();
+	if (!styles.empty())
+		out << htmltags::b_head << std::endl
+			<< htmltags::b_style << std::endl
+			<< styles << std::endl
+			<< htmltags::e_style << std::endl
+			<< htmltags::e_head << std::endl;
+
+	// Add component data.
 	std::string line;
-	while (std::getline(in, line))
-		_text_stream << line << std::endl;
-}
-
-
-std::string Component::get_line()
-{
-	std::string line;
-	_input_pos = _text_stream.tellp();
-//	_output_pos = _text_stream;
-	std::getline(_text_stream, line);
-
-	return std::move(line);
-}
-
-/*
-ostringstream& insert( ostringstream& oss, const string& s )
-{
-streamsize pos = oss.tellp();
-oss.str( s + oss.str() );
-oss.seekp( pos + s.length() );
-return oss;
-}
-*/
-
-void Component::reset_line(const std::string& line)
-{
-	_text_stream.seekg(_input_pos);
-	_text_stream << line << std::endl;
-}
-
-
-std::istream& operator>>(std::istream& in, Component& component)
-{
-	std::string line;
-	while (std::getline(in, line))
-		component._text_stream << line << std::endl;
-
-	return in;
-}
-
-
-std::ostream& operator<<(std::ostream& out, Component& component)
-{
-	std::string line;
-	while (std::getline(component._text_stream, line))
-		out << line << std::endl;
+	out << htmltags::b_body << std::endl
+		<< ((StreamComponent&)component) << std::endl
+		<< htmltags::e_body << std::endl
+		<< htmltags::e_html << std::endl;
 
 	return out;
 }
 
 
-Decorator::~Decorator()
+HTMLDecorator& HTMLDecorator::operator<<(HTMLDecorator& inner)
 {
-	delete _inner;
+	wrap(inner);
+	return inner;
 }
 
 
-void Decorator::wrap(Decorator& inner)
+void CodeToHTMLDecorator::execute(HTMLComponent& component)
 {
-	// none.
-}
-
-
-void Decorator::execute(std::istream& in, std::ostream& out)
-{
-	if (_inner != nullptr)
+	component << htmltags::b_code << std::endl;
+	while (!component.is_ended())
 	{
-		_inner->execute(in, out);
-		return;
-	}
+		std::string& line = component.get_string();
 
-	std::string line;
-	while (std::getline(in, line))
-		out << line << std::endl;
+		stringutils::search_replace_all(line, symbols::code::lt, symbols::html::lt);
+		stringutils::search_replace_all(line, symbols::code::gt, symbols::html::gt);
+		stringutils::search_replace_all(line, symbols::code::quot, symbols::html::quot);
+	}
+	component << htmltags::e_code << std::endl;
+
+	component.update();
+	HTMLDecorator::execute(component);
 }
 
 
-void HTMLDecorator::execute(std::istream& in, std::ostream& out)
+void LineNumbersDecorator::execute(HTMLComponent& component)
 {
-	std::string line;
-	std::stringstream ss;
+	static const std::string div_line = "<div class='line'>";
+	static const std::string div_num = "<div class='linenum'>";
+	static const std::string div_code = "<div class='code'>";
+	static const std::string close_tag = "</div>";
 
-	// TODO: load from css file.
-	out << "<!DOCTYPE html>" << std::endl
-		<< "<html>" << std::endl
-		<< "<head>" << std::endl
-		<< "<style>" << std::endl
-		<< "pre {-moz-tab-size: 4; tab-size: 4;}" << std::endl
-		<< "div, font {font-family: Ubuntu Mono, Monospace; }" << std::endl
-		<< "div {display: inline-block; }" << std::endl
-		<< "div.line {width: 100%; }" << std::endl
-		<< "div.line:hover {background: #EAEAEA; }" << std::endl
-		<< "div.linenum {text-align: right; width: 35px; color: #808080; margin-right: 10px; }" << std::endl
-		<< "font.macros, font.basetype, font.baseword {font-weight: bold; }" << std::endl
-		<< "font.macros {color: #909090; }" << std::endl
-		<< "font.basetype {font-style: italic; }" << std::endl
-		<< "font.comment {color: #A0A0A0; font-style: italic; }" << std::endl
-		<< "font.string {color: #A0A050; }" << std::endl
-		<< "</style>" << std::endl;
-
-	out << "<body>" << std::endl
-		<< "<pre>" << std::endl;
-
-	while (std::getline(in, line))
-	{
-		stringutils::search_replace_all(line, "<", "&lt;");
-		stringutils::search_replace_all(line, ">", "&gt;");
-		stringutils::search_replace_all(line, "\"", "&quot;");
-		ss << line << std::endl;
-	}
-
-	Decorator::execute(ss, out);
-	out << "</pre>" << std::endl
-		<< "</body>" << std::endl
-		<< "</html>" << std::endl;
-}
-
-
-void LineNumbersDecorator::execute(std::istream& in, std::ostream& out)
-{
 	size_t num = 1;
-	std::string line;
 	std::stringstream ss;
-
-	while (std::getline(in, line))
+	while (!component.is_ended())
 	{
-		ss << "<div class='line'><div class='linenum'>" << num << "</div>"
-		   << "<div class='code'>" << line << "</div></div>"
-		   << std::endl;
+		std::string& line = component.get_string();
+		ss << div_line
+		   << div_num << num << close_tag
+		   << div_code << line << close_tag
+		   << close_tag << std::endl;
+
+		line = ss.str();
+
+		ss.str("");
+		ss.clear();
 		++num;
 	}
 
-	Decorator::execute(ss, out);
+	component.update();
+	HTMLDecorator::execute(component);
 }
 
 
@@ -270,13 +214,13 @@ size_t KeywordsHighlightDecorator::highlight(
 	{
 		const size_t& pos = positions[i];
 		const size_t& data_len = data.size();
-		// Check keyword is located in usual code space,
-		// skip it if keyword is inside string or comment or subword.
-		if (stringutils::get_insidence(data, pos, "&quot;")		// skip string
-				|| stringutils::get_insidence(data, pos, "//")	// skip comment
-				|| (stringutils::get_insidence(data, pos, "<", ">") // skip html attributes
+
+		if (stringutils::get_insidence(data, pos, symbols::html::quot)							// skip string
+				|| stringutils::get_insidence(data, pos, symbols::code::comment)				// skip comment
+				|| (stringutils::get_insidence(data, pos, symbols::code::lt, symbols::code::gt) // skip html attribute
 					&& (pos + word_len < data_len)
 					&& (data[pos + word_len] == '='))
+				// Check that it is a clear keyword (not a subword).
 				|| ((pos > 0)
 					&& (std::isalnum(data[pos - 1])
 						|| (data[pos - 1] == '_')))
@@ -285,9 +229,11 @@ size_t KeywordsHighlightDecorator::highlight(
 						|| (data[pos + word_len] == '_'))))
 			continue;
 
+		// Insert right tag firstly.
 		if (!right_tag.empty())
 			data.insert(positions[i] + word_len, right_tag);
 
+		// Insert the left tag.
 		data.insert(positions[i], left_tag);
 		++highlights_num;
 	}
@@ -296,7 +242,7 @@ size_t KeywordsHighlightDecorator::highlight(
 }
 
 
-void KeywordsHighlightDecorator::execute(std::istream& in, std::ostream& out)
+void KeywordsHighlightDecorator::execute(HTMLComponent& component)
 {
 	static const std::string macros_tag = "<font class='macros'>";
 	static const std::string baseword_tag = "<font class='baseword'>";
@@ -304,11 +250,10 @@ void KeywordsHighlightDecorator::execute(std::istream& in, std::ostream& out)
 	static const std::string comment_tag = "<font class='comment'>";
 	static const std::string close_tag = "</font>";
 
-	std::string line;
-	std::stringstream ss;
-
-	while (std::getline(in, line))
+	while (!component.is_ended())
 	{
+		std::string& line = component.get_string();
+
 		for (const std::string& word : _macroses)
 			highlight(line, word, macros_tag, close_tag);
 
@@ -319,40 +264,36 @@ void KeywordsHighlightDecorator::execute(std::istream& in, std::ostream& out)
 			highlight(line, word, basetype_tag, close_tag);
 
 		// TODO: Create CommentHighlitDecorator.
-		if (highlight(line, "//", comment_tag))
-		{
-			ss << line << close_tag << std::endl;
-			continue;
-		}
-
-		ss << line << std::endl;
+//		if (highlight(line, symbols::code::comment, comment_tag))
+//		{
+//			ss << line << close_tag << std::endl;
+//		}
 	}
 
-	Decorator::execute(ss, out);
+	component.update();
+	HTMLDecorator::execute(component);
 }
 
 
-void StringHighlightDecorator::execute(std::istream& in, std::ostream& out)
+void StringHighlightDecorator::execute(HTMLComponent& component)
 {
 	static const std::string left_tag = "<font class='string'>";
 	static const std::string right_tag = "</font>";
 	static const size_t left_tag_len = left_tag.size();
 	static const size_t tags_len = left_tag_len + right_tag.size();
-	static const std::string quot = "&quot;";
-	static const size_t quout_size = quot.size();
+	static const size_t quout_size = symbols::code::quot.size();
 
-	std::string line;
-	std::stringstream ss;
 	StringPositions positions;
 	size_t quot_num;
 	size_t insert_pos;
 	size_t checking_pos;
 	const std::string* tag;
 
-	while (std::getline(in, line))
+	while (!component.is_ended())
 	{
 		quot_num = 0;
-		positions = stringutils::find_all(line, quot);
+		std::string& line = component.get_string();
+		positions = stringutils::find_all(line, symbols::code::quot);
 
 		for (size_t i = 0; i < positions.size(); ++i)
 		{
@@ -363,7 +304,6 @@ void StringHighlightDecorator::execute(std::istream& in, std::ostream& out)
 				checking_pos = insert_pos - 1;
 				tag = &left_tag;
 			}
-
 			// For quot end.
 			else
 			{
@@ -372,6 +312,7 @@ void StringHighlightDecorator::execute(std::istream& in, std::ostream& out)
 				tag = &right_tag;
 			}
 
+			// Check for clear quot (without backslash symbol at left).
 			if ((checking_pos < line.size())
 					&& (line[checking_pos] == stringutils::backslash))
 				continue;
@@ -379,9 +320,8 @@ void StringHighlightDecorator::execute(std::istream& in, std::ostream& out)
 			line.insert(insert_pos, *tag);
 			++quot_num;
 		}
-
-		ss << line << std::endl;
 	}
 
-	Decorator::execute(ss, out);
+	component.update();
+	HTMLDecorator::execute(component);
 }

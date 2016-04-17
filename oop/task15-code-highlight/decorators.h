@@ -7,98 +7,128 @@
 #include <sstream>
 #include <vector>
 
+#include "component.h"
 
-class Component
+
+namespace htmltags
+{
+	static const std::string doctype = "<!DOCTYPE html>";
+
+	static const std::string b_html = "<html>";
+	static const std::string b_body = "<body>";
+	static const std::string b_head = "<head>";
+	static const std::string b_style = "<style>";
+	static const std::string b_code = "<pre>";
+
+	static const std::string e_html = "</html>";
+	static const std::string e_body = "</body>";
+	static const std::string e_head = "</head>";
+	static const std::string e_style = "</style>";
+	static const std::string e_code = "</pre>";
+}
+
+namespace symbols
+{
+	namespace code
+	{
+		static const std::string comment = "//";
+		static const std::string quot = "\"";
+		static const std::string lt = "<";
+		static const std::string gt = ">";
+	}
+
+	namespace html
+	{
+		static const std::string quot = "&quot;";
+		static const std::string lt = "&lt;";
+		static const std::string gt = "&gt;";
+	}
+}
+
+
+class HTMLComponent : public StreamComponent
 {
 	public:
-		Component();
-		Component(std::istream& in);
-		~Component() {}
+		HTMLComponent() {}
+		HTMLComponent(std::istream& in);
+		~HTMLComponent() {}
 
-		std::string get_line();
-		void reset_line(const std::string& line);
+		void add_style(const std::string& style);
 
-		friend std::istream& operator>>(std::istream&, Component&);
-		friend std::ostream& operator<<(std::ostream&, Component&);
-
-	protected:
-		std::stringstream _text_stream;
+		friend std::ostream& operator<<(std::ostream& out, const HTMLComponent& component);
 
 	private:
-		std::stringstream::pos_type _input_pos;
-		std::stringstream::pos_type _output_pos;
+		std::stringstream _styles;
 };
+std::ostream& operator<<(std::ostream& out, const HTMLComponent& component);
 
 
-std::istream& operator>>(std::istream&, Component&);
-std::ostream& operator<<(std::ostream&, Component&);
-
-
-class HTMLComponent : public Component
+class HTMLDecorator
 {
 	public:
-		HTMLComponent();
-		HTMLComponent(const HTMLComponent&);
-		~HTMLComponent();
-};
-
-
-class Decorator
-{
-	public:
-		Decorator()
+		HTMLDecorator()
 			: _inner(nullptr) {}
-		Decorator(Decorator* inner)
-			: _inner(inner) {}
-		virtual ~Decorator();
+		HTMLDecorator(HTMLDecorator& inner)
+			: _inner(&inner) {}
+		virtual ~HTMLDecorator() {}
 
-		void wrap(Decorator& inner);
-		virtual void execute(std::istream& in, std::ostream& out);
+		void wrap(HTMLDecorator& inner)
+		{
+			_inner = &inner;
+		}
+
+		virtual void execute(HTMLComponent& component)
+		{
+			if (_inner != nullptr)
+				_inner->execute(component);
+		}
+
+		HTMLDecorator& operator<<(HTMLDecorator& inner);
 
 	protected:
-		Decorator* _inner;
+		HTMLDecorator* _inner;
 };
 
 
-class HTMLDecorator : public Decorator
+class CodeToHTMLDecorator : public HTMLDecorator
 {
 	public:
-		HTMLDecorator() {}
-		HTMLDecorator(Decorator* inner)
-			: Decorator(inner) {}
-		~HTMLDecorator() {}
+		CodeToHTMLDecorator() {}
+		CodeToHTMLDecorator(HTMLDecorator& inner)
+			: HTMLDecorator(inner) {}
+		~CodeToHTMLDecorator() {}
 
-		void execute(std::istream& in, std::ostream& out) override;
+		void execute(HTMLComponent& component) override;
 };
 
 
-class LineNumbersDecorator : public Decorator
+class LineNumbersDecorator : public HTMLDecorator
 {
 	public:
 		LineNumbersDecorator() {}
-		LineNumbersDecorator(Decorator* inner)
-			: Decorator(inner) {}
+		LineNumbersDecorator(HTMLDecorator& inner)
+			: HTMLDecorator(inner) {}
 		~LineNumbersDecorator() {}
 
-		void execute(std::istream& in, std::ostream& out) override;
+		void execute(HTMLComponent& component) override;
 };
 
 
-class KeywordsHighlightDecorator : public Decorator
+class KeywordsHighlightDecorator : public HTMLDecorator
 {
 	public:
 		using WordsSet = std::vector<std::string>;
 
 		KeywordsHighlightDecorator() {}
-		KeywordsHighlightDecorator(Decorator* inner)
-			: Decorator(inner) {}
+		KeywordsHighlightDecorator(HTMLDecorator& inner)
+			: HTMLDecorator(inner) {}
 		~KeywordsHighlightDecorator() {}
 
 		size_t highlight(std::string& data,
 					   const std::string& word,
 					   const std::string& left_tag,
 					   const std::string& right_tag = "");
-		void execute(std::istream& in, std::ostream& out) override;
+		void execute(HTMLComponent& component) override;
 
 	private:
 		static const WordsSet _macroses;
@@ -107,15 +137,15 @@ class KeywordsHighlightDecorator : public Decorator
 };
 
 
-class StringHighlightDecorator : public Decorator
+class StringHighlightDecorator : public HTMLDecorator
 {
 	public:
 		StringHighlightDecorator() {}
-		StringHighlightDecorator(Decorator* inner)
-			: Decorator(inner) {}
+		StringHighlightDecorator(HTMLDecorator& inner)
+			: HTMLDecorator(inner) {}
 		~StringHighlightDecorator() {}
 
-		void execute(std::istream& in, std::ostream& out) override;
+		void execute(HTMLComponent&) override;
 };
 
 
