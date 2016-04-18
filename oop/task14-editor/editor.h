@@ -25,7 +25,7 @@ class Editor
 		std::string _buffer;
 		std::istream& _commands_stream;
 		std::ostream& _output_stream;
-		CommandsPrototypes _commands_prototypes;
+		CommandsBuilders _commands_builders;
 		History _data_history;
 
 		void _yield(const std::string& s);

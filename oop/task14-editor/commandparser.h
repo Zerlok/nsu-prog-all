@@ -10,7 +10,7 @@
 class CommandParser
 {
 	public:
-		CommandParser(CommandsPrototypes& cmd_prototypes, const char& separator);
+		CommandParser(CommandsBuilders& cmd_prototypes, const char& separator);
 		~CommandParser();
 
 		size_t pos_char(const std::string& data, const char& s);
@@ -19,7 +19,7 @@ class CommandParser
 		const Command::AbstractPrototype* parse(const std::string& line);
 
 	private:
-		CommandsPrototypes& _cmd_prototypes;
+		CommandsBuilders& _cmd_prototypes;
 		char _separator;
 };
 

@@ -72,7 +72,7 @@ class Command
 };
 
 
-using CommandsPrototypes = PrototypeFactory<std::string, Command>;
+using CommandsBuilders = PrototypeFactory<std::string, Command>;
 
 
 class Command::AbstractPrototype
@@ -83,8 +83,16 @@ class Command::AbstractPrototype
 			// Constructors / Destructor.
 			Result(Command* p = nullptr, const Errors& e = Errors())
 				: ptr(p), errors(e) {}
-			Result(const Result&) = default;
-			Result(Result&&) = default;
+			Result(const Result&) = delete;
+			Result(Result&& r)
+				: ptr(r.ptr), errors(std::move(r.errors))
+			{
+				r.ptr = nullptr;
+			}
+			~Result()
+			{
+				delete ptr;
+			}
 
 			// Operators.
 			Result& operator=(const Result&) = default;

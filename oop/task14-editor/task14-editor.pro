@@ -15,7 +15,8 @@ SOURCES += main.cpp \
     editor.cpp \
     commandparser.cpp \
 	history.cpp \
-    editorerrors.cpp
+    editorerrors.cpp \
+    stringutils.cpp
 
 HEADERS += \
 	bigvector.h \
@@ -32,6 +33,7 @@ HEADERS += \
     helpcommand.h \
     setcommand.h \
     history.h \
-    editorerrors.h
+    editorerrors.h \
+    stringutils.h
 
 OTHER_FILES += gtest.cpp

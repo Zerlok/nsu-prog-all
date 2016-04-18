@@ -14,18 +14,18 @@ Editor::Editor(std::istream& input, std::ostream& output)
 	  _buffer(),
 	  _commands_stream(input),
 	  _output_stream(output),
-	  _commands_prototypes(),
+	  _commands_builders(),
 	  _data_history()
 {
 	_commands_stream >> std::noskipws;
 
-	_commands_prototypes.registerate<CopyCommand>("copy");
-	_commands_prototypes.registerate<HelpCommand>("help");
-	_commands_prototypes.registerate<InsertCommand>("insert");
-	_commands_prototypes.registerate<RedoCommand>("redo");
-	_commands_prototypes.registerate<SearchReplaceCommand>("sed");
-	_commands_prototypes.registerate<SetCommand>("set");
-	_commands_prototypes.registerate<UndoCommand>("undo");
+	_commands_builders.registerate<CopyCommand>("copy");
+	_commands_builders.registerate<HelpCommand>("help");
+	_commands_builders.registerate<InsertCommand>("insert");
+	_commands_builders.registerate<RedoCommand>("redo");
+	_commands_builders.registerate<SearchReplaceCommand>("sed");
+	_commands_builders.registerate<SetCommand>("set");
+	_commands_builders.registerate<UndoCommand>("undo");
 
 	_data_history.push_back(_current_data);
 }
@@ -59,7 +59,7 @@ const std::string& Editor::execute_command(Command& cmd)
 			break;
 
 		case Command::Type::help:
-			((HelpCommand&)cmd).execute(_output_stream, _commands_prototypes.get_registred());
+			((HelpCommand&)cmd).execute(_output_stream, _commands_builders.get_registred());
 			break;
 	}
 
@@ -76,7 +76,7 @@ void Editor::run()
 {
 	bool is_exit = false;
 	std::string line;
-	CommandParser cmd_parser(_commands_prototypes, ' ');
+	CommandParser cmd_parser(_commands_builders, ' ');
 
 	while (!is_exit)
 	{
@@ -88,6 +88,11 @@ void Editor::run()
 		{
 			is_exit = true;
 			break;
+		}
+		else if (line.empty())
+		{
+			_output_stream << "OUT: " << _current_data << std::endl;
+			continue;
 		}
 
 		const Command::AbstractPrototype* cmd_prototype = cmd_parser.parse(line);

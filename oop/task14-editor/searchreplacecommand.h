@@ -3,6 +3,7 @@
 
 
 #include "command.h"
+#include "stringutils.h"
 
 
 class SearchReplaceCommand : public Command
@@ -14,12 +15,12 @@ class SearchReplaceCommand : public Command
 			: Command(Type::data_manipulation),
 			  _substr(substr),
 			  _repl(),
-			  _use_buffer_repl(true) {}
+			  _use_buffer(true) {}
 		SearchReplaceCommand(const std::string& substr, const std::string& repl)
 			: Command(Type::data_manipulation),
 			  _substr(substr),
 			  _repl(repl),
-			  _use_buffer_repl(false) {}
+			  _use_buffer(false) {}
 		~SearchReplaceCommand() {}
 
 		size_t subfind(const std::string& data, const std::string& substr) const
@@ -64,14 +65,12 @@ class SearchReplaceCommand : public Command
 			if (!res)
 				return std::move(res);
 
-			const size_t pos = data.find(_substr);
-			res.data.erase(pos, _substr.size());
 
-			if (_use_buffer_repl)
-				res.data.insert(pos, buffer);
+			if (_use_buffer)
+				_repl = buffer;
 
-			else
-				res.data.insert(pos, _repl);
+			// Taken from task15-code-highlight (also there are stringutils' google tests located).
+			stringutils::search_replace_all(res.data, _substr, _repl);
 
 			return std::move(res);
 		}
@@ -79,7 +78,7 @@ class SearchReplaceCommand : public Command
 	private:
 		std::string _substr;
 		std::string _repl;
-		bool _use_buffer_repl;
+		bool _use_buffer;
 };
 
 

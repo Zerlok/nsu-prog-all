@@ -37,7 +37,7 @@ Strings CommandParser::split_string(const std::string& data)
 }
 
 
-CommandParser::CommandParser(CommandsPrototypes& cmd_prototypes, const char& separator)
+CommandParser::CommandParser(CommandsBuilders& cmd_prototypes, const char& separator)
 	: _cmd_prototypes(cmd_prototypes),
 	  _separator(separator)
 {
@@ -52,6 +52,9 @@ CommandParser::~CommandParser()
 const Command::AbstractPrototype* CommandParser::parse(const std::string& line)
 {
 	Strings args = split_string(line);
+	if (args.empty())
+		return nullptr;
+
 	const std::string cmd_name = args[0];
 	args.erase(args.begin());
 

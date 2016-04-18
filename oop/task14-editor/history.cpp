@@ -15,13 +15,15 @@ const std::string& History::get_current() const
 
 void History::push_back(const std::string& data)
 {
-	const size_t& size = data.size();
+	const size_t& size = _data_queue.size();
 	if ((size != 0)
 			&& (_index < size - 1))
 		_remove_after(_index);
 
+	if (!_data_queue.empty())
+		++_index;
+
 	_data_queue.push_back(data);
-	++_index;
 }
 
 
