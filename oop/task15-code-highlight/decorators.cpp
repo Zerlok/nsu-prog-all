@@ -48,47 +48,74 @@ HTMLDecorator& HTMLDecorator::operator<<(HTMLDecorator& inner)
 }
 
 
-void CodeToHTMLDecorator::execute(HTMLComponent& component)
+void CodeToHTMLDecorator::execute(std::string& line)
+{
+	stringutils::search_replace_all(line, symbols::code::lt, symbols::html::lt);
+	stringutils::search_replace_all(line, symbols::code::gt, symbols::html::gt);
+	stringutils::search_replace_all(line, symbols::code::quot, symbols::html::quot);
+	HTMLDecorator::execute(line);
+}
+
+
+void CodeToHTMLDecorator::execute(Component& component)
 {
 	std::string line;
 	while (!component.is_ended())
 	{
 		component >> line;
-
-		stringutils::search_replace_all(line, symbols::code::lt, symbols::html::lt);
-		stringutils::search_replace_all(line, symbols::code::gt, symbols::html::gt);
-		stringutils::search_replace_all(line, symbols::code::quot, symbols::html::quot);
-
+		execute(line);
 		component << line << Component::endl;
 	}
 
 	component.update();
-	HTMLDecorator::execute(component);
 }
 
 
-void LineNumbersDecorator::execute(HTMLComponent& component)
+const size_t&LineNumbersDecorator::get_line_num() const
+{
+	return _line_num;
+}
+
+
+void LineNumbersDecorator::reset_line_num()
+{
+	_line_num = 1;
+}
+
+
+void LineNumbersDecorator::add_style(HTMLComponent& component)
+{
+	component.add_style("\
+div.line, div.linenum, div.code { display: inline-block; } \
+div.line { width: 100%; } \
+div.line:hover { background: #EAEAEA; } \
+div.linenum { text-align: right; width: 35px; color: #808080; margin-right: 10px; }");
+	HTMLDecorator::add_style(component);
+}
+
+
+void LineNumbersDecorator::execute(Component& component)
 {
 	static const std::string div_line = "<div class='line'>";
 	static const std::string div_num = "<div class='linenum'>";
 	static const std::string div_code = "<div class='code'>";
 	static const std::string close_tag = "</div>";
 
-	size_t num = 1;
 	std::string line;
 	while (!component.is_ended())
 	{
 		component >> line;
+		HTMLDecorator::execute(line);
 		component << div_line
-				  << div_num << num << close_tag
+				  << div_num << _line_num << close_tag
 				  << div_code << line << close_tag
 				  << close_tag
 				  << Component::endl;
-		++num;
+		++_line_num;
 	}
 
+	reset_line_num();
 	component.update();
-	HTMLDecorator::execute(component);
 }
 
 
@@ -241,42 +268,58 @@ size_t KeywordsHighlightDecorator::highlight(
 }
 
 
-void KeywordsHighlightDecorator::execute(HTMLComponent& component)
+void KeywordsHighlightDecorator::add_style(HTMLComponent& component)
+{
+	component.add_style("\
+font.macros, font.basetype, font.baseword { font-weight: bold; } \
+font.macros { color: #909090; } \
+font.basetype { font-style: italic; }");
+	HTMLDecorator::add_style(component);
+}
+
+
+void KeywordsHighlightDecorator::execute(std::string& line)
 {
 	static const std::string macros_tag = "<font class='macros'>";
 	static const std::string baseword_tag = "<font class='baseword'>";
 	static const std::string basetype_tag = "<font class='basetype'>";
-	static const std::string comment_tag = "<font class='comment'>";
 	static const std::string close_tag = "</font>";
 
+	for (const std::string& word : _macroses)
+		highlight(line, word, macros_tag, close_tag);
+
+	for (const std::string& word : _basewords)
+		highlight(line, word, baseword_tag, close_tag);
+
+	for (const std::string& word : _basetypes)
+		highlight(line, word, basetype_tag, close_tag);
+
+	HTMLDecorator::execute(line);
+}
+
+
+void KeywordsHighlightDecorator::execute(Component& component)
+{
 	std::string line;
 	while (!component.is_ended())
 	{
 		component >> line;
-
-		for (const std::string& word : _macroses)
-			highlight(line, word, macros_tag, close_tag);
-
-		for (const std::string& word : _basewords)
-			highlight(line, word, baseword_tag, close_tag);
-
-		for (const std::string& word : _basetypes)
-			highlight(line, word, basetype_tag, close_tag);
-
-		// TODO: Create CommentHighlitDecorator.
-		if (highlight(line, symbols::code::comment, comment_tag))
-			component << line << close_tag << Component::endl;
-
-		else
-			component << line << Component::endl;
+		execute(line);
+		component << line << Component::endl;
 	}
 
 	component.update();
-	HTMLDecorator::execute(component);
 }
 
 
-void StringHighlightDecorator::execute(HTMLComponent& component)
+void StringHighlightDecorator::add_style(HTMLComponent& component)
+{
+	component.add_style("font.string {color: #858540; }");
+	HTMLDecorator::add_style(component);
+}
+
+
+void StringHighlightDecorator::execute(std::string& line)
 {
 	static const std::string left_tag = "<font class='string'>";
 	static const std::string right_tag = "</font>";
@@ -285,48 +328,94 @@ void StringHighlightDecorator::execute(HTMLComponent& component)
 	static const std::string& quot = symbols::html::quot;
 	static const size_t quout_size = quot.size();
 
-	StringPositions positions;
-	size_t quot_num;
+	size_t quot_num = 0;
 	size_t insert_pos;
 	size_t checking_pos;
 	const std::string* tag;
+	StringPositions positions = stringutils::find_all(line, quot);
 
+	for (size_t i = 0; i < positions.size(); ++i)
+	{
+		// For quot begin.
+		if (quot_num % 2 == 0)
+		{
+			insert_pos = positions[i] + (quot_num / 2) * tags_len;
+			checking_pos = insert_pos - 1;
+			tag = &left_tag;
+		}
+		// For quot end.
+		else
+		{
+			checking_pos = positions[i] + ((quot_num - 1) / 2) * tags_len + left_tag_len - 1;
+			insert_pos = checking_pos + 1 + quout_size;
+			tag = &right_tag;
+		}
+
+		// Check for clear quot (without backslash symbol at left).
+		if ((checking_pos < line.size())
+				&& (line[checking_pos] == stringutils::backslash))
+			continue;
+
+		line.insert(insert_pos, *tag);
+		++quot_num;
+	}
+
+	HTMLDecorator::execute(line);
+}
+
+
+void StringHighlightDecorator::execute(Component& component)
+{
 	std::string line;
 	while (!component.is_ended())
 	{
 		component >> line;
-		quot_num = 0;
-		positions = stringutils::find_all(line, quot);
-
-		for (size_t i = 0; i < positions.size(); ++i)
-		{
-			// For quot begin.
-			if (quot_num % 2 == 0)
-			{
-				insert_pos = positions[i] + (quot_num / 2) * tags_len;
-				checking_pos = insert_pos - 1;
-				tag = &left_tag;
-			}
-			// For quot end.
-			else
-			{
-				checking_pos = positions[i] + ((quot_num - 1) / 2) * tags_len + left_tag_len - 1;
-				insert_pos = checking_pos + 1 + quout_size;
-				tag = &right_tag;
-			}
-
-			// Check for clear quot (without backslash symbol at left).
-			if ((checking_pos < line.size())
-					&& (line[checking_pos] == stringutils::backslash))
-				continue;
-
-			line.insert(insert_pos, *tag);
-			++quot_num;
-		}
-
+		execute(line);
 		component << line << Component::endl;
 	}
 
 	component.update();
-	HTMLDecorator::execute(component);
+}
+
+
+void CommentHighlightDecorator::add_style(HTMLComponent& component)
+{
+	component.add_style("font.comment { color: #A0A0A0; font-style: italic; }");
+	HTMLDecorator::add_style(component);
+}
+
+
+void CommentHighlightDecorator::execute(std::string& line)
+{
+	static const std::string comment_tag = "<font class='comment'>";
+	static const std::string close_tag = "</font>";
+
+	StringPositions positions = stringutils::find_all(line, symbols::code::comment);
+	for (const size_t& pos : positions)
+	{
+		if ((pos == 0)
+				|| ((line[pos - 1] != stringutils::backslash)
+					&& (!stringutils::get_insidence(line, pos, symbols::html::quot))))
+		{
+			line.insert(pos, comment_tag);
+			line.append(close_tag);
+			break;
+		}
+	}
+
+	HTMLDecorator::execute(line);
+}
+
+
+void CommentHighlightDecorator::execute(Component& component)
+{
+	std::string line;
+	while (!component.is_ended())
+	{
+		component >> line;
+		execute(line);
+		component << line << Component::endl;
+	}
+
+	component.update();
 }

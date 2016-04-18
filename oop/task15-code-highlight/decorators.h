@@ -39,7 +39,7 @@ namespace symbols
 
 	namespace html
 	{
-		static const std::string quot = "&quot;";
+		static const std::string quot = "\&quot;";
 		static const std::string lt = "&lt;";
 		static const std::string gt = "&gt;";
 	}
@@ -77,7 +77,17 @@ class HTMLDecorator
 			_inner = &inner;
 		}
 
-		virtual void execute(HTMLComponent& component)
+		virtual void add_style(HTMLComponent& component)
+		{
+			if (_inner != nullptr)
+				_inner->add_style(component);
+		}
+		virtual void execute(std::string& line)
+		{
+			if (_inner != nullptr)
+				_inner->execute(line);
+		}
+		virtual void execute(Component& component)
 		{
 			if (_inner != nullptr)
 				_inner->execute(component);
@@ -98,19 +108,29 @@ class CodeToHTMLDecorator : public HTMLDecorator
 			: HTMLDecorator(inner) {}
 		~CodeToHTMLDecorator() {}
 
-		void execute(HTMLComponent& component) override;
+		void execute(std::string& line) override;
+		void execute(Component& component) override;
 };
 
 
 class LineNumbersDecorator : public HTMLDecorator
 {
 	public:
-		LineNumbersDecorator() {}
+		LineNumbersDecorator()
+			: _line_num(1) {}
 		LineNumbersDecorator(HTMLDecorator& inner)
 			: HTMLDecorator(inner) {}
 		~LineNumbersDecorator() {}
 
-		void execute(HTMLComponent& component) override;
+		const size_t& get_line_num() const;
+		void reset_line_num();
+
+		void add_style(HTMLComponent& component) override;
+//		void execute(std::string& line);
+		void execute(Component& component) override;
+
+	private:
+		size_t _line_num;
 };
 
 
@@ -128,7 +148,10 @@ class KeywordsHighlightDecorator : public HTMLDecorator
 					   const std::string& word,
 					   const std::string& left_tag,
 					   const std::string& right_tag = "");
-		void execute(HTMLComponent& component) override;
+
+		void add_style(HTMLComponent& component) override;
+		void execute(std::string& line) override;
+		void execute(Component& component) override;
 
 	private:
 		static const WordsSet _macroses;
@@ -145,7 +168,23 @@ class StringHighlightDecorator : public HTMLDecorator
 			: HTMLDecorator(inner) {}
 		~StringHighlightDecorator() {}
 
-		void execute(HTMLComponent&) override;
+		void add_style(HTMLComponent& component) override;
+		void execute(std::string& line) override;
+		void execute(Component& component) override;
+};
+
+
+class CommentHighlightDecorator : public HTMLDecorator
+{
+	public:
+		CommentHighlightDecorator() {}
+		CommentHighlightDecorator(HTMLDecorator& inner)
+			: HTMLDecorator(inner) {}
+		~CommentHighlightDecorator() {}
+
+		void add_style(HTMLComponent& component) override;
+		void execute(std::string& line) override;
+		void execute(Component& component) override;
 };
 
 

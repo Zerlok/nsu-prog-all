@@ -9,34 +9,26 @@ int main(int argc, char *argv[])
 	std::ofstream out;
 
 	HTMLComponent data;
-	data.add_style("\
-			font, pre { font-family: Ubuntu Mono, Monospace; } \
-			pre { -moz-tab-size: 4; tab-size: 4;} \
-			\
-			div { display: inline-block; } \
-			div.line { width: 100%; } \
-			div.line:hover { background: #EAEAEA; } \
-			div.linenum { text-align: right; width: 35px; color: #808080; margin-right: 10px; } \
-			\
-			font.macros, font.basetype, font.baseword {font-weight: bold; } \
-			font.macros {color: #909090; } \
-			font.basetype {font-style: italic; } \
-			font.comment {color: #A0A0A0; font-style: italic; } \
-			\
-			font.string {color: #858540; } \
-	");
 
 	HTMLDecorator decorator;
 	CodeToHTMLDecorator code_to_html;
 	KeywordsHighlightDecorator keywords_highlighter;
 	LineNumbersDecorator line_numerator;
 	StringHighlightDecorator string_highlighter;
+	CommentHighlightDecorator comment_highlighter;
 
 	decorator
-			<< code_to_html
 			<< line_numerator
+			<< code_to_html
 			<< string_highlighter
-			<< keywords_highlighter;
+			<< keywords_highlighter
+			<< comment_highlighter;
+
+	data.add_style("\
+			font, pre { font-family: Ubuntu Mono, Monospace; } \
+			pre { -moz-tab-size: 4; tab-size: 4;} \
+	");
+	decorator.add_style(data);
 
 	if (argc < 2)
 		std::cerr << "At least one argument is required: file for parsing." << std::endl
