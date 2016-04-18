@@ -164,6 +164,7 @@ bool StreamComponent::update()
 
 	_stream.swap(_buffer);
 	_buffer.str(empty);
+	_stream.clear();
 	_buffer.clear();
 
 	_is_clear = true;

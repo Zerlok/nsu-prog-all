@@ -22,5 +22,5 @@ HEADERS += \
     component.h
 
 OTHER_FILES += \
-	toparse.cpp \
-	test.cpp
+	gtest.cpp \
+	toparse.cpp

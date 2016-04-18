@@ -126,7 +126,6 @@ class LineNumbersDecorator : public HTMLDecorator
 		void reset_line_num();
 
 		void add_style(HTMLComponent& component) override;
-//		void execute(std::string& line);
 		void execute(Component& component) override;
 
 	private:
