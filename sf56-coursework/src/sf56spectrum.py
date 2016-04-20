@@ -82,8 +82,9 @@ class Spectrum:
 		
 		if isinstance(s, int):
 			mul_spectrum.axis_y = [y * s for y in self.axis_y]
+			return mul_spectrum
 			
-		elif not isinstance(s, Spectrum):
+		if not isinstance(s, Spectrum):
 			return None
 		
 		if len(self) != len(s):
@@ -94,6 +95,13 @@ class Spectrum:
 		
 		mul_spectrum.axis_y = map(__mul__, self.axis_y, s.axis_y)
 		return mul_spectrum
+	
+	def __rsub__(self, s):
+		return Spectrum(
+				name = "{} - {}".format(s, self.name),
+				x = list(self.axis_x),
+				y = [s - y for y in self.axis_y],
+		)
 	
 	def __str__(self):
 		return self.name
