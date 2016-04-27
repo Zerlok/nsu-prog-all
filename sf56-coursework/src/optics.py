@@ -3,8 +3,8 @@ reflected spectrums."""
 
 
 from sys import argv
-from sf56spectrum import get_x_range_intersection, read_sf, Spectrum
-from plotter import show_spectrums
+from sf56spectrum import get_x_range_intersection, read_sf, Chart
+from plotter import show_charts
 
 
 def get_absorption_spectrum(transmit, reflect):
@@ -12,12 +12,12 @@ def get_absorption_spectrum(transmit, reflect):
 	transmit.set_x_range(x_range)
 	reflect.set_x_range(x_range)
 	
-	absorption = Spectrum("absorption spectrum")
+	absorption = Chart("absorption spectrum")
 	
 	for i in xrange(len(transmit)):
-		tr_co = transmit.get_co(i)
-		ref_co = reflect.get_co(i)
-		absorption.append(tr_co[0], 100 - tr_co[1] - ref_co[1])
+		tr_co = transmit.get_xy(i)
+		ref_co = reflect.get_xy(i)
+		absorption._append(tr_co[0], 100 - tr_co[1] - ref_co[1])
 	
 	return absorption
 
@@ -31,4 +31,4 @@ if __name__ == '__main__':
 	
 	tr = read_sf(argv[1])
 	ref = read_sf(argv[2])
-	show_spectrums(tr, ref, get_absorption_spectrum(tr, ref))
+	show_charts(tr, ref, get_absorption_spectrum(tr, ref))

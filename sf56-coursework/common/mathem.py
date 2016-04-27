@@ -4,7 +4,7 @@ from numpy.linalg import det as determinant
 
 class Polinom:
 	def __init__(self, *cords):
-		# Solve linear equation system for polinom indices.
+		"""Solve linear equation system for polinom indices."""
 		main_mtrx = matrix(
 			[[co[0]**p for p in xrange(len(cords)-1, -1, -1)]
 			for co in cords]
@@ -17,7 +17,7 @@ class Polinom:
 			for j in xrange(len(cords)):
 				m[j, i] = cords[j][1]
 			 
-			matrices_dets.append(determinant(m))
+			matrices_dets._append(determinant(m))
 		
 		self.indices = tuple(m_det / main_det for m_det in matrices_dets) if main_det else None
 		self.length = len(self.indices) if self.indices else 0
@@ -31,8 +31,8 @@ class Polinom:
 def get_spectrum_polinom(spectrum, *indices):
 	cords = []
 	for i in indices:
-		co = spectrum.get_co(i)
+		co = spectrum.get_xy(i)
 		if co:
-			cords.append(co)
+			cords._append(co)
 	
 	return Polinom(*cords)
