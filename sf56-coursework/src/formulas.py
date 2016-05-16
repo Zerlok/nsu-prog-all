@@ -8,9 +8,6 @@ class TRFormulasGenerator:
 	@staticmethod
 	def get_clean(self):
 		r12, r23, t12, t23, d = symbols("r12 r23 t12 t23 d")
-# 		tr = (t12*t23*exp(I*d/2)) / (1 + (1 - t12)*(1 - t23)*exp(I*d))		# T from book UPDATED!
-# 		tr = (t12*t23*exp(I*d/2)) / (1 - (1 + t12)*(1 - t23)*exp(I*d))		# T from book
-# 		ref = r12 + (t12**2 * r23*exp(I*d)) / (1 + r12*r23*exp(I*d))		# R mine
 		tr = ((t12*t23*exp(I*d/2)) / (1 + r12*r23*exp(I*d)))				# T mine
 		ref = ((r12 + r23*exp(I*d)) / (1 + r12*r23*exp(I*d)))				# R from book
 		return tr, ref
@@ -43,6 +40,7 @@ class TRFormulasGenerator:
 		
 		tr = ((t12*t23*exp(I*delta/2)) / (1 + r12*r23*exp(I*delta)))
 		ref = ((r12 + r23*exp(I*delta)) / (1 + r12*r23*exp(I*delta)))
+# 		ref = ((r12 - r23*exp(I*delta)*(r12**2 - t12**2)) / (1 + r12*r23*exp(I*delta)))
 		return tr, ref
 	
 	@staticmethod
@@ -83,36 +81,35 @@ def build_T_R_charts(tr, ref, x_values):
 	)		
 
 
-def show_T_R_charts(N1, N2, N3, phi, h, min_wave, max_wave, step):
-	x_values = [x*10**-9 for x in xrange(min_wave, max_wave+step, step)]
+def show_T_R_charts(N1, N2, N3, phi, h, min_wave, max_wave, wave_step):
+	x_values = [x*10**-9 for x in xrange(min_wave, max_wave+wave_step, wave_step)]
 	arguments = {'N1': N1, 'N2': N2, 'N3': N3, 'phi': phi, 'h': h}
 
 	T, R = TRFormulasGenerator.get_expanded()
 	tr = T.subs(arguments.items())
 	ref = R.subs(arguments.items())
 
-	tr_plot, ref_plot = build_T_R_charts(tr, ref, x_values)
-	summ = tr_plot + ref_plot
+	tr_plot, ref_chart = build_T_R_charts(tr, ref, x_values)
+	summ = tr_plot + ref_chart
 	summ.name = "T + R"
-	pointing1 = ref_plot + (tr_plot * N3)
-	pointing1.name = "T + R*N3"
-	pointing2 = ref_plot + (tr_plot * (N3 / N2))
-	pointing2.name = "T + R*(N3/N2)"	
 	title = "T R formulas for {phi} angle, N1:{N1} N2:{N2} N3:{N3}, plate thickness: {h}m".format(**arguments)
-	show_charts(ref_plot, tr_plot, summ, pointing1, pointing2, title=title, y_range=(0, 100))
+	show_charts(ref_chart, tr_plot, summ, title=title, y_range=(0, 100))
+# 	pointing = ref_chart + (tr_plot * N3)
+# 	pointing.name = "T + R*N3"
+# 	show_charts(ref_chart, tr_plot, summ, pointing, title=title, y_range=(0, 100))
 
 
 if __name__ == '__main__':
 	arguments = {
 			'N1': 1,
 			'N2': 2,
-			'N3': 1,
+			'N3': 1.5,
 			'phi': 0,		#  0 degree.
 # 			'phi': pi/4,	# 45 degree.
 # 			'phi': pi*9/20,	# 81 degree.
 			'h': 100*10**-9,
 			'min_wave': 200,
 			'max_wave': 6000,
-			'step': 100,
+			'wave_step': 100,
 	}
 	show_T_R_charts(**arguments)

@@ -17,7 +17,7 @@ class Polinom:
 			for j in xrange(len(cords)):
 				m[j, i] = cords[j][1]
 			 
-			matrices_dets._append(determinant(m))
+			matrices_dets.append(determinant(m))
 		
 		self.indices = tuple(m_det / main_det for m_det in matrices_dets) if main_det else None
 		self.length = len(self.indices) if self.indices else 0

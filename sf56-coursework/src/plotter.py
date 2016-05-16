@@ -151,8 +151,8 @@ class Chart:
 	def _append(self, x, y):
 		'''Adds x and y back to chart.
 		NOTE: x must be greater than all other x in spectrum!'''
-		self.axis_x._append(x)
-		self.axis_y._append(y)
+		self.axis_x.append(x)
+		self.axis_y.append(y)
 		self.length += 1
 		
 	def copy(self):
@@ -191,6 +191,11 @@ class Chart:
 		self.axis_x.insert(idx, x)
 		self.axis_y.insert(idx, y)
 		self.length += 1
+		
+	def merge(self, another):
+		self.axis_x.extend(another.axis_x)
+		self.axis_y.extend(another.axis_y)
+		self.length += another.length
 	
 	def set_x_range(self, x_range):
 		'''Rebuilds chart with new x_range. NOTE: x_range must be sorted!'''
@@ -214,7 +219,7 @@ class Chart:
 			else:
 				idx = bisect(old_axis_x, x)
 				# range(idx-2, idx+2) == [idx-2, idx-1, *new*, idx, idx+1]
-				known_y_values = [(old_axis_x[i], old_axis_y[i]) for i in xrange(idx-2, idx+2)]
+				known_y_values = [(old_axis_x[i], old_axis_y[i]) for i in xrange(idx-2, idx+2) if 0 <= i < len(old_axis_x)]
 				# Approximate unknown y value by using the polinom of degree 4
 				p = Polinom(*known_y_values)
 				self._append(x, p.value(x))
@@ -256,6 +261,7 @@ def get_x_range_intersection(*charts):
 # PyQtGraph functions. 
 #===============================================================================
 
+
 def generate_palette(n):
 	'''Generates n RGB palettes.'''
 	if n <= len(DEFAULT_PALETTE):
@@ -291,7 +297,8 @@ def pyqtgraph_app():
 			pyg.setConfigOption('foreground', 'k')
 
 			# Create the plot window.
-			qt_window = pyg.GraphicsWindow(title=WINDOW_TITLE)			
+			qt_window = pyg.GraphicsWindow(title=WINDOW_TITLE)
+			qt_window.resize(1000, 600)
 			function(qt_window, *args, **kwargs)
 		
 			# Run Qt app.

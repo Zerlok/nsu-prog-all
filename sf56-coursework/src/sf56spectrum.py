@@ -1,4 +1,6 @@
+# -*-coding: utf-8-*-
 """Python module to work with SF-56 spectrum files."""
+
 from os.path import exists, isfile, basename
 from re import compile as reg_compile, split as reg_split
 
@@ -19,7 +21,7 @@ def read_sf(filename):
 			row = validate_sf_row(row)
 			if row:
 				columns = reg_split(SF_SEPARATOR_PTRN, row)
-				spectrum.insert(float(columns[0]), float(columns[1]))
+				spectrum.insert(float(columns[0])*10**-9, float(columns[1]))
 	
 	return spectrum
 
@@ -56,8 +58,10 @@ def write_sf(spectrum, filename):
 			sf_file.write("{}\t{}\n".format(x, y))
 
 
-def show_spectrums(*spectrums):
+def show_spectrums(*spectrums, **kwargs):
 	show_charts(*spectrums,
-			x_name = "Intensity",
-			x_= "%",
-			y_name)
+			x_name = u"Длина волны",
+			x_units = "m",
+			y_name = u"Интенсивность",
+			y_units = "%",
+			**kwargs)
