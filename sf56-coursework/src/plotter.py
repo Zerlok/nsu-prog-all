@@ -1,3 +1,5 @@
+# -*-coding: utf-8-*-
+
 import pyqtgraph as pyg
 from pyqtgraph.Qt import QtGui, QtCore
 from sys import flags as sysflags
@@ -9,16 +11,23 @@ from operator import __add__, __sub__, __mul__, __div__
 
 WINDOW_TITLE = "Charts View"
 DEFAULT_PALETTE = (
-		(55, 0, 173),
-		(173, 31, 0),
-		(66, 173, 0),
-		(0, 173, 60),
-		(133, 127, 0),
-		(173, 0, 40),
-		(0, 133, 61),
-		(50, 133, 0),
-		(0, 116, 133),
-		(173, 147, 0),
+	(55, 0, 173),
+	(173, 31, 0),
+	(66, 173, 0),
+	(0, 173, 60),
+	(133, 127, 0),
+	(173, 0, 40),
+	(0, 133, 61),
+	(50, 133, 0),
+	(0, 116, 133),
+	(173, 147, 0),
+)
+DEFAULT_STYLES = (
+	QtCore.Qt.SolidLine,
+	QtCore.Qt.DashLine,
+	QtCore.Qt.DotLine,
+	QtCore.Qt.DashDotLine,
+	QtCore.Qt.DashDotDotLine,
 )
 
 
@@ -298,7 +307,7 @@ def pyqtgraph_app():
 
 			# Create the plot window.
 			qt_window = pyg.GraphicsWindow(title=WINDOW_TITLE)
-			qt_window.resize(1000, 600)
+			qt_window.resize(800, 500)
 			function(qt_window, *args, **kwargs)
 		
 			# Run Qt app.
@@ -328,21 +337,21 @@ def show_charts(
 		y_range = None
 		palette = None"""
 	# Get arguments from kwargs.
-	title = kwargs.get('title', "Plot")
+	title = kwargs.get('title')
 	is_legend_on = kwargs.get('legend', True)
 	x_axis_name = kwargs.get('x_name', "X")
 	y_axis_name = kwargs.get('y_name', "Y")
-	x_axis_units = kwargs.get('x_units', None)
-	y_axis_units = kwargs.get('y_units', None)
-	x_axis_range = kwargs.get('x_range', None)
-	y_axis_range = kwargs.get('y_range', None)
-	palette = kwargs.get('palette', generate_palette(len(charts)))
+	x_axis_units = kwargs.get('x_units')
+	y_axis_units = kwargs.get('y_units')
+	x_axis_range = kwargs.get('x_range')
+	y_axis_range = kwargs.get('y_range')
 	
 	# Setup plot view.
+	cssstyle = {'color': 'black'}
 	plot_view = qt_window.addPlot(title=title)
 	plot_view.showGrid(x=True, y=True)
-	plot_view.setLabel('bottom', x_axis_name, units=x_axis_units)
-	plot_view.setLabel('left', y_axis_name, units=y_axis_units)
+	plot_view.setLabel('bottom', x_axis_name, units=x_axis_units, **cssstyle)
+	plot_view.setLabel('left', y_axis_name, units=y_axis_units, **cssstyle)
 	if is_legend_on:
 		plot_view.addLegend()
 	if x_axis_range:
@@ -357,7 +366,7 @@ def show_charts(
 					name = charts[i].name,
 					x = charts[i].axis_x,
 					y = charts[i].axis_y,
-					pen = pyg.mkPen(palette[i], width=2),
+					pen = pyg.mkPen('k', width=1.5, style=DEFAULT_STYLES[i]),
 			)
 		else:
 			print "Not Chart instance received:", charts[i]

@@ -12,10 +12,10 @@ SF_EXTENSION='.sf'
 SF_SEPARATOR_PTRN=reg_compile(r'\s+')
 
 
-def read_sf(filename):
+def read_sf(filename, name=None):
 	'''Reads spectrum file into dictionary.
 	Note for sf files: first column value must be UNIQUE!'''
-	spectrum = Chart(basename(filename))
+	spectrum = Chart(name or basename(filename))
 	with open(filename, 'r') as sf_file:
 		for row in sf_file:
 			row = validate_sf_row(row)
@@ -60,8 +60,9 @@ def write_sf(spectrum, filename):
 
 def show_spectrums(*spectrums, **kwargs):
 	show_charts(*spectrums,
-			x_name = u"Длина волны",
-			x_units = "m",
-			y_name = u"Интенсивность",
-			y_units = "%",
+			x_name = u"\u03BB",
+			x_units = u"м",
+			y_name = u"I(\u03BB)",
+			y_units = u"%",
+			y_range = (-1, 101),
 			**kwargs)
