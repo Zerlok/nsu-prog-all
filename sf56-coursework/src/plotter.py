@@ -168,11 +168,11 @@ class Chart:
 		return Chart(self.name, list(self.axis_x), list(self.axis_y))
 	
 	def differentiate(self):
-		diff = Chart("(%s)'" % self.name)
+		diff = Chart("%s'" % self.name)
 		diff._append(self.axis_x[0], 0)
 		
 		for i in xrange(1, len(self)):
-			diff._append(self.axis_x[i], self.axis_y[i] - self.axis_y[i - 1])
+			diff._append(self.axis_x[i], (self.axis_y[i] - self.axis_y[i - 1]) / (self.axis_x[i] - self.axis_x[i - 1]))
 		
 		return diff
 	
@@ -232,6 +232,8 @@ class Chart:
 				# Approximate unknown y value by using the polinom of degree 4
 				p = Polinom(*known_y_values)
 				self._append(x, p.value(x))
+		
+		return self
 
 
 def get_x_range_intersection(*charts):
