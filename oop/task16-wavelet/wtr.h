@@ -6,15 +6,14 @@
 #include "transformation.h"
 
 
-//using Floats = std::vector<float>;
-typedef std::vector<float> Floats;
-typedef Floats::size_type size_t;
+using Floats = std::vector<float>;
+using size_t = Floats::size_type;
 
 
 class OneDimTransformator : public Transformator<Floats>
 {
 	public:
-		OneDimTransformator(const Transformation<Floats>& tr)
+		OneDimTransformator(Transformation<Floats> *tr = nullptr)
 			: Transformator<Floats>(tr) {}
 
 		void apply_forward(Floats& vec) override;
@@ -25,7 +24,7 @@ class OneDimTransformator : public Transformator<Floats>
 class DAUB4Transform : public Transformation<Floats>
 {
 	public:
-		DAUB4Transform();
+		DAUB4Transform() {}
 
 		virtual void forward(Floats& vec) const override;
 		virtual void backward(Floats& vec) const override;
@@ -41,44 +40,45 @@ class DAUB4Transform : public Transformation<Floats>
 class PartlyTransform : public Transformation<Floats>
 {
 	public:
-		class Filt;
+		class Filt
+		{
+			public:
+				enum class Mode
+				{
+					first = 4,
+					second = 12,
+					third = 20
+				};
 
-		PartlyTransform(const Filt& wfilt);
+				Filt(const Mode& mode);
+				Filt(const Filt& filt);
+
+				int ncof;
+				int ioff;
+				int joff;
+
+				Floats cc;
+				Floats cr;
+
+			private:
+				static const Floats c4;
+				static const Floats c4r;
+				static const Floats c12;
+				static const Floats c12r;
+				static const Floats c20;
+				static const Floats c20r;
+		};
+
+		PartlyTransform(const Filt::Mode& mode)
+			: _wfilt(mode) {}
+		PartlyTransform(const Filt& wfilt)
+			: _wfilt(wfilt) {}
 
 		virtual void forward(Floats& vec) const override;
 		virtual void backward(Floats& vec) const override;
 
 	private:
-		const Filt& _wfilt;
-};
-
-
-class PartlyTransform::Filt
-{
-	public:
-		enum class Mode
-		{
-			first = 4,
-			second = 12,
-			third = 20
-		};
-
-		Filt(const Mode& mode);
-
-		int ncof;
-		int ioff;
-		int joff;
-
-		Floats cc;
-		Floats cr;
-
-	private:
-		static const Floats c4;
-		static const Floats c4r;
-		static const Floats c12;
-		static const Floats c12r;
-		static const Floats c20;
-		static const Floats c20r;
+		const Filt _wfilt;
 };
 
 

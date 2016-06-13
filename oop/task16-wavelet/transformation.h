@@ -2,11 +2,6 @@
 #define __TRANSFORMATION_H__
 
 
-#include <vector>
-using Floats = std::vector<float>;
-using size_t = Floats::size_type;
-
-
 template<class T>
 class Transformation
 {
@@ -21,15 +16,21 @@ template<class T>
 class Transformator
 {
 	public:
-		Transformator(const Transformation<T>& tr)
+		Transformator(Transformation<T>* tr = nullptr)
 			: _tr(tr) {}
-		virtual ~Transformator() {}
+		virtual ~Transformator() { delete _tr; }
 
-		virtual void apply_forward(Floats& vec) = 0;
-		virtual void apply_backward(Floats& vec) = 0;
+		virtual void apply_forward(T& vec) = 0;
+		virtual void apply_backward(T& vec) = 0;
+
+		void set_transformation(Transformation<T>* tr)
+		{
+			delete _tr;
+			_tr = tr;
+		}
 
 	protected:
-		const Transformation<T>& _tr;
+		const Transformation<T>* _tr;
 };
 
 

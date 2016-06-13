@@ -1,11 +1,6 @@
 #include "haartransformation.h"
 
 
-HaarTransformation::HaarTransformation()
-{
-}
-
-
 void HaarTransformation::forward(Floats& vec) const
 {
 	const size_t n = vec.size();

@@ -3,31 +3,34 @@
 
 void OneDimTransformator::apply_forward(Floats& vec)
 {
-	const size_t n = vec.size();
+//	const size_t n = vec.size();
 
-	if (n < 4)
-		return;
+//	if (n < 4)
+//		return;
 
-	Floats wksp = vec;
-	for (size_t nn = n; nn >= 4; nn >>= 1)
-		_tr.forward(wksp);
+//	Floats wksp = vec;
+//	for (size_t nn = n; nn >= 4; nn >>= 1)
+//		_tr->forward(wksp);
+//	wksp.swap(vec);
 
-	wksp.swap(vec);
+	_tr->forward(vec);
 }
 
 
 void OneDimTransformator::apply_backward(Floats& vec)
 {
-	const size_t n = vec.size();
+//	const size_t n = vec.size();
 
-	if (n < 4)
-		return;
+//	if (n < 4)
+//		return;
 
-	Floats wksp = vec;
-	for (size_t nn = 4; nn <= n; nn <<= 1)
-		_tr.backward(wksp);
+//	Floats wksp = vec;
+//	for (size_t nn = 4; nn <= n; nn <<= 1)
+//		_tr->backward(wksp);
 
-	wksp.swap(vec);
+//	wksp.swap(vec);
+
+	_tr->backward(vec);
 }
 
 
@@ -53,11 +56,11 @@ void DAUB4Transform::forward(Floats& vec) const
 		 i += 1, j += 2)
 	{
 		wksp[i] = c0*vec[j] + c1*vec[j+1] + c2*vec[j+2] + c3*vec[j+3];
-		wksp[i+nh] = c3*vec[j] - c2*vec[j+1] + c1*vec[j+2] - c0*vec[j+3];
+		wksp[nh-i] = c3*vec[j] - c2*vec[j+1] + c1*vec[j+2] - c0*vec[j+3];
 	}
 
-	wksp[i] = c0*vec[n-1] + c1*vec[n] + c2*vec[1] + c3*vec[2];
-	wksp[i+nh] = c3*vec[n-1] - c2*vec[n] + c1*vec[1] - c0*vec[2];
+	wksp[i] = c0*vec[n-2] + c1*vec[n-1] + c2*vec[0] + c3*vec[1];
+	wksp[nh-i] = c3*vec[n-2] - c2*vec[n-1] + c1*vec[0] - c0*vec[1];
 
 	vec.swap(wksp);
 }
@@ -75,13 +78,13 @@ void DAUB4Transform::backward(Floats& vec) const
 	Floats wksp = Floats(n);
 	size_t i, j;
 
-	wksp[0] = c2*vec[nh] + c1*vec[n] + c0*vec[0] + c3*vec[nh1];
-	wksp[1] = c3*vec[nh] - c0*vec[n] + c1*vec[0] - c2*vec[nh1];
+	wksp[0] = c2*vec[nh-1] + c1*vec[nh] + c0*vec[0] + c3*vec[nh1-1];
+	wksp[1] = c3*vec[nh-1] - c0*vec[nh] + c1*vec[0] - c2*vec[nh1-1];
 
 	for (i = 0, j = 2; i < nh; i++)
 	{
-		wksp[j++] = c2*vec[i] + c1*vec[i+nh] + c0*vec[i+1] + c3*vec[i+nh1];
-		wksp[j++] = c3*vec[i] - c0*vec[i+nh] + c1*vec[i+1] - c2*vec[i+nh1];
+		wksp[j++] = c2*vec[i] + c1*vec[nh-i] + c0*vec[i+1] + c3*vec[nh1-i];
+		wksp[j++] = c3*vec[i] - c0*vec[nh-i] + c1*vec[i+1] - c2*vec[nh1-i];
 	}
 
 	vec.swap(wksp);
@@ -233,4 +236,14 @@ PartlyTransform::Filt::Filt(const Mode& mode)
 	}
 
 	ioff = joff = -(ncof >> 1);
+}
+
+
+PartlyTransform::Filt::Filt(const PartlyTransform::Filt& filt)
+	: ncof(filt.ncof),
+	  ioff(filt.ioff),
+	  joff(filt.joff),
+	  cc(filt.cc),
+	  cr(filt.cr)
+{
 }

@@ -3,7 +3,9 @@
 
 
 #include <vector>
-typedef std::vector<float> Floats;
+using Floats = std::vector<float>;
+using size_t = Floats::size_type;
+
 
 #include "transformation.h"
 
@@ -11,7 +13,7 @@ typedef std::vector<float> Floats;
 class HaarTransformation : public Transformation<Floats>
 {
 	public:
-		HaarTransformation();
+		HaarTransformation() {}
 
 		void forward(Floats& vec) const override;
 		void backward(Floats& vec) const override;
