@@ -19,7 +19,6 @@ SOURCES += \
 
 HEADERS += \
 	wtr.h \
-    utils.h \
     transformation.h \
     haartransformation.h
 

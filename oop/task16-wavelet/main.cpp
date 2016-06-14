@@ -3,7 +3,6 @@
 #include <cmath>
 #include "haartransformation.h"
 #include "wtr.h"
-#include "utils.h"
 
 
 template<class T>
@@ -47,7 +46,10 @@ int main(void)
 
 	for (;;)
 	{
-		std::cout << "Enter k [-2, -4, 4, 12, 20], frac (0.0 <= frac <= 1.0), num (if 0 then 512): " << std::endl;
+		/* DATA READ BLOCK */
+		std::cout << "Enter k [-2 - Haar, -4 - DAUB4, 4, 12, 20]" << std::endl
+				  << "compressing ratio (0.0 <= frac <= 1.0)" << std::endl
+				  << "len of data (if 0 then 512):" << std::endl;
 		std::cin >> k >> frac >> num;
 		invalid_k = false;
 		if (num == 0)
@@ -55,11 +57,11 @@ int main(void)
 		nbeg = RBEG * num;
 		nend = REND * num;
 
-		Floats abser(num);
 		Floats modifying_data(num);
 		Floats initial_data(num);
 
 		frac = std::min(top, std::max(frac, bottom));
+		/* SET TRANSFORMATION FROM K */
 		switch (k)
 		{
 			case -2:
@@ -90,23 +92,23 @@ int main(void)
 		if (invalid_k)
 			continue;
 
+		/* SET INITIAL DATA */
 		for (size_t i = 0; i < num; ++i)
 			if ((i > nbeg) && (i < nend))
 				initial_data[i] = modifying_data[i] = ((float(nend-i) * float(i-nbeg) * 4) / ((nend - nbeg)*(nend-nbeg)));
-		std::cout << "BEGIN:" << std::endl
+		std::cout << "INIT:" << std::endl
 				  << initial_data << std::endl;
 
+		/* DO TRANSFORMATION */
 		transformator.apply_forward(modifying_data);
-		for (size_t i = 0; i < num; ++i)
-			abser[i] = std::abs(modifying_data[i]);
 		std::cout << "ENCODED:" << std::endl
 				  << modifying_data << std::endl;
 
+		/* DO COMPRESSING */
 		zeroes = 0;
-		thresh = frac;
 		for (size_t i = 0; i < num; ++i)
 		{
-			if (std::abs(modifying_data[i]) <= thresh)
+			if (std::abs(modifying_data[i]) <= frac)
 			{
 				modifying_data[i] = 0.0;
 				++zeroes;
@@ -115,8 +117,9 @@ int main(void)
 		std::cout << "COMPRESSED:" << std::endl
 				  << modifying_data << std::endl;
 
-		thresh = 0.0;
+		/* REDO TRANSFORMATION */
 		transformator.apply_backward(modifying_data);
+		thresh = 0.0;
 		for (size_t i = 0; i < num; ++i)
 		{
 			tmp = std::abs(modifying_data[i] - initial_data[i]);
@@ -126,8 +129,8 @@ int main(void)
 		std::cout << "DECODED:" << std::endl
 				  << modifying_data << std::endl;
 
-		std::cout << "k, num, zeroes = " << k << ' ' << num << ' ' << zeroes << std::endl
-				  << "discrepancy = " << thresh << std::endl;
+		std::cout << "k, data len, zeroes = " << k << ' ' << num << ' ' << zeroes << std::endl
+				  << "compressed difference = " << thresh << std::endl;
 	}
 
 	return 0;

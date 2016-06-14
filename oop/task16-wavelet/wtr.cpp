@@ -3,33 +3,12 @@
 
 void OneDimTransformator::apply_forward(Floats& vec)
 {
-//	const size_t n = vec.size();
-
-//	if (n < 4)
-//		return;
-
-//	Floats wksp = vec;
-//	for (size_t nn = n; nn >= 4; nn >>= 1)
-//		_tr->forward(wksp);
-//	wksp.swap(vec);
-
 	_tr->forward(vec);
 }
 
 
 void OneDimTransformator::apply_backward(Floats& vec)
 {
-//	const size_t n = vec.size();
-
-//	if (n < 4)
-//		return;
-
-//	Floats wksp = vec;
-//	for (size_t nn = 4; nn <= n; nn <<= 1)
-//		_tr->backward(wksp);
-
-//	wksp.swap(vec);
-
 	_tr->backward(vec);
 }
 
@@ -42,52 +21,61 @@ const double DAUB4Transform::c3 = -0.1294095225512604;
 
 void DAUB4Transform::forward(Floats& vec) const
 {
-	size_t n = vec.size();
+	const size_t len = vec.size();
 
-	if (n < 4)
+	if (len < 4)
 		return;
 
-	size_t nh = n - 1;
-	Floats wksp = Floats(n);
 	size_t i, j;
-
-	for (i = 0, j = 0;
-		 j < n - 3;
-		 i += 1, j += 2)
+	Floats tmp(len);
+	for (size_t n = len; n >= 4; n >>= 1)
 	{
-		wksp[i] = c0*vec[j] + c1*vec[j+1] + c2*vec[j+2] + c3*vec[j+3];
-		wksp[nh-i] = c3*vec[j] - c2*vec[j+1] + c1*vec[j+2] - c0*vec[j+3];
+		const size_t last = n - 1;
+		const size_t mid = n >> 1;
+
+		for (i = 0, j = 0;
+			 j < last - 2;
+			 i += 1, j += 2)
+		{
+			tmp[i] = c0*vec[j] + c1*vec[j+1] + c2*vec[j+2] + c3*vec[j+3];
+			tmp[mid+i] = c3*vec[j] - c2*vec[j+1] + c1*vec[j+2] - c0*vec[j+3];
+		}
+
+		tmp[i] = c0*vec[last-1] + c1*vec[last] + c2*vec[0] + c3*vec[1];
+		tmp[mid+i] = c3*vec[last-1] - c2*vec[last] + c1*vec[0] - c0*vec[1];
+
+		for (i = 0; i < n; ++i)
+			vec[i] = tmp[i];
 	}
-
-	wksp[i] = c0*vec[n-2] + c1*vec[n-1] + c2*vec[0] + c3*vec[1];
-	wksp[nh-i] = c3*vec[n-2] - c2*vec[n-1] + c1*vec[0] - c0*vec[1];
-
-	vec.swap(wksp);
 }
 
 
 void DAUB4Transform::backward(Floats& vec) const
 {
-	size_t n = vec.size();
+	const size_t len = vec.size();
 
-	if (n < 4)
+	if (len < 4)
 		return;
 
-	size_t nh = n - 1;
-	size_t nh1 = (nh >> 1) + 1;
-	Floats wksp = Floats(n);
 	size_t i, j;
-
-	wksp[0] = c2*vec[nh-1] + c1*vec[nh] + c0*vec[0] + c3*vec[nh1-1];
-	wksp[1] = c3*vec[nh-1] - c0*vec[nh] + c1*vec[0] - c2*vec[nh1-1];
-
-	for (i = 0, j = 2; i < nh; i++)
+	Floats tmp(len);
+	for (size_t n = 4; n <= len; n <<= 1)
 	{
-		wksp[j++] = c2*vec[i] + c1*vec[nh-i] + c0*vec[i+1] + c3*vec[nh1-i];
-		wksp[j++] = c3*vec[i] - c0*vec[nh-i] + c1*vec[i+1] - c2*vec[nh1-i];
-	}
+		const size_t last = n - 1;
+		const size_t mid = n >> 1;
 
-	vec.swap(wksp);
+		tmp[0] = c2*vec[mid-1] + c1*vec[last] + c0*vec[0] + c3*vec[mid];
+		tmp[1] = c3*vec[mid-1] - c0*vec[last] + c1*vec[0] - c2*vec[mid];
+
+		for (i = 0, j = 2; i < mid-1; ++i)
+		{
+			tmp[j++] = c2*vec[i] + c1*vec[mid+i] + c0*vec[i+1] + c3*vec[mid+i+1];
+			tmp[j++] = c3*vec[i] - c0*vec[mid+i] + c1*vec[i+1] - c2*vec[mid+i+1];
+		}
+
+		for (i = 0; i < n; ++i)
+			vec[i] = tmp[i];
+	}
 }
 
 
