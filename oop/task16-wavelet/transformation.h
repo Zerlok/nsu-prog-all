@@ -2,35 +2,40 @@
 #define __TRANSFORMATION_H__
 
 
-template<class T>
-class Transformation
+#include <vector>
+#include <stddef.h>
+
+
+template<class DataSet>
+class DataSizeGetter
 {
 	public:
-		virtual ~Transformation() {}
-		virtual void forward(T& vec) const = 0;
-		virtual void backward(T& vec) const = 0;
+		size_t operator()(const DataSet& data) const { return data.size(); }
 };
 
 
-template<class T>
-class Transformator
+template<class DataType>
+class TransformationTraits
 {
 	public:
-		Transformator(Transformation<T>* tr = nullptr)
-			: _tr(tr) {}
-		virtual ~Transformator() { delete _tr; }
+		using Data = DataType;							// Working data type.
+		using DataSet = std::vector<DataType>;			// Transformation data input type.
+		using SizeGetter = DataSizeGetter<DataSet>;		// Size getter function.
+};
 
-		virtual void apply_forward(T& vec) = 0;
-		virtual void apply_backward(T& vec) = 0;
 
-		void set_transformation(Transformation<T>* tr)
-		{
-			delete _tr;
-			_tr = tr;
-		}
-
+template<class DataType>
+class Transformation
+{
+	public:
+		using Traits = TransformationTraits<DataType>;
+		
+		virtual ~Transformation() {}
+		virtual typename Traits::DataSet forward(const typename Traits::DataSet&, const size_t& begin, const size_t& end) const = 0;
+		virtual typename Traits::DataSet backward(const typename Traits::DataSet&, const size_t& begin, const size_t& end) const = 0;
+		
 	protected:
-		const Transformation<T>* _tr;
+		typename Traits::SizeGetter _getsize;
 };
 
 

@@ -1,8 +1,10 @@
 #include <iostream>
 #include <vector>
 #include <cmath>
-#include "haartransformation.h"
-#include "wtr.h"
+
+#include "transformators.h"
+#include "haar.h"
+#include "daub4.h"
 
 
 template<class T>
@@ -33,6 +35,8 @@ static const float REND = 0.75;
 static const float bottom = 0.0;
 static const float top = 1.0;
 
+using Doubles = std::vector<double>;
+
 
 int main(void)
 {
@@ -42,7 +46,7 @@ int main(void)
 	size_t nbeg, nend, num;
 	size_t zeroes;
 
-	OneDimTransformator transformator;
+	OneDimTransformator<double> transformator;
 
 	for (;;)
 	{
@@ -57,32 +61,32 @@ int main(void)
 		nbeg = RBEG * num;
 		nend = REND * num;
 
-		Floats modifying_data(num);
-		Floats initial_data(num);
+		Doubles modifying_data(num);
+		Doubles initial_data(num);
 
 		frac = std::min(top, std::max(frac, bottom));
 		/* SET TRANSFORMATION FROM K */
 		switch (k)
 		{
 			case -2:
-				transformator.set_transformation(new HaarTransformation());
+				transformator.set_transformation(new HaarTransformation<double>());
 				break;
 
 			case -4:
 				transformator.set_transformation(new DAUB4Transform());
 				break;
 
-			case 4:
-				transformator.set_transformation(new PartlyTransform(PartlyTransform::Filt::Mode::first));
-				break;
-
-			case 12:
-				transformator.set_transformation(new PartlyTransform(PartlyTransform::Filt::Mode::second));
-				break;
-
-			case 20:
-				transformator.set_transformation(new PartlyTransform(PartlyTransform::Filt::Mode::third));
-				break;
+//			case 4:
+//				transformator.set_transformation(new PartlyTransform(PartlyTransform::Filt::Mode::first));
+//				break;
+//
+//			case 12:
+//				transformator.set_transformation(new PartlyTransform(PartlyTransform::Filt::Mode::second));
+//				break;
+//
+//			case 20:
+//				transformator.set_transformation(new PartlyTransform(PartlyTransform::Filt::Mode::third));
+//				break;
 
 			default:
 				invalid_k = true;
