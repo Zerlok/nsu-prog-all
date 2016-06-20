@@ -13,7 +13,7 @@ class TransformatorTraits
 		using DataTransformation = Transformation<DataType>;
 		using Data = typename DataTransformation::Traits::Data;
 		using DataSet = typename DataTransformation::Traits::DataSet;
-		using SizeGetter = typename DataTransformation::Traits::SizeGetter;
+		using Adapter = typename DataTransformation::Traits::Adapter;
 };
 
 
@@ -23,10 +23,12 @@ class Transformator
 	public:
 		using Traits = TraitsType;
 		
+		Transformator()
+			: _tr(nullptr), _adapter() {}
 		virtual ~Transformator() { delete _tr; }
 
-		virtual typename Traits::DataSet apply_forward(const typename Traits::DataSet&) = 0;
-		virtual typename Traits::DataSet apply_backward(const typename Traits::DataSet&) = 0;
+		virtual typename Traits::DataSet apply_forward(const typename Traits::DataSet&) const = 0;
+		virtual typename Traits::DataSet apply_backward(const typename Traits::DataSet&) const = 0;
 
 		void set_transformation(const typename Traits::DataTransformation* tr)
 		{
@@ -36,7 +38,7 @@ class Transformator
 
 	protected:
 		const typename Traits::DataTransformation* _tr;
-		typename Traits::SizeGetter _getsize;
+		const typename Traits::Adapter _adapter;
 };
 
 
@@ -47,15 +49,15 @@ class OneDimTransformator : public Transformator<DataType>
 		using super = Transformator<DataType>;
 				
 		typename super::Traits::DataSet apply_forward(
-				const typename super::Traits::DataSet& data) override
+				const typename super::Traits::DataSet& data) const override
 		{
-			return super::_tr->forward(data, 0, super::_getsize(data));
+			return super::_tr->forward(data, super::_adapter.size(data));
 		}
 		
 		typename super::Traits::DataSet apply_backward(
-				const typename super::Traits::DataSet& data) override
+				const typename super::Traits::DataSet& data) const override
 		{
-			return super::_tr->backward(data, 0, super::_getsize(data));
+			return super::_tr->backward(data, super::_adapter.size(data));
 		}
 };
 
@@ -65,23 +67,23 @@ class DividingTransformator : public Transformator<DataType>
 {
 	public:
 		using super = Transformator<DataType>;
-		
-		typename super::DataSet apply_forward(
-				const typename super::DataSet& data) override
+				
+		typename super::Traits::DataSet apply_forward(
+				const typename super::Traits::DataSet& data) const override
 		{
-			typename super::DataSet tmp(data);
-			for (size_t n = super::_getsize(data); n >= 4; n >>= 1)
-				tmp = super::_tr->forward(tmp, 0, n);
+			typename super::Traits::DataSet tmp(data);
+			for (size_t n = super::_adapter.size(data); n >= 4; n >>= 1)
+				tmp = super::_tr->forward(tmp, n);
 			
 			return std::move(tmp);
 		}
 		
-		typename super::DataSet apply_backward(
-				const typename super::DataSet& data) override
+		typename super::Traits::DataSet apply_backward(
+				const typename super::Traits::DataSet& data) const override
 		{
-			typename super::DataSet tmp(data);
-			for (size_t n = 2; n < super::_getsize(tmp); n <<= 1)
-				tmp = super::_tr->backward(tmp, 0, n);
+			typename super::Traits::DataSet tmp(data);
+			for (size_t n = 4; n <= super::_adapter.size(tmp); n <<= 1)
+				tmp = super::_tr->backward(tmp, n);
 			
 			return std::move(tmp);
 		}

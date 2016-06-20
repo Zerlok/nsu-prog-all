@@ -1,7 +1,7 @@
 TASKNAME = Wavelet transformation (refactoring from C to C++)
 
 TEMPLATE = app
-CONFIG += console gnu++11 release
+CONFIG += console gnu++11
 CONFIG -= app_bundle
 CONFIG -= qt
 
@@ -9,26 +9,18 @@ CONFIG -= qt
 QMAKE_CXXFLAGS += -std=gnu++11
 
 
-SOURCES += \
-	wtr.cpp \
-	haartransformation.cpp
+HEADERS += \
+	transformation.h \
+	transformators.h \
+	daub4.h \
+	haar.h \
+    utils.h
 
-debug {
+SOURCES += gtest.cpp main.cpp
+
+equals(DEFINES, _DEBUG_)
+{
 	QMAKE_CXXFLAGS += -lpthread -lgtest
 	LIBS += -lpthread -lgtest
 	INCLUDEPATH += /usr/include/gtest
-	SOURCES += gtest.cpp
-	message("Google Unit Tests enabled!")
 }
-
-release {
-	SOURCES += main.cpp
-	message("Release build set!")
-}
-
-
-HEADERS += \
-	wtr.h \
-    transformation.h \
-    haartransformation.h
-
