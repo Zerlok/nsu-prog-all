@@ -71,7 +71,7 @@ class DividingTransformator : public Transformator<DataType>
 		typename super::Traits::DataSet apply_forward(
 				const typename super::Traits::DataSet& data) const override
 		{
-			typename super::Traits::DataSet tmp(data);
+			typename super::Traits::DataSet tmp = super::_adapter.clone(data);
 			for (size_t n = super::_adapter.size(data); n >= 4; n >>= 1)
 				tmp = super::_tr->forward(tmp, n);
 			
@@ -81,7 +81,7 @@ class DividingTransformator : public Transformator<DataType>
 		typename super::Traits::DataSet apply_backward(
 				const typename super::Traits::DataSet& data) const override
 		{
-			typename super::Traits::DataSet tmp(data);
+			typename super::Traits::DataSet tmp = super::_adapter.clone(data);
 			for (size_t n = 4; n <= super::_adapter.size(tmp); n <<= 1)
 				tmp = super::_tr->backward(tmp, n);
 			

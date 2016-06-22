@@ -5,17 +5,17 @@ CONFIG -= qt
 
 QMAKE_CXXFLAGS += -std=gnu++11
 
+LIBS += -lopencv_core -lopencv_highgui -lopencv_photo -lpthread -lgtest
+INCLUDEPATH += /usr/local/lib /usr/include/gtest
 
-LIBS += -lopencv_core -lopencv_highgui -lopencv_photo
-INCLUDEPATH += /usr/local/lib
-
-QMAKE_CXXFLAGS += -lpthread -lgtest
-LIBS += -lpthread -lgtest
-INCLUDEPATH += /usr/include/gtest
-SOURCES += gtest.cpp main.cpp
+SOURCES += \
+	main.cpp \
+	gtest.cpp
 
 HEADERS += \
+	cvtransformation.h \
 	../task16-wavelet/transformation.h \
 	../task16-wavelet/transformators.h \
 	../task16-wavelet/haar.h \
-	../task16-wavelet/daub4.h
+	../task16-wavelet/daub4.h \
+	../task16-wavelet/utils.h

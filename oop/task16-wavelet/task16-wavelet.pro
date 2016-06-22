@@ -14,7 +14,7 @@ HEADERS += \
 	transformators.h \
 	daub4.h \
 	haar.h \
-    utils.h
+	utils.h
 
 SOURCES += gtest.cpp main.cpp
 

@@ -18,7 +18,7 @@ class HaarTransformation : public Transformation<DataType>
 		{
 			const size_t len = std::min(end, super::_adapter.size(data));
 			const size_t mid = len / 2;
-			typename super::Traits::DataSet tmp(data);
+			typename super::Traits::DataSet tmp = super::_adapter.clone(data);
 
 			for (size_t i = 0; i < mid; ++i)
 			{
@@ -35,7 +35,7 @@ class HaarTransformation : public Transformation<DataType>
 		{
 			const size_t len = std::min(end, super::_adapter.size(data));
 			const size_t mid = len / 2;
-			typename super::Traits::DataSet tmp(data);
+			typename super::Traits::DataSet tmp = super::_adapter.clone(data);
 
 			for (size_t i = 0; i < mid; ++i)
 			{

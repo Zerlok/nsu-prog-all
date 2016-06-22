@@ -9,39 +9,20 @@
 #include "daub4.h"
 #include "utils.h"
 
+
 static const int NMAX = 512;
 static const float RBEG = 0.25;
 static const float REND = 0.75;
 static const float bottom = 0.0;
 static const float top = 1.0;
-static const bool display = true;
 
 using Doubles = std::vector<double>;
-
-
-double get_k_min_abs_value(const std::vector<double>& vec, const size_t& k)
-{
-	std::vector<double> saved;
-
-	for (size_t i = 0; i < vec.size(); ++i)
-	{
-		if (i >= k)
-		{
-			for (size_t j = 0; j < k; ++j)
-				if (std::fabs(vec[i]) < saved[j])
-					saved.insert(saved.begin()+j, std::abs(vec[i]));
-		}
-		else
-			saved.push_back(vec[i]);
-	}
-
-	return saved[k];
-}
 
 
 int main(int argc, char *argv[])
 {
 	int k;
+	bool display = ((argc > 1) && bool(argv[1]));
 	bool invalid_k;
 	float frac, thresh, tmp;
 	size_t nbeg, nend, num;
@@ -76,7 +57,7 @@ int main(int argc, char *argv[])
 				break;
 
 			case -4:
-				transformator.set_transformation(new DAUB4Transform<double>());
+				transformator.set_transformation(new DAUB4Transformation<double>());
 				break;
 
 			default:
@@ -123,7 +104,7 @@ int main(int argc, char *argv[])
 		thresh = 0.0;
 		for (size_t i = 0; i < num; ++i)
 		{
-			tmp = std::abs(decoded_data[i] - initial_data[i]);
+			tmp = roundk(std::abs(decoded_data[i] - initial_data[i]), 10);
 			if (tmp > thresh)
 				thresh = tmp;
 		}

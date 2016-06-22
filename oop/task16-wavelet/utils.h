@@ -28,7 +28,56 @@ template<class T>
 inline T roundk(const T& val, const size_t& k = 0)
 {
 	long long int m = std::pow(10, k);
-	return std::round(val*m) / m;
+	return std::round(val * m) / m;
+}
+
+
+template<class T>
+size_t bisect(const std::vector<T>& vec, const T& val)
+{
+	for (size_t i = 0; i < vec.size(); ++i)
+		if (val < vec[i])
+			return i;
+
+	return 0;
+}
+
+
+template<class T>
+size_t insort(std::vector<T>& vec, const T& val)
+{
+	const size_t idx = bisect(vec, val);
+	vec.insert(vec.begin() + idx, val);
+	return idx;
+}
+
+
+template<class T>
+T get_k_min_abs_value(const std::vector<T>& vec, const size_t& k)
+{
+	T zero {};
+	std::vector<T> saved;
+
+	for (size_t i = 0; i < vec.size(); ++i)
+		if (vec[i] != zero)
+			insort(saved, std::abs(vec[i]));
+
+	return ((!saved.empty()
+			 && (k > 0))
+			? saved[std::min(k, vec.size())-1]
+			: 0);
+}
+
+
+template<class To, class From>
+std::vector<To> reset_type(const std::vector<From>& valuesf)
+{
+	const size_t len = valuesf.size();
+	std::vector<To> valuest(len);
+	for (size_t i = 0; i < len; ++i)
+		valuest[i] = To(std::round(valuesf[i]));
+
+	return std::move(valuest);
 }
 
 

@@ -24,6 +24,11 @@ class DataAdapter
 		{
 			return data.size();
 		}
+
+		DataSet clone(const DataSet& data) const
+		{
+			return std::move(DataSet(data));
+		}
 };
 
 

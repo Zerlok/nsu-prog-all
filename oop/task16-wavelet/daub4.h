@@ -16,7 +16,7 @@ class DAUB4Transformation : public Transformation<DataType>
 				const size_t& end) const override
 		{
 			const size_t len = std::min(end, super::_adapter.size(vec));
-			typename super::Traits::DataSet tmp(vec);
+			typename super::Traits::DataSet tmp = super::_adapter.clone(vec);
 
 			if (len < 4)
 				return std::move(tmp);
@@ -56,7 +56,7 @@ class DAUB4Transformation : public Transformation<DataType>
 				const size_t& end) const override
 		{
 			const size_t len = std::min(end, super::_adapter.size(vec));
-			typename super::Traits::DataSet tmp(vec);
+			typename super::Traits::DataSet tmp = super::_adapter.clone(vec);
 
 			if (len < 4)
 				return std::move(tmp);
