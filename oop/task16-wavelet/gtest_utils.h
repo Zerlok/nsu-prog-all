@@ -6,21 +6,23 @@
 #include <vector>
 #include <gtest/gtest.h>
 
+#include "utils.h"
+
 
 template<class T>
-::testing::AssertionResult values_are_near(const std::vector<T>& vec1, const std::vector<T>& vec2, const size_t& abs)
+::testing::AssertionResult values_are_near(const T& data1, const T& data2, const size_t& abs)
 {
-	if (vec1.size() != vec2.size())
+	if (data1.size() != data2.size())
 		return ::testing::AssertionFailure()
-				<< "vectors' sizes are different: "
-				<< vec1.size() << " " << vec2.size();
+				<< "containers' sizes are different: "
+				<< data1.size() << " " << data2.size();
 
-	for (size_t i = 0; i < vec1.size(); ++i)
-		if (roundk((vec1[i] - vec2[i]), abs) != 0.0)
+	for (size_t i = 0; i < data1.size(); ++i)
+		if (roundk((data1[i] - data2[i]), abs) != 0.0)
 			return ::testing::AssertionFailure()
 					<< "different values at " << i << " position, abs: " << abs << std::endl
-					<< "  actual: " << vec2[i] << std::endl
-					<< "  expected: " << vec1[i];
+					<< "  actual: " << data2[i] << std::endl
+					<< "  expected: " << data1[i];
 
 	return ::testing::AssertionSuccess() << "all values are near with abs: " << abs;
 }

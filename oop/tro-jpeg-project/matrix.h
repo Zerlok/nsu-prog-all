@@ -247,7 +247,7 @@ class Matrix
 		{
 			const size_t col_num = col.get_num();
 			for (size_t i = 0; i < col.size(); ++i)
-				_at(col_num, i) = col[i];
+				_at(i, col_num) = col[i];
 		}
 
 	private:

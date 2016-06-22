@@ -32,46 +32,20 @@ static cv::Mat matrix2mat(const Matrix<T>& from)
 }
 
 
-//template<class T>
-//class MatrixRowTransformator : public Transformator<T, typename Matrix<T>::Row>
-//{
-//	public:
-//		using Row = typename Matrix<T>::Row;
-//		using super = Transformator<T, Row>;
-
-//		Row apply_forward(const Row&) const
-//		{
-
-//		}
-
-//		Row apply_backward(const Row&) const
-//		{
-
-//		}
-//};
-
-
-//template<class T>
-//class MatrixColTransformator : public Transformator<T, typename Matrix<T>::Col>
-//{
-
-//};
-
-
-template<class T, class RowTion, class ColTion>
+template<class T, template <class, class> class Transformation>
 class MatrixTransformator
 {
 	public:
 		using MatrixT = Matrix<T>;
 		using MatrixRow = typename MatrixT::Row;
 		using MatrixCol = typename MatrixT::Col;
-		using RowTransformator = OneDimTransformator<T, MatrixRow, RowTion>;
-		using ColTransformator = OneDimTransformator<T, MatrixCol, ColTion>;
+		using RowTransformator = OneDimTransformator<T, MatrixRow>;
+		using ColTransformator = OneDimTransformator<T, MatrixCol>;
 
 		MatrixTransformator()
 		{
-			_rowtor.set_transformation(new RowTion());
-			_coltor.set_transformation(new ColTion());
+			_rowtor.set_transformation(new Transformation<T, MatrixRow>());
+			_coltor.set_transformation(new Transformation<T, MatrixCol>());
 		}
 
 		MatrixT apply_forward(const MatrixT& mtrx) const

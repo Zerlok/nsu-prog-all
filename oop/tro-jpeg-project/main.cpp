@@ -5,11 +5,13 @@
 #include <opencv2/opencv.hpp>
 
 #include "cvtransformation.h"
+#include "matrix.h"
 #include "../task16-wavelet/transformators.h"
 #include "../task16-wavelet/haar.h"
 #include "../task16-wavelet/daub4.h"
 #include "../task16-wavelet/utils.h"
 
+using MatrixD = Matrix<double>;
 
 int main(int argc, char *argv[])
 {
@@ -29,9 +31,10 @@ int main(int argc, char *argv[])
 
 //	cv::Mat encoded = tor.apply_forward(before);
 //	cv::Mat after = tor.apply_backward(encoded);
-	std::vector<double> afterdouble = tor.apply_forward(mat2doubles(before));
-	cv::Mat encoded = doubles2mat(afterdouble, before.rows, before.cols);
-	cv::Mat after = doubles2mat(tor.apply_backward(afterdouble), before.rows, before.cols);
+	MatrixTransformator<double, DAUB4Transformation> tor;
+	MatrixD afterdouble = tor.apply_forward(mat2matrix<double>(before));
+	cv::Mat encoded = matrix2mat(afterdouble);
+	cv::Mat after = matrix2mat(tor.apply_backward(afterdouble));
 
 	cv::namedWindow("Before", cv::WINDOW_NORMAL);
 	cv::imshow("Before", before);
