@@ -3,20 +3,20 @@
 #include <gtest/gtest.h>
 
 #include "cvtransformation.h"
+#include "matrix.h"
 #include "../task16-wavelet/haar.h"
 #include "../task16-wavelet/daub4.h"
 #include "../task16-wavelet/transformators.h"
 
 
-using MatAdapter = typename TransformationTraits<cv::Mat>::Adapter;
-static const MatAdapter adapter;
-static cv::Mat mat(8, 8, CV_8UC1);
+static cv::Mat mat(9, 9, CV_8UC1);
+using MatrixD = Matrix<double>;
 
 
 void init_mat(cv::Mat& mat)
 {
-	for (size_t i = 0; i < (mat.rows * mat.cols); ++i)
-		mat.data[i] = i;
+	for (size_t i = 0; i < size_t(mat.rows * mat.cols); ++i)
+		mat.data[i] = i*2;
 }
 
 
@@ -39,45 +39,54 @@ void init_mat(cv::Mat& mat)
 #define EXPECT_EQ_MATS(mat1, mat2) EXPECT_TRUE(eq_mats(mat1, mat2))
 
 
-TEST(cvMat, ColsRows)
+TEST(Matrix, mat2matrix)
 {
-	MatTransformator mator;
 	cv::Mat m(10, 10, CV_8UC1);
 	init_mat(m);
-	const size_t c = 3;
-	const size_t r = 7;
-	cv::Mat col = mator.get_column(m, c);
-	cv::Mat row = mator.get_row(m, r);
 
-	for (size_t i = 0; i < size_t(m.rows); ++i)
-		EXPECT_EQ(m.data[(i*m.cols) + c], col.data[i]);
+	Matrix<int> mtrx = mat2matrix<int>(m);
+	EXPECT_EQ(100, mtrx.size());
 
-	for (size_t i = 0; i < size_t(m.rows); ++i)
-		EXPECT_EQ(m.data[(r*m.cols) + i], row.data[i]);
+	for (size_t i = 0; i < mtrx.size(); ++i)
+		EXPECT_EQ(m.data[i], mtrx[i]);
+
+	EXPECT_EQ(m.row(7).data[0], mtrx.get_row(7)[0]);
+	EXPECT_EQ(m.col(7).data[0], mtrx.get_col(7)[0]);
+	EXPECT_EQ(m.data[99], mtrx.get_row(9)[9]);
+	EXPECT_EQ(m.data[99], mtrx.get_col(9)[9]);
+
+	EXPECT_EQ(m.row(3).data[7], mtrx(3, 7));
+
+	cv::Mat m2 = matrix2mat(mtrx);
+	EXPECT_EQ_MATS(m, m2);
 }
 
 
-TEST(cvMat, HaarTransformation)
+TEST(Matrix, HaarTransformation)
 {
-	MatTransformator tr;
-	tr.set_transformation(new HaarTransformation<cv::Mat>());
-	cv::Mat tmp;
-	tmp = tr.apply_forward(mat);
+	MatrixD data = mat2matrix<double>(mat);
+	MatrixTransformator<MatrixD> tr;
+	tr.set_transformation(new HaarTransformation<MatrixD>());
+	MatrixD tmp;
+	tmp = tr.apply_forward(data);
 	tmp = tr.apply_backward(tmp);
-	EXPECT_EQ_MATS(mat, tmp)
-			<< mat << std::endl << tmp;
+
+	std::cout << data << std::endl;
+	std::cout << tmp << std::endl;
 }
 
 
-TEST(cvMat, DAUB4Transformation)
+TEST(Matrix, DAUB4Transformation)
 {
-	MatTransformator tr;
-	cv::Mat tmp;
-	tr.set_transformation(new DAUB4Transformation<cv::Mat>());
-	tmp = tr.apply_forward(mat);
+	MatrixD data = mat2matrix<double>(mat);
+	MatrixTransformator<MatrixD> tr;
+	tr.set_transformation(new DAUB4Transformation<MatrixD>());
+	MatrixD tmp;
+	tmp = tr.apply_forward(data);
 	tmp = tr.apply_backward(tmp);
-	EXPECT_EQ_MATS(mat, tmp)
-			<< mat << std::endl << tmp;
+
+	std::cout << data << std::endl;
+	std::cout << tmp << std::endl;
 }
 
 

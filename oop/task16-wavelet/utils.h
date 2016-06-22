@@ -5,7 +5,6 @@
 #include <iostream>
 #include <vector>
 #include <cmath>
-#include <gtest/gtest.h>
 
 
 template<class T>
@@ -70,7 +69,7 @@ T get_k_min_abs_value(const std::vector<T>& vec, const size_t& k)
 
 
 template<class To, class From>
-std::vector<To> reset_type(const std::vector<From>& valuesf)
+std::vector<To> reset_vector_type(const std::vector<From>& valuesf)
 {
 	const size_t len = valuesf.size();
 	std::vector<To> valuest(len);
@@ -79,28 +78,6 @@ std::vector<To> reset_type(const std::vector<From>& valuesf)
 
 	return std::move(valuest);
 }
-
-
-template<class T>
-::testing::AssertionResult values_are_near(const std::vector<T>& vec1, const std::vector<T>& vec2, const size_t& abs)
-{
-	if (vec1.size() != vec2.size())
-		return ::testing::AssertionFailure()
-				<< "vectors' sizes are different: "
-				<< vec1.size() << " " << vec2.size();
-
-	for (size_t i = 0; i < vec1.size(); ++i)
-		if (roundk((vec1[i] - vec2[i]), abs) != 0.0)
-			return ::testing::AssertionFailure()
-					<< "different values at " << i << " position, abs: " << abs << std::endl
-					<< "  actual: " << vec2[i] << std::endl
-					<< "  expected: " << vec1[i];
-
-	return ::testing::AssertionSuccess() << "all values are near with abs: " << abs;
-}
-
-#define EXPECT_NEAR_VALUES(vec1, vec2, abs) EXPECT_TRUE(values_are_near(vec1, vec2, abs)) << vec1 << vec2
-#define EXPECT_FAR_VALUES(vec1, vec2, abs) EXPECT_FALSE(values_are_near(vec1, vec2, abs)) << vec1 << vec2
 
 
 // __EXTRA_UTILS_H__

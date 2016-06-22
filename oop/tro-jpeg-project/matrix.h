@@ -1,0 +1,296 @@
+#ifndef __MATRIX_H__
+#define __MATRIX_H__
+
+
+template<class T>
+class Matrix
+{
+	public:
+		using Type = T;
+		using Set = std::vector<T>;
+
+		class Range
+		{
+			public:
+				virtual ~Range() {}
+
+				virtual size_t size() const = 0;
+				virtual T& operator[](const size_t&) = 0;
+				virtual const T& operator[](const size_t&) const = 0;
+		};
+
+		class Row : public Range
+		{
+			public:
+				Row(Matrix* m = nullptr, const size_t& n = 0)
+					: _mtrx(m),
+					  _row_num(n),
+					  _size((m != nullptr) ? m->cols() : 0) {}
+				Row(const Row& row)
+					: _mtrx(row._mtrx),
+					  _row_num(row._row_num),
+					  _size(row._size) {}
+				Row(Row&& row)
+					: _mtrx(row._mtrx),
+					  _row_num(std::move(row._row_num)),
+					  _size(std::move(row._size))
+				{
+					row._mtrx = nullptr;
+				}
+				~Row() {}
+
+				size_t size() const override
+				{
+					return _size;
+				}
+
+				T& operator[](const size_t& i) override
+				{
+					return _mtrx->_at(_row_num, i);
+				}
+
+				const T& operator[](const size_t& i) const override
+				{
+					return _mtrx->_at(_row_num, i);
+				}
+
+				Row& operator=(const Row& row)
+				{
+					_mtrx = row._mtrx;
+					_rows_num = row._row_num;
+					_size = row._size;
+
+					return (*this);
+				}
+
+				Row& operator=(Row&& row)
+				{
+					_mtrx = row._mtrx;
+					_rows_num = row._row_num;
+					_size = row._size;
+
+					row._mtrx = nullptr;
+					row._row_num = 0;
+					row._size = 0;
+
+					return (*this);
+				}
+
+			private:
+				Matrix* _mtrx;
+				size_t _row_num;
+				size_t _size;
+		};
+
+		class Col : public Range
+		{
+			public:
+				Col(Matrix* m = nullptr, const size_t& n = 0)
+					: _mtrx(m),
+					  _col_num(n),
+					  _size((m != nullptr) ? m->rows() : 0) {}
+				Col(const Col& col)
+					: _mtrx(col._mtrx),
+					  _col_num(std::move(col._col_num)),
+					  _size(col._size) {}
+				Col(Col&& col)
+					: _mtrx(col._mtrx),
+					  _col_num(std::move(col._col_num)),
+					  _size(std::move(col._size)) {}
+				~Col() {}
+
+				size_t size() const override
+				{
+					return _size;
+				}
+
+				T& operator[](const size_t& i) override
+				{
+					return _mtrx->_at(i, _col_num);
+				}
+
+				const T& operator[](const size_t& i) const override
+				{
+					return _mtrx->_at(i, _col_num);
+				}
+
+				Col& operator=(const Col& col)
+				{
+					_mtrx = col._mtrx;
+					_col_num = col._col_num;
+					_size = col._size;
+
+					return (*this);
+				}
+
+				Col& operator=(Col&& col)
+				{
+					_mtrx = col._mtrx;
+					_col_num = col._col_num;
+					_size = col._size;
+
+					col._mtrx = nullptr;
+					col._col_num = 0;
+					col._size = 0;
+
+					return (*this);
+				}
+
+			private:
+				Matrix* _mtrx;
+				size_t _col_num;
+				size_t _size;
+		};
+
+		Matrix(const size_t& rows = 0, const size_t& cols = 0)
+			: _data(rows * cols),
+			  _rows_num(rows),
+			  _cols_num(cols) {}
+		Matrix(const Matrix& m)
+			: _data(m._data),
+			  _rows_num(m._rows_num),
+			  _cols_num(m._cols_num) {}
+		Matrix(Matrix&& m)
+			: _data(std::move(m._data)),
+			  _rows_num(std::move(m._rows_num)),
+			  _cols_num(std::move(m._cols_num)) {}
+		~Matrix() {}
+
+		T& operator[](const size_t& idx)
+		{
+			return _data[idx];
+		}
+
+		const T& operator[](const size_t& idx) const
+		{
+			return _data[idx];
+		}
+
+		T& operator()(const size_t& row_num, const size_t& col_num)
+		{
+			return _at(row_num, col_num);
+		}
+
+		const T& operator()(const size_t& row_num, const size_t& col_num) const
+		{
+			return _at(row_num, col_num);
+		}
+
+		Matrix<T>& operator=(const Matrix<T>& mtrx);
+
+		Matrix<T>& operator=(Matrix<T>&& mtrx)
+		{
+			_data = std::move(mtrx._data);
+			_rows_num = std::move(mtrx._rows_num);
+			_cols_num = std::move(mtrx._cols_num);
+
+			return (*this);
+		}
+
+		/*
+		Row operator[](const size_t& row_num)
+		{
+			return std::move(get_row(row_num));
+		}
+
+		const Row operator[](const size_t& row_num) const
+		{
+			return std::move(get_row(row_num));
+		}
+
+		T& operator[](const size_t& row_num, const size_t& col_num)
+		{
+			return _at(row_num, col_num);
+		}
+
+		const T& operator[](const size_t& row_num, const size_t& col_num) const
+		{
+			return _at(row_num, col_num);
+		}
+*/
+
+		bool operator==(const Matrix<T>& mtrx) const
+		{
+			if ((_rows_num != mtrx._rows_num)
+					|| (_cols_num != mtrx._cols_num))
+				return false;
+
+			for (size_t i = 0; i < size(); ++i)
+				if (_data[i] != mtrx._data[i])
+					return false;
+
+			return true;
+		}
+
+		size_t size() const
+		{
+			return (_rows_num * _cols_num);
+		}
+
+		size_t rows() const
+		{
+			return _rows_num;
+		}
+
+		size_t cols() const
+		{
+			return _cols_num;
+		}
+
+		Row get_row(const size_t& row_num)
+		{
+			return std::move(Row(this, row_num));
+		}
+
+		const Row get_row(const size_t& row_num) const
+		{
+			return std::move(Row(this, row_num));
+		}
+
+		Col get_col(const size_t& col_num)
+		{
+			return std::move(Col(this, col_num));
+		}
+
+		const Col get_col(const size_t& col_num) const
+		{
+			return std::move(Col(this, col_num));
+		}
+
+	private:
+		std::vector<T> _data;
+		size_t _rows_num;
+		size_t _cols_num;
+
+		T& _at(const size_t& row_num, const size_t& col_num)
+		{
+			return _data[(row_num * _cols_num) + col_num];
+		}
+
+		const T& _at(const size_t& row_num, const size_t& col_num) const
+		{
+			return _data[(row_num * _cols_num) + col_num];
+		}
+};
+
+
+template<class T>
+std::ostream operator<<(std::ostream& out, const Matrix<T>& mtrx)
+{
+	std::cout << "<Matrix len=[" << mtrx.rows() << "x" << mtrx.cols() << "]>" << std::endl;
+	for (size_t r = 0; r < mtrx.rows(); ++r)
+	{
+		const typename Matrix<T>::Row row = mtrx.get_row(r);
+		for (size_t i = 0; i < row.size(); ++i)
+			std::cout << row[i] << " ";
+		std::cout << std::endl;
+	}
+	std::cout << "</Matrix>" << std::endl;
+
+	return out;
+}
+
+
+// __MATRIX_H__
+#endif
+

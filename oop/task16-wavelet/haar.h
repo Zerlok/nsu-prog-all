@@ -12,35 +12,35 @@ class HaarTransformation : public Transformation<DataType>
 	public:
 		using super = Transformation<DataType>;
 		
-		typename super::Traits::DataSet forward(
-				const typename super::Traits::DataSet& data,
+		typename super::Traits::DataTransform forward(
+				const typename super::Traits::DataTransform& data,
 				const size_t& end) const override
 		{
-			const size_t len = std::min(end, super::_adapter.size(data));
+			const size_t len = std::min(end, data.size());
 			const size_t mid = len / 2;
-			typename super::Traits::DataSet tmp = super::_adapter.clone(data);
+			typename super::Traits::DataTransform tmp(len);
 
 			for (size_t i = 0; i < mid; ++i)
 			{
-				super::_adapter.at(tmp, i) = _half_sum(super::_adapter.at(data, i*2), super::_adapter.at(data, i*2 + 1));
-				super::_adapter.at(tmp, mid + i) = _half_diff(super::_adapter.at(data, i*2), super::_adapter.at(data, i*2 + 1));
+				tmp[i] = _half_sum(data[i*2], data[i*2 + 1]);
+				tmp[mid+i] = _half_diff(data[i*2], data[i*2 + 1]);
 			}
 
 			return std::move(tmp);
 		}
 
-		typename super::Traits::DataSet backward(
-				const typename super::Traits::DataSet& data,
+		typename super::Traits::DataTransform backward(
+				const typename super::Traits::DataTransform& data,
 				const size_t& end) const override
 		{
-			const size_t len = std::min(end, super::_adapter.size(data));
+			const size_t len = std::min(end, data.size());
 			const size_t mid = len / 2;
-			typename super::Traits::DataSet tmp = super::_adapter.clone(data);
+			typename super::Traits::DataTransform tmp(len);
 
 			for (size_t i = 0; i < mid; ++i)
 			{
-				super::_adapter.at(tmp, i*2) = super::_adapter.at(data, i) + super::_adapter.at(data, mid + i);
-				super::_adapter.at(tmp, i*2 + 1) = super::_adapter.at(data, i) - super::_adapter.at(data, mid + i);
+				tmp[i*2] = data[i] + data[mid + i];
+				tmp[i*2 + 1] = data[i] - data[mid + i];
 			}
 
 			return std::move(tmp);

@@ -18,4 +18,5 @@ HEADERS += \
 	../task16-wavelet/transformators.h \
 	../task16-wavelet/haar.h \
 	../task16-wavelet/daub4.h \
-	../task16-wavelet/utils.h
+	../task16-wavelet/utils.h \
+    matrix.h

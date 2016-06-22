@@ -11,12 +11,12 @@ class DAUB4Transformation : public Transformation<DataType>
 	public:
 		using super = Transformation<DataType>;
 
-		virtual typename super::Traits::DataSet forward(
-				const typename super::Traits::DataSet& vec,
+		virtual typename super::Traits::DataTransform forward(
+				const typename super::Traits::DataTransform& vec,
 				const size_t& end) const override
 		{
-			const size_t len = std::min(end, super::_adapter.size(vec));
-			typename super::Traits::DataSet tmp = super::_adapter.clone(vec);
+			const size_t len = std::min(end, vec.size());
+			typename super::Traits::DataTransform tmp(len);
 
 			if (len < 4)
 				return std::move(tmp);
@@ -29,34 +29,22 @@ class DAUB4Transformation : public Transformation<DataType>
 				 j < last - 2;
 				 i += 1, j += 2)
 			{
-				super::_adapter.at(tmp, i) = c0 * super::_adapter.at(vec, j)
-						+ c1 * super::_adapter.at(vec, j+1)
-						+ c2 * super::_adapter.at(vec, j+2)
-						+ c3 * super::_adapter.at(vec, j+3);
-				super::_adapter.at(tmp, mid+i) = c3 * super::_adapter.at(vec, j)
-						- c2 * super::_adapter.at(vec, j+1)
-						+ c1 * super::_adapter.at(vec, j+2)
-						- c0 * super::_adapter.at(vec, j+3);
+				tmp[i] = c0 * vec[j] + c1 * vec[j+1] + c2 * vec[j+2] + c3 * vec[j+3];
+				tmp[mid+i] = c3 * vec[j] - c2 * vec[j+1] + c1 * vec[j+2] - c0 * vec[j+3];
 			}
 
-			super::_adapter.at(tmp, i) = c0 * super::_adapter.at(vec, last-1)
-					+ c1 * super::_adapter.at(vec, last)
-					+ c2 * super::_adapter.at(vec, 0)
-					+ c3 * super::_adapter.at(vec, 1);
-			super::_adapter.at(tmp, mid+i) = c3*super::_adapter.at(vec, last-1)
-					- c2 * super::_adapter.at(vec, last)
-					+ c1 * super::_adapter.at(vec, 0)
-					- c0 * super::_adapter.at(vec, 1);
+			tmp[i] = c0 * vec[last-1] + c1 * vec[last] + c2 * vec[0] + c3 * vec[1];
+			tmp[mid+i] = c3 * vec[last-1] - c2 * vec[last] + c1 * vec[0] - c0 * vec[1];
 
 			return std::move(tmp);
 		}
 
-		virtual typename super::Traits::DataSet backward(
-				const typename super::Traits::DataSet& vec,
+		virtual typename super::Traits::DataTransform backward(
+				const typename super::Traits::DataTransform& vec,
 				const size_t& end) const override
 		{
-			const size_t len = std::min(end, super::_adapter.size(vec));
-			typename super::Traits::DataSet tmp = super::_adapter.clone(vec);
+			const size_t len = std::min(end, vec.size());
+			typename super::Traits::DataTransform tmp(len);
 
 			if (len < 4)
 				return std::move(tmp);
@@ -64,26 +52,14 @@ class DAUB4Transformation : public Transformation<DataType>
 			const size_t last = len - 1;
 			const size_t mid = len >> 1;
 
-			super::_adapter.at(tmp, 0) = c2 * super::_adapter.at(vec, mid-1)
-					+ c1 * super::_adapter.at(vec, last)
-					+ c0 * super::_adapter.at(vec, 0)
-					+ c3 * super::_adapter.at(vec, mid);
-			super::_adapter.at(tmp, 1) = c3 * super::_adapter.at(vec, mid-1)
-					- c0 * super::_adapter.at(vec, last)
-					+ c1 * super::_adapter.at(vec, 0)
-					- c2 * super::_adapter.at(vec, mid);
+			tmp[0] = c2 * vec[mid-1] + c1 * vec[last] + c0 * vec[0] + c3 * vec[mid];
+			tmp[1] = c3 * vec[mid-1] - c0 * vec[last] + c1 * vec[0] - c2 * vec[mid];
 
 			size_t i, j;
 			for (i = 0, j = 2; i < mid-1; ++i)
 			{
-				super::_adapter.at(tmp, j++) = c2 * super::_adapter.at(vec, i)
-						+ c1 * super::_adapter.at(vec, mid+i)
-						+ c0 * super::_adapter.at(vec, i+1)
-						+ c3 * super::_adapter.at(vec, mid+i+1);
-				super::_adapter.at(tmp, j++) = c3 * super::_adapter.at(vec, i)
-						- c0 * super::_adapter.at(vec, mid+i)
-						+ c1 * super::_adapter.at(vec, i+1)
-						- c2 * super::_adapter.at(vec, mid+i+1);
+				tmp[j++] = c2 * vec[i] + c1 * vec[mid+i] + c0 * vec[i+1] + c3 * vec[mid+i+1];
+				tmp[j++] = c3 * vec[i] - c0 * vec[mid+i] + c1 * vec[i+1] - c2 * vec[mid+i+1];
 			}
 
 			return std::move(tmp);
