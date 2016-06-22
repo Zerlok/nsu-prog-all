@@ -9,137 +9,138 @@ class Matrix
 		using Type = T;
 		using Set = std::vector<T>;
 
-		class Range
+		class Row
 		{
 			public:
-				virtual ~Range() {}
-
-				virtual size_t size() const = 0;
-				virtual T& operator[](const size_t&) = 0;
-				virtual const T& operator[](const size_t&) const = 0;
-		};
-
-		class Row : public Range
-		{
-			public:
-				Row(Matrix* m = nullptr, const size_t& n = 0)
-					: _mtrx(m),
-					  _row_num(n),
-					  _size((m != nullptr) ? m->cols() : 0) {}
-				Row(const Row& row)
-					: _mtrx(row._mtrx),
-					  _row_num(row._row_num),
-					  _size(row._size) {}
-				Row(Row&& row)
-					: _mtrx(row._mtrx),
-					  _row_num(std::move(row._row_num)),
-					  _size(std::move(row._size))
+				Row() {}
+				Row(Matrix* m, const size_t& n)
+					: _subdata((m != nullptr ) ? m->cols() : 0),
+					  _row_num(n)
 				{
-					row._mtrx = nullptr;
+					for (size_t i = 0; i < _subdata.size(); ++i)
+						_subdata[i] = m->_at(n, i);
 				}
+				Row(const Matrix* m, const size_t& n)
+					: _subdata((m != nullptr) ? m->cols() : 0),
+					  _row_num(n)
+				{
+					for (size_t i = 0; i < _subdata.size(); ++i)
+						_subdata[i] = m->_at(n, i);
+				}
+				Row(const Row& row)
+					: _subdata(row._subdata),
+					  _row_num(row._row_num) {}
+				Row(Row&& row)
+					: _subdata(std::move(row._subdata)),
+					  _row_num(std::move(row._row_num)) {}
 				~Row() {}
 
-				size_t size() const override
+				size_t size() const
 				{
-					return _size;
+					return _subdata.size();
 				}
 
-				T& operator[](const size_t& i) override
+				T& operator[](const size_t& i)
 				{
-					return _mtrx->_at(_row_num, i);
+					return _subdata[i];
 				}
 
-				const T& operator[](const size_t& i) const override
+				const T& operator[](const size_t& i) const
 				{
-					return _mtrx->_at(_row_num, i);
+					return _subdata[i];
 				}
 
 				Row& operator=(const Row& row)
 				{
-					_mtrx = row._mtrx;
-					_rows_num = row._row_num;
-					_size = row._size;
+					_subdata = row._subdata;
+					_row_num = row._row_num;
 
 					return (*this);
 				}
 
 				Row& operator=(Row&& row)
 				{
-					_mtrx = row._mtrx;
-					_rows_num = row._row_num;
-					_size = row._size;
-
-					row._mtrx = nullptr;
-					row._row_num = 0;
-					row._size = 0;
+					_subdata = std::move(row._subdata);
+					_row_num = std::move(row._row_num);
 
 					return (*this);
 				}
 
+				size_t get_num() const
+				{
+					return _row_num;
+				}
+
 			private:
-				Matrix* _mtrx;
+				std::vector<T> _subdata;
 				size_t _row_num;
-				size_t _size;
 		};
 
-		class Col : public Range
+		class Col
 		{
 			public:
-				Col(Matrix* m = nullptr, const size_t& n = 0)
-					: _mtrx(m),
-					  _col_num(n),
-					  _size((m != nullptr) ? m->rows() : 0) {}
+				Col() {}
+				Col(Matrix* m, const size_t& n)
+					: _subdata((m != nullptr) ? m->rows() : 0),
+					  _col_num(n)
+				{
+					for (size_t i = 0; i < _subdata.size(); ++i)
+						_subdata[i] = m->_at(i, n);
+				}
+				Col(const Matrix* m, const size_t& n)
+					: _subdata((m != nullptr) ? m->rows() : 0),
+					  _col_num(n)
+				{
+					for (size_t i = 0; i < _subdata.size(); ++i)
+						_subdata[i] = m->_at(i, n);
+				}
 				Col(const Col& col)
-					: _mtrx(col._mtrx),
-					  _col_num(std::move(col._col_num)),
-					  _size(col._size) {}
+					: _subdata(col._subdata),
+					  _col_num(col._col_num) {}
 				Col(Col&& col)
-					: _mtrx(col._mtrx),
-					  _col_num(std::move(col._col_num)),
-					  _size(std::move(col._size)) {}
+					: _subdata(std::move(col._subdata)),
+					  _col_num(std::move(col._col_num)) {}
 				~Col() {}
 
-				size_t size() const override
+				size_t size() const
 				{
-					return _size;
+					return _subdata.size();
 				}
 
-				T& operator[](const size_t& i) override
+				T& operator[](const size_t& i)
 				{
-					return _mtrx->_at(i, _col_num);
+					return _subdata[i];
 				}
 
-				const T& operator[](const size_t& i) const override
+				const T& operator[](const size_t& i) const
 				{
-					return _mtrx->_at(i, _col_num);
+					return _subdata[i];
 				}
 
 				Col& operator=(const Col& col)
 				{
-					_mtrx = col._mtrx;
+					_subdata = col._subdata;
 					_col_num = col._col_num;
-					_size = col._size;
 
 					return (*this);
 				}
 
 				Col& operator=(Col&& col)
 				{
-					_mtrx = col._mtrx;
-					_col_num = col._col_num;
-					_size = col._size;
-
-					col._mtrx = nullptr;
-					col._col_num = 0;
-					col._size = 0;
+					_subdata = std::move(col._subdata);
+					_col_num = std::move(col._col_num);
 
 					return (*this);
 				}
 
+				size_t get_num() const
+				{
+					return _col_num;
+				}
+
 			private:
-				Matrix* _mtrx;
+				std::vector<T> _subdata;
 				size_t _col_num;
-				size_t _size;
 		};
 
 		Matrix(const size_t& rows = 0, const size_t& cols = 0)
@@ -176,7 +177,7 @@ class Matrix
 			return _at(row_num, col_num);
 		}
 
-		Matrix<T>& operator=(const Matrix<T>& mtrx);
+		Matrix<T>& operator=(const Matrix<T>& mtrx) = delete;
 
 		Matrix<T>& operator=(Matrix<T>&& mtrx)
 		{
@@ -186,28 +187,6 @@ class Matrix
 
 			return (*this);
 		}
-
-		/*
-		Row operator[](const size_t& row_num)
-		{
-			return std::move(get_row(row_num));
-		}
-
-		const Row operator[](const size_t& row_num) const
-		{
-			return std::move(get_row(row_num));
-		}
-
-		T& operator[](const size_t& row_num, const size_t& col_num)
-		{
-			return _at(row_num, col_num);
-		}
-
-		const T& operator[](const size_t& row_num, const size_t& col_num) const
-		{
-			return _at(row_num, col_num);
-		}
-*/
 
 		bool operator==(const Matrix<T>& mtrx) const
 		{
@@ -257,6 +236,20 @@ class Matrix
 			return std::move(Col(this, col_num));
 		}
 
+		void set_row(const Row& row)
+		{
+			const size_t row_num = row.get_num();
+			for (size_t i = 0; i < row.size(); ++i)
+				_at(row_num, i) = row[i];
+		}
+
+		void set_col(const Col& col)
+		{
+			const size_t col_num = col.get_num();
+			for (size_t i = 0; i < col.size(); ++i)
+				_at(col_num, i) = col[i];
+		}
+
 	private:
 		std::vector<T> _data;
 		size_t _rows_num;
@@ -275,7 +268,7 @@ class Matrix
 
 
 template<class T>
-std::ostream operator<<(std::ostream& out, const Matrix<T>& mtrx)
+std::ostream& operator<<(std::ostream& out, const Matrix<T>& mtrx)
 {
 	std::cout << "<Matrix len=[" << mtrx.rows() << "x" << mtrx.cols() << "]>" << std::endl;
 	for (size_t r = 0; r < mtrx.rows(); ++r)

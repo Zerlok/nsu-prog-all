@@ -6,72 +6,75 @@
 #include "transformation.h"
 
 
-template<class DataType>
+template<class DataType,
+		 class DataIn = typename TransformationTraits<DataType>::DataTransform,
+		 class TransType = Transformation<DataType, DataIn> >
 class TransformatorTraits
 {
 	public:
-		using TransformationType = Transformation<DataType>;
-		using Data = typename TransformationType::Traits::Data;
-		using DataTransform = typename TransformationType::Traits::DataTransform;
-		using DataInput = DataTransform;
+		using DataInput = DataIn;				// What transformator takes on input (input data type).
+		using TransformationType = TransType;	// Transformation type.
 };
 
 
-template<class DataType>
+template<class DataType,
+		 class DataIn = typename TransformatorTraits<DataType>::DataInput,
+		 class TransType = typename TransformatorTraits<DataType, DataIn>::TransformationType>
 class Transformator
 {
 	public:
-		using Traits = TransformatorTraits<DataType>;
+		using Traits = TransformatorTraits<DataType, DataIn, TransType>;
 		
 		Transformator()
 			: _tr(nullptr) {}
 		virtual ~Transformator() { delete _tr; }
 
-		virtual typename Traits::DataInput apply_forward(const typename Traits::DataInput&) const = 0;
-		virtual typename Traits::DataInput apply_backward(const typename Traits::DataInput&) const = 0;
+		virtual DataIn apply_forward(const DataIn&) const = 0;
+		virtual DataIn apply_backward(const DataIn&) const = 0;
 
-		void set_transformation(const typename Traits::TransformationType* tr)
+		void set_transformation(const TransType* tr)
 		{
 			delete _tr;
 			_tr = tr;
 		}
 
 	protected:
-		const typename Traits::TransformationType* _tr;
+		const TransType* _tr;
 };
 
 
-template<class DataType>
-class OneDimTransformator : public Transformator<DataType>
+template<class DataType,
+		 class DataIn = typename TransformatorTraits<DataType>::DataInput,
+		 class TransType = typename TransformatorTraits<DataType, DataIn>::TransformationType>
+class OneDimTransformator : public Transformator<DataType, DataIn, TransType>
 {
 	public:
-		using super = Transformator<DataType>;
+		using super = Transformator<DataType, DataIn, TransType>;
 				
-		typename super::Traits::DataInput apply_forward(
-				const typename super::Traits::DataInput& data) const override
+		DataIn apply_forward(const DataIn& data) const override
 		{
 			return super::_tr->forward(data, data.size());
 		}
 		
-		typename super::Traits::DataInput apply_backward(
-				const typename super::Traits::DataInput& data) const override
+		DataIn apply_backward(const DataIn& data) const override
 		{
 			return super::_tr->backward(data, data.size());
 		}
 };
 
 
-template<class DataType>
-class DividingTransformator : public Transformator<DataType>
+template<class DataType,
+		 class DataIn = typename TransformatorTraits<DataType>::DataInput,
+		 class TransType = typename TransformatorTraits<DataType, DataIn>::TransformationType>
+class DividingTransformator : public Transformator<DataType, DataIn, TransType>
 {
 	public:
-		using super = Transformator<DataType>;
-				
-		typename super::Traits::DataInput apply_forward(
-				const typename super::Traits::DataInput& data) const override
+		using super = Transformator<DataType, DataIn, TransType>;
+
+		DataIn apply_forward(const DataIn& data) const override
 		{
-			typename super::Traits::DataInput tmp(data);
-			typename super::Traits::DataTransform line;
+			DataIn tmp(data);
+			DataIn line;
 			for (size_t n = data.size(); n >= 4; n >>= 1)
 			{
 				line = super::_tr->forward(tmp, n);
@@ -82,11 +85,10 @@ class DividingTransformator : public Transformator<DataType>
 			return std::move(tmp);
 		}
 		
-		typename super::Traits::DataInput apply_backward(
-				const typename super::Traits::DataInput& data) const override
+		DataIn apply_backward(const DataIn& data) const override
 		{
-			typename super::Traits::DataInput tmp(data);
-			typename super::Traits::DataTransform line;
+			DataIn tmp(data);
+			DataIn line;
 			for (size_t n = 4; n <= data.size(); n <<= 1)
 			{
 				line = super::_tr->backward(tmp, n);

@@ -6,19 +6,19 @@
 #include "transformation.h"
 
 
-template <class DataType>
-class HaarTransformation : public Transformation<DataType>
+template <class DataType,
+		  class DataTrans = typename TransformationTraits<DataType>::DataTransform >
+class HaarTransformation : public Transformation<DataType, DataTrans>
 {
 	public:
-		using super = Transformation<DataType>;
+		using super = Transformation<DataType, DataTrans>;
 		
-		typename super::Traits::DataTransform forward(
-				const typename super::Traits::DataTransform& data,
-				const size_t& end) const override
+		DataTrans forward(const DataTrans& data,
+						  const size_t& end) const override
 		{
 			const size_t len = std::min(end, data.size());
 			const size_t mid = len / 2;
-			typename super::Traits::DataTransform tmp(len);
+			DataTrans tmp(data);
 
 			for (size_t i = 0; i < mid; ++i)
 			{
@@ -29,13 +29,12 @@ class HaarTransformation : public Transformation<DataType>
 			return std::move(tmp);
 		}
 
-		typename super::Traits::DataTransform backward(
-				const typename super::Traits::DataTransform& data,
-				const size_t& end) const override
+		DataTrans backward(const DataTrans& data,
+						   const size_t& end) const override
 		{
 			const size_t len = std::min(end, data.size());
 			const size_t mid = len / 2;
-			typename super::Traits::DataTransform tmp(len);
+			DataTrans tmp(data);
 
 			for (size_t i = 0; i < mid; ++i)
 			{
@@ -47,16 +46,16 @@ class HaarTransformation : public Transformation<DataType>
 		}
 
 	private:
-		inline typename super::Traits::Data _half_sum(
-				const typename super::Traits::Data& a,
-				const typename super::Traits::Data& b) const
+		inline DataType _half_sum(
+				const DataType& a,
+				const DataType& b) const
 		{
 			return ((a / 2) + (b / 2));
 		}
 
-		inline typename super::Traits::Data _half_diff(
-				const typename super::Traits::Data& a,
-				const typename super::Traits::Data& b) const
+		inline DataType _half_diff(
+				const DataType& a,
+				const DataType& b) const
 		{
 			return ((a / 2) - (b / 2));
 		}

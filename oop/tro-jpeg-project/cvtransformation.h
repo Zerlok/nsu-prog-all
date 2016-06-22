@@ -9,26 +9,6 @@
 
 
 template<class T>
-class TransformationTraits< Matrix<T> >
-{
-	public:
-		using Data = T;
-		using DataTransform = typename Matrix<T>::Range;
-};
-
-
-template<class T>
-class TransformatorTraits< Matrix<T> >
-{
-	public:
-		using TransformationType = Transformation< Matrix<T> >;
-		using Data = typename TransformationType::Traits::Data;
-		using DataInput = Matrix<T>;
-		using DataTransform = typename TransformationType::Traits::DataTransform;
-};
-
-
-template<class T>
 Matrix<T> mat2matrix(const cv::Mat& from)
 {
 	const size_t len = (from.rows * from.cols);
@@ -52,53 +32,97 @@ static cv::Mat matrix2mat(const Matrix<T>& from)
 }
 
 
-template<class MatrixT>
-class MatrixTransformator : public Transformator<MatrixT>
+//template<class T>
+//class MatrixRowTransformator : public Transformator<T, typename Matrix<T>::Row>
+//{
+//	public:
+//		using Row = typename Matrix<T>::Row;
+//		using super = Transformator<T, Row>;
+
+//		Row apply_forward(const Row&) const
+//		{
+
+//		}
+
+//		Row apply_backward(const Row&) const
+//		{
+
+//		}
+//};
+
+
+//template<class T>
+//class MatrixColTransformator : public Transformator<T, typename Matrix<T>::Col>
+//{
+
+//};
+
+
+template<class T, class RowTion, class ColTion>
+class MatrixTransformator
 {
 	public:
-		using super = Transformator<MatrixT>;
+		using MatrixT = Matrix<T>;
+		using MatrixRow = typename MatrixT::Row;
+		using MatrixCol = typename MatrixT::Col;
+		using RowTransformator = OneDimTransformator<T, MatrixRow, RowTion>;
+		using ColTransformator = OneDimTransformator<T, MatrixCol, ColTion>;
 
-		MatrixT apply_forward(const MatrixT& mat) const
+		MatrixTransformator()
 		{
-			MatrixT tmp(mat.rows(), mat.cols());
-			typename MatrixT::Row row;
-			typename MatrixT::Col col;
+			_rowtor.set_transformation(new RowTion());
+			_coltor.set_transformation(new ColTion());
+		}
+
+		MatrixT apply_forward(const MatrixT& mtrx) const
+		{
+			MatrixT tmp(mtrx.rows(), mtrx.cols());
+			MatrixRow mtrx_row;
+			MatrixCol mtrx_col;
 
 			for (size_t r = 0; r < tmp.rows(); ++r)
 			{
-				row = mat.get_row(r);
-				super::_tr->forward(row, row.size());
+				mtrx_row = mtrx.get_row(r);
+				mtrx_row = _rowtor.apply_forward(mtrx_row);
+				tmp.set_row(mtrx_row);
 			}
 
 			for (size_t c = 0; c < tmp.cols(); ++c)
 			{
-				col = tmp.get_col(c);
-				super::_tr->forward(col, col.size());
+				mtrx_col = tmp.get_col(c);
+				mtrx_col = _coltor.apply_forward(mtrx_col);
+				tmp.set_col(mtrx_col);
 			}
 
 			return std::move(tmp);
 		}
 
-		MatrixT apply_backward(const MatrixT& mat) const
+		MatrixT apply_backward(const MatrixT& mtrx) const
 		{
-			MatrixT tmp(mat.rows(), mat.cols());
-			typename MatrixT::Row row;
-			typename MatrixT::Col col;
+			MatrixT tmp(mtrx.rows(), mtrx.cols());
+			MatrixRow mtrx_row;
+			MatrixCol mtrx_col;
 
 			for (size_t c = 0; c < tmp.cols(); ++c)
 			{
-				col = mat.get_col(c);
-				super::_tr->backward(col, col.size());
+				mtrx_col = mtrx.get_col(c);
+				mtrx_col = _coltor.apply_backward(mtrx_col);
+				tmp.set_col(mtrx_col);
 			}
 
 			for (size_t r = 0; r < tmp.rows(); ++r)
 			{
-				row = mat.get_row(r);
-				super::_tr->backward(tmp.get_row(r), row.si);
+				mtrx_row = tmp.get_row(r);
+				mtrx_row = _rowtor.apply_backward(mtrx_row);
+				tmp.set_row(mtrx_row);
 			}
 
 			return std::move(tmp);
 		}
+
+	private:
+		RowTransformator _rowtor;
+		ColTransformator _coltor;
 };
 
 

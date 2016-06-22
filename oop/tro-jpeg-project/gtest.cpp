@@ -65,28 +65,27 @@ TEST(Matrix, mat2matrix)
 TEST(Matrix, HaarTransformation)
 {
 	MatrixD data = mat2matrix<double>(mat);
-	MatrixTransformator<MatrixD> tr;
-	tr.set_transformation(new HaarTransformation<MatrixD>());
+	MatrixTransformator<double, HaarTransformation<double, MatrixD::Row>, HaarTransformation<double, MatrixD::Col> > tr;
+
 	MatrixD tmp;
 	tmp = tr.apply_forward(data);
 	tmp = tr.apply_backward(tmp);
 
-	std::cout << data << std::endl;
-	std::cout << tmp << std::endl;
+	std::cout << "Data: " << data << std::endl;
+	std::cout << "TMP:" << tmp << std::endl;
 }
 
 
 TEST(Matrix, DAUB4Transformation)
 {
 	MatrixD data = mat2matrix<double>(mat);
-	MatrixTransformator<MatrixD> tr;
-	tr.set_transformation(new DAUB4Transformation<MatrixD>());
+	MatrixTransformator<double, DAUB4Transformation<double, MatrixD::Row>, DAUB4Transformation<double, MatrixD::Col> > tr;
 	MatrixD tmp;
 	tmp = tr.apply_forward(data);
 	tmp = tr.apply_backward(tmp);
 
-	std::cout << data << std::endl;
-	std::cout << tmp << std::endl;
+	std::cout << "Data: " << data << std::endl;
+	std::cout << "TMP:" << tmp << std::endl;
 }
 
 
