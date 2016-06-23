@@ -250,6 +250,17 @@ class Matrix
 				_at(i, col_num) = col[i];
 		}
 
+		std::vector<T> sorted_abs() const
+		{
+			std::vector<T> values(size());
+
+			for (size_t i = 0; i < values.size(); ++i)
+				values[i] = std::abs(_data[i]);
+
+			std::sort(values.begin(), values.end());
+			return std::move(values);
+		}
+
 	private:
 		std::vector<T> _data;
 		size_t _rows_num;

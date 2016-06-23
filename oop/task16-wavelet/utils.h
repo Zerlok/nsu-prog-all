@@ -34,11 +34,12 @@ inline T roundk(const T& val, const size_t& k = 0)
 template<class T>
 size_t bisect(const std::vector<T>& vec, const T& val)
 {
-	for (size_t i = 0; i < vec.size(); ++i)
+	size_t i;
+	for (i = 0; i < vec.size(); ++i)
 		if (val < vec[i])
 			return i;
 
-	return 0;
+	return i;
 }
 
 
@@ -51,11 +52,11 @@ size_t insort(std::vector<T>& vec, const T& val)
 }
 
 
-template<class T>
-T get_k_min_abs_value(const std::vector<T>& vec, const size_t& k)
+template<class T, template <class> class Cont>
+T get_k_min_abs_value(const Cont<T>& vec, const size_t& k)
 {
 	T zero {};
-	std::vector<T> saved;
+	std::vector<T> saved {};
 
 	for (size_t i = 0; i < vec.size(); ++i)
 		if (vec[i] != zero)

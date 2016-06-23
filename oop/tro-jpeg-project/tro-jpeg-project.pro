@@ -19,4 +19,6 @@ HEADERS += \
 	../task16-wavelet/haar.h \
 	../task16-wavelet/daub4.h \
 	../task16-wavelet/utils.h \
-    matrix.h
+	../task13/serdeser.h \
+    matrix.h \
+    haffman.h
