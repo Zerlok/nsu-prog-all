@@ -1,0 +1,334 @@
+#!/bin/bash
+
+#
+# Main constants.
+#
+CCPP="g++"
+CCPP_FLAGS="-std=c++11"
+CCPP_LIBS=()
+CCPP_INCLUDES=()
+GTEST_FLAGS="-lgtest -lpthread"
+VERBOSE_ALL=false
+VERBOSE_PARSED_PRO=false
+DO_COMPILATION=true
+
+
+#
+# Input options.
+#
+GTEST_ENABLED=true
+MAIN_ENABLED=true
+USE_OBJECTS=false
+TARGET_DIR="."
+TARGET_NAME=
+SOURCES_DIR=
+OBJECTS_DIR=
+PRO_PATH=
+TASK=
+TASK_NAME=
+
+
+#
+# Show help message.
+#
+function help_message()
+{
+	echo "Usage: ${0} FILE [OPTIONS...]"
+	echo "   FILE - is a QT *.pro file"
+	echo
+	echo "Available options:"
+	echo "   -p, --parse-only           - parse *.pro file and show it's data"
+	echo "   -g, --gtest-only           - compile google test only"
+	echo "   -m, --main-only            - compile main only"
+	echo "   -t, --traget [DIR]         - target dir (for shadow compilation)"
+	echo "   -n, --name [NAME]          - name of compiled program (use when gtest or main compilation specified)"
+	echo "   -G, --gtest-objects [DIR]  - compile google test only by using *.o project compiled files from specified dir"
+	echo "   --no-compile               - avoid ${CCPP} compilation"
+	echo "   -v, --VERBOSE_ALL              - show debug messages"
+}
+
+
+#
+# Show parsed input arguments.
+#
+function show_parsed_input()
+{
+	echo "Parsed input:"
+	echo "   Task:          ${TASK}"
+	echo "   Pro file:      ${PRO_PATH}"
+	echo "   Gtest enabled: ${GTEST_ENABLED}"
+	echo "   Using objects: ${USE_OBJECTS}"
+	echo "   Main enabled:  ${MAIN_ENABLED}"
+	echo "   Target name:   ${TARGET_NAME}"
+	echo "   Target dir:    ${TARGET_DIR}"
+	echo "   Objects dir:   ${OBJECTS_DIR}"
+	echo "   Sources dir:   ${SOURCES_DIR}"
+}
+
+
+#
+# Show parsed arguments for compiler.
+#
+function show_compiler_arguments
+{
+	echo "${CCPP} arguments:"
+	echo "   Sources:"
+	for src in ${sources[@]}
+	do
+		echo "      $src"
+	done
+	
+	echo "   Libs:"
+	for lib in ${CCPP_LIBS[@]}
+	do
+		echo "      $lib"
+	done
+	
+	echo "   Includes:"
+	for inc in ${CCPP_INCLUDES[@]}
+	do
+		echo "      $inc"
+	done
+}
+
+
+#
+# Parse bash-script input arguments.
+#
+function parse_input_arguments()
+{
+	while [[ $# -gt 0 ]]
+	do
+		case "$1" in
+			-h|--help)
+				help_message
+				exit 0
+				;;
+			-p|--parse-only)
+				DO_COMPILATION=false
+				GTEST_ENABLED=false
+				MAIN_ENABLED=false
+				VERBOSE_PARSED_PRO=true
+				;;
+			-g|--gtest-only)
+				GTEST_ENABLED=true
+				MAIN_ENABLED=false
+				;;
+			-m|--main-only)
+				GTEST_ENABLED=false
+				MAIN_ENABLED=true
+				;;
+			-t|--target)
+				TARGET_DIR="${2%%/}"
+				shift
+				;;
+			-n|--name)
+				TARGET_NAME="$2"
+				shift
+				;;
+			-G|--gtest-objects)
+				GTEST_ENABLED=true
+				USE_OBJECTS=true
+				MAIN_ENABLED=false
+				OBJECTS_DIR="${2%%/}"
+				shift
+				;;
+			-v|--VERBOSE_ALL)
+				VERBOSE_ALL=true
+				;;
+			--no-compile)
+				DO_COMPILATION=false
+				;;
+			*)
+				if [[ -z $PRO_PATH ]]
+				then
+					PRO_PATH="$1"
+				else
+					echo "Unknown argument: $1, use --help"
+					exit 1
+				fi
+				;;
+		esac
+		shift
+	done
+
+	if [[ -z $PRO_PATH ]]
+	then
+		echo "A .pro file is not specified!"
+		exit 1
+	elif [ ! -f $PRO_PATH ]
+	then
+		echo "${PRO_PATH} does not exists or is not a file!"
+		exit 1
+	elif [[ $PRO_PATH != *".pro" ]]
+	then
+		echo "${PRO_PATH} is not a .pro file!"
+		exit 1
+	fi
+
+	SOURCES_DIR=$(dirname ${PRO_PATH})
+	pro_file="${PRO_PATH##*/}"
+	TASK="${pro_file%%.pro}"
+}
+
+
+#
+# Parse *.pro file.
+#
+function parse_pro_file()
+{
+	while read line
+	do
+		case "$line" in
+			"SOURCES"*)
+				linesources=(${line##*= })
+				for src in ${linesources[@]}
+				do
+					sources+=("$SOURCES_DIR/$src")
+				done
+				;;
+
+			"LIBS"*)
+				CCPP_LIBS+=(${line##*= })
+				;;
+
+			"INCLUDEPATH"*)
+				CCPP_INCLUDES+=(${line##*= })
+				;;
+				
+			"TASKNAME"*)
+				TASK_NAME=${line##*= }
+				;;
+		esac
+	done < "$1"
+}
+
+
+#
+# Get sources for Google Unit test.
+#
+function get_gtest_sources()
+{
+	gsources=("${SOURCES_DIR}/gtest.cpp")
+	for src in $@
+	do
+		if [[ "$src" != *"main."* ]]
+		then
+			gsources+=("$src")
+		fi
+	done
+}
+
+
+#
+# Compile main task (main.cpp)
+#
+function compile_main()
+{
+	name="${TARGET_NAME}"
+	if [[ -z $name ]]
+	then
+		name="main-${TASK}"
+	fi
+
+	exec_line="${CCPP} ${CCPP_FLAGS}"
+
+	if [[ ! -z ${CCPP_INCLUDES} ]]
+	then
+		exec_line="${exec_line} -I${CCPP_INCLUDES[@]}"
+	fi
+
+	exec_line="${exec_line} ${sources[@]} -o ${TARGET_DIR}/${name}"
+
+	if [[ ! -z ${CCPP_LIBS} ]]
+	then
+		exec_line="${exec_line} ${CCPP_LIBS[@]}"
+	fi
+
+	echo $exec_line
+
+	if $DO_COMPILATION
+	then
+		$exec_line
+	fi
+}
+
+
+#
+# Compile task with google test
+#
+function compile_gtest()
+{
+	if $USE_OBJECTS
+	then
+		objects=("${OBJECTS_DIR}/*.o")
+		get_gtest_sources "${objects[@]}"
+	else
+		get_gtest_sources "${sources[@]}"
+	fi
+
+	name="${TARGET_NAME}"
+	if [[ -z $name ]]
+	then
+		name="gtest-${TASK}"
+	elif $MAIN_ENABLED
+	then
+		name="gtest-${name}"
+	fi
+
+	exec_line="${CCPP} ${CCPP_FLAGS} ${gsources[@]} -o ${TARGET_DIR}/${name}"
+
+	if [[ ! -z ${CCPP_LIBS} ]]
+	then
+		exec_line="${exec_line} ${CCPP_LIBS[@]}"
+	fi
+
+	if [[ ! -z ${CCPP_INCLUDES} ]]
+	then
+		exec_line="${exec_line} -I${CCPP_INCLUDES[@]}"
+	fi
+
+	exec_line="${exec_line} ${GTEST_FLAGS}"
+
+	echo $exec_line
+
+	if $DO_COMPILATION
+	then
+		${exec_line}
+	fi
+}
+
+
+function main()
+{
+	sources=()
+	gsources=()
+
+	if $VERBOSE_ALL
+	then
+		show_parsed_input
+		echo
+	fi
+	
+	parse_pro_file $PRO_PATH
+	echo "Task: ${TASK_NAME}"
+	
+	if $VERBOSE_ALL || $VERBOSE_PARSED_PRO
+	then
+		show_compiler_arguments
+	fi
+
+	if $GTEST_ENABLED
+	then
+		compile_gtest
+	fi
+
+	if $MAIN_ENABLED
+	then
+		compile_main
+	fi
+}
+
+
+parse_input_arguments $@
+main

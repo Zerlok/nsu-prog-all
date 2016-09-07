@@ -1,0 +1,20 @@
+open the car door
+sit on the seat
+close the door
+fasten your seat belt
+insert the key
+rotate the key
+press brake
+release the handbrake
+release the brake
+press the gas
+drive to the store
+press brake
+switch handbrake
+release brake
+rotate the key
+release the key
+tighten the handbrake
+open the car door
+stand up from car seat
+close the door

@@ -1,0 +1,8 @@
+go to the store = sit in the car, start the car engine, drive the car, stop at the store
+sit in the car = open the car door, sit on the seat, close the door, fasten your seat belt
+start the car engine = insert the key, rotate the key
+drive the car = press brake, release the handbrake, release the brake, press the gas
+stop at the store = drive to the store, park the car, exit from the car
+park the car = press brake, switch handbrake, release brake
+exit from the car = switch off the car engine, tighten the handbrake, open the car door, stand up from car seat, close the door
+switch off the car engine = rotate the key, release the key

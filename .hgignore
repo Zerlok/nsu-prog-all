@@ -2,10 +2,12 @@ syntax: glob
 *.o
 *.sh
 *.out
+*.orig
 *.gch
 *.csv
 *.txt
 *.zip
+*.bin
 *.tar.gz
 *.sublime-project
 *.sublime-workspace
@@ -18,5 +20,10 @@ syntax: glob
 *.textile
 *.idea
 *.jar
-*13202-troshnev*
+*target/classes*
+*target/test*
+*oop/build*
+*.metadata
+*.settings
+*.pyc
 *_samples*

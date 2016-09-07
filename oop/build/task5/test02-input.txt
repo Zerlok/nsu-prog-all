@@ -1,0 +1,5 @@
+AABC = A, AB, c
+Z = A, AB, AABC, AABAABCD
+AB = A, b
+AABAABCD = A, AB, AABC, d
+A = a
