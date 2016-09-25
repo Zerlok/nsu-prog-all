@@ -5,5 +5,5 @@ CONFIG -= qt
 
 SOURCES += main.cpp
 
-QMAKE_CXXFLAGS += -std=c++11 -lglut -lGL -lGLU -lGEW
-LIBS += -lglut -lGL -lGLU -lGLEW
+QMAKE_CXXFLAGS += -std=c++11 -lglut -lGL -lGEW -lGLU
+LIBS += -lglut -lGL -lGLEW -lGLU
