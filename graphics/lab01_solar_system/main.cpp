@@ -1,9 +1,22 @@
 #include <stdio.h>
+#include <sys/time.h>
+#include <cstdlib>
+
 #include <GL/glew.h>
 #include <GL/gl.h>
 #include <GL/glut.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+
+
+double getTimeAngle()
+{
+	struct timeval tp;
+	gettimeofday(&tp, NULL);
+	double t = ((tp.tv_sec % 10000) * 10) + (tp.tv_usec / 10000) / 10.0;
+	printf("T: %d.%d ---> %f\n", tp.tv_sec, tp.tv_usec, t);
+	return t;
+}
 
 
 float width;
@@ -18,15 +31,22 @@ GLuint bufferColor;
 
 GLuint attrConstColor;
 
+int VERTICES_NUM;
+
 
 void InitGeometry()
 {
 	GLfloat vertices[] = {
-		-0.5f,  0.5f, 0.0f, 1.0f,
-		 0.5f,  0.5f, 0.0f, 1.0f,
-		-0.5f, -0.5f, 0.0f, 1.0f,
-		 0.5f, -0.5f, 0.0f, 1.0f,
+		-1.0f, -1.0f, -1.0f, 1.0f,
+		-1.0f,  1.0f, -1.0f, 1.0f,
+		1.0f, -1.0f, -1.0f, 1.0f,
+		1.0f,  1.0f, -1.0f, 1.0f,
+		-1.0f, -1.0f, 1.0f, 1.0f,
+		-1.0f,  1.0f, 1.0f, 1.0f,
+		1.0f, -1.0f, 1.0f, 1.0f,
+		1.0f,  1.0f, 1.0f, 1.0f,
 	};
+	VERTICES_NUM = 8;
 
 	glGenBuffers(1, &bufferPosition);
 	glBindBuffer(GL_ARRAY_BUFFER, bufferPosition);
@@ -38,6 +58,10 @@ void InitGeometry()
 		0.0, 1.0, 0.0, 1.0f,
 		0.0, 0.0, 1.0, 1.0f,
 		1.0, 1.0, 0.0, 1.0f,
+		1.0, 0.0, 1.0, 1.0f,
+		0.0, 1.0, 1.0, 1.0f,
+		0.0, 0.0, 1.0, 1.0f,
+		1.0, 0.0, 1.0, 1.0f,
 	};
 
 	glGenBuffers(1, &bufferColor);
@@ -45,10 +69,36 @@ void InitGeometry()
 	glBufferData(GL_ARRAY_BUFFER, sizeof(colors), colors, GL_STATIC_DRAW);
 }
 
+
 void DeinitGeometry()
 {
-
+	glDeleteBuffers(sizeof(bufferPosition), &bufferPosition);
+	glDeleteBuffers(sizeof(bufferColor), &bufferColor);
 }
+
+
+void draw(const glm::mat4x4& matr, const int& begin, const int& end)
+{
+	glMatrixMode(GL_MODELVIEW);
+	glLoadMatrixf(&matr[0][0]);
+
+	glUniform4f(attrConstColor, 3, 3, 3, 1);
+
+	glEnableVertexAttribArray(0);
+	glEnableVertexAttribArray(1);
+
+	glBindBuffer(GL_ARRAY_BUFFER, bufferPosition);
+	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
+
+	glBindBuffer(GL_ARRAY_BUFFER, bufferColor);
+	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, 0);
+
+	glDrawArrays(GL_TRIANGLE_STRIP, begin, end);
+
+	glDisableVertexAttribArray(1);
+	glDisableVertexAttribArray(0);
+}
+
 
 void Render (void)
 {
@@ -58,52 +108,54 @@ void Render (void)
 
 	glUseProgram(program);
 
-	// Matrix Projection
+	// Matrix Projection.
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	gluPerspective(45.0, (GLdouble)width/(GLdouble)height, 0.01, 100.0) ;
+	gluPerspective(50.0, (GLdouble)width/(GLdouble)height, 0.01, 100.0) ;
 
-	// Matrix View
-	//glMatrixMode(GL_MODELVIEW);
-	//glLoadIdentity();
-	//gluLookAt(0.0f, 3.0f, 5.0f,	0.0f, 0.0f, 0.0f,	0.0f, 1.0f, 0.0f);
+	// Init Matrices.
+	const double globalAngle = getTimeAngle() / 6.283;
+	const glm::mat4x4 matView  = glm::lookAt(glm::vec3(30, 20, 0), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
+	const glm::mat4x4 matWorld = glm::mat4x4();
+	const glm::mat4x4 matWorldView = matView * matWorld;
 
-	glm::mat4x4 matWorld = glm::mat4x4();
-	glm::mat4x4 matView  = glm::lookAt(glm::vec3(0, 3, 5), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
+	// The Sun.
+	float aSun = globalAngle;
+	const glm::mat4x4 matSunWorldView = glm::rotate(matWorldView, aSun, glm::vec3(0.0f, 1.0f, 0.0f));
 
-	glm::mat4x4 matWorldView = matView * matWorld;
+	// The Earth.
+	float aEarth = globalAngle / 3.0;
+	glm::mat4x4 matEarthWorldView = matSunWorldView;
+	matEarthWorldView = glm::translate(matEarthWorldView, glm::vec3(10.0f, 0.0f, 0.0f));
+	matEarthWorldView = glm::rotate(matEarthWorldView, aEarth, glm::vec3(0.0f, 1.0f, 0.0f));
+	matEarthWorldView = glm::scale(matEarthWorldView, glm::vec3(0.5f, 0.5f, 0.5f));
 
-	glMatrixMode(GL_MODELVIEW);
-	glLoadMatrixf(&matWorldView[0][0]);
+	// The Moon.
+	float aMoon = globalAngle / 9.0;
+	glm::mat4x4 matMoonWorldView = matEarthWorldView;
+	matMoonWorldView = glm::translate(matMoonWorldView, glm::vec3(5.0f, 0.0f, 0.0f));
+	matMoonWorldView = glm::rotate(matMoonWorldView, aMoon, glm::vec3(0.0f, 1.0f, 0.0f));
+	matMoonWorldView = glm::scale(matMoonWorldView, glm::vec3(0.5f, 0.5f, 0.5f));
 
-	{
-		glUniform4f(attrConstColor, 3, 3, 3, 1);
+	// Drawing.
+	draw(matMoonWorldView, 0, VERTICES_NUM);
+	draw(matEarthWorldView, 0, VERTICES_NUM);
+	draw(matSunWorldView, 0, VERTICES_NUM);
 
-		glEnableVertexAttribArray(0);
-		glEnableVertexAttribArray(1);
-
-		glBindBuffer(GL_ARRAY_BUFFER, bufferPosition);
-		glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
-
-		glBindBuffer(GL_ARRAY_BUFFER, bufferColor);
-		glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, 0);
-
-		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-
-		glEnableVertexAttribArray(1);
-		glEnableVertexAttribArray(0);
-	}
-
+	// In the end.
 	glUseProgram(0);
-
 	glFlush();
 }
+
 
 // Calls in loop
 void Cycle()
 {
+	double angle = getTimeAngle();
+//	printf("A: %f\n", angle);
 	glutPostRedisplay();
 }
+
 
 // Reshapes the window appropriately
 void Reshape(int w, int h)
@@ -118,6 +170,7 @@ void Reshape(int w, int h)
 	gluPerspective(45.0, (GLdouble)width/(GLdouble)height, 0.01, 100.0) ;
 
 }
+
 
 void InitShaders()
 {
@@ -202,6 +255,7 @@ void InitShaders()
 	attrConstColor = glGetUniformLocation(program, "constColor");
 }
 
+
 void DeinitShaders()
 {
 	glDetachShader(program, vertexShader);
@@ -213,7 +267,7 @@ void DeinitShaders()
 	glDeleteShader(vertexShader);
 }
 
-//int _tmain(int argc, _TCHAR* argv[])
+
 int main(int argc, char* argv[])
 {
 	glutInit(&argc, argv); // Initialize GLUT
@@ -221,17 +275,19 @@ int main(int argc, char* argv[])
 	//glEnable(GL_DEPTH_TEST);
 	// Create the application's window
 	{
-		glutInitWindowPosition(100, 100);			// Set the position of the window
-		glutInitWindowSize(512, 512);				// Set the width and height of the window
+		glutInitWindowPosition(2000, 100);			// Set the position of the window
+		glutInitWindowSize(768, 512);				// Set the width and height of the window
 		glutCreateWindow("OpenGL First Window");	// Set the title for the window
 	}
 
 	GLenum err = glewInit();
 	if (GLEW_OK != err)
 	{
-		fprintf(stderr, "Error in glewInit, code: %d", err);
-		return 0;
+		fprintf(stderr, "Error in glewInit, code: (%d), message: %s", err, glewGetErrorString(err));
+		return 1;
 	}
+	else
+		fprintf(stdout, "Running the application...\n");
 
 	glutDisplayFunc(Render);
 	glutReshapeFunc(Reshape);
