@@ -38,7 +38,7 @@ GLuint attrConstColor; // ???
 
 // -------------- MY GLOBALS -------------- //
 
-int INDICIES_NUM;
+int FACES_NUM;
 
 
 // -------------- OpenGL FUNCTIONS -------------- //
@@ -60,29 +60,29 @@ void initGeometry()
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-	INDICIES_NUM = 24;
-	GLuint indicies[] = {
+	FACES_NUM = 36;
+	GLuint faces[] = {
 		0, 2, 1,  0, 3, 2,
 		5, 6, 7,  5, 7, 4,
 		1, 5, 4,  1, 4, 0,
-		3, 6, 2,  3, 7, 6,
-		0, 7, 5,  0, 4, 7,
 		2, 5, 1,  2, 6, 5,
+		3, 6, 2,  3, 7, 6,
+		0, 7, 4,  0, 3, 7,
 	};
 
 	glGenBuffers(1, &IBO);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indicies), indicies, GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(faces), faces, GL_STATIC_DRAW);
 
 	GLfloat colors[] = {
-		1.0, 0.0, 0.0, 1.0f,
-		0.0, 1.0, 0.0, 1.0f,
-		0.0, 0.0, 1.0, 1.0f,
-		1.0, 1.0, 0.0, 1.0f,
-		1.0, 0.0, 1.0, 1.0f,
-		0.0, 1.0, 1.0, 1.0f,
-		0.0, 0.0, 1.0, 1.0f,
-		1.0, 0.0, 1.0, 1.0f,
+		0.2f, 0.7f, 0.2f, 1.0f,
+		0.2f, 0.7f, 0.2f, 1.0f,
+		0.7f, 0.7f, 0.2f, 1.0f,
+		0.7f, 0.7f, 0.2f, 1.0f,
+		0.2f, 0.7f, 0.7f, 1.0f,
+		0.2f, 0.7f, 0.7f, 1.0f,
+		0.7f, 0.2f, 0.7f, 1.0f,
+		0.7f, 0.2f, 0.7f, 1.0f,
 	};
 
 	glGenBuffers(1, &CBO);
@@ -115,7 +115,7 @@ void drawMatrix(const glm::mat4x4& matr)
 	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, 0);
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
-	glDrawElements(GL_TRIANGLES, INDICIES_NUM, GL_UNSIGNED_INT, 0);
+	glDrawElements(GL_TRIANGLES, FACES_NUM, GL_UNSIGNED_INT, 0);
 
 	glDisableVertexAttribArray(1);
 	glDisableVertexAttribArray(0);
@@ -124,8 +124,10 @@ void drawMatrix(const glm::mat4x4& matr)
 
 void renderGeometry()
 {
-	glClearColor(0.2f, 0.2f, 0.2f, 1.0f); // Clear the background of our window to red
-	glClear(GL_COLOR_BUFFER_BIT); //Clear the colour buffer (more buffers later on)
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LESS);
+	glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); //Clear the colour buffer (more buffers later on)
 	glFrontFace(GL_CW);
 	glCullFace(GL_FRONT);
 	glLoadIdentity(); // Load the Identity Matrix to reset our drawing locations
@@ -144,10 +146,11 @@ void renderGeometry()
 	const glm::mat4x4 matWorldView = matView * matWorld;
 
 	// The Sun.
-	const float aSun = globalAngle;
+	const float aSun = globalAngle / 2.0;
 	const float aSunEarth = globalAngle / 3.0;
 	const glm::mat4x4 matSunWorld = glm::rotate(matWorldView, aSunEarth, glm::vec3(0.0f, 1.0f, 0.0f));
-	const glm::mat4x4 matSunWorldView = glm::rotate(matWorldView, aSun, glm::vec3(0.0f, 1.0f, 0.0f));
+	glm::mat4x4 matSunWorldView = glm::rotate(matWorldView, aSun, glm::vec3(0.0f, 1.0f, 0.0f));
+	matSunWorldView = glm::rotate(matSunWorldView, aSun / 2.0f, glm::vec3(1.0f, 0.0f, 0.0f));
 
 	// The Earth.
 	const float aEarth = globalAngle * 1.2;
@@ -279,9 +282,7 @@ void deinitShaders()
 {
 	glDetachShader(shaderProgram, vertexShader);
 	glDetachShader(shaderProgram, fragmentShader);
-
 	glDeleteProgram(shaderProgram);
-
 	glDeleteShader(fragmentShader);
 	glDeleteShader(vertexShader);
 }
@@ -289,12 +290,11 @@ void deinitShaders()
 
 int main(int argc, char* argv[])
 {
-	glutInit(&argc, argv); // Initialize GLUT
+	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_RGBA);
-	// Create the application's window
-	glutInitWindowPosition(2000, 100);			// Set the position of the window
-	glutInitWindowSize(768, 512);				// Set the width and height of the window
-	glutCreateWindow("OpenGL First Window");	// Set the title for the window
+	glutInitWindowPosition(2000, 100);
+	glutInitWindowSize(768, 512);
+	glutCreateWindow("OpenGL - Solar System Simulation");
 
 	GLenum err = glewInit();
 	if (GLEW_OK != err)
@@ -302,8 +302,6 @@ int main(int argc, char* argv[])
 		fprintf(stderr, "Error in glewInit, code: (%d), message: %s", err, glewGetErrorString(err));
 		return 1;
 	}
-	else
-		fprintf(stdout, "Running the application...\n");
 
 	glutDisplayFunc(renderGeometry);
 	glutReshapeFunc(reshape);
