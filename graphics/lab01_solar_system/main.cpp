@@ -1,7 +1,9 @@
+// -------------- BASIC INCLUDES -------------- //
 #include <stdio.h>
 #include <sys/time.h>
 #include <cstdlib>
 
+// -------------- OpenGL INCLUDES -------------- //
 #include <GL/glew.h>
 #include <GL/gl.h>
 #include <GL/glut.h>
@@ -13,45 +15,64 @@ double getTimeAngle()
 {
 	struct timeval tp;
 	gettimeofday(&tp, NULL);
-	double t = ((tp.tv_sec % 10000) * 10) + (tp.tv_usec / 10000) / 10.0;
-	printf("T: %d.%d ---> %f\n", tp.tv_sec, tp.tv_usec, t);
-	return t;
+//	printf("T: %d.%d ---> %f\n", tp.tv_sec, tp.tv_usec, t);
+	return ((tp.tv_sec % 10000) * 10) + (tp.tv_usec / 10000) / 10.0;
 }
 
+
+// -------------- OpenGL GLOBALS -------------- //
 
 float width;
 float height;
 
 GLuint vertexShader;
 GLuint fragmentShader;
-GLuint program;
+GLuint shaderProgram;
 
-GLuint bufferPosition;
-GLuint bufferColor;
+GLuint VBO; // Vertex Buffer Object
+GLuint CBO; // Color Buffer Object
+GLuint IBO; // Index Buffer Object
 
-GLuint attrConstColor;
-
-int VERTICES_NUM;
+GLuint attrConstColor; // ???
 
 
-void InitGeometry()
+// -------------- MY GLOBALS -------------- //
+
+int INDICIES_NUM;
+
+
+// -------------- OpenGL FUNCTIONS -------------- //
+
+void initGeometry()
 {
 	GLfloat vertices[] = {
 		-1.0f, -1.0f, -1.0f, 1.0f,
-		-1.0f,  1.0f, -1.0f, 1.0f,
+		-1.0f, 1.0f, -1.0f, 1.0f,
+		1.0f, 1.0f, -1.0f, 1.0f,
 		1.0f, -1.0f, -1.0f, 1.0f,
-		1.0f,  1.0f, -1.0f, 1.0f,
 		-1.0f, -1.0f, 1.0f, 1.0f,
-		-1.0f,  1.0f, 1.0f, 1.0f,
+		-1.0f, 1.0f, 1.0f, 1.0f,
+		1.0f, 1.0f, 1.0f, 1.0f,
 		1.0f, -1.0f, 1.0f, 1.0f,
-		1.0f,  1.0f, 1.0f, 1.0f,
 	};
-	VERTICES_NUM = 8;
 
-	glGenBuffers(1, &bufferPosition);
-	glBindBuffer(GL_ARRAY_BUFFER, bufferPosition);
+	glGenBuffers(1, &VBO);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
+	INDICIES_NUM = 24;
+	GLuint indicies[] = {
+		0, 2, 1,  0, 3, 2,
+		5, 6, 7,  5, 7, 4,
+		1, 5, 4,  1, 4, 0,
+		3, 6, 2,  3, 7, 6,
+		0, 7, 5,  0, 4, 7,
+		2, 5, 1,  2, 6, 5,
+	};
+
+	glGenBuffers(1, &IBO);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indicies), indicies, GL_STATIC_DRAW);
 
 	GLfloat colors[] = {
 		1.0, 0.0, 0.0, 1.0f,
@@ -64,20 +85,20 @@ void InitGeometry()
 		1.0, 0.0, 1.0, 1.0f,
 	};
 
-	glGenBuffers(1, &bufferColor);
-	glBindBuffer(GL_ARRAY_BUFFER, bufferColor);
+	glGenBuffers(1, &CBO);
+	glBindBuffer(GL_ARRAY_BUFFER, CBO);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(colors), colors, GL_STATIC_DRAW);
 }
 
 
-void DeinitGeometry()
+void deinitGeometry()
 {
-	glDeleteBuffers(sizeof(bufferPosition), &bufferPosition);
-	glDeleteBuffers(sizeof(bufferColor), &bufferColor);
+	glDeleteBuffers(sizeof(VBO), &VBO);
+	glDeleteBuffers(sizeof(CBO), &CBO);
 }
 
 
-void draw(const glm::mat4x4& matr, const int& begin, const int& end)
+void drawMatrix(const glm::mat4x4& matr)
 {
 	glMatrixMode(GL_MODELVIEW);
 	glLoadMatrixf(&matr[0][0]);
@@ -87,26 +108,29 @@ void draw(const glm::mat4x4& matr, const int& begin, const int& end)
 	glEnableVertexAttribArray(0);
 	glEnableVertexAttribArray(1);
 
-	glBindBuffer(GL_ARRAY_BUFFER, bufferPosition);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
 
-	glBindBuffer(GL_ARRAY_BUFFER, bufferColor);
+	glBindBuffer(GL_ARRAY_BUFFER, CBO);
 	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, 0);
 
-	glDrawArrays(GL_TRIANGLE_STRIP, begin, end);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
+	glDrawElements(GL_TRIANGLES, INDICIES_NUM, GL_UNSIGNED_INT, 0);
 
 	glDisableVertexAttribArray(1);
 	glDisableVertexAttribArray(0);
 }
 
 
-void Render (void)
+void renderGeometry()
 {
-	glClearColor(0.0f, 0.0f, 0.5f, 1.0f); // Clear the background of our window to red
+	glClearColor(0.2f, 0.2f, 0.2f, 1.0f); // Clear the background of our window to red
 	glClear(GL_COLOR_BUFFER_BIT); //Clear the colour buffer (more buffers later on)
+	glFrontFace(GL_CW);
+	glCullFace(GL_FRONT);
 	glLoadIdentity(); // Load the Identity Matrix to reset our drawing locations
 
-	glUseProgram(program);
+	glUseProgram(shaderProgram);
 
 	// Matrix Projection.
 	glMatrixMode(GL_PROJECTION);
@@ -115,32 +139,36 @@ void Render (void)
 
 	// Init Matrices.
 	const double globalAngle = getTimeAngle() / 6.283;
-	const glm::mat4x4 matView  = glm::lookAt(glm::vec3(30, 20, 0), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
+	const glm::mat4x4 matView  = glm::lookAt(glm::vec3(20, 13, 0), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
 	const glm::mat4x4 matWorld = glm::mat4x4();
 	const glm::mat4x4 matWorldView = matView * matWorld;
 
 	// The Sun.
-	float aSun = globalAngle;
+	const float aSun = globalAngle;
+	const float aSunEarth = globalAngle / 3.0;
+	const glm::mat4x4 matSunWorld = glm::rotate(matWorldView, aSunEarth, glm::vec3(0.0f, 1.0f, 0.0f));
 	const glm::mat4x4 matSunWorldView = glm::rotate(matWorldView, aSun, glm::vec3(0.0f, 1.0f, 0.0f));
 
 	// The Earth.
-	float aEarth = globalAngle / 3.0;
-	glm::mat4x4 matEarthWorldView = matSunWorldView;
-	matEarthWorldView = glm::translate(matEarthWorldView, glm::vec3(10.0f, 0.0f, 0.0f));
-	matEarthWorldView = glm::rotate(matEarthWorldView, aEarth, glm::vec3(0.0f, 1.0f, 0.0f));
-	matEarthWorldView = glm::scale(matEarthWorldView, glm::vec3(0.5f, 0.5f, 0.5f));
+	const float aEarth = globalAngle * 1.2;
+	const float aEarthMoon = globalAngle * 0.9;
+	glm::mat4x4 matEarthWorld = matSunWorld;
+	matEarthWorld = glm::translate(matEarthWorld, glm::vec3(10.0f, 0.0f, 0.0f));
+	matEarthWorld= glm::scale(matEarthWorld, glm::vec3(0.5f, 0.5f, 0.5f));
+	const glm::mat4x4 matEarthWorldView = glm::rotate(matEarthWorld, aEarth, glm::vec3(0.0f, 1.0f, 0.0f));
+	matEarthWorld= glm::rotate(matEarthWorld, aEarthMoon, glm::vec3(0.0f, 1.0f, 0.0f));
 
 	// The Moon.
 	float aMoon = globalAngle / 9.0;
-	glm::mat4x4 matMoonWorldView = matEarthWorldView;
+	glm::mat4x4 matMoonWorldView = matEarthWorld;
 	matMoonWorldView = glm::translate(matMoonWorldView, glm::vec3(5.0f, 0.0f, 0.0f));
 	matMoonWorldView = glm::rotate(matMoonWorldView, aMoon, glm::vec3(0.0f, 1.0f, 0.0f));
-	matMoonWorldView = glm::scale(matMoonWorldView, glm::vec3(0.5f, 0.5f, 0.5f));
+	matMoonWorldView = glm::scale(matMoonWorldView, glm::vec3(0.3f, 0.3f, 0.3f));
 
 	// Drawing.
-	draw(matMoonWorldView, 0, VERTICES_NUM);
-	draw(matEarthWorldView, 0, VERTICES_NUM);
-	draw(matSunWorldView, 0, VERTICES_NUM);
+	drawMatrix(matMoonWorldView);
+	drawMatrix(matEarthWorldView);
+	drawMatrix(matSunWorldView);
 
 	// In the end.
 	glUseProgram(0);
@@ -149,16 +177,14 @@ void Render (void)
 
 
 // Calls in loop
-void Cycle()
+void renderCycle()
 {
-	double angle = getTimeAngle();
-//	printf("A: %f\n", angle);
 	glutPostRedisplay();
 }
 
 
 // Reshapes the window appropriately
-void Reshape(int w, int h)
+void reshape(int w, int h)
 {
 	width  = w;
 	height = h;
@@ -172,35 +198,27 @@ void Reshape(int w, int h)
 }
 
 
-void InitShaders()
+void initShaders()
 {
-	//! Čńőîäíűé ęîä řĺéäĺđîâ
 	const char* vsSource =
-		//"attribute vec3 coord;\n"
-		//"out vec3 fragmentColor;\n"
 		"attribute vec4 position;"
 		"attribute vec4 color;"
 		"uniform vec4 constColor;"
 		"void main() {\n"
-		//"  gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;\n"
-		//"  gl_FrontColor = gl_Color;\n"
 		"  gl_Position = gl_ModelViewProjectionMatrix * position;\n"
 		"  gl_FrontColor = color * constColor;\n"
 		"}\n";
 	const char* fsSource =
-		//"uniform vec4 color;\n"
-		//"in vec3 fragmentColor;\n"
 		"void main() {\n"
-		//"  gl_FragColor = color;\n"
 		"  gl_FragColor = gl_Color;\n"
-		//"  gl_FragColor = vec4(fragmentColor, 1.0);\n"
 		"}\n";
 	int success = 0;
 
 	vertexShader = glCreateShader(GL_VERTEX_SHADER);
-	glShaderSource (vertexShader, 1, &vsSource, NULL);
+	glShaderSource(vertexShader, 1, &vsSource, NULL);
 	glCompileShader(vertexShader);
-	glGetShaderiv  (vertexShader, GL_COMPILE_STATUS, &success);
+	glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
+
 	if (!success)
 	{
 		const int MAX_INFO_LOG_SIZE = 1024;
@@ -211,9 +229,10 @@ void InitShaders()
 	}
 
 	fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-	glShaderSource (fragmentShader, 1, &fsSource, NULL);
+	glShaderSource(fragmentShader, 1, &fsSource, NULL);
 	glCompileShader(fragmentShader);
-	glGetShaderiv  (fragmentShader, GL_COMPILE_STATUS, &success);
+	glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
+
 	if (!success)
 	{
 		const int MAX_INFO_LOG_SIZE = 1024;
@@ -223,45 +242,45 @@ void InitShaders()
 		fprintf(stderr, "Info log: %s\n", infoLog);
 	}
 
-	program = glCreateProgram();
-	glAttachShader(program, vertexShader);
-	glAttachShader(program, fragmentShader);
+	shaderProgram = glCreateProgram();
+	glAttachShader(shaderProgram, vertexShader);
+	glAttachShader(shaderProgram, fragmentShader);
 
-	glBindAttribLocation(program, 0, "position");
-	glBindAttribLocation(program, 1, "color");
+	glBindAttribLocation(shaderProgram, 0, "position");
+	glBindAttribLocation(shaderProgram, 1, "color");
 
-	glLinkProgram (program);
-	glGetProgramiv(program, GL_LINK_STATUS, &success);
+	glLinkProgram(shaderProgram);
+	glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
 	if (!success)
 	{
 		const int MAX_INFO_LOG_SIZE = 1024;
 		GLchar infoLog[MAX_INFO_LOG_SIZE];
-		glGetProgramInfoLog(program, MAX_INFO_LOG_SIZE, NULL, infoLog);
+		glGetProgramInfoLog(shaderProgram, MAX_INFO_LOG_SIZE, NULL, infoLog);
 		fprintf(stderr, "Error in program linkage!\n");
 		fprintf(stderr, "Info log: %s\n", infoLog);
 	}
 
-	glValidateProgram(program);
-	glGetProgramiv(program, GL_VALIDATE_STATUS, &success);
+	glValidateProgram(shaderProgram);
+	glGetProgramiv(shaderProgram, GL_VALIDATE_STATUS, &success);
 	if (!success)
 	{
 		const int MAX_INFO_LOG_SIZE = 1024;
 		GLchar infoLog[MAX_INFO_LOG_SIZE];
-		glGetProgramInfoLog(program, MAX_INFO_LOG_SIZE, NULL, infoLog);
+		glGetProgramInfoLog(shaderProgram, MAX_INFO_LOG_SIZE, NULL, infoLog);
 		fprintf(stderr, "Error in program validation!\n");
 		fprintf(stderr, "Info log: %s\n", infoLog);
 	}
 
-	attrConstColor = glGetUniformLocation(program, "constColor");
+	attrConstColor = glGetUniformLocation(shaderProgram, "constColor");
 }
 
 
-void DeinitShaders()
+void deinitShaders()
 {
-	glDetachShader(program, vertexShader);
-	glDetachShader(program, fragmentShader);
+	glDetachShader(shaderProgram, vertexShader);
+	glDetachShader(shaderProgram, fragmentShader);
 
-	glDeleteProgram(program);
+	glDeleteProgram(shaderProgram);
 
 	glDeleteShader(fragmentShader);
 	glDeleteShader(vertexShader);
@@ -272,13 +291,10 @@ int main(int argc, char* argv[])
 {
 	glutInit(&argc, argv); // Initialize GLUT
 	glutInitDisplayMode(GLUT_RGBA);
-	//glEnable(GL_DEPTH_TEST);
 	// Create the application's window
-	{
-		glutInitWindowPosition(2000, 100);			// Set the position of the window
-		glutInitWindowSize(768, 512);				// Set the width and height of the window
-		glutCreateWindow("OpenGL First Window");	// Set the title for the window
-	}
+	glutInitWindowPosition(2000, 100);			// Set the position of the window
+	glutInitWindowSize(768, 512);				// Set the width and height of the window
+	glutCreateWindow("OpenGL First Window");	// Set the title for the window
 
 	GLenum err = glewInit();
 	if (GLEW_OK != err)
@@ -289,18 +305,17 @@ int main(int argc, char* argv[])
 	else
 		fprintf(stdout, "Running the application...\n");
 
-	glutDisplayFunc(Render);
-	glutReshapeFunc(Reshape);
-	glutIdleFunc(Cycle);
+	glutDisplayFunc(renderGeometry);
+	glutReshapeFunc(reshape);
+	glutIdleFunc(renderCycle);
 
-	InitGeometry();
-	InitShaders();
+	initGeometry();
+	initShaders();
 
 	glutMainLoop();
 
-	DeinitShaders();
-
-	int i = 0;
+	deinitShaders();
+	deinitGeometry();
 
 	return 0;
 }

@@ -7,3 +7,6 @@ SOURCES += main.cpp
 
 QMAKE_CXXFLAGS += -std=c++11 -lglut -lGL -lGEW -lGLU
 LIBS += -lglut -lGL -lGLEW -lGLU
+
+HEADERS += \
+    tro_shader.h
