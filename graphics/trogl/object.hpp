@@ -17,22 +17,32 @@ class Object
 		};
 
 		Object(const Type& type,
-			   const std::string& name,
-			   const Point& pos = Point::zero);
+			   const Point& pos = Point::zero,
+			   const std::string& name = std::string());
 		Object(const Object& obj);
 		Object(Object&& obj);
 		virtual ~Object();
 
 		const Point& getPosition() const;
-		void setPosition(const Point& point);
+		void setPosition(const Point& position);
+
+		const Point& getRotation() const;
+		void setRotation(const Point& rotation);
+
+		const Point& getScale() const;
+		void setScale(const Point& scale);
 
 		const std::string& getName() const;
 		void setName(const std::string& name);
 
 	protected:
-		const Type& _type;
-		std::string _name;
+		Type _type;
+
 		Point _position;
+		Point _rotation;
+		Point _scale;
+
+		std::string _name;
 
 	private:
 		static size_t _objID;

@@ -7,8 +7,8 @@ CONFIG -= qt
 QMAKE_CXXFLAGS += -std=c++11 -lglut -lGL -lGEW -lGLU
 LIBS += -lglut -lGL -lGLEW -lGLU
 
-LIBS += -L/home/zerlok/nsu_prog/libs -llogger
 INCLUDEPATH += /home/zerlok/nsu_prog/include
+LIBS += -L/home/zerlok/nsu_prog/libs -llogger
 
 
 SOURCES += main.cpp \
@@ -18,10 +18,11 @@ SOURCES += main.cpp \
     lamp.cpp \
     object.cpp \
     engine.cpp \
-    types.cpp \
     material.cpp \
     texture.cpp \
-    common/point.cpp
+    common/point.cpp \
+    common/color.cpp \
+    meshcube.cpp
 
 HEADERS += \
     engine.hpp \
@@ -31,7 +32,8 @@ HEADERS += \
     mesh.hpp \
     lamp.hpp \
     object.hpp \
-    types.hpp \
     material.hpp \
     texture.hpp \
-    common/point.hpp
+    common/point.hpp \
+    common/color.hpp \
+    meshcube.hpp

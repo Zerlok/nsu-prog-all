@@ -1,4 +1,14 @@
-#include "types.hpp"
+#include "color.hpp"
+
+#include <utility>
+
+
+const Color Color::white = Color(255, 255, 255);
+const Color Color::grey = Color(128, 128, 128);
+const Color Color::black = Color(0, 0, 0);
+const Color Color::red = Color(255, 0, 0);
+const Color Color::green = Color(0, 255, 0);
+const Color Color::blue = Color(0, 0, 255);
 
 
 Color Color::makeRGB(const unsigned char& r,

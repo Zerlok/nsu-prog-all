@@ -1,4 +1,4 @@
-#ifndef ____MATERIAL_HPP__PP__
+#ifndef __MATERIAL_HPP__
 #define __MATERIAL_HPP__
 
 

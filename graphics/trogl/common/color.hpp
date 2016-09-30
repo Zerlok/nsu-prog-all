@@ -1,13 +1,17 @@
-#ifndef __ENGINE_TYPES_HPP__
-#define __ENGINE_TYPES_HPP__
-
-
-#include "../logger/logger.hpp"
+#ifndef __COLOR_HPP__
+#define __COLOR_HPP__
 
 
 class Color
 {
 	public:
+		static const Color white;
+		static const Color grey;
+		static const Color black;
+		static const Color red;
+		static const Color green;
+		static const Color blue;
+
 		static Color makeRGB(const unsigned char& r,
 							 const unsigned char& g,
 							 const unsigned char& b);
@@ -44,4 +48,4 @@ class Color
 };
 
 
-#endif // __ENGINE_TYPES_HPP__
+#endif // __COLOR_HPP__

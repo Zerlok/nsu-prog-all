@@ -5,7 +5,7 @@
 #include <string>
 #include <list>
 
-#include "types.hpp"
+#include "common/color.hpp"
 
 #include "object.hpp"
 #include "lamp.hpp"

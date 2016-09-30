@@ -1,11 +1,15 @@
-#ifndef LAMP_H
-#define LAMP_H
+#ifndef __LAMP_HPP__
+#define __LAMP_HPP__
 
 
-class Lamp
+#include "object.hpp"
+
+
+class Lamp : public Object
 {
 	public:
 		Lamp();
 };
 
-#endif // LAMP_H
+
+#endif // __LAMP_HPP__

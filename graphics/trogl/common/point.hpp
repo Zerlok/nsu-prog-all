@@ -6,8 +6,9 @@ class Point
 {
 	public:
 		static const Point zero;
+		static const Point one;
 
-		Point(const int& x, const int& y, const int& z);
+		Point(const float& x = 0, const float& y = 0, const float& z = 0);
 		Point(const Point& p);
 		Point(Point&& p);
 		~Point();
@@ -18,12 +19,20 @@ class Point
 		bool operator==(const Point& p) const;
 		bool operator!=(const Point& p) const;
 
+		Point& operator+=(const Point& p);
+		Point operator+(const Point& p) const;
+
+		Point& operator-=(const Point& p);
+		Point operator-(const Point& p) const;
+
 		double distance(const Point& p) const;
+		Point crossProduct(const Point& p) const;
+		double dotProduct(const Point& p) const;
 
 	private:
-		int _x;
-		int _y;
-		int _z;
+		float _x;
+		float _y;
+		float _z;
 };
 
 
