@@ -2,6 +2,9 @@
 #define __ENGINE_TYPES_HPP__
 
 
+#include "../logger/logger.hpp"
+
+
 class Color
 {
 	public:

@@ -7,6 +7,9 @@ CONFIG -= qt
 QMAKE_CXXFLAGS += -std=c++11 -lglut -lGL -lGEW -lGLU
 LIBS += -lglut -lGL -lGLEW -lGLU
 
+LIBS += -L/home/zerlok/nsu_prog/libs -llogger
+INCLUDEPATH += /home/zerlok/nsu_prog/include
+
 
 SOURCES += main.cpp \
     scene.cpp \

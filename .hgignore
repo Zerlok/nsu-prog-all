@@ -1,6 +1,5 @@
 syntax: glob
 *.o
-*.sh
 *.out
 *.gch
 *.csv
@@ -33,3 +32,7 @@ oop/task3/argvparser.h
 *.metadata
 *.settings
 *.pyc
+
+include/*
+libs/*
+

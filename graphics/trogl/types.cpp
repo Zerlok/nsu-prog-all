@@ -1,9 +1,6 @@
 #include "types.hpp"
 
 
-const unsigned char Color::COLOR_DEPTH = 256;
-
-
 Color Color::makeRGB(const unsigned char& r,
 					 const unsigned char& g,
 					 const unsigned char& b)
@@ -36,7 +33,7 @@ Color Color::makeHSV(const unsigned char& h,
 		r = v;
 		g = v;
 		b = v;
-		return rgb;
+		return std::move(Color(r, g, b));
 	}
 
 	region = h / 43;

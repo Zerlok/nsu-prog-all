@@ -42,7 +42,7 @@ Object::Object(const Type& type,
 Object::Object(const Object& obj)
 	: _type(obj._type),
 	  _name(obj._name),
-	  _position(obj._pos)
+	  _position(obj._position)
 {
 	++_objID;
 	if (_name.empty())
@@ -53,6 +53,17 @@ Object::Object(const Object& obj)
 Object::Object(Object&& obj)
 	: _type(std::move(obj._type)),
 	  _name(std::move(obj._name)),
-	  _position(std::move(obj._pos))
+	  _position(std::move(obj._position))
 {
+}
+
+
+Object::~Object()
+{
+}
+
+
+const Point&Object::getPosition() const
+{
+	return _position;
 }
