@@ -23,7 +23,10 @@ class Scene : public Component
 	public:
 		Scene(const std::string& name = std::string(),
 			  const Camera& camera = DEFAULT_CAMERA);
+		Scene(const Scene& scene);
 		~Scene();
+
+		Scene& operator=(const Scene& scene);
 
 		void addMesh(const Mesh& mesh);
 		void addLamp(const Lamp& lamp);

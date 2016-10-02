@@ -14,7 +14,7 @@ Scene::Scene(const std::string& name, const Camera& camera)
 	  _meshes(),
 	  _lamps(),
 	  _camera(camera),
-	  _bgColor()
+	  _bgColor(Color::grey)
 {
 	_objects.push_back(&_camera);
 	logDebug << "Scene with camera "
@@ -22,9 +22,44 @@ Scene::Scene(const std::string& name, const Camera& camera)
 }
 
 
+Scene::Scene(const Scene& scene)
+	: Component(scene),
+	  _objects(),
+	  _meshes(),
+	  _lamps(),
+	  _camera(scene._camera),
+	  _bgColor(scene._bgColor)
+{
+	for (const Mesh& m : scene._meshes)
+		addMesh(m);
+
+	for (const Lamp& l : scene._lamps)
+		addLamp(l);
+}
+
+
 Scene::~Scene()
 {
 	logDebug << "Scene removed" << logEnd;
+}
+
+
+Scene&Scene::operator=(const Scene& scene)
+{
+	_objects.clear();
+	_meshes.clear();
+	_lamps.clear();
+
+	for (const Mesh& m : scene._meshes)
+		addMesh(m);
+
+	for (const Lamp& l : scene._lamps)
+		addLamp(l);
+
+	_camera = scene._camera;
+	_bgColor = scene._bgColor;
+
+	return (*this);
 }
 
 
@@ -78,4 +113,16 @@ void Scene::setCamera(const Camera& camera)
 	_camera = camera;
 	_objects.push_back(&_camera);
 	logDebug << " replaced with " << _camera.getName() << " (new)" << logEnd;
+}
+
+
+const Color&Scene::getBgColor() const
+{
+	return _bgColor;
+}
+
+
+void Scene::setBgColor(const Color& color)
+{
+	_bgColor = color;
 }

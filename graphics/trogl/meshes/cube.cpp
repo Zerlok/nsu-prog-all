@@ -4,14 +4,15 @@
 Cube::Cube(const float& r, const Color& c)
 	: Mesh()
 {
-	addVertex(Vertex(+r, +r, +r, c));
-	addVertex(Vertex(+r, -r, +r, c));
-	addVertex(Vertex(-r, +r, +r, c));
-	addVertex(Vertex(-r, -r, +r, c));
+	addVertex(Vertex(-r, -r, -r, c));
+	addVertex(Vertex(-r, +r, -r, c));
 	addVertex(Vertex(+r, +r, -r, c));
 	addVertex(Vertex(+r, -r, -r, c));
-	addVertex(Vertex(-r, +r, -r, c));
-	addVertex(Vertex(-r, -r, -r, c));
+
+	addVertex(Vertex(-r, -r, +r, c));
+	addVertex(Vertex(-r, +r, +r, c));
+	addVertex(Vertex(+r, +r, +r, c));
+	addVertex(Vertex(+r, -r, +r, c));
 
 	addFace(Face(0, 2, 1));
 	addFace(Face(0, 3, 2));

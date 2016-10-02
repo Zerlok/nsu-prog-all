@@ -13,9 +13,12 @@ class TroglEngine
 		virtual ~TroglEngine();
 
 		// OpenGL running.
-		void showScene(const Scene& scene);
+		void setActiveScene(const Scene& scene);
+		void showScene();
 
 	protected:
+		Scene _scene;
+
 		float _width;
 		float _height;
 
@@ -23,9 +26,9 @@ class TroglEngine
 		GLuint _fragmentShader;
 		GLuint _shaderProgram;
 
-		size_t _vbo_size;
-		size_t _cbo_size;
-		size_t _ibo_size;
+		size_t _vboSize;
+		size_t _cboSize;
+		size_t _iboSize;
 
 		GLuint _vbo; // Vertex Buffer Object
 		GLuint _cbo; // Color Buffer Object
@@ -49,7 +52,7 @@ class TroglEngine
 		static std::string generateWindowName(const Scene& scene);
 
 		bool _isValid;
-		bool runGlewTest() const;
+		bool runGlewTest();
 };
 
 

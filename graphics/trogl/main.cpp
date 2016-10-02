@@ -3,18 +3,21 @@
 
 #include "engine.hpp"
 #include "meshes/cube.hpp"
+#include "meshes/strangecube.hpp"
 
 
-static Logger& globalLogger = Logger::getInstance(std::cout, Logger::Level::INFO);
+static Logger& globalLogger = Logger::getInstance(std::cout, Logger::Level::DEBUG);
 
 
 int main(int argc, char *argv[])
 {
 	Scene scene;
-	scene.addMesh(Cube(1.0));
+	StrangeCube c;
+	scene.addMesh(c);
 
 	TroglEngine engine;
-	engine.showScene(scene);
+	engine.setActiveScene(scene);
+	engine.showScene();
 
 	return 0;
 }

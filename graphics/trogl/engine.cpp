@@ -9,20 +9,28 @@ TroglEngine* TroglEngine::_current = nullptr;
 
 
 TroglEngine::TroglEngine()
-	: _width(0),
+	: _scene(Scene("default")),
+	  _width(0),
 	  _height(0),
 	  _vertexShader(),
 	  _fragmentShader(),
 	  _shaderProgram(),
-	  _vbo_size(0),
-	  _cbo_size(0),
-	  _ibo_size(0),
+	  _vboSize(0),
+	  _cboSize(0),
+	  _iboSize(0),
 	  _vbo(),
 	  _cbo(),
 	  _ibo(),
-	  _attrConstColor()
+	  _attrConstColor(),
+	  _isValid(true)
 {
 	logDebug << "Engine init started" << logEnd;
+
+	int argc = 1;
+	char* argv = "engine";
+	glutInit(&argc, &argv);
+	glutInitDisplayMode(GLUT_RGBA);
+	glutInitWindowPosition(2000, 100);
 
 	logDebug << "Engine created" << logEnd;
 }
@@ -40,28 +48,29 @@ TroglEngine::~TroglEngine()
 }
 
 
-void TroglEngine::showScene(const Scene& scene)
+void TroglEngine::setActiveScene(const Scene& scene)
 {
-	int argc = 1;
-	char* argv = "engine";
-	glutInit(&argc, &argv);
-	glutInitDisplayMode(GLUT_RGBA);
-	glutInitWindowPosition(2000, 100);
+	_scene = scene;
+}
+
+
+void TroglEngine::showScene()
+{
 	glutInitWindowSize(
-				scene.getCamera().getWidth(),
-				scene.getCamera().getHeight());
-	glutCreateWindow(generateWindowName(scene).c_str());
-	_isValid = runGlewTest();
+				_scene.getCamera().getWidth(),
+				_scene.getCamera().getHeight());
+	glutCreateWindow(generateWindowName(_scene).c_str());
+	runGlewTest();
 
 	if (!_isValid)
 	{
-		logError << "Cannot show scene " << scene.getName()
+		logError << "Cannot show scene " << _scene.getName()
 				 << " engine couldn't initialize" << logEnd;
 		return;
 	}
 
 	logInfo << "Engine rendering started (scene: "
-			<< scene.getName() << ")" << logEnd;
+			<< _scene.getName() << ")" << logEnd;
 
 	_current = this;
 	glutDisplayFunc(draw);
@@ -71,10 +80,9 @@ void TroglEngine::showScene(const Scene& scene)
 	// TODO: add scene lamps.
 
 	// TODO: add scene meshes.
-	for (const Mesh& m : scene.getMeshes())
+	for (const Mesh& m : _scene.getMeshes())
 		initGeometry(m);
 
-//	initGeometry();
 	initShaders();
 
 	glutMainLoop();
@@ -120,7 +128,7 @@ void TroglEngine::drawMatrix(const glm::mat4x4& mat)
 	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, 0);
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ibo);
-	glDrawElements(GL_TRIANGLES, _ibo_size, GL_UNSIGNED_INT, 0);
+	glDrawElements(GL_TRIANGLES, _iboSize, GL_UNSIGNED_INT, 0);
 
 	glDisableVertexAttribArray(1);
 	glDisableVertexAttribArray(0);
@@ -129,23 +137,25 @@ void TroglEngine::drawMatrix(const glm::mat4x4& mat)
 
 void TroglEngine::initGeometry(const Mesh& mesh)
 {
-	_ibo_size = mesh.getFaces().size() * 3 * sizeof(GLuint);
-	_vbo_size = mesh.getVertices().size() * 4 * sizeof(GLfloat);
-	_cbo_size = _vbo_size;
+	_iboSize = mesh.getFaces().size() * 3 * sizeof(GLuint);
+	_vboSize = mesh.getVertices().size() * 4 * sizeof(GLfloat);
+	_cboSize = _vboSize;
 
-	GLfloat* vertices = new GLfloat[_vbo_size];
-	GLfloat* colors = new GLfloat[_cbo_size];
-	GLuint* indicies = new GLuint[_ibo_size];
+	GLfloat* vertices = new GLfloat[_vboSize];
+	GLfloat* colors = new GLfloat[_cboSize];
+	GLuint* indicies = new GLuint[_iboSize];
 
+	// add vertecies and colors.
 	size_t idx = 0;
-	for (size_t i = 0; i < _vbo_size; i += 4)
+	const Point& objPos = mesh.getPosition();
+	for (size_t i = 0; i < _vboSize; i += 4)
 	{
 		const Mesh::Vertex& v = mesh.getVertex(idx);
 		++idx;
 
-		vertices[i] = v.getPosition().getX();
-		vertices[i+1] = v.getPosition().getY();
-		vertices[i+2] = v.getPosition().getZ();
+		vertices[i] = v.getPosition().getX() + objPos.getX();
+		vertices[i+1] = v.getPosition().getY() + objPos.getY();
+		vertices[i+2] = v.getPosition().getZ() + objPos.getZ();
 		vertices[i+3] = 1.0f;
 
 		colors[i] = v.getColor().getRedF();
@@ -154,8 +164,9 @@ void TroglEngine::initGeometry(const Mesh& mesh)
 		colors[i+3] = v.getColor().getAlphaF();
 	}
 
+	// add indicies from mesh faces.
 	idx = 0;
-	for (size_t i = 0; i < _ibo_size; i += 3)
+	for (size_t i = 0; i < _iboSize; i += 3)
 	{
 		const Mesh::Face& f = mesh.getFace(idx);
 		++idx;
@@ -167,15 +178,15 @@ void TroglEngine::initGeometry(const Mesh& mesh)
 
 	glGenBuffers(1, &_vbo);
 	glBindBuffer(GL_ARRAY_BUFFER, _vbo);
-	glBufferData(GL_ARRAY_BUFFER, _vbo_size, vertices, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, _vboSize, vertices, GL_STATIC_DRAW);
 
 	glGenBuffers(1, &_ibo);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ibo);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, _ibo_size, indicies, GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, _iboSize, indicies, GL_STATIC_DRAW);
 
 	glGenBuffers(1, &_cbo);
 	glBindBuffer(GL_ARRAY_BUFFER, _cbo);
-	glBufferData(GL_ARRAY_BUFFER, _cbo_size, colors, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, _cboSize, colors, GL_STATIC_DRAW);
 
 	delete[] vertices;
 	delete[] colors;
@@ -187,7 +198,8 @@ void TroglEngine::drawGeometry()
 {
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
-	glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
+	const Color& bg = _scene.getBgColor();
+	glClearColor(bg.getRedF(), bg.getGreenF(), bg.getBlueF(), bg.getAlphaF());
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); //Clear the colour buffer (more buffers later on)
 	glFrontFace(GL_CW);
 	glCullFace(GL_FRONT);
@@ -198,7 +210,13 @@ void TroglEngine::drawGeometry()
 	// Matrix Projection.
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	gluPerspective(50.0, (GLdouble)_width/(GLdouble)_height, 0.01, 100.0) ;
+	const Camera& cam = _scene.getCamera();
+	_width = cam.getWidth();
+	_height = cam.getHeight();
+	gluPerspective(cam.getFOV(),
+				   (GLdouble)_width/(GLdouble)_height,
+				   cam.getLowDistance(),
+				   cam.getHighDistance());
 
 	// Init Matrices.
 	const double globalAngle = getTime() / 6.283;
@@ -349,15 +367,17 @@ std::string TroglEngine::generateWindowName(const Scene& scene)
 }
 
 
-bool TroglEngine::runGlewTest() const
+bool TroglEngine::runGlewTest()
 {
 	GLenum err = glewInit();
 	if (GLEW_OK != err)
 	{
 		logError << "Error in glewInit, code: " << err
 				 << ", message: " << glewGetErrorString(err) << logEnd;
-		return false;
+
+		_isValid = false;
 	}
 
-	return true;
+	_isValid = true;
+	return _isValid;
 }
