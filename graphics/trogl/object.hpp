@@ -3,25 +3,28 @@
 
 
 #include <string>
-
 #include "common/point.hpp"
+#include "component.hpp"
 
 
-class Object
+class Object : public Component
 {
 	public:
 		enum class Type
 		{
 			MESH = 'M',
 			LAMP = 'L',
+			CAMERA = 'C',
 		};
 
 		Object(const Type& type,
-			   const Point& pos = Point::zero,
-			   const std::string& name = std::string());
+			   const std::string& name = DEFAULT_NAME,
+			   const Point& pos = Point::zero);
 		Object(const Object& obj);
 		Object(Object&& obj);
 		virtual ~Object();
+
+		const Type& getObjectType() const;
 
 		const Point& getPosition() const;
 		void setPosition(const Point& position);
@@ -32,21 +35,18 @@ class Object
 		const Point& getScale() const;
 		void setScale(const Point& scale);
 
-		const std::string& getName() const;
-		void setName(const std::string& name);
+	private:
+		Type _object_type;
 
 	protected:
-		Type _type;
-
 		Point _position;
 		Point _rotation;
 		Point _scale;
 
-		std::string _name;
-
 	private:
-		static size_t _objID;
-		static std::string _generateName(const Type& type);
+		static const std::string DEFAULT_NAME;
+		static std::string generateNameFromObjType(const Type& type, const size_t& id);
+		static size_t objID;
 };
 
 

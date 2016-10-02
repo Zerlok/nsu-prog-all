@@ -2,10 +2,14 @@
 #define __TEXTURE_HPP__
 
 
-class Texture
+#include "component.hpp"
+
+
+class Texture : public Component
 {
 	public:
-		Texture();
+		Texture(const std::string& name = std::string());
+		~Texture();
 };
 
 

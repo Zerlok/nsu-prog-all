@@ -6,9 +6,10 @@
 Mesh::Mesh(const Point& pos,
 		   const Point& rot,
 		   const Point& sca)
-	: Object(Object::Type::MESH, pos)
+	: Object(Object::Type::MESH)
 {
 	logDebug << "Mesh object created" << logEnd;
+	setPosition(pos);
 	setRotation(rot);
 	setScale(sca);
 }
@@ -23,7 +24,7 @@ Mesh::~Mesh()
 }
 
 
-const Mesh::Vertex& Mesh::getVertex(const size_t& i)
+const Mesh::Vertex& Mesh::getVertex(const size_t& i) const
 {
 	return _vertices[i % _vertices.size()];
 }
@@ -43,7 +44,7 @@ void Mesh::addVertex(const Mesh::Vertex& vertex)
 }
 
 
-const Mesh::Face&Mesh::getFace(const size_t& i)
+const Mesh::Face&Mesh::getFace(const size_t& i) const
 {
 	return _faces[i % _faces.size()];
 }
@@ -103,7 +104,7 @@ Mesh::Vertex::~Vertex()
 }
 
 
-const Point&Mesh::Vertex::getPosition() const
+const Point& Mesh::Vertex::getPosition() const
 {
 	return _position;
 }
@@ -115,7 +116,7 @@ void Mesh::Vertex::setPosition(const Point& point)
 }
 
 
-const Color&Mesh::Vertex::getColor() const
+const Color& Mesh::Vertex::getColor() const
 {
 	return _color;
 }
@@ -127,7 +128,7 @@ void Mesh::Vertex::setColor(const Color& color)
 }
 
 
-const size_t&Mesh::Vertex::getIndex() const
+const size_t& Mesh::Vertex::getIndex() const
 {
 	return _idx;
 }
@@ -172,6 +173,24 @@ Mesh::Face::Face(Mesh::Face&& f)
 
 Mesh::Face::~Face()
 {
+}
+
+
+const size_t& Mesh::Face::getFirstIndex() const
+{
+	return _first;
+}
+
+
+const size_t& Mesh::Face::getSecondIndex() const
+{
+	return _second;
+}
+
+
+const size_t& Mesh::Face::getThirdIndex() const
+{
+	return _third;
 }
 
 

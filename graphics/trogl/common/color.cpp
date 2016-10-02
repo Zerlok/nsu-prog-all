@@ -152,3 +152,27 @@ const unsigned char& Color::getAlpha() const
 {
 	return _alpha;
 }
+
+
+float Color::getRedF() const
+{
+	return float(_red) / 255.0f;
+}
+
+
+float Color::getGreenF() const
+{
+	return float(_green) / 255.0f;
+}
+
+
+float Color::getBlueF() const
+{
+	return float(_blue) / 255.0f;
+}
+
+
+float Color::getAlphaF() const
+{
+	return float(_alpha) / 255.0f;
+}

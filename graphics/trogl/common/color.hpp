@@ -27,7 +27,7 @@ class Color
 		Color(const unsigned char& red = 0,
 			  const unsigned char& green = 0,
 			  const unsigned char& blue = 0,
-			  const unsigned char& alpha = 0);
+			  const unsigned char& alpha = 255);
 		Color(const Color& c);
 		Color(Color&& c);
 		~Color();
@@ -39,6 +39,11 @@ class Color
 		const unsigned char& getGreen() const;
 		const unsigned char& getBlue() const;
 		const unsigned char& getAlpha() const;
+
+		float getRedF() const;
+		float getGreenF() const;
+		float getBlueF() const;
+		float getAlphaF() const;
 
 	private:
 		unsigned char _red;

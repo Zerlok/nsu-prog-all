@@ -8,37 +8,47 @@
 #include "common/color.hpp"
 
 #include "object.hpp"
-#include "lamp.hpp"
 #include "mesh.hpp"
+#include "lamp.hpp"
+#include "camera.hpp"
 
 
-class Scene
+using Objects = std::list<Object*>;
+using Meshes = std::list<Mesh>;
+using Lamps = std::list<Lamp>;
+
+
+class Scene : public Component
 {
 	public:
-		Scene();
+		Scene(const std::string& name = std::string(),
+			  const Camera& camera = DEFAULT_CAMERA);
 		~Scene();
 
-		void addLamp(const Lamp& lamp);
 		void addMesh(const Mesh& mesh);
+		void addLamp(const Lamp& lamp);
 
-		const std::list<Object*> getObjects() const;
-		const std::list<Lamp>& getLamps() const;
-		const std::list<Mesh>& getMeshes() const;
+		const Objects& getObjects() const;
+		const Meshes& getMeshes() const;
+		const Lamps& getLamps() const;
 
-		const std::string& getName() const;
-		void setName(const std::string& name);
+		const Camera& getCamera() const;
+		void setCamera(const Camera& camera);
 
 		const Color& getBgColor() const;
 		void setBgColor(const Color& color);
 
 	private:
-		std::list<Object*> _objects;
-		std::list<Lamp> _lamps;
-		std::list<Mesh> _meshes;
+		static const std::string DEFAULT_NAME;
+		static const Camera DEFAULT_CAMERA;
+
+		Objects _objects;
+		Meshes _meshes;
+		Lamps _lamps;
+		Camera _camera;
 
 		Color _bgColor;
-
-		std::string _name;
 };
+
 
 #endif // __SCENE_HPP__

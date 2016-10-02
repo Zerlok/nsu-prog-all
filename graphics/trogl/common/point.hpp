@@ -29,6 +29,10 @@ class Point
 		Point crossProduct(const Point& p) const;
 		double dotProduct(const Point& p) const;
 
+		const float& getX() const;
+		const float& getY() const;
+		const float& getZ() const;
+
 	private:
 		float _x;
 		float _y;

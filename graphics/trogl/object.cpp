@@ -1,14 +1,15 @@
 #include "object.hpp"
 
-#include <sstream>
-
 #include <logger.hpp>
+#include <sstream>
+#include <iomanip>
 
 
-size_t Object::_objID = 0;
+const std::string Object::DEFAULT_NAME = std::string();
+size_t Object::objID = 0;
 
 
-std::string Object::_generateName(const Type& type)
+std::string Object::generateNameFromObjType(const Type& type, const size_t& id)
 {
 	std::stringstream ss;
 	switch (type)
@@ -19,55 +20,60 @@ std::string Object::_generateName(const Type& type)
 		case Type::LAMP:
 			ss << "Lamp";
 			break;
+		case Type::CAMERA:
+			ss << "Camera";
+			break;
 		default:
 			break;
 	}
 
-	ss << _objID;
+	ss << std::setw(3) << std::setfill('0') << id;
+
 	return ss.str();
 }
 
 
 Object::Object(const Type& type,
-			   const Point& pos,
-			   const std::string& name)
-	: _type(type),
-	  _position(pos),
-	  _name(name)
+			   const std::string& name,
+			   const Point& pos)
+	: Component(Component::Type::OBJECT, name),
+	  _object_type(type),
+	  _position(pos)
 {
-	++_objID;
-	if (_name.empty())
-		_name = _generateName(_type);
+	++objID;
+	if (name.empty())
+		_name = generateNameFromObjType(_object_type, objID);
 
-	logDebug << _name << " (" << _objID << ") object created" << logEnd;
+	logDebug << "Object " << objID << " " << _name << " created" << logEnd;
 }
 
 
 Object::Object(const Object& obj)
-	: _type(obj._type),
-	  _position(obj._position),
-	  _name(obj._name)
+	: Component(obj),
+	  _object_type(obj._object_type),
+	  _position(obj._position)
 {
-	++_objID;
-	if (_name.empty())
-		_name = _generateName(_type);
-
-	logDebug << _name << " (" << _objID << ") object copied" << logEnd;
+	logDebug << "Object " << _name << " copyed" << logEnd;
 }
 
 
 Object::Object(Object&& obj)
-	: _type(std::move(obj._type)),
-	  _position(std::move(obj._position)),
-	  _name(std::move(obj._name))
+	: Component(std::move(obj)),
+	  _object_type(std::move(obj._object_type)),
+	  _position(std::move(obj._position))
 {
-	logDebug << _name << " (" << _objID << ") object moved" << logEnd;
 }
 
 
 Object::~Object()
 {
-	logDebug << _name << " object removed" << logEnd;
+	logDebug << "Object " << _name << " deleted" << logEnd;
+}
+
+
+const Object::Type& Object::getObjectType() const
+{
+	return _object_type;
 }
 
 
@@ -104,16 +110,4 @@ const Point& Object::getScale() const
 void Object::setScale(const Point& scale)
 {
 	_scale = scale;
-}
-
-
-const std::string& Object::getName() const
-{
-	return _name;
-}
-
-
-void Object::setName(const std::string& name)
-{
-	_name = name;
 }

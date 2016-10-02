@@ -2,10 +2,14 @@
 #define __MATERIAL_HPP__
 
 
-class Material
+#include "component.hpp"
+
+
+class Material : public Component
 {
 	public:
-		Material();
+		Material(const std::string& name = std::string());
+		~Material();
 };
 
 

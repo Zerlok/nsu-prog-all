@@ -2,20 +2,16 @@
 #include <logger.hpp>
 
 #include "engine.hpp"
-#include "meshcube.hpp"
+#include "meshes/cube.hpp"
 
+
+static Logger& globalLogger = Logger::getInstance(std::cout, Logger::Level::INFO);
 
 
 int main(int argc, char *argv[])
 {
-	Logger::init(std::cout, Logger::Level::DEBUG);
-
 	Scene scene;
-	scene.addLamp(Lamp());
-	scene.addMesh(Mesh());
-	scene.addMesh(Mesh(Point(100, 2, 37.4)));
-
-	scene.addMesh(MeshCube(1.0, 1.0, 1.0));
+	scene.addMesh(Cube(1.0));
 
 	TroglEngine engine;
 	engine.showScene(scene);

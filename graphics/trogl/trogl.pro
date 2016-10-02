@@ -22,7 +22,9 @@ SOURCES += main.cpp \
     texture.cpp \
     common/point.cpp \
     common/color.cpp \
-    meshcube.cpp
+    component.cpp \
+    meshes/cube.cpp \
+    meshes/meshcube.cpp
 
 HEADERS += \
     engine.hpp \
@@ -36,4 +38,7 @@ HEADERS += \
     texture.hpp \
     common/point.hpp \
     common/color.hpp \
-    meshcube.hpp
+    common/utils.h \
+    component.hpp \
+    meshes/cube.hpp \
+    meshes/meshcube.hpp

@@ -77,11 +77,11 @@ class Mesh : public Object
 			 const Point& sca = Point::one);
 		virtual ~Mesh();
 
-		const Vertex& getVertex(const size_t& i);
+		const Vertex& getVertex(const size_t& i) const;
 		const Vertices& getVertices() const;
 		void addVertex(const Vertex& vertex);
 
-		const Face& getFace(const size_t& i);
+		const Face& getFace(const size_t& i) const;
 		const Faces& getFaces() const;
 		void addFace(const Face& face);
 

@@ -123,3 +123,21 @@ double Point::dotProduct(const Point& p) const
 {
 	return (_x * p._x + _y * p._y, _z * p._z);
 }
+
+
+const float& Point::getX() const
+{
+	return _x;
+}
+
+
+const float& Point::getY() const
+{
+	return _y;
+}
+
+
+const float& Point::getZ() const
+{
+	return _z;
+}
