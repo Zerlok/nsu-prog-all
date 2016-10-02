@@ -5,6 +5,18 @@
 #include "common/utils.h"
 
 
+const Shader TroglEngine::DEFAULT_VERTEX_SHADER = Shader(
+		"attribute vec4 position;"
+		"attribute vec4 color;"
+		"uniform vec4 constColor;"
+		"void main() {\n"
+		"  gl_Position = gl_ModelViewProjectionMatrix * position;\n"
+		"  gl_FrontColor = color * constColor;\n"
+		"}\n");
+const Shader TroglEngine::DEFAULT_FACE_SHADER = Shader(
+		"void main() {\n"
+		"  gl_FragColor = gl_Color;\n"
+		"}\n");
 TroglEngine* TroglEngine::_current = nullptr;
 
 
@@ -12,16 +24,18 @@ TroglEngine::TroglEngine()
 	: _scene(Scene("default")),
 	  _width(0),
 	  _height(0),
-	  _vertexShader(),
-	  _fragmentShader(),
-	  _shaderProgram(),
-	  _vboSize(0),
-	  _cboSize(0),
-	  _iboSize(0),
-	  _vbo(),
-	  _cbo(),
-	  _ibo(),
+	  _glVertexShader(),
+	  _glFragmentShader(),
+	  _glShaderProgram(),
+	  _glVBO(),
+	  _glCBO(),
+	  _glIBO(),
 	  _attrConstColor(),
+	  _vertices(),
+	  _colors(),
+	  _indicies(),
+	  _vertexShader(DEFAULT_VERTEX_SHADER),
+	  _faceShader(DEFAULT_FACE_SHADER),
 	  _isValid(true)
 {
 	logDebug << "Engine init started" << logEnd;
@@ -45,6 +59,18 @@ TroglEngine::~TroglEngine()
 	}
 
 	logDebug << "Engine removed" << logEnd;
+}
+
+
+void TroglEngine::setVertextShader(const Shader& vs)
+{
+	_vertexShader = vs;
+}
+
+
+void TroglEngine::setFaceShader(const Shader& fs)
+{
+	_faceShader = fs;
 }
 
 
@@ -81,11 +107,49 @@ void TroglEngine::showScene()
 
 	// TODO: add scene meshes.
 	for (const Mesh& m : _scene.getMeshes())
-		initGeometry(m);
+		assignGeometry(m);
 
+	initGeometry();
 	initShaders();
 
 	glutMainLoop();
+}
+
+
+void TroglEngine::assignGeometry(const Mesh& mesh)
+{
+	_vertices.resize(_vertices.size() + (mesh.getVertices().size() * 4), 0.0f);
+	_colors.resize(_vertices.size(), 0.0f);
+	_indicies.resize(_indicies.size() + (mesh.getFaces().size() * 3), 1.0f);
+
+	// add vertecies and colors.
+	size_t idx = 0;
+	const Point& objPos = mesh.getPosition();
+	for (size_t i = 0; i < _vertices.size(); i += 4)
+	{
+		const Mesh::Vertex& v = mesh.getVertex(idx++);
+
+		_vertices[i] = v.getPosition().getX() + objPos.getX();
+		_vertices[i+1] = v.getPosition().getY() + objPos.getY();
+		_vertices[i+2] = v.getPosition().getZ() + objPos.getZ();
+		_vertices[i+3] = 1.0f;
+
+		_colors[i] = v.getColor().getRedF();
+		_colors[i+1] = v.getColor().getGreenF();
+		_colors[i+2] = v.getColor().getBlueF();
+		_colors[i+3] = v.getColor().getAlphaF();
+	}
+
+	// add indicies from mesh faces.
+	idx = 0;
+	for (size_t i = 0; i < _indicies.size(); i += 3)
+	{
+		const Mesh::Face& f = mesh.getFace(idx++);
+
+		_indicies[i] = f.getFirstIndex();
+		_indicies[i+1] = f.getSecondIndex();
+		_indicies[i+2] = f.getThirdIndex();
+	}
 }
 
 
@@ -121,76 +185,38 @@ void TroglEngine::drawMatrix(const glm::mat4x4& mat)
 	glEnableVertexAttribArray(0);
 	glEnableVertexAttribArray(1);
 
-	glBindBuffer(GL_ARRAY_BUFFER, _vbo);
+	glBindBuffer(GL_ARRAY_BUFFER, _glVBO);
 	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
 
-	glBindBuffer(GL_ARRAY_BUFFER, _cbo);
+	glBindBuffer(GL_ARRAY_BUFFER, _glCBO);
 	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, 0);
 
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ibo);
-	glDrawElements(GL_TRIANGLES, _iboSize, GL_UNSIGNED_INT, 0);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _glIBO);
+	glDrawElements(GL_TRIANGLES, _indicies.size() * sizeof(GLuint), GL_UNSIGNED_INT, 0);
 
 	glDisableVertexAttribArray(1);
 	glDisableVertexAttribArray(0);
 }
 
 
-void TroglEngine::initGeometry(const Mesh& mesh)
+void TroglEngine::initGeometry()
 {
-	_iboSize = mesh.getFaces().size() * 3 * sizeof(GLuint);
-	_vboSize = mesh.getVertices().size() * 4 * sizeof(GLfloat);
-	_cboSize = _vboSize;
+	logInfo << "Initializing the geometry (total vertices, colors, polygons): "
+			<< _vertices.size() << " "
+			<< _colors.size() << " "
+			<< _indicies.size() << logEnd;
 
-	GLfloat* vertices = new GLfloat[_vboSize];
-	GLfloat* colors = new GLfloat[_cboSize];
-	GLuint* indicies = new GLuint[_iboSize];
+	glGenBuffers(1, &_glVBO);
+	glBindBuffer(GL_ARRAY_BUFFER, _glVBO);
+	glBufferData(GL_ARRAY_BUFFER, _vertices.size() * sizeof(GLfloat), _vertices.data(), GL_STATIC_DRAW);
 
-	// add vertecies and colors.
-	size_t idx = 0;
-	const Point& objPos = mesh.getPosition();
-	for (size_t i = 0; i < _vboSize; i += 4)
-	{
-		const Mesh::Vertex& v = mesh.getVertex(idx);
-		++idx;
+	glGenBuffers(1, &_glIBO);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _glIBO);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, _indicies.size() * sizeof(GLfloat), _indicies.data(), GL_STATIC_DRAW);
 
-		vertices[i] = v.getPosition().getX() + objPos.getX();
-		vertices[i+1] = v.getPosition().getY() + objPos.getY();
-		vertices[i+2] = v.getPosition().getZ() + objPos.getZ();
-		vertices[i+3] = 1.0f;
-
-		colors[i] = v.getColor().getRedF();
-		colors[i+1] = v.getColor().getGreenF();
-		colors[i+2] = v.getColor().getBlueF();
-		colors[i+3] = v.getColor().getAlphaF();
-	}
-
-	// add indicies from mesh faces.
-	idx = 0;
-	for (size_t i = 0; i < _iboSize; i += 3)
-	{
-		const Mesh::Face& f = mesh.getFace(idx);
-		++idx;
-
-		indicies[i] = f.getFirstIndex();
-		indicies[i+1] = f.getSecondIndex();
-		indicies[i+2] = f.getThirdIndex();
-	}
-
-	glGenBuffers(1, &_vbo);
-	glBindBuffer(GL_ARRAY_BUFFER, _vbo);
-	glBufferData(GL_ARRAY_BUFFER, _vboSize, vertices, GL_STATIC_DRAW);
-
-	glGenBuffers(1, &_ibo);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ibo);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, _iboSize, indicies, GL_STATIC_DRAW);
-
-	glGenBuffers(1, &_cbo);
-	glBindBuffer(GL_ARRAY_BUFFER, _cbo);
-	glBufferData(GL_ARRAY_BUFFER, _cboSize, colors, GL_STATIC_DRAW);
-
-	delete[] vertices;
-	delete[] colors;
-	delete[] indicies;
+	glGenBuffers(1, &_glCBO);
+	glBindBuffer(GL_ARRAY_BUFFER, _glCBO);
+	glBufferData(GL_ARRAY_BUFFER, _colors.size() * sizeof(GLuint), _colors.data(), GL_STATIC_DRAW);
 }
 
 
@@ -205,7 +231,7 @@ void TroglEngine::drawGeometry()
 	glCullFace(GL_FRONT);
 	glLoadIdentity(); // Load the Identity Matrix to reset our drawing locations
 
-	glUseProgram(_shaderProgram);
+	glUseProgram(_glShaderProgram);
 
 	// Matrix Projection.
 	glMatrixMode(GL_PROJECTION);
@@ -260,96 +286,91 @@ void TroglEngine::drawGeometry()
 
 void TroglEngine::deinitGeometry()
 {
-	glDeleteBuffers(sizeof(_vbo), &_vbo);
-	glDeleteBuffers(sizeof(_ibo), &_ibo);
-	glDeleteBuffers(sizeof(_vbo), &_cbo);
+	glDeleteBuffers(sizeof(_glVBO), &_glVBO);
+	glDeleteBuffers(sizeof(_glIBO), &_glIBO);
+	glDeleteBuffers(sizeof(_glVBO), &_glCBO);
+
+	_vertices.clear();
+	_colors.clear();
+	_indicies.clear();
 }
 
 
 void TroglEngine::initShaders()
 {
-	const char* vsSource =
-		"attribute vec4 position;"
-		"attribute vec4 color;"
-		"uniform vec4 constColor;"
-		"void main() {\n"
-		"  gl_Position = gl_ModelViewProjectionMatrix * position;\n"
-		"  gl_FrontColor = color * constColor;\n"
-		"}\n";
-	const char* fsSource =
-		"void main() {\n"
-		"  gl_FragColor = gl_Color;\n"
-		"}\n";
+	const char* vsSrc = _vertexShader.getSrcPtr();
+	const char* fsSrc = _faceShader.getSrcPtr();
+
 	int success = 0;
 
-	_vertexShader = glCreateShader(GL_VERTEX_SHADER);
-	glShaderSource(_vertexShader, 1, &vsSource, NULL);
-	glCompileShader(_vertexShader);
-	glGetShaderiv(_vertexShader, GL_COMPILE_STATUS, &success);
+	_glVertexShader = glCreateShader(GL_VERTEX_SHADER);
+	glShaderSource(_glVertexShader, 1, &vsSrc, NULL);
+	glCompileShader(_glVertexShader);
+	glGetShaderiv(_glVertexShader, GL_COMPILE_STATUS, &success);
 
 	if (!success)
 	{
 		const int MAX_INFO_LOG_SIZE = 1024;
 		GLchar infoLog[MAX_INFO_LOG_SIZE];
-		glGetShaderInfoLog(_vertexShader, MAX_INFO_LOG_SIZE, NULL, infoLog);
+		glGetShaderInfoLog(_glVertexShader, MAX_INFO_LOG_SIZE, NULL, infoLog);
 		fprintf(stderr, "Error in vertex shader compilation!\n");
 		fprintf(stderr, "Info log: %s\n", infoLog);
 	}
 
-	_fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-	glShaderSource(_fragmentShader, 1, &fsSource, NULL);
-	glCompileShader(_fragmentShader);
-	glGetShaderiv(_fragmentShader, GL_COMPILE_STATUS, &success);
+	_glFragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+	glShaderSource(_glFragmentShader, 1, &(fsSrc), NULL);
+	glCompileShader(_glFragmentShader);
+	glGetShaderiv(_glFragmentShader, GL_COMPILE_STATUS, &success);
 
 	if (!success)
 	{
 		const int MAX_INFO_LOG_SIZE = 1024;
 		GLchar infoLog[MAX_INFO_LOG_SIZE];
-		glGetShaderInfoLog(_fragmentShader, MAX_INFO_LOG_SIZE, NULL, infoLog);
+		glGetShaderInfoLog(_glFragmentShader, MAX_INFO_LOG_SIZE, NULL, infoLog);
 		fprintf(stderr, "Error in vertex shader compilation!\n");
 		fprintf(stderr, "Info log: %s\n", infoLog);
 	}
 
-	_shaderProgram = glCreateProgram();
-	glAttachShader(_shaderProgram, _vertexShader);
-	glAttachShader(_shaderProgram, _fragmentShader);
+	_glShaderProgram = glCreateProgram();
+	glAttachShader(_glShaderProgram, _glVertexShader);
+	glAttachShader(_glShaderProgram, _glFragmentShader);
 
-	glBindAttribLocation(_shaderProgram, 0, "position");
-	glBindAttribLocation(_shaderProgram, 1, "color");
+	glBindAttribLocation(_glShaderProgram, 0, "position");
+	glBindAttribLocation(_glShaderProgram, 1, "color");
 
-	glLinkProgram(_shaderProgram);
-	glGetProgramiv(_shaderProgram, GL_LINK_STATUS, &success);
+	glLinkProgram(_glShaderProgram);
+	glGetProgramiv(_glShaderProgram, GL_LINK_STATUS, &success);
 	if (!success)
 	{
 		const int MAX_INFO_LOG_SIZE = 1024;
 		GLchar infoLog[MAX_INFO_LOG_SIZE];
-		glGetProgramInfoLog(_shaderProgram, MAX_INFO_LOG_SIZE, NULL, infoLog);
+		glGetProgramInfoLog(_glShaderProgram, MAX_INFO_LOG_SIZE, NULL, infoLog);
 		fprintf(stderr, "Error in program linkage!\n");
 		fprintf(stderr, "Info log: %s\n", infoLog);
 	}
 
-	glValidateProgram(_shaderProgram);
-	glGetProgramiv(_shaderProgram, GL_VALIDATE_STATUS, &success);
+	glValidateProgram(_glShaderProgram);
+	glGetProgramiv(_glShaderProgram, GL_VALIDATE_STATUS, &success);
 	if (!success)
 	{
 		const int MAX_INFO_LOG_SIZE = 1024;
 		GLchar infoLog[MAX_INFO_LOG_SIZE];
-		glGetProgramInfoLog(_shaderProgram, MAX_INFO_LOG_SIZE, NULL, infoLog);
+		glGetProgramInfoLog(_glShaderProgram, MAX_INFO_LOG_SIZE, NULL, infoLog);
 		fprintf(stderr, "Error in program validation!\n");
 		fprintf(stderr, "Info log: %s\n", infoLog);
 	}
 
-	_attrConstColor = glGetUniformLocation(_shaderProgram, "constColor");
+	_attrConstColor = glGetUniformLocation(_glShaderProgram, "constColor");
 }
 
 
 void TroglEngine::deinitShaders()
 {
-	glDetachShader(_shaderProgram, _vertexShader);
-	glDetachShader(_shaderProgram, _fragmentShader);
-	glDeleteProgram(_shaderProgram);
-	glDeleteShader(_fragmentShader);
-	glDeleteShader(_vertexShader);
+	glDetachShader(_glShaderProgram, _glVertexShader);
+	glDetachShader(_glShaderProgram, _glFragmentShader);
+	glDeleteProgram(_glShaderProgram);
+	glDeleteShader(_glFragmentShader);
+	glDeleteShader(_glVertexShader);
 }
 
 

@@ -4,6 +4,7 @@
 
 #include "opengls.hpp"
 #include "scene.hpp"
+#include "shader.hpp"
 
 
 class TroglEngine
@@ -12,40 +13,31 @@ class TroglEngine
 		TroglEngine();
 		virtual ~TroglEngine();
 
-		// OpenGL running.
+		void setVertextShader(const Shader& vs);
+		void setFaceShader(const Shader& fs);
+
 		void setActiveScene(const Scene& scene);
-		void showScene();
+
+		void showScene(); // runs GL.
 
 	protected:
 		Scene _scene;
 
-		float _width;
-		float _height;
+		void assignGeometry(const Mesh& mesh);
 
-		GLuint _vertexShader;
-		GLuint _fragmentShader;
-		GLuint _shaderProgram;
-
-		size_t _vboSize;
-		size_t _cboSize;
-		size_t _iboSize;
-
-		GLuint _vbo; // Vertex Buffer Object
-		GLuint _cbo; // Color Buffer Object
-		GLuint _ibo; // Index Buffer Object
-
-		GLuint _attrConstColor;
-
-		void drawMatrix(const glm::mat4x4& mat);
-
-		void initGeometry(const Mesh& mesh);
-		void drawGeometry();
+		void initGeometry();
 		void deinitGeometry();
 
 		void initShaders();
 		void deinitShaders();
 
+		void drawMatrix(const glm::mat4x4& mat);
+		void drawGeometry();
+
 	private:
+		static const Shader DEFAULT_VERTEX_SHADER;
+		static const Shader DEFAULT_FACE_SHADER;
+
 		static TroglEngine* _current;
 		static void draw();
 		static void reshape(int w, int h);
@@ -53,6 +45,26 @@ class TroglEngine
 
 		bool _isValid;
 		bool runGlewTest();
+
+		float _width;
+		float _height;
+
+		GLuint _glVertexShader;
+		GLuint _glFragmentShader;
+		GLuint _glShaderProgram;
+
+		GLuint _glVBO; // Vertex Buffer Object
+		GLuint _glCBO; // Color Buffer Object
+		GLuint _glIBO; // Index Buffer Object
+
+		GLuint _attrConstColor;
+
+		std::vector<GLfloat> _vertices;
+		std::vector<GLfloat> _colors;
+		std::vector<GLuint> _indicies;
+
+		Shader _vertexShader;
+		Shader _faceShader;
 };
 
 

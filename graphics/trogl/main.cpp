@@ -12,6 +12,9 @@ static Logger& globalLogger = Logger::getInstance(std::cout, Logger::Level::DEBU
 int main(int argc, char *argv[])
 {
 	Scene scene;
+	scene.setBgColor(Color(50, 50, 50));
+
+//	Cube c(1.0, Color::red);
 	StrangeCube c;
 	scene.addMesh(c);
 

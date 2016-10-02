@@ -3,12 +3,9 @@
 #include <logger.hpp>
 
 
-StrangeCube::StrangeCube(const Point& pos,
-				   const Point& rot,
-				   const Point& sca,
-				   const Color& mainColor,
+StrangeCube::StrangeCube(const Color& mainColor,
 				   const Color& bordersColor)
-	: Mesh(pos, rot, sca)
+	: Mesh()
 {
 	logDebug << "Strange cube init started" << logEnd;
 

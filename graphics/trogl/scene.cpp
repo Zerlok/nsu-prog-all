@@ -44,8 +44,10 @@ Scene::~Scene()
 }
 
 
-Scene&Scene::operator=(const Scene& scene)
+Scene& Scene::operator=(const Scene& scene)
 {
+	Component::operator=(scene);
+
 	_objects.clear();
 	_meshes.clear();
 	_lamps.clear();

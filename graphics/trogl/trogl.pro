@@ -24,7 +24,8 @@ SOURCES += main.cpp \
     common/color.cpp \
     component.cpp \
     meshes/cube.cpp \
-    meshes/strangecube.cpp
+    meshes/strangecube.cpp \
+    shader.cpp
 
 HEADERS += \
     engine.hpp \
@@ -41,4 +42,5 @@ HEADERS += \
     common/utils.h \
     component.hpp \
     meshes/cube.hpp \
-    meshes/strangecube.hpp
+    meshes/strangecube.hpp \
+    shader.hpp
