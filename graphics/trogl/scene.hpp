@@ -13,7 +13,6 @@
 #include "camera.hpp"
 
 
-using Objects = std::list<Object*>;
 using Meshes = std::list<Mesh>;
 using Lamps = std::list<Lamp>;
 
@@ -31,7 +30,6 @@ class Scene : public Component
 		void addMesh(const Mesh& mesh);
 		void addLamp(const Lamp& lamp);
 
-		const Objects& getObjects() const;
 		const Meshes& getMeshes() const;
 		const Lamps& getLamps() const;
 
@@ -45,7 +43,6 @@ class Scene : public Component
 		static const std::string DEFAULT_NAME;
 		static const Camera DEFAULT_CAMERA;
 
-		Objects _objects;
 		Meshes _meshes;
 		Lamps _lamps;
 		Camera _camera;

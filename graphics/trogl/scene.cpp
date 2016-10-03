@@ -15,7 +15,6 @@ Scene::Scene(const std::string& name, const Camera& camera)
 	  _camera(camera),
 	  _bgColor(Color::grey)
 {
-	_objects.push_back(&_camera);
 	logDebug << "Scene with camera "
 			 << _camera.getName() << " created" << logEnd;
 }

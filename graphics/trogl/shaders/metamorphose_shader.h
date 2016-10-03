@@ -3,6 +3,7 @@
 
 
 #include "../shader.hpp"
+#include "common/utils.h"
 
 
 class MetamorphoseShader : public Shader

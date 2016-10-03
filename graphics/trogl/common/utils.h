@@ -5,7 +5,7 @@
 #include <sys/time.h>
 
 
-double getTime()
+static double getTime()
 {
 	static struct timeval tp;
 	gettimeofday(&tp, NULL);

@@ -50,6 +50,8 @@ Camera::~Camera()
 
 Camera& Camera::operator=(const Camera& c)
 {
+	Object::operator=(c);
+
 	_fov = c._fov;
 	_low_distance = c._low_distance;
 	_high_distance = c._high_distance;
@@ -62,6 +64,8 @@ Camera& Camera::operator=(const Camera& c)
 
 Camera& Camera::operator=(Camera&& c)
 {
+	Object::operator=(c);
+
 	_fov = std::move(c._fov);
 	_low_distance = std::move(c._low_distance);
 	_high_distance = std::move(c._high_distance);

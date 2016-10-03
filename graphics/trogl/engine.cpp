@@ -22,6 +22,7 @@ TroglEngine* TroglEngine::_current = nullptr;
 
 TroglEngine::TroglEngine()
 	: _scene(Scene("default")),
+	  _isValid(true),
 	  _width(0),
 	  _height(0),
 	  _glVertexShader(),
@@ -35,8 +36,7 @@ TroglEngine::TroglEngine()
 	  _colors(),
 	  _indicies(),
 	  _vertexShader(DEFAULT_VERTEX_SHADER),
-	  _faceShader(DEFAULT_FACE_SHADER),
-	  _isValid(true)
+	  _faceShader(DEFAULT_FACE_SHADER)
 {
 	logDebug << "Engine init started" << logEnd;
 
@@ -82,16 +82,24 @@ void TroglEngine::setActiveScene(const Scene& scene)
 
 void TroglEngine::showScene()
 {
+	const Camera& cam = _scene.getCamera();
 	glutInitWindowSize(
-				_scene.getCamera().getWidth(),
-				_scene.getCamera().getHeight());
+				cam.getWidth(),
+				cam.getHeight());
 	glutCreateWindow(generateWindowName(_scene).c_str());
 	runGlewTest();
 
 	if (!_isValid)
 	{
 		logError << "Cannot show scene " << _scene.getName()
-				 << " engine couldn't initialize" << logEnd;
+				 << " - engine couldn't initialize" << logEnd;
+		return;
+	}
+
+	if (!cam.isValid())
+	{
+		logError << "Cannot show scene " << _scene.getName()
+				 << " - camera settings are invalid" << logEnd;
 		return;
 	}
 
@@ -206,7 +214,7 @@ void TroglEngine::drawMatrix(const glm::mat4x4& mat)
 
 void TroglEngine::initGeometry()
 {
-	logInfo << "Initializing the geometry (total vertices, colors, polygons): "
+	logInfo << "Initializing the geometry (vertices, colors, polygons): "
 			<< _vertices.size() << " "
 			<< _colors.size() << " "
 			<< _indicies.size() << logEnd;
@@ -256,40 +264,10 @@ void TroglEngine::renderFrame()
 				   cam.getHighDistance());
 
 	// Init Matrices.
-	const double globalAngle = getTime() / 6.283;
-//	const double globalAngle = 0.0;
-//	const glm::mat4x4 matView  = glm::lookAt(cam.getPosition(), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
-	const glm::mat4x4 matView  = glm::lookAt(glm::vec3(20, 13, 0), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
-	const glm::mat4x4 matWorld = glm::mat4x4();
-	const glm::mat4x4 matWorldView = matView * matWorld;
-
-	// The Sun.
-	const float aSun = globalAngle / 2.0;
-	const float aSunEarth = globalAngle / 3.0;
-	const glm::mat4x4 matSunWorld = glm::rotate(matWorldView, aSunEarth, glm::vec3(0.0f, 1.0f, 0.0f));
-	glm::mat4x4 matSunWorldView = glm::rotate(matWorldView, aSun, glm::vec3(0.0f, 1.0f, 0.0f));
-	matSunWorldView = glm::rotate(matSunWorldView, aSun / 2.0f, glm::vec3(1.0f, 0.0f, 0.0f));
-
-	// The Earth.
-	const float aEarth = globalAngle * 1.2;
-	const float aEarthMoon = globalAngle * 0.9;
-	glm::mat4x4 matEarthWorld = matSunWorld;
-	matEarthWorld = glm::translate(matEarthWorld, glm::vec3(10.0f, 0.0f, 0.0f));
-	matEarthWorld= glm::scale(matEarthWorld, glm::vec3(0.5f, 0.5f, 0.5f));
-	const glm::mat4x4 matEarthWorldView = glm::rotate(matEarthWorld, aEarth, glm::vec3(0.0f, 1.0f, 0.0f));
-	matEarthWorld= glm::rotate(matEarthWorld, aEarthMoon, glm::vec3(0.0f, 1.0f, 0.0f));
-
-	// The Moon.
-	float aMoon = globalAngle / 9.0;
-	glm::mat4x4 matMoonWorldView = matEarthWorld;
-	matMoonWorldView = glm::translate(matMoonWorldView, glm::vec3(5.0f, 0.0f, 0.0f));
-	matMoonWorldView = glm::rotate(matMoonWorldView, aMoon, glm::vec3(0.0f, 1.0f, 0.0f));
-	matMoonWorldView = glm::scale(matMoonWorldView, glm::vec3(0.3f, 0.3f, 0.3f));
+	const glm::mat4x4 matView  = glm::lookAt(cam.getPosition(), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
 
 	// Drawing.
-	drawMatrix(matMoonWorldView);
-	drawMatrix(matEarthWorldView);
-	drawMatrix(matSunWorldView);
+	drawMatrix(matView);
 
 	// In the end.
 	glUseProgram(0);
