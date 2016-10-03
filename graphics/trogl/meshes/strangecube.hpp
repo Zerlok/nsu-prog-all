@@ -8,8 +8,8 @@
 class StrangeCube : public Mesh
 {
 	public:
-		StrangeCube(const Color& mainColor = Color::white,
-					const Color& bordersColor = Color::black);
+		StrangeCube(const Color& borderColor = Color::white,
+					const Color& innerColor = Color::black);
 		~StrangeCube();
 };
 

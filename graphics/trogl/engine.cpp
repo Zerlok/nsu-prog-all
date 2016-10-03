@@ -10,8 +10,7 @@ const Shader TroglEngine::DEFAULT_VERTEX_SHADER = Shader(
 		"attribute vec4 color;"
 		"uniform vec4 constColor;"
 		"void main() {\n"
-		"  vec3 pos = position.xyz;\n"
-		"  gl_Position = gl_ModelViewProjectionMatrix * vec4(pos, 1.0);\n"
+		"  gl_Position = gl_ModelViewProjectionMatrix * position;\n"
 		"  gl_FrontColor = color * constColor;\n"
 		"}\n");
 const Shader TroglEngine::DEFAULT_FACE_SHADER = Shader(
@@ -226,15 +225,21 @@ void TroglEngine::initGeometry()
 }
 
 
-void TroglEngine::drawGeometry()
+void TroglEngine::renderFrame()
 {
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
+
 	const Color& bg = _scene.getBgColor();
 	glClearColor(bg.getRedF(), bg.getGreenF(), bg.getBlueF(), bg.getAlphaF());
+	glClearDepth(1.0f);
+
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); //Clear the colour buffer (more buffers later on)
+
 	glFrontFace(GL_CW);
+	glEnable(GL_CULL_FACE);
 	glCullFace(GL_FRONT);
+
 	glLoadIdentity(); // Load the Identity Matrix to reset our drawing locations
 
 	glUseProgram(_glShaderProgram);
@@ -252,6 +257,8 @@ void TroglEngine::drawGeometry()
 
 	// Init Matrices.
 	const double globalAngle = getTime() / 6.283;
+//	const double globalAngle = 0.0;
+//	const glm::mat4x4 matView  = glm::lookAt(cam.getPosition(), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
 	const glm::mat4x4 matView  = glm::lookAt(glm::vec3(20, 13, 0), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
 	const glm::mat4x4 matWorld = glm::mat4x4();
 	const glm::mat4x4 matWorldView = matView * matWorld;
@@ -319,8 +326,7 @@ void TroglEngine::initShaders()
 		const int MAX_INFO_LOG_SIZE = 1024;
 		GLchar infoLog[MAX_INFO_LOG_SIZE];
 		glGetShaderInfoLog(_glVertexShader, MAX_INFO_LOG_SIZE, NULL, infoLog);
-		fprintf(stderr, "Error in vertex shader compilation!\n");
-		fprintf(stderr, "Info log: %s\n", infoLog);
+		logError << "Error in vertex shader compilation:\n" << infoLog << logEnd;
 	}
 
 	_glFragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
@@ -333,8 +339,7 @@ void TroglEngine::initShaders()
 		const int MAX_INFO_LOG_SIZE = 1024;
 		GLchar infoLog[MAX_INFO_LOG_SIZE];
 		glGetShaderInfoLog(_glFragmentShader, MAX_INFO_LOG_SIZE, NULL, infoLog);
-		fprintf(stderr, "Error in vertex shader compilation!\n");
-		fprintf(stderr, "Info log: %s\n", infoLog);
+		logError << "Error in vertex shader compilation: " << infoLog << logEnd;
 	}
 
 	_glShaderProgram = glCreateProgram();
@@ -351,8 +356,7 @@ void TroglEngine::initShaders()
 		const int MAX_INFO_LOG_SIZE = 1024;
 		GLchar infoLog[MAX_INFO_LOG_SIZE];
 		glGetProgramInfoLog(_glShaderProgram, MAX_INFO_LOG_SIZE, NULL, infoLog);
-		fprintf(stderr, "Error in program linkage!\n");
-		fprintf(stderr, "Info log: %s\n", infoLog);
+		logError << "Error in program linkage: " << infoLog << logEnd;
 	}
 
 	glValidateProgram(_glShaderProgram);
@@ -362,8 +366,7 @@ void TroglEngine::initShaders()
 		const int MAX_INFO_LOG_SIZE = 1024;
 		GLchar infoLog[MAX_INFO_LOG_SIZE];
 		glGetProgramInfoLog(_glShaderProgram, MAX_INFO_LOG_SIZE, NULL, infoLog);
-		fprintf(stderr, "Error in program validation!\n");
-		fprintf(stderr, "Info log: %s\n", infoLog);
+		logError << "Error in program validation: " << infoLog << logEnd;
 	}
 
 	_attrConstColor = glGetUniformLocation(_glShaderProgram, "constColor");
@@ -382,7 +385,7 @@ void TroglEngine::deinitShaders()
 
 void TroglEngine::draw()
 {
-	_current->drawGeometry();
+	_current->renderFrame();
 }
 
 

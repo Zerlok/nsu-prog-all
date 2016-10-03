@@ -62,11 +62,11 @@ void initGeometry()
 
 	FACES_NUM = 36;
 	GLuint faces[] = {
-		0, 2, 1,  0, 3, 2,
-		5, 6, 7,  5, 7, 4,
-		1, 5, 4,  1, 4, 0,
-		2, 5, 1,  2, 6, 5,
-		3, 6, 2,  3, 7, 6,
+		0, 1, 2,  0, 2, 3,
+		5, 7, 6,  5, 4, 7,
+		1, 4, 5,  1, 0, 4,
+		2, 1, 5,  2, 5, 6,
+		3, 2, 6,  3, 6, 7,
 		0, 7, 4,  0, 3, 7,
 	};
 
@@ -126,13 +126,22 @@ void renderGeometry()
 {
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
+
 	glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
+	glClearDepth(1.0f);
+
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); //Clear the colour buffer (more buffers later on)
+
 	glFrontFace(GL_CW);
+
+	glEnable(GL_CULL_FACE);
 	glCullFace(GL_FRONT);
+
 	glLoadIdentity(); // Load the Identity Matrix to reset our drawing locations
 
 	glUseProgram(shaderProgram);
+
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 	// Matrix Projection.
 	glMatrixMode(GL_PROJECTION);

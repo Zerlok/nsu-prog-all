@@ -24,6 +24,9 @@ class Object : public Component
 		Object(Object&& obj);
 		virtual ~Object();
 
+		Object& operator=(const Object& obj);
+		Object& operator=(Object&& obj);
+
 		const Type& getObjectType() const;
 
 		const glm::vec3& getPosition() const;

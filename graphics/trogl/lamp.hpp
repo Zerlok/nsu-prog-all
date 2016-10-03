@@ -9,6 +9,12 @@ class Lamp : public Object
 {
 	public:
 		Lamp();
+		Lamp(const Lamp& lamp);
+		Lamp(Lamp&& lamp);
+		~Lamp();
+
+		Lamp& operator=(const Lamp& lamp);
+		Lamp& operator=(Lamp&& lamp);
 };
 
 

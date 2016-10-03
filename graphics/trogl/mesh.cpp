@@ -3,15 +3,35 @@
 #include <logger.hpp>
 
 
-Mesh::Mesh(const glm::vec3& pos,
+Mesh::Mesh(const std::string& name,
+		   const glm::vec3& pos,
 		   const glm::vec3& rot,
 		   const glm::vec3& sca)
-	: Object(Object::Type::MESH)
+	: Object(Object::Type::MESH, name)
 {
 	logDebug << "Mesh object created" << logEnd;
 	setPosition(pos);
 	setRotation(rot);
 	setScale(sca);
+}
+
+
+Mesh::Mesh(const Mesh& mesh)
+	: Object(mesh),
+	  _vertices(mesh._vertices),
+	  _faces(mesh._faces),
+	  _material(mesh._material)
+{
+	_reassign();
+}
+
+
+Mesh::Mesh(Mesh&& mesh)
+	: Object(std::move(mesh)),
+	  _vertices(std::move(mesh._vertices)),
+	  _faces(std::move(mesh._faces)),
+	  _material(std::move(mesh._material))
+{
 }
 
 
@@ -21,6 +41,28 @@ Mesh::~Mesh()
 			 << _vertices.size() << " vertices, "
 			 << _faces.size() << " faces"
 			 << logEnd;
+}
+
+
+Mesh& Mesh::operator=(const Mesh& mesh)
+{
+	Object::operator=(mesh);
+	_vertices = mesh._vertices;
+	_faces = mesh._faces;
+	_reassign();
+
+	return (*this);
+}
+
+
+Mesh& Mesh::operator=(Mesh&& mesh)
+{
+	Object::operator=(mesh);
+	_vertices = std::move(mesh._vertices);
+	_faces = std::move(mesh._faces);
+	_reassign();
+
+	return (*this);
 }
 
 
@@ -63,9 +105,19 @@ void Mesh::addFace(const Mesh::Face& face)
 }
 
 
-void Mesh::normalizeFaces()
+void Mesh::recalculateNormals()
 {
 
+}
+
+
+void Mesh::_reassign()
+{
+	for (Vertex& v : _vertices)
+		v._mesh = this;
+
+	for (Face& f : _faces)
+		f._mesh = this;
 }
 
 
@@ -107,6 +159,28 @@ Mesh::Vertex::Vertex(Mesh::Vertex&& v)
 
 Mesh::Vertex::~Vertex()
 {
+}
+
+
+Mesh::Vertex& Mesh::Vertex::operator=(const Mesh::Vertex& v)
+{
+	_idx = v._idx;
+	_position = v._position;
+	_color = v._color;
+	_mesh = v._mesh;
+
+	return (*this);
+}
+
+
+Mesh::Vertex& Mesh::Vertex::operator=(Mesh::Vertex&& v)
+{
+	_idx = std::move(v._idx);
+	_position = std::move(v._position);
+	_color = std::move(v._color);
+	_mesh = std::move(v._mesh);
+
+	return (*this);
 }
 
 
@@ -179,6 +253,28 @@ Mesh::Face::Face(Mesh::Face&& f)
 
 Mesh::Face::~Face()
 {
+}
+
+
+Mesh::Face& Mesh::Face::operator=(const Mesh::Face& f)
+{
+	_first = f._first;
+	_second = f._second;
+	_third = f._third;
+	_mesh = f._mesh;
+
+	return (*this);
+}
+
+
+Mesh::Face& Mesh::Face::operator=(Mesh::Face&& f)
+{
+	_first = std::move(f._first);
+	_second = std::move(f._second);
+	_third = std::move(f._third);
+	_mesh = std::move(f._mesh);
+
+	return (*this);
 }
 
 

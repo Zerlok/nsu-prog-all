@@ -9,6 +9,10 @@ class MetamorphoseShader : public Shader
 {
 	public:
 		MetamorphoseShader();
+		~MetamorphoseShader();
+
+	private:
+		static const std::string SRC;
 };
 
 

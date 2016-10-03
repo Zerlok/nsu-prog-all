@@ -71,6 +71,30 @@ Object::~Object()
 }
 
 
+Object& Object::operator=(const Object& obj)
+{
+	_object_type = obj._object_type;
+	_name = obj._name;
+	_position = obj._position;
+	_rotation = obj._rotation;
+	_scale = obj._scale;
+
+	return (*this);
+}
+
+
+Object& Object::operator=(Object&& obj)
+{
+	_object_type = std::move(obj._object_type);
+	_name = std::move(obj._name);
+	_position = std::move(obj._position);
+	_rotation = std::move(obj._rotation);
+	_scale = std::move(obj._scale);
+
+	return (*this);
+}
+
+
 const Object::Type& Object::getObjectType() const
 {
 	return _object_type;

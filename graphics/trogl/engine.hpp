@@ -32,7 +32,7 @@ class TroglEngine
 		void deinitShaders();
 
 		void drawMatrix(const glm::mat4x4& mat);
-		void drawGeometry();
+		void renderFrame();
 
 	private:
 		static const Shader DEFAULT_VERTEX_SHADER;

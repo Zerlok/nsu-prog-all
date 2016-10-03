@@ -1,5 +1,5 @@
-#ifndef SHADER_H
-#define SHADER_H
+#ifndef __SHADER_HPP__
+#define __SHADER_HPP__
 
 
 #include <string>
@@ -20,4 +20,4 @@ class Shader
 };
 
 
-#endif // SHADER_H
+#endif // __SHADER_HPP__
