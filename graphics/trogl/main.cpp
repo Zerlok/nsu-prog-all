@@ -18,6 +18,10 @@ int main(int argc, char *argv[])
 	StrangeCube c;
 	scene.addMesh(c);
 
+//	Cube c1(0.8, Color::red);
+//	c1.setPosition(glm::vec3(0.0, 0.0, 0.0));
+//	scene.addMesh(c1);
+
 	TroglEngine engine;
 	engine.setActiveScene(scene);
 	engine.showScene();

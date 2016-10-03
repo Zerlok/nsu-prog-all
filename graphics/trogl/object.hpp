@@ -3,7 +3,7 @@
 
 
 #include <string>
-#include "common/point.hpp"
+#include <glm/glm.hpp>
 #include "component.hpp"
 
 
@@ -19,29 +19,29 @@ class Object : public Component
 
 		Object(const Type& type,
 			   const std::string& name = DEFAULT_NAME,
-			   const Point& pos = Point::zero);
+			   const glm::vec3& pos = glm::vec3());
 		Object(const Object& obj);
 		Object(Object&& obj);
 		virtual ~Object();
 
 		const Type& getObjectType() const;
 
-		const Point& getPosition() const;
-		void setPosition(const Point& position);
+		const glm::vec3& getPosition() const;
+		void setPosition(const glm::vec3& position);
 
-		const Point& getRotation() const;
-		void setRotation(const Point& rotation);
+		const glm::vec3& getRotation() const;
+		void setRotation(const glm::vec3& rotation);
 
-		const Point& getScale() const;
-		void setScale(const Point& scale);
+		const glm::vec3& getScale() const;
+		void setScale(const glm::vec3& scale);
 
 	private:
 		Type _object_type;
 
 	protected:
-		Point _position;
-		Point _rotation;
-		Point _scale;
+		glm::vec3 _position;
+		glm::vec3 _rotation;
+		glm::vec3 _scale;
 
 	private:
 		static const std::string DEFAULT_NAME;

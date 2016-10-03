@@ -10,7 +10,8 @@ const Shader TroglEngine::DEFAULT_VERTEX_SHADER = Shader(
 		"attribute vec4 color;"
 		"uniform vec4 constColor;"
 		"void main() {\n"
-		"  gl_Position = gl_ModelViewProjectionMatrix * position;\n"
+		"  vec3 pos = position.xyz;\n"
+		"  gl_Position = gl_ModelViewProjectionMatrix * vec4(pos, 1.0);\n"
 		"  gl_FrontColor = color * constColor;\n"
 		"}\n");
 const Shader TroglEngine::DEFAULT_FACE_SHADER = Shader(
@@ -118,20 +119,24 @@ void TroglEngine::showScene()
 
 void TroglEngine::assignGeometry(const Mesh& mesh)
 {
-	_vertices.resize(_vertices.size() + (mesh.getVertices().size() * 4), 0.0f);
+	static const size_t vStep = 4;
+	static const size_t iStep = 3;
+	const size_t vOffset = _vertices.size();
+	const size_t iOffset = _indicies.size();
+	_vertices.resize(vOffset + (mesh.getVertices().size() * vStep), 0.0f);
 	_colors.resize(_vertices.size(), 0.0f);
-	_indicies.resize(_indicies.size() + (mesh.getFaces().size() * 3), 1.0f);
+	_indicies.resize(iOffset + (mesh.getFaces().size() * iStep), 0.0f);
 
 	// add vertecies and colors.
 	size_t idx = 0;
-	const Point& objPos = mesh.getPosition();
-	for (size_t i = 0; i < _vertices.size(); i += 4)
+	const glm::vec3& objPos = mesh.getPosition();
+	for (size_t i = vOffset; i < _vertices.size(); i += vStep)
 	{
 		const Mesh::Vertex& v = mesh.getVertex(idx++);
 
-		_vertices[i] = v.getPosition().getX() + objPos.getX();
-		_vertices[i+1] = v.getPosition().getY() + objPos.getY();
-		_vertices[i+2] = v.getPosition().getZ() + objPos.getZ();
+		_vertices[i] = v.getPosition().x + objPos.x;
+		_vertices[i+1] = v.getPosition().y + objPos.y;
+		_vertices[i+2] = v.getPosition().z + objPos.z;
 		_vertices[i+3] = 1.0f;
 
 		_colors[i] = v.getColor().getRedF();
@@ -142,13 +147,14 @@ void TroglEngine::assignGeometry(const Mesh& mesh)
 
 	// add indicies from mesh faces.
 	idx = 0;
-	for (size_t i = 0; i < _indicies.size(); i += 3)
+	const size_t indexNumOffset = vOffset / vStep;
+	for (size_t i = iOffset; i < _indicies.size(); i += iStep)
 	{
 		const Mesh::Face& f = mesh.getFace(idx++);
 
-		_indicies[i] = f.getFirstIndex();
-		_indicies[i+1] = f.getSecondIndex();
-		_indicies[i+2] = f.getThirdIndex();
+		_indicies[i] = indexNumOffset + f.getFirstIndex();
+		_indicies[i+1] = indexNumOffset + f.getSecondIndex();
+		_indicies[i+2] = indexNumOffset + f.getThirdIndex();
 	}
 }
 

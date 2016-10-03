@@ -35,7 +35,7 @@ std::string Object::generateNameFromObjType(const Type& type, const size_t& id)
 
 Object::Object(const Type& type,
 			   const std::string& name,
-			   const Point& pos)
+			   const glm::vec3& pos)
 	: Component(Component::Type::OBJECT, name),
 	  _object_type(type),
 	  _position(pos)
@@ -77,37 +77,37 @@ const Object::Type& Object::getObjectType() const
 }
 
 
-const Point&Object::getPosition() const
+const glm::vec3&Object::getPosition() const
 {
 	return _position;
 }
 
 
-void Object::setPosition(const Point& position)
+void Object::setPosition(const glm::vec3& position)
 {
 	_position = position;
 }
 
 
-const Point& Object::getRotation() const
+const glm::vec3& Object::getRotation() const
 {
 	return _rotation;
 }
 
 
-void Object::setRotation(const Point& rotation)
+void Object::setRotation(const glm::vec3& rotation)
 {
 	_rotation = rotation;
 }
 
 
-const Point& Object::getScale() const
+const glm::vec3& Object::getScale() const
 {
 	return _scale;
 }
 
 
-void Object::setScale(const Point& scale)
+void Object::setScale(const glm::vec3& scale)
 {
 	_scale = scale;
 }

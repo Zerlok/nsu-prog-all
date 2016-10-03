@@ -3,9 +3,9 @@
 #include <logger.hpp>
 
 
-Mesh::Mesh(const Point& pos,
-		   const Point& rot,
-		   const Point& sca)
+Mesh::Mesh(const glm::vec3& pos,
+		   const glm::vec3& rot,
+		   const glm::vec3& sca)
 	: Object(Object::Type::MESH)
 {
 	logDebug << "Mesh object created" << logEnd;
@@ -63,6 +63,12 @@ void Mesh::addFace(const Mesh::Face& face)
 }
 
 
+void Mesh::normalizeFaces()
+{
+
+}
+
+
 Mesh::Vertex::Vertex(const float& x, const float& y, const float& z, const Color& color)
 	: _position(x, y, z),
 	  _color(color),
@@ -72,7 +78,7 @@ Mesh::Vertex::Vertex(const float& x, const float& y, const float& z, const Color
 }
 
 
-Mesh::Vertex::Vertex(const Point& pos, const Color& color)
+Mesh::Vertex::Vertex(const glm::vec3& pos, const Color& color)
 	: _position(pos),
 	  _color(color),
 	  _idx(0),
@@ -104,15 +110,15 @@ Mesh::Vertex::~Vertex()
 }
 
 
-const Point& Mesh::Vertex::getPosition() const
+const glm::vec3& Mesh::Vertex::getPosition() const
 {
 	return _position;
 }
 
 
-void Mesh::Vertex::setPosition(const Point& point)
+void Mesh::Vertex::setPosition(const glm::vec3& pos)
 {
-	_position = point;
+	_position = pos;
 }
 
 
@@ -194,19 +200,19 @@ const size_t& Mesh::Face::getThirdIndex() const
 }
 
 
-const Point Mesh::Face::getNormal() const
+glm::vec3 Mesh::Face::getNormal() const
 {
 	if (_mesh == nullptr)
-		return Point::zero;
+		return glm::vec3();
 
 	const Vertex& f = _mesh->getVertex(_first);
 	const Vertex& s = _mesh->getVertex(_second);
 	const Vertex& t = _mesh->getVertex(_third);
 
-	const Point left = (t.getPosition() - f.getPosition());
-	const Point right = (s.getPosition() - f.getPosition());
+	const glm::vec3 left = (t.getPosition() - f.getPosition());
+	const glm::vec3 right = (s.getPosition() - f.getPosition());
 
-	return right.crossProduct(left);
+	return glm::cross(right, left);
 }
 
 

@@ -1,12 +1,10 @@
-#ifndef __MESH_H__
-#define __MESH_H__
+#ifndef __MESH_HPP__
+#define __MESH_HPP__
 
-
-#include "common/point.hpp"
-#include "common/color.hpp"
 
 #include <vector>
 
+#include "common/color.hpp"
 #include "object.hpp"
 #include "material.hpp"
 
@@ -21,14 +19,14 @@ class Mesh : public Object
 					   const float& y,
 					   const float& z,
 					   const Color& color = Color::black);
-				Vertex(const Point& pos,
+				Vertex(const glm::vec3& pos,
 					   const Color& color = Color::black);
 				Vertex(const Vertex& v);
 				Vertex(Vertex&& v);
 				~Vertex();
 
-				const Point& getPosition() const;
-				void setPosition(const Point& point);
+				const glm::vec3& getPosition() const;
+				void setPosition(const glm::vec3& pos);
 
 				const Color& getColor() const;
 				void setColor(const Color& color);
@@ -36,7 +34,7 @@ class Mesh : public Object
 				const size_t& getIndex() const;
 
 			private:
-				Point _position;
+				glm::vec3 _position;
 				Color _color;
 				size_t _idx;
 
@@ -59,7 +57,7 @@ class Mesh : public Object
 				const size_t& getSecondIndex() const;
 				const size_t& getThirdIndex() const;
 
-				const Point getNormal() const;
+				glm::vec3 getNormal() const;
 				void flip();
 
 			protected:
@@ -72,9 +70,9 @@ class Mesh : public Object
 		};
 		using Faces = std::vector<Face>;
 
-		Mesh(const Point& pos = Point::zero,
-			 const Point& rot = Point::zero,
-			 const Point& sca = Point::one);
+		Mesh(const glm::vec3& pos = glm::vec3(),
+			 const glm::vec3& rot = glm::vec3(),
+			 const glm::vec3& sca = glm::vec3(1.0, 1.0, 1.0));
 		virtual ~Mesh();
 
 		const Vertex& getVertex(const size_t& i) const;
@@ -88,6 +86,8 @@ class Mesh : public Object
 		const Material& getMaterial() const;
 		void setMaterial(const Material& material);
 
+		void normalizeFaces();
+
 	protected:
 		Vertices _vertices;
 		Faces _faces;
@@ -95,4 +95,4 @@ class Mesh : public Object
 };
 
 
-#endif // __MESH_H__
+#endif // __MESH_HPP__
