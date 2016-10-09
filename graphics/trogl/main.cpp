@@ -2,9 +2,14 @@
 #include <logger.hpp>
 
 #include "engine.hpp"
+
+#include "shaders/metamorphose_shader.h"
+#include "shaders/screwshader.hpp"
+
 #include "meshes/cube.hpp"
 #include "meshes/strangecube.hpp"
-#include "shaders/metamorphose_shader.h"
+#include "meshes/megacube.hpp"
+#include "meshes/cylinder.hpp"
 
 
 static Logger& globalLogger = Logger::getInstance(std::cout, Logger::Level::DEBUG);
@@ -20,14 +25,19 @@ int main(int argc, char *argv[])
 	Scene scene("Lab02", camera);
 	scene.setBgColor(Color(50, 50, 50));
 
-	StrangeCube c;
-	scene.addMesh(c);
+	MegaCube megaCube;
+	scene.addMesh(megaCube);
+
+//	Cylinder cylinder;
+//	scene.addMesh(cylinder);
 
 	engine.setActiveScene(scene);
 
 	// Setup shaders.
 	MetamorphoseShader mprhShader;
 	engine.setVertextShader(mprhShader);
+//	ScrewShader screwShader;
+//	engine.setVertextShader(screwShader);
 
 	// Show scene.
 	engine.showScene();

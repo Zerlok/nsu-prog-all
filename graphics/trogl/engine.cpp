@@ -173,6 +173,7 @@ void TroglEngine::drawMatrix(const glm::mat4x4& mat)
 	glLoadMatrixf(&mat[0][0]);
 
 	glUniform4f(_attrConstColor, 3, 3, 3, 1);
+	glUniform1f(_attrAlpha, std::cos(getTime() / 10.0) * 1.21);
 	glUniform1f(_attrCosSqAlpha, std::pow(std::cos(getTime() / 10.0), 2));
 
 	glEnableVertexAttribArray(0);
@@ -341,6 +342,7 @@ void TroglEngine::initShaders()
 
 	_attrConstColor = glGetUniformLocation(_glShaderProgram, "constColor");
 	_attrCosSqAlpha = glGetUniformLocation(_glShaderProgram, "cosSqAlpha");
+	_attrAlpha = glGetUniformLocation(_glShaderProgram, "alpha");
 }
 
 

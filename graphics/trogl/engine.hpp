@@ -61,6 +61,7 @@ class TroglEngine
 
 		GLuint _attrConstColor;
 		GLuint _attrCosSqAlpha;
+		GLuint _attrAlpha;
 
 		std::vector<GLfloat> _vertices;
 		std::vector<GLfloat> _colors;

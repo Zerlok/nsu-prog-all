@@ -26,7 +26,10 @@ SOURCES += main.cpp \
     meshes/cube.cpp \
     meshes/strangecube.cpp \
     shader.cpp \
-    shaders/metamorphose_shader.cpp
+    shaders/metamorphose_shader.cpp \
+    meshes/megacube.cpp \
+    meshes/cylinder.cpp \
+    shaders/screwshader.cpp
 
 HEADERS += \
     engine.hpp \
@@ -45,4 +48,7 @@ HEADERS += \
     meshes/cube.hpp \
     meshes/strangecube.hpp \
     shader.hpp \
-    shaders/metamorphose_shader.h
+    shaders/metamorphose_shader.h \
+    meshes/megacube.hpp \
+    meshes/cylinder.hpp \
+    shaders/screwshader.hpp
