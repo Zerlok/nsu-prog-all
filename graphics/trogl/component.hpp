@@ -16,6 +16,7 @@ class Component
 			OBJECT,
 			MATERIAL,
 			TEXTURE,
+			SHADER,
 		};
 
 		Component(const Type& t,
@@ -36,6 +37,7 @@ class Component
 		void setName(const std::string& name);
 
 		virtual Component copy() const;
+		virtual std::string toString() const;
 
 		friend std::ostream& operator<<(std::ostream& out, const Component& c);
 

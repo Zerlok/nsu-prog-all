@@ -14,7 +14,7 @@ class TroglEngine
 		virtual ~TroglEngine();
 
 		void setVertextShader(const Shader& vs);
-		void setFaceShader(const Shader& fs);
+		void setFragmentShader(const Shader& fs);
 
 		void setActiveScene(const Scene& scene);
 
@@ -36,11 +36,13 @@ class TroglEngine
 
 	private:
 		static const Shader DEFAULT_VERTEX_SHADER;
-		static const Shader DEFAULT_FACE_SHADER;
+		static const Shader DEFAULT_FRAGMENT_SHADER;
 
 		static TroglEngine* _current;
-		static void draw();
+		static void display();
 		static void reshape(int w, int h);
+		static void cycle();
+
 		static std::string generateWindowName(const Scene& scene);
 
 		bool _isValid;
@@ -58,18 +60,19 @@ class TroglEngine
 		GLuint _glIBO; // Index Buffer Object
 
 		GLuint _attrConstColor;
+		GLuint _attrCosSqAlpha;
 
 		std::vector<GLfloat> _vertices;
 		std::vector<GLfloat> _colors;
 		std::vector<GLuint> _indicies;
 
 		Shader _vertexShader;
-		Shader _faceShader;
+		Shader _fragmentShader;
 };
 
 
 void reshape(int w, int h);
-void renderCycle();
+void cycle();
 
 
 #endif // __ENGINE_HPP__

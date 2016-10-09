@@ -2,15 +2,16 @@
 
 
 const std::string MetamorphoseShader::SRC = "\
-attribute vec4 position; \
-attribute vec4 color; \
-attribute double cosSqAlpha;\
-uniform vec4 constColor; \
+#version 120\n\
+attribute vec4 position;\
+attribute vec4 color;\
+uniform float cosSqAlpha;\
+uniform vec4 constColor;\
 \
 void main() {\
  vec3 pos = position.xyz;\
- double k = 1 / sqrt(dot(pos, pos));\
- pos = pos * k * (1 - cosSqAlpha);\
+ float k = 1 / sqrt(dot(pos, pos));\
+ pos = pos * cosSqAlpha + pos * k * (1 - cosSqAlpha);\
  gl_Position = gl_ModelViewProjectionMatrix * vec4(pos, 1.0);\
  gl_FrontColor = color * constColor;\
 }\
@@ -18,7 +19,7 @@ void main() {\
 
 
 MetamorphoseShader::MetamorphoseShader()
-	: Shader(SRC)
+	: Shader("Metamorph Shader", SRC)
 {
 }
 

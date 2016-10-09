@@ -28,6 +28,9 @@ std::string Component::generateNameFromType(const Type& type, const size_t& id)
 		case Type::TEXTURE:
 			ss << "Texture";
 			break;
+		case Type::SHADER:
+			ss << "Shader";
+			break;
 		default:
 			break;
 	}
@@ -140,6 +143,14 @@ Component Component::copy() const
 	c._name = generateNameFromCopy(c);
 
 	return std::move(c);
+}
+
+
+std::string Component::toString() const
+{
+	std::stringstream ss;
+	ss << _name;
+	return std::move(ss.str());
 }
 
 
