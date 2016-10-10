@@ -13,7 +13,7 @@ int function(int a)
 
 int main(int argc, char *argv[])
 {
-	Logger::init(std::cout, Logger::Level::INFO);
+	Logger::init(std::cout, Logger::Level::INFO, Logger::Description::LEVEL);
 
 	Logger::debug() << "hello, debug!" << Logger::end;
 	Logger::info() << "hello, info!" << Logger::end;
@@ -25,7 +25,7 @@ int main(int argc, char *argv[])
 	if (function(10) < 200)
 		Logger::error() << "hello, error!" << Logger::end;
 
-	logWarningFull << "This is it!" << logEnd;
+	logWarning << "This is it!" << logEnd;
 
 	return 0;
 }

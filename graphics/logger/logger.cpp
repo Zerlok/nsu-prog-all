@@ -2,13 +2,14 @@
 
 
 Logger* Logger::_instance = nullptr;
-const std::string Logger::CONSTRUCTOR_MESSAGE = "Logger was created";
+const std::string Logger::CONSTRUCTOR_MESSAGE = "Logger was started";
 const std::string Logger::DESTRUCTOR_MESSAGE = "Logger was stopped";
+const char* Logger::EMPTY_STRING = "none";
 
 
-void Logger::init(std::ostream& out, const Level& level)
+void Logger::init(std::ostream& out, const Level& level, const Description& descr)
 {
-	static Logger instance(out, level);
+	static Logger instance(out, level, descr);
 }
 
 
@@ -74,7 +75,7 @@ Logger& Logger::end()
 }
 
 
-std::ostream& Logger::strTimestamp(std::ostream& out)
+std::ostream& Logger::addTimestamp(std::ostream& out)
 {
 	static struct timeval time;
 	gettimeofday(&time, NULL);
@@ -99,9 +100,10 @@ Logger::Level Logger::validateInitialLevel(const Logger::Level& level)
 }
 
 
-Logger::Logger(std::ostream& output, const Level& level)
+Logger::Logger(std::ostream& output, const Level& level, const Description& descr)
 	: _output(output),
-	  _level(validateInitialLevel(level))
+	  _level(validateInitialLevel(level)),
+	  _description(descr)
 {
 	_instance = this;
 	info() << CONSTRUCTOR_MESSAGE << end;
@@ -125,13 +127,26 @@ Logger& Logger::_out(const Level& level,
 	_current_message_level = level;
 	if (validateCurrentLevel())
 	{
-		_output << '[' << strTimestamp << "] [" << level << "] ";
+		_output << '[' << addTimestamp << "] ";
 
-		if (funcname != nullptr)
-			_output << "@" << funcname << " ";
-
-		if (filename != nullptr)
-			_output << "(in file " << filename << ':' << linenum << ") ";
+		switch (_description)
+		{
+			case Description::LEVEL:
+				_output << '[' << level << "] ";
+				break;
+			case Description::LEVEL_AND_FUNCTION:
+				_output << '[' << level
+						<< "] @" << funcname << ' ';
+				break;
+			case Description::FULL:
+				_output << '[' << level
+						<< "] @" << funcname
+						<< " (in file " << filename << ':' << linenum << ") ";
+				break;
+			case Description::MESSAGE_ONLY:
+			default:
+				break;
+		}
 	}
 
 	return (*this);
@@ -194,6 +209,15 @@ Logger& Logger::operator<<(Logger& (*manipulator)(void))
 }
 
 
+Logger& Logger::operator<<(std::ostream&(*manipulator)(std::ostream&))
+{
+	if (validateCurrentLevel())
+		manipulator(_output);
+
+	return (*this);
+}
+
+
 bool Logger::validateCurrentLevel() const
 {
 	return (int(_current_message_level) >= int(_level));
@@ -212,6 +236,8 @@ std::ostream&operator<<(std::ostream& out, const Logger::Level& level)
 			return out << "WARNING";
 		case Logger::Level::ERROR:
 			return out << "ERROR";
+		case Logger::Level::FATAL:
+			return out << "FATAL";
 		default:
 			return out;
 	}
