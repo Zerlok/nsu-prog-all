@@ -8,6 +8,7 @@
 #include "shader.hpp"
 
 
+// TODO: make all data as pointers!
 class TroglEngine
 {
 	public:

@@ -4,7 +4,7 @@
 #include <sstream>
 #include "common/utils.h"
 
-
+// TODO: place default shaders into Material (default material shaders).
 Shader* TroglEngine::DEFAULT_VERTEX_SHADER = new Shader(
 		"Default vertex shader",
 		"attribute vec4 position;"
@@ -42,6 +42,7 @@ TroglEngine::TroglEngine()
 {
 	logDebug << "Engine init started" << logEnd;
 
+	// TODO: move glut init into "initialize" function, create bool _isInited for checks.
 	int argc = 1;
 	char* argv = "engine";
 	glutInit(&argc, &argv);
@@ -107,6 +108,7 @@ void TroglEngine::showScene()
 		return;
 	}
 
+	// TODO: make Engine as singleton.
 	_current = this;
 	glutDisplayFunc(display);
 	glutReshapeFunc(reshape);
@@ -114,7 +116,7 @@ void TroglEngine::showScene()
 
 	// TODO: add light to scene.
 
-	// TODO: get object material.
+	// TODO: add objects' materials (save shaders).
 	for (const Mesh& m : _scene.getMeshes())
 		assignGeometry(m);
 
@@ -210,6 +212,8 @@ void TroglEngine::drawGUI()
 	glRasterPos2f(-0.9, +0.9);
 	glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 
+	// TODO: make FPS display as a GUI.
+	// TODO: make option FPS display on/off.
 	static size_t framesNum = 0;
 	static size_t fps = 0;
 	static size_t startCountTime = getTimeUInt();
@@ -243,6 +247,7 @@ void TroglEngine::renderFrame()
 {
 	const Color& bg = _scene.getBgColor();
 
+	// TODO: add comment description: what does each line do with GL.
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
 	glClearColor(bg.getRedF(), bg.getGreenF(), bg.getBlueF(), bg.getAlphaF());
@@ -268,7 +273,7 @@ void TroglEngine::renderFrame()
 				   cam.getLowDistance(),
 				   cam.getHighDistance());
 
-	// Init Matrices.
+	// TODO: create camera lookAt method, which returns the position where does camera look at.
 	const glm::mat4x4 matView  = glm::lookAt(cam.getPosition(), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
 
 	// Drawing.
@@ -318,7 +323,12 @@ void TroglEngine::deinitGeometry()
 
 void TroglEngine::initShaders()
 {
-	// TODO: move shader init into shader itself.
+	// TODO: Take shaders from object materials
+	/* HOWTO:
+	 * Compile shader program for each shader from objects' materials. Save
+	 * shader program into shaders vector.
+	 * Place compilation process in different functions.
+	 */
 	const char* vsSrc = _vertexShader->getSrcPtr();
 	const char* fsSrc = _fragmentShader->getSrcPtr();
 
@@ -396,6 +406,7 @@ void TroglEngine::initShaders()
 
 void TroglEngine::deinitShaders()
 {
+	// TODO: remove all shader programs (for each object) and delete shaders.
 	glDetachShader(_glShaderProgram, _glVertexShader);
 	glDetachShader(_glShaderProgram, _glFragmentShader);
 	glDeleteProgram(_glShaderProgram);
