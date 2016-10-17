@@ -196,26 +196,65 @@ void TroglEngine::drawMatrix(const glm::mat4x4& mat)
 }
 
 
+void TroglEngine::drawGUI()
+{
+	// What does it do?
+	glMatrixMode(GL_PROJECTION);
+	glPushMatrix(); // save
+	glLoadIdentity();// and clear
+	glMatrixMode(GL_MODELVIEW);
+	glPushMatrix();
+	glLoadIdentity();
+	glDisable(GL_DEPTH_TEST); // also disable the depth test so renders on top
+
+	glRasterPos2f(-0.9, +0.9);
+	glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+
+	static size_t framesNum = 0;
+	static size_t fps = 0;
+	static size_t startCountTime = getTimeUInt();
+	size_t currentTime = getTimeUInt();
+
+	if (currentTime - startCountTime >= 1)
+	{
+		fps = framesNum;
+		framesNum = 0;
+		startCountTime = currentTime;
+	}
+	++framesNum;
+
+	std::stringstream ss;
+	ss << "FPS: " << fps;
+	const char* p = ss.str().c_str();
+	do
+		glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, *p);
+	while (*(++p));
+	glEnable(GL_DEPTH_TEST); // Turn depth testing back on
+
+	// What does it do?
+	glMatrixMode(GL_PROJECTION);
+	glPopMatrix(); // revert back to the matrix I had before.
+	glMatrixMode(GL_MODELVIEW);
+	glPopMatrix();
+}
+
+
 void TroglEngine::renderFrame()
 {
+	const Color& bg = _scene.getBgColor();
+
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
-
-	const Color& bg = _scene.getBgColor();
 	glClearColor(bg.getRedF(), bg.getGreenF(), bg.getBlueF(), bg.getAlphaF());
 	glClearDepth(1.0f);
-
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); //Clear the colour buffer (more buffers later on)
-
 	glFrontFace(GL_CW);
-
-//	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_FRONT);
 
-	glLoadIdentity(); // Load the Identity Matrix to reset our drawing locations
+//	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
+	glLoadIdentity(); // Load the Identity Matrix to reset our drawing locations
 	glUseProgram(_glShaderProgram);
 
 	// Matrix Projection.
@@ -234,6 +273,7 @@ void TroglEngine::renderFrame()
 
 	// Drawing.
 	drawMatrix(matView);
+	drawGUI();
 
 	// In the end.
 	glUseProgram(0);
@@ -411,7 +451,7 @@ void TroglEngine::reshape(int w, int h)
 
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	gluPerspective(45.0, (GLdouble)width/(GLdouble)height, 0.01, 100.0) ;
+	gluPerspective(45.0, (GLdouble)width/(GLdouble)height, 0.01, 100.0);
 }
 
 

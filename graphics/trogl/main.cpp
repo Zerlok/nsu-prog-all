@@ -23,15 +23,22 @@ int main(int argc, char *argv[])
 
 	// Setup scene.
 	Camera camera;
-	camera.setPosition(glm::vec3(5.0, 4.0, 2.0));
+	camera.setPosition(glm::vec3(10.0, 4.0, 5.0));
 	Scene scene("Lab02", camera);
 	scene.setBgColor(Color(50, 50, 50));
 
 //	Cube c(1.0);
 //	scene.addMesh(c);
 
-	MegaCube megaCube;
-	scene.addMesh(megaCube);
+	for (size_t y = 0; y < 4; ++y)
+	{
+		for (size_t x = 0; x < 4; ++x)
+		{
+			MegaCube c;
+			c.setPosition(glm::vec3(x*2.1, 0.0f, y*2.1));
+			scene.addMesh(c);
+		}
+	}
 
 //	Cylinder cylinder;
 //	scene.addMesh(cylinder);

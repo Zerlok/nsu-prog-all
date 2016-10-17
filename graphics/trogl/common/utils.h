@@ -5,11 +5,20 @@
 #include <sys/time.h>
 
 
-static double getTime()
+static struct timeval TIMEVALUE;
+
+
+static double getTimeDouble()
 {
-	static struct timeval tp;
-	gettimeofday(&tp, NULL);
-	return ((tp.tv_sec % 10000) * 10) + (tp.tv_usec / 10000) / 10.0;
+	gettimeofday(&TIMEVALUE, NULL);
+	return ((TIMEVALUE.tv_sec % 10000) * 10) + (TIMEVALUE.tv_usec / 10000) / 10.0;
+}
+
+
+static size_t getTimeUInt()
+{
+	gettimeofday(&TIMEVALUE, NULL);
+	return TIMEVALUE.tv_usec / 100000;
 }
 
 

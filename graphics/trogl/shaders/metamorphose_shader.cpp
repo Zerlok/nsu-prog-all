@@ -41,5 +41,5 @@ void MetamorphoseShader::initUniformsLocations(const GLuint& glShaderProgram)
 
 void MetamorphoseShader::prepareForRender()
 {
-	glUniform1f(_attrCosSqAlpha, std::pow(std::cos(getTime() / 10.0), 2));
+	glUniform1f(_attrCosSqAlpha, std::pow(std::cos(getTimeDouble() / 10.0), 2));
 }

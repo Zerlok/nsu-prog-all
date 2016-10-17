@@ -35,6 +35,7 @@ class TroglEngine
 		void initShaders();
 		void deinitShaders();
 
+		void drawGUI();
 		void drawMatrix(const glm::mat4x4& mat);
 		void renderFrame();
 

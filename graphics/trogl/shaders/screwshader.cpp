@@ -61,5 +61,5 @@ void ScrewShader::initUniformsLocations(const GLuint& glShaderProgram)
 
 void ScrewShader::prepareForRender()
 {
-	glUniform1f(_attrAlpha, std::cos(getTime() / 10.0) * 1.21);
+	glUniform1f(_attrAlpha, std::cos(getTimeDouble() / 10.0) * 1.21);
 }
