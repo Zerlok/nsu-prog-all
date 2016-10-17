@@ -1,6 +1,10 @@
 #include "screwshader.hpp"
 
 
+#include <logger.hpp>
+#include "common/utils.h"
+
+
 const std::string ScrewShader::SRC = "\
 #version 120\n\
 attribute vec4 position;\
@@ -31,7 +35,7 @@ int sign(vec3 v)\
 void main() {\
  vec3 pos = position.xyz;\
  \
- pos = pos * rotationMatrix(vec3(0.0, 1.0, 0.0), alpha * sign(pos));\
+ pos = pos * rotationMatrix(vec3(0.0, 1.0, 0.0), alpha * sin(pos.y));\
  gl_Position = gl_ModelViewProjectionMatrix * vec4(pos, 1.0);\
  gl_FrontColor = color * constColor;\
 }\
@@ -46,4 +50,16 @@ ScrewShader::ScrewShader()
 
 ScrewShader::~ScrewShader()
 {
+}
+
+
+void ScrewShader::initUniformsLocations(const GLuint& glShaderProgram)
+{
+	_attrAlpha = glGetUniformLocation(glShaderProgram, "alpha");
+}
+
+
+void ScrewShader::prepareForRender()
+{
+	glUniform1f(_attrAlpha, std::cos(getTime() / 10.0) * 1.21);
 }

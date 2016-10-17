@@ -5,7 +5,7 @@
 #include "common/utils.h"
 
 
-const Shader TroglEngine::DEFAULT_VERTEX_SHADER = Shader(
+Shader* TroglEngine::DEFAULT_VERTEX_SHADER = new Shader(
 		"Default vertex shader",
 		"attribute vec4 position;"
 		"attribute vec4 color;"
@@ -14,7 +14,7 @@ const Shader TroglEngine::DEFAULT_VERTEX_SHADER = Shader(
 		"  gl_Position = gl_ModelViewProjectionMatrix * position;\n"
 		"  gl_FrontColor = color * constColor;\n"
 		"}\n");
-const Shader TroglEngine::DEFAULT_FRAGMENT_SHADER = Shader(
+Shader* TroglEngine::DEFAULT_FRAGMENT_SHADER = new Shader(
 		"Default fragment shader",
 		"void main() {\n"
 		"  gl_FragColor = gl_Color;\n"
@@ -64,14 +64,16 @@ TroglEngine::~TroglEngine()
 }
 
 
-void TroglEngine::setVertextShader(const Shader& vs)
+void TroglEngine::setVertextShader(Shader* vs)
 {
+	delete _vertexShader;
 	_vertexShader = vs;
 }
 
 
-void TroglEngine::setFragmentShader(const Shader& fs)
+void TroglEngine::setFragmentShader(Shader* fs)
 {
+	delete _fragmentShader;
 	_fragmentShader = fs;
 }
 
@@ -110,8 +112,9 @@ void TroglEngine::showScene()
 	glutReshapeFunc(reshape);
 	glutIdleFunc(cycle);
 
-	// TODO: add scene lamps.
+	// TODO: add light to scene.
 
+	// TODO: get object material.
 	for (const Mesh& m : _scene.getMeshes())
 		assignGeometry(m);
 
@@ -173,8 +176,8 @@ void TroglEngine::drawMatrix(const glm::mat4x4& mat)
 	glLoadMatrixf(&mat[0][0]);
 
 	glUniform4f(_attrConstColor, 3, 3, 3, 1);
-	glUniform1f(_attrAlpha, std::cos(getTime() / 10.0) * 1.21);
-	glUniform1f(_attrCosSqAlpha, std::pow(std::cos(getTime() / 10.0), 2));
+	_vertexShader->prepareForRender();
+	_fragmentShader->prepareForRender();
 
 	glEnableVertexAttribArray(0);
 	glEnableVertexAttribArray(1);
@@ -205,6 +208,9 @@ void TroglEngine::renderFrame()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); //Clear the colour buffer (more buffers later on)
 
 	glFrontFace(GL_CW);
+
+//	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_FRONT);
 
@@ -272,8 +278,9 @@ void TroglEngine::deinitGeometry()
 
 void TroglEngine::initShaders()
 {
-	const char* vsSrc = _vertexShader.getSrcPtr();
-	const char* fsSrc = _fragmentShader.getSrcPtr();
+	// TODO: move shader init into shader itself.
+	const char* vsSrc = _vertexShader->getSrcPtr();
+	const char* fsSrc = _fragmentShader->getSrcPtr();
 
 	int success = 0;
 
@@ -287,11 +294,11 @@ void TroglEngine::initShaders()
 		const int MAX_INFO_LOG_SIZE = 1024;
 		GLchar infoLog[MAX_INFO_LOG_SIZE];
 		glGetShaderInfoLog(_glVertexShader, MAX_INFO_LOG_SIZE, NULL, infoLog);
-		logError << "Error in " << _vertexShader.getName()
+		logError << "Error in " << _vertexShader->getName()
 				 << "compilation:\n" << infoLog << logEnd;
 	}
 	else
-		logDebug << _vertexShader.getName() << " compiled successfuly." << logEnd;
+		logDebug << _vertexShader->getName() << " compiled successfuly." << logEnd;
 
 	_glFragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
 	glShaderSource(_glFragmentShader, 1, &(fsSrc), NULL);
@@ -303,11 +310,11 @@ void TroglEngine::initShaders()
 		const int MAX_INFO_LOG_SIZE = 1024;
 		GLchar infoLog[MAX_INFO_LOG_SIZE];
 		glGetShaderInfoLog(_glFragmentShader, MAX_INFO_LOG_SIZE, NULL, infoLog);
-		logError << "Error in " << _fragmentShader.getName()
+		logError << "Error in " << _fragmentShader->getName()
 				 << " compilation:\n" << infoLog << logEnd;
 	}
 	else
-		logDebug << _fragmentShader.getName() << " compiled successfuly." << logEnd;
+		logDebug << _fragmentShader->getName() << " compiled successfuly." << logEnd;
 
 	_glShaderProgram = glCreateProgram();
 	glAttachShader(_glShaderProgram, _glVertexShader);
@@ -341,8 +348,9 @@ void TroglEngine::initShaders()
 		logDebug << "Shader program is valid." << logEnd;
 
 	_attrConstColor = glGetUniformLocation(_glShaderProgram, "constColor");
-	_attrCosSqAlpha = glGetUniformLocation(_glShaderProgram, "cosSqAlpha");
-	_attrAlpha = glGetUniformLocation(_glShaderProgram, "alpha");
+
+	_vertexShader->initUniformsLocations(_glShaderProgram);
+	_fragmentShader->initUniformsLocations(_glShaderProgram);
 }
 
 
@@ -353,6 +361,9 @@ void TroglEngine::deinitShaders()
 	glDeleteProgram(_glShaderProgram);
 	glDeleteShader(_glFragmentShader);
 	glDeleteShader(_glVertexShader);
+
+	delete _vertexShader;
+	delete _fragmentShader;
 
 	logDebug << "Shaders deinited." << logEnd;
 }

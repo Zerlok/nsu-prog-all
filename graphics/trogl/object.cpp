@@ -17,8 +17,8 @@ std::string Object::generateNameFromObjType(const Type& type, const size_t& id)
 		case Type::MESH:
 			ss << "Mesh";
 			break;
-		case Type::LAMP:
-			ss << "Lamp";
+		case Type::LIGHT:
+			ss << "Light";
 			break;
 		case Type::CAMERA:
 			ss << "Camera";

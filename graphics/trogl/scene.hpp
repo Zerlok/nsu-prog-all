@@ -9,12 +9,12 @@
 
 #include "object.hpp"
 #include "mesh.hpp"
-#include "lamp.hpp"
+#include "light.hpp"
 #include "camera.hpp"
 
 
 using Meshes = std::list<Mesh>;
-using Lamps = std::list<Lamp>;
+using Lights = std::list<Light>;
 
 
 class Scene : public Component
@@ -28,10 +28,10 @@ class Scene : public Component
 		Scene& operator=(const Scene& scene);
 
 		void addMesh(const Mesh& mesh);
-		void addLamp(const Lamp& lamp);
+		void addLight(const Light& lamp);
 
 		const Meshes& getMeshes() const;
-		const Lamps& getLamps() const;
+		const Lights& getLamps() const;
 
 		const Camera& getCamera() const;
 		void setCamera(const Camera& camera);
@@ -44,7 +44,7 @@ class Scene : public Component
 		static const Camera DEFAULT_CAMERA;
 
 		Meshes _meshes;
-		Lamps _lamps;
+		Lights _lights;
 		Camera _camera;
 
 		Color _bgColor;

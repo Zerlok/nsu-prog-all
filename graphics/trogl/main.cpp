@@ -12,7 +12,9 @@
 #include "meshes/cylinder.hpp"
 
 
-static Logger& globalLogger = Logger::getInstance(std::cout, Logger::Level::DEBUG);
+static Logger& globalLogger = Logger::getInstance(std::cout,
+												  Logger::Level::DEBUG,
+												  Logger::Description::FULL);
 
 
 int main(int argc, char *argv[])
@@ -25,6 +27,9 @@ int main(int argc, char *argv[])
 	Scene scene("Lab02", camera);
 	scene.setBgColor(Color(50, 50, 50));
 
+//	Cube c(1.0);
+//	scene.addMesh(c);
+
 	MegaCube megaCube;
 	scene.addMesh(megaCube);
 
@@ -34,7 +39,7 @@ int main(int argc, char *argv[])
 	engine.setActiveScene(scene);
 
 	// Setup shaders.
-	MetamorphoseShader mprhShader;
+	MetamorphoseShader* mprhShader = new MetamorphoseShader();
 	engine.setVertextShader(mprhShader);
 //	ScrewShader screwShader;
 //	engine.setVertextShader(screwShader);

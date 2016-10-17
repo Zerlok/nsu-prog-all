@@ -3,6 +3,7 @@
 
 
 #include <string>
+#include "opengls.hpp"
 #include "component.hpp"
 
 
@@ -18,8 +19,8 @@ class Shader : public Component
 		Shader& operator=(const Shader& sh);
 		Shader& operator=(Shader&& sh);
 
-//		virtual void initUniformsLocations();
-//		virtual void prepareForRender();
+		virtual void initUniformsLocations(const GLuint& glShaderProgram);
+		virtual void prepareForRender();
 
 		const char* getSrcPtr() const;
 		const std::string& getSrc() const;

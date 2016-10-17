@@ -15,7 +15,6 @@ SOURCES += main.cpp \
     scene.cpp \
     camera.cpp \
     mesh.cpp \
-    lamp.cpp \
     object.cpp \
     engine.cpp \
     material.cpp \
@@ -29,7 +28,10 @@ SOURCES += main.cpp \
     shaders/metamorphose_shader.cpp \
     meshes/megacube.cpp \
     meshes/cylinder.cpp \
-    shaders/screwshader.cpp
+    shaders/screwshader.cpp \
+    light.cpp \
+    lamps/lamp.cpp \
+    gui.cpp
 
 HEADERS += \
     engine.hpp \
@@ -37,7 +39,6 @@ HEADERS += \
     scene.hpp \
     camera.hpp \
     mesh.hpp \
-    lamp.hpp \
     object.hpp \
     material.hpp \
     texture.hpp \
@@ -51,4 +52,7 @@ HEADERS += \
     shaders/metamorphose_shader.h \
     meshes/megacube.hpp \
     meshes/cylinder.hpp \
-    shaders/screwshader.hpp
+    shaders/screwshader.hpp \
+    light.hpp \
+    lamps/lamp.hpp \
+    gui.hpp

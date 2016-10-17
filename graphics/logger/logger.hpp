@@ -34,7 +34,8 @@ class Logger
 				const Description& descr = Description::LEVEL);
 		static Logger& getInstance(
 				std::ostream& _out,
-				const Level& level);
+				const Level& level,
+				const Description& descr);
 
 		static Logger& out(const Level& level,
 						   const char* funcname = EMPTY_STRING,
@@ -122,18 +123,6 @@ std::ostream& operator<<(std::ostream& out, const Logger::Level& level);
 
 
 #define logEnd (Logger::end)
-
-//#define logDebug (Logger::debug())
-//#define logInfo (Logger::info())
-//#define logWarning (Logger::warning())
-//#define logError (Logger::error())
-//#define logFatal (Logger::fatal())
-
-//#define logDebugFunc (Logger::debug(__FUNCTION__))
-//#define logInfoFunc (Logger::info(__FUNCTION__))
-//#define logWarningFunc (Logger::warning(__FUNCTION__))
-//#define logErrorFunc (Logger::error(__FUNCTION__))
-//#define logFatalFunc (Logger::fatal(__FUNCTION__))
 
 #define logDebug (Logger::debug(__FUNCTION__, __FILE__, __LINE__))
 #define logInfo (Logger::info(__FUNCTION__, __FILE__, __LINE__))

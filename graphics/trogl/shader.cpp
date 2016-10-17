@@ -45,6 +45,16 @@ Shader& Shader::operator=(Shader&& sh)
 }
 
 
+void Shader::initUniformsLocations(const GLuint& glShaderProgram)
+{
+}
+
+
+void Shader::prepareForRender()
+{
+}
+
+
 const char* Shader::getSrcPtr() const
 {
 	return _src.data();

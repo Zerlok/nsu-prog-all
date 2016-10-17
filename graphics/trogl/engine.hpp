@@ -4,6 +4,7 @@
 
 #include "opengls.hpp"
 #include "scene.hpp"
+#include "gui.hpp"
 #include "shader.hpp"
 
 
@@ -13,14 +14,17 @@ class TroglEngine
 		TroglEngine();
 		virtual ~TroglEngine();
 
-		void setVertextShader(const Shader& vs);
-		void setFragmentShader(const Shader& fs);
+		// TODO: shader to material -> material for each object!
+		void setVertextShader(Shader* vs);
+		void setFragmentShader(Shader* fs);
 
+		void setGUI(const GUI& gui);
 		void setActiveScene(const Scene& scene);
 
 		void showScene(); // runs GL.
 
 	protected:
+		GUI _gui;
 		Scene _scene;
 
 		void assignGeometry(const Mesh& mesh);
@@ -35,8 +39,8 @@ class TroglEngine
 		void renderFrame();
 
 	private:
-		static const Shader DEFAULT_VERTEX_SHADER;
-		static const Shader DEFAULT_FRAGMENT_SHADER;
+		static Shader* DEFAULT_VERTEX_SHADER;
+		static Shader* DEFAULT_FRAGMENT_SHADER;
 
 		static TroglEngine* _current;
 		static void display();
@@ -60,15 +64,13 @@ class TroglEngine
 		GLuint _glIBO; // Index Buffer Object
 
 		GLuint _attrConstColor;
-		GLuint _attrCosSqAlpha;
-		GLuint _attrAlpha;
 
 		std::vector<GLfloat> _vertices;
 		std::vector<GLfloat> _colors;
 		std::vector<GLuint> _indicies;
 
-		Shader _vertexShader;
-		Shader _fragmentShader;
+		Shader* _vertexShader;
+		Shader* _fragmentShader;
 };
 
 

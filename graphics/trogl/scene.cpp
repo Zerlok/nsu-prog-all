@@ -11,7 +11,7 @@ const std::string Scene::DEFAULT_NAME = "Scene";
 Scene::Scene(const std::string& name, const Camera& camera)
 	: Component(Component::Type::SCENE, name),
 	  _meshes(),
-	  _lamps(),
+	  _lights(),
 	  _camera(camera),
 	  _bgColor(Color::grey)
 {
@@ -23,7 +23,7 @@ Scene::Scene(const std::string& name, const Camera& camera)
 Scene::Scene(const Scene& scene)
 	: Component(scene),
 	  _meshes(scene._meshes),
-	  _lamps(scene._lamps),
+	  _lights(scene._lights),
 	  _camera(scene._camera),
 	  _bgColor(scene._bgColor)
 {
@@ -41,7 +41,7 @@ Scene& Scene::operator=(const Scene& scene)
 	Component::operator=(scene);
 
 	_meshes = scene._meshes;
-	_lamps = scene._lamps;
+	_lights = scene._lights;
 	_camera = scene._camera;
 	_bgColor = scene._bgColor;
 
@@ -57,10 +57,10 @@ void Scene::addMesh(const Mesh& mesh)
 }
 
 
-void Scene::addLamp(const Lamp& lamp)
+void Scene::addLight(const Light& lamp)
 {
-	_lamps.push_back(lamp);
-	logDebug << "Lamp: " << _lamps.back().getName()
+	_lights.push_back(lamp);
+	logDebug << "Lamp: " << _lights.back().getName()
 			 << " added to scene " << _name << logEnd;
 }
 
@@ -71,9 +71,9 @@ const Meshes& Scene::getMeshes() const
 }
 
 
-const Lamps& Scene::getLamps() const
+const Lights& Scene::getLamps() const
 {
-	return _lamps;
+	return _lights;
 }
 
 

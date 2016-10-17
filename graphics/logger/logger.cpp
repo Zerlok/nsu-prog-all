@@ -13,9 +13,9 @@ void Logger::init(std::ostream& out, const Level& level, const Description& desc
 }
 
 
-Logger& Logger::getInstance(std::ostream& out, const Level& level)
+Logger& Logger::getInstance(std::ostream& out, const Level& level, const Logger::Description& descr)
 {
-	init(out, level);
+	init(out, level, descr);
 	return (*_instance);
 }
 

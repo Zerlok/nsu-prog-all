@@ -11,8 +11,13 @@ class MetamorphoseShader : public Shader
 		MetamorphoseShader();
 		~MetamorphoseShader();
 
+		void initUniformsLocations(const GLuint &glShaderProgram);
+		void prepareForRender();
+
 	private:
 		static const std::string SRC;
+
+		GLuint _attrCosSqAlpha;
 };
 
 

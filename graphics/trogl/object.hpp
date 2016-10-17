@@ -13,7 +13,7 @@ class Object : public Component
 		enum class Type
 		{
 			MESH = 'M',
-			LAMP = 'L',
+			LIGHT = 'L',
 			CAMERA = 'C',
 		};
 
