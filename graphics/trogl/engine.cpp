@@ -23,8 +23,9 @@ TroglEngine* TroglEngine::_current = nullptr;
 
 
 TroglEngine::TroglEngine()
-	: _scene(Scene("default")),
-	  _isValid(true),
+	: _scene(nullptr),
+	  _gui(nullptr),
+	  _isValid(false),
 	  _width(0),
 	  _height(0),
 	  _glVertexShader(),
@@ -79,7 +80,7 @@ void TroglEngine::setFragmentShader(Shader* fs)
 }
 
 
-void TroglEngine::setActiveScene(const Scene& scene)
+void TroglEngine::setActiveScene(const ScenePtr& scene)
 {
 	_scene = scene;
 }
@@ -87,23 +88,28 @@ void TroglEngine::setActiveScene(const Scene& scene)
 
 void TroglEngine::showScene()
 {
-	const Camera& cam = _scene.getCamera();
+	if (_scene == nullptr)
+	{
+		logError << "Cannot show scene - it was not set yet!" << logEnd;
+		return;
+	}
+
+	const Camera& cam = _scene->getCamera().get_reference();
 	glutInitWindowSize(
 				cam.getWidth(),
 				cam.getHeight());
-	glutCreateWindow(generateWindowName(_scene).c_str());
-	runGlewTest();
+	glutCreateWindow(generateWindowName(*_scene).c_str());
 
-	if (!_isValid)
+	if (!runGlewTest())
 	{
-		logError << "Cannot show scene " << _scene.getName()
+		logError << "Cannot show scene " << _scene->getName()
 				 << " - engine couldn't initialize" << logEnd;
 		return;
 	}
 
 	if (!cam.isValid())
 	{
-		logError << "Cannot show scene " << _scene.getName()
+		logError << "Cannot show scene " << _scene->getName()
 				 << " - camera settings are invalid" << logEnd;
 		return;
 	}
@@ -117,35 +123,35 @@ void TroglEngine::showScene()
 	// TODO: add light to scene.
 
 	// TODO: add objects' materials (save shaders).
-	for (const Mesh& m : _scene.getMeshes())
+	for (const MeshPtr& m : _scene->getMeshes())
 		assignGeometry(m);
 
 	initGeometry();
 	initShaders();
 
 	logInfo << "Engine rendering started (scene: "
-			<< _scene.getName() << ")" << logEnd;
+			<< _scene->getName() << ")" << logEnd;
 
 	glutMainLoop();
 }
 
 
-void TroglEngine::assignGeometry(const Mesh& mesh)
+void TroglEngine::assignGeometry(const MeshPtr& mesh)
 {
 	static const size_t vStep = 4;
 	static const size_t iStep = 3;
 	const size_t vOffset = _vertices.size();
 	const size_t iOffset = _indicies.size();
-	_vertices.resize(vOffset + (mesh.getVertices().size() * vStep), 0.0f);
+	_vertices.resize(vOffset + (mesh->getVertices().size() * vStep), 0.0f);
 	_colors.resize(_vertices.size(), 0.0f);
-	_indicies.resize(iOffset + (mesh.getFaces().size() * iStep), 0.0f);
+	_indicies.resize(iOffset + (mesh->getFaces().size() * iStep), 0.0f);
 
 	// add vertecies and colors.
 	size_t idx = 0;
-	const glm::vec3& objPos = mesh.getPosition();
+	const glm::vec3& objPos = mesh->getPosition();
 	for (size_t i = vOffset; i < _vertices.size(); i += vStep)
 	{
-		const Mesh::Vertex& v = mesh.getVertex(idx++);
+		const Mesh::Vertex& v = mesh->getVertex(idx++);
 
 		_vertices[i] = v.getPosition().x + objPos.x;
 		_vertices[i+1] = v.getPosition().y + objPos.y;
@@ -163,7 +169,7 @@ void TroglEngine::assignGeometry(const Mesh& mesh)
 	const size_t indexNumOffset = vOffset / vStep;
 	for (size_t i = iOffset; i < _indicies.size(); i += iStep)
 	{
-		const Mesh::Face& f = mesh.getFace(idx++);
+		const Mesh::Face& f = mesh->getFace(idx++);
 
 		_indicies[i] = indexNumOffset + f.getFirstIndex();
 		_indicies[i+1] = indexNumOffset + f.getSecondIndex();
@@ -245,7 +251,7 @@ void TroglEngine::drawGUI()
 
 void TroglEngine::renderFrame()
 {
-	const Color& bg = _scene.getBgColor();
+	const Color& bg = _scene->getBgColor();
 
 	// TODO: add comment description: what does each line do with GL.
 	glEnable(GL_DEPTH_TEST);
@@ -265,16 +271,16 @@ void TroglEngine::renderFrame()
 	// Matrix Projection.
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	const Camera& cam = _scene.getCamera();
-	_width = cam.getWidth();
-	_height = cam.getHeight();
-	gluPerspective(cam.getFOV(),
+	const CameraPtr& cam = _scene->getCamera();
+	_width = cam->getWidth();
+	_height = cam->getHeight();
+	gluPerspective(cam->getFOV(),
 				   (GLdouble)_width/(GLdouble)_height,
-				   cam.getLowDistance(),
-				   cam.getHighDistance());
+				   cam->getLowDistance(),
+				   cam->getHighDistance());
 
 	// TODO: create camera lookAt method, which returns the position where does camera look at.
-	const glm::mat4x4 matView  = glm::lookAt(cam.getPosition(), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
+	const glm::mat4x4 matView  = glm::lookAt(cam->getPosition(), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
 
 	// Drawing.
 	drawMatrix(matView);
@@ -433,9 +439,8 @@ bool TroglEngine::runGlewTest()
 	GLenum err = glewInit();
 	if (err != GLEW_OK)
 	{
-		logError << "Error in glewInit, code: " << err
+		logFatal << "Error in glewInit, code: " << err
 				 << ", message: " << glewGetErrorString(err) << logEnd;
-
 		_isValid = false;
 	}
 

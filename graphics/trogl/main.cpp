@@ -13,7 +13,7 @@
 
 
 static Logger& globalLogger = Logger::getInstance(std::cout,
-												  Logger::Level::DEBUG,
+												  Logger::Level::INFO,
 												  Logger::Description::FULL);
 
 
@@ -22,33 +22,29 @@ int main(int argc, char *argv[])
 	TroglEngine engine;
 
 	// Setup scene.
-	Camera camera;
-	camera.setPosition(glm::vec3(10.0, 4.0, 5.0));
-	Scene scene("Lab02", camera);
-	scene.setBgColor(Color(50, 50, 50));
+	CameraPtr camera(new Camera());
+	camera->setPosition(glm::vec3(10.0, 4.0, 5.0));
+	ScenePtr scene(new Scene("Lab03", camera));
+	scene->setBgColor(Color::grey);
 
-//	Cube c(1.0);
-//	scene.addMesh(c);
-
-	for (size_t y = 0; y < 4; ++y)
+	int size = 2;
+	float offset = 2.5;
+	for (int y = -size; y < size+1; ++y)
 	{
-		for (size_t x = 0; x < 4; ++x)
+		for (int x = -size; x < size+1; ++x)
 		{
-			MegaCube c;
-			c.setPosition(glm::vec3(x*2.1, 0.0f, y*2.1));
-			scene.addMesh(c);
+			MeshPtr c(new MegaCube());
+			c->setPosition(glm::vec3(x*offset, y*offset, 0.0));
+			scene->addMesh(c);
 		}
 	}
-
-//	Cylinder cylinder;
-//	scene.addMesh(cylinder);
 
 	engine.setActiveScene(scene);
 
 	// Setup shaders.
-	MetamorphoseShader* mprhShader = new MetamorphoseShader();
-	engine.setVertextShader(mprhShader);
-//	ScrewShader screwShader;
+	Shader* shader = new MetamorphoseShader();
+//	Shader* shader = new ScrewShader3();
+	engine.setVertextShader(shader);
 //	engine.setVertextShader(screwShader);
 
 	// Show scene.

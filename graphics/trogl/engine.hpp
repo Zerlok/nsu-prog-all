@@ -19,16 +19,16 @@ class TroglEngine
 		void setVertextShader(Shader* vs);
 		void setFragmentShader(Shader* fs);
 
-		void setGUI(const GUI& gui);
-		void setActiveScene(const Scene& scene);
+		void setGUI(GUI* gui);
+		void setActiveScene(const ScenePtr& scene);
 
 		void showScene(); // runs GL.
 
 	protected:
-		GUI _gui;
-		Scene _scene;
+		ScenePtr _scene;
+		GUI* _gui;
 
-		void assignGeometry(const Mesh& mesh);
+		void assignGeometry(const MeshPtr& mesh);
 
 		void initGeometry();
 		void deinitGeometry();
@@ -48,11 +48,10 @@ class TroglEngine
 		static void display();
 		static void reshape(int w, int h);
 		static void cycle();
-
 		static std::string generateWindowName(const Scene& scene);
+		bool runGlewTest();
 
 		bool _isValid;
-		bool runGlewTest();
 
 		float _width;
 		float _height;
@@ -65,6 +64,7 @@ class TroglEngine
 		GLuint _glCBO; // Color Buffer Object
 		GLuint _glIBO; // Index Buffer Object
 
+		// TODO: remove this attribute (or place it into shader).
 		GLuint _attrConstColor;
 
 		std::vector<GLfloat> _vertices;

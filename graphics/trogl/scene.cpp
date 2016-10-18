@@ -4,27 +4,28 @@
 #include <logger.hpp>
 
 
-const Camera Scene::DEFAULT_CAMERA = Camera();
 const std::string Scene::DEFAULT_NAME = "Scene";
+const CameraPtr Scene::DEFAULT_CAMERA = CameraPtr(new Camera());
 
 
-Scene::Scene(const std::string& name, const Camera& camera)
+Scene::Scene(const std::string& name,
+			 const CameraPtr& camera)
 	: Component(Component::Type::SCENE, name),
+	  _camera(camera),
 	  _meshes(),
 	  _lights(),
-	  _camera(camera),
 	  _bgColor(Color::grey)
 {
 	logDebug << "Scene with camera "
-			 << _camera.getName() << " created" << logEnd;
+			 << _camera->getName() << " created" << logEnd;
 }
 
 
 Scene::Scene(const Scene& scene)
 	: Component(scene),
+	  _camera(scene._camera),
 	  _meshes(scene._meshes),
 	  _lights(scene._lights),
-	  _camera(scene._camera),
 	  _bgColor(scene._bgColor)
 {
 }
@@ -39,28 +40,27 @@ Scene::~Scene()
 Scene& Scene::operator=(const Scene& scene)
 {
 	Component::operator=(scene);
-
+	_camera = scene._camera;
 	_meshes = scene._meshes;
 	_lights = scene._lights;
-	_camera = scene._camera;
 	_bgColor = scene._bgColor;
 
 	return (*this);
 }
 
 
-void Scene::addMesh(const Mesh& mesh)
+void Scene::addMesh(const MeshPtr& mesh)
 {
 	_meshes.push_back(mesh);
-	logDebug << "Mesh: " << _meshes.back().getName()
+	logDebug << "Mesh: " << _meshes.back()->getName()
 			 << " added to scene " << _name << logEnd;
 }
 
 
-void Scene::addLight(const Light& lamp)
+void Scene::addLight(const LightPtr& lamp)
 {
 	_lights.push_back(lamp);
-	logDebug << "Lamp: " << _lights.back().getName()
+	logDebug << "Lamp: " << _lights.back()->getName()
 			 << " added to scene " << _name << logEnd;
 }
 
@@ -77,21 +77,21 @@ const Lights& Scene::getLamps() const
 }
 
 
-const Camera& Scene::getCamera() const
+const CameraPtr& Scene::getCamera() const
 {
 	return _camera;
 }
 
 
-void Scene::setCamera(const Camera& camera)
+void Scene::setCamera(const CameraPtr& camera)
 {
-	logDebug << "Scene camera " << _camera.getName() << " (old)";
+	logDebug << "Scene old camera " << _camera->getName();
 	_camera = camera;
-	logDebug << " replaced with " << _camera.getName() << " (new)" << logEnd;
+	logDebug << " replaced with new " << _camera->getName() << logEnd;
 }
 
 
-const Color&Scene::getBgColor() const
+const Color& Scene::getBgColor() const
 {
 	return _bgColor;
 }
