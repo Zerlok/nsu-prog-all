@@ -7,16 +7,21 @@ class SharedPointer
 {
 	public:
 		// Typedefs.
-		typedef Type* pointer_t;
-		typedef Type& reference_t;
+		using pointer_t = Type*;
+		using reference_t = Type&;
+		using cpointer_t = Type const*;
+		using creference_t = const Type&;
 
 		// Constructors / Destructor.
 		SharedPointer(pointer_t ptr = nullptr)
-			: _ptr_destructor(new PointerDestructor(ptr)) { }
+			: _ptr_destructor(new PointerDestructor(ptr))
+		{
+		}
 		SharedPointer(const SharedPointer& sptr)
 			: _ptr_destructor(sptr._ptr_destructor)
 		{
-			++(_ptr_destructor->shares_counter);
+			if (_ptr_destructor != nullptr)
+				++(_ptr_destructor->shares_counter);
 		}
 		SharedPointer(SharedPointer&& sptr)
 			: _ptr_destructor(sptr._ptr_destructor)
@@ -31,7 +36,7 @@ class SharedPointer
 		// Operators.
 		SharedPointer& operator=(pointer_t ptr)
 		{
-			if ((_ptr_destructor->pure_pointer) == ptr)
+			if (this->operator==(ptr))
 				return (*this);
 
 			reset(ptr);
@@ -61,25 +66,42 @@ class SharedPointer
 			return (*this);
 		}
 
-		bool operator==(const pointer_t ptr) const
+		bool operator==(pointer_t ptr) const
+		{
+			return (get_pointer() == ptr);
+		}
+		bool operator==(cpointer_t ptr) const
 		{
 			return (get_cpointer() == ptr);
 		}
 		bool operator==(const SharedPointer& sptr) const
 		{
-			return ((_ptr_destructor == sptr._ptr_destructor)
-					|| (get_cpointer() == sptr.get_cpointer()));
+			return (get_cpointer() == sptr.get_cpointer());
 		}
+
+		bool operator!=(pointer_t ptr) const
+		{
+			return (!this->operator==(ptr));
+		}
+		bool operator!=(cpointer_t ptr) const
+		{
+			return (!this->operator==(ptr));
+		}
+		bool operator!=(const SharedPointer& sptr) const
+		{
+			return (!this->operator==(sptr));
+		}
+
 		operator bool() const
 		{
 			return !is_null();
 		}
 
-		const reference_t operator*() const
+		creference_t operator*() const
 		{
 			return get_creference();
 		}
-		const pointer_t operator->() const
+		cpointer_t operator->() const
 		{
 			return get_cpointer();
 		}
@@ -94,13 +116,13 @@ class SharedPointer
 		}
 
 		// Getters.
-		const pointer_t get_cpointer() const
+		cpointer_t get_cpointer() const
 		{
 			return (!is_null()
 					? (_ptr_destructor->pure_pointer)
 					: nullptr);
 		}
-		const pointer_t get_pointer() const
+		cpointer_t get_pointer() const
 		{
 			return get_cpointer();
 		}
@@ -112,11 +134,11 @@ class SharedPointer
 					: nullptr);
 		}
 
-		const reference_t get_creference() const
+		creference_t get_creference() const
 		{
 			return *(_ptr_destructor->pure_pointer);
 		}
-		const reference_t get_reference() const
+		creference_t get_reference() const
 		{
 			return get_creference();
 		}
@@ -154,8 +176,7 @@ class SharedPointer
 		void reset(pointer_t ptr)
 		{
 			release();
-			if (ptr != nullptr)
-				_ptr_destructor = new PointerDestructor(ptr);
+			_ptr_destructor = new PointerDestructor(ptr);
 		}
 
 	private:
@@ -164,12 +185,13 @@ class SharedPointer
 		 */
 		struct PointerDestructor
 		{
-			PointerDestructor(pointer_t ptr, size_t num = 1)
+			PointerDestructor(pointer_t ptr, const size_t& num = 1)
 				: pure_pointer(ptr),
 				  shares_counter(num) {}
 			~PointerDestructor()
 			{
-				delete pure_pointer;
+				if (pure_pointer != nullptr)
+					delete pure_pointer;
 			}
 
 			pointer_t pure_pointer;
@@ -196,7 +218,7 @@ class SharedPointer
 
 
 template<class Type>
-SharedPointer<Type> shared_pointer(Type* ptr)
+SharedPointer<Type> shared_pointer(typename SharedPointer<Type>::pointer_t ptr)
 {
 	return std::move(SharedPointer<Type>(ptr));
 }

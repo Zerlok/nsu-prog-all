@@ -31,7 +31,10 @@ SOURCES += main.cpp \
     shaders/screwshader.cpp \
     light.cpp \
     lamps/lamp.cpp \
-    gui.cpp
+    gui.cpp \
+    gui/guifps.cpp \
+    gui/guilabel.cpp \
+    gui/guiplane.cpp
 
 HEADERS += \
     engine.hpp \
@@ -55,4 +58,7 @@ HEADERS += \
     shaders/screwshader.hpp \
     light.hpp \
     lamps/lamp.hpp \
-    gui.hpp
+    gui.hpp \
+    gui/guilabel.hpp \
+    gui/guifps.hpp \
+    gui/guiplane.hpp

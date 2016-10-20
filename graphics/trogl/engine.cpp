@@ -4,8 +4,9 @@
 #include <sstream>
 #include "common/utils.h"
 
+
 // TODO: place default shaders into Material (default material shaders).
-Shader* TroglEngine::DEFAULT_VERTEX_SHADER = new Shader(
+const ShaderPtr Engine::DEFAULT_VERTEX_SHADER = new Shader(
 		"Default vertex shader",
 		"attribute vec4 position;"
 		"attribute vec4 color;"
@@ -14,17 +15,18 @@ Shader* TroglEngine::DEFAULT_VERTEX_SHADER = new Shader(
 		"  gl_Position = gl_ModelViewProjectionMatrix * position;\n"
 		"  gl_FrontColor = color * constColor;\n"
 		"}\n");
-Shader* TroglEngine::DEFAULT_FRAGMENT_SHADER = new Shader(
+const ShaderPtr Engine::DEFAULT_FRAGMENT_SHADER = new Shader(
 		"Default fragment shader",
 		"void main() {\n"
 		"  gl_FragColor = gl_Color;\n"
 		"}\n");
-TroglEngine* TroglEngine::_current = nullptr;
+Engine* Engine::_current = nullptr;
 
 
-TroglEngine::TroglEngine()
+Engine::Engine(bool displayFPS)
 	: _scene(nullptr),
 	  _gui(nullptr),
+	  _guiFPS(),
 	  _isValid(false),
 	  _width(0),
 	  _height(0),
@@ -43,6 +45,8 @@ TroglEngine::TroglEngine()
 {
 	logDebug << "Engine init started" << logEnd;
 
+	setDisplayFPS(displayFPS);
+
 	// TODO: move glut init into "initialize" function, create bool _isInited for checks.
 	int argc = 1;
 	char* argv = "engine";
@@ -54,7 +58,7 @@ TroglEngine::TroglEngine()
 }
 
 
-TroglEngine::~TroglEngine()
+Engine::~Engine()
 {
 	if (_isValid)
 	{
@@ -66,29 +70,42 @@ TroglEngine::~TroglEngine()
 }
 
 
-void TroglEngine::setVertextShader(Shader* vs)
+void Engine::setVertextShader(const ShaderPtr& vs)
 {
-	delete _vertexShader;
 	_vertexShader = vs;
 }
 
 
-void TroglEngine::setFragmentShader(Shader* fs)
+void Engine::setFragmentShader(const ShaderPtr& fs)
 {
-	delete _fragmentShader;
 	_fragmentShader = fs;
 }
 
 
-void TroglEngine::setActiveScene(const ScenePtr& scene)
+void Engine::setDisplayFPS(bool displayFPS)
+{
+	if (displayFPS)
+		_guiFPS = new GUIfps(0, 0, 1, 1);
+	else
+		_guiFPS = nullptr;
+}
+
+
+void Engine::setGUI(const GUIPtr& gui)
+{
+	_gui = gui;
+}
+
+
+void Engine::setActiveScene(const ScenePtr& scene)
 {
 	_scene = scene;
 }
 
 
-void TroglEngine::showScene()
+void Engine::showScene()
 {
-	if (_scene == nullptr)
+	if (!_scene)
 	{
 		logError << "Cannot show scene - it was not set yet!" << logEnd;
 		return;
@@ -98,7 +115,7 @@ void TroglEngine::showScene()
 	glutInitWindowSize(
 				cam.getWidth(),
 				cam.getHeight());
-	glutCreateWindow(generateWindowName(*_scene).c_str());
+	int sceneWindow = glutCreateWindow(generateWindowName(*_scene).c_str());
 
 	if (!runGlewTest())
 	{
@@ -129,14 +146,15 @@ void TroglEngine::showScene()
 	initGeometry();
 	initShaders();
 
-	logInfo << "Engine rendering started (scene: "
-			<< _scene->getName() << ")" << logEnd;
-
+	logInfo << "Engine rendering started (scene: " << _scene->getName() << ")" << logEnd;
 	glutMainLoop();
+	logInfo << "Engine rendering finished." << logEnd;
+
+	glutDestroyWindow(sceneWindow);
 }
 
 
-void TroglEngine::assignGeometry(const MeshPtr& mesh)
+void Engine::assignGeometry(const MeshPtr& mesh)
 {
 	static const size_t vStep = 4;
 	static const size_t iStep = 3;
@@ -178,7 +196,7 @@ void TroglEngine::assignGeometry(const MeshPtr& mesh)
 }
 
 
-void TroglEngine::drawMatrix(const glm::mat4x4& mat)
+void Engine::drawMatrix(const glm::mat4x4& mat)
 {
 	glMatrixMode(GL_MODELVIEW);
 	glLoadMatrixf(&mat[0][0]);
@@ -204,7 +222,7 @@ void TroglEngine::drawMatrix(const glm::mat4x4& mat)
 }
 
 
-void TroglEngine::drawGUI()
+void Engine::drawGUI()
 {
 	// What does it do?
 	glMatrixMode(GL_PROJECTION);
@@ -215,30 +233,28 @@ void TroglEngine::drawGUI()
 	glLoadIdentity();
 	glDisable(GL_DEPTH_TEST); // also disable the depth test so renders on top
 
-	glRasterPos2f(-0.9, +0.9);
-	glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-
-	// TODO: make FPS display as a GUI.
-	// TODO: make option FPS display on/off.
-	static size_t framesNum = 0;
-	static size_t fps = 0;
-	static size_t startCountTime = getTimeUInt();
-	size_t currentTime = getTimeUInt();
-
-	if (currentTime - startCountTime >= 1)
+	if (_guiFPS)
 	{
-		fps = framesNum;
-		framesNum = 0;
-		startCountTime = currentTime;
+		_guiFPS->tick();
+		drawGUILabel(*_guiFPS);
 	}
-	++framesNum;
 
-	std::stringstream ss;
-	ss << "FPS: " << fps;
-	const char* p = ss.str().c_str();
-	do
-		glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, *p);
-	while (*(++p));
+	if (_gui)
+	{
+		for (const GUIComponentPtr& comp : _gui->getComponents())
+		{
+			switch (comp->getGuiComponentType())
+			{
+				case GUIComponent::Type::LABEL:
+					drawGUILabel((const GUILabel&)(*comp));
+					break;
+				case GUIComponent::Type::PLANE:
+					drawGUIPlane((const GUIPlane&)(*comp));
+					break;
+			}
+		}
+	}
+
 	glEnable(GL_DEPTH_TEST); // Turn depth testing back on
 
 	// What does it do?
@@ -249,7 +265,23 @@ void TroglEngine::drawGUI()
 }
 
 
-void TroglEngine::renderFrame()
+void Engine::drawGUILabel(const GUILabel& glabel)
+{
+	glRasterPos2f(-0.9, +0.9);
+	glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+	const char* p = glabel.getText().c_str();
+	do
+		glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12, *p);
+	while (*(++p));
+}
+
+
+void Engine::drawGUIPlane(const GUIPlane& gplane)
+{
+}
+
+
+void Engine::renderFrame()
 {
 	const Color& bg = _scene->getBgColor();
 
@@ -292,7 +324,7 @@ void TroglEngine::renderFrame()
 }
 
 
-void TroglEngine::initGeometry()
+void Engine::initGeometry()
 {
 	logInfo << "Initializing the geometry (vertices, colors, polygons): "
 			<< _vertices.size() << " "
@@ -313,7 +345,7 @@ void TroglEngine::initGeometry()
 }
 
 
-void TroglEngine::deinitGeometry()
+void Engine::deinitGeometry()
 {
 	glDeleteBuffers(sizeof(_glVBO), &_glVBO);
 	glDeleteBuffers(sizeof(_glIBO), &_glIBO);
@@ -327,7 +359,7 @@ void TroglEngine::deinitGeometry()
 }
 
 
-void TroglEngine::initShaders()
+void Engine::initShaders()
 {
 	// TODO: Take shaders from object materials
 	/* HOWTO:
@@ -410,7 +442,7 @@ void TroglEngine::initShaders()
 }
 
 
-void TroglEngine::deinitShaders()
+void Engine::deinitShaders()
 {
 	// TODO: remove all shader programs (for each object) and delete shaders.
 	glDetachShader(_glShaderProgram, _glVertexShader);
@@ -419,14 +451,11 @@ void TroglEngine::deinitShaders()
 	glDeleteShader(_glFragmentShader);
 	glDeleteShader(_glVertexShader);
 
-	delete _vertexShader;
-	delete _fragmentShader;
-
 	logDebug << "Shaders deinited." << logEnd;
 }
 
 
-std::string TroglEngine::generateWindowName(const Scene& scene)
+std::string Engine::generateWindowName(const Scene& scene)
 {
 	std::stringstream ss;
 	ss << "TroGL Engine [" << scene.getName() << "]";
@@ -434,7 +463,7 @@ std::string TroglEngine::generateWindowName(const Scene& scene)
 }
 
 
-bool TroglEngine::runGlewTest()
+bool Engine::runGlewTest()
 {
 	GLenum err = glewInit();
 	if (err != GLEW_OK)
@@ -449,13 +478,13 @@ bool TroglEngine::runGlewTest()
 }
 
 
-void TroglEngine::display()
+void Engine::display()
 {
 	_current->renderFrame();
 }
 
 
-void TroglEngine::reshape(int w, int h)
+void Engine::reshape(int w, int h)
 {
 	float& width = _current->_width;
 	float& height = _current->_height;
@@ -471,7 +500,7 @@ void TroglEngine::reshape(int w, int h)
 }
 
 
-void TroglEngine::cycle()
+void Engine::cycle()
 {
 	glutPostRedisplay();
 }

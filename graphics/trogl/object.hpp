@@ -4,6 +4,7 @@
 
 #include <string>
 #include <glm/glm.hpp>
+#include <sharedpointer.h>
 #include "component.hpp"
 
 
@@ -51,6 +52,8 @@ class Object : public Component
 		static std::string generateNameFromObjType(const Type& type, const size_t& id);
 		static size_t objID;
 };
+
+using ObjectPtr = SharedPointer<Object>;
 
 
 #endif // __OBJECT_HPP__

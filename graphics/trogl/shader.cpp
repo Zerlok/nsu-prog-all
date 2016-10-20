@@ -45,7 +45,7 @@ Shader& Shader::operator=(Shader&& sh)
 }
 
 
-void Shader::initUniformsLocations(const GLuint& glShaderProgram)
+void Shader::initUniformsLocations(const GLuint&)
 {
 }
 

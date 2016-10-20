@@ -2,6 +2,7 @@
 #define __MATERIAL_HPP__
 
 
+#include <sharedpointer.h>
 #include "component.hpp"
 #include "shader.hpp"
 
@@ -9,8 +10,8 @@
 class Material : public Component
 {
 	public:
-		Material(const std::string& name = std::string(),
-				 const Shader& shader = Shader());
+		Material(const std::string& name = "",
+				 const ShaderPtr& shader = nullptr);
 		Material(const Material& mat);
 		Material(Material&& mat);
 		virtual ~Material();
@@ -20,8 +21,10 @@ class Material : public Component
 
 	protected:
 		// TODO: add light behavior.
-		Shader _shader;
+		ShaderPtr _shader;
 };
+
+using MaterialPtr = SharedPointer<Material>;
 
 
 #endif // __MATERIAL_HPP__

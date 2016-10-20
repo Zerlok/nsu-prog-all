@@ -1,32 +1,44 @@
 #include "gui.hpp"
 
 
-GUIComponent::GUIComponent(const size_t& x,
+GUIComponent::GUIComponent(const Type& type,
+						   const size_t& x,
 						   const size_t& y,
 						   const size_t& width,
-						   const size_t& height)
-	: _x(x),
+						   const size_t& height,
+						   const Color& fgColor,
+						   const Color& bgColor)
+	: _guiComponentType(type),
+	  _x(x),
 	  _y(y),
 	  _width(width),
-	  _height(height)
+	  _height(height),
+	  _fgColor(fgColor),
+	  _bgColor(bgColor)
 {
 }
 
 
 GUIComponent::GUIComponent(const GUIComponent& comp)
-	: _x(comp._x),
+	: _guiComponentType(comp._guiComponentType),
+	  _x(comp._x),
 	  _y(comp._y),
 	  _width(comp._width),
-	  _height(comp._height)
+	  _height(comp._height),
+	  _fgColor(comp._fgColor),
+	  _bgColor(comp._bgColor)
 {
 }
 
 
 GUIComponent::GUIComponent(GUIComponent&& comp)
-	: _x(std::move(comp._x)),
+	: _guiComponentType(std::move(comp._guiComponentType)),
+	  _x(std::move(comp._x)),
 	  _y(std::move(comp._y)),
 	  _width(std::move(comp._width)),
-	  _height(std::move(comp._height))
+	  _height(std::move(comp._height)),
+	  _fgColor(std::move(comp._fgColor)),
+	  _bgColor(std::move(comp._bgColor))
 {
 }
 
@@ -38,10 +50,13 @@ GUIComponent::~GUIComponent()
 
 GUIComponent& GUIComponent::operator=(const GUIComponent& comp)
 {
+	_guiComponentType = comp._guiComponentType;
 	_x = comp._x;
 	_y = comp._y;
 	_width = comp._width;
 	_height = comp._height;
+	_fgColor = comp._fgColor;
+	_bgColor = comp._bgColor;
 
 	return (*this);
 }
@@ -49,12 +64,21 @@ GUIComponent& GUIComponent::operator=(const GUIComponent& comp)
 
 GUIComponent& GUIComponent::operator=(GUIComponent&& comp)
 {
+	_guiComponentType = std::move(comp._guiComponentType);
 	_x = std::move(comp._x);
 	_y = std::move(comp._y);
 	_width = std::move(comp._width);
 	_height = std::move(comp._height);
+	_fgColor = std::move(comp._fgColor);
+	_bgColor = std::move(comp._bgColor);
 
 	return (*this);
+}
+
+
+const GUIComponent::Type& GUIComponent::getGuiComponentType() const
+{
+	return _guiComponentType;
 }
 
 
@@ -82,67 +106,59 @@ const size_t& GUIComponent::getHeight() const
 }
 
 
-GUILabel::GUILabel(const std::string& text,
-				   const size_t& x,
-				   const size_t& y,
-				   const size_t& width,
-				   const size_t& height)
-	: GUIComponent(x, y, width, height),
-	  _textStream()
+const Color& GUIComponent::getFgColor() const
 {
-	_textStream.str(text);
+	return _fgColor;
 }
 
 
-GUILabel::GUILabel(const GUILabel& comp)
-	: GUIComponent(comp),
-	  _textStream()
+const Color& GUIComponent::getBgColor() const
 {
-	_textStream.str(comp._textStream.str());
+	return _bgColor;
 }
 
 
-GUILabel::GUILabel(GUILabel&& comp)
-	: GUIComponent(comp),
-	  _textStream(std::move(comp._textStream))
+void GUIComponent::setX(const size_t& x)
 {
+	_x = x;
 }
 
 
-GUILabel::~GUILabel()
+void GUIComponent::setY(const size_t& y)
 {
+	_y = y;
 }
 
 
-GUILabel& GUILabel::operator=(const GUILabel& comp)
+void GUIComponent::setWidth(const size_t& width)
 {
-	GUIComponent::operator=(comp);
-	_textStream.str(comp._textStream.str());
-
-	return (*this);
+	_width = width;
 }
 
 
-GUILabel& GUILabel::operator=(GUILabel&& comp)
+void GUIComponent::setHeight(const size_t& height)
 {
-	GUIComponent::operator=(comp);
-	_textStream = std::move(comp._textStream);
-
-	return (*this);
+	_height = height;
 }
 
 
-std::string GUILabel::getText() const
+void GUIComponent::setFgColor(const Color& fgColor)
 {
-	return std::move(_textStream.str());
+	_fgColor = fgColor;
+}
+
+
+void GUIComponent::setBgColor(const Color& bgColor)
+{
+	_bgColor = bgColor;
 }
 
 
 // ------------ GUI ------------ //
 
 GUI::GUI()
-	: Component(Component::Type::GUI),
-	  _components()
+    : Component(Component::Type::GUI),
+      _components()
 {
 }
 
@@ -152,9 +168,13 @@ GUI::~GUI()
 }
 
 
-void GUI::addComponent(const GUIComponent& gcomp)
+bool GUI::addComponent(const GUIComponentPtr& gcomp)
 {
+    if (!gcomp)
+		return false;
+
 	_components.push_back(gcomp);
+	return true;
 }
 
 

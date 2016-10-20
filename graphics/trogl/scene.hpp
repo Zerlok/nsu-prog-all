@@ -14,10 +14,6 @@
 #include "camera.hpp"
 
 
-using CameraPtr = SharedPointer<Camera>;
-using MeshPtr = SharedPointer<Mesh>;
-using LightPtr = SharedPointer<Light>;
-
 using Meshes = std::list<MeshPtr>;
 using Lights = std::list<LightPtr>;
 

@@ -19,23 +19,26 @@ static Logger& globalLogger = Logger::getInstance(std::cout,
 
 int main(int argc, char *argv[])
 {
-	TroglEngine engine;
+	Engine engine;
 
 	// Setup scene.
-	CameraPtr camera(new Camera());
+	CameraPtr camera = new Camera();
 	camera->setPosition(glm::vec3(10.0, 4.0, 5.0));
-	ScenePtr scene(new Scene("Lab03", camera));
+	ScenePtr scene = new Scene("Lab03", camera);
 	scene->setBgColor(Color::grey);
 
 	int size = 2;
 	float offset = 2.5;
-	for (int y = -size; y < size+1; ++y)
+	for (int z = -size; z < size+1; ++z)
 	{
-		for (int x = -size; x < size+1; ++x)
+		for (int y = -size; y < size+1; ++y)
 		{
-			MeshPtr c(new MegaCube());
-			c->setPosition(glm::vec3(x*offset, y*offset, 0.0));
-			scene->addMesh(c);
+			for (int x = -size; x < size+1; ++x)
+			{
+				MeshPtr c = new MegaCube();
+				c->setPosition(glm::vec3(x*offset, y*offset, z*offset));
+				scene->addMesh(c);
+			}
 		}
 	}
 
@@ -48,6 +51,7 @@ int main(int argc, char *argv[])
 //	engine.setVertextShader(screwShader);
 
 	// Show scene.
+	engine.setDisplayFPS(true);
 	engine.showScene();
 
 	return 0;

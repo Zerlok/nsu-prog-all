@@ -2,6 +2,7 @@
 #define __LIGHT_HPP__
 
 
+#include <sharedpointer.h>
 #include "object.hpp"
 
 
@@ -28,6 +29,8 @@ class Light : public Object
 	protected:
 		Type _light_type;
 };
+
+using LightPtr = SharedPointer<Light>;
 
 
 #endif // __LIGHT_HPP__

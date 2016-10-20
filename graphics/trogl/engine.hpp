@@ -4,29 +4,36 @@
 
 #include "opengls.hpp"
 #include "scene.hpp"
-#include "gui.hpp"
 #include "shader.hpp"
+#include "gui.hpp"
+#include "gui/guilabel.hpp"
+#include "gui/guiplane.hpp"
+#include "gui/guifps.hpp"
 
 
-// TODO: make all data as pointers!
-class TroglEngine
+class Engine
 {
 	public:
-		TroglEngine();
-		virtual ~TroglEngine();
+		Engine(bool displayFPS = false);
+		virtual ~Engine();
 
 		// TODO: shader to material -> material for each object!
-		void setVertextShader(Shader* vs);
-		void setFragmentShader(Shader* fs);
+		void setVertextShader(const ShaderPtr& vs);
+		void setFragmentShader(const ShaderPtr& fs);
 
-		void setGUI(GUI* gui);
+		void setDisplayFPS(bool displayFPS);
+
+		void setGUI(const GUIPtr& gui);
 		void setActiveScene(const ScenePtr& scene);
 
 		void showScene(); // runs GL.
 
 	protected:
+		using GUIfpsPtr = SharedPointer<GUIfps>;
+
 		ScenePtr _scene;
-		GUI* _gui;
+		GUIPtr _gui;
+		GUIfpsPtr _guiFPS;
 
 		void assignGeometry(const MeshPtr& mesh);
 
@@ -37,14 +44,18 @@ class TroglEngine
 		void deinitShaders();
 
 		void drawGUI();
+		void drawGUILabel(const GUILabel& glabel);
+		void drawGUIPlane(const GUIPlane& gplane);
+
 		void drawMatrix(const glm::mat4x4& mat);
 		void renderFrame();
 
 	private:
-		static Shader* DEFAULT_VERTEX_SHADER;
-		static Shader* DEFAULT_FRAGMENT_SHADER;
 
-		static TroglEngine* _current;
+		static const ShaderPtr DEFAULT_VERTEX_SHADER;
+		static const ShaderPtr DEFAULT_FRAGMENT_SHADER;
+
+		static Engine* _current;
 		static void display();
 		static void reshape(int w, int h);
 		static void cycle();
@@ -71,8 +82,8 @@ class TroglEngine
 		std::vector<GLfloat> _colors;
 		std::vector<GLuint> _indicies;
 
-		Shader* _vertexShader;
-		Shader* _fragmentShader;
+		ShaderPtr _vertexShader;
+		ShaderPtr _fragmentShader;
 };
 
 

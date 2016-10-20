@@ -22,7 +22,7 @@ Mesh::Mesh(const Mesh& mesh)
 	  _faces(mesh._faces),
 	  _material(mesh._material)
 {
-	_reassign();
+	_reassignDataReferences();
 }
 
 
@@ -49,7 +49,7 @@ Mesh& Mesh::operator=(const Mesh& mesh)
 	Object::operator=(mesh);
 	_vertices = mesh._vertices;
 	_faces = mesh._faces;
-	_reassign();
+	_reassignDataReferences();
 
 	return (*this);
 }
@@ -60,7 +60,7 @@ Mesh& Mesh::operator=(Mesh&& mesh)
 	Object::operator=(mesh);
 	_vertices = std::move(mesh._vertices);
 	_faces = std::move(mesh._faces);
-	_reassign();
+	_reassignDataReferences();
 
 	return (*this);
 }
@@ -111,7 +111,7 @@ void Mesh::recalculateNormals()
 }
 
 
-void Mesh::_reassign()
+void Mesh::_reassignDataReferences()
 {
 	for (Vertex& v : _vertices)
 		v._mesh = this;
@@ -143,7 +143,7 @@ Mesh::Vertex::Vertex(const Mesh::Vertex& v)
 	: _position(v._position),
 	  _color(v._color),
 	  _idx(v._idx),
-	  _mesh(nullptr)
+	  _mesh(v._mesh)
 {
 }
 
@@ -178,7 +178,7 @@ Mesh::Vertex& Mesh::Vertex::operator=(Mesh::Vertex&& v)
 	_idx = std::move(v._idx);
 	_position = std::move(v._position);
 	_color = std::move(v._color);
-	_mesh = std::move(v._mesh);
+	_mesh = nullptr;
 
 	return (*this);
 }
@@ -237,7 +237,7 @@ Mesh::Face::Face(const Mesh::Face& f)
 	: _first(f._first),
 	  _second(f._second),
 	  _third(f._third),
-	  _mesh(nullptr)
+	  _mesh(f._mesh)
 {
 }
 
@@ -272,7 +272,7 @@ Mesh::Face& Mesh::Face::operator=(Mesh::Face&& f)
 	_first = std::move(f._first);
 	_second = std::move(f._second);
 	_third = std::move(f._third);
-	_mesh = std::move(f._mesh);
+	_mesh = nullptr;
 
 	return (*this);
 }
@@ -298,7 +298,7 @@ const size_t& Mesh::Face::getThirdIndex() const
 
 glm::vec3 Mesh::Face::getNormal() const
 {
-	if (_mesh == nullptr)
+	if (!_mesh)
 		return glm::vec3();
 
 	const Vertex& f = _mesh->getVertex(_first);

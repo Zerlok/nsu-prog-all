@@ -15,10 +15,10 @@ static double getTimeDouble()
 }
 
 
-static size_t getTimeUInt()
+static size_t getTimestamp()
 {
 	gettimeofday(&TIMEVALUE, NULL);
-	return TIMEVALUE.tv_usec / 100000;
+	return TIMEVALUE.tv_sec;
 }
 
 

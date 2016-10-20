@@ -2,6 +2,7 @@
 #define __CAMERA_HPP__
 
 
+#include <sharedpointer.h>
 #include "object.hpp"
 
 
@@ -47,6 +48,8 @@ class Camera : public Object
 		size_t _width;
 		size_t _height;
 };
+
+using CameraPtr = SharedPointer<Camera>;
 
 
 #endif // __CAMERA_HPP__

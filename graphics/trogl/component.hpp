@@ -4,6 +4,7 @@
 
 #include <string>
 #include <iostream>
+#include <sharedpointer.h>
 
 
 class Component
@@ -52,6 +53,8 @@ class Component
 	protected:
 		std::string _name;
 };
+
+using ComponentPtr = SharedPointer<Component>;
 
 std::ostream& operator<<(std::ostream& out, const Component& c);
 

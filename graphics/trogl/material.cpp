@@ -1,7 +1,7 @@
 #include "material.hpp"
 
 
-Material::Material(const std::string& name, const Shader& shader)
+Material::Material(const std::string& name, const ShaderPtr& shader)
 	: Component(Component::Type::MATERIAL, name),
 	  _shader(shader)
 {

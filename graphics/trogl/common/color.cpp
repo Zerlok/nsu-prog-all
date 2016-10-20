@@ -3,6 +3,7 @@
 #include <utility>
 
 
+const Color Color::transparent = Color(0, 0, 0, 0);
 const Color Color::white = Color(255, 255, 255);
 const Color Color::grey = Color(128, 128, 128);
 const Color Color::black = Color(0, 0, 0);

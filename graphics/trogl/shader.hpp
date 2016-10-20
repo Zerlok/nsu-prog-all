@@ -3,6 +3,7 @@
 
 
 #include <string>
+#include <sharedpointer.h>
 #include "opengls.hpp"
 #include "component.hpp"
 
@@ -19,7 +20,7 @@ class Shader : public Component
 		Shader& operator=(const Shader& sh);
 		Shader& operator=(Shader&& sh);
 
-		virtual void initUniformsLocations(const GLuint& glShaderProgram);
+		virtual void initUniformsLocations(const GLuint&);
 		virtual void prepareForRender();
 
 		const char* getSrcPtr() const;
@@ -28,6 +29,8 @@ class Shader : public Component
 	private:
 		std::string _src;
 };
+
+using ShaderPtr = SharedPointer<Shader>;
 
 
 #endif // __SHADER_HPP__
