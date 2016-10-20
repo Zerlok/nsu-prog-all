@@ -17,25 +17,22 @@ class Engine
 		Engine(bool displayFPS = false);
 		virtual ~Engine();
 
-		// TODO: shader to material -> material for each object!
-		void setVertextShader(const ShaderPtr& vs);
-		void setFragmentShader(const ShaderPtr& fs);
-
-		void setDisplayFPS(bool displayFPS);
-
+		// Methods.
 		void setGUI(const GUIPtr& gui);
+		void setDisplayFPS(bool displayFPS);
 		void setActiveScene(const ScenePtr& scene);
 
-		void showScene(); // runs GL.
+		void showScene();
 
 	protected:
+		// Inner classes.
+		class SingleVertexObject;
+
+		using EngineObjects = std::list<SingleVertexObject>;
 		using GUIfpsPtr = SharedPointer<GUIfps>;
 
-		ScenePtr _scene;
-		GUIPtr _gui;
-		GUIfpsPtr _guiFPS;
-
-		void assignGeometry(const MeshPtr& mesh);
+		// Methods.
+		void assignMeshToEngineObject(const MeshPtr& mesh);
 
 		void initGeometry();
 		void deinitGeometry();
@@ -47,43 +44,82 @@ class Engine
 		void drawGUILabel(const GUILabel& glabel);
 		void drawGUIPlane(const GUIPlane& gplane);
 
-		void drawMatrix(const glm::mat4x4& mat);
 		void renderFrame();
 
-	private:
+		// Fields.
+		ScenePtr _scene;
+		GUIPtr _gui;
+		GUIfpsPtr _guiFPS;
+		EngineObjects _objects;
+		bool _isValid;
+		float _width;
+		float _height;
 
+	private:
+		// Static fields.
 		static const ShaderPtr DEFAULT_VERTEX_SHADER;
 		static const ShaderPtr DEFAULT_FRAGMENT_SHADER;
 
 		static Engine* _current;
+
+		// Static methods.
 		static void display();
 		static void reshape(int w, int h);
 		static void cycle();
-		static std::string generateWindowName(const Scene& scene);
-		bool runGlewTest();
+		static std::string _generateWindowName(const Scene& scene);
+		static bool _runGlewTest();
+};
 
-		bool _isValid;
 
-		float _width;
-		float _height;
+class Engine::SingleVertexObject
+{
+	public:
+		SingleVertexObject(const MeshPtr& mesh);
+		SingleVertexObject(SingleVertexObject&& obj);
+		~SingleVertexObject();
 
-		GLuint _glVertexShader;
-		GLuint _glFragmentShader;
-		GLuint _glShaderProgram;
+		bool validate() const;
 
-		GLuint _glVBO; // Vertex Buffer Object
-		GLuint _glCBO; // Color Buffer Object
-		GLuint _glIBO; // Index Buffer Object
+		bool compileShaders();
+		void loadGeometry();
+		void loadShaders();
 
-		// TODO: remove this attribute (or place it into shader).
-		GLuint _attrConstColor;
+		void unloadGeometry();
+		void unloadShaders();
 
+		void draw(const glm::mat4x4& mat);
+
+	private:
+		// Static fields.
+		static const size_t _vertexStep;
+		static const size_t _colorStep;
+		static const size_t _indexStep;
+
+		// OpenGL attributes.
+		GLuint _glVBO;				// Vertex Buffer Object
+		GLuint _glCBO;				// Color Buffer Object
+		GLuint _glIBO;				// Index Buffer Object
+		GLuint _glVertexShader;		// Vertices rendering
+		GLuint _glFragmentShader;	// Faces rendering.
+		GLuint _glShaderProgram;	// Total shadering program.
+		GLuint _attrConstColor;		// Shader const color.
+		GLuint _attrObjCenterPosition; // Shader center position of object.
+		size_t _glShadersCompileCount;
+
+		// Object attributes.
 		std::vector<GLfloat> _vertices;
 		std::vector<GLfloat> _colors;
 		std::vector<GLuint> _indicies;
 
 		ShaderPtr _vertexShader;
 		ShaderPtr _fragmentShader;
+
+		MeshPtr _mesh;
+
+		// Methods.
+		bool _compileVertexShader();
+		bool _compileFragmentShader();
+		bool _compileShaderProgram();
 };
 
 

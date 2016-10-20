@@ -6,20 +6,6 @@
 
 
 // TODO: place default shaders into Material (default material shaders).
-const ShaderPtr Engine::DEFAULT_VERTEX_SHADER = new Shader(
-		"Default vertex shader",
-		"attribute vec4 position;"
-		"attribute vec4 color;"
-		"uniform vec4 constColor;"
-		"void main() {\n"
-		"  gl_Position = gl_ModelViewProjectionMatrix * position;\n"
-		"  gl_FrontColor = color * constColor;\n"
-		"}\n");
-const ShaderPtr Engine::DEFAULT_FRAGMENT_SHADER = new Shader(
-		"Default fragment shader",
-		"void main() {\n"
-		"  gl_FragColor = gl_Color;\n"
-		"}\n");
 Engine* Engine::_current = nullptr;
 
 
@@ -29,19 +15,7 @@ Engine::Engine(bool displayFPS)
 	  _guiFPS(),
 	  _isValid(false),
 	  _width(0),
-	  _height(0),
-	  _glVertexShader(),
-	  _glFragmentShader(),
-	  _glShaderProgram(),
-	  _glVBO(),
-	  _glCBO(),
-	  _glIBO(),
-	  _attrConstColor(),
-	  _vertices(),
-	  _colors(),
-	  _indicies(),
-	  _vertexShader(DEFAULT_VERTEX_SHADER),
-	  _fragmentShader(DEFAULT_FRAGMENT_SHADER)
+	  _height(0)
 {
 	logDebug << "Engine init started" << logEnd;
 
@@ -60,25 +34,7 @@ Engine::Engine(bool displayFPS)
 
 Engine::~Engine()
 {
-	if (_isValid)
-	{
-		deinitShaders();
-		deinitGeometry();
-	}
-
 	logDebug << "Engine removed" << logEnd;
-}
-
-
-void Engine::setVertextShader(const ShaderPtr& vs)
-{
-	_vertexShader = vs;
-}
-
-
-void Engine::setFragmentShader(const ShaderPtr& fs)
-{
-	_fragmentShader = fs;
 }
 
 
@@ -115,9 +71,9 @@ void Engine::showScene()
 	glutInitWindowSize(
 				cam.getWidth(),
 				cam.getHeight());
-	int sceneWindow = glutCreateWindow(generateWindowName(*_scene).c_str());
+	int sceneWindow = glutCreateWindow(_generateWindowName(*_scene).c_str());
 
-	if (!runGlewTest())
+	if (!_runGlewTest())
 	{
 		logError << "Cannot show scene " << _scene->getName()
 				 << " - engine couldn't initialize" << logEnd;
@@ -141,10 +97,18 @@ void Engine::showScene()
 
 	// TODO: add objects' materials (save shaders).
 	for (const MeshPtr& m : _scene->getMeshes())
-		assignGeometry(m);
+	{
+		_objects.push_back(SingleVertexObject(m));
+		SingleVertexObject& obj = _objects.back();
+		obj.compileShaders();
 
-	initGeometry();
-	initShaders();
+		if (!obj.validate())
+		{
+			_objects.pop_back();
+			logWarning << "Invalid object: " << m->getName()
+					   << " not assigned." << logEnd;
+		}
+	}
 
 	logInfo << "Engine rendering started (scene: " << _scene->getName() << ")" << logEnd;
 	glutMainLoop();
@@ -154,71 +118,9 @@ void Engine::showScene()
 }
 
 
-void Engine::assignGeometry(const MeshPtr& mesh)
+void Engine::assignMeshToEngineObject(const MeshPtr& mesh)
 {
-	static const size_t vStep = 4;
-	static const size_t iStep = 3;
-	const size_t vOffset = _vertices.size();
-	const size_t iOffset = _indicies.size();
-	_vertices.resize(vOffset + (mesh->getVertices().size() * vStep), 0.0f);
-	_colors.resize(_vertices.size(), 0.0f);
-	_indicies.resize(iOffset + (mesh->getFaces().size() * iStep), 0.0f);
-
-	// add vertecies and colors.
-	size_t idx = 0;
-	const glm::vec3& objPos = mesh->getPosition();
-	for (size_t i = vOffset; i < _vertices.size(); i += vStep)
-	{
-		const Mesh::Vertex& v = mesh->getVertex(idx++);
-
-		_vertices[i] = v.getPosition().x + objPos.x;
-		_vertices[i+1] = v.getPosition().y + objPos.y;
-		_vertices[i+2] = v.getPosition().z + objPos.z;
-		_vertices[i+3] = 1.0f;
-
-		_colors[i] = v.getColor().getRedF();
-		_colors[i+1] = v.getColor().getGreenF();
-		_colors[i+2] = v.getColor().getBlueF();
-		_colors[i+3] = v.getColor().getAlphaF();
-	}
-
-	// add indicies from mesh faces.
-	idx = 0;
-	const size_t indexNumOffset = vOffset / vStep;
-	for (size_t i = iOffset; i < _indicies.size(); i += iStep)
-	{
-		const Mesh::Face& f = mesh->getFace(idx++);
-
-		_indicies[i] = indexNumOffset + f.getFirstIndex();
-		_indicies[i+1] = indexNumOffset + f.getSecondIndex();
-		_indicies[i+2] = indexNumOffset + f.getThirdIndex();
-	}
-}
-
-
-void Engine::drawMatrix(const glm::mat4x4& mat)
-{
-	glMatrixMode(GL_MODELVIEW);
-	glLoadMatrixf(&mat[0][0]);
-
-	glUniform4f(_attrConstColor, 3, 3, 3, 1);
-	_vertexShader->prepareForRender();
-	_fragmentShader->prepareForRender();
-
-	glEnableVertexAttribArray(0);
-	glEnableVertexAttribArray(1);
-
-	glBindBuffer(GL_ARRAY_BUFFER, _glVBO);
-	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
-
-	glBindBuffer(GL_ARRAY_BUFFER, _glCBO);
-	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, 0);
-
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _glIBO);
-	glDrawElements(GL_TRIANGLES, _indicies.size() * sizeof(GLuint), GL_UNSIGNED_INT, 0);
-
-	glDisableVertexAttribArray(1);
-	glDisableVertexAttribArray(0);
+	_objects.push_back(SingleVertexObject(mesh));
 }
 
 
@@ -267,8 +169,12 @@ void Engine::drawGUI()
 
 void Engine::drawGUILabel(const GUILabel& glabel)
 {
+	// TODO: count position from gui component.
 	glRasterPos2f(-0.9, +0.9);
-	glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+	glColor4f(glabel.getFgColor().getRedF(),
+			  glabel.getFgColor().getGreenF(),
+			  glabel.getFgColor().getBlueF(),
+			  glabel.getFgColor().getAlphaF());
 	const char* p = glabel.getText().c_str();
 	do
 		glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12, *p);
@@ -283,12 +189,14 @@ void Engine::drawGUIPlane(const GUIPlane& gplane)
 
 void Engine::renderFrame()
 {
-	const Color& bg = _scene->getBgColor();
-
 	// TODO: add comment description: what does each line do with GL.
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
-	glClearColor(bg.getRedF(), bg.getGreenF(), bg.getBlueF(), bg.getAlphaF());
+	const Color& bg = _scene->getBgColor();
+	glClearColor(bg.getRedF(),
+				 bg.getGreenF(),
+				 bg.getBlueF(),
+				 bg.getAlphaF());
 	glClearDepth(1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); //Clear the colour buffer (more buffers later on)
 	glFrontFace(GL_CW);
@@ -297,8 +205,7 @@ void Engine::renderFrame()
 
 //	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
-	glLoadIdentity(); // Load the Identity Matrix to reset our drawing locations
-	glUseProgram(_glShaderProgram);
+//	glLoadIdentity(); // Load the Identity Matrix to reset our drawing locations
 
 	// Matrix Projection.
 	glMatrixMode(GL_PROJECTION);
@@ -312,150 +219,30 @@ void Engine::renderFrame()
 				   cam->getHighDistance());
 
 	// TODO: create camera lookAt method, which returns the position where does camera look at.
-	const glm::mat4x4 matView  = glm::lookAt(cam->getPosition(), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
+	const glm::mat4x4 matView  = glm::lookAt(cam->getPosition(),
+											 cam->getLookingAtPosition(),
+											 cam->getHeadDirection());
 
 	// Drawing.
-	drawMatrix(matView);
+	// TODO: draw every object with its material (load its shaders).
+	for (SingleVertexObject& obj : _objects)
+	{
+		obj.loadGeometry();
+		obj.loadShaders();
+		obj.draw(matView);
+		obj.unloadShaders();
+		obj.unloadGeometry();
+	}
+
+	// Draw GUI at the end of frame (to overlay over every objects on scene).
 	drawGUI();
 
 	// In the end.
-	glUseProgram(0);
 	glFlush();
 }
 
 
-void Engine::initGeometry()
-{
-	logInfo << "Initializing the geometry (vertices, colors, polygons): "
-			<< _vertices.size() << " "
-			<< _colors.size() << " "
-			<< _indicies.size() << logEnd;
-
-	glGenBuffers(1, &_glVBO);
-	glBindBuffer(GL_ARRAY_BUFFER, _glVBO);
-	glBufferData(GL_ARRAY_BUFFER, _vertices.size() * sizeof(GLfloat), _vertices.data(), GL_STATIC_DRAW);
-
-	glGenBuffers(1, &_glIBO);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _glIBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, _indicies.size() * sizeof(GLfloat), _indicies.data(), GL_STATIC_DRAW);
-
-	glGenBuffers(1, &_glCBO);
-	glBindBuffer(GL_ARRAY_BUFFER, _glCBO);
-	glBufferData(GL_ARRAY_BUFFER, _colors.size() * sizeof(GLuint), _colors.data(), GL_STATIC_DRAW);
-}
-
-
-void Engine::deinitGeometry()
-{
-	glDeleteBuffers(sizeof(_glVBO), &_glVBO);
-	glDeleteBuffers(sizeof(_glIBO), &_glIBO);
-	glDeleteBuffers(sizeof(_glVBO), &_glCBO);
-
-	_vertices.clear();
-	_colors.clear();
-	_indicies.clear();
-
-	logDebug << "Geometry deinited." << logEnd;
-}
-
-
-void Engine::initShaders()
-{
-	// TODO: Take shaders from object materials
-	/* HOWTO:
-	 * Compile shader program for each shader from objects' materials. Save
-	 * shader program into shaders vector.
-	 * Place compilation process in different functions.
-	 */
-	const char* vsSrc = _vertexShader->getSrcPtr();
-	const char* fsSrc = _fragmentShader->getSrcPtr();
-
-	int success = 0;
-
-	_glVertexShader = glCreateShader(GL_VERTEX_SHADER);
-	glShaderSource(_glVertexShader, 1, &vsSrc, NULL);
-	glCompileShader(_glVertexShader);
-	glGetShaderiv(_glVertexShader, GL_COMPILE_STATUS, &success);
-
-	if (!success)
-	{
-		const int MAX_INFO_LOG_SIZE = 1024;
-		GLchar infoLog[MAX_INFO_LOG_SIZE];
-		glGetShaderInfoLog(_glVertexShader, MAX_INFO_LOG_SIZE, NULL, infoLog);
-		logError << "Error in " << _vertexShader->getName()
-				 << "compilation:\n" << infoLog << logEnd;
-	}
-	else
-		logDebug << _vertexShader->getName() << " compiled successfuly." << logEnd;
-
-	_glFragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-	glShaderSource(_glFragmentShader, 1, &(fsSrc), NULL);
-	glCompileShader(_glFragmentShader);
-	glGetShaderiv(_glFragmentShader, GL_COMPILE_STATUS, &success);
-
-	if (!success)
-	{
-		const int MAX_INFO_LOG_SIZE = 1024;
-		GLchar infoLog[MAX_INFO_LOG_SIZE];
-		glGetShaderInfoLog(_glFragmentShader, MAX_INFO_LOG_SIZE, NULL, infoLog);
-		logError << "Error in " << _fragmentShader->getName()
-				 << " compilation:\n" << infoLog << logEnd;
-	}
-	else
-		logDebug << _fragmentShader->getName() << " compiled successfuly." << logEnd;
-
-	_glShaderProgram = glCreateProgram();
-	glAttachShader(_glShaderProgram, _glVertexShader);
-	glAttachShader(_glShaderProgram, _glFragmentShader);
-
-	glBindAttribLocation(_glShaderProgram, 0, "position");
-	glBindAttribLocation(_glShaderProgram, 1, "color");
-
-	glLinkProgram(_glShaderProgram);
-	glGetProgramiv(_glShaderProgram, GL_LINK_STATUS, &success);
-	if (!success)
-	{
-		const int MAX_INFO_LOG_SIZE = 1024;
-		GLchar infoLog[MAX_INFO_LOG_SIZE];
-		glGetProgramInfoLog(_glShaderProgram, MAX_INFO_LOG_SIZE, NULL, infoLog);
-		logError << "Error in program linkage: " << infoLog << logEnd;
-	}
-	else
-		logDebug << "Shader program linked successfuly." << logEnd;
-
-	glValidateProgram(_glShaderProgram);
-	glGetProgramiv(_glShaderProgram, GL_VALIDATE_STATUS, &success);
-	if (!success)
-	{
-		const int MAX_INFO_LOG_SIZE = 1024;
-		GLchar infoLog[MAX_INFO_LOG_SIZE];
-		glGetProgramInfoLog(_glShaderProgram, MAX_INFO_LOG_SIZE, NULL, infoLog);
-		logError << "Error in program validation: " << infoLog << logEnd;
-	}
-	else
-		logDebug << "Shader program is valid." << logEnd;
-
-	_attrConstColor = glGetUniformLocation(_glShaderProgram, "constColor");
-
-	_vertexShader->initUniformsLocations(_glShaderProgram);
-	_fragmentShader->initUniformsLocations(_glShaderProgram);
-}
-
-
-void Engine::deinitShaders()
-{
-	// TODO: remove all shader programs (for each object) and delete shaders.
-	glDetachShader(_glShaderProgram, _glVertexShader);
-	glDetachShader(_glShaderProgram, _glFragmentShader);
-	glDeleteProgram(_glShaderProgram);
-	glDeleteShader(_glFragmentShader);
-	glDeleteShader(_glVertexShader);
-
-	logDebug << "Shaders deinited." << logEnd;
-}
-
-
-std::string Engine::generateWindowName(const Scene& scene)
+std::string Engine::_generateWindowName(const Scene& scene)
 {
 	std::stringstream ss;
 	ss << "TroGL Engine [" << scene.getName() << "]";
@@ -463,18 +250,17 @@ std::string Engine::generateWindowName(const Scene& scene)
 }
 
 
-bool Engine::runGlewTest()
+bool Engine::_runGlewTest()
 {
 	GLenum err = glewInit();
 	if (err != GLEW_OK)
 	{
 		logFatal << "Error in glewInit, code: " << err
 				 << ", message: " << glewGetErrorString(err) << logEnd;
-		_isValid = false;
+		return false;
 	}
 
-	_isValid = true;
-	return _isValid;
+	return true;
 }
 
 
@@ -503,4 +289,300 @@ void Engine::reshape(int w, int h)
 void Engine::cycle()
 {
 	glutPostRedisplay();
+}
+
+
+// --------------------- SINGLE VERTEX OBJECT --------------------- //
+
+const size_t Engine::SingleVertexObject::_vertexStep = 4;
+const size_t Engine::SingleVertexObject::_colorStep = 4;
+const size_t Engine::SingleVertexObject::_indexStep = 3;
+
+
+Engine::SingleVertexObject::SingleVertexObject(const MeshPtr& mesh)
+	: _glVBO(),
+	  _glCBO(),
+	  _glIBO(),
+	  _glVertexShader(),
+	  _glFragmentShader(),
+	  _glShaderProgram(),
+	  _glShadersCompileCount(0),
+	  _vertices((mesh->getVertices().size() * _vertexStep), 0.0f),
+	  _colors((mesh->getVertices().size() * _colorStep), 1.0f),
+	  _indicies((mesh->getFaces().size() * _indexStep), 0.0f),
+	  _vertexShader(mesh->getMaterial()->getVertexShader()),
+	  _fragmentShader(mesh->getMaterial()->getFragmentShader()),
+	  _mesh(mesh)
+{
+	/* Apply mesh vertices positions from object attributes
+	 * (in reverse order: scale, rotation, position).
+	 */
+	_mesh->applyScale();
+	_mesh->applyRotation();
+	_mesh->applyPosition();
+
+	size_t idx;
+	// add vertecies and colors.
+	idx = 0;
+	for (size_t i = 0; i < _vertices.size(); i += _vertexStep)
+	{
+		const Mesh::Vertex& v = _mesh->getVertex(idx++);
+
+		_vertices[i] = v.getPosition().x;
+		_vertices[i+1] = v.getPosition().y;
+		_vertices[i+2] = v.getPosition().z;
+		_vertices[i+3] = 1.0f;
+
+		_colors[i] = v.getColor().getRedF();
+		_colors[i+1] = v.getColor().getGreenF();
+		_colors[i+2] = v.getColor().getBlueF();
+		_colors[i+3] = v.getColor().getAlphaF();
+	}
+
+	// add indicies from mesh faces.
+	idx = 0;
+	for (size_t i = 0; i < _indicies.size(); i += _indexStep)
+	{
+		const Mesh::Face& f = _mesh->getFace(idx++);
+
+		_indicies[i] = f.getFirstIndex();
+		_indicies[i+1] = f.getSecondIndex();
+		_indicies[i+2] = f.getThirdIndex();
+	}
+}
+
+
+Engine::SingleVertexObject::SingleVertexObject(Engine::SingleVertexObject&& obj)
+	: _glVBO(std::move(obj._glVBO)),
+	  _glCBO(std::move(obj._glCBO)),
+	  _glIBO(std::move(obj._glIBO)),
+	  _glVertexShader(std::move(obj._glVertexShader)),
+	  _glFragmentShader(std::move(obj._glFragmentShader)),
+	  _glShaderProgram(std::move(obj._glShaderProgram)),
+	  _glShadersCompileCount(std::move(obj._glShadersCompileCount)),
+	  _vertices(std::move(obj._vertices)),
+	  _colors(std::move(obj._colors)),
+	  _indicies(std::move(obj._indicies)),
+	  _vertexShader(std::move(obj._vertexShader)),
+	  _fragmentShader(std::move(obj._fragmentShader)),
+	  _mesh(obj._mesh)
+{
+}
+
+
+Engine::SingleVertexObject::~SingleVertexObject()
+{
+	glDeleteBuffers(sizeof(_glVBO), &_glVBO);
+	glDeleteBuffers(sizeof(_glIBO), &_glIBO);
+	glDeleteBuffers(sizeof(_glVBO), &_glCBO);
+	logDebug << "Objects geometry removed" << logEnd;
+
+	switch (_glShadersCompileCount)
+	{
+		case 3:
+			glDetachShader(_glShaderProgram, _glVertexShader);
+			glDetachShader(_glShaderProgram, _glFragmentShader);
+			glDeleteProgram(_glShaderProgram);
+
+		case 2:
+			glDeleteShader(_glFragmentShader);
+
+		case 1:
+			glDeleteShader(_glVertexShader);
+
+		case 0:
+		default:
+			break;
+	}
+
+	logDebug << "Shaders deinited." << logEnd;
+}
+
+
+void Engine::SingleVertexObject::loadGeometry()
+{
+	glGenBuffers(1, &_glVBO);
+	glBindBuffer(GL_ARRAY_BUFFER, _glVBO);
+	glBufferData(GL_ARRAY_BUFFER, _vertices.size() * sizeof(GLfloat), _vertices.data(), GL_STATIC_DRAW);
+
+	glGenBuffers(1, &_glIBO);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _glIBO);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, _indicies.size() * sizeof(GLfloat), _indicies.data(), GL_STATIC_DRAW);
+
+	glGenBuffers(1, &_glCBO);
+	glBindBuffer(GL_ARRAY_BUFFER, _glCBO);
+	glBufferData(GL_ARRAY_BUFFER, _colors.size() * sizeof(GLuint), _colors.data(), GL_STATIC_DRAW);
+}
+
+
+void Engine::SingleVertexObject::loadShaders()
+{
+	glUseProgram(_glShaderProgram);
+}
+
+
+void Engine::SingleVertexObject::unloadGeometry()
+{
+
+}
+
+
+void Engine::SingleVertexObject::unloadShaders()
+{
+	glUseProgram(0);
+}
+
+
+bool Engine::SingleVertexObject::validate() const
+{
+	if (_glShadersCompileCount != 3)
+		return false;
+
+	return true;
+}
+
+
+bool Engine::SingleVertexObject::compileShaders()
+{
+	_compileVertexShader();
+	_compileFragmentShader();
+	_compileShaderProgram();
+
+	if (_glShadersCompileCount != 3)
+		return false;
+
+	_attrConstColor = glGetUniformLocation(_glShaderProgram, "constColor");
+	_attrObjCenterPosition = glGetAttribLocation(_glShaderProgram, "objCenterPosition");
+
+	_vertexShader->initUniformsLocations(_glShaderProgram);
+	_fragmentShader->initUniformsLocations(_glShaderProgram);
+
+	return true;
+}
+
+
+void Engine::SingleVertexObject::draw(const glm::mat4x4& mat)
+{
+	glMatrixMode(GL_MODELVIEW);
+	glLoadMatrixf(&mat[0][0]);
+
+	const glm::vec3& pos = _mesh->getPosition();
+	glUniform4f(_attrConstColor, 3, 3, 3, 1);
+	glUniform3f(_attrObjCenterPosition, pos.x, pos.y, pos.z);
+	_vertexShader->prepareForRender();
+	_fragmentShader->prepareForRender();
+
+	glEnableVertexAttribArray(0);
+	glEnableVertexAttribArray(1);
+
+	glBindBuffer(GL_ARRAY_BUFFER, _glVBO);
+	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
+
+	glBindBuffer(GL_ARRAY_BUFFER, _glCBO);
+	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, 0);
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _glIBO);
+	glDrawElements(GL_TRIANGLES, _indicies.size() * sizeof(GLuint), GL_UNSIGNED_INT, 0);
+
+	glDisableVertexAttribArray(1);
+	glDisableVertexAttribArray(0);
+}
+
+
+bool Engine::SingleVertexObject::_compileVertexShader()
+{
+	int success = 0;
+	const char* vsSrc = _vertexShader->getSrcPtr();
+
+	_glVertexShader = glCreateShader(GL_VERTEX_SHADER);
+	glShaderSource(_glVertexShader, 1, &vsSrc, NULL);
+	glCompileShader(_glVertexShader);
+	glGetShaderiv(_glVertexShader, GL_COMPILE_STATUS, &success);
+
+	if (!success)
+	{
+		const int MAX_INFO_LOG_SIZE = 1024;
+		GLchar infoLog[MAX_INFO_LOG_SIZE];
+		glGetShaderInfoLog(_glVertexShader, MAX_INFO_LOG_SIZE, NULL, infoLog);
+		logError << "Error in " << _vertexShader->getName()
+				 << "compilation:\n" << infoLog << logEnd;
+
+		return false;
+	}
+
+	++_glShadersCompileCount;
+	logDebug << _vertexShader->getName() << " compiled successfuly." << logEnd;
+	return true;
+}
+
+
+bool Engine::SingleVertexObject::_compileFragmentShader()
+{
+	if (_glFragmentShader < 1)
+		return false;
+
+	int success = 0;
+	const char* fsSrc = _fragmentShader->getSrcPtr();
+
+	_glFragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+	glShaderSource(_glFragmentShader, 1, &(fsSrc), NULL);
+	glCompileShader(_glFragmentShader);
+	glGetShaderiv(_glFragmentShader, GL_COMPILE_STATUS, &success);
+
+	if (!success)
+	{
+		const int MAX_INFO_LOG_SIZE = 1024;
+		GLchar infoLog[MAX_INFO_LOG_SIZE];
+		glGetShaderInfoLog(_glFragmentShader, MAX_INFO_LOG_SIZE, NULL, infoLog);
+		logError << "Error in " << _fragmentShader->getName()
+				 << " compilation:\n" << infoLog << logEnd;
+
+		return false;
+	}
+
+	++_glShadersCompileCount;
+	logDebug << _fragmentShader->getName() << " compiled successfuly." << logEnd;
+	return true;
+}
+
+
+bool Engine::SingleVertexObject::_compileShaderProgram()
+{
+	if (_glShadersCompileCount < 2)
+		return false;
+
+	int success = 0;
+	const int MAX_INFO_LOG_SIZE = 1024;
+	GLchar infoLog[MAX_INFO_LOG_SIZE];
+
+	_glShaderProgram = glCreateProgram();
+	glAttachShader(_glShaderProgram, _glVertexShader);
+	glAttachShader(_glShaderProgram, _glFragmentShader);
+
+	glBindAttribLocation(_glShaderProgram, 0, "position");
+	glBindAttribLocation(_glShaderProgram, 1, "colors");
+
+	glLinkProgram(_glShaderProgram);
+	glGetProgramiv(_glShaderProgram, GL_LINK_STATUS, &success);
+	if (!success)
+	{
+		glGetProgramInfoLog(_glShaderProgram, MAX_INFO_LOG_SIZE, NULL, infoLog);
+		logError << "Error in program linkage: " << infoLog << logEnd;
+		return false;
+	}
+
+	logDebug << "Shader program linked successfuly." << logEnd;
+
+	glValidateProgram(_glShaderProgram);
+	glGetProgramiv(_glShaderProgram, GL_VALIDATE_STATUS, &success);
+	if (!success)
+	{
+		glGetProgramInfoLog(_glShaderProgram, MAX_INFO_LOG_SIZE, NULL, infoLog);
+		logError << "Error in program validation: " << infoLog << logEnd;
+		return false;
+	}
+
+	++_glShadersCompileCount;
+	logDebug << "Shader program is valid. Shaders compilation finished." << logEnd;
+	return true;
 }

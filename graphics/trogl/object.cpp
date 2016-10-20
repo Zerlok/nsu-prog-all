@@ -5,32 +5,16 @@
 #include <iomanip>
 
 
+size_t Object::_objID = 0;
+
 const std::string Object::DEFAULT_NAME = std::string();
-size_t Object::objID = 0;
+const glm::vec3 Object::DEFAULT_POSITION = glm::vec3(0.0, 0.0, 0.0);
+const glm::vec3 Object::DEFAULT_ROTATION = glm::vec3(0.0, 0.0, 0.0);
+const glm::vec3 Object::DEFAULT_SCALE = glm::vec3(1.0, 1.0, 1.0);
 
-
-std::string Object::generateNameFromObjType(const Type& type, const size_t& id)
-{
-	std::stringstream ss;
-	switch (type)
-	{
-		case Type::MESH:
-			ss << "Mesh";
-			break;
-		case Type::LIGHT:
-			ss << "Light";
-			break;
-		case Type::CAMERA:
-			ss << "Camera";
-			break;
-		default:
-			break;
-	}
-
-	ss << std::setw(3) << std::setfill('0') << id;
-
-	return ss.str();
-}
+const glm::vec3 Object::AXIS_X = glm::vec3(1.0, 0.0, 0.0);
+const glm::vec3 Object::AXIS_Y = glm::vec3(0.0, 1.0, 0.0);
+const glm::vec3 Object::AXIS_Z = glm::vec3(0.0, 0.0, 1.0);
 
 
 Object::Object(const Type& type,
@@ -40,11 +24,11 @@ Object::Object(const Type& type,
 	  _object_type(type),
 	  _position(pos)
 {
-	++objID;
+	++_objID;
 	if (name.empty())
-		_name = generateNameFromObjType(_object_type, objID);
+		_name = _generateNameFromObjType(_object_type, _objID);
 
-	logDebug << "Object " << objID << " " << _name << " created" << logEnd;
+	logDebug << "Object " << _objID << " " << _name << " created" << logEnd;
 }
 
 
@@ -134,4 +118,46 @@ const glm::vec3& Object::getScale() const
 void Object::setScale(const glm::vec3& scale)
 {
 	_scale = scale;
+}
+
+
+void Object::applyPosition()
+{
+	_position = DEFAULT_POSITION;
+}
+
+
+void Object::applyRotation()
+{
+	_rotation = DEFAULT_ROTATION;
+}
+
+
+void Object::applyScale()
+{
+	_scale = DEFAULT_SCALE;
+}
+
+
+std::string Object::_generateNameFromObjType(const Type& type, const size_t& id)
+{
+	std::stringstream ss;
+	switch (type)
+	{
+		case Type::MESH:
+			ss << "Mesh";
+			break;
+		case Type::LIGHT:
+			ss << "Light";
+			break;
+		case Type::CAMERA:
+			ss << "Camera";
+			break;
+		default:
+			break;
+	}
+
+	ss << std::setw(3) << std::setfill('0') << id;
+
+	return ss.str();
 }

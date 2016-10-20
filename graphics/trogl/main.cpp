@@ -13,7 +13,7 @@
 
 
 static Logger& globalLogger = Logger::getInstance(std::cout,
-												  Logger::Level::INFO,
+												  Logger::Level::DEBUG,
 												  Logger::Description::FULL);
 
 
@@ -27,30 +27,25 @@ int main(int argc, char *argv[])
 	ScenePtr scene = new Scene("Lab03", camera);
 	scene->setBgColor(Color::grey);
 
-	int size = 2;
-	float offset = 2.5;
-	for (int z = -size; z < size+1; ++z)
-	{
-		for (int y = -size; y < size+1; ++y)
-		{
-			for (int x = -size; x < size+1; ++x)
-			{
-				MeshPtr c = new MegaCube();
-				c->setPosition(glm::vec3(x*offset, y*offset, z*offset));
-				scene->addMesh(c);
-			}
-		}
-	}
+//	int size = 2;
+//	float offset = 2.5;
+//	for (int z = -size; z < size+1; ++z)
+//	{
+//		for (int y = -size; y < size+1; ++y)
+//		{
+//			for (int x = -size; x < size+1; ++x)
+//			{
+//				MeshPtr c = new MegaCube();
+//				c->setPosition(glm::vec3(x*offset, y*offset, z*offset));
+//				scene->addMesh(c);
+//			}
+//		}
+//	}
 
-	engine.setActiveScene(scene);
-
-	// Setup shaders.
-	Shader* shader = new MetamorphoseShader();
-//	Shader* shader = new ScrewShader3();
-	engine.setVertextShader(shader);
-//	engine.setVertextShader(screwShader);
+	scene->addMesh(new MegaCube());
 
 	// Show scene.
+	engine.setActiveScene(scene);
 	engine.setDisplayFPS(true);
 	engine.showScene();
 

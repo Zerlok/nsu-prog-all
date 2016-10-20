@@ -37,9 +37,9 @@ Mesh::Mesh(Mesh&& mesh)
 
 Mesh::~Mesh()
 {
-	logDebug << "Mesh object removed and it's "
+	logDebug << "Mesh object with "
 			 << _vertices.size() << " vertices, "
-			 << _faces.size() << " faces"
+			 << _faces.size() << " faces removed"
 			 << logEnd;
 }
 
@@ -98,6 +98,12 @@ const Mesh::Faces&Mesh::getFaces() const
 }
 
 
+const MaterialPtr& Mesh::getMaterial() const
+{
+	return _material;
+}
+
+
 void Mesh::addFace(const Mesh::Face& face)
 {
 	_faces.push_back(face);
@@ -105,9 +111,47 @@ void Mesh::addFace(const Mesh::Face& face)
 }
 
 
+void Mesh::setMaterial(const MaterialPtr& material)
+{
+	_material = material;
+}
+
+
 void Mesh::recalculateNormals()
 {
+}
 
+
+void Mesh::applyPosition()
+{
+	for (Vertex& v : _vertices)
+		v._position += _position;
+}
+
+
+void Mesh::applyRotation()
+{
+	glm::mat4 xRotationMat(1);
+	glm::mat4 yRotationMat(1);
+	glm::mat4 zRotationMat(1);
+
+	xRotationMat = glm::rotate(xRotationMat, _rotation.x, AXIS_X);
+	yRotationMat = glm::rotate(yRotationMat, _rotation.y, AXIS_Y);
+	zRotationMat = glm::rotate(zRotationMat, _rotation.z, AXIS_Z);
+
+	for (Vertex& v : _vertices)
+	{
+		v._position = glm::vec3(xRotationMat * glm::vec4(v._position, 1.0));
+		v._position = glm::vec3(yRotationMat * glm::vec4(v._position, 1.0));
+		v._position = glm::vec3(zRotationMat * glm::vec4(v._position, 1.0));
+	}
+}
+
+
+void Mesh::applyScale()
+{
+	for (Vertex& v : _vertices)
+		v._position *= _scale;
 }
 
 
@@ -121,7 +165,10 @@ void Mesh::_reassignDataReferences()
 }
 
 
-Mesh::Vertex::Vertex(const float& x, const float& y, const float& z, const Color& color)
+Mesh::Vertex::Vertex(const float& x,
+					 const float& y,
+					 const float& z,
+					 const Color& color)
 	: _position(x, y, z),
 	  _color(color),
 	  _idx(0),

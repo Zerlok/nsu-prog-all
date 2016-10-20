@@ -2,6 +2,10 @@
 #define __SHAREDPOINTER_H__
 
 
+#include <stddef.h>
+#include <utility>
+
+
 template<class Type, bool do_copy_on_write = false>
 class SharedPointer
 {

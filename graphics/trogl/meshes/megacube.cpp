@@ -2,6 +2,7 @@
 
 
 #include <logger.hpp>
+#include "shaders/metamorphose_shader.h"
 
 
 MegaCube::MegaCube()
@@ -9,8 +10,11 @@ MegaCube::MegaCube()
 {
 	logDebug << "Mega cube init started" << logEnd;
 
+	static const MaterialPtr mat = new Material("MegaMaterial", new MetamorphoseShader());
 	static const Color color1 = Color::black;
 	static const Color color2 = Color::white;
+
+	setMaterial(mat);
 
 	// Vertices.
 	{
@@ -478,5 +482,4 @@ MegaCube::MegaCube()
 
 MegaCube::~MegaCube()
 {
-
 }

@@ -34,7 +34,8 @@ SOURCES += main.cpp \
     gui.cpp \
     gui/guifps.cpp \
     gui/guilabel.cpp \
-    gui/guiplane.cpp
+    gui/guiplane.cpp \
+    materials/diffusematerial.cpp
 
 HEADERS += \
     engine.hpp \
@@ -61,4 +62,5 @@ HEADERS += \
     gui.hpp \
     gui/guilabel.hpp \
     gui/guifps.hpp \
-    gui/guiplane.hpp
+    gui/guiplane.hpp \
+    materials/diffusematerial.hpp

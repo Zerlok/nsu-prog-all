@@ -22,24 +22,26 @@ class Camera : public Object
 
 		Camera& operator=(const Camera& c);
 		Camera& operator=(Camera&& c);
-		operator bool() const;
 
+		operator bool() const;
+		bool operator!() const;
 		bool isValid() const;
 
 		const float& getFOV() const;
-		void setFOV(const float& fov);
-
 		const float& getLowDistance() const;
-		void setLowDistance(const float& distance);
-
 		const float& getHighDistance() const;
-		void setHighDistance(const float& distance);
-
 		const size_t& getWidth() const;
-		void setWidth(const size_t& width);
-
 		const size_t& getHeight() const;
+		const glm::vec3& getLookingAtPosition() const;
+		const glm::vec3& getHeadDirection() const;
+
+		void setFOV(const float& fov);
+		void setLowDistance(const float& distance);
+		void setHighDistance(const float& distance);
+		void setWidth(const size_t& width);
 		void setHeight(const size_t& height);
+		void setLookingAtPosition(const glm::vec3& lookingAtPosition);
+		void setHeadDirection(const glm::vec3& headDirection);
 
 	private:
 		float _fov;
@@ -47,6 +49,8 @@ class Camera : public Object
 		float _high_distance;
 		size_t _width;
 		size_t _height;
+		glm::vec3 _lookingAtPosition;
+		glm::vec3 _headDirection;
 };
 
 using CameraPtr = SharedPointer<Camera>;

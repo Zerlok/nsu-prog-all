@@ -39,18 +39,30 @@ class Object : public Component
 		const glm::vec3& getScale() const;
 		void setScale(const glm::vec3& scale);
 
+		virtual void applyPosition();
+		virtual void applyRotation();
+		virtual void applyScale();
+
 	private:
 		Type _object_type;
 
 	protected:
+		static const std::string DEFAULT_NAME;
+		static const glm::vec3 DEFAULT_POSITION;
+		static const glm::vec3 DEFAULT_ROTATION;
+		static const glm::vec3 DEFAULT_SCALE;
+
+		static const glm::vec3 AXIS_X;
+		static const glm::vec3 AXIS_Y;
+		static const glm::vec3 AXIS_Z;
+
 		glm::vec3 _position;
 		glm::vec3 _rotation;
 		glm::vec3 _scale;
 
 	private:
-		static const std::string DEFAULT_NAME;
-		static std::string generateNameFromObjType(const Type& type, const size_t& id);
-		static size_t objID;
+		static size_t _objID;
+		static std::string _generateNameFromObjType(const Type& type, const size_t& id);
 };
 
 using ObjectPtr = SharedPointer<Object>;

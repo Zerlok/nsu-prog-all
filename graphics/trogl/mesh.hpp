@@ -19,10 +19,10 @@ class Mesh : public Object
 		using Vertices = std::vector<Vertex>;
 		using Faces = std::vector<Face>;
 
-		Mesh(const std::string& name = std::string(),
-			 const glm::vec3& pos = glm::vec3(0.0, 0.0, 0.0),
-			 const glm::vec3& rot = glm::vec3(0.0, 0.0, 0.0),
-			 const glm::vec3& sca = glm::vec3(1.0, 1.0, 1.0));
+		Mesh(const std::string& name = "",
+			 const glm::vec3& pos = Object::DEFAULT_POSITION,
+			 const glm::vec3& rot = Object::DEFAULT_ROTATION,
+			 const glm::vec3& sca = Object::DEFAULT_SCALE);
 		Mesh(const Mesh& mesh);
 		Mesh(Mesh&& mesh);
 		virtual ~Mesh();
@@ -31,17 +31,21 @@ class Mesh : public Object
 		Mesh& operator=(Mesh&& mesh);
 
 		const Vertex& getVertex(const size_t& i) const;
-		const Vertices& getVertices() const;
-		void addVertex(const Vertex& vertex);
-
 		const Face& getFace(const size_t& i) const;
-		const Faces& getFaces() const;
-		void addFace(const Face& face);
 
+		const Vertices& getVertices() const;
+		const Faces& getFaces() const;
 		const MaterialPtr& getMaterial() const;
+
+		void addVertex(const Vertex& vertex);
+		void addFace(const Face& face);
 		void setMaterial(const MaterialPtr& material);
 
 		void recalculateNormals();
+
+		void applyPosition() override;
+		void applyRotation() override;
+		void applyScale() override;
 
 	protected:
 		Vertices _vertices;

@@ -16,7 +16,9 @@ Camera::Camera()
 	  _low_distance(DEFAULT_LOW_DISTANCE),
 	  _high_distance(DEFAULT_HIGH_DISTANCE),
 	  _width(DEFAULT_WIDTH),
-	  _height(DEFAULT_HEIGHT)
+	  _height(DEFAULT_HEIGHT),
+	  _lookingAtPosition(Object::DEFAULT_POSITION),
+	  _headDirection(Object::AXIS_Y)
 {
 }
 
@@ -27,7 +29,9 @@ Camera::Camera(const Camera& c)
 	  _low_distance(c._low_distance),
 	  _high_distance(c._high_distance),
 	  _width(c._width),
-	  _height(c._height)
+	  _height(c._height),
+	  _lookingAtPosition(c._lookingAtPosition),
+	  _headDirection(c._headDirection)
 {
 }
 
@@ -38,7 +42,9 @@ Camera::Camera(Camera&& c)
 	  _low_distance(std::move(c._low_distance)),
 	  _high_distance(std::move(c._high_distance)),
 	  _width(std::move(c._width)),
-	  _height(std::move(c._height))
+	  _height(std::move(c._height)),
+	  _lookingAtPosition(std::move(c._lookingAtPosition)),
+	  _headDirection(std::move(c._headDirection))
 {
 }
 
@@ -51,12 +57,13 @@ Camera::~Camera()
 Camera& Camera::operator=(const Camera& c)
 {
 	Object::operator=(c);
-
 	_fov = c._fov;
 	_low_distance = c._low_distance;
 	_high_distance = c._high_distance;
 	_width = c._width;
 	_height = c._height;
+	_lookingAtPosition = c._lookingAtPosition;
+	_headDirection = c._headDirection;
 
 	return (*this);
 }
@@ -65,12 +72,13 @@ Camera& Camera::operator=(const Camera& c)
 Camera& Camera::operator=(Camera&& c)
 {
 	Object::operator=(c);
-
 	_fov = std::move(c._fov);
 	_low_distance = std::move(c._low_distance);
 	_high_distance = std::move(c._high_distance);
 	_width = std::move(c._width);
 	_height = std::move(c._height);
+	_lookingAtPosition = std::move(c._lookingAtPosition);
+	_headDirection = std::move(c._headDirection);
 
 	return (*this);
 }
@@ -82,8 +90,15 @@ Camera::operator bool() const
 }
 
 
+bool Camera::operator!() const
+{
+	return (!bool(*this));
+}
+
+
 bool Camera::isValid() const
 {
+	// Check fov.
 	if ((_fov <= 0.0f)
 			&& (_fov >= 170.0))
 	{
@@ -92,11 +107,23 @@ bool Camera::isValid() const
 		return false;
 	}
 
+	// Check far and near distances ranges.
 	if (_high_distance < _low_distance)
 	{
 		logWarning << "Camera: Invalid distances parameters: "
 				   << _low_distance << " >= " << _high_distance
 				   << " (but must be less)" << logEnd;
+		return false;
+	}
+
+	// Check looking at position distance is in far and near distances range.
+	const glm::vec3::length_type lookingDistance = (_lookingAtPosition - _position).length();
+	if ((lookingDistance > _high_distance)
+			|| (lookingDistance < _low_distance))
+	{
+		logWarning << "Camera: Invalid looking at distance: "
+				   << lookingDistance << " is not in range of [low distance, high distance]"
+				   << logEnd;
 		return false;
 	}
 
@@ -139,16 +166,36 @@ void Camera::setHeight(const size_t& height)
 	_height = height;
 }
 
+const glm::vec3& Camera::getLookingAtPosition() const
+{
+    return _lookingAtPosition;
+}
+
+void Camera::setLookingAtPosition(const glm::vec3& lookingAtPosition)
+{
+    _lookingAtPosition = lookingAtPosition;
+}
+
+const glm::vec3& Camera::getHeadDirection() const
+{
+    return _headDirection;
+}
+
+void Camera::setHeadDirection(const glm::vec3& headDirection)
+{
+    _headDirection = headDirection;
+}
+
 
 const float& Camera::getLowDistance() const
 {
-	return _low_distance;
+    return _low_distance;
 }
 
 
 void Camera::setLowDistance(const float& distance)
 {
-	_low_distance = distance;
+    _low_distance = distance;
 }
 
 
