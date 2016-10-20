@@ -4,7 +4,6 @@
 
 #include <iostream>
 #include <string>
-#include <sys/time.h>
 
 
 class Logger
@@ -28,14 +27,17 @@ class Logger
 			FULL,
 		};
 
+		// Methods.
 		static void init(
-				std::ostream& _out = std::cout,
+				std::ostream& out = std::cout,
 				const Level& level = Level::INFO,
-				const Description& descr = Description::LEVEL);
+				const Description& descr = Description::LEVEL,
+				const bool& displayInitMsg = true);
 		static Logger& getInstance(
-				std::ostream& _out,
-				const Level& level,
-				const Description& descr);
+				std::ostream& out = std::cout,
+				const Level& level = Level::INFO,
+				const Description& descr = Description::LEVEL,
+				const bool& displayInitMsg = true);
 
 		static Logger& out(const Level& level,
 						   const char* funcname = EMPTY_STRING,
@@ -58,6 +60,7 @@ class Logger
 							 const int& linenum = 0);
 		static Logger& end();
 
+		// Operators.
 		Logger& operator<<(Logger& (*manipulator)(void));
 		Logger& operator<<(std::ostream& (*manipulator)(std::ostream&));
 
@@ -70,30 +73,34 @@ class Logger
 		}
 
 	private:
-		static const std::string CONSTRUCTOR_MESSAGE;
-		static const std::string DESTRUCTOR_MESSAGE;
+		// Static.
+		static const char* CONSTRUCTOR_MESSAGE;
+		static const char* DESTRUCTOR_MESSAGE;
 
 		static const char* EMPTY_STRING;
 
 		static Logger* _instance;
 
-		static std::ostream& addTimestamp(std::ostream& _out);
+		static std::string basename(const char* filename);
+		static std::ostream& addTimestamp(std::ostream& out);
 		static Level validateInitialLevel(const Level& level);
 
+		// Constructors / Destructor.
 		Logger(std::ostream& output,
 			   const Level& level,
-			   const Description& descr);
+			   const Description& descr,
+			   const bool& displayInitMsg);
 		~Logger();
 		Logger(const Logger&) = delete;
 		Logger(Logger&&) = delete;
 		Logger& operator=(const Logger&) = delete;
 		Logger& operator=(Logger&&) = delete;
 
-		Logger& _out(
-				const Level &level,
-				const char* funcname,
-				const char* filename,
-				const int &linenum);
+		// Methods.
+		Logger& _out(const Level &level,
+					 const char* funcname,
+					 const char* filename,
+					 const int &linenum);
 		Logger& _debug(const char* funcname,
 					   const char* filename,
 					   const int& linenum);
@@ -113,22 +120,28 @@ class Logger
 
 		bool validateCurrentLevel() const;
 
+		// Fields.
 		std::ostream& _output;
 		Level _current_message_level;
 		const Level _level;
 		const Description _description;
+		const bool _displayDestroyMsg;
 };
 
 std::ostream& operator<<(std::ostream& out, const Logger::Level& level);
 
 
-#define logEnd (Logger::end)
+#define logger_t static Logger&
+#define logger_i Logger::getInstance
+#define logger_l Logger::Level
+#define logger_d Logger::Description
 
 #define logDebug (Logger::debug(__FUNCTION__, __FILE__, __LINE__))
 #define logInfo (Logger::info(__FUNCTION__, __FILE__, __LINE__))
 #define logWarning (Logger::warning(__FUNCTION__, __FILE__, __LINE__))
 #define logError (Logger::error(__FUNCTION__, __FILE__, __LINE__))
 #define logFatal (Logger::fatal(__FUNCTION__, __FILE__, __LINE__))
+#define logEndl (Logger::end)
 
 
 #endif // __LOGGER_HPP__

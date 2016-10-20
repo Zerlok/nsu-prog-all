@@ -8,7 +8,7 @@
 MegaCube::MegaCube()
 	: Mesh("MegaCube")
 {
-	logDebug << "Mega cube init started" << logEnd;
+	logDebug << "Mega cube init started" << logEndl;
 
 	static const MaterialPtr mat = new Material("MegaMaterial", new MetamorphoseShader());
 	static const Color color1 = Color::black;
@@ -476,7 +476,7 @@ MegaCube::MegaCube()
 	addFace(Face(150, 18, 151));
 	}
 
-	logDebug << "Mega cube init finished" << logEnd;
+	logDebug << "Mega cube init finished" << logEndl;
 }
 
 

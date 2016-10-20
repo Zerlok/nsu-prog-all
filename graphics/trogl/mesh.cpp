@@ -9,7 +9,7 @@ Mesh::Mesh(const std::string& name,
 		   const glm::vec3& sca)
 	: Object(Object::Type::MESH, name)
 {
-	logDebug << "Mesh object created" << logEnd;
+	logDebug << "Mesh object created" << logEndl;
 	setPosition(pos);
 	setRotation(rot);
 	setScale(sca);
@@ -40,7 +40,7 @@ Mesh::~Mesh()
 	logDebug << "Mesh object with "
 			 << _vertices.size() << " vertices, "
 			 << _faces.size() << " faces removed"
-			 << logEnd;
+			 << logEndl;
 }
 
 

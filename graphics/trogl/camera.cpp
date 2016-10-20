@@ -103,7 +103,7 @@ bool Camera::isValid() const
 			&& (_fov >= 170.0))
 	{
 		logWarning << "Camera: Invalid FOV parameter "
-				   << _fov << " (0.0; 170)!" << logEnd;
+				   << _fov << " (0.0; 170)!" << logEndl;
 		return false;
 	}
 
@@ -112,7 +112,7 @@ bool Camera::isValid() const
 	{
 		logWarning << "Camera: Invalid distances parameters: "
 				   << _low_distance << " >= " << _high_distance
-				   << " (but must be less)" << logEnd;
+				   << " (but must be less)" << logEndl;
 		return false;
 	}
 
@@ -123,7 +123,7 @@ bool Camera::isValid() const
 	{
 		logWarning << "Camera: Invalid looking at distance: "
 				   << lookingDistance << " is not in range of [low distance, high distance]"
-				   << logEnd;
+				   << logEndl;
 		return false;
 	}
 

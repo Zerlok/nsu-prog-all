@@ -1,21 +1,30 @@
 #include "logger.hpp"
 
 
+#include <sys/time.h>
+
+
 Logger* Logger::_instance = nullptr;
-const std::string Logger::CONSTRUCTOR_MESSAGE = "Logger was started";
-const std::string Logger::DESTRUCTOR_MESSAGE = "Logger was stopped";
+const char* Logger::CONSTRUCTOR_MESSAGE = "========== LOGGER STARTED ==========";
+const char* Logger::DESTRUCTOR_MESSAGE = "========== LOGGER STOPPED ==========";
 const char* Logger::EMPTY_STRING = "none";
 
 
-void Logger::init(std::ostream& out, const Level& level, const Description& descr)
+void Logger::init(std::ostream& out,
+				  const Level& level,
+				  const Description& descr,
+				  const bool& displayInitMsg)
 {
-	static Logger instance(out, level, descr);
+	static Logger instance(out, level, descr, displayInitMsg);
 }
 
 
-Logger& Logger::getInstance(std::ostream& out, const Level& level, const Logger::Description& descr)
+Logger& Logger::getInstance(std::ostream& out,
+							const Level& level,
+							const Logger::Description& descr,
+							const bool& displayInitMsg)
 {
-	init(out, level, descr);
+	init(out, level, descr, displayInitMsg);
 	return (*_instance);
 }
 
@@ -25,7 +34,7 @@ Logger& Logger::out(const Logger::Level& level,
 					const char* filename,
 					const int& linenum)
 {
-	return _instance->_out(level, funcname, filename, linenum);
+	return getInstance()._out(level, funcname, filename, linenum);
 }
 
 
@@ -33,7 +42,7 @@ Logger& Logger::debug(const char* funcname,
 					  const char* filename,
 					  const int& linenum)
 {
-	return _instance->_debug(funcname, filename, linenum);
+	return getInstance()._debug(funcname, filename, linenum);
 }
 
 
@@ -41,7 +50,7 @@ Logger& Logger::info(const char* funcname,
 					 const char* filename,
 					 const int& linenum)
 {
-	return _instance->_info(funcname, filename, linenum);
+	return getInstance()._info(funcname, filename, linenum);
 }
 
 
@@ -49,7 +58,7 @@ Logger& Logger::warning(const char* funcname,
 						const char* filename,
 						const int& linenum)
 {
-	return _instance->_warning(funcname, filename, linenum);
+	return getInstance()._warning(funcname, filename, linenum);
 }
 
 
@@ -57,7 +66,7 @@ Logger& Logger::error(const char* funcname,
 					  const char* filename,
 					  const int& linenum)
 {
-	return _instance->_error(funcname, filename, linenum);
+	return getInstance()._error(funcname, filename, linenum);
 }
 
 
@@ -65,13 +74,25 @@ Logger& Logger::fatal(const char* funcname,
 					  const char* filename,
 					  const int& linenum)
 {
-	return _instance->_fatal(funcname, filename, linenum);
+	return getInstance()._fatal(funcname, filename, linenum);
 }
 
 
 Logger& Logger::end()
 {
-	return _instance->_end();
+	return getInstance()._end();
+}
+
+
+std::string Logger::basename(const char* filepath)
+{
+	std::string path = filepath;
+	size_t sep_pos = path.rfind('/') + 1;
+
+	if (sep_pos == std::string::npos)
+		return std::move(path);
+
+	return std::move(path.substr(sep_pos, path.size() - sep_pos));
 }
 
 
@@ -93,6 +114,9 @@ Logger::Level Logger::validateInitialLevel(const Logger::Level& level)
 		case Level::ERROR:
 			return level;
 
+		case Level::FATAL:
+			return Level::ERROR;
+
 		case Level::NONE:
 		default:
 			return Level::DEBUG;
@@ -100,26 +124,39 @@ Logger::Level Logger::validateInitialLevel(const Logger::Level& level)
 }
 
 
-Logger::Logger(std::ostream& output, const Level& level, const Description& descr)
+Logger::Logger(std::ostream& output,
+			   const Level& level,
+			   const Description& descr,
+			   const bool& displayInitMsg)
 	: _output(output),
 	  _level(validateInitialLevel(level)),
-	  _description(descr)
+	  _description(descr),
+	  _displayDestroyMsg(displayInitMsg)
 {
 	_instance = this;
-	info() << CONSTRUCTOR_MESSAGE << end;
+
+	if (displayInitMsg)
+	{
+		_info(__FUNCTION__, __FILE__, __LINE__) << CONSTRUCTOR_MESSAGE;
+		_end();
+	}
 }
 
 
 Logger::~Logger()
 {
-	info() << DESTRUCTOR_MESSAGE << end;
+	if (_displayDestroyMsg)
+	{
+		_info(__FUNCTION__, __FILE__, __LINE__) << DESTRUCTOR_MESSAGE;
+		_end();
+	}
 }
 
 
 Logger& Logger::_out(const Level& level,
-					const char* funcname,
-					const char* filename,
-					const int &linenum)
+					 const char* funcname,
+					 const char* filename,
+					 const int &linenum)
 {
 	if (_current_message_level != Level::NONE)
 		return (*this);
@@ -136,12 +173,12 @@ Logger& Logger::_out(const Level& level,
 				break;
 			case Description::LEVEL_AND_FUNCTION:
 				_output << '[' << level
-						<< "] @" << funcname << ' ';
+						<< "] [" << funcname << "] ";
 				break;
 			case Description::FULL:
 				_output << '[' << level
-						<< "] @" << funcname
-						<< " (in file " << filename << ':' << linenum << ") ";
+						<< "] [" << funcname
+						<< "] (in " << basename(filename) << ':' << linenum << ") ";
 				break;
 			case Description::MESSAGE_ONLY:
 			default:

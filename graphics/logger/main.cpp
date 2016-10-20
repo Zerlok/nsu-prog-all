@@ -4,28 +4,31 @@
 #include "logger.hpp"
 
 
+
+logger_t log = logger_i(std::cout, logger_l::DEBUG, logger_d::FULL);
+
+
+
 int function(int a)
 {
-	logInfo << "Input argument: " << a << logEnd;
+	logInfo << "Input argument: " << a << logEndl;
 	return a+100;
 }
 
 
 int main(int argc, char *argv[])
 {
-	Logger::init(std::cout, Logger::Level::INFO, Logger::Description::LEVEL);
-
-	Logger::debug() << "hello, debug!" << Logger::end;
-	Logger::info() << "hello, info!" << Logger::end;
+	logDebug << "hello, debug!" << logEndl;
+	logInfo << "hello, info!" << logEndl;
 
 	Logger::init();
 
-	Logger::warning() << "hello, warning!" << Logger::end;
+	logWarning << "hello, warning!" << logEndl;
 
 	if (function(10) < 200)
-		Logger::error() << "hello, error!" << Logger::end;
+		logError << "hello, error!" << logEndl;
 
-	logWarning << "This is it!" << logEnd;
+	logWarning << "This is it!" << logEndl;
 
 	return 0;
 }

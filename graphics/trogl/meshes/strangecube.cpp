@@ -7,7 +7,7 @@ StrangeCube::StrangeCube(const Color& borderColor,
 				   const Color& innerColor)
 	: Mesh()
 {
-	logDebug << "Strange cube init started" << logEnd;
+	logDebug << "Strange cube init started" << logEndl;
 
 	// vertices and faces init.
 	{
@@ -177,7 +177,7 @@ StrangeCube::StrangeCube(const Color& borderColor,
 		addFace(Face(54, 55, 53));
 	}
 
-	logDebug << "Strange cube init finished" << logEnd;
+	logDebug << "Strange cube init finished" << logEndl;
 }
 
 

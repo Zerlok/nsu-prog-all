@@ -28,7 +28,7 @@ Object::Object(const Type& type,
 	if (name.empty())
 		_name = _generateNameFromObjType(_object_type, _objID);
 
-	logDebug << "Object " << _objID << " " << _name << " created" << logEnd;
+	logDebug << "Object " << _objID << " " << _name << " created" << logEndl;
 }
 
 
@@ -37,7 +37,7 @@ Object::Object(const Object& obj)
 	  _object_type(obj._object_type),
 	  _position(obj._position)
 {
-	logDebug << "Object " << _name << " copyed" << logEnd;
+	logDebug << "Object " << _name << " copyed" << logEndl;
 }
 
 
@@ -51,7 +51,7 @@ Object::Object(Object&& obj)
 
 Object::~Object()
 {
-	logDebug << "Object " << _name << " deleted" << logEnd;
+	logDebug << "Object " << _name << " deleted" << logEndl;
 }
 
 

@@ -17,7 +17,7 @@ Engine::Engine(bool displayFPS)
 	  _width(0),
 	  _height(0)
 {
-	logDebug << "Engine init started" << logEnd;
+	logDebug << "Engine init started" << logEndl;
 
 	setDisplayFPS(displayFPS);
 
@@ -28,13 +28,13 @@ Engine::Engine(bool displayFPS)
 	glutInitDisplayMode(GLUT_RGBA);
 	glutInitWindowPosition(2000, 100);
 
-	logDebug << "Engine created" << logEnd;
+	logDebug << "Engine created" << logEndl;
 }
 
 
 Engine::~Engine()
 {
-	logDebug << "Engine removed" << logEnd;
+	logDebug << "Engine removed" << logEndl;
 }
 
 
@@ -63,7 +63,7 @@ void Engine::showScene()
 {
 	if (!_scene)
 	{
-		logError << "Cannot show scene - it was not set yet!" << logEnd;
+		logError << "Cannot show scene - it was not set yet!" << logEndl;
 		return;
 	}
 
@@ -76,14 +76,14 @@ void Engine::showScene()
 	if (!_runGlewTest())
 	{
 		logError << "Cannot show scene " << _scene->getName()
-				 << " - engine couldn't initialize" << logEnd;
+				 << " - engine couldn't initialize" << logEndl;
 		return;
 	}
 
 	if (!cam.isValid())
 	{
 		logError << "Cannot show scene " << _scene->getName()
-				 << " - camera settings are invalid" << logEnd;
+				 << " - camera settings are invalid" << logEndl;
 		return;
 	}
 
@@ -104,15 +104,15 @@ void Engine::showScene()
 
 		if (!obj.validate())
 		{
-			_objects.pop_back();
 			logWarning << "Invalid object: " << m->getName()
-					   << " not assigned." << logEnd;
+					   << " not assigned." << logEndl;
+			_objects.pop_back();
 		}
 	}
 
-	logInfo << "Engine rendering started (scene: " << _scene->getName() << ")" << logEnd;
+	logInfo << "Engine rendering started (scene: " << _scene->getName() << ")" << logEndl;
 	glutMainLoop();
-	logInfo << "Engine rendering finished." << logEnd;
+	logInfo << "Engine rendering finished." << logEndl;
 
 	glutDestroyWindow(sceneWindow);
 }
@@ -256,7 +256,7 @@ bool Engine::_runGlewTest()
 	if (err != GLEW_OK)
 	{
 		logFatal << "Error in glewInit, code: " << err
-				 << ", message: " << glewGetErrorString(err) << logEnd;
+				 << ", message: " << glewGetErrorString(err) << logEndl;
 		return false;
 	}
 
@@ -375,7 +375,7 @@ Engine::SingleVertexObject::~SingleVertexObject()
 	glDeleteBuffers(sizeof(_glVBO), &_glVBO);
 	glDeleteBuffers(sizeof(_glIBO), &_glIBO);
 	glDeleteBuffers(sizeof(_glVBO), &_glCBO);
-	logDebug << "Objects geometry removed" << logEnd;
+	logDebug << "Objects geometry removed" << logEndl;
 
 	switch (_glShadersCompileCount)
 	{
@@ -395,7 +395,7 @@ Engine::SingleVertexObject::~SingleVertexObject()
 			break;
 	}
 
-	logDebug << "Shaders deinited." << logEnd;
+	logDebug << "Shaders deinited." << logEndl;
 }
 
 
@@ -444,6 +444,8 @@ bool Engine::SingleVertexObject::validate() const
 
 bool Engine::SingleVertexObject::compileShaders()
 {
+	_glShadersCompileCount = 0;
+
 	_compileVertexShader();
 	_compileFragmentShader();
 	_compileShaderProgram();
@@ -505,20 +507,20 @@ bool Engine::SingleVertexObject::_compileVertexShader()
 		GLchar infoLog[MAX_INFO_LOG_SIZE];
 		glGetShaderInfoLog(_glVertexShader, MAX_INFO_LOG_SIZE, NULL, infoLog);
 		logError << "Error in " << _vertexShader->getName()
-				 << "compilation:\n" << infoLog << logEnd;
+				 << "compilation:\n" << infoLog << logEndl;
 
 		return false;
 	}
 
 	++_glShadersCompileCount;
-	logDebug << _vertexShader->getName() << " compiled successfuly." << logEnd;
+	logDebug << _vertexShader->getName() << " compiled successfuly." << logEndl;
 	return true;
 }
 
 
 bool Engine::SingleVertexObject::_compileFragmentShader()
 {
-	if (_glFragmentShader < 1)
+	if (_glShadersCompileCount < 1)
 		return false;
 
 	int success = 0;
@@ -535,13 +537,13 @@ bool Engine::SingleVertexObject::_compileFragmentShader()
 		GLchar infoLog[MAX_INFO_LOG_SIZE];
 		glGetShaderInfoLog(_glFragmentShader, MAX_INFO_LOG_SIZE, NULL, infoLog);
 		logError << "Error in " << _fragmentShader->getName()
-				 << " compilation:\n" << infoLog << logEnd;
+				 << " compilation:\n" << infoLog << logEndl;
 
 		return false;
 	}
 
 	++_glShadersCompileCount;
-	logDebug << _fragmentShader->getName() << " compiled successfuly." << logEnd;
+	logDebug << _fragmentShader->getName() << " compiled successfuly." << logEndl;
 	return true;
 }
 
@@ -567,22 +569,22 @@ bool Engine::SingleVertexObject::_compileShaderProgram()
 	if (!success)
 	{
 		glGetProgramInfoLog(_glShaderProgram, MAX_INFO_LOG_SIZE, NULL, infoLog);
-		logError << "Error in program linkage: " << infoLog << logEnd;
+		logError << "Error in program linkage: " << infoLog << logEndl;
 		return false;
 	}
 
-	logDebug << "Shader program linked successfuly." << logEnd;
+	logDebug << "Shader program linked successfuly." << logEndl;
 
 	glValidateProgram(_glShaderProgram);
 	glGetProgramiv(_glShaderProgram, GL_VALIDATE_STATUS, &success);
 	if (!success)
 	{
 		glGetProgramInfoLog(_glShaderProgram, MAX_INFO_LOG_SIZE, NULL, infoLog);
-		logError << "Error in program validation: " << infoLog << logEnd;
+		logError << "Error in program validation: " << infoLog << logEndl;
 		return false;
 	}
 
 	++_glShadersCompileCount;
-	logDebug << "Shader program is valid. Shaders compilation finished." << logEnd;
+	logDebug << "Shader program is valid. Shaders compilation finished." << logEndl;
 	return true;
 }
