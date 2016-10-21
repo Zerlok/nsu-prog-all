@@ -6,6 +6,9 @@
 #include "common/utils.h"
 
 
+loggerType loggerInstance = loggerForModule(Logger::Level::DEBUG, Logger::Description::FULL);
+
+
 Engine* Engine::_current = nullptr;
 
 
@@ -17,7 +20,7 @@ Engine::Engine(bool displayFPS)
 	  _width(0),
 	  _height(0)
 {
-	logDebug << "Engine init started" << logEndl;
+	logModule << "Engine init started" << logEndl;
 
 	setDisplayFPS(displayFPS);
 
@@ -28,13 +31,13 @@ Engine::Engine(bool displayFPS)
 	glutInitDisplayMode(GLUT_RGBA);
 	glutInitWindowPosition(2000, 100);
 
-	logDebug << "Engine created" << logEndl;
+	logModule << "Engine created" << logEndl;
 }
 
 
 Engine::~Engine()
 {
-	logDebug << "Engine removed" << logEndl;
+	logModule << "Engine removed" << logEndl;
 }
 
 
@@ -421,7 +424,7 @@ void Engine::SingleVertexObject::deinitGLGeometry()
 	glDeleteBuffers(sizeof(_glCBO), &_glCBO);
 	glDeleteBuffers(sizeof(_glIBO), &_glIBO);
 
-	logDebug << "Objects geometry removed" << logEndl;
+	logModule << "Objects geometry removed" << logEndl;
 }
 
 

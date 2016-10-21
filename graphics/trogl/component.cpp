@@ -6,6 +6,9 @@
 #include <logger.hpp>
 
 
+loggerType loggerInstance = loggerForModule(Logger::Level::DEBUG, Logger::Description::FULL);
+
+
 size_t Component::_globID = 0;
 
 
@@ -18,7 +21,7 @@ Component::Component(const Component::Type& t,
 	if (_name.empty())
 		_name = _generateNameFromType(_type, _ID);
 
-	logDebug << (*this) << " created" << logEndl;
+	logModule << (*this) << " created" << logEndl;
 }
 
 
@@ -27,7 +30,7 @@ Component::Component(const Component& c)
 	  _ID(c._ID),
 	  _name(c._name)
 {
-	logDebug << (*this) << " created from " << c << logEndl;
+	logModule << (*this) << " copied from " << c << logEndl;
 }
 
 
@@ -36,13 +39,13 @@ Component::Component(Component&& c)
 	  _ID(std::move(c._ID)),
 	  _name(std::move(c._name))
 {
-	logDebug << "Component " << (*this) << " moved" << logEndl;
+	logModule << "Component " << (*this) << " moved" << logEndl;
 }
 
 
 Component::~Component()
 {
-	logDebug << "Component " << (*this) << " deleted" << logEndl;
+	logModule << "Component " << (*this) << " deleted" << logEndl;
 }
 
 

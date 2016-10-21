@@ -1,6 +1,12 @@
 #include "light.hpp"
 
 
+#include <logger.hpp>
+
+
+loggerType loggerInstance = loggerForModule(Logger::Level::DEBUG, Logger::Description::FULL);
+
+
 Light::Light(const Type& type)
 	: Object(Object::Type::LIGHT),
 	  _lightType(type)

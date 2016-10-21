@@ -5,6 +5,9 @@
 #include <logger.hpp>
 
 
+loggerType loggerInstance = loggerForModule(Logger::Level::DEBUG, Logger::Description::FULL);
+
+
 size_t Object::_objID = 0;
 
 const std::string Object::DEFAULT_NAME = std::string();
@@ -28,7 +31,7 @@ Object::Object(const Type& type,
 	if (name.empty())
 		_name = _generateNameFromObjType(_object_type, _objID);
 
-	logDebug << "Object " << _objID << " " << _name << " created" << logEndl;
+	logModule << "Object " << _objID << " " << _name << " created" << logEndl;
 }
 
 
@@ -37,7 +40,7 @@ Object::Object(const Object& obj)
 	  _object_type(obj._object_type),
 	  _position(obj._position)
 {
-	logDebug << "Object " << _name << " copyed" << logEndl;
+	logModule << "Object " << _name << " copyed" << logEndl;
 }
 
 
@@ -51,7 +54,7 @@ Object::Object(Object&& obj)
 
 Object::~Object()
 {
-	logDebug << "Object " << _name << " deleted" << logEndl;
+	logModule << "Object " << _name << " deleted" << logEndl;
 }
 
 

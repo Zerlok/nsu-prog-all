@@ -4,6 +4,9 @@
 #include <logger.hpp>
 
 
+loggerType loggerInstance = loggerForModule(Logger::Level::DEBUG, Logger::Description::FULL);
+
+
 const std::string Scene::DEFAULT_NAME = "Scene";
 const CameraPtr Scene::DEFAULT_CAMERA = CameraPtr(new Camera());
 
@@ -16,7 +19,7 @@ Scene::Scene(const std::string& name,
 	  _lights(),
 	  _bgColor(Color::grey)
 {
-	logDebug << "Scene with camera "
+	logModule << "Scene with camera "
 			 << _camera->getName() << " created" << logEndl;
 }
 
@@ -33,7 +36,7 @@ Scene::Scene(const Scene& scene)
 
 Scene::~Scene()
 {
-	logDebug << "Scene removed" << logEndl;
+	logModule << "Scene removed" << logEndl;
 }
 
 
@@ -76,7 +79,7 @@ const CameraPtr& Scene::getCamera() const
 void Scene::addMesh(const MeshPtr& mesh)
 {
 	_meshes.push_back(mesh);
-	logDebug << "Mesh: " << _meshes.back()->getName()
+	logModule << "Mesh: " << _meshes.back()->getName()
 			 << " added to scene " << _name << logEndl;
 }
 
@@ -84,16 +87,16 @@ void Scene::addMesh(const MeshPtr& mesh)
 void Scene::addLight(const LightPtr& lamp)
 {
 	_lights.push_back(lamp);
-	logDebug << "Lamp: " << _lights.back()->getName()
+	logModule << "Lamp: " << _lights.back()->getName()
 			 << " added to scene " << _name << logEndl;
 }
 
 
 void Scene::setCamera(const CameraPtr& camera)
 {
-	logDebug << "Scene old camera " << _camera->getName();
+	logModule << "Scene old camera " << _camera->getName();
 	_camera = camera;
-	logDebug << " replaced with new " << _camera->getName() << logEndl;
+	logModule << " replaced with new " << _camera->getName() << logEndl;
 }
 
 

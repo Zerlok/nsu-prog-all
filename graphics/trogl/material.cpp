@@ -1,6 +1,12 @@
 #include "material.hpp"
 
 
+#include <logger.hpp>
+
+
+loggerType loggerInstance = loggerForModule(Logger::Level::DEBUG, Logger::Description::FULL);
+
+
 const ShaderPtr Material::DEFAULT_SHADER = new Shader("Diffuse vertex shader");
 
 
@@ -9,6 +15,9 @@ Material::Material(const std::string& name,
 	: Component(Component::Type::MATERIAL, name),
 	  _shader(shader)
 {
+	logModule << "Material: " << name << " with "
+			  << shader->getName() << " created"
+			  << logEndl;
 }
 
 

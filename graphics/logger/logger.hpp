@@ -4,11 +4,13 @@
 
 #include <iostream>
 #include <string>
+#include <unordered_map>
 
 
 class Logger
 {
 	public:
+		// Inner classes.
 		enum class Level
 		{
 			NONE = 0,
@@ -27,38 +29,23 @@ class Logger
 			FULL,
 		};
 
-		// Methods.
-		static void init(
-				std::ostream& out = std::cout,
-				const Level& level = Level::INFO,
-				const Description& descr = Description::LEVEL,
-				const bool& displayInitMsg = true);
-		static Logger& getInstance(
-				std::ostream& out = std::cout,
-				const Level& level = Level::INFO,
-				const Description& descr = Description::LEVEL,
-				const bool& displayInitMsg = true);
-
-		static Logger& out(const Level& level,
-						   const char* funcname = EMPTY_STRING,
-						   const char* filename = EMPTY_STRING,
-						   const int& linenum = 0);
-		static Logger& debug(const char* funcname = EMPTY_STRING,
-							 const char* filename = EMPTY_STRING,
-							 const int& linenum = 0);
-		static Logger& info(const char* funcname = EMPTY_STRING,
-							const char* filename = EMPTY_STRING,
-							const int& linenum = 0);
-		static Logger& warning(const char* funcname = EMPTY_STRING,
-							   const char* filename = EMPTY_STRING,
-							   const int& linenum = 0);
-		static Logger& error(const char* funcname = EMPTY_STRING,
-							 const char* filename = EMPTY_STRING,
-							 const int& linenum = 0);
-		static Logger& fatal(const char* funcname = EMPTY_STRING,
-							 const char* filename = EMPTY_STRING,
-							 const int& linenum = 0);
-		static Logger& end();
+		// Static methods.
+		static void init(const char* filename = EMPTY_STRING,
+						 const int& linenum = 0,
+						 std::ostream& out = std::cout,
+						 const Level& level = Level::INFO,
+						 const Description& descr = Description::LEVEL,
+						 const bool& displayInitMsg = true);
+		static Logger& getInstance(const char* filename = EMPTY_STRING,
+								   const int& linenum = 0,
+								   std::ostream& out = std::cout,
+								   const Level& level = Level::INFO,
+								   const Description& descr = Description::LEVEL,
+								   const bool& displayInitMsg = true);
+		static Logger& addModule(const char* filename,
+								 const Level& level = Level::INFO,
+								 const Description& description = Description::LEVEL);
+		static Logger& endl();
 
 		// Operators.
 		Logger& operator<<(Logger& (*manipulator)(void));
@@ -67,12 +54,36 @@ class Logger
 		template<class T>
 		Logger& operator<<(const T& t)
 		{
-			if (validateCurrentLevel())
+			if (_isCurrentLevelValid())
 				_output << t;
 			return (*this);
 		}
 
+		// Methods.
+		Logger& debug(const char* funcname,
+					  const char* filename,
+					  const int& linenum);
+		Logger& info(const char* funcname,
+					 const char* filename,
+					 const int& linenum);
+		Logger& warning(const char* funcname,
+						const char* filename,
+						const int& linenum);
+		Logger& error(const char* funcname,
+					  const char* filename,
+					  const int& linenum);
+		Logger& fatal(const char* funcname,
+					  const char* filename,
+					  const int& linenum);
+		Logger& module(const char* funcname,
+					   const char* filename,
+					   const int& linenum);
+
 	private:
+		// Inner classes.
+		using Format = std::pair<Logger::Level, Logger::Description>;
+		using Modules = std::unordered_map<std::string, Format>;
+
 		// Static.
 		static const char* CONSTRUCTOR_MESSAGE;
 		static const char* DESTRUCTOR_MESSAGE;
@@ -80,6 +91,7 @@ class Logger
 		static const char* EMPTY_STRING;
 
 		static Logger* _instance;
+		static Modules _modules;
 
 		static std::string basename(const char* filename);
 		static std::ostream& addTimestamp(std::ostream& out);
@@ -89,6 +101,8 @@ class Logger
 		Logger(std::ostream& output,
 			   const Level& level,
 			   const Description& descr,
+			   const char* filename,
+			   const int& linenum,
 			   const bool& displayInitMsg);
 		~Logger();
 		Logger(const Logger&) = delete;
@@ -98,27 +112,14 @@ class Logger
 
 		// Methods.
 		Logger& _out(const Level &level,
+					 const Description& descr,
 					 const char* funcname,
 					 const char* filename,
 					 const int &linenum);
-		Logger& _debug(const char* funcname,
-					   const char* filename,
-					   const int& linenum);
-		Logger& _info(const char* funcname,
-					  const char* filename,
-					  const int& linenum);
-		Logger& _warning(const char* funcname,
-						 const char* filename,
-						 const int& linenum);
-		Logger& _error(const char* funcname,
-					   const char* filename,
-					   const int& linenum);
-		Logger& _fatal(const char* funcname,
-					   const char* filename,
-					   const int& linenum);
 		Logger& _end();
 
-		bool validateCurrentLevel() const;
+		bool _isCurrentLevelValid() const;
+		bool _isCurrentLevelAlreadySet() const;
 
 		// Fields.
 		std::ostream& _output;
@@ -131,17 +132,17 @@ class Logger
 std::ostream& operator<<(std::ostream& out, const Logger::Level& level);
 
 
-#define logger_t static Logger&
-#define logger_i Logger::getInstance
-#define logger_l Logger::Level
-#define logger_d Logger::Description
+#define loggerType static Logger&
+#define loggerInit(out, level, descr) (Logger::getInstance(__FILE__, __LINE__, out, level, descr))
+#define loggerForModule(level, descr) (Logger::addModule(__FILE__, level, descr))
 
-#define logDebug (Logger::debug(__FUNCTION__, __FILE__, __LINE__))
-#define logInfo (Logger::info(__FUNCTION__, __FILE__, __LINE__))
-#define logWarning (Logger::warning(__FUNCTION__, __FILE__, __LINE__))
-#define logError (Logger::error(__FUNCTION__, __FILE__, __LINE__))
-#define logFatal (Logger::fatal(__FUNCTION__, __FILE__, __LINE__))
-#define logEndl (Logger::end)
+#define logDebug (Logger::getInstance(__FILE__, __LINE__).debug(__FUNCTION__, __FILE__, __LINE__))
+#define logInfo (Logger::getInstance(__FILE__, __LINE__).info(__FUNCTION__, __FILE__, __LINE__))
+#define logWarning (Logger::getInstance(__FILE__, __LINE__).warning(__FUNCTION__, __FILE__, __LINE__))
+#define logError (Logger::getInstance(__FILE__, __LINE__).error(__FUNCTION__, __FILE__, __LINE__))
+#define logFatal (Logger::getInstance(__FILE__, __LINE__).fatal(__FUNCTION__, __FILE__, __LINE__))
+#define logModule (Logger::getInstance(__FILE__, __LINE__).module(__FUNCTION__, __FILE__, __LINE__))
+#define logEndl (Logger::endl)
 
 
 #endif // __LOGGER_HPP__

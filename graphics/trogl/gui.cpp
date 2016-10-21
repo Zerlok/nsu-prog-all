@@ -1,6 +1,12 @@
 #include "gui.hpp"
 
 
+#include <logger.hpp>
+
+
+loggerType loggerInstance = loggerForModule(Logger::Level::DEBUG, Logger::Description::FULL);
+
+
 GUIComponent::GUIComponent(const Type& type,
 						   const size_t& x,
 						   const size_t& y,

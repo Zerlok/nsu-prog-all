@@ -5,6 +5,9 @@
 #include "common/utils.h"
 
 
+loggerType loggerInstance = loggerForModule(Logger::Level::DEBUG, Logger::Description::FULL);
+
+
 StrangeCube::StrangeCube(const Color& c1,
 						 const Color& c2)
 	: Mesh("StrangeCube")
@@ -183,9 +186,9 @@ StrangeCube::StrangeCube(const Color& c1,
 		addFace(Face(54, 55, 53));
 	}
 
-	logDebug << "Initialized (duration: "
-			 << getTimeDouble() - start << "ms)"
-			 << logEndl;
+	logModule << "Initialized (duration: "
+			  << getTimeDouble() - start << "ms)"
+			  << logEndl;
 }
 
 

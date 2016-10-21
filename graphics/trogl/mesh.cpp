@@ -4,13 +4,16 @@
 #include <logger.hpp>
 
 
+loggerType loggerInstance = loggerForModule(Logger::Level::DEBUG, Logger::Description::FULL);
+
+
 Mesh::Mesh(const std::string& name,
 		   const glm::vec3& pos,
 		   const glm::vec3& rot,
 		   const glm::vec3& sca)
 	: Object(Object::Type::MESH, name)
 {
-	logDebug << "Mesh object created" << logEndl;
+	logModule << "Mesh object created" << logEndl;
 	setPosition(pos);
 	setRotation(rot);
 	setScale(sca);
@@ -38,7 +41,7 @@ Mesh::Mesh(Mesh&& mesh)
 
 Mesh::~Mesh()
 {
-	logDebug << "Mesh object with "
+	logModule << "Mesh object with "
 			 << _vertices.size() << " vertices, "
 			 << _faces.size() << " faces removed"
 			 << logEndl;

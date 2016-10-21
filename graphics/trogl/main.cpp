@@ -12,11 +12,9 @@
 #include "meshes/cylinder.hpp"
 
 
-logger_t loggerGlobalInstance = logger_i(
-		std::cout,
-		logger_l::DEBUG,
-		logger_d::FULL
-);
+loggerType loggerGlobalInstance = loggerInit(std::cout,
+											 Logger::Level::INFO,
+											 Logger::Description::FULL);
 
 
 int main(int argc, char *argv[])

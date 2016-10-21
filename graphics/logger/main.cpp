@@ -2,11 +2,7 @@
 
 
 #include "logger.hpp"
-
-
-
-logger_t log = logger_i(std::cout, logger_l::DEBUG, logger_d::FULL);
-
+#include "myclass.h"
 
 
 int function(int a)
@@ -16,12 +12,17 @@ int function(int a)
 }
 
 
+loggerType log = loggerInit(std::cout,
+							Logger::Level::DEBUG,
+							Logger::Description::LEVEL);
+
+
 int main(int argc, char *argv[])
 {
 	logDebug << "hello, debug!" << logEndl;
 	logInfo << "hello, info!" << logEndl;
 
-	Logger::init();
+	MyClass obj;
 
 	logWarning << "hello, warning!" << logEndl;
 

@@ -4,6 +4,9 @@
 #include <logger.hpp>
 
 
+loggerType loggerInstance = loggerForModule(Logger::Level::DEBUG, Logger::Description::FULL);
+
+
 const std::string Shader::DEFAULT_VERTEX_SRC = \
 	"#version 120\n"
 	"attribute vec4 position;\n"
@@ -67,8 +70,8 @@ Shader::Shader(Shader&& sh)
 
 Shader::~Shader()
 {
-	logDebug << "Shaderscompilation count: " << _shadersCompileCount << logEndl;
-	logDebug << "Removing: (";
+	logModule << "Shaderscompilation count: " << _shadersCompileCount << logEndl;
+	logModule << "Removing: (";
 
 	switch (_shadersCompileCount)
 	{
@@ -76,24 +79,24 @@ Shader::~Shader()
 			glDetachShader(_glShaderProgram, _glVertexShader);
 			glDetachShader(_glShaderProgram, _glFragmentShader);
 			glDeleteProgram(_glShaderProgram);
-			logDebug << "Shader program, ";
+			logModule << "Shader program, ";
 
 		case 2:
 			glDeleteShader(_glFragmentShader);
-			logDebug << "Fragment shader, ";
+			logModule << "Fragment shader, ";
 
 		case 1:
 			glDeleteShader(_glVertexShader);
-			logDebug << "Vertex shader";
+			logModule << "Vertex shader";
 			break;
 
 		case 0:
 		default:
-			logDebug << "none";
+			logModule << "none";
 			break;
 	}
 
-	logDebug << ") => shaders deinited." << logEndl;
+	logModule << ") => shaders deinited." << logEndl;
 }
 
 
@@ -201,7 +204,7 @@ bool Shader::_compileVertexShader()
 	}
 
 	++_shadersCompileCount;
-	logDebug << getName() << " vertex compiled successfuly." << logEndl;
+	logModule << getName() << " vertex compiled successfuly." << logEndl;
 	return true;
 }
 
@@ -231,7 +234,7 @@ bool Shader::_compileFragmentShader()
 	}
 
 	++_shadersCompileCount;
-	logDebug << getName() << " fragment compiled successfuly." << logEndl;
+	logModule << getName() << " fragment compiled successfuly." << logEndl;
 	return true;
 }
 
@@ -261,7 +264,7 @@ bool Shader::_compileShaderProgram()
 		return false;
 	}
 
-	logDebug << "Shader program linked successfuly." << logEndl;
+	logModule << "Shader program linked successfuly." << logEndl;
 
 	glValidateProgram(_glShaderProgram);
 	glGetProgramiv(_glShaderProgram, GL_VALIDATE_STATUS, &success);
@@ -273,6 +276,6 @@ bool Shader::_compileShaderProgram()
 	}
 
 	++_shadersCompileCount;
-	logDebug << "Shader program is valid. Shaders compilation finished." << logEndl;
+	logModule << "Shader program is valid. Shaders compilation finished." << logEndl;
 	return true;
 }
