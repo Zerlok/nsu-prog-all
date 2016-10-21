@@ -2,7 +2,6 @@
 #define __DIFFUSE_MATERIAL_HPP__
 
 
-#include "shader.hpp"
 #include "material.hpp"
 
 

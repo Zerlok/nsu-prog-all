@@ -4,10 +4,10 @@
 
 #include <vector>
 #include <sharedpointer.h>
-
-#include "object.hpp"
+#include <glm/glm.hpp>
 #include "common/color.hpp"
 #include "material.hpp"
+#include "object.hpp"
 
 
 class Mesh : public Object
@@ -84,6 +84,7 @@ class Mesh::Vertex
 
 	private:
 		glm::vec3 _position;
+		// TODO: move color into material.
 		Color _color;
 		size_t _idx;
 

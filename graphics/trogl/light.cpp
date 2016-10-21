@@ -3,21 +3,21 @@
 
 Light::Light(const Type& type)
 	: Object(Object::Type::LIGHT),
-	  _light_type(type)
+	  _lightType(type)
 {	
 }
 
 
 Light::Light(const Light& light)
 	: Object(light),
-	  _light_type(light._light_type)
+	  _lightType(light._lightType)
 {
 }
 
 
 Light::Light(Light&& light)
 	: Object(light),
-	  _light_type(std::move(light._light_type))
+	  _lightType(std::move(light._lightType))
 {
 }
 
@@ -30,7 +30,7 @@ Light::~Light()
 Light& Light::operator=(const Light& light)
 {
 	Object::operator=(light);
-	_light_type = light._light_type;
+	_lightType = light._lightType;
 
 	return (*this);
 }
@@ -39,7 +39,7 @@ Light& Light::operator=(const Light& light)
 Light& Light::operator=(Light&& light)
 {
 	Object::operator=(light);
-	_light_type = std::move(light._light_type);
+	_lightType = std::move(light._lightType);
 
 	return (*this);
 }
@@ -47,5 +47,5 @@ Light& Light::operator=(Light&& light)
 
 const Light::Type& Light::getLightType() const
 {
-    return _light_type;
+	return _lightType;
 }

@@ -1,25 +1,12 @@
-#ifndef UTILS_H
-#define UTILS_H
+#ifndef __UTILS_H__
+#define __UTILS_H__
 
 
-#include <sys/time.h>
+#include <stddef.h>
 
 
-static struct timeval TIMEVALUE;
+double getTimeDouble();
+size_t getTimestamp();
 
 
-static double getTimeDouble()
-{
-	gettimeofday(&TIMEVALUE, NULL);
-	return ((TIMEVALUE.tv_sec % 10000) * 10) + (TIMEVALUE.tv_usec / 10000) / 10.0;
-}
-
-
-static size_t getTimestamp()
-{
-	gettimeofday(&TIMEVALUE, NULL);
-	return TIMEVALUE.tv_sec;
-}
-
-
-#endif // UTILS_H
+#endif // __UTILS_H__

@@ -31,13 +31,12 @@ class Object : public Component
 		const Type& getObjectType() const;
 
 		const glm::vec3& getPosition() const;
-		void setPosition(const glm::vec3& position);
-
 		const glm::vec3& getRotation() const;
-		void setRotation(const glm::vec3& rotation);
-
 		const glm::vec3& getScale() const;
-		void setScale(const glm::vec3& scale);
+
+		virtual void setPosition(const glm::vec3& position);
+		virtual void setRotation(const glm::vec3& rotation);
+		virtual void setScale(const glm::vec3& scale);
 
 		virtual void applyPosition();
 		virtual void applyRotation();

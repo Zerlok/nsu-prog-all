@@ -1,11 +1,11 @@
 #include <iostream>
+#include <iomanip>
 #include <logger.hpp>
 
 #include "engine.hpp"
 
-#include "shaders/metamorphose_shader.h"
-#include "shaders/screwshader.hpp"
-
+#include "common/utils.h"
+#include "common/color.hpp"
 #include "meshes/cube.hpp"
 #include "meshes/strangecube.hpp"
 #include "meshes/megacube.hpp"
@@ -21,28 +21,38 @@ logger_t loggerGlobalInstance = logger_i(
 
 int main(int argc, char *argv[])
 {
+	const int size = 3;
+	const float offset = 2.5;
+	const glm::vec3 cameraPos = glm::vec3(
+			2*(size+1)*offset,
+			(size+1)*offset / 1.8,
+			(size+1)*offset
+	);
+
 	Engine engine;
 
 	// Setup scene.
 	CameraPtr camera = new Camera();
-	camera->setPosition(glm::vec3(10.0, 4.0, 5.0));
-	ScenePtr scene = new Scene("Lab03", camera);
+	camera->setPosition(cameraPos);
+	ScenePtr scene = new Scene("My Scene", camera);
 	scene->setBgColor(Color::grey);
 
-	int size = 3;
-	float offset = 2.5;
+	const double start = getTimeDouble();
 	for (int z = -size; z < size+1; ++z)
 	{
 		for (int y = -size; y < size+1; ++y)
 		{
 			for (int x = -size; x < size+1; ++x)
 			{
-				MeshPtr c = new MegaCube();
+				MeshPtr c = new MegaCube(Color::black, Color::white);
 				c->setPosition(glm::vec3(x*offset, y*offset, z*offset));
 				scene->addMesh(c);
 			}
 		}
 	}
+	const double end = getTimeDouble();
+	logInfo << std::pow(2*size + 1, 3) << " meshes created (duration: "
+			<< std::setprecision(9) << (end - start) << "s)" << logEndl;
 
 	// Show scene.
 	engine.setActiveScene(scene);

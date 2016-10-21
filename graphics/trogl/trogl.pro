@@ -19,7 +19,6 @@ SOURCES += main.cpp \
     engine.cpp \
     material.cpp \
     texture.cpp \
-    common/point.cpp \
     common/color.cpp \
     component.cpp \
     meshes/cube.cpp \
@@ -35,7 +34,8 @@ SOURCES += main.cpp \
     gui/guifps.cpp \
     gui/guilabel.cpp \
     gui/guiplane.cpp \
-    materials/diffusematerial.cpp
+    materials/diffusematerial.cpp \
+    common/utils.cpp
 
 HEADERS += \
     engine.hpp \
@@ -46,7 +46,6 @@ HEADERS += \
     object.hpp \
     material.hpp \
     texture.hpp \
-    common/point.hpp \
     common/color.hpp \
     common/utils.h \
     component.hpp \

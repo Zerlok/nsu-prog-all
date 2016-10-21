@@ -2,7 +2,7 @@
 #define __LAMP_HPP__
 
 
-#include "../light.hpp"
+#include "light.hpp"
 
 
 class Lamp : public Light

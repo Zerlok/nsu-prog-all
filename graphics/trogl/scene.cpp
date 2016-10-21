@@ -1,6 +1,6 @@
 #include "scene.hpp"
 
-#include <algorithm>
+
 #include <logger.hpp>
 
 
@@ -49,6 +49,30 @@ Scene& Scene::operator=(const Scene& scene)
 }
 
 
+const Meshes& Scene::getMeshes() const
+{
+	return _meshes;
+}
+
+
+const Lights& Scene::getLamps() const
+{
+	return _lights;
+}
+
+
+const Color& Scene::getBgColor() const
+{
+	return _bgColor;
+}
+
+
+const CameraPtr& Scene::getCamera() const
+{
+	return _camera;
+}
+
+
 void Scene::addMesh(const MeshPtr& mesh)
 {
 	_meshes.push_back(mesh);
@@ -65,24 +89,6 @@ void Scene::addLight(const LightPtr& lamp)
 }
 
 
-const Meshes& Scene::getMeshes() const
-{
-	return _meshes;
-}
-
-
-const Lights& Scene::getLamps() const
-{
-	return _lights;
-}
-
-
-const CameraPtr& Scene::getCamera() const
-{
-	return _camera;
-}
-
-
 void Scene::setCamera(const CameraPtr& camera)
 {
 	logDebug << "Scene old camera " << _camera->getName();
@@ -90,11 +96,6 @@ void Scene::setCamera(const CameraPtr& camera)
 	logDebug << " replaced with new " << _camera->getName() << logEndl;
 }
 
-
-const Color& Scene::getBgColor() const
-{
-	return _bgColor;
-}
 
 
 void Scene::setBgColor(const Color& color)

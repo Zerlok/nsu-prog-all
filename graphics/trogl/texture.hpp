@@ -8,7 +8,7 @@
 class Texture : public Component
 {
 	public:
-		Texture(const std::string& name = std::string());
+		Texture(const std::string& name = "");
 		~Texture();
 };
 

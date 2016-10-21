@@ -1,8 +1,8 @@
 #include "object.hpp"
 
-#include <logger.hpp>
 #include <sstream>
 #include <iomanip>
+#include <logger.hpp>
 
 
 size_t Object::_objID = 0;

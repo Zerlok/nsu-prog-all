@@ -2,14 +2,16 @@
 #define __CYLINDER_HPP__
 
 
-#include "../mesh.hpp"
+#include "common/color.hpp"
+#include "mesh.hpp"
 
 
 class Cylinder : public Mesh
 {
 	public:
-		Cylinder();
+		Cylinder(const Color& c1, const Color& c2);
 		~Cylinder();
 };
+
 
 #endif // __CYLINDER_HPP__

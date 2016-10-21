@@ -1,62 +1,22 @@
 #include "component.hpp"
 
-#include <logger.hpp>
+
 #include <sstream>
 #include <iomanip>
+#include <logger.hpp>
 
 
-size_t Component::globID = 0;
-
-
-std::string Component::generateNameFromType(const Type& type, const size_t& id)
-{
-	std::stringstream ss;
-	switch (type)
-	{
-		case Type::GUI:
-			ss << "GUI";
-			break;
-		case Type::SCENE:
-			ss << "Scene";
-			break;
-		case Type::OBJECT:
-			ss << "Object";
-			break;
-		case Type::MATERIAL:
-			ss << "Material";
-			break;
-		case Type::TEXTURE:
-			ss << "Texture";
-			break;
-		case Type::SHADER:
-			ss << "Shader";
-			break;
-		default:
-			break;
-	}
-
-	ss << std::setw(3) << std::setfill('0') << id;
-
-	return ss.str();
-}
-
-
-std::string Component::generateNameFromCopy(const Component& c)
-{
-	std::stringstream ss;
-	ss << c.getName() << ".copy";
-	return ss.str();
-}
+size_t Component::_globID = 0;
 
 
 Component::Component(const Component::Type& t,
 					 const std::string& name)
 	: _type(t),
-	  _ID(++globID),
+	  _ID(++_globID),
 	  _name(name)
 {
 	if (_name.empty())
-		_name = generateNameFromType(_type, _ID);
+		_name = _generateNameFromType(_type, _ID);
 
 	logDebug << (*this) << " created" << logEndl;
 }
@@ -139,8 +99,8 @@ void Component::setName(const std::string& name)
 Component Component::copy() const
 {
 	Component c(*this);
-	c._ID = ++globID;
-	c._name = generateNameFromCopy(c);
+	c._ID = ++_globID;
+	c._name = _generateNameFromCopy(c);
 
 	return std::move(c);
 }
@@ -154,11 +114,53 @@ std::string Component::toString() const
 }
 
 
-std::ostream&operator<<(std::ostream& out, const Component& c)
+std::ostream& operator<<(std::ostream& out, const Component& c)
 {
 	out << "<Component:"
 		<< &c << " '"
 		<< c._name << "'>";
 
 	return out;
+}
+
+
+std::string Component::_generateNameFromType(const Type& type,
+											const size_t& id)
+{
+	std::stringstream ss;
+	switch (type)
+	{
+		case Type::GUI:
+			ss << "GUI";
+			break;
+		case Type::SCENE:
+			ss << "Scene";
+			break;
+		case Type::OBJECT:
+			ss << "Object";
+			break;
+		case Type::MATERIAL:
+			ss << "Material";
+			break;
+		case Type::TEXTURE:
+			ss << "Texture";
+			break;
+		case Type::SHADER:
+			ss << "Shader";
+			break;
+		default:
+			break;
+	}
+
+	ss << std::setw(3) << std::setfill('0') << id;
+
+	return ss.str();
+}
+
+
+std::string Component::_generateNameFromCopy(const Component& c)
+{
+	std::stringstream ss;
+	ss << c.getName() << ".copy";
+	return ss.str();
 }

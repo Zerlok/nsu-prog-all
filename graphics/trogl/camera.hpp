@@ -3,6 +3,7 @@
 
 
 #include <sharedpointer.h>
+#include "opengls.hpp"
 #include "object.hpp"
 
 
@@ -42,6 +43,8 @@ class Camera : public Object
 		void setHeight(const size_t& height);
 		void setLookingAtPosition(const glm::vec3& lookingAtPosition);
 		void setHeadDirection(const glm::vec3& headDirection);
+
+		void setRotation(const glm::vec3& rotation) override;
 
 	private:
 		float _fov;

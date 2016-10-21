@@ -2,7 +2,9 @@
 #define __METAMORPHOSE_SHADER_HPP__
 
 
-#include "../shader.hpp"
+#include <string>
+#include "opengls.hpp"
+#include "shader.hpp"
 
 
 class MetamorphoseShader : public Shader

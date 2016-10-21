@@ -2,7 +2,8 @@
 #define __MESH_CUBE_HPP__
 
 
-#include "../mesh.hpp"
+#include "common/color.hpp"
+#include "mesh.hpp"
 
 
 class Cube : public Mesh

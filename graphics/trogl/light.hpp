@@ -27,7 +27,7 @@ class Light : public Object
 		const Type& getLightType() const;
 
 	protected:
-		Type _light_type;
+		Type _lightType;
 };
 
 using LightPtr = SharedPointer<Light>;

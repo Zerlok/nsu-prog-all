@@ -1,11 +1,11 @@
 #include "engine.hpp"
 
-#include <logger.hpp>
+
 #include <sstream>
+#include <logger.hpp>
 #include "common/utils.h"
 
 
-// TODO: place default shaders into Material (default material shaders).
 Engine* Engine::_current = nullptr;
 
 
@@ -95,7 +95,6 @@ void Engine::showScene()
 
 	// TODO: add light to scene.
 
-	// TODO: add objects' materials (save shaders).
 	for (const MeshPtr& m : _scene->getMeshes())
 	{
 		_objects.push_back(SingleVertexObject(m));
@@ -211,13 +210,11 @@ void Engine::renderFrame()
 				   cam->getLowDistance(),
 				   cam->getHighDistance());
 
-	// TODO: create camera lookAt method, which returns the position where does camera look at.
 	const glm::mat4x4 matView  = glm::lookAt(cam->getPosition(),
 											 cam->getLookingAtPosition(),
 											 cam->getHeadDirection());
 
-	// Drawing.
-	// TODO: draw every object with its material (load its shaders).
+	// Draw the objects.
 	for (SingleVertexObject& obj : _objects)
 		obj.draw(matView);
 
@@ -232,7 +229,7 @@ void Engine::renderFrame()
 std::string Engine::_generateWindowName(const Scene& scene)
 {
 	std::stringstream ss;
-	ss << "TroGL Engine [" << scene.getName() << "]";
+	ss << "TroGL Engine [" << scene.getName() << ']';
 	return ss.str();
 }
 

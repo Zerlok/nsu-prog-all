@@ -1,72 +1,78 @@
 #include "strangecube.hpp"
 
+
 #include <logger.hpp>
+#include "common/utils.h"
 
 
-StrangeCube::StrangeCube(const Color& borderColor,
-				   const Color& innerColor)
-	: Mesh()
+StrangeCube::StrangeCube(const Color& c1,
+						 const Color& c2)
+	: Mesh("StrangeCube")
 {
-	logDebug << "Strange cube init started" << logEndl;
+	const double start = getTimeDouble();
 
-	// vertices and faces init.
+	// Vertices.
 	{
-		addVertex(Vertex(-1.0, -1.0, -1.0, borderColor));
-		addVertex(Vertex(-1.0, -1.0, 1.0, borderColor));
-		addVertex(Vertex(-1.0, 1.0, -1.0, borderColor));
-		addVertex(Vertex(-1.0, 1.0, 1.0, borderColor));
-		addVertex(Vertex(1.0, -1.0, -1.0, borderColor));
-		addVertex(Vertex(1.0, -1.0, 1.0, borderColor));
-		addVertex(Vertex(1.0, 1.0, -1.0, borderColor));
-		addVertex(Vertex(1.0, 1.0, 1.0, borderColor));
-		addVertex(Vertex(-1.0, -1.0, -0.333, borderColor));
-		addVertex(Vertex(-1.0, -1.0, 0.333, borderColor));
-		addVertex(Vertex(-1.0, -0.333, 1.0, borderColor));
-		addVertex(Vertex(-1.0, 0.333, 1.0, borderColor));
-		addVertex(Vertex(-1.0, 1.0, 0.333, borderColor));
-		addVertex(Vertex(-1.0, 1.0, -0.333, borderColor));
-		addVertex(Vertex(-1.0, 0.333, -1.0, borderColor));
-		addVertex(Vertex(-1.0, -0.333, -1.0, borderColor));
-		addVertex(Vertex(-0.333, 1.0, 1.0, borderColor));
-		addVertex(Vertex(0.333, 1.0, 1.0, borderColor));
-		addVertex(Vertex(1.0, 1.0, 0.333, borderColor));
-		addVertex(Vertex(1.0, 1.0, -0.333, borderColor));
-		addVertex(Vertex(0.333, 1.0, -1.0, borderColor));
-		addVertex(Vertex(-0.333, 1.0, -1.0, borderColor));
-		addVertex(Vertex(1.0, 0.333, 1.0, borderColor));
-		addVertex(Vertex(1.0, -0.333, 1.0, borderColor));
-		addVertex(Vertex(1.0, -1.0, 0.333, borderColor));
-		addVertex(Vertex(1.0, -1.0, -0.333, borderColor));
-		addVertex(Vertex(1.0, -0.333, -1.0, borderColor));
-		addVertex(Vertex(1.0, 0.333, -1.0, borderColor));
-		addVertex(Vertex(0.333, -1.0, 1.0, borderColor));
-		addVertex(Vertex(-0.333, -1.0, 1.0, borderColor));
-		addVertex(Vertex(-0.333, -1.0, -1.0, borderColor));
-		addVertex(Vertex(0.333, -1.0, -1.0, borderColor));
-		addVertex(Vertex(0.333, -0.333, 1.0, innerColor));
-		addVertex(Vertex(-0.333, -0.333, 1.0, innerColor));
-		addVertex(Vertex(0.333, 0.333, 1.0, innerColor));
-		addVertex(Vertex(-0.333, 0.333, 1.0, innerColor));
-		addVertex(Vertex(-0.333, -0.333, -1.0, innerColor));
-		addVertex(Vertex(0.333, -0.333, -1.0, innerColor));
-		addVertex(Vertex(-0.333, 0.333, -1.0, innerColor));
-		addVertex(Vertex(0.333, 0.333, -1.0, innerColor));
-		addVertex(Vertex(0.333, -1.0, 0.333, innerColor));
-		addVertex(Vertex(0.333, -1.0, -0.333, innerColor));
-		addVertex(Vertex(-0.333, -1.0, 0.333, innerColor));
-		addVertex(Vertex(-0.333, -1.0, -0.333, innerColor));
-		addVertex(Vertex(1.0, 0.333, 0.333, innerColor));
-		addVertex(Vertex(1.0, 0.333, -0.333, innerColor));
-		addVertex(Vertex(1.0, -0.333, 0.333, innerColor));
-		addVertex(Vertex(1.0, -0.333, -0.333, innerColor));
-		addVertex(Vertex(-0.333, 1.0, 0.333, innerColor));
-		addVertex(Vertex(-0.333, 1.0, -0.333, innerColor));
-		addVertex(Vertex(0.333, 1.0, 0.333, innerColor));
-		addVertex(Vertex(0.333, 1.0, -0.333, innerColor));
-		addVertex(Vertex(-1.0, -0.333, 0.333, innerColor));
-		addVertex(Vertex(-1.0, -0.333, -0.333, innerColor));
-		addVertex(Vertex(-1.0, 0.333, 0.333, innerColor));
-		addVertex(Vertex(-1.0, 0.333, -0.333, innerColor));
+		addVertex(Vertex(-1.0, -1.0, -1.0, c1));
+		addVertex(Vertex(-1.0, -1.0, 1.0, c1));
+		addVertex(Vertex(-1.0, 1.0, -1.0, c1));
+		addVertex(Vertex(-1.0, 1.0, 1.0, c1));
+		addVertex(Vertex(1.0, -1.0, -1.0, c1));
+		addVertex(Vertex(1.0, -1.0, 1.0, c1));
+		addVertex(Vertex(1.0, 1.0, -1.0, c1));
+		addVertex(Vertex(1.0, 1.0, 1.0, c1));
+		addVertex(Vertex(-1.0, -1.0, -0.333, c1));
+		addVertex(Vertex(-1.0, -1.0, 0.333, c1));
+		addVertex(Vertex(-1.0, -0.333, 1.0, c1));
+		addVertex(Vertex(-1.0, 0.333, 1.0, c1));
+		addVertex(Vertex(-1.0, 1.0, 0.333, c1));
+		addVertex(Vertex(-1.0, 1.0, -0.333, c1));
+		addVertex(Vertex(-1.0, 0.333, -1.0, c1));
+		addVertex(Vertex(-1.0, -0.333, -1.0, c1));
+		addVertex(Vertex(-0.333, 1.0, 1.0, c1));
+		addVertex(Vertex(0.333, 1.0, 1.0, c1));
+		addVertex(Vertex(1.0, 1.0, 0.333, c1));
+		addVertex(Vertex(1.0, 1.0, -0.333, c1));
+		addVertex(Vertex(0.333, 1.0, -1.0, c1));
+		addVertex(Vertex(-0.333, 1.0, -1.0, c1));
+		addVertex(Vertex(1.0, 0.333, 1.0, c1));
+		addVertex(Vertex(1.0, -0.333, 1.0, c1));
+		addVertex(Vertex(1.0, -1.0, 0.333, c1));
+		addVertex(Vertex(1.0, -1.0, -0.333, c1));
+		addVertex(Vertex(1.0, -0.333, -1.0, c1));
+		addVertex(Vertex(1.0, 0.333, -1.0, c1));
+		addVertex(Vertex(0.333, -1.0, 1.0, c1));
+		addVertex(Vertex(-0.333, -1.0, 1.0, c1));
+		addVertex(Vertex(-0.333, -1.0, -1.0, c1));
+		addVertex(Vertex(0.333, -1.0, -1.0, c1));
+		addVertex(Vertex(0.333, -0.333, 1.0, c2));
+		addVertex(Vertex(-0.333, -0.333, 1.0, c2));
+		addVertex(Vertex(0.333, 0.333, 1.0, c2));
+		addVertex(Vertex(-0.333, 0.333, 1.0, c2));
+		addVertex(Vertex(-0.333, -0.333, -1.0, c2));
+		addVertex(Vertex(0.333, -0.333, -1.0, c2));
+		addVertex(Vertex(-0.333, 0.333, -1.0, c2));
+		addVertex(Vertex(0.333, 0.333, -1.0, c2));
+		addVertex(Vertex(0.333, -1.0, 0.333, c2));
+		addVertex(Vertex(0.333, -1.0, -0.333, c2));
+		addVertex(Vertex(-0.333, -1.0, 0.333, c2));
+		addVertex(Vertex(-0.333, -1.0, -0.333, c2));
+		addVertex(Vertex(1.0, 0.333, 0.333, c2));
+		addVertex(Vertex(1.0, 0.333, -0.333, c2));
+		addVertex(Vertex(1.0, -0.333, 0.333, c2));
+		addVertex(Vertex(1.0, -0.333, -0.333, c2));
+		addVertex(Vertex(-0.333, 1.0, 0.333, c2));
+		addVertex(Vertex(-0.333, 1.0, -0.333, c2));
+		addVertex(Vertex(0.333, 1.0, 0.333, c2));
+		addVertex(Vertex(0.333, 1.0, -0.333, c2));
+		addVertex(Vertex(-1.0, -0.333, 0.333, c2));
+		addVertex(Vertex(-1.0, -0.333, -0.333, c2));
+		addVertex(Vertex(-1.0, 0.333, 0.333, c2));
+		addVertex(Vertex(-1.0, 0.333, -0.333, c2));
+	}
+
+	// Faces.
+	{
 		addFace(Face(23, 46, 22));
 		addFace(Face(5, 24, 23));
 		addFace(Face(44, 22, 46));
@@ -177,7 +183,9 @@ StrangeCube::StrangeCube(const Color& borderColor,
 		addFace(Face(54, 55, 53));
 	}
 
-	logDebug << "Strange cube init finished" << logEndl;
+	logDebug << "Initialized (duration: "
+			 << getTimeDouble() - start << "ms)"
+			 << logEndl;
 }
 
 

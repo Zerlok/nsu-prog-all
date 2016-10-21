@@ -4,7 +4,6 @@
 
 #include <vector>
 #include <sharedpointer.h>
-
 #include "common/color.hpp"
 #include "component.hpp"
 

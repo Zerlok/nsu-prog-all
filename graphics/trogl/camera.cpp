@@ -1,5 +1,6 @@
 #include "camera.hpp"
 
+
 #include <logger.hpp>
 
 
@@ -166,24 +167,36 @@ void Camera::setHeight(const size_t& height)
 	_height = height;
 }
 
+
 const glm::vec3& Camera::getLookingAtPosition() const
 {
     return _lookingAtPosition;
 }
 
+
 void Camera::setLookingAtPosition(const glm::vec3& lookingAtPosition)
 {
+	// TODO: Rotate camera in direction of lookingAtPosition.
     _lookingAtPosition = lookingAtPosition;
 }
+
 
 const glm::vec3& Camera::getHeadDirection() const
 {
     return _headDirection;
 }
 
+
 void Camera::setHeadDirection(const glm::vec3& headDirection)
 {
-    _headDirection = headDirection;
+	_headDirection = headDirection;
+}
+
+
+void Camera::setRotation(const glm::vec3& rotation)
+{
+	// TODO: Rotate lookingAtPosition.
+	Object::setRotation(rotation);
 }
 
 

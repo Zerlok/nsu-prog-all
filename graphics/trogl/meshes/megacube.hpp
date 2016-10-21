@@ -2,13 +2,14 @@
 #define __MEGACUBE_HPP__
 
 
-#include "../mesh.hpp"
+#include "common/color.hpp"
+#include "mesh.hpp"
 
 
 class MegaCube : public Mesh
 {
 	public:
-		MegaCube();
+		MegaCube(const Color& c1, const Color& c2);
 		~MegaCube();
 };
 

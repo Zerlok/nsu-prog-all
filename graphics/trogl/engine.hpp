@@ -4,7 +4,8 @@
 
 #include "opengls.hpp"
 #include "scene.hpp"
-#include "shader.hpp"
+#include "mesh.hpp"
+
 #include "gui.hpp"
 #include "gui/guilabel.hpp"
 #include "gui/guiplane.hpp"
@@ -97,6 +98,8 @@ class Engine::SingleVertexObject
 		size_t _indicesSize;
 
 		ShaderPtr _shader;
+
+		// FIXME: do not use non-const MeshPtr.
 		MeshPtr _mesh;
 
 		// Methods.

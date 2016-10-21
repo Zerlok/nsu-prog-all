@@ -3,8 +3,8 @@
 
 
 #include <sharedpointer.h>
-#include "component.hpp"
 #include "shader.hpp"
+#include "component.hpp"
 
 
 class Material : public Component
@@ -25,7 +25,6 @@ class Material : public Component
 	protected:
 		static const ShaderPtr DEFAULT_SHADER;
 
-		// TODO: add light behavior (is it in shaders?).
 		ShaderPtr _shader;
 };
 

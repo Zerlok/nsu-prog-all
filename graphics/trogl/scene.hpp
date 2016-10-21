@@ -5,10 +5,7 @@
 #include <string>
 #include <list>
 #include <sharedpointer.h>
-
 #include "common/color.hpp"
-
-#include "object.hpp"
 #include "mesh.hpp"
 #include "light.hpp"
 #include "camera.hpp"
@@ -28,16 +25,14 @@ class Scene : public Component
 
 		Scene& operator=(const Scene& scene);
 
-		void addMesh(const MeshPtr& mesh);
-		void addLight(const LightPtr& lamp);
-
 		const Meshes& getMeshes() const;
 		const Lights& getLamps() const;
-
-		const CameraPtr& getCamera() const;
-		void setCamera(const CameraPtr& camera);
-
 		const Color& getBgColor() const;
+		const CameraPtr& getCamera() const;
+
+		void addMesh(const MeshPtr& mesh);
+		void addLight(const LightPtr& lamp);
+		void setCamera(const CameraPtr& camera);
 		void setBgColor(const Color& color);
 
 	private:
