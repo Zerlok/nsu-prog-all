@@ -11,8 +11,7 @@ class Material : public Component
 {
 	public:
 		Material(const std::string& name = "",
-				 const ShaderPtr& vertexShader = DEFAULT_VERTEX_SHADER,
-				 const ShaderPtr& fragmentShader = DEFAULT_FRAGMENT_SHADER);
+				 const ShaderPtr& shader = DEFAULT_SHADER);
 		Material(const Material& mat);
 		Material(Material&& mat);
 		virtual ~Material();
@@ -20,19 +19,14 @@ class Material : public Component
 		Material& operator=(const Material& mat);
 		Material& operator=(Material&& mat);
 
-		const ShaderPtr& getVertexShader() const;
-		const ShaderPtr& getFragmentShader() const;
-
-		void setVertexShader(const ShaderPtr& vertexShader);
-		void setFragmentShader(const ShaderPtr& fragmentShader);
+		const ShaderPtr& getShader() const;
+		void setShader(const ShaderPtr& shader);
 
 	protected:
-		static const ShaderPtr DEFAULT_VERTEX_SHADER;
-		static const ShaderPtr DEFAULT_FRAGMENT_SHADER;
+		static const ShaderPtr DEFAULT_SHADER;
 
 		// TODO: add light behavior (is it in shaders?).
-		ShaderPtr _vertexShader;
-		ShaderPtr _fragmentShader;
+		ShaderPtr _shader;
 };
 
 using MaterialPtr = SharedPointer<Material>;

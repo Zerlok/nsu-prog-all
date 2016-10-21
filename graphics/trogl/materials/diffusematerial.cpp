@@ -2,7 +2,7 @@
 
 
 DiffuseMaterial::DiffuseMaterial()
-	: Material("Diffusematerial", DEFAULT_VERTEX_SHADER, DEFAULT_FRAGMENT_SHADER)
+	: Material("Diffusematerial", DEFAULT_SHADER)
 {
 }
 

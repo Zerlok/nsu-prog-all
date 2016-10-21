@@ -1,47 +1,27 @@
 #include "material.hpp"
 
 
-const ShaderPtr Material::DEFAULT_VERTEX_SHADER = new Shader(
-		"Diffuse vertex shader",
-		"#version 120\n"
-		"attribute vec4 position;\n"
-		"attribute vec4 color;\n"
-		"void main() {\n"
-		"  gl_Position = gl_ModelViewProjectionMatrix * position;\n"
-		"  gl_FrontColor = color;\n"
-		"}\n"
-);
-const ShaderPtr Material::DEFAULT_FRAGMENT_SHADER = new Shader(
-		"Diffuse fragment shader",
-		"#version 120\n"
-		"void main() {\n"
-		"  gl_FragColor = gl_Color;\n"
-		"}\n"
-);
+const ShaderPtr Material::DEFAULT_SHADER = new Shader("Diffuse vertex shader");
 
 
 Material::Material(const std::string& name,
-				   const ShaderPtr& vertexShader,
-				   const ShaderPtr& fragmentShader)
+				   const ShaderPtr& shader)
 	: Component(Component::Type::MATERIAL, name),
-	  _vertexShader(vertexShader),
-	  _fragmentShader(fragmentShader)
+	  _shader(shader)
 {
 }
 
 
 Material::Material(const Material& mat)
 	: Component(mat),
-	  _vertexShader(mat._vertexShader),
-	  _fragmentShader(mat._fragmentShader)
+	  _shader(mat._shader)
 {
 }
 
 
 Material::Material(Material&& mat)
 	: Component(mat),
-	  _vertexShader(std::move(mat._vertexShader)),
-	  _fragmentShader(std::move(mat._fragmentShader))
+	  _shader(std::move(mat._shader))
 {
 }
 
@@ -54,8 +34,7 @@ Material::~Material()
 Material& Material::operator=(const Material& mat)
 {
 	Component::operator=(mat);
-	_vertexShader = mat._vertexShader;
-	_fragmentShader = mat._fragmentShader;
+	_shader = mat._shader;
 
 	return (*this);
 }
@@ -64,32 +43,19 @@ Material& Material::operator=(const Material& mat)
 Material& Material::operator=(Material&& mat)
 {
 	Component::operator=(mat);
-	_vertexShader = std::move(mat._vertexShader);
-	_fragmentShader = std::move(mat._fragmentShader);
+	_shader = std::move(mat._shader);
 
 	return (*this);
 }
 
 
-const ShaderPtr& Material::getVertexShader() const
+const ShaderPtr& Material::getShader() const
 {
-	return _vertexShader;
+	return _shader;
 }
 
 
-const ShaderPtr& Material::getFragmentShader() const
+void Material::setShader(const ShaderPtr& shader)
 {
-	return _fragmentShader;
-}
-
-
-void Material::setVertexShader(const ShaderPtr& vertexShader)
-{
-	_vertexShader = vertexShader;
-}
-
-
-void Material::setFragmentShader(const ShaderPtr& fragmentShader)
-{
-	_fragmentShader = fragmentShader;
+	_shader = shader;
 }

@@ -11,7 +11,7 @@ class ScrewShader : public Shader
 		ScrewShader();
 		~ScrewShader();
 
-		void initUniformsLocations(const GLuint &glShaderProgram);
+		void initCustomVarsLocations(const GLuint &glShaderProgram);
 		void prepareForRender();
 
 	private:

@@ -11,7 +11,7 @@ class MetamorphoseShader : public Shader
 		MetamorphoseShader();
 		~MetamorphoseShader();
 
-		void initUniformsLocations(const GLuint &glShaderProgram);
+		void initCustomVarsLocations(const GLuint &glShaderProgram);
 		void prepareForRender();
 
 	private:

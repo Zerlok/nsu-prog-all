@@ -52,7 +52,7 @@ ScrewShader::~ScrewShader()
 }
 
 
-void ScrewShader::initUniformsLocations(const GLuint& glShaderProgram)
+void ScrewShader::initCustomVarsLocations(const GLuint& glShaderProgram)
 {
 	_attrAlpha = glGetUniformLocation(glShaderProgram, "alpha");
 }

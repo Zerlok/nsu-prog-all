@@ -11,23 +11,50 @@
 class Shader : public Component
 {
 	public:
-		Shader(const std::string& name = std::string(),
-			   const std::string& src = std::string());
+		// Static fields.
+		static const std::string DEFAULT_VERTEX_SRC;
+		static const std::string DEFAULT_FRAGMENT_SRC;
+
+		// Constructors / Destructor.
+		Shader(const std::string& name,
+			   const std::string& vertexSrc = DEFAULT_VERTEX_SRC,
+			   const std::string& fragmentSrc = DEFAULT_FRAGMENT_SRC);
 		Shader(const Shader& sh);
 		Shader(Shader&& sh);
-		~Shader();
+		virtual ~Shader();
 
+		// Operators.
 		Shader& operator=(const Shader& sh);
 		Shader& operator=(Shader&& sh);
 
-		virtual void initUniformsLocations(const GLuint&);
+		// Methods.
+		bool isCompiled() const;
+		bool isValid() const;
+
+		const GLuint& getProgram() const;
+
+		void compile();
+
+		// Virtual methods.
+		virtual void initCustomVarsLocations(const GLuint&);
 		virtual void prepareForRender();
 
-		const char* getSrcPtr() const;
-		const std::string& getSrc() const;
-
 	private:
-		std::string _src;
+		// Fields.
+		std::string _vertexSrc;
+		std::string _fragmentSrc;
+
+		bool _isCompiled;
+		size_t _shadersCompileCount;
+
+		GLuint _glVertexShader;		// Vertices rendering
+		GLuint _glFragmentShader;	// Faces rendering.
+		GLuint _glShaderProgram;	// Total shadering program.
+
+		// Methods.
+		bool _compileVertexShader();
+		bool _compileFragmentShader();
+		bool _compileShaderProgram();
 };
 
 using ShaderPtr = SharedPointer<Shader>;

@@ -44,8 +44,6 @@ int main(int argc, char *argv[])
 		}
 	}
 
-//	scene->addMesh(new MegaCube());
-
 	// Show scene.
 	engine.setActiveScene(scene);
 	engine.setDisplayFPS(true);

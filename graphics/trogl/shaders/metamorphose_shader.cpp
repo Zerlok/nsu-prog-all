@@ -27,7 +27,7 @@ void main() {\
 
 
 MetamorphoseShader::MetamorphoseShader()
-	: Shader("Metamorph Shader", SRC)
+	: Shader("Metamorph Shader", SRC, DEFAULT_FRAGMENT_SRC)
 {
 }
 
@@ -37,7 +37,7 @@ MetamorphoseShader::~MetamorphoseShader()
 }
 
 
-void MetamorphoseShader::initUniformsLocations(const GLuint& glShaderProgram)
+void MetamorphoseShader::initCustomVarsLocations(const GLuint& glShaderProgram)
 {
 	_attrCosSqAlpha = glGetUniformLocation(glShaderProgram, "cosSqAlpha");
 }

@@ -72,10 +72,13 @@ class Engine::SingleVertexObject
 		~SingleVertexObject();
 
 		// Methods.
-		bool validate() const;
+		bool isValid() const;
 
 		void initGLGeometry();
 		void compileGLShaders();
+
+		void deinitGLGeometry();
+		void deinitGLShaders();
 
 		void draw(const glm::mat4x4& mat);
 
@@ -89,27 +92,17 @@ class Engine::SingleVertexObject
 		GLuint _glVBO;				// Vertex Buffer Object
 		GLuint _glCBO;				// Color Buffer Object
 		GLuint _glIBO;				// Index Buffer Object
-		GLuint _glVertexShader;		// Vertices rendering
-		GLuint _glFragmentShader;	// Faces rendering.
-		GLuint _glShaderProgram;	// Total shadering program.
 		GLuint _attrObjCenterPosition; // Shader center position of object.
 
-		size_t _shadersCompileCount;
 		size_t _indicesSize;
 
-		ShaderPtr _vertexShader;
-		ShaderPtr _fragmentShader;
-
+		ShaderPtr _shader;
 		MeshPtr _mesh;
 
 		// Methods.
 		void _initVertexBufferObject();
 		void _initColorBufferObject();
 		void _initIndexBufferObject();
-
-		bool _compileVertexShader();
-		bool _compileFragmentShader();
-		bool _compileShaderProgram();
 };
 
 
