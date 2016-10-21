@@ -100,7 +100,8 @@ void Engine::showScene()
 	{
 		_objects.push_back(SingleVertexObject(m));
 		SingleVertexObject& obj = _objects.back();
-		obj.compileShaders();
+		obj.initGLGeometry();
+		obj.compileGLShaders();
 
 		if (!obj.validate())
 		{
@@ -115,12 +116,6 @@ void Engine::showScene()
 	logInfo << "Engine rendering finished." << logEndl;
 
 	glutDestroyWindow(sceneWindow);
-}
-
-
-void Engine::assignMeshToEngineObject(const MeshPtr& mesh)
-{
-	_objects.push_back(SingleVertexObject(mesh));
 }
 
 
@@ -205,8 +200,6 @@ void Engine::renderFrame()
 
 //	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
-//	glLoadIdentity(); // Load the Identity Matrix to reset our drawing locations
-
 	// Matrix Projection.
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
@@ -226,13 +219,7 @@ void Engine::renderFrame()
 	// Drawing.
 	// TODO: draw every object with its material (load its shaders).
 	for (SingleVertexObject& obj : _objects)
-	{
-		obj.loadGeometry();
-		obj.loadShaders();
 		obj.draw(matView);
-		obj.unloadShaders();
-		obj.unloadGeometry();
-	}
 
 	// Draw GUI at the end of frame (to overlay over every objects on scene).
 	drawGUI();
@@ -306,10 +293,9 @@ Engine::SingleVertexObject::SingleVertexObject(const MeshPtr& mesh)
 	  _glVertexShader(),
 	  _glFragmentShader(),
 	  _glShaderProgram(),
-	  _glShadersCompileCount(0),
-	  _vertices((mesh->getVertices().size() * _vertexStep), 0.0f),
-	  _colors((mesh->getVertices().size() * _colorStep), 1.0f),
-	  _indicies((mesh->getFaces().size() * _indexStep), 0.0f),
+	  _attrObjCenterPosition(),
+	  _shadersCompileCount(0),
+	  _indicesSize(0),
 	  _vertexShader(mesh->getMaterial()->getVertexShader()),
 	  _fragmentShader(mesh->getMaterial()->getFragmentShader()),
 	  _mesh(mesh)
@@ -320,35 +306,6 @@ Engine::SingleVertexObject::SingleVertexObject(const MeshPtr& mesh)
 	_mesh->applyScale();
 	_mesh->applyRotation();
 	_mesh->applyPosition();
-
-	size_t idx;
-	// add vertecies and colors.
-	idx = 0;
-	for (size_t i = 0; i < _vertices.size(); i += _vertexStep)
-	{
-		const Mesh::Vertex& v = _mesh->getVertex(idx++);
-
-		_vertices[i] = v.getPosition().x;
-		_vertices[i+1] = v.getPosition().y;
-		_vertices[i+2] = v.getPosition().z;
-		_vertices[i+3] = 1.0f;
-
-		_colors[i] = v.getColor().getRedF();
-		_colors[i+1] = v.getColor().getGreenF();
-		_colors[i+2] = v.getColor().getBlueF();
-		_colors[i+3] = v.getColor().getAlphaF();
-	}
-
-	// add indicies from mesh faces.
-	idx = 0;
-	for (size_t i = 0; i < _indicies.size(); i += _indexStep)
-	{
-		const Mesh::Face& f = _mesh->getFace(idx++);
-
-		_indicies[i] = f.getFirstIndex();
-		_indicies[i+1] = f.getSecondIndex();
-		_indicies[i+2] = f.getThirdIndex();
-	}
 }
 
 
@@ -359,13 +316,12 @@ Engine::SingleVertexObject::SingleVertexObject(Engine::SingleVertexObject&& obj)
 	  _glVertexShader(std::move(obj._glVertexShader)),
 	  _glFragmentShader(std::move(obj._glFragmentShader)),
 	  _glShaderProgram(std::move(obj._glShaderProgram)),
-	  _glShadersCompileCount(std::move(obj._glShadersCompileCount)),
-	  _vertices(std::move(obj._vertices)),
-	  _colors(std::move(obj._colors)),
-	  _indicies(std::move(obj._indicies)),
+	  _attrObjCenterPosition(std::move(obj._attrObjCenterPosition)),
+	  _shadersCompileCount(std::move(obj._shadersCompileCount)),
+	  _indicesSize(std::move(obj._indicesSize)),
 	  _vertexShader(std::move(obj._vertexShader)),
 	  _fragmentShader(std::move(obj._fragmentShader)),
-	  _mesh(obj._mesh)
+	  _mesh(std::move(obj._mesh))
 {
 }
 
@@ -377,7 +333,7 @@ Engine::SingleVertexObject::~SingleVertexObject()
 	glDeleteBuffers(sizeof(_glVBO), &_glCBO);
 	logDebug << "Objects geometry removed" << logEndl;
 
-	switch (_glShadersCompileCount)
+	switch (_shadersCompileCount)
 	{
 		case 3:
 			glDetachShader(_glShaderProgram, _glVertexShader);
@@ -399,78 +355,113 @@ Engine::SingleVertexObject::~SingleVertexObject()
 }
 
 
-void Engine::SingleVertexObject::loadGeometry()
-{
-	glGenBuffers(1, &_glVBO);
-	glBindBuffer(GL_ARRAY_BUFFER, _glVBO);
-	glBufferData(GL_ARRAY_BUFFER, _vertices.size() * sizeof(GLfloat), _vertices.data(), GL_STATIC_DRAW);
-
-	glGenBuffers(1, &_glIBO);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _glIBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, _indicies.size() * sizeof(GLfloat), _indicies.data(), GL_STATIC_DRAW);
-
-	glGenBuffers(1, &_glCBO);
-	glBindBuffer(GL_ARRAY_BUFFER, _glCBO);
-	glBufferData(GL_ARRAY_BUFFER, _colors.size() * sizeof(GLuint), _colors.data(), GL_STATIC_DRAW);
-}
-
-
-void Engine::SingleVertexObject::loadShaders()
-{
-	glUseProgram(_glShaderProgram);
-}
-
-
-void Engine::SingleVertexObject::unloadGeometry()
-{
-
-}
-
-
-void Engine::SingleVertexObject::unloadShaders()
-{
-	glUseProgram(0);
-}
-
-
 bool Engine::SingleVertexObject::validate() const
 {
-	if (_glShadersCompileCount != 3)
+	if (_shadersCompileCount != 3)
 		return false;
 
 	return true;
 }
 
 
-bool Engine::SingleVertexObject::compileShaders()
+void Engine::SingleVertexObject::initGLGeometry()
 {
-	_glShadersCompileCount = 0;
+	_initVertexBufferObject();
+	_initColorBufferObject();
+	_initIndexBufferObject();
+}
+
+
+void Engine::SingleVertexObject::_initVertexBufferObject()
+{
+	std::vector<GLfloat> vertices((_mesh->getVertices().size() * _vertexStep), 0.0f);
+	size_t idx = 0;
+
+	for (size_t i = 0; i < vertices.size(); i += _vertexStep)
+	{
+		const Mesh::Vertex& v = _mesh->getVertex(idx++);
+
+		vertices[i] = v.getPosition().x;
+		vertices[i+1] = v.getPosition().y;
+		vertices[i+2] = v.getPosition().z;
+		vertices[i+3] = 1.0f;
+	}
+
+	glGenBuffers(1, &_glVBO);
+	glBindBuffer(GL_ARRAY_BUFFER, _glVBO);
+	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(GLfloat), vertices.data(), GL_STATIC_DRAW);
+}
+
+
+void Engine::SingleVertexObject::_initColorBufferObject()
+{
+	std::vector<GLfloat> colors((_mesh->getVertices().size() * _colorStep), 1.0f);
+	size_t idx = 0;
+
+	for (size_t i = 0; i < colors.size(); i += _colorStep)
+	{
+		const Mesh::Vertex& v = _mesh->getVertex(idx++);
+
+		colors[i] = v.getColor().getRedF();
+		colors[i+1] = v.getColor().getGreenF();
+		colors[i+2] = v.getColor().getBlueF();
+		colors[i+3] = v.getColor().getAlphaF();
+	}
+
+	glGenBuffers(1, &_glCBO);
+	glBindBuffer(GL_ARRAY_BUFFER, _glCBO);
+	glBufferData(GL_ARRAY_BUFFER, colors.size() * sizeof(GLuint), colors.data(), GL_STATIC_DRAW);
+}
+
+
+void Engine::SingleVertexObject::_initIndexBufferObject()
+{
+	std::vector<GLuint> indicies((_mesh->getFaces().size() * _indexStep), 0.0f);
+	size_t idx = 0;
+
+	for (size_t i = 0; i < indicies.size(); i += _indexStep)
+	{
+		const Mesh::Face& f = _mesh->getFace(idx++);
+
+		indicies[i] = f.getFirstIndex();
+		indicies[i+1] = f.getSecondIndex();
+		indicies[i+2] = f.getThirdIndex();
+	}
+	_indicesSize = indicies.size() * sizeof(GLuint);
+
+	glGenBuffers(1, &_glIBO);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _glIBO);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, _indicesSize, indicies.data(), GL_STATIC_DRAW);
+}
+
+
+void Engine::SingleVertexObject::compileGLShaders()
+{
+	_shadersCompileCount = 0;
 
 	_compileVertexShader();
 	_compileFragmentShader();
 	_compileShaderProgram();
 
-	if (_glShadersCompileCount != 3)
-		return false;
+	if (_shadersCompileCount != 3)
+		return;
 
-	_attrConstColor = glGetUniformLocation(_glShaderProgram, "constColor");
-	_attrObjCenterPosition = glGetAttribLocation(_glShaderProgram, "objCenterPosition");
+	_attrObjCenterPosition = glGetUniformLocation(_glShaderProgram, "objCenterPosition");
 
 	_vertexShader->initUniformsLocations(_glShaderProgram);
 	_fragmentShader->initUniformsLocations(_glShaderProgram);
-
-	return true;
 }
 
 
 void Engine::SingleVertexObject::draw(const glm::mat4x4& mat)
 {
+	glUseProgram(_glShaderProgram);
+
 	glMatrixMode(GL_MODELVIEW);
 	glLoadMatrixf(&mat[0][0]);
 
 	const glm::vec3& pos = _mesh->getPosition();
-	glUniform4f(_attrConstColor, 3, 3, 3, 1);
-	glUniform3f(_attrObjCenterPosition, pos.x, pos.y, pos.z);
+	glUniform4f(_attrObjCenterPosition, pos.x, pos.y, pos.z, 1.0f);
 	_vertexShader->prepareForRender();
 	_fragmentShader->prepareForRender();
 
@@ -484,10 +475,12 @@ void Engine::SingleVertexObject::draw(const glm::mat4x4& mat)
 	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, 0);
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _glIBO);
-	glDrawElements(GL_TRIANGLES, _indicies.size() * sizeof(GLuint), GL_UNSIGNED_INT, 0);
+	glDrawElements(GL_TRIANGLES, _indicesSize, GL_UNSIGNED_INT, 0);
 
 	glDisableVertexAttribArray(1);
 	glDisableVertexAttribArray(0);
+
+	glUseProgram(0);
 }
 
 
@@ -512,7 +505,7 @@ bool Engine::SingleVertexObject::_compileVertexShader()
 		return false;
 	}
 
-	++_glShadersCompileCount;
+	++_shadersCompileCount;
 	logDebug << _vertexShader->getName() << " compiled successfuly." << logEndl;
 	return true;
 }
@@ -520,7 +513,7 @@ bool Engine::SingleVertexObject::_compileVertexShader()
 
 bool Engine::SingleVertexObject::_compileFragmentShader()
 {
-	if (_glShadersCompileCount < 1)
+	if (_shadersCompileCount < 1)
 		return false;
 
 	int success = 0;
@@ -542,7 +535,7 @@ bool Engine::SingleVertexObject::_compileFragmentShader()
 		return false;
 	}
 
-	++_glShadersCompileCount;
+	++_shadersCompileCount;
 	logDebug << _fragmentShader->getName() << " compiled successfuly." << logEndl;
 	return true;
 }
@@ -550,7 +543,7 @@ bool Engine::SingleVertexObject::_compileFragmentShader()
 
 bool Engine::SingleVertexObject::_compileShaderProgram()
 {
-	if (_glShadersCompileCount < 2)
+	if (_shadersCompileCount < 2)
 		return false;
 
 	int success = 0;
@@ -584,7 +577,7 @@ bool Engine::SingleVertexObject::_compileShaderProgram()
 		return false;
 	}
 
-	++_glShadersCompileCount;
+	++_shadersCompileCount;
 	logDebug << "Shader program is valid. Shaders compilation finished." << logEndl;
 	return true;
 }

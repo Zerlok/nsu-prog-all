@@ -6,10 +6,9 @@ const ShaderPtr Material::DEFAULT_VERTEX_SHADER = new Shader(
 		"#version 120\n"
 		"attribute vec4 position;\n"
 		"attribute vec4 color;\n"
-		"uniform vec4 constColor;\n"
 		"void main() {\n"
 		"  gl_Position = gl_ModelViewProjectionMatrix * position;\n"
-		"  gl_FrontColor = color * constColor;\n"
+		"  gl_FrontColor = color;\n"
 		"}\n"
 );
 const ShaderPtr Material::DEFAULT_FRAGMENT_SHADER = new Shader(

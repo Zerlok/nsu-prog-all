@@ -29,7 +29,7 @@ int main(int argc, char *argv[])
 	ScenePtr scene = new Scene("Lab03", camera);
 	scene->setBgColor(Color::grey);
 
-	int size = 1;
+	int size = 3;
 	float offset = 2.5;
 	for (int z = -size; z < size+1; ++z)
 	{

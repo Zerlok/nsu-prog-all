@@ -32,14 +32,6 @@ class Engine
 		using GUIfpsPtr = SharedPointer<GUIfps>;
 
 		// Methods.
-		void assignMeshToEngineObject(const MeshPtr& mesh);
-
-		void initGeometry();
-		void deinitGeometry();
-
-		void initShaders();
-		void deinitShaders();
-
 		void drawGUI();
 		void drawGUILabel(const GUILabel& glabel);
 		void drawGUIPlane(const GUIPlane& gplane);
@@ -74,18 +66,16 @@ class Engine
 class Engine::SingleVertexObject
 {
 	public:
+		// Constructors / Destructor.
 		SingleVertexObject(const MeshPtr& mesh);
 		SingleVertexObject(SingleVertexObject&& obj);
 		~SingleVertexObject();
 
+		// Methods.
 		bool validate() const;
 
-		bool compileShaders();
-		void loadGeometry();
-		void loadShaders();
-
-		void unloadGeometry();
-		void unloadShaders();
+		void initGLGeometry();
+		void compileGLShaders();
 
 		void draw(const glm::mat4x4& mat);
 
@@ -102,14 +92,10 @@ class Engine::SingleVertexObject
 		GLuint _glVertexShader;		// Vertices rendering
 		GLuint _glFragmentShader;	// Faces rendering.
 		GLuint _glShaderProgram;	// Total shadering program.
-		GLuint _attrConstColor;		// Shader const color.
 		GLuint _attrObjCenterPosition; // Shader center position of object.
-		size_t _glShadersCompileCount;
 
-		// Object attributes.
-		std::vector<GLfloat> _vertices;
-		std::vector<GLfloat> _colors;
-		std::vector<GLuint> _indicies;
+		size_t _shadersCompileCount;
+		size_t _indicesSize;
 
 		ShaderPtr _vertexShader;
 		ShaderPtr _fragmentShader;
@@ -117,6 +103,10 @@ class Engine::SingleVertexObject
 		MeshPtr _mesh;
 
 		// Methods.
+		void _initVertexBufferObject();
+		void _initColorBufferObject();
+		void _initIndexBufferObject();
+
 		bool _compileVertexShader();
 		bool _compileFragmentShader();
 		bool _compileShaderProgram();

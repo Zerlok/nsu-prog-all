@@ -10,7 +10,6 @@ const std::string ScrewShader::SRC = "\
 attribute vec4 position;\
 attribute vec4 color;\
 uniform float alpha;\
-uniform vec4 constColor;\
 \
 mat3 rotationMatrix(vec3 axis, float angle)\
 {\
@@ -37,7 +36,7 @@ void main() {\
  \
  pos = pos * rotationMatrix(vec3(0.0, 1.0, 0.0), alpha * sin(pos.y));\
  gl_Position = gl_ModelViewProjectionMatrix * vec4(pos, 1.0);\
- gl_FrontColor = color * constColor;\
+ gl_FrontColor = color;\
 }\
 ";
 
