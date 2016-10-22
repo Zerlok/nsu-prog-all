@@ -30,19 +30,19 @@ class Logger
 		};
 
 		// Static methods.
-		static void init(const char* filename = EMPTY_STRING,
+		static void init(const std::string& filename = EMPTY_STRING,
 						 const int& linenum = 0,
 						 std::ostream& out = std::cout,
 						 const Level& level = Level::INFO,
 						 const Description& descr = Description::LEVEL,
 						 const bool& displayInitMsg = true);
-		static Logger& getInstance(const char* filename = EMPTY_STRING,
+		static Logger& getInstance(const std::string& filename = EMPTY_STRING,
 								   const int& linenum = 0,
 								   std::ostream& out = std::cout,
 								   const Level& level = Level::INFO,
 								   const Description& descr = Description::LEVEL,
 								   const bool& displayInitMsg = true);
-		static Logger& addModule(const char* filename,
+		static Logger& addModule(const std::string& filename,
 								 const Level& level = Level::INFO,
 								 const Description& description = Description::LEVEL);
 		static Logger& endl();
@@ -60,23 +60,23 @@ class Logger
 		}
 
 		// Methods.
-		Logger& debug(const char* funcname,
-					  const char* filename,
+		Logger& debug(const std::string& funcname,
+					  const std::string& filename,
 					  const int& linenum);
-		Logger& info(const char* funcname,
-					 const char* filename,
+		Logger& info(const std::string& funcname,
+					 const std::string& filename,
 					 const int& linenum);
-		Logger& warning(const char* funcname,
-						const char* filename,
+		Logger& warning(const std::string& funcname,
+						const std::string& filename,
 						const int& linenum);
-		Logger& error(const char* funcname,
-					  const char* filename,
+		Logger& error(const std::string& funcname,
+					  const std::string& filename,
 					  const int& linenum);
-		Logger& fatal(const char* funcname,
-					  const char* filename,
+		Logger& fatal(const std::string& funcname,
+					  const std::string& filename,
 					  const int& linenum);
-		Logger& module(const char* funcname,
-					   const char* filename,
+		Logger& module(const std::string& funcname,
+					   const std::string& filename,
 					   const int& linenum);
 
 	private:
@@ -85,23 +85,19 @@ class Logger
 		using Modules = std::unordered_map<std::string, Format>;
 
 		// Static.
-		static const char* CONSTRUCTOR_MESSAGE;
-		static const char* DESTRUCTOR_MESSAGE;
+		static const std::string EMPTY_STRING;
 
-		static const char* EMPTY_STRING;
-
-		static Logger* _instance;
-		static Modules _modules;
-
-		static std::string basename(const char* filename);
+		static std::string basename(const std::string& filename);
 		static std::ostream& addTimestamp(std::ostream& out);
 		static Level validateInitialLevel(const Level& level);
+		static Modules& _getModules();
+
 
 		// Constructors / Destructor.
 		Logger(std::ostream& output,
 			   const Level& level,
 			   const Description& descr,
-			   const char* filename,
+			   const std::string& filename,
 			   const int& linenum,
 			   const bool& displayInitMsg);
 		~Logger();
@@ -113,8 +109,8 @@ class Logger
 		// Methods.
 		Logger& _out(const Level &level,
 					 const Description& descr,
-					 const char* funcname,
-					 const char* filename,
+					 const std::string& funcname,
+					 const std::string& filename,
 					 const int &linenum);
 		Logger& _end();
 

@@ -4,95 +4,79 @@
 #include <sys/time.h>
 
 
-Logger* Logger::_instance = nullptr;
-Logger::Modules Logger::_modules = Logger::Modules();
-
-const char* Logger::CONSTRUCTOR_MESSAGE = "========== LOGGER STARTED ==========";
-const char* Logger::DESTRUCTOR_MESSAGE = "========== LOGGER STOPPED ==========";
-const char* Logger::EMPTY_STRING = "none";
+const std::string Logger::EMPTY_STRING = "none";
 
 
-void Logger::init(const char* filename,
-				  const int& linenum,
-				  std::ostream& out,
-				  const Level& level,
-				  const Description& descr,
-				  const bool& displayInitMsg)
-{
-	static Logger instance(out, level, descr, filename, linenum, displayInitMsg);
-}
-
-
-Logger& Logger::getInstance(const char* filename,
+Logger& Logger::getInstance(const std::string& filename,
 							const int& linenum,
 							std::ostream& out,
 							const Level& level,
 							const Logger::Description& descr,
 							const bool& displayInitMsg)
 {
-	init(filename, linenum, out, level, descr, displayInitMsg);
-	return (*_instance);
+	static Logger loggerInstance(out, level, descr, filename, linenum, displayInitMsg);
+	return loggerInstance;
 }
 
 
-Logger& Logger::addModule(const char* filename,
+Logger& Logger::addModule(const std::string& filename,
 						  const Logger::Level& level,
 						  const Logger::Description& description)
 {
-	const Modules::const_iterator it = _modules.find(filename);
-	if (it == _modules.end())
-		_modules.insert({filename, {level, description}});
+	const Modules::const_iterator it = _getModules().find(filename);
+	if (it == _getModules().end())
+		_getModules().insert({filename, {level, description}});
 
 	return getInstance();
 }
 
 
-Logger& Logger::debug(const char* funcname,
-					  const char* filename,
+Logger& Logger::debug(const std::string& funcname,
+					  const std::string& filename,
 					  const int& linenum)
 {
 	return _out(Level::DEBUG, _description, funcname, filename, linenum);
 }
 
 
-Logger& Logger::info(const char* funcname,
-					 const char* filename,
+Logger& Logger::info(const std::string& funcname,
+					 const std::string& filename,
 					 const int& linenum)
 {
 	return _out(Level::INFO, _description, funcname, filename, linenum);
 }
 
 
-Logger& Logger::warning(const char* funcname,
-						const char* filename,
+Logger& Logger::warning(const std::string& funcname,
+						const std::string& filename,
 						const int& linenum)
 {
 	return _out(Level::WARNING, _description, funcname, filename, linenum);
 }
 
 
-Logger& Logger::error(const char* funcname,
-					  const char* filename,
+Logger& Logger::error(const std::string& funcname,
+					  const std::string& filename,
 					  const int& linenum)
 {
 	return _out(Level::ERROR, _description, funcname, filename, linenum);
 }
 
 
-Logger& Logger::fatal(const char* funcname,
-					  const char* filename,
+Logger& Logger::fatal(const std::string& funcname,
+					  const std::string& filename,
 					  const int& linenum)
 {
 	return _out(Level::FATAL, _description, funcname, filename, linenum);
 }
 
 
-Logger& Logger::module(const char* funcname,
-						const char* filename,
+Logger& Logger::module(const std::string& funcname,
+						const std::string& filename,
 						const int& linenum)
 {
-	const Modules::const_iterator it = _modules.find(filename);
-	if (it == _modules.end())
+	const Modules::const_iterator it = _getModules().find(filename);
+	if (it == _getModules().end())
 		return _out(_level, _description, funcname, filename, linenum);
 
 	const Format& moduleFormat = it->second;
@@ -106,7 +90,7 @@ Logger& Logger::endl()
 }
 
 
-std::string Logger::basename(const char* filepath)
+std::string Logger::basename(const std::string& filepath)
 {
 	std::string path = filepath;
 	size_t sep_pos = path.rfind('/') + 1;
@@ -149,7 +133,7 @@ Logger::Level Logger::validateInitialLevel(const Logger::Level& level)
 Logger::Logger(std::ostream& output,
 			   const Level& level,
 			   const Description& descr,
-			   const char* filename,
+			   const std::string& filename,
 			   const int& linenum,
 			   const bool& displayInitMsg)
 	: _output(output),
@@ -157,11 +141,10 @@ Logger::Logger(std::ostream& output,
 	  _description(descr),
 	  _displayDestroyMsg(displayInitMsg)
 {
-	_instance = this;
-
 	if (displayInitMsg)
 	{
-		_out(Level::INFO, Description::FULL, __FUNCTION__, filename, linenum) << CONSTRUCTOR_MESSAGE;
+		_out(Level::INFO, Description::FULL, __FUNCTION__, filename, linenum)
+				<< "========== LOGGER STARTED ==========";
 		_end();
 	}
 }
@@ -172,11 +155,14 @@ Logger::~Logger()
 	if (_displayDestroyMsg)
 	{
 		Logger& l = info(__FUNCTION__, __FILE__, __LINE__) << " registred modules:" << std::endl;
-		for (auto it : _modules)
-			l << it.first << " - " << (it.second).first << ", " << int((it.second).second) << std::endl;
+		for (auto it : _getModules())
+			l << it.first << " --- "
+			  << (it.second).first << ", "
+			  << int((it.second).second) << std::endl;
 		_end();
 
-		info(__FUNCTION__, __FILE__, __LINE__) << DESTRUCTOR_MESSAGE;
+		info(__FUNCTION__, __FILE__, __LINE__)
+				<< "========== LOGGER STOPPED ==========";
 		_end();
 	}
 }
@@ -184,8 +170,8 @@ Logger::~Logger()
 
 Logger& Logger::_out(const Level& level,
 					 const Description& descr,
-					 const char* funcname,
-					 const char* filename,
+					 const std::string& funcname,
+					 const std::string& filename,
 					 const int& linenum)
 {
 	if (_isCurrentLevelAlreadySet())
@@ -209,7 +195,7 @@ Logger& Logger::_out(const Level& level,
 		case Description::FULL:
 			_output << '[' << level
 					<< "] [" << funcname
-					<< "] (in " << basename(filename) << ':' << linenum << ") ";
+					<< "] [" << basename(filename) << ':' << linenum << "] ";
 			break;
 		case Description::MESSAGE_ONLY:
 		default:
@@ -254,6 +240,13 @@ bool Logger::_isCurrentLevelValid() const
 bool Logger::_isCurrentLevelAlreadySet() const
 {
 	return (_current_message_level != Level::NONE);
+}
+
+
+Logger::Modules& Logger::_getModules()
+{
+	static Modules modulesInstance;
+	return modulesInstance;
 }
 
 

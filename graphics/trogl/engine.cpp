@@ -6,7 +6,7 @@
 #include "common/utils.h"
 
 
-loggerType loggerInstance = loggerForModule(Logger::Level::DEBUG, Logger::Description::FULL);
+loggerType loggerInstance = loggerForModule(Logger::Level::INFO, Logger::Description::FULL);
 
 
 Engine* Engine::_current = nullptr;
