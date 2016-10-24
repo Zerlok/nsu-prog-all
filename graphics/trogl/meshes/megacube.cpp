@@ -2,7 +2,6 @@
 
 
 #include <logger.hpp>
-#include "common/utils.h"
 #include "shaders/metamorphose_shader.h"
 
 

@@ -76,6 +76,12 @@ const CameraPtr& Scene::getCamera() const
 }
 
 
+CameraPtr& Scene::getCamera()
+{
+	return _camera;
+}
+
+
 void Scene::addMesh(const MeshPtr& mesh)
 {
 	_meshes.push_back(mesh);

@@ -2,21 +2,27 @@
 
 
 #include <logger.hpp>
+#include "materials/diffusematerial.hpp"
 
 
 loggerType loggerInstance = loggerForModule(Logger::Level::DEBUG, Logger::Description::FULL);
 
 
+const MaterialPtr Mesh::DEFAULT_MATERIAL = new DiffuseMaterial();
+
+
 Mesh::Mesh(const std::string& name,
 		   const glm::vec3& pos,
 		   const glm::vec3& rot,
-		   const glm::vec3& sca)
+		   const glm::vec3& sca,
+		   const MaterialPtr& mat)
 	: Object(Object::Type::MESH, name)
 {
 	logModule << "Mesh object created" << logEndl;
 	setPosition(pos);
 	setRotation(rot);
 	setScale(sca);
+	setMaterial(mat);
 }
 
 

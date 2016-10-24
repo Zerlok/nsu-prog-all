@@ -2,12 +2,16 @@
 
 
 #include "common/color.hpp"
+#include "shaders/metamorphose_shader.h"
 
 
 Cylinder::Cylinder(const Color& c1,
 				   const Color& c2)
 	: Mesh("Cylinder")
 {
+	static const MaterialPtr mat = new Material("CylMat", new MetamorphoseShader());
+	setMaterial(mat);
+
 	// Vertices.
 	{
 		addVertex(Vertex(0.0, -1.0, 1.0, c2));

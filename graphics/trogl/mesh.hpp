@@ -13,23 +13,31 @@
 class Mesh : public Object
 {
 	public:
+		// Static.
+		static const MaterialPtr DEFAULT_MATERIAL;
+
+		// Inner classes.
 		class Vertex;
 		class Face;
 
 		using Vertices = std::vector<Vertex>;
 		using Faces = std::vector<Face>;
 
+		// Constructors / Destructor.
 		Mesh(const std::string& name = "",
 			 const glm::vec3& pos = Object::DEFAULT_POSITION,
 			 const glm::vec3& rot = Object::DEFAULT_ROTATION,
-			 const glm::vec3& sca = Object::DEFAULT_SCALE);
+			 const glm::vec3& sca = Object::DEFAULT_SCALE,
+			 const MaterialPtr& mat = Mesh::DEFAULT_MATERIAL);
 		Mesh(const Mesh& mesh);
 		Mesh(Mesh&& mesh);
 		virtual ~Mesh();
 
+		// Operators.
 		Mesh& operator=(const Mesh& mesh);
 		Mesh& operator=(Mesh&& mesh);
 
+		// Methods.
 		const Vertex& getVertex(const size_t& i) const;
 		const Face& getFace(const size_t& i) const;
 
@@ -43,15 +51,18 @@ class Mesh : public Object
 
 		void recalculateNormals();
 
+		// Methods overriden.
 		void applyPosition() override;
 		void applyRotation() override;
 		void applyScale() override;
 
 	protected:
+		// Fields.
 		Vertices _vertices;
 		Faces _faces;
 		MaterialPtr _material;
 
+		// Methods.
 		void _reassignDataReferences();
 };
 

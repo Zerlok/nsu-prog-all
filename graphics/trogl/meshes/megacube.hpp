@@ -13,4 +13,5 @@ class MegaCube : public Mesh
 		~MegaCube();
 };
 
+
 #endif // __MEGACUBE_HPP__

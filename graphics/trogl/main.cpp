@@ -17,40 +17,55 @@ loggerType loggerGlobalInstance = loggerInit(std::cout,
 											 Logger::Description::FULL);
 
 
-int main(int argc, char *argv[])
+template<class M>
+void fillSceneWithMeshes(ScenePtr& scene, const size_t& size)
 {
-	const int size = 3;
+	int sizeInt = size;
+	size_t verticesNum = 0;
+	size_t facesNum = 0;
+
 	const float offset = 2.5;
 	const glm::vec3 cameraPos = glm::vec3(
 			2*(size+1)*offset,
 			(size+1)*offset / 1.8,
 			(size+1)*offset
 	);
-
-	Engine engine;
-
-	// Setup scene.
-	CameraPtr camera = new Camera();
+	CameraPtr& camera = scene->getCamera();
 	camera->setPosition(cameraPos);
-	ScenePtr scene = new Scene("My Scene", camera);
-	scene->setBgColor(Color::grey);
 
 	const double start = getTimeDouble();
-	for (int z = -size; z < size+1; ++z)
+	for (int z = -sizeInt; z < sizeInt+1; ++z)
 	{
-		for (int y = -size; y < size+1; ++y)
+		for (int y = -sizeInt; y < sizeInt+1; ++y)
 		{
-			for (int x = -size; x < size+1; ++x)
+			for (int x = -sizeInt; x < sizeInt+1; ++x)
 			{
-				MeshPtr c = new MegaCube(Color::black, Color::white);
+				MeshPtr c = new M(Color::black, Color::white);
 				c->setPosition(glm::vec3(x*offset, y*offset, z*offset));
 				scene->addMesh(c);
+
+				verticesNum += c->getVertices().size();
+				facesNum += c->getFaces().size();
 			}
 		}
 	}
 	const double end = getTimeDouble();
-	logInfo << std::pow(2*size + 1, 3) << " meshes created (duration: "
-			<< std::setprecision(9) << (end - start) << "s)" << logEndl;
+	logInfo << std::pow(2*sizeInt + 1, 3) << " meshes created"
+			<< " (vertices: " << verticesNum << ", faces: " << facesNum
+			<< ") (duration: " << std::setprecision(9) << (end - start) << "s)" << logEndl;
+}
+
+
+int main(int argc, char *argv[])
+{
+	Engine engine;
+
+	// Setup scene.
+	CameraPtr camera = new Camera();
+	ScenePtr scene = new Scene("My Scene", camera);
+	scene->setBgColor(Color::grey);
+
+	fillSceneWithMeshes<Cylinder>(scene, 3);
 
 	// Show scene.
 	engine.setActiveScene(scene);

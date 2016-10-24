@@ -5,7 +5,7 @@
 
 
 DiffuseMaterial::DiffuseMaterial()
-	: Material("Diffusematerial", DEFAULT_SHADER)
+	: Material("Diffusematerial", Material::DEFAULT_SHADER)
 {
 	// TODO: add light behavior.
 }
