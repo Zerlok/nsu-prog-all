@@ -12,11 +12,12 @@ loggerType loggerInstance = loggerForModule(Logger::Level::DEBUG, Logger::Descri
 Engine* Engine::_current = nullptr;
 
 
-Engine::Engine(bool displayFPS)
-	: _scene(nullptr),
+Engine::Engine(const bool& displayFPS)
+	: _glWindow(0),
+	  _wasValidated(false),
+	  _scene(nullptr),
 	  _gui(nullptr),
 	  _guiFPS(),
-	  _isValid(false),
 	  _width(0),
 	  _height(0)
 {
@@ -24,29 +25,26 @@ Engine::Engine(bool displayFPS)
 
 	setDisplayFPS(displayFPS);
 
-	// TODO: move glut init into "initialize" function, create bool _isInited for checks.
-	int argc = 1;
-	char* argv = "engine";
-	glutInit(&argc, &argv);
-	glutInitDisplayMode(GLUT_RGBA);
-	glutInitWindowPosition(2000, 100);
-
 	logModule << "Engine created" << logEndl;
 }
 
 
 Engine::~Engine()
 {
+	if ((_wasValidated)
+			&& (_glWindow))
+			glutDestroyWindow(_glWindow);
+
 	logModule << "Engine removed" << logEndl;
 }
 
 
-void Engine::setDisplayFPS(bool displayFPS)
+void Engine::setDisplayFPS(const bool& displayFPS)
 {
 	if (displayFPS)
 		_guiFPS = new GUIfps(0, 0, 1, 1);
 	else
-		_guiFPS = nullptr;
+		_guiFPS.release();
 }
 
 
@@ -62,46 +60,48 @@ void Engine::setActiveScene(const ScenePtr& scene)
 }
 
 
-void Engine::showScene()
+bool Engine::validateScene()
 {
+	_wasValidated = true;
+
 	if (!_scene)
 	{
 		logError << "Cannot show scene - it was not set yet!" << logEndl;
-		return;
+		return false;
 	}
+
+	int argc = 1;
+	char* argv = "engine";
+	glutInit(&argc, &argv);
+	glutInitDisplayMode(GLUT_RGBA);
+	glutInitWindowPosition(2000, 100);
 
 	const Camera& cam = _scene->getCamera().get_reference();
 	glutInitWindowSize(
 				cam.getWidth(),
 				cam.getHeight());
-	int sceneWindow = glutCreateWindow(_generateWindowName(*_scene).c_str());
+	_glWindow = glutCreateWindow(_generateWindowName(*_scene).c_str());
 
 	if (!_runGlewTest())
 	{
 		logError << "Cannot show scene " << _scene->getName()
 				 << " - engine couldn't initialize" << logEndl;
-		return;
+		return false;
 	}
 
 	if (!cam.isValid())
 	{
 		logError << "Cannot show scene " << _scene->getName()
 				 << " - camera settings are invalid" << logEndl;
-		return;
+		return false;
 	}
-
-	// TODO: make Engine as singleton.
-	_current = this;
-	glutDisplayFunc(display);
-	glutReshapeFunc(reshape);
-	glutIdleFunc(cycle);
 
 	// TODO: add light to scene.
 
 	for (const MeshPtr& m : _scene->getMeshes())
 	{
-		_objects.push_back(SingleVertexObject(m));
-		SingleVertexObject& obj = _objects.back();
+		_objects.push_back(VertexObject(m));
+		VertexObject& obj = _objects.back();
 		obj.initGLGeometry();
 		obj.compileGLShaders();
 
@@ -113,16 +113,32 @@ void Engine::showScene()
 		}
 	}
 
+	return true;
+}
+
+
+void Engine::showScene()
+{
+	if (!_wasValidated)
+		if (!validateScene())
+			return;
+
+	// TODO: make Engine as singleton.
+	_current = this;
+	glutDisplayFunc(display);
+	glutReshapeFunc(reshape);
+	glutIdleFunc(cycle);
+
 	logInfo << "Engine rendering started (scene: " << _scene->getName() << ")" << logEndl;
 	glutMainLoop();
 	logInfo << "Engine rendering finished." << logEndl;
-
-	glutDestroyWindow(sceneWindow);
 }
 
 
 void Engine::drawGUI()
 {
+	glUseProgram(0);
+
 	// What does it do?
 	glMatrixMode(GL_PROJECTION);
 	glPushMatrix(); // save
@@ -202,7 +218,7 @@ void Engine::renderFrame()
 
 //	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
-	// Matrix Projection.
+	// Matrix View Projection.
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	const CameraPtr& cam = _scene->getCamera();
@@ -218,7 +234,7 @@ void Engine::renderFrame()
 											 cam->getHeadDirection());
 
 	// Draw the objects.
-	for (SingleVertexObject& obj : _objects)
+	for (VertexObject& obj : _objects)
 		obj.draw(matView);
 
 	// Draw GUI at the end of frame (to overlay over every objects on scene).
@@ -281,16 +297,16 @@ void Engine::cycle()
 
 // --------------------- SINGLE VERTEX OBJECT --------------------- //
 
-const size_t Engine::SingleVertexObject::_vertexStep = 4;
-const size_t Engine::SingleVertexObject::_colorStep = 4;
-const size_t Engine::SingleVertexObject::_indexStep = 3;
+const size_t Engine::VertexObject::_vertexStep = 4;
+const size_t Engine::VertexObject::_colorStep = 4;
+const size_t Engine::VertexObject::_indexStep = 3;
 
 
-Engine::SingleVertexObject::SingleVertexObject(const MeshPtr& mesh)
+Engine::VertexObject::VertexObject(const MeshPtr& mesh)
 	: _glVBO(0),
 	  _glCBO(0),
 	  _glIBO(0),
-	  _attrObjCenterPosition(0),
+	  _attrObjPosition(0),
 	  _indicesSize(0),
 	  _shader(mesh->getMaterial()->getShader()),
 	  _mesh(mesh)
@@ -304,11 +320,11 @@ Engine::SingleVertexObject::SingleVertexObject(const MeshPtr& mesh)
 }
 
 
-Engine::SingleVertexObject::SingleVertexObject(Engine::SingleVertexObject&& obj)
+Engine::VertexObject::VertexObject(Engine::VertexObject&& obj)
 	: _glVBO(std::move(obj._glVBO)),
 	  _glCBO(std::move(obj._glCBO)),
 	  _glIBO(std::move(obj._glIBO)),
-	  _attrObjCenterPosition(std::move(obj._attrObjCenterPosition)),
+	  _attrObjPosition(std::move(obj._attrObjPosition)),
 	  _indicesSize(std::move(obj._indicesSize)),
 	  _shader(std::move(obj._shader)),
 	  _mesh(std::move(obj._mesh))
@@ -319,14 +335,13 @@ Engine::SingleVertexObject::SingleVertexObject(Engine::SingleVertexObject&& obj)
 }
 
 
-Engine::SingleVertexObject::~SingleVertexObject()
+Engine::VertexObject::~VertexObject()
 {
-	deinitGLGeometry();
-	deinitGLShaders();
+	_deinitGLGeometry();
 }
 
 
-bool Engine::SingleVertexObject::isValid() const
+bool Engine::VertexObject::isValid() const
 {
 	return ((_glVBO != 0)
 			&& (_glCBO != 0)
@@ -335,7 +350,7 @@ bool Engine::SingleVertexObject::isValid() const
 }
 
 
-void Engine::SingleVertexObject::initGLGeometry()
+void Engine::VertexObject::initGLGeometry()
 {
 	_initVertexBufferObject();
 	_initColorBufferObject();
@@ -343,7 +358,44 @@ void Engine::SingleVertexObject::initGLGeometry()
 }
 
 
-void Engine::SingleVertexObject::_initVertexBufferObject()
+void Engine::VertexObject::compileGLShaders()
+{
+	_shader->compile();
+
+	if (_shader->isValid())
+		_attrObjPosition = glGetUniformLocation(_shader->getProgram(), "trogl_objPosition");
+}
+
+
+void Engine::VertexObject::draw(const glm::mat4x4& mat)
+{
+	glUseProgram(_shader->getProgram());
+
+	glMatrixMode(GL_MODELVIEW);
+	glLoadMatrixf(&mat[0][0]);
+
+	const glm::vec3& pos = _mesh->getPosition();
+	glUniform4f(_attrObjPosition, pos.x, pos.y, pos.z, 1.0f);
+	_shader->prepareForRender();
+
+	glEnableVertexAttribArray(0);
+	glEnableVertexAttribArray(1);
+
+	glBindBuffer(GL_ARRAY_BUFFER, _glVBO);
+	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
+
+	glBindBuffer(GL_ARRAY_BUFFER, _glCBO);
+	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, 0);
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _glIBO);
+	glDrawElements(GL_TRIANGLES, _indicesSize, GL_UNSIGNED_INT, 0);
+
+	glDisableVertexAttribArray(1);
+	glDisableVertexAttribArray(0);
+}
+
+
+void Engine::VertexObject::_initVertexBufferObject()
 {
 	std::vector<GLfloat> vertices((_mesh->getVertices().size() * _vertexStep), 0.0f);
 	size_t idx = 0;
@@ -364,7 +416,7 @@ void Engine::SingleVertexObject::_initVertexBufferObject()
 }
 
 
-void Engine::SingleVertexObject::_initColorBufferObject()
+void Engine::VertexObject::_initColorBufferObject()
 {
 	std::vector<GLfloat> colors((_mesh->getVertices().size() * _colorStep), 1.0f);
 	size_t idx = 0;
@@ -385,7 +437,7 @@ void Engine::SingleVertexObject::_initColorBufferObject()
 }
 
 
-void Engine::SingleVertexObject::_initIndexBufferObject()
+void Engine::VertexObject::_initIndexBufferObject()
 {
 	std::vector<GLuint> indicies((_mesh->getFaces().size() * _indexStep), 0.0f);
 	size_t idx = 0;
@@ -406,16 +458,7 @@ void Engine::SingleVertexObject::_initIndexBufferObject()
 }
 
 
-void Engine::SingleVertexObject::compileGLShaders()
-{
-	_shader->compile();
-
-	if (_shader->isValid())
-		_attrObjCenterPosition = glGetUniformLocation(_shader->getProgram(), "objCenterPosition");
-}
-
-
-void Engine::SingleVertexObject::deinitGLGeometry()
+void Engine::VertexObject::_deinitGLGeometry()
 {
 	if (!isValid())
 		return;
@@ -428,37 +471,30 @@ void Engine::SingleVertexObject::deinitGLGeometry()
 }
 
 
-void Engine::SingleVertexObject::deinitGLShaders()
+Engine::LightObject::LightObject(const LightPtr& light)
+	: _shader(light->getShader())
 {
-	_shader.release();
 }
 
 
-void Engine::SingleVertexObject::draw(const glm::mat4x4& mat)
+Engine::LightObject::LightObject(Engine::LightObject&& obj)
+	: _shader(std::move(obj._shader))
 {
-	glUseProgram(_shader->getProgram());
+}
 
-	glMatrixMode(GL_MODELVIEW);
-	glLoadMatrixf(&mat[0][0]);
 
-	const glm::vec3& pos = _mesh->getPosition();
-	glUniform4f(_attrObjCenterPosition, pos.x, pos.y, pos.z, 1.0f);
-	_shader->prepareForRender();
+Engine::LightObject::~LightObject()
+{
+}
 
-	glEnableVertexAttribArray(0);
-	glEnableVertexAttribArray(1);
 
-	glBindBuffer(GL_ARRAY_BUFFER, _glVBO);
-	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
+bool Engine::LightObject::isValid() const
+{
+	return _shader->isValid();
+}
 
-	glBindBuffer(GL_ARRAY_BUFFER, _glCBO);
-	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, 0);
 
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _glIBO);
-	glDrawElements(GL_TRIANGLES, _indicesSize, GL_UNSIGNED_INT, 0);
-
-	glDisableVertexAttribArray(1);
-	glDisableVertexAttribArray(0);
-
-	glUseProgram(0);
+void Engine::LightObject::compileGLShaders()
+{
+	_shader->compile();
 }

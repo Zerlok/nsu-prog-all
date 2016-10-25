@@ -253,7 +253,7 @@ bool Shader::_compileShaderProgram()
 	glAttachShader(_glShaderProgram, _glFragmentShader);
 
 	glBindAttribLocation(_glShaderProgram, 0, "position");
-	glBindAttribLocation(_glShaderProgram, 1, "colors");
+	glBindAttribLocation(_glShaderProgram, 1, "color");
 
 	glLinkProgram(_glShaderProgram);
 	glGetProgramiv(_glShaderProgram, GL_LINK_STATUS, &success);

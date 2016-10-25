@@ -6,10 +6,13 @@
 
 #include "common/utils.h"
 #include "common/color.hpp"
+
 #include "meshes/cube.hpp"
 #include "meshes/strangecube.hpp"
 #include "meshes/megacube.hpp"
 #include "meshes/cylinder.hpp"
+
+#include "lamps/lamp.hpp"
 
 
 loggerType loggerGlobalInstance = loggerInit(std::cout,
@@ -65,11 +68,13 @@ int main(int argc, char *argv[])
 	ScenePtr scene = new Scene("My Scene", camera);
 	scene->setBgColor(Color::grey);
 
-	fillSceneWithMeshes<Cylinder>(scene, 3);
+	fillSceneWithMeshes<MegaCube>(scene, 0);
+	scene->addLight(new Lamp());
 
 	// Show scene.
-	engine.setActiveScene(scene);
 	engine.setDisplayFPS(true);
+	engine.setActiveScene(scene);
+	engine.validateScene();
 	engine.showScene();
 
 	return 0;

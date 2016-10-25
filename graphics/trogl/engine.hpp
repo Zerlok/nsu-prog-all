@@ -15,21 +15,23 @@
 class Engine
 {
 	public:
-		Engine(bool displayFPS = false);
-		virtual ~Engine();
+		Engine(const bool& displayFPS = false);
+		~Engine();
 
 		// Methods.
 		void setGUI(const GUIPtr& gui);
-		void setDisplayFPS(bool displayFPS);
+		void setDisplayFPS(const bool& displayFPS);
 		void setActiveScene(const ScenePtr& scene);
 
+		bool validateScene();
 		void showScene();
 
 	protected:
 		// Inner classes.
-		class SingleVertexObject;
+		class VertexObject;
+		class LightObject;
 
-		using EngineObjects = std::list<SingleVertexObject>;
+		using EngineObjects = std::list<VertexObject>;
 		using GUIfpsPtr = SharedPointer<GUIfps>;
 
 		// Methods.
@@ -40,11 +42,15 @@ class Engine
 		void renderFrame();
 
 		// Fields.
+		int _glWindow;
+		bool _wasValidated;
+
 		ScenePtr _scene;
 		GUIPtr _gui;
 		GUIfpsPtr _guiFPS;
+
 		EngineObjects _objects;
-		bool _isValid;
+
 		float _width;
 		float _height;
 
@@ -63,23 +69,22 @@ class Engine
 		static bool _runGlewTest();
 };
 
+void reshape(int w, int h);
+void cycle();
 
-class Engine::SingleVertexObject
+
+class Engine::VertexObject
 {
 	public:
 		// Constructors / Destructor.
-		SingleVertexObject(const MeshPtr& mesh);
-		SingleVertexObject(SingleVertexObject&& obj);
-		~SingleVertexObject();
+		VertexObject(const MeshPtr& mesh);
+		VertexObject(VertexObject&& obj);
+		~VertexObject();
 
 		// Methods.
 		bool isValid() const;
-
-		void initGLGeometry();
 		void compileGLShaders();
-
-		void deinitGLGeometry();
-		void deinitGLShaders();
+		void initGLGeometry();
 
 		void draw(const glm::mat4x4& mat);
 
@@ -93,10 +98,9 @@ class Engine::SingleVertexObject
 		GLuint _glVBO;				// Vertex Buffer Object
 		GLuint _glCBO;				// Color Buffer Object
 		GLuint _glIBO;				// Index Buffer Object
-		GLuint _attrObjCenterPosition; // Shader center position of object.
+		GLuint _attrObjPosition;
 
 		size_t _indicesSize;
-
 		ShaderPtr _shader;
 
 		// FIXME: do not use non-const MeshPtr.
@@ -106,11 +110,25 @@ class Engine::SingleVertexObject
 		void _initVertexBufferObject();
 		void _initColorBufferObject();
 		void _initIndexBufferObject();
+		void _deinitGLGeometry();
 };
 
 
-void reshape(int w, int h);
-void cycle();
+class Engine::LightObject
+{
+	public:
+		// Constructrs / Destructor.
+		LightObject(const LightPtr& light);
+		LightObject(LightObject&& obj);
+		~LightObject();
+
+		// Methods.
+		bool isValid() const;
+		void compileGLShaders();
+
+	private:
+		ShaderPtr _shader;
+};
 
 
 #endif // __ENGINE_HPP__

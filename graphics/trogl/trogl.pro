@@ -28,7 +28,8 @@ SOURCES += \
 	scene.cpp \
 	gui.cpp \
 	engine.cpp \
-	main.cpp
+	main.cpp \
+    shaders/diffuseshader.cpp
 SOURCES += \
 	shaders/metamorphose_shader.cpp \
 	shaders/screwshader.cpp \
@@ -56,7 +57,8 @@ HEADERS += \
 	light.hpp \
 	scene.hpp \
 	gui.hpp \
-	engine.hpp
+	engine.hpp \
+    shaders/diffuseshader.hpp
 HEADERS += \
 	shaders/metamorphose_shader.h \
 	shaders/screwshader.hpp \
