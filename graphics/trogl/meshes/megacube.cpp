@@ -2,7 +2,7 @@
 
 
 #include <logger.hpp>
-#include "shaders/metamorphose_shader.h"
+#include "shaders/metamorphoseshader.hpp"
 
 
 MegaCube::MegaCube(const Color& c1,

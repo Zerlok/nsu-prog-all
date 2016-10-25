@@ -2,7 +2,7 @@
 
 
 #include "common/color.hpp"
-#include "shaders/metamorphose_shader.h"
+#include "shaders/metamorphoseshader.hpp"
 
 
 Cylinder::Cylinder(const Color& c1,

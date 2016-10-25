@@ -38,4 +38,3 @@ void DiffuseShader::initCustomVarsLocations(const GLuint& glProgram)
 void DiffuseShader::prepareForRender()
 {
 }
-

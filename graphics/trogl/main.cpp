@@ -55,7 +55,7 @@ void fillSceneWithMeshes(ScenePtr& scene, const size_t& size)
 	const double end = getTimeDouble();
 	logInfo << std::pow(2*sizeInt + 1, 3) << " meshes created"
 			<< " (vertices: " << verticesNum << ", faces: " << facesNum
-			<< ") (duration: " << std::setprecision(9) << (end - start) << "s)" << logEndl;
+			<< ") (duration: " << (end - start) << "s)" << logEndl;
 }
 
 
@@ -68,7 +68,7 @@ int main(int argc, char *argv[])
 	ScenePtr scene = new Scene("My Scene", camera);
 	scene->setBgColor(Color::grey);
 
-	fillSceneWithMeshes<MegaCube>(scene, 0);
+	fillSceneWithMeshes<MegaCube>(scene, 3);
 	scene->addLight(new Lamp());
 
 	// Show scene.
