@@ -86,7 +86,7 @@ class Engine::VertexObject
 		void compileGLShaders();
 		void initGLGeometry();
 
-		void draw(const glm::mat4x4& mat);
+		void draw();
 
 	private:
 		// Static fields.
@@ -107,6 +107,8 @@ class Engine::VertexObject
 		MeshPtr _mesh;
 
 		// Methods.
+		bool _isGLGeometryValid() const;
+
 		void _initVertexBufferObject();
 		void _initColorBufferObject();
 		void _initIndexBufferObject();

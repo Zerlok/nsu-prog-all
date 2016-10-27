@@ -36,7 +36,7 @@ HEADERS += \
     camera.hpp \
     scene.hpp \
     gui.hpp \
-	engine.hpp
+    engine.hpp
 
 # Custom shaders.
 HEADERS += \
@@ -68,7 +68,8 @@ HEADERS += \
 # Other.
 HEADERS += \
     common/color.hpp \
-    common/utils.h
+    common/utils.hpp \
+    engineutils.hpp
 
 
 # Main sources of modules.
@@ -84,7 +85,7 @@ SOURCES += \
     scene.cpp \
     gui.cpp \
     engine.cpp \
-	main.cpp
+    main.cpp
 
 # Custom shaders.
 SOURCES += \

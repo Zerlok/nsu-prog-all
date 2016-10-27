@@ -19,8 +19,7 @@ class Object : public Component
 		};
 
 		Object(const Type& type,
-			   const std::string& name = DEFAULT_NAME,
-			   const glm::vec3& pos = glm::vec3());
+			   const std::string& name = DEFAULT_NAME);
 		Object(const Object& obj);
 		Object(Object&& obj);
 		virtual ~Object();

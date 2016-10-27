@@ -1,7 +1,7 @@
 #include "guifps.hpp"
 
 
-#include "common/utils.h"
+#include "common/utils.hpp"
 
 
 const std::string GUIfps::LABEL = "fps: ";

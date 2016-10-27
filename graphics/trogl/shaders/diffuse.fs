@@ -1,14 +1,11 @@
 #version 120
 
-in vertexNormal;
-
-attribute vec4 position;
-attribute vec4 color;
+//in vertexNormal;
 
 uniform vec4 lampPosition;
 
 
 void main()
 {
-	gl_FragColor = color;
+        gl_FragColor = gl_Color;
 }

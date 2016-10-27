@@ -2,9 +2,7 @@
 #include <iomanip>
 #include <logger.hpp>
 
-#include "engine.hpp"
-
-#include "common/utils.h"
+#include "common/utils.hpp"
 #include "common/color.hpp"
 
 #include "meshes/cube.hpp"
@@ -14,66 +12,60 @@
 
 #include "lamps/lamp.hpp"
 
+#include "engine.hpp"
+#include "engineutils.hpp"
+
 
 loggerType lInstance = loggerInit(std::cout,
 								  Logger::Level::INFO,
 								  Logger::Description::FULL);
 
 
-template<class M>
-void fillSceneWithMeshes(ScenePtr& scene, const size_t& size)
+std::ostream& operator<<(std::ostream& out, const glm::vec3& v)
 {
-	int sizeInt = size;
-	size_t verticesNum = 0;
-	size_t facesNum = 0;
-
-	const float offset = 2.5;
-	const glm::vec3 cameraPos = glm::vec3(
-			2*(size+1)*offset,
-			(size+1)*offset / 1.8,
-			(size+1)*offset
-	);
-	CameraPtr& camera = scene->getCamera();
-	camera->setPosition(cameraPos);
-
-	const double start = getTimeDouble();
-	for (int z = -sizeInt; z < sizeInt+1; ++z)
-	{
-		for (int y = -sizeInt; y < sizeInt+1; ++y)
-		{
-			for (int x = -sizeInt; x < sizeInt+1; ++x)
-			{
-				MeshPtr c = new M(Color::black, Color::white);
-				c->setPosition(glm::vec3(x*offset, y*offset, z*offset));
-				scene->addMesh(c);
-
-				verticesNum += c->getVertices().size();
-				facesNum += c->getFaces().size();
-			}
-		}
-	}
-	const double end = getTimeDouble();
-	logInfo << std::pow(2*sizeInt + 1, 3) << " meshes created"
-			<< " (vertices: " << verticesNum << ", faces: " << facesNum
-			<< ") (duration: " << (end - start) << "s)" << logEndl;
+	out << '(' << v.x << ", " << v.y << ", " << v.z << ')';
+	return out;
 }
 
 
 int main(int argc, char *argv[])
 {
-	Engine engine;
+	// Meshes generation settings.
+	const size_t size = 3;
+	const float offset = 2.5;
+
+//	using MyMesh = Cube;
+//	const MyMesh defaultMesh = MyMesh(1.0, Color(200, 200, 200), 0);
+	using MyMesh = MegaCube;
+	const MyMesh defaultMesh = MegaCube(Color::white, Color::black);
+	using MeshGenerator = ObjectGenerator<MyMesh, ObjectGeneratorTraits<Mesh> >;
+
+	const glm::vec3 cameraPos = glm::vec3(2*(size)*offset,
+										  (size)*offset / 1.8,
+										  (size)*offset);
 
 	// Setup scene.
 	CameraPtr camera = new Camera();
+	camera->setPosition(cameraPos);
 	ScenePtr scene = new Scene("My Scene", camera);
 	scene->setBgColor(Color::grey);
 
-	fillSceneWithMeshes<MegaCube>(scene, 0);
+	// Generate meshes.
+	MeshGenerator meshGenerator;
+	const MeshGenerator::Objects meshes = meshGenerator.cloneObjectsWithLatticeArrangement(size, offset, defaultMesh);
+	for (const MeshGenerator::ObjectPointer& m : meshes)
+		scene->addMesh(m);
+
+	// Add light.
 	scene->addLight(new Lamp());
 
+	logInfo << "Meshes on scene: " << scene->getMeshes().size() << logEndl;
+	logInfo << "Lamps on scene: " << scene->getLamps().size() << logEndl;
+
 	// Show scene.
-	engine.setDisplayFPS(true);
+	Engine engine;
 	engine.setActiveScene(scene);
+	engine.setDisplayFPS(true);
 	engine.validateScene();
 	engine.showScene();
 

@@ -1,18 +1,24 @@
 #include "cube.hpp"
 
 
-Cube::Cube(const float& r, const Color& c)
-	: Mesh()
-{
-	addVertex(Vertex(-r, -r, -r, c));
-	addVertex(Vertex(-r, +r, -r, c));
-	addVertex(Vertex(+r, +r, -r, c));
-	addVertex(Vertex(+r, -r, -r, c));
+#include "material.hpp"
+#include "materials/diffusematerial.hpp"
 
-	addVertex(Vertex(-r, -r, +r, c));
-	addVertex(Vertex(-r, +r, +r, c));
-	addVertex(Vertex(+r, +r, +r, c));
-	addVertex(Vertex(+r, -r, +r, c));
+
+Cube::Cube(const float& radius,
+		   const Color& color,
+		   const size_t& subdivideLevel)
+	: Mesh("Cube")
+{
+	addVertex(Vertex(-radius, -radius, -radius, color));
+	addVertex(Vertex(-radius, +radius, -radius, color));
+	addVertex(Vertex(+radius, +radius, -radius, color));
+	addVertex(Vertex(+radius, -radius, -radius, color));
+
+	addVertex(Vertex(-radius, -radius, +radius, color));
+	addVertex(Vertex(-radius, +radius, +radius, color));
+	addVertex(Vertex(+radius, +radius, +radius, color));
+	addVertex(Vertex(+radius, -radius, +radius, color));
 
 	addFace(Face(0, 2, 1));
 	addFace(Face(0, 3, 2));

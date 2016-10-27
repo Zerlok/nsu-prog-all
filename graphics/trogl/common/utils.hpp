@@ -1,5 +1,5 @@
-#ifndef __UTILS_H__
-#define __UTILS_H__
+#ifndef __UTILS_HPP__
+#define __UTILS_HPP__
 
 
 #include <stddef.h>
@@ -19,4 +19,4 @@ namespace path
 }
 
 
-#endif // __UTILS_H__
+#endif // __UTILS_HPP__

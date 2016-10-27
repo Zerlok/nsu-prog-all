@@ -21,11 +21,12 @@ const glm::vec3 Object::AXIS_Z = glm::vec3(0.0, 0.0, 1.0);
 
 
 Object::Object(const Type& type,
-			   const std::string& name,
-			   const glm::vec3& pos)
+			   const std::string& name)
 	: Component(Component::Type::OBJECT, name),
 	  _object_type(type),
-	  _position(pos)
+	  _position(),
+	  _rotation(),
+	  _scale()
 {
 	++_objID;
 	if (name.empty())
@@ -38,7 +39,9 @@ Object::Object(const Type& type,
 Object::Object(const Object& obj)
 	: Component(obj),
 	  _object_type(obj._object_type),
-	  _position(obj._position)
+	  _position(obj._position),
+	  _rotation(obj._rotation),
+	  _scale(obj._scale)
 {
 	logModule << "Object " << _name << " copyed" << logEndl;
 }
@@ -47,7 +50,9 @@ Object::Object(const Object& obj)
 Object::Object(Object&& obj)
 	: Component(std::move(obj)),
 	  _object_type(std::move(obj._object_type)),
-	  _position(std::move(obj._position))
+	  _position(std::move(obj._position)),
+	  _rotation(std::move(obj._rotation)),
+	  _scale(std::move(obj._scale))
 {
 }
 

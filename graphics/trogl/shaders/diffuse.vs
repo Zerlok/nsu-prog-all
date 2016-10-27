@@ -3,7 +3,7 @@
 attribute vec4 position;
 attribute vec4 color;
 
-out vec3 vectorNormal;
+//out vec3 vectorNormal;
 
 
 void main()

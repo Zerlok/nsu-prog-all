@@ -121,7 +121,7 @@ class Logger
 std::ostream& operator<<(std::ostream& out, const Logger::Level& level);
 
 
-#define loggerType static Logger&
+#define loggerType static const Logger&
 #define loggerInit(out, level, descr) (Logger::getInstance(__FILE__, __LINE__, out, level, descr))
 #define loggerModules static const Logger::Modules&
 #define loggerForModule(level, descr) (Logger::addModule(__FILE__, level, descr))

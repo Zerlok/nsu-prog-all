@@ -11,6 +11,14 @@
 class Shader : public Component
 {
 	public:
+		// Inner classes.
+		enum class Status
+		{
+			NOT_COMPILED = 0,
+			COMPILATION_FAILED,
+			COMPILATION_SUCCESSFUL,
+		};
+
 		// Static fields.
 		static const std::string SRC_DIR;
 		static const std::string DEFAULT_VS_FILE;
@@ -34,8 +42,9 @@ class Shader : public Component
 		Shader& operator=(Shader&& sh);
 
 		// Methods.
-		bool isValid() const;
-		const bool& wasCompiled() const;
+		bool isCompiled() const;
+		bool isCompiledSuccessfuly() const;
+		const Status& getStatus() const;
 		const GLuint& getProgram() const;
 
 		void compile();
@@ -52,7 +61,6 @@ class Shader : public Component
 		std::string _vertexSrc;
 		std::string _fragmentSrc;
 
-		bool _wasCompiled;
 		size_t _shadersCompileCount;
 
 		GLuint _glVertexShader;		// Vertices rendering
@@ -60,6 +68,9 @@ class Shader : public Component
 		GLuint _glShaderProgram;	// Total shadering program.
 
 	private:
+		// Fields.
+		Status _status;
+
 		// Methods.
 		bool _compileVertexShader();
 		bool _compileFragmentShader();

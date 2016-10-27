@@ -170,6 +170,10 @@ Logger::~Logger()
 {
 	if (_displayDestroyMsg)
 	{
+		info(__FUNCTION__, __FILE__, __LINE__)
+				<< "========== LOGGER STOPPED ==========";
+		_end();
+
 		Logger& l = info(__FUNCTION__, __FILE__, __LINE__)
 				<< " registred modules:" << std::endl;
 		for (auto it : getModules())
@@ -177,10 +181,6 @@ Logger::~Logger()
 			  << (it.second).first << ", "
 			  << int((it.second).second)
 			  << std::endl;
-		_end();
-
-		info(__FUNCTION__, __FILE__, __LINE__)
-				<< "========== LOGGER STOPPED ==========";
 		_end();
 	}
 }

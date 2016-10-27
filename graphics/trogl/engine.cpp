@@ -3,7 +3,7 @@
 
 #include <sstream>
 #include <logger.hpp>
-#include "common/utils.h"
+#include "common/utils.hpp"
 
 
 loggerModules lModules = loggerForModule(Logger::Level::INFO,
@@ -130,7 +130,21 @@ void Engine::showScene()
 	glutReshapeFunc(reshape);
 	glutIdleFunc(cycle);
 
+	size_t verticesNum = 0;
+	size_t facesNum = 0;
+	for (const MeshPtr& m : _scene->getMeshes())
+	{
+		verticesNum += m->getVertices().size();
+		facesNum += m->getFaces().size();
+	}
+
 	logInfo << "Engine rendering started (scene: " << _scene->getName() << ")" << logEndl;
+	logInfo << "Scene has "
+			<< _scene->getMeshes().size() << " meshes ("
+			<< verticesNum << " vertices, "
+			<< facesNum << " faces)"
+			<< logEndl;
+
 	glutMainLoop();
 	logInfo << "Engine rendering finished." << logEndl;
 }
@@ -233,10 +247,12 @@ void Engine::renderFrame()
 	const glm::mat4x4 matView  = glm::lookAt(cam->getPosition(),
 											 cam->getLookingAtPosition(),
 											 cam->getHeadDirection());
+	glMatrixMode(GL_MODELVIEW);
+	glLoadMatrixf(&matView[0][0]);
 
 	// Draw the objects.
 	for (VertexObject& obj : _objects)
-		obj.draw(matView);
+		obj.draw();
 
 	// Draw GUI at the end of frame (to overlay over every objects on scene).
 	drawGUI();
@@ -344,15 +360,16 @@ Engine::VertexObject::~VertexObject()
 
 bool Engine::VertexObject::isValid() const
 {
-	return ((_glVBO != 0)
-			&& (_glCBO != 0)
-			&& (_glIBO != 0)
-			&& _shader->isValid());
+	return (_isGLGeometryValid()
+			&& _shader->isCompiledSuccessfuly());
 }
 
 
 void Engine::VertexObject::initGLGeometry()
 {
+	if (_isGLGeometryValid())
+		return;
+
 	_initVertexBufferObject();
 	_initColorBufferObject();
 	_initIndexBufferObject();
@@ -361,19 +378,17 @@ void Engine::VertexObject::initGLGeometry()
 
 void Engine::VertexObject::compileGLShaders()
 {
-	_shader->compile();
+	if (!(_shader->isCompiled()))
+		_shader->compile();
 
-	if (_shader->isValid())
+	if (_shader->isCompiledSuccessfuly())
 		_attrObjPosition = glGetUniformLocation(_shader->getProgram(), "trogl_objPosition");
 }
 
 
-void Engine::VertexObject::draw(const glm::mat4x4& mat)
+void Engine::VertexObject::draw()
 {
 	glUseProgram(_shader->getProgram());
-
-	glMatrixMode(GL_MODELVIEW);
-	glLoadMatrixf(&mat[0][0]);
 
 	const glm::vec3& pos = _mesh->getPosition();
 	glUniform4f(_attrObjPosition, pos.x, pos.y, pos.z, 1.0f);
@@ -389,10 +404,19 @@ void Engine::VertexObject::draw(const glm::mat4x4& mat)
 	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, 0);
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _glIBO);
+	// TODO: use GL_TRIANGLES_STRIP instead.
 	glDrawElements(GL_TRIANGLES, _indicesSize, GL_UNSIGNED_INT, 0);
 
 	glDisableVertexAttribArray(1);
 	glDisableVertexAttribArray(0);
+}
+
+
+bool Engine::VertexObject::_isGLGeometryValid() const
+{
+	return ((_glVBO != 0)
+			&& (_glCBO != 0)
+			&& (_glIBO != 0));
 }
 
 
@@ -461,14 +485,17 @@ void Engine::VertexObject::_initIndexBufferObject()
 
 void Engine::VertexObject::_deinitGLGeometry()
 {
-	if (!isValid())
-		return;
+	if (_isGLGeometryValid())
+		logModule << "Removing object's geometry" << logEndl;
 
-	glDeleteBuffers(sizeof(_glVBO), &_glVBO);
-	glDeleteBuffers(sizeof(_glCBO), &_glCBO);
-	glDeleteBuffers(sizeof(_glIBO), &_glIBO);
+	if (_glVBO != 0)
+		glDeleteBuffers(sizeof(_glVBO), &_glVBO);
 
-	logModule << "Objects geometry removed" << logEndl;
+	if (_glCBO != 0)
+		glDeleteBuffers(sizeof(_glCBO), &_glCBO);
+
+	if (_glIBO != 0)
+		glDeleteBuffers(sizeof(_glIBO), &_glIBO);
 }
 
 
@@ -491,7 +518,7 @@ Engine::LightObject::~LightObject()
 
 bool Engine::LightObject::isValid() const
 {
-	return _shader->isValid();
+	return _shader->isCompiledSuccessfuly();
 }
 
 
