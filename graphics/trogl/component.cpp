@@ -6,7 +6,7 @@
 #include <logger.hpp>
 
 
-loggerType loggerInstance = loggerForModule(Logger::Level::DEBUG, Logger::Description::FULL);
+loggerModules lModules = loggerForModule(Logger::Level::DEBUG, Logger::Description::FULL);
 
 
 size_t Component::_globID = 0;

@@ -2,24 +2,19 @@
 
 
 #include <logger.hpp>
+#include "common/utils.h"
 
 
-loggerType loggerInstance = loggerForModule(Logger::Level::INFO,
-											Logger::Description::FULL);
+loggerModules lModules = loggerForModule(Logger::Level::DEBUG,
+										 Logger::Description::FULL);
 
 
-const std::string DiffuseShader::SRC = \
-"#version 120\n"
-"attribute vec4 position;\n"
-"attribute vec4 color;\n"
-"uniform vec4 lampPosition;\n"
-"void main() {\n"
-"  gl_FragColor = color;\n"
-"}\n";
+const std::string DiffuseShader::VS_FILE = path::join(Shader::SRC_DIR, "diffuse.vs");
+const std::string DiffuseShader::FS_FILE = path::join(Shader::SRC_DIR, "diffuse.fs");
 
 
 DiffuseShader::DiffuseShader()
-	: Shader("Lamp diffuse shader", Shader::DEFAULT_VERTEX_SRC, SRC)
+	: Shader("Diffuse Shader", VS_FILE, FS_FILE)
 {
 }
 
@@ -29,9 +24,8 @@ DiffuseShader::~DiffuseShader()
 }
 
 
-void DiffuseShader::initCustomVarsLocations(const GLuint& glProgram)
+void DiffuseShader::initCustomVarsLocations()
 {
-
 }
 
 

@@ -4,10 +4,10 @@
 #include <logger.hpp>
 
 
-loggerType loggerInstance = loggerForModule(Logger::Level::DEBUG, Logger::Description::FULL);
+loggerModules lModules = loggerForModule(Logger::Level::DEBUG, Logger::Description::FULL);
 
 
-const ShaderPtr Material::DEFAULT_SHADER = new Shader("Diffuse vertex shader");
+const ShaderPtr Material::DEFAULT_SHADER = Shader::createPtrFromSrc("diffuse");
 
 
 Material::Material(const std::string& name,

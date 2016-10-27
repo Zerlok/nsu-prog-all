@@ -29,6 +29,9 @@ class Logger
 			FULL,
 		};
 
+		using Format = std::pair<Logger::Level, Logger::Description>;
+		using Modules = std::unordered_map<std::string, Format>;
+
 		// Static methods.
 		static Logger& getInstance(const std::string& filename = EMPTY_STRING,
 								   const int& linenum = 0,
@@ -36,9 +39,9 @@ class Logger
 								   const Level& level = Level::INFO,
 								   const Description& descr = Description::LEVEL,
 								   const bool& displayInitMsg = true);
-		static Logger& addModule(const std::string& filename,
-								 const Level& level = Level::INFO,
-								 const Description& description = Description::LEVEL);
+		static const Modules& addModule(const std::string& filename,
+										const Level& level = Level::INFO,
+										const Description& description = Description::LEVEL);
 		static Logger& endl();
 
 		// Operators.
@@ -74,17 +77,11 @@ class Logger
 					   const int& linenum);
 
 	private:
-		// Inner classes.
-		using Format = std::pair<Logger::Level, Logger::Description>;
-		using Modules = std::unordered_map<std::string, Format>;
-
 		// Static fields.
-		static const std::string& CONSTRUCTOR_MESSAGE;
-		static const std::string& DESTRUCTOR_MESSAGE;
-
 		static const std::string& EMPTY_STRING;
 
 		// Static methods.
+		static const Format& getFormatForModule(const std::string& filename);
 		static Modules& getModules();
 		static std::string basename(const std::string& filename);
 		static std::ostream& addTimestamp(std::ostream& out);
@@ -117,8 +114,7 @@ class Logger
 		// Fields.
 		std::ostream& _output;
 		Level _current_message_level;
-		const Level _level;
-		const Description _description;
+		const Format _format;
 		const bool _displayDestroyMsg;
 };
 
@@ -127,6 +123,7 @@ std::ostream& operator<<(std::ostream& out, const Logger::Level& level);
 
 #define loggerType static Logger&
 #define loggerInit(out, level, descr) (Logger::getInstance(__FILE__, __LINE__, out, level, descr))
+#define loggerModules static const Logger::Modules&
 #define loggerForModule(level, descr) (Logger::addModule(__FILE__, level, descr))
 
 #define logDebug (Logger::getInstance(__FILE__, __LINE__).debug(__FUNCTION__, __FILE__, __LINE__))

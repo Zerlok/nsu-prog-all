@@ -4,7 +4,7 @@
 #include <logger.hpp>
 
 
-loggerType loggerInstance = loggerForModule(Logger::Level::DEBUG, Logger::Description::FULL);
+loggerModules lModules = loggerForModule(Logger::Level::DEBUG, Logger::Description::FULL);
 
 
 const std::string Scene::DEFAULT_NAME = "Scene";

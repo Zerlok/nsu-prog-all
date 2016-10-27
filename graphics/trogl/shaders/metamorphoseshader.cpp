@@ -5,30 +5,17 @@
 #include "common/utils.h"
 
 
-const std::string MetamorphoseShader::SRC = "\
-#version 120\n\
-attribute vec4 position;\
-attribute vec4 color;\
-uniform vec4 trogl_objPosition;\
-uniform float cosSqAlpha;\
-\
-void main() {\
- vec3 pos = position.xyz;\
- pos -= trogl_objPosition.xyz;\
-\
- float k = 1 / sqrt(dot(pos, pos));\
- pos = pos * cosSqAlpha + pos * k * (1 - cosSqAlpha);\
-\
- pos += trogl_objPosition.xyz;\
- gl_Position = gl_ModelViewProjectionMatrix * vec4(pos, 1.0);\
- gl_FrontColor = color;\
-}\
-";
+loggerModules lModules = loggerForModule(Logger::Level::DEBUG,
+										 Logger::Description::FULL);
+
+
+const std::string MetamorphoseShader::VS_FILE = path::join(Shader::SRC_DIR, "metamorph.vs");
 
 
 MetamorphoseShader::MetamorphoseShader()
-	: Shader("Metamorph Shader", SRC, DEFAULT_FRAGMENT_SRC)
+	: Shader("Metamorph Shader", VS_FILE, DEFAULT_FS_FILE)
 {
+	logModule << "Metamorph Shader created" << std::endl;
 }
 
 
@@ -37,9 +24,9 @@ MetamorphoseShader::~MetamorphoseShader()
 }
 
 
-void MetamorphoseShader::initCustomVarsLocations(const GLuint& glShaderProgram)
+void MetamorphoseShader::initCustomVarsLocations()
 {
-	_attrCosSqAlpha = glGetUniformLocation(glShaderProgram, "cosSqAlpha");
+	_attrCosSqAlpha = glGetUniformLocation(_glShaderProgram, "cosSqAlpha");
 }
 
 

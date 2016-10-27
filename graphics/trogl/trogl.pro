@@ -8,15 +8,18 @@ CONFIG -= qt
 QMAKE_CXXFLAGS += -std=c++11 -lglut -lGL -lGEW -lGLU
 LIBS += -lglut -lGL -lGLEW -lGLU
 
+# My libs (logger and shared pointer).
+#INCLUDEPATH += /home/zerlok/nsu_prog/include
+#LIBS += -L/home/zerlok/nsu_prog/libs -llogger
+
+
+INCLUDEPATH += ../logger/ ../../oop/task11/
+HEADERS += ../logger/logger.hpp ../../oop/task11/sharedpointer.h
+SOURCES += ../logger/logger.cpp
 
 # For debug.
 QMAKE_CXXFLAGS_DEBUG += -O0
 QMAKE_CXXFLAGS_DEBUG -= -O1 -O2 -O3
-
-
-# My libs (logger and shared pointer).
-INCLUDEPATH += /home/zerlok/nsu_prog/include
-LIBS += -L/home/zerlok/nsu_prog/libs -llogger
 
 
 # Main modules.
@@ -33,7 +36,7 @@ HEADERS += \
     camera.hpp \
     scene.hpp \
     gui.hpp \
-    engine.hpp \
+	engine.hpp
 
 # Custom shaders.
 HEADERS += \
@@ -81,7 +84,7 @@ SOURCES += \
     scene.cpp \
     gui.cpp \
     engine.cpp \
-    main.cpp \
+	main.cpp
 
 # Custom shaders.
 SOURCES += \
@@ -114,3 +117,11 @@ SOURCES += \
 SOURCES += \
     common/color.cpp \
     common/utils.cpp
+
+DISTFILES += \
+    shaders/default.vs \
+    shaders/default.fs \
+    shaders/metamorph.vs \
+	shaders/screw.vs \
+	shaders/diffuse.vs \
+	shaders/diffuse.fs

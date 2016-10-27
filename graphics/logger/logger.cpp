@@ -18,15 +18,15 @@ Logger& Logger::getInstance(const std::string& filename,
 }
 
 
-Logger& Logger::addModule(const std::string& filename,
-						  const Logger::Level& level,
-						  const Logger::Description& description)
+const Logger::Modules& Logger::addModule(const std::string& filename,
+										const Logger::Level& level,
+										const Logger::Description& description)
 {
 	const Modules::const_iterator it = getModules().find(filename);
 	if (it == getModules().end())
 		getModules().insert({filename, {level, description}});
 
-	return getInstance();
+	return getModules();
 }
 
 
@@ -34,7 +34,8 @@ Logger& Logger::debug(const std::string& funcname,
 					  const std::string& filename,
 					  const int& linenum)
 {
-	return _out(Level::DEBUG, _description, funcname, filename, linenum);
+	const Format& moduleFormat = getFormatForModule(filename);
+	return _out(Level::DEBUG, moduleFormat.second, funcname, filename, linenum);
 }
 
 
@@ -42,7 +43,8 @@ Logger& Logger::info(const std::string& funcname,
 					 const std::string& filename,
 					 const int& linenum)
 {
-	return _out(Level::INFO, _description, funcname, filename, linenum);
+	const Format& moduleFormat = getFormatForModule(filename);
+	return _out(Level::INFO, moduleFormat.second, funcname, filename, linenum);
 }
 
 
@@ -50,7 +52,8 @@ Logger& Logger::warning(const std::string& funcname,
 						const std::string& filename,
 						const int& linenum)
 {
-	return _out(Level::WARNING, _description, funcname, filename, linenum);
+	const Format& moduleFormat = getFormatForModule(filename);
+	return _out(Level::WARNING, moduleFormat.second, funcname, filename, linenum);
 }
 
 
@@ -58,7 +61,8 @@ Logger& Logger::error(const std::string& funcname,
 					  const std::string& filename,
 					  const int& linenum)
 {
-	return _out(Level::ERROR, _description, funcname, filename, linenum);
+	const Format& moduleFormat = getFormatForModule(filename);
+	return _out(Level::ERROR, moduleFormat.second, funcname, filename, linenum);
 }
 
 
@@ -66,7 +70,8 @@ Logger& Logger::fatal(const std::string& funcname,
 					  const std::string& filename,
 					  const int& linenum)
 {
-	return _out(Level::FATAL, _description, funcname, filename, linenum);
+	const Format& moduleFormat = getFormatForModule(filename);
+	return _out(Level::FATAL, moduleFormat.second, funcname, filename, linenum);
 }
 
 
@@ -74,12 +79,18 @@ Logger& Logger::module(const std::string& funcname,
 						const std::string& filename,
 						const int& linenum)
 {
+	const Format& moduleFormat = getFormatForModule(filename);
+	return _out(moduleFormat.first, moduleFormat.second, funcname, filename, linenum);
+}
+
+
+const Logger::Format& Logger::getFormatForModule(const std::string& filename)
+{
 	const Modules::const_iterator it = getModules().find(filename);
 	if (it == getModules().end())
-		return _out(_level, _description, funcname, filename, linenum);
+		return getInstance()._format;
 
-	const Format& moduleFormat = it->second;
-	return _out(moduleFormat.first, moduleFormat.second, funcname, filename, linenum);
+	return it->second;
 }
 
 
@@ -99,12 +110,12 @@ Logger& Logger::endl()
 std::string Logger::basename(const std::string& filepath)
 {
 	std::string path = filepath;
-	size_t sep_pos = path.rfind('/') + 1;
+	size_t pos = path.rfind('/') + 1;
 
-	if (sep_pos == std::string::npos)
+	if (pos == std::string::npos)
 		return std::move(path);
 
-	return std::move(path.substr(sep_pos, path.size() - sep_pos));
+	return std::move(path.substr(pos, path.size() - pos));
 }
 
 
@@ -143,8 +154,7 @@ Logger::Logger(std::ostream& output,
 			   const int& linenum,
 			   const bool& displayInitMsg)
 	: _output(output),
-	  _level(validateInitialLevel(level)),
-	  _description(descr),
+	  _format({validateInitialLevel(level), descr}),
 	  _displayDestroyMsg(displayInitMsg)
 {
 	if (displayInitMsg)
@@ -160,7 +170,8 @@ Logger::~Logger()
 {
 	if (_displayDestroyMsg)
 	{
-		Logger& l = info(__FUNCTION__, __FILE__, __LINE__) << " registred modules:" << std::endl;
+		Logger& l = info(__FUNCTION__, __FILE__, __LINE__)
+				<< " registred modules:" << std::endl;
 		for (auto it : getModules())
 			l << it.first << " - "
 			  << (it.second).first << ", "
@@ -240,7 +251,7 @@ Logger& Logger::operator<<(std::ostream&(*manipulator)(std::ostream&))
 
 bool Logger::_isCurrentLevelValid() const
 {
-	return (int(_current_message_level) >= int(_level));
+	return (int(_current_message_level) >= int(_format.first));
 }
 
 

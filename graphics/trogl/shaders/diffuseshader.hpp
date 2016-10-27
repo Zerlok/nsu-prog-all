@@ -12,11 +12,12 @@ class DiffuseShader : public Shader
 		DiffuseShader();
 		~DiffuseShader();
 
-		void initCustomVarsLocations(const GLuint &glProgram) override;
+		void initCustomVarsLocations() override;
 		void prepareForRender() override;
 
 	private:
-		static const std::string SRC;
+		static const std::string VS_FILE;
+		static const std::string FS_FILE;
 };
 
 

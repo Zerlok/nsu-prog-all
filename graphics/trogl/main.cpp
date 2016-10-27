@@ -15,9 +15,9 @@
 #include "lamps/lamp.hpp"
 
 
-loggerType loggerGlobalInstance = loggerInit(std::cout,
-											 Logger::Level::INFO,
-											 Logger::Description::FULL);
+loggerType lInstance = loggerInit(std::cout,
+								  Logger::Level::INFO,
+								  Logger::Description::FULL);
 
 
 template<class M>
@@ -68,7 +68,7 @@ int main(int argc, char *argv[])
 	ScenePtr scene = new Scene("My Scene", camera);
 	scene->setBgColor(Color::grey);
 
-	fillSceneWithMeshes<MegaCube>(scene, 3);
+	fillSceneWithMeshes<MegaCube>(scene, 0);
 	scene->addLight(new Lamp());
 
 	// Show scene.

@@ -5,7 +5,7 @@
 #include "common/utils.h"
 
 
-loggerType loggerInstance = loggerForModule(Logger::Level::DEBUG, Logger::Description::FULL);
+loggerModules lModules = loggerForModule(Logger::Level::DEBUG, Logger::Description::FULL);
 
 
 StrangeCube::StrangeCube(const Color& c1,

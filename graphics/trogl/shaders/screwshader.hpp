@@ -11,11 +11,11 @@ class ScrewShader : public Shader
 		ScrewShader();
 		~ScrewShader();
 
-		void initCustomVarsLocations(const GLuint &glShaderProgram);
-		void prepareForRender();
+		void initCustomVarsLocations() override;
+		void prepareForRender() override;
 
 	private:
-		static const std::string SRC;
+		static const std::string VS_FILE;
 
 		GLuint _attrAlpha;
 };

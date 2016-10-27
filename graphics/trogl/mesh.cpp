@@ -5,7 +5,7 @@
 #include "materials/diffusematerial.hpp"
 
 
-loggerType loggerInstance = loggerForModule(Logger::Level::DEBUG, Logger::Description::FULL);
+loggerModules lModules = loggerForModule(Logger::Level::DEBUG, Logger::Description::FULL);
 
 
 const MaterialPtr Mesh::DEFAULT_MATERIAL = new DiffuseMaterial();

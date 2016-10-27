@@ -1,34 +1,64 @@
 #include "shader.hpp"
 
 
+#include <fstream>
+#include <sstream>
 #include <logger.hpp>
+#include "common/utils.h"
 
 
-loggerType loggerInstance = loggerForModule(Logger::Level::DEBUG, Logger::Description::FULL);
+loggerModules lModules = loggerForModule(Logger::Level::DEBUG, Logger::Description::FULL);
 
 
-const std::string Shader::DEFAULT_VERTEX_SRC = \
-	"#version 120\n"
-	"attribute vec4 position;\n"
-	"attribute vec4 color;\n"
-	"void main() {\n"
-	"  gl_Position = gl_ModelViewProjectionMatrix * position;\n"
-	"  gl_FrontColor = color;\n"
-	"}\n";
-const std::string Shader::DEFAULT_FRAGMENT_SRC = \
-	"#version 120\n"
-	"void main() {\n"
-	"  gl_FragColor = gl_Color;\n"
-	"}\n";
+const std::string Shader::SRC_DIR = path::join(path::dirname(__FILE__), "shaders");
+const std::string Shader::DEFAULT_VS_FILE = path::join(Shader::SRC_DIR, "default.vs");
+const std::string Shader::DEFAULT_FS_FILE = path::join(Shader::SRC_DIR, "default.fs");
+
+
+std::string Shader::loadFile(const std::string& filename)
+{
+	std::stringstream ss;
+	std::ifstream in(filename);
+
+	if (!in.is_open())
+	{
+		logError << "Can't open file: " << filename << logEndl;
+		return std::move(ss.str());
+	}
+
+	std::string line;
+	while (!in.eof())
+	{
+		std::getline(in, line);
+		ss << line << std::endl;
+	}
+
+	in.close();
+	return std::move(ss.str());
+}
+
+
+Shader Shader::createFromSrc(const std::string& shaderName)
+{
+	const std::string vsFilename = path::join(SRC_DIR, shaderName + ".vs");
+	const std::string fsFilename = path::join(SRC_DIR, shaderName + ".fs");
+	return std::move(Shader(shaderName, vsFilename, fsFilename));
+}
+
+
+SharedPointer<Shader> Shader::createPtrFromSrc(const std::string& shaderName)
+{
+	return std::move(ShaderPtr(new Shader(createFromSrc(shaderName))));
+}
 
 
 Shader::Shader(const std::string& name,
-			   const std::string& vertexSrc,
-			   const std::string& fragmentSrc)
+			   const std::string& vsFile,
+			   const std::string& fsFile)
 	: Component(Component::Type::SHADER, name),
-	  _vertexSrc(vertexSrc),
-	  _fragmentSrc(fragmentSrc),
-	  _isCompiled(false),
+	  _vertexSrc(loadFile(vsFile)),
+	  _fragmentSrc(loadFile(fsFile)),
+	  _wasCompiled(false),
 	  _shadersCompileCount(0),
 	  _glVertexShader(),
 	  _glFragmentShader(),
@@ -41,7 +71,7 @@ Shader::Shader(const Shader& sh)
 	: Component(sh),
 	  _vertexSrc(sh._vertexSrc),
 	  _fragmentSrc(sh._fragmentSrc),
-	  _isCompiled(false),
+	  _wasCompiled(false),
 	  _shadersCompileCount(0),
 	  _glVertexShader(),
 	  _glFragmentShader(),
@@ -54,13 +84,13 @@ Shader::Shader(Shader&& sh)
 	: Component(sh),
 	  _vertexSrc(std::move(sh._vertexSrc)),
 	  _fragmentSrc(std::move(sh._fragmentSrc)),
-	  _isCompiled(std::move(sh._isCompiled)),
+	  _wasCompiled(std::move(sh._wasCompiled)),
 	  _shadersCompileCount(std::move(sh._shadersCompileCount)),
 	  _glVertexShader(std::move(sh._glVertexShader)),
 	  _glFragmentShader(std::move(sh._glFragmentShader)),
 	  _glShaderProgram(std::move(sh._glShaderProgram))
 {
-	sh._isCompiled = false;
+	sh._wasCompiled = false;
 	sh._shadersCompileCount = 0;
 	sh._glVertexShader = 0;
 	sh._glFragmentShader = 0;
@@ -70,7 +100,7 @@ Shader::Shader(Shader&& sh)
 
 Shader::~Shader()
 {
-	logModule << "Shaderscompilation count: " << _shadersCompileCount << logEndl;
+	logModule << "Shaders compilation count: " << _shadersCompileCount << logEndl;
 	logModule << "Removing: (";
 
 	switch (_shadersCompileCount)
@@ -96,7 +126,7 @@ Shader::~Shader()
 			break;
 	}
 
-	logModule << ") => shaders deinited." << logEndl;
+	logModule << ") => shaders removed." << logEndl;
 }
 
 
@@ -105,7 +135,7 @@ Shader& Shader::operator=(const Shader& sh)
 	Component::operator=(sh);
 	_vertexSrc = sh._vertexSrc;
 	_fragmentSrc = sh._fragmentSrc;
-	_isCompiled = false;
+	_wasCompiled = false;
 	_shadersCompileCount = 0;
 	_glVertexShader = 0;
 	_glFragmentShader = 0;
@@ -120,13 +150,13 @@ Shader& Shader::operator=(Shader&& sh)
 	Component::operator=(sh);
 	_vertexSrc = std::move(sh._vertexSrc);
 	_fragmentSrc = std::move(sh._fragmentSrc);
-	_isCompiled = std::move(sh._isCompiled);
+	_wasCompiled = std::move(sh._wasCompiled);
 	_shadersCompileCount = std::move(sh._shadersCompileCount);
 	_glVertexShader = std::move(sh._glVertexShader);
 	_glFragmentShader = std::move(sh._glFragmentShader);
 	_glShaderProgram = std::move(sh._glShaderProgram);
 
-	sh._isCompiled = false;
+	sh._wasCompiled = false;
 	sh._shadersCompileCount = 0;
 	sh._glVertexShader = 0;
 	sh._glFragmentShader = 0;
@@ -136,16 +166,15 @@ Shader& Shader::operator=(Shader&& sh)
 }
 
 
-bool Shader::isCompiled() const
-{
-	return (_isCompiled
-			&& (_shadersCompileCount == 3));
-}
-
-
 bool Shader::isValid() const
 {
 	return (_shadersCompileCount == 3);
+}
+
+
+const bool& Shader::wasCompiled() const
+{
+	return _wasCompiled;
 }
 
 
@@ -157,7 +186,7 @@ const GLuint& Shader::getProgram() const
 
 void Shader::compile()
 {
-	if (isCompiled())
+	if (wasCompiled())
 		return;
 
 	_compileVertexShader();
@@ -167,17 +196,30 @@ void Shader::compile()
 	if (!isValid())
 		return;
 
-	_isCompiled = true;
-	initCustomVarsLocations(_glShaderProgram);
+	_wasCompiled = true;
+	initCustomVarsLocations();
 }
 
 
-void Shader::initCustomVarsLocations(const GLuint&)
+void Shader::initCustomVarsLocations()
 {
 }
 
 
 void Shader::prepareForRender()
+{
+}
+
+
+Shader::Shader(const std::string& name)
+	: Component(Component::Type::SHADER, name),
+	  _vertexSrc(),
+	  _fragmentSrc(),
+	  _wasCompiled(false),
+	  _shadersCompileCount(0),
+	  _glVertexShader(),
+	  _glFragmentShader(),
+	  _glShaderProgram()
 {
 }
 
