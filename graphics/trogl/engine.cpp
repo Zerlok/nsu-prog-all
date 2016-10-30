@@ -465,15 +465,15 @@ void Engine::VertexObject::_initColorBufferObject()
 void Engine::VertexObject::_initIndexBufferObject()
 {
 	std::vector<GLuint> indicies((_mesh->getFaces().size() * _indexStep), 0.0f);
-	size_t idx = 0;
+	size_t i = 0;
 
-	for (size_t i = 0; i < indicies.size(); i += _indexStep)
+	for (auto it : _mesh->getFaces())
 	{
-		const Mesh::Face& f = _mesh->getFace(idx++);
+		const Mesh::Face& f = it.second;
 
-		indicies[i] = f.getFirstIndex();
-		indicies[i+1] = f.getSecondIndex();
-		indicies[i+2] = f.getThirdIndex();
+		indicies[i++] = f.getFirst().getIndex();
+		indicies[i++] = f.getSecond().getIndex();
+		indicies[i++] = f.getThird().getIndex();
 	}
 	_indicesSize = indicies.size() * sizeof(GLuint);
 

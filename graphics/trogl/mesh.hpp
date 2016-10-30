@@ -3,8 +3,10 @@
 
 
 #include <vector>
-#include <sharedpointer.h>
+#include <tuple>
+#include <unordered_map>
 #include <glm/glm.hpp>
+#include <sharedpointer.h>
 #include "common/color.hpp"
 #include "material.hpp"
 #include "object.hpp"
@@ -17,18 +19,130 @@ class Mesh : public Object
 		static const MaterialPtr DEFAULT_MATERIAL;
 
 		// Inner classes.
-		class Vertex;
+		enum class IndexingType
+		{
+			TRIANGLES = GL_TRIANGLES,
+			TRIANGLES_STRIP = GL_TRIANGLE_STRIP,
+		};
+
 		class Face;
+		class Vertex
+		{
+			public:
+				// Constructors / Destructor.
+				Vertex(const size_t& idx,
+					   const float& x,
+					   const float& y,
+					   const float& z,
+					   const Color& color,
+					   Mesh* mesh);
+				Vertex(const Vertex& v);
+				Vertex(Vertex&& v);
+				~Vertex();
+
+				// Operators.
+				Vertex& operator=(const Vertex& v);
+				Vertex& operator=(Vertex&& v);
+
+				// Methods.
+				const size_t& getIndex() const;
+				const glm::vec3& getPosition() const;
+				const glm::vec3& getNormal() const;
+				const Color& getColor() const;
+
+				void setPosition(const glm::vec3& pos);
+				void setColor(const Color& color);
+
+			private:
+				// Fields.
+				size_t _idx;
+				glm::vec3 _position;
+				glm::vec3 _normal;
+				// TODO: move color into material.
+				Color _color;
+
+				// Association link with Mesh.
+				Mesh* _linkedMesh;
+				friend class Mesh;
+
+				// Aggregation link with Faces.
+				std::vector<Face*> _linkedFaces;
+				friend class Face;
+
+				// Methods.
+				void _recalculateNormal();
+		};
+
+		class Face
+		{
+			public:
+				// Constructors / Destructor.
+				Face(Vertex& v1,
+					 Vertex& v2,
+					 Vertex& v3,
+					 Mesh* mesh);
+				Face(const Face& f);
+				Face(Face&& f);
+				~Face();
+
+				// Operators.
+				Face& operator=(const Face& f);
+				Face& operator=(Face&& f);
+
+				// Methods.
+				const Vertex& getFirst() const;
+				const Vertex& getSecond() const;
+				const Vertex& getThird() const;
+
+				const glm::vec3& getNormal() const;
+				void flip();
+
+			private:
+				// Fields.
+				// Association link with Vertices.
+				Vertex* _first;
+				Vertex* _second;
+				Vertex* _third;
+				friend class Mesh::Vertex;
+
+				// Association link with Mesh.
+				Mesh* _linkedMesh;
+				friend class Mesh;
+
+				glm::vec3 _normal;
+
+				// Methods.
+				glm::vec3 _calculateNormal();
+		};
+
+		class Polygon : public std::tuple<size_t, size_t, size_t>
+		{
+			public:
+				Polygon(const size_t& i1,
+						const size_t& i2,
+						const size_t& i3)
+					: std::tuple<size_t, size_t, size_t>(i1, i2, i3) {}
+
+				class hash
+				{
+					public:
+						size_t operator()(const Polygon& p) const
+						{
+							size_t h1 = std::hash<size_t>()(std::get<0>(p));
+							size_t h2 = std::hash<size_t>()(std::get<1>(p));
+							size_t h3 = std::hash<size_t>()(std::get<2>(p));
+							return (h1 ^ h2 ^ h3);
+						}
+				};
+		};
 
 		using Vertices = std::vector<Vertex>;
-		using Faces = std::vector<Face>;
+		using Faces = std::unordered_map<Polygon, Face, Polygon::hash>;
 
 		// Constructors / Destructor.
 		Mesh(const std::string& name = "",
-			 const glm::vec3& pos = Object::DEFAULT_POSITION,
-			 const glm::vec3& rot = Object::DEFAULT_ROTATION,
-			 const glm::vec3& sca = Object::DEFAULT_SCALE,
-			 const MaterialPtr& mat = Mesh::DEFAULT_MATERIAL);
+			 const MaterialPtr& mat = Mesh::DEFAULT_MATERIAL,
+			 const IndexingType& indexType = IndexingType::TRIANGLES);
 		Mesh(const Mesh& mesh);
 		Mesh(Mesh&& mesh);
 		virtual ~Mesh();
@@ -39,14 +153,19 @@ class Mesh : public Object
 
 		// Methods.
 		const Vertex& getVertex(const size_t& i) const;
-		const Face& getFace(const size_t& i) const;
+		const Face& getFace(const size_t& i1,
+							const size_t& i2,
+							const size_t& i3) const;
 
 		const Vertices& getVertices() const;
 		const Faces& getFaces() const;
 		const MaterialPtr& getMaterial() const;
 
-		void addVertex(const Vertex& vertex);
-		void addFace(const Face& face);
+		size_t addVertex(const float& x, const float& y, const float& z, const Color& color);
+		size_t addVertex(Vertex&& vertex);
+		void addFace(const size_t& i1,
+					 const size_t& i2,
+					 const size_t& i3);
 		void setMaterial(const MaterialPtr& material);
 
 		void recalculateNormals();
@@ -61,76 +180,13 @@ class Mesh : public Object
 		Vertices _vertices;
 		Faces _faces;
 		MaterialPtr _material;
+		IndexingType _indexType;
 
 		// Methods.
 		void _reassignDataReferences();
 };
 
 using MeshPtr = SharedPointer<Mesh>;
-
-
-class Mesh::Vertex
-{
-	public:
-		Vertex(const float& x,
-			   const float& y,
-			   const float& z,
-			   const Color& color = Color::black);
-		Vertex(const glm::vec3& pos,
-			   const Color& color = Color::black);
-		Vertex(const Vertex& v);
-		Vertex(Vertex&& v);
-		~Vertex();
-
-		Vertex& operator=(const Vertex& v);
-		Vertex& operator=(Vertex&& v);
-
-		const glm::vec3& getPosition() const;
-		void setPosition(const glm::vec3& pos);
-
-		const Color& getColor() const;
-		void setColor(const Color& color);
-
-		const size_t& getIndex() const;
-
-	private:
-		glm::vec3 _position;
-		// TODO: move color into material.
-		Color _color;
-		size_t _idx;
-
-		Mesh* _mesh; // agregation reference to Mesh.
-		friend class Mesh;
-};
-
-
-class Mesh::Face
-{
-	public:
-		Face(const size_t& f, const size_t& s, const size_t& t);
-		Face(const Vertex& f, const Vertex& s, const Vertex& t);
-		Face(const Face& f);
-		Face(Face&& f);
-		~Face();
-
-		Face& operator=(const Face& f);
-		Face& operator=(Face&& f);
-
-		const size_t& getFirstIndex() const;
-		const size_t& getSecondIndex() const;
-		const size_t& getThirdIndex() const;
-
-		glm::vec3 getNormal() const;
-		void flip();
-
-	private:
-		size_t _first;
-		size_t _second;
-		size_t _third;
-
-		Mesh* _mesh; // agregation reference to Mesh.
-		friend class Mesh;
-};
 
 
 #endif // __MESH_HPP__

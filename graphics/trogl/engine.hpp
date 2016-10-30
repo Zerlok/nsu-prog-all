@@ -98,6 +98,7 @@ class Engine::VertexObject
 		GLuint _glVBO;				// Vertex Buffer Object
 		GLuint _glCBO;				// Color Buffer Object
 		GLuint _glIBO;				// Index Buffer Object
+
 		GLuint _attrObjPosition;
 
 		size_t _indicesSize;

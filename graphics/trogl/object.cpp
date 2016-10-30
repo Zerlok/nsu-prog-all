@@ -24,9 +24,9 @@ Object::Object(const Type& type,
 			   const std::string& name)
 	: Component(Component::Type::OBJECT, name),
 	  _object_type(type),
-	  _position(),
-	  _rotation(),
-	  _scale()
+	  _position(DEFAULT_POSITION),
+	  _rotation(DEFAULT_ROTATION),
+	  _scale(DEFAULT_SCALE)
 {
 	++_objID;
 	if (name.empty())

@@ -9,13 +9,13 @@ QMAKE_CXXFLAGS += -std=c++11 -lglut -lGL -lGEW -lGLU
 LIBS += -lglut -lGL -lGLEW -lGLU
 
 # My libs (logger and shared pointer).
-#INCLUDEPATH += /home/zerlok/nsu_prog/include
-#LIBS += -L/home/zerlok/nsu_prog/libs -llogger
+INCLUDEPATH += /home/zerlok/nsu_prog/include
+LIBS += -L/home/zerlok/nsu_prog/libs -llogger
 
 
-INCLUDEPATH += ../logger/ ../../oop/task11/
-HEADERS += ../logger/logger.hpp ../../oop/task11/sharedpointer.h
-SOURCES += ../logger/logger.cpp
+#INCLUDEPATH += ../logger/ ../../oop/task11/
+#HEADERS += ../logger/logger.hpp ../../oop/task11/sharedpointer.h
+#SOURCES += ../logger/logger.cpp
 
 # For debug.
 QMAKE_CXXFLAGS_DEBUG += -O0
