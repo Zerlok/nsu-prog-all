@@ -10,6 +10,12 @@ loggerModules lModules = loggerForModule(Logger::Level::DEBUG, Logger::Descripti
 
 
 size_t Component::_globID = 0;
+size_t Component::_objectID = 0;
+size_t Component::_shaderID = 0;
+size_t Component::_materialID = 0;
+size_t Component::_textureID = 0;
+size_t Component::_sceneID = 0;
+size_t Component::_guiID = 0;
 
 
 Component::Component(const Component::Type& t,
@@ -19,7 +25,7 @@ Component::Component(const Component::Type& t,
 	  _name(name)
 {
 	if (_name.empty())
-		_name = _generateNameFromType(_type, _ID);
+		_name = _generateNameFromType(_type);
 
 	logModule << (*this) << " created" << logEndl;
 }
@@ -127,30 +133,37 @@ std::ostream& operator<<(std::ostream& out, const Component& c)
 }
 
 
-std::string Component::_generateNameFromType(const Type& type,
-											const size_t& id)
+std::string Component::_generateNameFromType(const Type& type)
 {
+	size_t id;
 	std::stringstream ss;
 	switch (type)
 	{
 		case Type::GUI:
+			id = _guiID++;
 			ss << "GUI";
 			break;
 		case Type::SCENE:
+			id = _sceneID++;
 			ss << "Scene";
 			break;
 		case Type::OBJECT:
+			id = _objectID++;
 			ss << "Object";
 			break;
 		case Type::MATERIAL:
+			id = _materialID++;
 			ss << "Material";
 			break;
 		case Type::TEXTURE:
+			id = _textureID++;
 			ss << "Texture";
 			break;
 		case Type::SHADER:
+			id = _shaderID++;
 			ss << "Shader";
 			break;
+
 		default:
 			break;
 	}

@@ -96,11 +96,13 @@ class Engine::VertexObject
 
 		// OpenGL attributes.
 		GLuint _glVBO;				// Vertex Buffer Object
+		GLuint _glNBO;				// Vertex Normals Buffer Object
 		GLuint _glCBO;				// Color Buffer Object
 		GLuint _glIBO;				// Index Buffer Object
 
 		GLuint _attrObjPosition;
 
+		Mesh::IndexingType _indexType;
 		size_t _indicesSize;
 		ShaderPtr _shader;
 

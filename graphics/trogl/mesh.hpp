@@ -19,7 +19,7 @@ class Mesh : public Object
 		static const MaterialPtr DEFAULT_MATERIAL;
 
 		// Inner classes.
-		enum class IndexingType
+		enum IndexingType
 		{
 			TRIANGLES = GL_TRIANGLES,
 			TRIANGLES_STRIP = GL_TRIANGLE_STRIP,
@@ -160,9 +160,9 @@ class Mesh : public Object
 		const Vertices& getVertices() const;
 		const Faces& getFaces() const;
 		const MaterialPtr& getMaterial() const;
+		const IndexingType& getIndexType() const;
 
 		size_t addVertex(const float& x, const float& y, const float& z, const Color& color);
-		size_t addVertex(Vertex&& vertex);
 		void addFace(const size_t& i1,
 					 const size_t& i2,
 					 const size_t& i3);

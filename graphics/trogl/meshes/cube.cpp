@@ -8,7 +8,7 @@
 Cube::Cube(const float& radius,
 		   const Color& color,
 		   const size_t& subdivideLevel)
-	: Mesh("Cube")
+	: Mesh("Cube", Mesh::DEFAULT_MATERIAL, Mesh::IndexingType::TRIANGLES_STRIP)
 {
 	addVertex(-radius, -radius, -radius, color);
 	addVertex(-radius, +radius, -radius, color);

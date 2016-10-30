@@ -8,13 +8,14 @@
 loggerModules lModules = loggerForModule(Logger::Level::DEBUG, Logger::Description::FULL);
 
 
-size_t Object::_objID = 0;
+size_t Object::_meshID = 0;
+size_t Object::_lightID = 0;
+size_t Object::_cameraID = 0;
 
 const std::string Object::DEFAULT_NAME = std::string();
 const glm::vec3 Object::DEFAULT_POSITION = glm::vec3(0.0, 0.0, 0.0);
 const glm::vec3 Object::DEFAULT_ROTATION = glm::vec3(0.0, 0.0, 0.0);
 const glm::vec3 Object::DEFAULT_SCALE = glm::vec3(1.0, 1.0, 1.0);
-
 const glm::vec3 Object::AXIS_X = glm::vec3(1.0, 0.0, 0.0);
 const glm::vec3 Object::AXIS_Y = glm::vec3(0.0, 1.0, 0.0);
 const glm::vec3 Object::AXIS_Z = glm::vec3(0.0, 0.0, 1.0);
@@ -28,11 +29,10 @@ Object::Object(const Type& type,
 	  _rotation(DEFAULT_ROTATION),
 	  _scale(DEFAULT_SCALE)
 {
-	++_objID;
 	if (name.empty())
-		_name = _generateNameFromObjType(_object_type, _objID);
+		_name = _generateNameFromObjType(_object_type);
 
-	logModule << "Object " << _objID << " " << _name << " created" << logEndl;
+	logModule << "Object " << _meshID << " " << _name << " created" << logEndl;
 }
 
 
@@ -99,27 +99,27 @@ const glm::vec3&Object::getPosition() const
 }
 
 
-void Object::setPosition(const glm::vec3& position)
-{
-	_position = position;
-}
-
-
 const glm::vec3& Object::getRotation() const
 {
 	return _rotation;
 }
 
 
-void Object::setRotation(const glm::vec3& rotation)
-{
-	_rotation = rotation;
-}
-
-
 const glm::vec3& Object::getScale() const
 {
 	return _scale;
+}
+
+
+void Object::setPosition(const glm::vec3& position)
+{
+	_position = position;
+}
+
+
+void Object::setRotation(const glm::vec3& rotation)
+{
+	_rotation = rotation;
 }
 
 
@@ -131,34 +131,41 @@ void Object::setScale(const glm::vec3& scale)
 
 void Object::applyPosition()
 {
+	// FIXME: in Mesh position is not updates to default!
 	_position = DEFAULT_POSITION;
 }
 
 
 void Object::applyRotation()
 {
+	// FIXME: in Mesh rotation is not updates to default!
 	_rotation = DEFAULT_ROTATION;
 }
 
 
 void Object::applyScale()
 {
+	// FIXME: in Mesh scale is not updates to default!
 	_scale = DEFAULT_SCALE;
 }
 
 
-std::string Object::_generateNameFromObjType(const Type& type, const size_t& id)
+std::string Object::_generateNameFromObjType(const Type& type)
 {
+	size_t id;
 	std::stringstream ss;
 	switch (type)
 	{
 		case Type::MESH:
+			id = ++_meshID;
 			ss << "Mesh";
 			break;
 		case Type::LIGHT:
+			id = ++_lightID;
 			ss << "Light";
 			break;
 		case Type::CAMERA:
+			id = ++_cameraID;
 			ss << "Camera";
 			break;
 		default:

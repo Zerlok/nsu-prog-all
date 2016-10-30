@@ -321,6 +321,7 @@ const size_t Engine::VertexObject::_indexStep = 3;
 
 Engine::VertexObject::VertexObject(const MeshPtr& mesh)
 	: _glVBO(0),
+	  _glNBO(0),
 	  _glCBO(0),
 	  _glIBO(0),
 	  _attrObjPosition(0),
@@ -339,6 +340,7 @@ Engine::VertexObject::VertexObject(const MeshPtr& mesh)
 
 Engine::VertexObject::VertexObject(Engine::VertexObject&& obj)
 	: _glVBO(std::move(obj._glVBO)),
+	  _glNBO(std::move(obj._glNBO)),
 	  _glCBO(std::move(obj._glCBO)),
 	  _glIBO(std::move(obj._glIBO)),
 	  _attrObjPosition(std::move(obj._attrObjPosition)),
@@ -347,6 +349,7 @@ Engine::VertexObject::VertexObject(Engine::VertexObject&& obj)
 	  _mesh(std::move(obj._mesh))
 {
 	obj._glVBO = 0;
+	obj._glNBO = 0;
 	obj._glCBO = 0;
 	obj._glIBO = 0;
 }
@@ -396,17 +399,21 @@ void Engine::VertexObject::draw()
 
 	glEnableVertexAttribArray(0);
 	glEnableVertexAttribArray(1);
+	glEnableVertexAttribArray(2);
 
 	glBindBuffer(GL_ARRAY_BUFFER, _glVBO);
-	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
+	glVertexAttribPointer(0, _vertexStep, GL_FLOAT, GL_FALSE, 0, 0);
+
+	glBindBuffer(GL_ARRAY_BUFFER, _glNBO);
+	glVertexAttribPointer(1, _vertexStep, GL_FLOAT, GL_FALSE, 0, 0);
 
 	glBindBuffer(GL_ARRAY_BUFFER, _glCBO);
-	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, 0);
+	glVertexAttribPointer(2, _colorStep, GL_FLOAT, GL_FALSE, 0, 0);
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _glIBO);
-	// TODO: use GL_TRIANGLES_STRIP instead.
 	glDrawElements(GL_TRIANGLES, _indicesSize, GL_UNSIGNED_INT, 0);
 
+	glDisableVertexAttribArray(2);
 	glDisableVertexAttribArray(1);
 	glDisableVertexAttribArray(0);
 }
@@ -415,6 +422,7 @@ void Engine::VertexObject::draw()
 bool Engine::VertexObject::_isGLGeometryValid() const
 {
 	return ((_glVBO != 0)
+			&& (_glNBO != 0)
 			&& (_glCBO != 0)
 			&& (_glIBO != 0));
 }
@@ -423,6 +431,7 @@ bool Engine::VertexObject::_isGLGeometryValid() const
 void Engine::VertexObject::_initVertexBufferObject()
 {
 	std::vector<GLfloat> vertices((_mesh->getVertices().size() * _vertexStep), 0.0f);
+	std::vector<GLfloat> normals((_mesh->getVertices().size() * _vertexStep), 0.0f);
 	size_t idx = 0;
 
 	for (size_t i = 0; i < vertices.size(); i += _vertexStep)
@@ -433,11 +442,20 @@ void Engine::VertexObject::_initVertexBufferObject()
 		vertices[i+1] = v.getPosition().y;
 		vertices[i+2] = v.getPosition().z;
 		vertices[i+3] = 1.0f;
+
+		normals[i] = v.getNormal().x;
+		normals[i+1] = v.getNormal().y;
+		normals[i+2] = v.getNormal().z;
+		normals[i+3] = 0.0f;
 	}
 
 	glGenBuffers(1, &_glVBO);
 	glBindBuffer(GL_ARRAY_BUFFER, _glVBO);
 	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(GLfloat), vertices.data(), GL_STATIC_DRAW);
+
+	glGenBuffers(1, &_glNBO);
+	glBindBuffer(GL_ARRAY_BUFFER, _glNBO);
+	glBufferData(GL_ARRAY_BUFFER, normals.size() * sizeof(GLfloat), normals.data(), GL_STATIC_DRAW);
 }
 
 
@@ -475,6 +493,7 @@ void Engine::VertexObject::_initIndexBufferObject()
 		indicies[i++] = f.getSecond().getIndex();
 		indicies[i++] = f.getThird().getIndex();
 	}
+	_indexType = _mesh->getIndexType();
 	_indicesSize = indicies.size() * sizeof(GLuint);
 
 	glGenBuffers(1, &_glIBO);
@@ -490,6 +509,9 @@ void Engine::VertexObject::_deinitGLGeometry()
 
 	if (_glVBO != 0)
 		glDeleteBuffers(sizeof(_glVBO), &_glVBO);
+
+	if (_glNBO != 0)
+		glDeleteBuffers(sizeof(_glNBO), &_glNBO);
 
 	if (_glCBO != 0)
 		glDeleteBuffers(sizeof(_glCBO), &_glCBO);

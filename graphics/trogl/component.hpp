@@ -13,12 +13,12 @@ class Component
 		// Enum.
 		enum class Type
 		{
-			GUI,
-			SCENE,
 			OBJECT,
+			SHADER,
 			MATERIAL,
 			TEXTURE,
-			SHADER,
+			SCENE,
+			GUI,
 		};
 
 		// Constructors / Destructor.
@@ -51,9 +51,15 @@ class Component
 	private:
 		// Static fields.
 		static size_t _globID;
+		static size_t _objectID;
+		static size_t _shaderID;
+		static size_t _materialID;
+		static size_t _textureID;
+		static size_t _sceneID;
+		static size_t _guiID;
 
 		// Static methods.
-		static std::string _generateNameFromType(const Type& type, const size_t& id);
+		static std::string _generateNameFromType(const Type& type);
 		static std::string _generateNameFromCopy(const Component& c);
 
 		// Fields.

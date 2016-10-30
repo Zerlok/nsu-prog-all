@@ -1,6 +1,7 @@
 #version 120
 
 attribute vec4 position;
+attribute vec4 normal;
 attribute vec4 color;
 
 

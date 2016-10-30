@@ -33,16 +33,15 @@ int main(int argc, char *argv[])
 	// Meshes generation settings.
 	const size_t size = 3;
 	const float offset = 2.5;
-
-//	using MyMesh = Cube;
-//	const MyMesh defaultMesh = MyMesh(1.0, Color(200, 200, 200), 0);
-	using MyMesh = MegaCube;
-	const MyMesh defaultMesh = MegaCube(Color::white, Color::black);
-	using MeshGenerator = ObjectGenerator<MyMesh, ObjectGeneratorTraits<Mesh> >;
-
 	const glm::vec3 cameraPos = glm::vec3(2*(size)*offset,
 										  (size)*offset / 1.8,
 										  (size)*offset);
+
+	using MyMesh = MegaCube;
+	const MyMesh clonableMesh = MegaCube(Color::white, Color::black);
+//	using MyMesh = Cube;
+//	const MyMesh clonableMesh = MyMesh(1.0, Color(220, 220, 220), 0);
+	using MeshGenerator = ObjectGenerator<MyMesh, ObjectGeneratorTraits<Mesh> >;
 
 	// Setup scene.
 	CameraPtr camera = new Camera();
@@ -52,15 +51,12 @@ int main(int argc, char *argv[])
 
 	// Generate meshes.
 	MeshGenerator meshGenerator;
-	const MeshGenerator::Objects meshes = meshGenerator.cloneObjectsWithLatticeArrangement(size, offset, defaultMesh);
+	const MeshGenerator::Objects meshes = meshGenerator.cloneObjectsWithLatticeArrangement(size, offset, clonableMesh);
 	for (const MeshGenerator::ObjectPointer& m : meshes)
 		scene->addMesh(m);
 
 	// Add light.
 	scene->addLight(new Lamp());
-
-	logInfo << "Meshes on scene: " << scene->getMeshes().size() << logEndl;
-	logInfo << "Lamps on scene: " << scene->getLamps().size() << logEndl;
 
 	// Show scene.
 	Engine engine;

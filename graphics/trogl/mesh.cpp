@@ -101,7 +101,7 @@ const Mesh::Vertices& Mesh::getVertices() const
 }
 
 
-const Mesh::Faces&Mesh::getFaces() const
+const Mesh::Faces& Mesh::getFaces() const
 {
 	return _faces;
 }
@@ -113,13 +113,19 @@ const MaterialPtr& Mesh::getMaterial() const
 }
 
 
+const Mesh::IndexingType& Mesh::getIndexType() const
+{
+	return _indexType;
+}
+
+
 size_t Mesh::addVertex(const float& x,
 					   const float& y,
 					   const float& z,
 					   const Color& color)
 {
 	const size_t idx = _vertices.size();
-	_vertices.push_back(Vertex(idx, x, y, z, color, this));
+	_vertices.push_back({idx, x, y, z, color, this});
 	return idx;
 }
 
@@ -131,7 +137,7 @@ void Mesh::addFace(const size_t& i1,
 	Vertex& v1 = _vertices[i1];
 	Vertex& v2 = _vertices[i2];
 	Vertex& v3 = _vertices[i3];
-	_faces.insert({{i1, i2, i3}, Face(v1, v2, v3, this)});
+	_faces.insert({{i1, i2, i3}, {v1, v2, v3, this}});
 }
 
 
@@ -155,13 +161,10 @@ void Mesh::applyPosition()
 
 void Mesh::applyRotation()
 {
-	glm::mat4 xRotationMat(1);
-	glm::mat4 yRotationMat(1);
-	glm::mat4 zRotationMat(1);
-
-	xRotationMat = glm::rotate(xRotationMat, _rotation.x, AXIS_X);
-	yRotationMat = glm::rotate(yRotationMat, _rotation.y, AXIS_Y);
-	zRotationMat = glm::rotate(zRotationMat, _rotation.z, AXIS_Z);
+	static const glm::mat4 I(1);
+	const glm::mat4 xRotationMat = glm::rotate(I, _rotation.x, AXIS_X);
+	const glm::mat4 yRotationMat = glm::rotate(I, _rotation.y, AXIS_Y);
+	const glm::mat4 zRotationMat = glm::rotate(I, _rotation.z, AXIS_Z);
 
 	for (Vertex& v : _vertices)
 	{
