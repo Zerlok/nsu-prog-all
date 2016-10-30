@@ -9,6 +9,7 @@
 #include "meshes/strangecube.hpp"
 #include "meshes/megacube.hpp"
 #include "meshes/cylinder.hpp"
+#include "meshes/sphere.hpp"
 
 #include "lamps/lamp.hpp"
 
@@ -31,16 +32,16 @@ std::ostream& operator<<(std::ostream& out, const glm::vec3& v)
 int main(int argc, char *argv[])
 {
 	// Meshes generation settings.
-	const size_t size = 3;
+	const size_t size = 1;
 	const float offset = 2.5;
 	const glm::vec3 cameraPos = glm::vec3(2*(size)*offset,
 										  (size)*offset / 1.8,
 										  (size)*offset);
 
-	using MyMesh = MegaCube;
-	const MyMesh clonableMesh = MegaCube(Color::white, Color::black);
-//	using MyMesh = Cube;
-//	const MyMesh clonableMesh = MyMesh(1.0, Color(220, 220, 220), 0);
+//	using MyMesh = MegaCube;
+//	const MyMesh clonableMesh = MegaCube(Color::white, Color::black);
+	using MyMesh = Sphere;
+	const MyMesh clonableMesh = MyMesh(2.0, 9, 19);
 	using MeshGenerator = ObjectGenerator<MyMesh, ObjectGeneratorTraits<Mesh> >;
 
 	// Setup scene.
@@ -56,7 +57,9 @@ int main(int argc, char *argv[])
 		scene->addMesh(m);
 
 	// Add light.
-	scene->addLight(new Lamp());
+	LightPtr lamp = new Lamp();
+	lamp->setPosition({0.0, 2.0, 0.0});
+	scene->addLight(lamp);
 
 	// Show scene.
 	Engine engine;

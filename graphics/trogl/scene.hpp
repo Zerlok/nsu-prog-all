@@ -33,7 +33,7 @@ class Scene : public Component
 		CameraPtr& getCamera();
 
 		void addMesh(const MeshPtr& mesh);
-		void addLight(const LightPtr& lamp);
+		void addLight(const LightPtr& light);
 		void setCamera(const CameraPtr& camera);
 		void setBgColor(const Color& color);
 

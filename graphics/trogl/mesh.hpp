@@ -31,9 +31,9 @@ class Mesh : public Object
 			public:
 				// Constructors / Destructor.
 				Vertex(const size_t& idx,
-					   const float& x,
-					   const float& y,
-					   const float& z,
+					   const double& x,
+					   const double& y,
+					   const double& z,
 					   const Color& color,
 					   Mesh* mesh);
 				Vertex(const Vertex& v);
@@ -162,7 +162,7 @@ class Mesh : public Object
 		const MaterialPtr& getMaterial() const;
 		const IndexingType& getIndexType() const;
 
-		size_t addVertex(const float& x, const float& y, const float& z, const Color& color);
+		size_t addVertex(const double& x, const double& y, const double& z, const Color& color);
 		void addFace(const size_t& i1,
 					 const size_t& i2,
 					 const size_t& i3);

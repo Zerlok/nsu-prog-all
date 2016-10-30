@@ -232,6 +232,7 @@ void Engine::renderFrame()
 	glCullFace(GL_FRONT);
 
 //	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+//	glPolygonMode(GL_FRONT_AND_BACK, GL_POINT);
 
 	// Matrix View Projection.
 	glMatrixMode(GL_PROJECTION);
@@ -244,9 +245,13 @@ void Engine::renderFrame()
 				   cam->getLowDistance(),
 				   cam->getHighDistance());
 
-	const glm::mat4x4 matView  = glm::lookAt(cam->getPosition(),
-											 cam->getLookingAtPosition(),
-											 cam->getHeadDirection());
+	glm::mat4x4 matView  = glm::lookAt(cam->getPosition(),
+									   cam->getLookingAtPosition(),
+									   cam->getHeadDirection());
+	// TODO: move into animation.
+//	matView = glm::rotate(matView, float(getTimeDouble() / 11.0), glm::vec3(0.0f, 1.0f, 0.0f));
+//	matView = glm::rotate(matView, float(getTimeDouble() / 17.0), glm::vec3(0.0f, 0.0f, 1.0f));
+
 	glMatrixMode(GL_MODELVIEW);
 	glLoadMatrixf(&matView[0][0]);
 

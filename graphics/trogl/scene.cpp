@@ -90,9 +90,9 @@ void Scene::addMesh(const MeshPtr& mesh)
 }
 
 
-void Scene::addLight(const LightPtr& lamp)
+void Scene::addLight(const LightPtr& light)
 {
-	_lights.push_back(lamp);
+	_lights.push_back(light);
 	logModule << "Lamp: " << _lights.back()->getName()
 			 << " added to scene " << _name << logEndl;
 }

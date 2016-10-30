@@ -12,7 +12,8 @@ const MaterialPtr Mesh::DEFAULT_MATERIAL = new DiffuseMaterial();
 
 
 Mesh::Mesh(const std::string& name,
-		   const MaterialPtr& mat, const IndexingType& indexType)
+		   const MaterialPtr& mat,
+		   const IndexingType& indexType)
 	: Object(Object::Type::MESH, name),
 	  _vertices(),
 	  _faces(),
@@ -119,9 +120,9 @@ const Mesh::IndexingType& Mesh::getIndexType() const
 }
 
 
-size_t Mesh::addVertex(const float& x,
-					   const float& y,
-					   const float& z,
+size_t Mesh::addVertex(const double& x,
+					   const double& y,
+					   const double& z,
 					   const Color& color)
 {
 	const size_t idx = _vertices.size();
@@ -200,9 +201,9 @@ void Mesh::_reassignDataReferences()
 
 
 Mesh::Vertex::Vertex(const size_t& idx,
-					 const float& x,
-					 const float& y,
-					 const float& z,
+					 const double& x,
+					 const double& y,
+					 const double& z,
 					 const Color& color,
 					 Mesh* mesh)
 	: _idx(idx),

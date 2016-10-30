@@ -36,7 +36,8 @@ HEADERS += \
     camera.hpp \
     scene.hpp \
     gui.hpp \
-    engine.hpp
+    engine.hpp \
+    meshes/sphere.hpp
 
 # Custom shaders.
 HEADERS += \
@@ -85,7 +86,8 @@ SOURCES += \
     scene.cpp \
     gui.cpp \
     engine.cpp \
-    main.cpp
+    main.cpp \
+    meshes/sphere.cpp
 
 # Custom shaders.
 SOURCES += \
