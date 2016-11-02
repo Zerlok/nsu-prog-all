@@ -150,6 +150,7 @@ void Mesh::setMaterial(const MaterialPtr& material)
 
 void Mesh::recalculateNormals()
 {
+	// TODO: invert bad faces (their normals watching inside of a mesh).
 }
 
 
@@ -177,6 +178,8 @@ void Mesh::applyRotation()
 		v._normal = glm::vec3(yRotationMat * glm::vec4(v._position, 0.0));
 		v._normal = glm::vec3(zRotationMat * glm::vec4(v._position, 0.0));
 	}
+
+	_rotation = Object::DEFAULT_ROTATION;
 }
 
 
@@ -187,6 +190,8 @@ void Mesh::applyScale()
 		v._position *= _scale;
 		v._normal = glm::normalize(v._normal / _scale);
 	}
+
+	_scale = Object::DEFAULT_SCALE;
 }
 
 
@@ -285,6 +290,7 @@ void Mesh::Vertex::setPosition(const glm::vec3& pos)
 
 const Color& Mesh::Vertex::getColor() const
 {
+	// TODO: get color from material.
 	return _color;
 }
 

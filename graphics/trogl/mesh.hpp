@@ -162,7 +162,10 @@ class Mesh : public Object
 		const MaterialPtr& getMaterial() const;
 		const IndexingType& getIndexType() const;
 
-		size_t addVertex(const double& x, const double& y, const double& z, const Color& color);
+		size_t addVertex(const double& x,
+						 const double& y,
+						 const double& z,
+						 const Color& color);
 		void addFace(const size_t& i1,
 					 const size_t& i2,
 					 const size_t& i3);
@@ -170,7 +173,6 @@ class Mesh : public Object
 
 		void recalculateNormals();
 
-		// Methods overriden.
 		void applyPosition() override;
 		void applyRotation() override;
 		void applyScale() override;

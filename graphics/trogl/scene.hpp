@@ -26,7 +26,7 @@ class Scene : public Component
 		Scene& operator=(const Scene& scene);
 
 		const Meshes& getMeshes() const;
-		const Lights& getLamps() const;
+		const Lights& getLights() const;
 		const Color& getBgColor() const;
 		const CameraPtr& getCamera() const;
 

@@ -221,6 +221,11 @@ void Shader::initCustomVarsLocations()
 }
 
 
+void Shader::passObject(const Object*)
+{
+}
+
+
 void Shader::prepareForRender()
 {
 }

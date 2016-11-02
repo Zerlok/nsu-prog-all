@@ -204,6 +204,21 @@ void Camera::setRotation(const glm::vec3& rotation)
 }
 
 
+void Camera::applyPosition()
+{
+}
+
+
+void Camera::applyRotation()
+{
+}
+
+
+void Camera::applyScale()
+{
+}
+
+
 const float& Camera::getLowDistance() const
 {
     return _low_distance;

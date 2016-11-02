@@ -14,7 +14,7 @@ Sphere::Sphere(const float& radius,
 			   const size_t& segments)
 	: Mesh("Sphere")
 {
-	static const Color c = Color::white;
+	static const Color c = Color(200, 200, 200);
 	static const double maxPsy = 2 * M_PI;
 	static const double maxPhi = M_PI;
 

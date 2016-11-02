@@ -3,6 +3,7 @@
 
 
 #include <sharedpointer.h>
+#include "common/color.hpp"
 #include "shader.hpp"
 #include "object.hpp"
 
@@ -13,17 +14,17 @@ class Light : public Object
 		// Inner classes.
 		enum class Type
 		{
-			POINT = 0,
-			DIRCTIONAL = 1,
-			SPOT = 2,
+			// Do not change these values - harcoded in shaders.
+			POINT = 1,
+			SUN = 2,
+			SPOT = 3,
 		};
 
 		// Constructors / Destructor.
-		Light(const Type& type,
-			  const ShaderPtr& shader);
+		Light(const Type& type);
 		Light(const Light& light);
 		Light(Light&& light);
-		~Light();
+		virtual ~Light();
 
 		// Operators.
 		Light& operator=(const Light& light);
@@ -31,14 +32,31 @@ class Light : public Object
 
 		// Methods.
 		const Type& getLightType() const;
-		const ShaderPtr& getShader() const;
+		const float& getPower() const;
+		const glm::vec3& getDirection() const;
+		const Color& getColor() const;
+		const float& getInnerAngle() const;
+		const float& getOutterAngle() const;
 
-		void setShader(const ShaderPtr& shader);
+		void setPower(const float& power);
+		void setDirection(const glm::vec3& direction);
+		void setColor(const Color& color);
+		void setInnerAngle(const float& innerAngle);
+		void setOutterAngle(const float& outterAngle);
+
+		// OVerriden methods.
+		void applyPosition() override;
+		void applyRotation() override;
+		void applyScale() override;
 
 	protected:
 		// Fields.
 		Type _lightType;
-		ShaderPtr _shader;
+		float _power;
+		glm::vec3 _direction;
+		Color _color;
+		float _innerAngle;
+		float _outterAngle;
 };
 
 using LightPtr = SharedPointer<Light>;

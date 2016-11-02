@@ -86,7 +86,7 @@ class Engine::VertexObject
 		void compileGLShaders();
 		void initGLGeometry();
 
-		void draw();
+		void draw(const LightPtr& light);
 
 	private:
 		// Static fields.

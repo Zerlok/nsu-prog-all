@@ -10,17 +10,20 @@
 class Camera : public Object
 {
 	public:
+		// Static fields.
 		static const float DEFAULT_FOV;
 		static const float DEFAULT_LOW_DISTANCE;
 		static const float DEFAULT_HIGH_DISTANCE;
 		static const size_t DEFAULT_WIDTH;
 		static const size_t DEFAULT_HEIGHT;
 
+		// Constructors / Destructor.
 		Camera();
 		Camera(const Camera& c);
 		Camera(Camera&& c);
-		virtual ~Camera();
+		~Camera();
 
+		// Operators.
 		Camera& operator=(const Camera& c);
 		Camera& operator=(Camera&& c);
 
@@ -28,6 +31,7 @@ class Camera : public Object
 		bool operator!() const;
 		bool isValid() const;
 
+		// Methods.
 		const float& getFOV() const;
 		const float& getLowDistance() const;
 		const float& getHighDistance() const;
@@ -44,7 +48,12 @@ class Camera : public Object
 		void setLookingAtPosition(const glm::vec3& lookingAtPosition);
 		void setHeadDirection(const glm::vec3& headDirection);
 
+		// Overriden methods.
 		void setRotation(const glm::vec3& rotation) override;
+
+		void applyPosition() override;
+		void applyRotation() override;
+		void applyScale() override;
 
 	private:
 		float _fov;

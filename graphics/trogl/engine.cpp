@@ -257,7 +257,8 @@ void Engine::renderFrame()
 
 	// Draw the objects.
 	for (VertexObject& obj : _objects)
-		obj.draw();
+		// TODO: draw object for each light.
+		obj.draw(_scene->getLights().front());
 
 	// Draw GUI at the end of frame (to overlay over every objects on scene).
 	drawGUI();
@@ -388,18 +389,15 @@ void Engine::VertexObject::compileGLShaders()
 {
 	if (!(_shader->isCompiled()))
 		_shader->compile();
-
-	if (_shader->isCompiledSuccessfuly())
-		_attrObjPosition = glGetUniformLocation(_shader->getProgram(), "trogl_objPosition");
 }
 
 
-void Engine::VertexObject::draw()
+void Engine::VertexObject::draw(const LightPtr& light)
 {
 	glUseProgram(_shader->getProgram());
 
-	const glm::vec3& pos = _mesh->getPosition();
-	glUniform4f(_attrObjPosition, pos.x, pos.y, pos.z, 1.0f);
+	_shader->passObject(_mesh.get_pointer());
+	_shader->passObject(light.get_pointer());
 	_shader->prepareForRender();
 
 	glEnableVertexAttribArray(0);
@@ -526,30 +524,30 @@ void Engine::VertexObject::_deinitGLGeometry()
 }
 
 
-Engine::LightObject::LightObject(const LightPtr& light)
-	: _shader(light->getShader())
-{
-}
+//Engine::LightObject::LightObject(const LightPtr& light)
+//	: _shader(light->getShader())
+//{
+//}
 
 
-Engine::LightObject::LightObject(Engine::LightObject&& obj)
-	: _shader(std::move(obj._shader))
-{
-}
+//Engine::LightObject::LightObject(Engine::LightObject&& obj)
+//	: _shader(std::move(obj._shader))
+//{
+//}
 
 
-Engine::LightObject::~LightObject()
-{
-}
+//Engine::LightObject::~LightObject()
+//{
+//}
 
 
-bool Engine::LightObject::isValid() const
-{
-	return _shader->isCompiledSuccessfuly();
-}
+//bool Engine::LightObject::isValid() const
+//{
+//	return _shader->isCompiledSuccessfuly();
+//}
 
 
-void Engine::LightObject::compileGLShaders()
-{
-	_shader->compile();
-}
+//void Engine::LightObject::compileGLShaders()
+//{
+//	_shader->compile();
+//}

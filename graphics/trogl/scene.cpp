@@ -58,7 +58,7 @@ const Meshes& Scene::getMeshes() const
 }
 
 
-const Lights& Scene::getLamps() const
+const Lights& Scene::getLights() const
 {
 	return _lights;
 }

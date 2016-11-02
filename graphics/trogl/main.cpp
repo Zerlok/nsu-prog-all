@@ -11,8 +11,6 @@
 #include "meshes/cylinder.hpp"
 #include "meshes/sphere.hpp"
 
-#include "lamps/lamp.hpp"
-
 #include "engine.hpp"
 #include "engineutils.hpp"
 
@@ -41,7 +39,7 @@ int main(int argc, char *argv[])
 //	using MyMesh = MegaCube;
 //	const MyMesh clonableMesh = MegaCube(Color::white, Color::black);
 	using MyMesh = Sphere;
-	const MyMesh clonableMesh = MyMesh(2.0, 9, 19);
+	MyMesh clonableMesh = MyMesh(2.0, 9, 19);
 	using MeshGenerator = ObjectGenerator<MyMesh, ObjectGeneratorTraits<Mesh> >;
 
 	// Setup scene.
@@ -57,7 +55,7 @@ int main(int argc, char *argv[])
 		scene->addMesh(m);
 
 	// Add light.
-	LightPtr lamp = new Lamp();
+	LightPtr lamp = new Light(Light::Type::POINT);
 	lamp->setPosition({0.0, 2.0, 0.0});
 	scene->addLight(lamp);
 

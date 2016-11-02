@@ -129,27 +129,6 @@ void Object::setScale(const glm::vec3& scale)
 }
 
 
-void Object::applyPosition()
-{
-	// FIXME: in Mesh position is not updates to default!
-	_position = DEFAULT_POSITION;
-}
-
-
-void Object::applyRotation()
-{
-	// FIXME: in Mesh rotation is not updates to default!
-	_rotation = DEFAULT_ROTATION;
-}
-
-
-void Object::applyScale()
-{
-	// FIXME: in Mesh scale is not updates to default!
-	_scale = DEFAULT_SCALE;
-}
-
-
 std::string Object::_generateNameFromObjType(const Type& type)
 {
 	size_t id;

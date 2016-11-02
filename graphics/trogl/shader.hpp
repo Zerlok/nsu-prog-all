@@ -6,6 +6,7 @@
 #include <sharedpointer.h>
 #include "opengls.hpp"
 #include "component.hpp"
+#include "object.hpp"
 
 
 class Shader : public Component
@@ -51,6 +52,7 @@ class Shader : public Component
 
 		// Virtual methods.
 		virtual void initCustomVarsLocations();
+		virtual void passObject(const Object*);
 		virtual void prepareForRender();
 
 	protected:

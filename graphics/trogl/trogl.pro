@@ -9,13 +9,13 @@ QMAKE_CXXFLAGS += -std=c++11 -lglut -lGL -lGEW -lGLU
 LIBS += -lglut -lGL -lGLEW -lGLU
 
 # My libs (logger and shared pointer).
-INCLUDEPATH += /home/zerlok/nsu_prog/include
-LIBS += -L/home/zerlok/nsu_prog/libs -llogger
+#INCLUDEPATH += /home/zerlok/nsu_prog/include
+#LIBS += -L/home/zerlok/nsu_prog/libs -llogger
 
 
-#INCLUDEPATH += ../logger/ ../../oop/task11/
-#HEADERS += ../logger/logger.hpp ../../oop/task11/sharedpointer.h
-#SOURCES += ../logger/logger.cpp
+INCLUDEPATH += ../logger/ ../../oop/task11/
+HEADERS += ../logger/logger.hpp ../../oop/task11/sharedpointer.h
+SOURCES += ../logger/logger.cpp
 
 # For debug.
 QMAKE_CXXFLAGS_DEBUG += -O0
@@ -36,8 +36,7 @@ HEADERS += \
     camera.hpp \
     scene.hpp \
     gui.hpp \
-    engine.hpp \
-    meshes/sphere.hpp
+	engine.hpp
 
 # Custom shaders.
 HEADERS += \
@@ -54,17 +53,14 @@ HEADERS += \
     meshes/cube.hpp \
     meshes/strangecube.hpp \
     meshes/megacube.hpp \
-    meshes/cylinder.hpp
-
-# Custom lamps.
-HEADERS += \
-    lamps/lamp.hpp
+	meshes/cylinder.hpp \
+	meshes/sphere.hpp
 
 # Custom GUI components.
 HEADERS += \
     gui/guilabel.hpp \
-    gui/guifps.hpp \
-    gui/guiplane.hpp
+	gui/guiplane.hpp \
+	gui/guifps.hpp
 
 # Other.
 HEADERS += \
@@ -86,8 +82,7 @@ SOURCES += \
     scene.cpp \
     gui.cpp \
     engine.cpp \
-    main.cpp \
-    meshes/sphere.cpp
+	main.cpp
 
 # Custom shaders.
 SOURCES += \
@@ -104,17 +99,14 @@ SOURCES += \
     meshes/cube.cpp \
     meshes/strangecube.cpp \
     meshes/megacube.cpp \
-    meshes/cylinder.cpp
-
-# Custom lamps.
-SOURCES += \
-    lamps/lamp.cpp
+	meshes/cylinder.cpp \
+	meshes/sphere.cpp
 
 # Custom GUI components.
 SOURCES += \
-    gui/guifps.cpp \
     gui/guilabel.cpp \
-    gui/guiplane.cpp
+	gui/guiplane.cpp \
+	gui/guifps.cpp
 
 # Other.
 SOURCES += \

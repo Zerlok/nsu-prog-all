@@ -42,9 +42,9 @@ class Object : public Component
 		virtual void setRotation(const glm::vec3& rotation);
 		virtual void setScale(const glm::vec3& scale);
 
-		virtual void applyPosition();
-		virtual void applyRotation();
-		virtual void applyScale();
+		virtual void applyPosition() = 0;
+		virtual void applyRotation() = 0;
+		virtual void applyScale() = 0;
 
 	private:
 		Type _object_type;
