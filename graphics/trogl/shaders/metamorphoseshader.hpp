@@ -3,8 +3,7 @@
 
 
 #include <string>
-#include "opengls.hpp"
-#include "shader.hpp"
+#include "core/shader.hpp"
 
 
 class MetamorphoseShader : public Shader

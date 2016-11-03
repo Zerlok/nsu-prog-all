@@ -9,7 +9,7 @@ MegaCube::MegaCube(const Color& c1,
 				   const Color& c2)
 	: Mesh("MegaCube")
 {
-	static const MaterialPtr mat = new Material("MegaMaterial", new MetamorphoseShader());
+	static const MaterialPtr mat = new Material("MegaMaterial", Color::white, new MetamorphoseShader());
 	setMaterial(mat);
 
 	// Vertices.

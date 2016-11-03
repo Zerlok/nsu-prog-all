@@ -5,16 +5,26 @@
 #include "common/utils.hpp"
 
 
-loggerModules lModules = loggerForModule(Logger::Level::DEBUG,
+loggerModules lModules = loggerForModule(Logger::Level::WARNING,
 										 Logger::Description::FULL);
 
 
-const std::string DiffuseShader::VS_FILE = path::join(Shader::SRC_DIR, "diffuse.vs");
-const std::string DiffuseShader::FS_FILE = path::join(Shader::SRC_DIR, "diffuse.fs");
+std::string DiffuseShader::VS_FILE()
+{
+	static std::string vs_file = path::join(Shader::SRC_DIR, "diffuse.vs");
+	return vs_file;
+}
+
+
+std::string DiffuseShader::FS_FILE()
+{
+	static std::string fs_file = path::join(Shader::SRC_DIR, "diffuse.fs");
+	return fs_file;
+}
 
 
 DiffuseShader::DiffuseShader()
-	: Shader("Diffuse Shader", VS_FILE, FS_FILE),
+	: Shader("Diffuse Shader", VS_FILE(), FS_FILE()),
 	  _attrMeshPosition(0),
 	  _attrLampType(0),
 	  _attrLampPosition(0),
@@ -24,6 +34,7 @@ DiffuseShader::DiffuseShader()
 	  _attrLampInnerAngle(0),
 	  _attrLampOutterAngle(0)
 {
+	logModule << "Loading shader from files: " << VS_FILE << ' ' << FS_FILE << logEndl;
 }
 
 

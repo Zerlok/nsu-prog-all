@@ -2,13 +2,13 @@
 #define __DIFFUSE_MATERIAL_HPP__
 
 
-#include "material.hpp"
+#include "core/material.hpp"
 
 
 class DiffuseMaterial : public Material
 {
 	public:
-		DiffuseMaterial();
+		DiffuseMaterial(const Color& color = Material::DEFAULT_COLOR);
 		~DiffuseMaterial();
 };
 

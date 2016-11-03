@@ -2,7 +2,7 @@
 #define __GUI_PLANE_HPP__
 
 
-#include "gui.hpp"
+#include "core/gui.hpp"
 
 
 class GUIPlane : public GUIComponent

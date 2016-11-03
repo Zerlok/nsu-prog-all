@@ -3,10 +3,10 @@
 
 
 #include <string>
-#include "object.hpp"
-#include "mesh.hpp"
-#include "light.hpp"
-#include "shader.hpp"
+#include "core/object.hpp"
+#include "core/mesh.hpp"
+#include "core/light.hpp"
+#include "core/shader.hpp"
 
 
 class DiffuseShader : public Shader
@@ -27,8 +27,8 @@ class DiffuseShader : public Shader
 
 	private:
 		// Static fields.
-		static const std::string VS_FILE;
-		static const std::string FS_FILE;
+		static std::string VS_FILE();
+		static std::string FS_FILE();
 
 		// Fields.
 		GLuint _attrMeshPosition;

@@ -4,9 +4,9 @@
 
 #include <string>
 #include <sharedpointer.h>
-#include "object.hpp"
+#include "core/object.hpp"
 
-#include "mesh.hpp"
+#include "core/mesh.hpp"
 #include "meshes/cube.hpp"
 #include "meshes/cylinder.hpp"
 #include "meshes/megacube.hpp"

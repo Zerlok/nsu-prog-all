@@ -2,7 +2,7 @@
 #define __SPHERE_HPP__
 
 
-#include "mesh.hpp"
+#include "core/mesh.hpp"
 
 
 class Sphere : public Mesh

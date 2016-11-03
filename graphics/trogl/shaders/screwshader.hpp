@@ -2,7 +2,7 @@
 #define __SCREW_SHADER_HPP__
 
 
-#include "../shader.hpp"
+#include "core/shader.hpp"
 
 
 class ScrewShader : public Shader

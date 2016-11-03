@@ -2,11 +2,14 @@
 #define __ENGINGE_HPP__
 
 
-#include "opengls.hpp"
-#include "scene.hpp"
-#include "mesh.hpp"
+#include "core/opengls.hpp"
+#include "core/shader.hpp"
+#include "core/light.hpp"
+#include "core/mesh.hpp"
+#include "core/camera.hpp"
+#include "core/scene.hpp"
 
-#include "gui.hpp"
+#include "core/gui.hpp"
 #include "gui/guilabel.hpp"
 #include "gui/guiplane.hpp"
 #include "gui/guifps.hpp"

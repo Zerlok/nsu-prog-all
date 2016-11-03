@@ -1,15 +1,14 @@
 #include "cylinder.hpp"
 
 
-#include "common/color.hpp"
-#include "shaders/metamorphoseshader.hpp"
+#include "shaders/screwshader.hpp"
 
 
 Cylinder::Cylinder(const Color& c1,
 				   const Color& c2)
 	: Mesh("Cylinder")
 {
-	static const MaterialPtr mat = new Material("CylMat", new MetamorphoseShader());
+	static const MaterialPtr mat = new Material("CylMaterial", Color::white, new ScrewShader());
 	setMaterial(mat);
 
 	// Vertices.

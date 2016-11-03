@@ -4,7 +4,7 @@
 
 #include <string>
 #include <sstream>
-#include "gui.hpp"
+#include "core/gui.hpp"
 
 
 class GUILabel : public GUIComponent

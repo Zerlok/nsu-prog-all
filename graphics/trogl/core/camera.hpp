@@ -2,8 +2,8 @@
 #define __CAMERA_HPP__
 
 
+#include <glm/glm.hpp>
 #include <sharedpointer.h>
-#include "opengls.hpp"
 #include "object.hpp"
 
 

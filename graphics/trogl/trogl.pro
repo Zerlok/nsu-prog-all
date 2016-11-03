@@ -9,13 +9,13 @@ QMAKE_CXXFLAGS += -std=c++11 -lglut -lGL -lGEW -lGLU
 LIBS += -lglut -lGL -lGLEW -lGLU
 
 # My libs (logger and shared pointer).
-#INCLUDEPATH += /home/zerlok/nsu_prog/include
-#LIBS += -L/home/zerlok/nsu_prog/libs -llogger
+INCLUDEPATH += /home/zerlok/nsu_prog/include
+LIBS += -L/home/zerlok/nsu_prog/libs -llogger
 
 
-INCLUDEPATH += ../logger/ ../../oop/task11/
-HEADERS += ../logger/logger.hpp ../../oop/task11/sharedpointer.h
-SOURCES += ../logger/logger.cpp
+#INCLUDEPATH += ../logger/ ../../oop/task11/
+#HEADERS += ../logger/logger.hpp ../../oop/task11/sharedpointer.h
+#SOURCES += ../logger/logger.cpp
 
 # For debug.
 QMAKE_CXXFLAGS_DEBUG += -O0
@@ -25,24 +25,24 @@ QMAKE_CXXFLAGS_DEBUG -= -O1 -O2 -O3
 # Main modules.
 # (custom modules should be in same order).
 HEADERS += \
-    opengls.hpp \
-    component.hpp \
-    object.hpp \
-    shader.hpp \
-    texture.hpp \
-    material.hpp \
-    mesh.hpp \
-    light.hpp \
-    camera.hpp \
-    scene.hpp \
-    gui.hpp \
+	core/opengls.hpp \
+	core/component.hpp \
+	core/object.hpp \
+	core/shader.hpp \
+	core/texture.hpp \
+	core/material.hpp \
+	core/mesh.hpp \
+	core/light.hpp \
+	core/camera.hpp \
+	core/scene.hpp \
+	core/gui.hpp \
 	engine.hpp
 
 # Custom shaders.
 HEADERS += \
+	shaders/diffuseshader.hpp \
     shaders/metamorphoseshader.hpp \
-    shaders/screwshader.hpp \
-    shaders/diffuseshader.hpp
+	shaders/screwshader.hpp
 
 # Custom materials.
 HEADERS += \
@@ -71,16 +71,16 @@ HEADERS += \
 
 # Main sources of modules.
 SOURCES += \
-    component.cpp \
-    object.cpp \
-    shader.cpp \
-    texture.cpp \
-    material.cpp \
-    mesh.cpp \
-    light.cpp \
-    camera.cpp \
-    scene.cpp \
-    gui.cpp \
+	core/component.cpp \
+	core/object.cpp \
+	core/shader.cpp \
+	core/texture.cpp \
+	core/material.cpp \
+	core/mesh.cpp \
+	core/light.cpp \
+	core/camera.cpp \
+	core/scene.cpp \
+	core/gui.cpp \
     engine.cpp \
 	main.cpp
 

@@ -1,14 +1,14 @@
 #include "cube.hpp"
 
 
-#include "material.hpp"
+#include "core/material.hpp"
 #include "materials/diffusematerial.hpp"
 
 
 Cube::Cube(const float& radius,
 		   const Color& color,
 		   const size_t& subdivideLevel)
-	: Mesh("Cube", Mesh::DEFAULT_MATERIAL, Mesh::IndexingType::TRIANGLES_STRIP)
+	: Mesh("Cube", Mesh::DEFAULT_MATERIAL)
 {
 	addVertex(-radius, -radius, -radius, color);
 	addVertex(-radius, +radius, -radius, color);

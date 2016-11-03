@@ -1,13 +1,17 @@
 #include "diffusematerial.hpp"
 
 
-#include "shader.hpp"
+#include <logger.hpp>
+#include "shaders/diffuseshader.hpp"
 
 
-DiffuseMaterial::DiffuseMaterial()
-	: Material("Diffusematerial", Material::DEFAULT_SHADER)
+loggerModules lModule = loggerForModule(Logger::Level::WARNING, Logger::Description::FULL);
+
+
+DiffuseMaterial::DiffuseMaterial(const Color& color)
+	: Material("Diffusematerial", color, new DiffuseShader())
 {
-	// TODO: add light behavior.
+	logModule << "Created material" << logEndl;
 }
 
 

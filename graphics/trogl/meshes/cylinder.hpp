@@ -3,7 +3,7 @@
 
 
 #include "common/color.hpp"
-#include "mesh.hpp"
+#include "core/mesh.hpp"
 
 
 class Cylinder : public Mesh

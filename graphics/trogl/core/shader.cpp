@@ -10,13 +10,14 @@
 loggerModules lModules = loggerForModule(Logger::Level::DEBUG, Logger::Description::FULL);
 
 
-const std::string Shader::SRC_DIR = path::join(path::dirname(__FILE__), "shaders");
+const std::string Shader::SRC_DIR = path::join(path::dirname(path::dirname(__FILE__)), "shaders");
 const std::string Shader::DEFAULT_VS_FILE = path::join(Shader::SRC_DIR, "default.vs");
 const std::string Shader::DEFAULT_FS_FILE = path::join(Shader::SRC_DIR, "default.fs");
 
 
 std::string Shader::loadFile(const std::string& filename)
 {
+	logModule << "Loading shader from file: '" << filename << '\'' << logEndl;
 	std::stringstream ss;
 	std::ifstream in(filename);
 
@@ -64,6 +65,7 @@ Shader::Shader(const std::string& name,
 	  _glShaderProgram(),
 	  _status(Status::NOT_COMPILED)
 {
+	logModule << "Inited " << name << " from" << vsFile << ' ' << fsFile << logEndl;
 }
 
 
