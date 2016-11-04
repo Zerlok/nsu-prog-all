@@ -43,22 +43,24 @@ DiffuseShader::~DiffuseShader()
 }
 
 
-void DiffuseShader::passMesh(const Mesh* mesh)
+void DiffuseShader::passMesh(Mesh const* mesh)
 {
 	const glm::vec3& meshPos = mesh->getPosition();
 	glUniform4f(_attrMeshPosition, meshPos.x, meshPos.y, meshPos.z, 1.0f);
 }
 
 
-void DiffuseShader::passLight(const Light* light)
+void DiffuseShader::passLight(Light const* light)
 {
 	const glm::vec3& lightPos = light->getPosition();
 	const glm::vec3& lightDir = light->getDirection();
+	const Color lightColor = light->getColor();
 
 	glUniform1i(_attrLampType, int(light->getLightType()));
 	glUniform4f(_attrLampPosition, lightPos.x, lightPos.y, lightPos.z, 1.0f);
 	glUniform1f(_attrLampPower, light->getPower());
 	glUniform4f(_attrLampDirection, lightDir.x, lightDir.y, lightDir.z, 0.0f);
+	glUniform4f(_attrLampColor, lightColor.getRedF(), lightColor.getGreenF(), lightColor.getBlueF(), 1.0f);
 	glUniform1f(_attrLampInnerAngle, light->getInnerAngle());
 	glUniform1f(_attrLampOutterAngle, light->getOutterAngle());
 }
@@ -75,10 +77,19 @@ void DiffuseShader::initCustomVarsLocations()
 	_attrLampColor = glGetUniformLocation(_glShaderProgram, "lampColor");
 	_attrLampInnerAngle = glGetUniformLocation(_glShaderProgram, "lampIA");
 	_attrLampOutterAngle = glGetUniformLocation(_glShaderProgram, "lampOA");
+
+	logInfo << isCompiledSuccessfuly() << logEndl;
+	logInfo << _attrLampType << ' '
+			<< _attrLampPosition << ' '
+			<< _attrLampPower << ' '
+			<< _attrLampDirection << ' '
+			<< _attrLampColor << ' '
+			<< _attrLampInnerAngle << ' '
+			<< _attrLampOutterAngle << logEndl;
 }
 
 
-void DiffuseShader::passObject(const Object* obj)
+void DiffuseShader::passObject(Object const* obj)
 {
 	if (obj != nullptr)
 		return;

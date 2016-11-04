@@ -39,20 +39,6 @@ std::string Shader::loadFile(const std::string& filename)
 }
 
 
-Shader Shader::createFromSrc(const std::string& shaderName)
-{
-	const std::string vsFilename = path::join(SRC_DIR, shaderName + ".vs");
-	const std::string fsFilename = path::join(SRC_DIR, shaderName + ".fs");
-	return std::move(Shader(shaderName, vsFilename, fsFilename));
-}
-
-
-SharedPointer<Shader> Shader::createPtrFromSrc(const std::string& shaderName)
-{
-	return std::move(ShaderPtr(new Shader(createFromSrc(shaderName))));
-}
-
-
 Shader::Shader(const std::string& name,
 			   const std::string& vsFile,
 			   const std::string& fsFile)
@@ -215,21 +201,6 @@ void Shader::compile()
 			: Status::COMPILATION_FAILED;
 
 	initCustomVarsLocations();
-}
-
-
-void Shader::initCustomVarsLocations()
-{
-}
-
-
-void Shader::passObject(const Object*)
-{
-}
-
-
-void Shader::prepareForRender()
-{
 }
 
 

@@ -22,7 +22,7 @@ class DiffuseShader : public Shader
 
 		// Overriden methods.
 		void initCustomVarsLocations() override;
-		void passObject(const Object* obj) override;
+		void passObject(Object const* obj) override;
 		void prepareForRender() override;
 
 	private:

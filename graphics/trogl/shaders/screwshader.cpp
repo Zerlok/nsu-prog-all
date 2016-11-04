@@ -29,3 +29,11 @@ void ScrewShader::prepareForRender()
 {
 	glUniform1f(_attrAlpha, std::cos(getTimeDouble() / 10.0) * 1.21);
 }
+
+
+void ScrewShader::passObject(Object const*)
+{
+}
+
+
+

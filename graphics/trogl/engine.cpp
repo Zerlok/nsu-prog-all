@@ -249,8 +249,8 @@ void Engine::renderFrame()
 									   cam->getLookingAtPosition(),
 									   cam->getHeadDirection());
 	// TODO: move into animation.
-//	matView = glm::rotate(matView, float(getTimeDouble() / 11.0), glm::vec3(0.0f, 1.0f, 0.0f));
-//	matView = glm::rotate(matView, float(getTimeDouble() / 17.0), glm::vec3(0.0f, 0.0f, 1.0f));
+	matView = glm::rotate(matView, float(getTimeDouble() / 11.0), glm::vec3(0.0f, 1.0f, 0.0f));
+	matView = glm::rotate(matView, float(getTimeDouble() / 17.0), glm::vec3(0.0f, 0.0f, 1.0f));
 
 	glMatrixMode(GL_MODELVIEW);
 	glLoadMatrixf(&matView[0][0]);

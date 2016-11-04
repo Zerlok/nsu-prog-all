@@ -14,6 +14,7 @@ class MetamorphoseShader : public Shader
 
 		void initCustomVarsLocations() override;
 		void prepareForRender() override;
+		void passObject(Object const*) override;
 
 	private:
 		static const std::string VS_FILE;

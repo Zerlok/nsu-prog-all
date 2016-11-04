@@ -20,5 +20,11 @@ void main()
 	// TODO: count deffuse.
 	// TODO: count specular.
 	// TODO: count ambient.
-	gl_FragColor = vertexColor;
+	vec4 color;
+	vec4 direction = lampPosition - vertexPosition;
+	float distance = length(direction);
+	color = lampColor * lampPower * dot(direction, vertexNormal) / pow(distance, 2);
+	// color = direction;
+
+	gl_FragColor = color;
 }

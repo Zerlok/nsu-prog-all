@@ -27,8 +27,6 @@ class Shader : public Component
 
 		// Static methods.
 		static std::string loadFile(const std::string& filename);
-		static Shader createFromSrc(const std::string& shaderName);
-		static SharedPointer<Shader> createPtrFromSrc(const std::string& shaderName);
 
 		// Constructors / Destructor.
 		Shader(const std::string& name,
@@ -51,9 +49,9 @@ class Shader : public Component
 		void compile();
 
 		// Virtual methods.
-		virtual void initCustomVarsLocations();
-		virtual void passObject(const Object*);
-		virtual void prepareForRender();
+		virtual void initCustomVarsLocations() = 0;
+		virtual void passObject(Object const*) = 0;
+		virtual void prepareForRender() = 0;
 
 	protected:
 		// Constructor.

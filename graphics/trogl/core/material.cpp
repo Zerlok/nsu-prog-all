@@ -2,13 +2,14 @@
 
 
 #include <logger.hpp>
+#include "shaders/diffuseshader.hpp"
 
 
 loggerModules lModules = loggerForModule(Logger::Level::DEBUG, Logger::Description::FULL);
 
 
 const Color Material::DEFAULT_COLOR = Color(210, 210, 210);
-const ShaderPtr Material::DEFAULT_SHADER = Shader::createPtrFromSrc("diffuse");
+const ShaderPtr Material::DEFAULT_SHADER = new DiffuseShader();
 
 
 Material::Material(const std::string& name,

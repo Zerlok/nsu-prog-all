@@ -34,3 +34,8 @@ void MetamorphoseShader::prepareForRender()
 {
 	glUniform1f(_attrCosSqAlpha, std::pow(std::cos(getTimeDouble() / 10.0), 2));
 }
+
+
+void MetamorphoseShader::passObject(Object const*)
+{
+}
