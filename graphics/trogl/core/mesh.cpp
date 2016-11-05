@@ -5,7 +5,7 @@
 #include "materials/diffusematerial.hpp"
 
 
-loggerModules lModules = loggerForModule(Logger::Level::DEBUG, Logger::Description::FULL);
+logger_t loggerModules = loggerModule(Logger::Level::WARNING, loggerDescriptionFull);
 
 
 const MaterialPtr Mesh::DEFAULT_MATERIAL = new DiffuseMaterial();
@@ -21,7 +21,7 @@ Mesh::Mesh(const std::string& name,
 	  _indexType(indexType)
 
 {
-	logModule << "Mesh object created" << logEndl;
+	logDebug << "Mesh object created" << logEndl;
 }
 
 
@@ -49,7 +49,7 @@ Mesh::Mesh(Mesh&& mesh)
 
 Mesh::~Mesh()
 {
-	logModule << "Mesh object with "
+	logDebug << "Mesh object with "
 			  << _vertices.size() << " vertices, "
 			  << _faces.size() << " faces removed"
 			  << logEndl;

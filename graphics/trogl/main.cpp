@@ -15,9 +15,7 @@
 #include "engineutils.hpp"
 
 
-loggerType lInstance = loggerInit(std::cout,
-								  Logger::Level::INFO,
-								  Logger::Description::FULL);
+logger_t globalLogger = loggerInit(std::cout, Logger::Level::DEBUG, loggerDescriptionFull);
 
 
 std::ostream& operator<<(std::ostream& out, const glm::vec3& v)

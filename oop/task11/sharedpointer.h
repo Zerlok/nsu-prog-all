@@ -6,7 +6,7 @@
 #include <utility>
 
 
-template<class Type, bool do_copy_on_write = false>
+template<class Type>
 class SharedPointer
 {
 	public:
@@ -132,7 +132,6 @@ class SharedPointer
 		}
 		pointer_t get_pointer()
 		{
-			_copy_on_write();
 			return (!is_null()
 					? (_ptr_destructor->pure_pointer)
 					: nullptr);
@@ -148,7 +147,6 @@ class SharedPointer
 		}
 		reference_t get_reference()
 		{
-			_copy_on_write();
 			return *(_ptr_destructor->pure_pointer);
 		}
 
@@ -204,20 +202,6 @@ class SharedPointer
 
 		// Fileds.
 		PointerDestructor* _ptr_destructor;
-
-		// Methods.
-		void _copy_on_write()
-		{
-			if (!do_copy_on_write
-					|| is_null()
-					|| (_ptr_destructor->shares_counter <= 1))
-				return;
-
-			--(_ptr_destructor->shares_counter);
-
-			Type* ptr_copy = new Type(get_creference());
-			_ptr_destructor = new PointerDestructor(ptr_copy);
-		}
 };
 
 

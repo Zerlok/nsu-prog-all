@@ -4,7 +4,7 @@
 #include <logger.hpp>
 
 
-loggerModules lModules = loggerForModule(Logger::Level::DEBUG, Logger::Description::FULL);
+logger_t loggerModules = loggerModule(Logger::Level::WARNING, loggerDescriptionFull);
 
 
 Texture::Texture(const std::string& name)

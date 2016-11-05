@@ -5,7 +5,7 @@
 #include <logger.hpp>
 
 
-loggerModules lModules = loggerForModule(Logger::Level::DEBUG, Logger::Description::FULL);
+logger_t loggerModules = loggerModule(Logger::Level::WARNING, loggerDescriptionFull);
 
 
 size_t Object::_meshID = 0;
@@ -32,7 +32,7 @@ Object::Object(const Type& type,
 	if (name.empty())
 		_name = _generateNameFromObjType(_object_type);
 
-	logModule << "Object " << _meshID << " " << _name << " created" << logEndl;
+	logDebug << "Object " << _meshID << " " << _name << " created" << logEndl;
 }
 
 
@@ -43,7 +43,7 @@ Object::Object(const Object& obj)
 	  _rotation(obj._rotation),
 	  _scale(obj._scale)
 {
-	logModule << "Object " << _name << " copyed" << logEndl;
+	logDebug << "Object " << _name << " copyed" << logEndl;
 }
 
 
@@ -59,7 +59,7 @@ Object::Object(Object&& obj)
 
 Object::~Object()
 {
-	logModule << "Object " << _name << " deleted" << logEndl;
+	logDebug << "Object " << _name << " deleted" << logEndl;
 }
 
 

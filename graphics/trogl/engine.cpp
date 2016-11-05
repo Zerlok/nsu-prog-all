@@ -6,8 +6,8 @@
 #include "common/utils.hpp"
 
 
-loggerModules lModules = loggerForModule(Logger::Level::INFO,
-										 Logger::Description::FULL);
+logger_t loggerModules = loggerModule(Logger::Level::INFO,
+										 loggerDescriptionFull);
 
 
 Engine* Engine::_current = nullptr;
@@ -22,11 +22,11 @@ Engine::Engine(const bool& displayFPS)
 	  _width(0),
 	  _height(0)
 {
-	logModule << "Engine init started" << logEndl;
+	logDebug << "Engine init started" << logEndl;
 
 	setDisplayFPS(displayFPS);
 
-	logModule << "Engine created" << logEndl;
+	logDebug << "Engine created" << logEndl;
 }
 
 
@@ -36,7 +36,7 @@ Engine::~Engine()
 			&& (_glWindow))
 			glutDestroyWindow(_glWindow);
 
-	logModule << "Engine removed" << logEndl;
+	logDebug << "Engine removed" << logEndl;
 }
 
 
@@ -508,7 +508,7 @@ void Engine::VertexObject::_initIndexBufferObject()
 void Engine::VertexObject::_deinitGLGeometry()
 {
 	if (_isGLGeometryValid())
-		logModule << "Removing object's geometry" << logEndl;
+		logDebug << "Removing object's geometry" << logEndl;
 
 	if (_glVBO != 0)
 		glDeleteBuffers(sizeof(_glVBO), &_glVBO);

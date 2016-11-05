@@ -5,13 +5,13 @@
 #include "shaders/diffuseshader.hpp"
 
 
-loggerModules lModule = loggerForModule(Logger::Level::WARNING, Logger::Description::FULL);
+logger_t lModule = loggerModule(Logger::Level::WARNING, loggerDescriptionFull);
 
 
 DiffuseMaterial::DiffuseMaterial(const Color& color)
 	: Material("Diffusematerial", color, new DiffuseShader())
 {
-	logModule << "Created material" << logEndl;
+	logDebug << "Created material" << logEndl;
 }
 
 

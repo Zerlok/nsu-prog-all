@@ -7,7 +7,7 @@
 #include "common/utils.hpp"
 
 
-loggerModules lModules = loggerForModule(Logger::Level::DEBUG, Logger::Description::FULL);
+logger_t loggerModules = loggerModule(Logger::Level::WARNING, loggerDescriptionFull);
 
 
 const std::string Shader::SRC_DIR = path::join(path::dirname(path::dirname(__FILE__)), "shaders");
@@ -17,7 +17,7 @@ const std::string Shader::DEFAULT_FS_FILE = path::join(Shader::SRC_DIR, "default
 
 std::string Shader::loadFile(const std::string& filename)
 {
-	logModule << "Loading shader from file: '" << filename << '\'' << logEndl;
+	logDebug << "Loading shader from file: '" << filename << '\'' << logEndl;
 	std::stringstream ss;
 	std::ifstream in(filename);
 
@@ -51,7 +51,7 @@ Shader::Shader(const std::string& name,
 	  _glShaderProgram(),
 	  _status(Status::NOT_COMPILED)
 {
-	logModule << "Inited " << name << " from" << vsFile << ' ' << fsFile << logEndl;
+	logDebug << "Inited " << name << " from" << vsFile << ' ' << fsFile << logEndl;
 }
 
 
@@ -88,8 +88,8 @@ Shader::Shader(Shader&& sh)
 
 Shader::~Shader()
 {
-	logModule << "Shaders compilation count: " << _shadersCompileCount << logEndl;
-	logModule << "Removing: (";
+	logDebug << "Shaders compilation count: " << _shadersCompileCount << logEndl;
+	logDebug << "Removing: (";
 
 	switch (_shadersCompileCount)
 	{
@@ -97,24 +97,24 @@ Shader::~Shader()
 			glDetachShader(_glShaderProgram, _glVertexShader);
 			glDetachShader(_glShaderProgram, _glFragmentShader);
 			glDeleteProgram(_glShaderProgram);
-			logModule << "Shader program, ";
+			logDebug << "Shader program, ";
 
 		case 2:
 			glDeleteShader(_glFragmentShader);
-			logModule << "Fragment shader, ";
+			logDebug << "Fragment shader, ";
 
 		case 1:
 			glDeleteShader(_glVertexShader);
-			logModule << "Vertex shader";
+			logDebug << "Vertex shader";
 			break;
 
 		case 0:
 		default:
-			logModule << "none";
+			logDebug << "none";
 			break;
 	}
 
-	logModule << ") => shaders removed." << logEndl;
+	logDebug << ") => shaders removed." << logEndl;
 }
 
 
@@ -239,7 +239,7 @@ bool Shader::_compileVertexShader()
 	}
 
 	++_shadersCompileCount;
-	logModule << getName() << " vertex compiled successfuly." << logEndl;
+	logDebug << getName() << " vertex compiled successfuly." << logEndl;
 	return true;
 }
 
@@ -269,7 +269,7 @@ bool Shader::_compileFragmentShader()
 	}
 
 	++_shadersCompileCount;
-	logModule << getName() << " fragment compiled successfuly." << logEndl;
+	logDebug << getName() << " fragment compiled successfuly." << logEndl;
 	return true;
 }
 
@@ -300,7 +300,7 @@ bool Shader::_compileShaderProgram()
 		return false;
 	}
 
-	logModule << "Shader program linked successfuly." << logEndl;
+	logDebug << "Shader program linked successfuly." << logEndl;
 
 	glValidateProgram(_glShaderProgram);
 	glGetProgramiv(_glShaderProgram, GL_VALIDATE_STATUS, &success);
@@ -312,6 +312,6 @@ bool Shader::_compileShaderProgram()
 	}
 
 	++_shadersCompileCount;
-	logModule << "Shader program is valid. Shaders compilation finished." << logEndl;
+	logDebug << "Shader program is valid. Shaders compilation finished." << logEndl;
 	return true;
 }

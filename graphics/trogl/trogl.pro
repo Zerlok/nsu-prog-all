@@ -25,24 +25,24 @@ QMAKE_CXXFLAGS_DEBUG -= -O1 -O2 -O3
 # Main modules.
 # (custom modules should be in same order).
 HEADERS += \
-	core/opengls.hpp \
-	core/component.hpp \
-	core/object.hpp \
-	core/shader.hpp \
-	core/texture.hpp \
-	core/material.hpp \
-	core/mesh.hpp \
-	core/light.hpp \
-	core/camera.hpp \
-	core/scene.hpp \
-	core/gui.hpp \
-	engine.hpp
+    core/opengls.hpp \
+    core/component.hpp \
+    core/object.hpp \
+    core/shader.hpp \
+    core/texture.hpp \
+    core/material.hpp \
+    core/mesh.hpp \
+    core/light.hpp \
+    core/camera.hpp \
+    core/scene.hpp \
+    core/gui.hpp \
+    engine.hpp
 
 # Custom shaders.
 HEADERS += \
-	shaders/diffuseshader.hpp \
+    shaders/diffuseshader.hpp \
     shaders/metamorphoseshader.hpp \
-	shaders/screwshader.hpp
+    shaders/screwshader.hpp
 
 # Custom materials.
 HEADERS += \
@@ -53,14 +53,14 @@ HEADERS += \
     meshes/cube.hpp \
     meshes/strangecube.hpp \
     meshes/megacube.hpp \
-	meshes/cylinder.hpp \
-	meshes/sphere.hpp
+    meshes/cylinder.hpp \
+    meshes/sphere.hpp
 
 # Custom GUI components.
 HEADERS += \
     gui/guilabel.hpp \
-	gui/guiplane.hpp \
-	gui/guifps.hpp
+    gui/guiplane.hpp \
+    gui/guifps.hpp
 
 # Other.
 HEADERS += \
@@ -71,18 +71,18 @@ HEADERS += \
 
 # Main sources of modules.
 SOURCES += \
-	core/component.cpp \
-	core/object.cpp \
-	core/shader.cpp \
-	core/texture.cpp \
-	core/material.cpp \
-	core/mesh.cpp \
-	core/light.cpp \
-	core/camera.cpp \
-	core/scene.cpp \
-	core/gui.cpp \
+    core/component.cpp \
+    core/object.cpp \
+    core/shader.cpp \
+    core/texture.cpp \
+    core/material.cpp \
+    core/mesh.cpp \
+    core/light.cpp \
+    core/camera.cpp \
+    core/scene.cpp \
+    core/gui.cpp \
     engine.cpp \
-	main.cpp
+    main.cpp
 
 # Custom shaders.
 SOURCES += \
@@ -99,14 +99,14 @@ SOURCES += \
     meshes/cube.cpp \
     meshes/strangecube.cpp \
     meshes/megacube.cpp \
-	meshes/cylinder.cpp \
-	meshes/sphere.cpp
+    meshes/cylinder.cpp \
+    meshes/sphere.cpp
 
 # Custom GUI components.
 SOURCES += \
     gui/guilabel.cpp \
-	gui/guiplane.cpp \
-	gui/guifps.cpp
+    gui/guiplane.cpp \
+    gui/guifps.cpp
 
 # Other.
 SOURCES += \
@@ -117,6 +117,6 @@ DISTFILES += \
     shaders/default.vs \
     shaders/default.fs \
     shaders/metamorph.vs \
-	shaders/screw.vs \
-	shaders/diffuse.vs \
-	shaders/diffuse.fs
+    shaders/screw.vs \
+    shaders/diffuse.vs \
+    shaders/diffuse.fs

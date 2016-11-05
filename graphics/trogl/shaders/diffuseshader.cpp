@@ -5,8 +5,8 @@
 #include "common/utils.hpp"
 
 
-loggerModules lModules = loggerForModule(Logger::Level::WARNING,
-										 Logger::Description::FULL);
+logger_t loggerModules = loggerModule(Logger::Level::WARNING,
+										 loggerDescriptionFull);
 
 
 std::string DiffuseShader::VS_FILE()
@@ -34,7 +34,7 @@ DiffuseShader::DiffuseShader()
 	  _attrLampInnerAngle(0),
 	  _attrLampOutterAngle(0)
 {
-	logModule << "Loading shader from files: " << VS_FILE << ' ' << FS_FILE << logEndl;
+	logDebug << "Loading shader from files: " << VS_FILE << ' ' << FS_FILE << logEndl;
 }
 
 

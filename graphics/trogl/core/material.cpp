@@ -5,7 +5,7 @@
 #include "shaders/diffuseshader.hpp"
 
 
-loggerModules lModules = loggerForModule(Logger::Level::DEBUG, Logger::Description::FULL);
+logger_t loggerModules = loggerModule(Logger::Level::WARNING, loggerDescriptionFull);
 
 
 const Color Material::DEFAULT_COLOR = Color(210, 210, 210);
@@ -19,7 +19,7 @@ Material::Material(const std::string& name,
 	  _color(color),
 	  _shader(shader)
 {
-	logModule << "Material: " << name << " with "
+	logDebug << "Material: " << name << " with "
 			  << shader->getName() << " created"
 			  << logEndl;
 }

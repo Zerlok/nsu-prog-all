@@ -4,7 +4,7 @@
 #include <logger.hpp>
 
 
-loggerModules lModules = loggerForModule(Logger::Level::DEBUG, Logger::Description::FULL);
+logger_t loggerModules = loggerModule(Logger::Level::WARNING, loggerDescriptionFull);
 
 
 const float Camera::DEFAULT_FOV = 60.0;
@@ -24,7 +24,7 @@ Camera::Camera()
 	  _lookingAtPosition(Object::DEFAULT_POSITION),
 	  _headDirection(Object::AXIS_Y)
 {
-	logModule << "Camera " << getName() << " created" <<logEndl;
+	logDebug << "Camera " << getName() << " created" <<logEndl;
 }
 
 

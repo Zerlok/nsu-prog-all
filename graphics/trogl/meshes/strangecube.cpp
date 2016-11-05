@@ -5,7 +5,7 @@
 #include "common/utils.hpp"
 
 
-loggerModules lModules = loggerForModule(Logger::Level::DEBUG, Logger::Description::FULL);
+logger_t loggerModules = loggerModule(Logger::Level::WARNING, loggerDescriptionFull);
 
 
 StrangeCube::StrangeCube(const Color& c1,
@@ -186,7 +186,7 @@ StrangeCube::StrangeCube(const Color& c1,
 		addFace(54, 55, 53);
 	}
 
-	logModule << "Initialized (duration: "
+	logDebug << "Initialized (duration: "
 			  << getTimeDouble() - start << "ms)"
 			  << logEndl;
 }

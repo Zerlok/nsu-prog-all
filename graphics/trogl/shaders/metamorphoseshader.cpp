@@ -5,8 +5,8 @@
 #include "common/utils.hpp"
 
 
-loggerModules lModules = loggerForModule(Logger::Level::DEBUG,
-										 Logger::Description::FULL);
+logger_t loggerModules = loggerModule(Logger::Level::WARNING,
+										 loggerDescriptionFull);
 
 
 const std::string MetamorphoseShader::VS_FILE = path::join(Shader::SRC_DIR, "metamorph.vs");
@@ -15,7 +15,7 @@ const std::string MetamorphoseShader::VS_FILE = path::join(Shader::SRC_DIR, "met
 MetamorphoseShader::MetamorphoseShader()
 	: Shader("Metamorph Shader", VS_FILE, DEFAULT_FS_FILE)
 {
-	logModule << "Metamorph Shader created" << std::endl;
+	logDebug << "Metamorph Shader created" << std::endl;
 }
 
 
