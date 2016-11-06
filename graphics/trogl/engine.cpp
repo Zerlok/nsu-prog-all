@@ -6,7 +6,7 @@
 #include "common/utils.hpp"
 
 
-logger_t loggerModules = loggerModule(Logger::Level::INFO,
+logger_t loggerModules = loggerModule(Logger::Level::DEBUG,
 										 loggerDescriptionFull);
 
 

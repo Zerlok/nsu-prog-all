@@ -14,11 +14,12 @@ class MetamorphoseShader : public Shader
 
 		void initCustomVarsLocations() override;
 		void prepareForRender() override;
-		void passObject(Object const*) override;
+		void passObject(Object const*obj) override;
 
 	private:
 		static const std::string VS_FILE;
 
+		GLuint _attrObjPosition;
 		GLuint _attrCosSqAlpha;
 };
 

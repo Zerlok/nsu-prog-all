@@ -7,7 +7,7 @@
 #include "common/utils.hpp"
 
 
-logger_t loggerModules = loggerModule(Logger::Level::WARNING, loggerDescriptionFull);
+logger_t loggerModules = loggerModule(Logger::Level::DEBUG, loggerDescriptionFull);
 
 
 const std::string Shader::SRC_DIR = path::join(path::dirname(path::dirname(__FILE__)), "shaders");

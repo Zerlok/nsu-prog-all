@@ -26,6 +26,7 @@ MetamorphoseShader::~MetamorphoseShader()
 
 void MetamorphoseShader::initCustomVarsLocations()
 {
+	_attrObjPosition = glGetUniformLocation(_glShaderProgram, "meshPosition");
 	_attrCosSqAlpha = glGetUniformLocation(_glShaderProgram, "cosSqAlpha");
 }
 
@@ -36,6 +37,12 @@ void MetamorphoseShader::prepareForRender()
 }
 
 
-void MetamorphoseShader::passObject(Object const*)
+void MetamorphoseShader::passObject(Object const* obj)
 {
+	if ((obj == nullptr)
+			|| (obj->getObjectType() != Object::Type::MESH))
+		return;
+
+	const glm::vec3& pos = obj->getPosition();
+	glUniform3f(_attrObjPosition, pos.x, pos.y, pos.z);
 }

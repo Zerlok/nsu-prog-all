@@ -60,7 +60,8 @@ HEADERS += \
 HEADERS += \
     gui/guilabel.hpp \
     gui/guiplane.hpp \
-    gui/guifps.hpp
+    gui/guifps.hpp \
+    gui/guiconsole.hpp
 
 # Other.
 HEADERS += \
@@ -106,7 +107,8 @@ SOURCES += \
 SOURCES += \
     gui/guilabel.cpp \
     gui/guiplane.cpp \
-    gui/guifps.cpp
+    gui/guifps.cpp \
+    gui/guiconsole.cpp
 
 # Other.
 SOURCES += \

@@ -10,7 +10,7 @@ logger_t loggerModules = loggerModule(Logger::Level::WARNING, loggerDescriptionF
 Light::Light(const Type& type)
 	: Object(Object::Type::LIGHT),
 	  _lightType(type),
-	  _power(1.0),
+	  _power(1000.0),
 	  _direction(0.0, 0.0, 0.0),
 	  _color(Color::white),
 	  _innerAngle(0.0),

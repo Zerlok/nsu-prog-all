@@ -5,8 +5,7 @@
 #include "common/utils.hpp"
 
 
-logger_t loggerModules = loggerModule(Logger::Level::WARNING,
-										 loggerDescriptionFull);
+logger_t loggerModules = loggerModule(Logger::Level::DEBUG, loggerDescriptionFull);
 
 
 std::string DiffuseShader::VS_FILE()
@@ -34,7 +33,6 @@ DiffuseShader::DiffuseShader()
 	  _attrLampInnerAngle(0),
 	  _attrLampOutterAngle(0)
 {
-	logDebug << "Loading shader from files: " << VS_FILE << ' ' << FS_FILE << logEndl;
 }
 
 
@@ -46,7 +44,7 @@ DiffuseShader::~DiffuseShader()
 void DiffuseShader::passMesh(Mesh const* mesh)
 {
 	const glm::vec3& meshPos = mesh->getPosition();
-	glUniform4f(_attrMeshPosition, meshPos.x, meshPos.y, meshPos.z, 1.0f);
+	glUniform4f(_attrMeshPosition, meshPos.x, meshPos.y, meshPos.z, 1.0);
 }
 
 
@@ -93,6 +91,8 @@ void DiffuseShader::passObject(Object const* obj)
 {
 	if (obj != nullptr)
 		return;
+
+	logDebug << "Diffuse shader " << obj->getName() << " received" << logEndl;
 
 	switch (obj->getObjectType())
 	{

@@ -28,7 +28,7 @@ std::ostream& operator<<(std::ostream& out, const glm::vec3& v)
 int main(int argc, char *argv[])
 {
 	// Meshes generation settings.
-	const size_t size = 1;
+	const size_t size = 2;
 	const float offset = 2.5;
 	const glm::vec3 cameraPos = glm::vec3(2*(size)*offset,
 										  (size)*offset / 1.8,
@@ -37,7 +37,7 @@ int main(int argc, char *argv[])
 //	using MyMesh = MegaCube;
 //	const MyMesh clonableMesh = MegaCube(Color::white, Color::black);
 	using MyMesh = Sphere;
-	MyMesh clonableMesh = MyMesh(2.0, 9, 19);
+	MyMesh clonableMesh = MyMesh(1.0, 8, 16);
 	using MeshGenerator = ObjectGenerator<MyMesh, ObjectGeneratorTraits<Mesh> >;
 
 	// Setup scene.

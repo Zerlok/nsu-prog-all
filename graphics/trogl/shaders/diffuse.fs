@@ -1,6 +1,8 @@
 #version 120
 
 
+uniform vec4 meshPosition;
+
 uniform int lampType;
 uniform vec4 lampPosition;
 uniform float lampPower;
@@ -11,7 +13,7 @@ uniform float lampOA;
 
 
 varying vec4 vertexPosition;
-varying vec4 vertexNormal;
+varying vec3 vertexNormal;
 varying vec4 vertexColor;
 
 
@@ -20,11 +22,16 @@ void main()
 	// TODO: count deffuse.
 	// TODO: count specular.
 	// TODO: count ambient.
-	vec4 color;
-	vec4 direction = lampPosition - vertexPosition;
-	float distance = length(direction);
-	color = lampColor * lampPower * dot(direction, vertexNormal) / pow(distance, 2);
-	// color = direction;
 
-	gl_FragColor = color;
+        vec3 direction = lampPosition.xyz - vertexPosition.xyz;
+	float distance = length(direction);
+	direction = normalize(direction);
+
+        vec4 color;
+	color = vec4(lampPosition.xyz, 1.0);
+	// color = lampColor;
+	// color = color * max(dot(vertexNormal, direction), 0.0);
+	// color = color * lampPower / pow(distance, 2);
+
+        gl_FragColor = clamp(color, 0.0, 1.0);
 }
