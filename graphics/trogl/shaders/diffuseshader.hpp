@@ -39,6 +39,8 @@ class DiffuseShader : public Shader
 		GLuint _attrLampColor;
 		GLuint _attrLampInnerAngle;
 		GLuint _attrLampOutterAngle;
+
+		GLuint _attrTestColor;
 };
 
 

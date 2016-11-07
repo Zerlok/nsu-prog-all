@@ -217,6 +217,7 @@ void Engine::drawGUIPlane(const GUIPlane& gplane)
 
 void Engine::renderFrame()
 {
+	// TODO: use one style coding (OpenGL)
 	// TODO: add comment description: what does each line do with GL.
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
@@ -249,8 +250,9 @@ void Engine::renderFrame()
 									   cam->getLookingAtPosition(),
 									   cam->getHeadDirection());
 	// TODO: move into animation.
-	matView = glm::rotate(matView, float(getTimeDouble() / 11.0), glm::vec3(0.0f, 1.0f, 0.0f));
-	matView = glm::rotate(matView, float(getTimeDouble() / 17.0), glm::vec3(0.0f, 0.0f, 1.0f));
+	matView = glm::rotate(matView, 3.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+//	matView = glm::rotate(matView, float(getTimeDouble() / 11.0), glm::vec3(0.0f, 1.0f, 0.0f));
+//	matView = glm::rotate(matView, float(getTimeDouble() / 17.0), glm::vec3(0.0f, 0.0f, 1.0f));
 
 	glMatrixMode(GL_MODELVIEW);
 	glLoadMatrixf(&matView[0][0]);
@@ -330,7 +332,7 @@ Engine::VertexObject::VertexObject(const MeshPtr& mesh)
 	  _glNBO(0),
 	  _glCBO(0),
 	  _glIBO(0),
-	  _attrObjPosition(0),
+	  _attrTestColor(0),
 	  _indicesSize(0),
 	  _shader(mesh->getMaterial()->getShader()),
 	  _mesh(mesh)
@@ -349,7 +351,7 @@ Engine::VertexObject::VertexObject(Engine::VertexObject&& obj)
 	  _glNBO(std::move(obj._glNBO)),
 	  _glCBO(std::move(obj._glCBO)),
 	  _glIBO(std::move(obj._glIBO)),
-	  _attrObjPosition(std::move(obj._attrObjPosition)),
+	  _attrTestColor(std::move(obj._attrTestColor)),
 	  _indicesSize(std::move(obj._indicesSize)),
 	  _shader(std::move(obj._shader)),
 	  _mesh(std::move(obj._mesh))

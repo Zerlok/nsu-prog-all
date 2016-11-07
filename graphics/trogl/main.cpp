@@ -11,6 +11,9 @@
 #include "meshes/cylinder.hpp"
 #include "meshes/sphere.hpp"
 
+#include "materials/diffusematerial.hpp"
+#include "shaders/diffuseshader.hpp"
+
 #include "engine.hpp"
 #include "engineutils.hpp"
 
@@ -34,10 +37,10 @@ int main(int argc, char *argv[])
 										  (size)*offset / 1.8,
 										  (size)*offset);
 
-//	using MyMesh = MegaCube;
-//	const MyMesh clonableMesh = MegaCube(Color::white, Color::black);
-	using MyMesh = Sphere;
-	MyMesh clonableMesh = MyMesh(1.0, 8, 16);
+	using MyMesh = MegaCube;
+	const MyMesh clonableMesh = MegaCube(Color::white, Color::black);
+//	using MyMesh = Sphere;
+//	MyMesh clonableMessh = MyMesh(1.0, 8, 16);
 	using MeshGenerator = ObjectGenerator<MyMesh, ObjectGeneratorTraits<Mesh> >;
 
 	// Setup scene.
@@ -54,7 +57,7 @@ int main(int argc, char *argv[])
 
 	// Add light.
 	LightPtr lamp = new Light(Light::Type::POINT);
-	lamp->setPosition({0.0, 2.0, 0.0});
+	lamp->setPosition({0.0, 4.0, 0.0});
 	scene->addLight(lamp);
 
 	// Show scene.

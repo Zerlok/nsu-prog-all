@@ -103,7 +103,7 @@ class Engine::VertexObject
 		GLuint _glCBO;				// Color Buffer Object
 		GLuint _glIBO;				// Index Buffer Object
 
-		GLuint _attrObjPosition;
+		GLuint _attrTestColor;
 
 		Mesh::IndexingType _indexType;
 		size_t _indicesSize;

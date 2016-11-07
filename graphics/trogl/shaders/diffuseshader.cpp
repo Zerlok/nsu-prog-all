@@ -89,10 +89,8 @@ void DiffuseShader::initCustomVarsLocations()
 
 void DiffuseShader::passObject(Object const* obj)
 {
-	if (obj != nullptr)
+	if (obj == nullptr)
 		return;
-
-	logDebug << "Diffuse shader " << obj->getName() << " received" << logEndl;
 
 	switch (obj->getObjectType())
 	{

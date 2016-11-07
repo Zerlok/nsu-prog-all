@@ -15,6 +15,7 @@ void main()
 	float k = 1 / sqrt(dot(pos, pos));
 	pos = pos * cosSqAlpha + pos * k * (1 - cosSqAlpha);
 	pos += meshPosition;
+
 	gl_Position = gl_ModelViewProjectionMatrix * vec4(pos, 1.0);
 	gl_FrontColor = color;
 }
