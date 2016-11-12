@@ -1,12 +1,15 @@
 #include "mesh.hpp"
 
 
+#include <algorithm>
 #include <logger.hpp>
 #include "materials/diffusematerial.hpp"
 
 
-logger_t loggerModules = loggerModule(Logger::Level::WARNING, loggerDescriptionFull);
+logger_t modulesLogger = loggerModule(Logger::Level::WARNING, loggerDescriptionFull);
 
+
+// ---------------------------- MESH ---------------------------- //
 
 const MaterialPtr Mesh::DEFAULT_MATERIAL = new DiffuseMaterial();
 
@@ -16,42 +19,44 @@ Mesh::Mesh(const std::string& name,
 		   const IndexingType& indexType)
 	: Object(Object::Type::MESH, name),
 	  _vertices(),
-	  _faces(),
+	  _polygons(),
 	  _material(mat),
 	  _indexType(indexType)
 
 {
-	logDebug << "Mesh object created" << logEndl;
+	logDebug << "Mesh " << getName() << " created." << logEndl;
 }
 
 
 Mesh::Mesh(const Mesh& mesh)
 	: Object(mesh),
 	  _vertices(mesh._vertices),
-	  _faces(mesh._faces),
+	  _polygons(mesh._polygons),
 	  _material(mesh._material),
 	  _indexType(mesh._indexType)
 {
-	_reassignDataReferences();
+	_reassignDataLinks();
+	logDebug << "Mesh " << getName() << " copied from " << mesh.getName() << logEndl;
 }
 
 
 Mesh::Mesh(Mesh&& mesh)
 	: Object(std::move(mesh)),
 	  _vertices(std::move(mesh._vertices)),
-	  _faces(std::move(mesh._faces)),
+	  _polygons(std::move(mesh._polygons)),
 	  _material(std::move(mesh._material)),
 	  _indexType(std::move(mesh._indexType))
 {
-	_reassignDataReferences();
+	_reassignDataLinks();
+	logDebug << "Mesh " << getName() << " moved." << logEndl;
 }
 
 
 Mesh::~Mesh()
 {
-	logDebug << "Mesh object with "
+	logDebug << "Mesh " << getName() << "with "
 			  << _vertices.size() << " vertices, "
-			  << _faces.size() << " faces removed"
+			  << _polygons.size() << " faces deleted."
 			  << logEndl;
 }
 
@@ -60,11 +65,12 @@ Mesh& Mesh::operator=(const Mesh& mesh)
 {
 	Object::operator=(mesh);
 	_vertices = mesh._vertices;
-	_faces = mesh._faces;
+	_polygons = mesh._polygons;
 	_material = mesh._material;
 	_indexType = mesh._indexType;
-	_reassignDataReferences();
+	_reassignDataLinks();
 
+	logDebug << "Mesh " << getName() << " copied from " << mesh.getName() << logEndl;
 	return (*this);
 }
 
@@ -73,12 +79,19 @@ Mesh& Mesh::operator=(Mesh&& mesh)
 {
 	Object::operator=(mesh);
 	_vertices = std::move(mesh._vertices);
-	_faces = std::move(mesh._faces);
+	_polygons = std::move(mesh._polygons);
 	_material = std::move(mesh._material);
 	_indexType = std::move(mesh._indexType);
-	_reassignDataReferences();
+	_reassignDataLinks();
 
+	logDebug << "Mesh " << getName() << " moved." << logEndl;
 	return (*this);
+}
+
+
+Mesh::Vertex& Mesh::getVertex(const size_t& i)
+{
+	return _vertices[i];
 }
 
 
@@ -88,11 +101,11 @@ const Mesh::Vertex& Mesh::getVertex(const size_t& i) const
 }
 
 
-const Mesh::Face& Mesh::getFace(const size_t& i1,
+const Mesh::Polygon& Mesh::getPolygon(const size_t& i1,
 								const size_t& i2,
 								const size_t& i3) const
 {
-	return _faces.at({i1, i2, i3});
+	return *(_polygons.find({i1, i2, i3, nullptr}));
 }
 
 
@@ -102,9 +115,9 @@ const Mesh::Vertices& Mesh::getVertices() const
 }
 
 
-const Mesh::Faces& Mesh::getFaces() const
+const Mesh::Polygons& Mesh::getPolygons() const
 {
-	return _faces;
+	return _polygons;
 }
 
 
@@ -131,14 +144,11 @@ size_t Mesh::addVertex(const double& x,
 }
 
 
-void Mesh::addFace(const size_t& i1,
+void Mesh::addPolygon(const size_t& i1,
 				   const size_t& i2,
 				   const size_t& i3)
 {
-	Vertex& v1 = _vertices[i1];
-	Vertex& v2 = _vertices[i2];
-	Vertex& v3 = _vertices[i3];
-	_faces.insert({{i1, i2, i3}, {v1, v2, v3, this}});
+	_polygons.insert({i1, i2, i3, this});
 }
 
 
@@ -151,11 +161,18 @@ void Mesh::setMaterial(const MaterialPtr& material)
 void Mesh::recalculateNormals()
 {
 	// TODO: invert bad faces (their normals watching inside of a mesh).
+	for (auto poly : _polygons)
+	{
+		const float ratio = glm::dot(poly.calculateCenter(), poly.calculateNormal());
+		if (ratio < -0.5)
+			poly.flip();
+	}
 }
 
 
 void Mesh::applyPosition()
 {
+	// TODO: reset current mesh position to default.
 	for (Vertex& v : _vertices)
 		v._position += _position;
 }
@@ -195,15 +212,17 @@ void Mesh::applyScale()
 }
 
 
-void Mesh::_reassignDataReferences()
+void Mesh::_reassignDataLinks()
 {
 	for (Vertex& v : _vertices)
 		v._linkedMesh = this;
 
-	for (auto it : _faces)
-		it.second._linkedMesh = this;
+	for (auto it : _polygons)
+		it._linkedMesh = this;
 }
 
+
+// ---------------------------- MESH::VERTEX ---------------------------- //
 
 Mesh::Vertex::Vertex(const size_t& idx,
 					 const double& x,
@@ -215,67 +234,26 @@ Mesh::Vertex::Vertex(const size_t& idx,
 	  _position(x, y, z),
 	  _normal(0.0, 0.0, 0.0),
 	  _color(color),
-	  _linkedMesh(mesh)
-{
-}
-
-
-Mesh::Vertex::Vertex(const Mesh::Vertex& v)
-	: _idx(v._idx),
-	  _position(v._position),
-	  _normal(v._normal),
-	  _color(v._color),
-	  _linkedMesh(v._linkedMesh)
-{
-}
-
-
-Mesh::Vertex::Vertex(Mesh::Vertex&& v)
-	: _idx(std::move(v._idx)),
-	  _position(std::move(v._position)),
-	  _normal(std::move(v._normal)),
-	  _color(std::move(v._color)),
-	  _linkedMesh(v._linkedMesh)
+	  _linkedMesh(mesh),
+	  _linkedPolygons({})
 {
 }
 
 
 Mesh::Vertex::~Vertex()
 {
+	for (Polygon* poly : _linkedPolygons)
+		poly->_unlinkVertices();
 }
 
 
-Mesh::Vertex& Mesh::Vertex::operator=(const Mesh::Vertex& v)
-{
-	_idx = v._idx;
-	_position = v._position;
-	_normal = v._normal;
-	_color = v._color;
-	_linkedMesh = v._linkedMesh;
-
-	return (*this);
-}
-
-
-Mesh::Vertex& Mesh::Vertex::operator=(Mesh::Vertex&& v)
-{
-	_idx = std::move(v._idx);
-	_position = std::move(v._position);
-	_normal = std::move(v._normal);
-	_color = std::move(v._color);
-	_linkedMesh = v._linkedMesh;
-
-	return (*this);
-}
-
-
-const glm::vec3& Mesh::Vertex::getPosition() const
+const Object::vec& Mesh::Vertex::getPosition() const
 {
 	return _position;
 }
 
 
-const glm::vec3& Mesh::Vertex::getNormal() const
+const Object::vec& Mesh::Vertex::getNormal() const
 {
 	return _normal;
 }
@@ -310,120 +288,180 @@ const size_t& Mesh::Vertex::getIndex() const
 void Mesh::Vertex::_recalculateNormal()
 {
 	_normal = glm::vec3(0.0, 0.0, 0.0);
-	for (const Face* f : _linkedFaces)
-		_normal += f->getNormal();
+	for (const Polygon* poly : _linkedPolygons)
+		_normal += poly->calculateNormal();
 
 	_normal = glm::normalize(_normal);
 }
 
 
-Mesh::Face::Face(Mesh::Vertex& v1,
-				 Mesh::Vertex& v2,
-				 Mesh::Vertex& v3,
-				 Mesh* mesh)
-	: _first(&v1),
-	  _second(&v2),
-	  _third(&v3),
-	  _linkedMesh(mesh),
-	  _normal(_calculateNormal())
+void Mesh::Vertex::_linkPolygon(Mesh::Polygon* poly)
 {
-	_first->_linkedFaces.push_back(this);
-	_second->_linkedFaces.push_back(this);
-	_third->_linkedFaces.push_back(this);
-
-	_first->_recalculateNormal();
-	_second->_recalculateNormal();
-	_third->_recalculateNormal();
+	// FIXME: is it single poly in this vector? (Remove option may not work).
+	_linkedPolygons.push_back(poly);
 }
 
 
-Mesh::Face::Face(const Mesh::Face& f)
-	: _first(f._first),
-	  _second(f._second),
-	  _third(f._third),
-	  _linkedMesh(f._linkedMesh),
-	  _normal(f._normal)
+void Mesh::Vertex::_unlinkPolygon(Mesh::Polygon* poly)
 {
+	auto it = std::find(_linkedPolygons.begin(), _linkedPolygons.end(), poly);
+	if (it == _linkedPolygons.end())
+		return;
+
+	_linkedPolygons.erase(it);
 }
 
 
-Mesh::Face::Face(Mesh::Face&& f)
-	: _first(f._first),
-	  _second(f._second),
-	  _third(f._third),
-	  _linkedMesh(f._linkedMesh),
-	  _normal(std::move(f._normal))
+// ---------------------------- MESH::POLYGON ---------------------------- //
+
+Mesh::Polygon::Polygon(const size_t& i1,
+					   const size_t& i2,
+					   const size_t& i3,
+					   Mesh* mesh)
+	: _idx1(std::min(i1, std::min(i2, i3))),
+	  _idx2(std::max(i1, std::min(i2, i3))),
+	  _idx3(std::max(i1, std::max(i2, i3))),
+	  _linkedMesh(mesh)
 {
+	_linkVertices();
 }
 
 
-Mesh::Face::~Face()
+Mesh::Polygon::~Polygon()
 {
+	_unlinkVertices();
 }
 
 
-Mesh::Face& Mesh::Face::operator=(const Mesh::Face& f)
+bool Mesh::Polygon::operator==(const Mesh::Polygon& p) const
 {
-	_first = f._first;
-	_second = f._second;
-	_third = f._third;
-	_linkedMesh = f._linkedMesh;
-	_normal = f._normal;
-
-	return (*this);
+	return ((_idx1 == p._idx1)
+			&& (_idx2 == p._idx2)
+			&& (_idx3 == p._idx3));
 }
 
 
-Mesh::Face& Mesh::Face::operator=(Mesh::Face&& f)
+bool Mesh::Polygon::operator!=(const Mesh::Polygon& p) const
 {
-	_first = f._first;
-	_second = f._second;
-	_third = f._third;
-	_linkedMesh = f._linkedMesh;
-	_normal = std::move(f._normal);
-
-	return (*this);
+	return (!this->operator==(p));
 }
 
 
-const Mesh::Vertex& Mesh::Face::getFirst() const
+bool Mesh::Polygon::operator<(const Mesh::Polygon& p) const
 {
-	return (*_first);
+	return ((_idx1 < p._idx1)
+			&& (_idx2 < p._idx2)
+			&& (_idx3 < p._idx3));
 }
 
 
-const Mesh::Vertex& Mesh::Face::getSecond() const
+const size_t& Mesh::Polygon::getIdx1() const
 {
-	return (*_second);
+	return _idx1;
 }
 
 
-const Mesh::Vertex& Mesh::Face::getThird() const
+const size_t& Mesh::Polygon::getIdx2() const
 {
-	return (*_third);
+	return _idx2;
 }
 
 
-const glm::vec3& Mesh::Face::getNormal() const
+const size_t& Mesh::Polygon::getIdx3() const
 {
-	return _normal;
+	return _idx3;
 }
 
 
-void Mesh::Face::flip()
+const Mesh::Vertex& Mesh::Polygon::getV1() const
 {
-	std::swap(_second, _third);
-	_normal *= -1;
+	return _linkedMesh->getVertex(_idx1);
 }
 
 
-glm::vec3 Mesh::Face::_calculateNormal()
+const Mesh::Vertex& Mesh::Polygon::getV2() const
+{
+	return _linkedMesh->getVertex(_idx2);
+}
+
+
+const Mesh::Vertex& Mesh::Polygon::getV3() const
+{
+	return _linkedMesh->getVertex(_idx3);
+}
+
+
+Mesh::Vertex& Mesh::Polygon::getV1()
+{
+	return _linkedMesh->getVertex(_idx1);
+}
+
+
+Mesh::Vertex& Mesh::Polygon::getV2()
+{
+	return _linkedMesh->getVertex(_idx2);
+}
+
+
+Mesh::Vertex& Mesh::Polygon::getV3()
+{
+	return _linkedMesh->getVertex(_idx3);
+}
+
+
+Object::vec Mesh::Polygon::calculateNormal() const
+{
+	const vec& v1 = getV1().getPosition();
+	const vec& v2 = getV2().getPosition();
+	const vec& v3 = getV3().getPosition();
+
+	return std::move(glm::normalize(glm::cross((v2 - v1), (v3 - v1))));
+}
+
+
+Object::vec Mesh::Polygon::calculateCenter() const
+{
+	const vec& v1 = getV1().getPosition();
+	const vec& v2 = getV2().getPosition();
+	const vec& v3 = getV3().getPosition();
+
+	return std::move((v1 + v2 + v3) / 3.0f);
+}
+
+
+void Mesh::Polygon::flip()
+{
+	std::swap(_idx2, _idx3);
+}
+
+
+void Mesh::Polygon::_linkVertices()
 {
 	if (_linkedMesh == nullptr)
-		return std::move(glm::vec3(0.0, 0.0, 0.0));
+		return;
 
-	const glm::vec3 leftEdge = (_third->getPosition() - _first->getPosition());
-	const glm::vec3 rightEdge = (_second->getPosition() - _first->getPosition());
+	getV1()._linkPolygon(this);
+	getV2()._linkPolygon(this);
+	getV3()._linkPolygon(this);
+}
 
-	return std::move(glm::normalize(glm::cross(rightEdge, leftEdge)));
+
+void Mesh::Polygon::_unlinkVertices()
+{
+	if (_linkedMesh == nullptr)
+		return;
+
+	getV1()._unlinkPolygon(this);
+	getV2()._unlinkPolygon(this);
+	getV3()._unlinkPolygon(this);
+}
+
+
+size_t Mesh::Polygon::Hash::operator()(const Mesh::Polygon& p) const
+{
+	size_t h1 = std::hash<size_t>()(p._idx1);
+	size_t h2 = std::hash<size_t>()(p._idx2);
+	size_t h3 = std::hash<size_t>()(p._idx3);
+
+	return (h1 ^ h2 ^ h3);
 }

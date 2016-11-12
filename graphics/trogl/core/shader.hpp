@@ -47,6 +47,7 @@ class Shader : public Component
 		const GLuint& getProgram() const;
 
 		void compile();
+		void use();
 
 		// Virtual methods.
 		virtual void initCustomVarsLocations() = 0;

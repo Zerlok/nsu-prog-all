@@ -23,13 +23,16 @@ void main()
 	// TODO: count specular.
 	// TODO: count ambient.
 
-	vec3 direction = lampPosition.xyz - vertexPosition.xyz;
+	vec3 direction = (gl_ModelViewMatrix * lampPosition).xyz - vertexPosition.xyz;
 	float distance = length(direction);
 	direction = normalize(direction);
 
+	vec4 diffuseColor = lampColor * max(dot(vertexNormal, direction), 0.0) * lampPower / pow(distance, 2);
+
 	vec4 color;
-	color = lampColor * max(dot(vertexNormal, direction), 0.0);
-	// color = color * lampPower / pow(distance, 2);
+	color.x = vertexColor.x * diffuseColor.x;
+	color.y = vertexColor.y * diffuseColor.y;
+	color.z = vertexColor.z * diffuseColor.z;
 
 	gl_FragColor = clamp(color, 0.0, 1.0);
 }

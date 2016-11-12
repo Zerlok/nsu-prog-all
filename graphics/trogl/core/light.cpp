@@ -10,12 +10,13 @@ logger_t loggerModules = loggerModule(Logger::Level::WARNING, loggerDescriptionF
 Light::Light(const Type& type)
 	: Object(Object::Type::LIGHT),
 	  _lightType(type),
-	  _power(1000.0),
+	  _power(1.0),
 	  _direction(0.0, 0.0, 0.0),
 	  _color(Color::white),
 	  _innerAngle(0.0),
 	  _outterAngle(0.0)
-{	
+{
+	logDebug << "Light [" << _lightType << "] created." << logEndl;
 }
 
 
@@ -28,6 +29,7 @@ Light::Light(const Light& light)
 	  _innerAngle(light._innerAngle),
 	  _outterAngle(light._outterAngle)
 {
+	logDebug << "Light [" << _lightType << "] copied." << logEndl;
 }
 
 
@@ -40,11 +42,13 @@ Light::Light(Light&& light)
 	  _innerAngle(std::move(light._innerAngle)),
 	  _outterAngle(std::move(light._outterAngle))
 {
+	logDebug << "Light [" << _lightType << "] moved." << logEndl;
 }
 
 
 Light::~Light()
 {
+	logDebug << "Light [" << _lightType << "] deleted." << logEndl;
 }
 
 
@@ -120,7 +124,7 @@ void Light::setPower(const float& power)
 
 void Light::setDirection(const glm::vec3& direction)
 {
-	if (_lightType != Light::Type::POINT)
+	if (_hasDirection(_lightType))
 		_direction = direction;
 }
 
@@ -133,14 +137,14 @@ void Light::setColor(const Color& color)
 
 void Light::setInnerAngle(const float& innerAngle)
 {
-	if (_lightType == Light::Type::SPOT)
+	if (_hasAngles(_lightType))
 		_innerAngle = innerAngle;
 }
 
 
 void Light::setOutterAngle(const float& outterAngle)
 {
-	if (_lightType == Light::Type::SPOT)
+	if (_hasAngles(_lightType))
 		_outterAngle = outterAngle;
 }
 
@@ -157,4 +161,63 @@ void Light::applyRotation()
 
 void Light::applyScale()
 {
+}
+
+
+bool Light::_hasDirection(const Light::Type& type)
+{
+	switch (type)
+	{
+		case Type::SPOT:
+		case Type::SUN:
+			return true;
+
+		case Type::POINT:
+		case Type::AMBIENT:
+			return false;
+	}
+
+	return false;
+}
+
+
+bool Light::_hasAngles(const Light::Type& type)
+{
+	switch (type)
+	{
+		case Type::SPOT:
+			return true;
+
+		case Type::POINT:
+		case Type::SUN:
+		case Type::AMBIENT:
+			return false;
+	}
+
+	return false;
+}
+
+
+std::ostream&operator<<(std::ostream& out, const Light::Type& type)
+{
+	switch (type)
+	{
+		case Light::Type::POINT:
+			out << "POINT";
+			break;
+
+		case Light::Type::SPOT:
+			out << "SPOT";
+			break;
+
+		case Light::Type::SUN:
+			out << "SUN";
+			break;
+
+		case Light::Type::AMBIENT:
+			out << "AMBIENT";
+			break;
+	}
+
+	return out;
 }

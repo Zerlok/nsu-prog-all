@@ -18,6 +18,7 @@
 class Engine
 {
 	public:
+		// Constructors / Destructor.
 		Engine(const bool& displayFPS = false);
 		~Engine();
 
@@ -65,11 +66,11 @@ class Engine
 		static Engine* _current;
 
 		// Static methods.
-		static void display();
-		static void reshape(int w, int h);
-		static void cycle();
-		static std::string _generateWindowName(const Scene& scene);
+		static void _display();
+		static void _cycle();
+		static void _reshape(int w, int h);
 		static bool _runGlewTest();
+		static std::string _generateWindowName(const Scene& scene);
 };
 
 void reshape(int w, int h);

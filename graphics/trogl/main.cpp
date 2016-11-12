@@ -21,26 +21,21 @@
 logger_t globalLogger = loggerInit(std::cout, Logger::Level::DEBUG, loggerDescriptionFull);
 
 
-std::ostream& operator<<(std::ostream& out, const glm::vec3& v)
-{
-	out << '(' << v.x << ", " << v.y << ", " << v.z << ')';
-	return out;
-}
-
-
 int main(int argc, char *argv[])
 {
 	// Meshes generation settings.
-	const size_t size = 2;
+	const size_t size = 1;
 	const float offset = 2.5;
 	const glm::vec3 cameraPos = glm::vec3(2*(size)*offset,
 										  (size)*offset / 1.8,
 										  (size)*offset);
 
-	using MyMesh = MegaCube;
-	const MyMesh clonableMesh = MegaCube(Color::white, Color::black);
+	using MyMesh = Cube;
+	const MyMesh clonableMesh = Cube();
+//	using MyMesh = MegaCube;
+//	const MyMesh clonableMesh = MegaCube(Color::white, Color::black);
 //	using MyMesh = Sphere;
-//	MyMesh clonableMessh = MyMesh(1.0, 8, 16);
+//	MyMesh clonableMesh = MyMesh(4.0, 8, 16);
 	using MeshGenerator = ObjectGenerator<MyMesh, ObjectGeneratorTraits<Mesh> >;
 
 	// Setup scene.
@@ -57,7 +52,8 @@ int main(int argc, char *argv[])
 
 	// Add light.
 	LightPtr lamp = new Light(Light::Type::POINT);
-	lamp->setPosition({0.0, 4.0, 0.0});
+	lamp->setPower(20.0);
+	lamp->setPosition({4.3, 4.3, 4.3});
 	scene->addLight(lamp);
 
 	// Show scene.

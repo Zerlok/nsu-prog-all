@@ -2,6 +2,7 @@
 #define __LIGHT_HPP__
 
 
+#include <list>
 #include <sharedpointer.h>
 #include "common/color.hpp"
 #include "shader.hpp"
@@ -18,13 +19,14 @@ class Light : public Object
 			POINT = 1,
 			SUN = 2,
 			SPOT = 3,
+			AMBIENT = 4,
 		};
 
 		// Constructors / Destructor.
 		Light(const Type& type);
 		Light(const Light& light);
 		Light(Light&& light);
-		virtual ~Light();
+		~Light();
 
 		// Operators.
 		Light& operator=(const Light& light);
@@ -44,12 +46,16 @@ class Light : public Object
 		void setInnerAngle(const float& innerAngle);
 		void setOutterAngle(const float& outterAngle);
 
-		// OVerriden methods.
+		// Overriden methods.
 		void applyPosition() override;
 		void applyRotation() override;
 		void applyScale() override;
 
-	protected:
+	private:
+		// Static methods.
+		static bool _hasDirection(const Type& type);
+		static bool _hasAngles(const Type& type);
+
 		// Fields.
 		Type _lightType;
 		float _power;
@@ -59,7 +65,10 @@ class Light : public Object
 		float _outterAngle;
 };
 
+std::ostream& operator<<(std::ostream& out, const Light::Type& type);
+
 using LightPtr = SharedPointer<Light>;
+using Lights = std::list<LightPtr>;
 
 
 #endif // __LIGHT_HPP__

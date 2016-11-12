@@ -17,7 +17,8 @@ Scene::Scene(const std::string& name,
 	  _camera(camera),
 	  _meshes(),
 	  _lights(),
-	  _bgColor(Color::grey)
+	  _bgColor(Color::grey),
+	  _ambientPower(0.0)
 {
 	logDebug << "Scene with camera "
 			 << _camera->getName() << " created" << logEndl;
@@ -29,14 +30,16 @@ Scene::Scene(const Scene& scene)
 	  _camera(scene._camera),
 	  _meshes(scene._meshes),
 	  _lights(scene._lights),
-	  _bgColor(scene._bgColor)
+	  _bgColor(scene._bgColor),
+	  _ambientPower(scene._ambientPower)
 {
+	logDebug << "Scene " << getName() << " copied" << logEndl;
 }
 
 
 Scene::~Scene()
 {
-	logDebug << "Scene removed" << logEndl;
+	logDebug << "Scene " << getName() << " removed" << logEndl;
 }
 
 
@@ -47,6 +50,7 @@ Scene& Scene::operator=(const Scene& scene)
 	_meshes = scene._meshes;
 	_lights = scene._lights;
 	_bgColor = scene._bgColor;
+	_ambientPower = scene._ambientPower;
 
 	return (*this);
 }
@@ -76,17 +80,11 @@ const CameraPtr& Scene::getCamera() const
 }
 
 
-CameraPtr& Scene::getCamera()
-{
-	return _camera;
-}
-
-
 void Scene::addMesh(const MeshPtr& mesh)
 {
 	_meshes.push_back(mesh);
 	logDebug << "Mesh: " << _meshes.back()->getName()
-			 << " added to scene " << _name << logEndl;
+			 << " added to scene " << getName() << logEndl;
 }
 
 
@@ -94,7 +92,7 @@ void Scene::addLight(const LightPtr& light)
 {
 	_lights.push_back(light);
 	logDebug << "Lamp: " << _lights.back()->getName()
-			 << " added to scene " << _name << logEndl;
+			 << " added to scene " << getName() << logEndl;
 }
 
 
@@ -110,4 +108,10 @@ void Scene::setCamera(const CameraPtr& camera)
 void Scene::setBgColor(const Color& color)
 {
 	_bgColor = color;
+}
+
+
+void Scene::setAmbient(const float& power)
+{
+	_ambientPower = power;
 }

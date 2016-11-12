@@ -10,7 +10,7 @@
 class Component
 {
 	public:
-		// Enum.
+		// Inner classes.
 		enum class Type
 		{
 			OBJECT,
@@ -19,6 +19,12 @@ class Component
 			TEXTURE,
 			SCENE,
 			GUI,
+		};
+
+		class Hash
+		{
+			public:
+				size_t operator()(const Component& c) const;
 		};
 
 		// Constructors / Destructor.
@@ -34,15 +40,20 @@ class Component
 
 		bool operator==(const Component& c) const;
 		bool operator!=(const Component& c) const;
+		bool operator<(const Component& c) const;
+		bool operator>(const Component& c) const;
 
 		// Methods.
+		const size_t& getId() const;
 		const Type& getType() const;
 		const std::string& getName() const;
+
+		Component& toComponent();
+		const Component& toComponent() const;
 
 		void setName(const std::string& name);
 
 		// Virtual methods.
-		virtual Component copy() const;
 		virtual std::string toString() const;
 
 		// Friend functions.
@@ -59,15 +70,14 @@ class Component
 		static size_t _guiID;
 
 		// Static methods.
-		static std::string _generateNameFromType(const Type& type);
-		static std::string _generateNameFromCopy(const Component& c);
+		static size_t _getTypeId(const Component& type);
+		static void _incrementTypeId(const Component& type);
+		static void _applyNameFromType(Component& c);
+		static void _applyNameFromCopy(Component& c);
 
 		// Fields.
 		Type _type;
-		size_t _ID;
-
-	protected:
-		// Fields.
+		size_t _id;
 		std::string _name;
 };
 

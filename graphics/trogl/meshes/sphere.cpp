@@ -53,10 +53,10 @@ Sphere::Sphere(const float& radius,
 		{
 			for (size_t rowNum = 0; rowNum < rows-1; ++rowNum)
 			{
-				addFace(nextOffset + rowNum,
+				addPolygon(nextOffset + rowNum,
 						nextOffset + rowNum + 1,
 						currOffset + rowNum);
-				addFace(currOffset + rowNum + 1,
+				addPolygon(currOffset + rowNum + 1,
 						currOffset + rowNum,
 						nextOffset + rowNum + 1);
 			}
@@ -67,10 +67,10 @@ Sphere::Sphere(const float& radius,
 
 		for (size_t rowNum = 0; rowNum < rows-1; ++rowNum)
 		{
-			addFace(rowNum + 1,
+			addPolygon(rowNum + 1,
 					rowNum + 2,
 					currOffset + rowNum);
-			addFace(currOffset + rowNum + 1,
+			addPolygon(currOffset + rowNum + 1,
 					currOffset + rowNum,
 					rowNum + 2);
 		}
@@ -80,14 +80,14 @@ Sphere::Sphere(const float& radius,
 		nextOffset = currOffset + rows;
 		for (size_t segNum = 0; segNum < segments-1; ++segNum)
 		{
-			addFace(polarPlusIdx, nextOffset, currOffset);
+			addPolygon(polarPlusIdx, nextOffset, currOffset);
 			currOffset = nextOffset;
 			nextOffset = currOffset + rows;
-			addFace(polarMinusIdx, currOffset-1, nextOffset-1);
+			addPolygon(polarMinusIdx, currOffset-1, nextOffset-1);
 		}
 
-		addFace(polarPlusIdx, 1, currOffset);
-		addFace(polarMinusIdx, polarMinusIdx - 1, rows);
+		addPolygon(polarPlusIdx, 1, currOffset);
+		addPolygon(polarMinusIdx, polarMinusIdx - 1, rows);
 	}
 }
 

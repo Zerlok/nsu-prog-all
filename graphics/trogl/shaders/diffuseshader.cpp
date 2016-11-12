@@ -89,9 +89,6 @@ void DiffuseShader::initCustomVarsLocations()
 
 void DiffuseShader::passObject(Object const* obj)
 {
-	if (obj == nullptr)
-		return;
-
 	switch (obj->getObjectType())
 	{
 		case Object::Type::MESH:

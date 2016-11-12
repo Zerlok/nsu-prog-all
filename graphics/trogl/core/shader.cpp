@@ -204,6 +204,13 @@ void Shader::compile()
 }
 
 
+void Shader::use()
+{
+	glUseProgram(_glShaderProgram);
+	prepareForRender();
+}
+
+
 Shader::Shader(const std::string& name)
 	: Component(Component::Type::SHADER, name),
 	  _vertexSrc(),

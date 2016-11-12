@@ -34,7 +34,7 @@ Engine::~Engine()
 {
 	if ((_wasValidated)
 			&& (_glWindow))
-			glutDestroyWindow(_glWindow);
+		glutDestroyWindow(_glWindow);
 
 	logDebug << "Engine removed" << logEndl;
 }
@@ -120,22 +120,22 @@ bool Engine::validateScene()
 
 void Engine::showScene()
 {
-	if (!_wasValidated)
-		if (!validateScene())
-			return;
+	if (!_wasValidated
+			&& !validateScene())
+		return;
 
 	// TODO: make Engine as singleton.
 	_current = this;
-	glutDisplayFunc(display);
-	glutReshapeFunc(reshape);
-	glutIdleFunc(cycle);
+	glutDisplayFunc(_display);
+	glutReshapeFunc(_reshape);
+	glutIdleFunc(_cycle);
 
 	size_t verticesNum = 0;
 	size_t facesNum = 0;
 	for (const MeshPtr& m : _scene->getMeshes())
 	{
 		verticesNum += m->getVertices().size();
-		facesNum += m->getFaces().size();
+		facesNum += m->getPolygons().size();
 	}
 
 	logInfo << "Engine rendering started (scene: " << _scene->getName() << ")" << logEndl;
@@ -154,7 +154,7 @@ void Engine::drawGUI()
 {
 	glUseProgram(0);
 
-	// What does it do?
+	// TODO: What does it do?
 	glMatrixMode(GL_PROJECTION);
 	glPushMatrix(); // save
 	glLoadIdentity();// and clear
@@ -250,8 +250,8 @@ void Engine::renderFrame()
 									   cam->getLookingAtPosition(),
 									   cam->getHeadDirection());
 	// TODO: move into animation.
-	matView = glm::rotate(matView, 3.0f, glm::vec3(0.0f, 1.0f, 0.0f));
-//	matView = glm::rotate(matView, float(getTimeDouble() / 11.0), glm::vec3(0.0f, 1.0f, 0.0f));
+//	matView = glm::rotate(matView, 3.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+	matView = glm::rotate(matView, float(getTimeDouble() / 50.0), glm::vec3(0.0f, 1.0f, 0.0f));
 //	matView = glm::rotate(matView, float(getTimeDouble() / 17.0), glm::vec3(0.0f, 0.0f, 1.0f));
 
 	glMatrixMode(GL_MODELVIEW);
@@ -292,13 +292,13 @@ bool Engine::_runGlewTest()
 }
 
 
-void Engine::display()
+void Engine::_display()
 {
 	_current->renderFrame();
 }
 
 
-void Engine::reshape(int w, int h)
+void Engine::_reshape(int w, int h)
 {
 	float& width = _current->_width;
 	float& height = _current->_height;
@@ -306,7 +306,7 @@ void Engine::reshape(int w, int h)
 	width = w;
 	height = h;
 
-	glViewport(0, 0, (GLsizei) width, (GLsizei) height);
+	glViewport(0, 0, (GLsizei)width, (GLsizei)height);
 
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
@@ -314,7 +314,7 @@ void Engine::reshape(int w, int h)
 }
 
 
-void Engine::cycle()
+void Engine::_cycle()
 {
 	glutPostRedisplay();
 }
@@ -332,7 +332,6 @@ Engine::VertexObject::VertexObject(const MeshPtr& mesh)
 	  _glNBO(0),
 	  _glCBO(0),
 	  _glIBO(0),
-	  _attrTestColor(0),
 	  _indicesSize(0),
 	  _shader(mesh->getMaterial()->getShader()),
 	  _mesh(mesh)
@@ -343,6 +342,8 @@ Engine::VertexObject::VertexObject(const MeshPtr& mesh)
 	_mesh->applyScale();
 	_mesh->applyRotation();
 	_mesh->applyPosition();
+
+	_mesh->recalculateNormals();
 }
 
 
@@ -351,7 +352,6 @@ Engine::VertexObject::VertexObject(Engine::VertexObject&& obj)
 	  _glNBO(std::move(obj._glNBO)),
 	  _glCBO(std::move(obj._glCBO)),
 	  _glIBO(std::move(obj._glIBO)),
-	  _attrTestColor(std::move(obj._attrTestColor)),
 	  _indicesSize(std::move(obj._indicesSize)),
 	  _shader(std::move(obj._shader)),
 	  _mesh(std::move(obj._mesh))
@@ -389,18 +389,15 @@ void Engine::VertexObject::initGLGeometry()
 
 void Engine::VertexObject::compileGLShaders()
 {
-	if (!(_shader->isCompiled()))
-		_shader->compile();
+	_shader->compile();
 }
 
 
 void Engine::VertexObject::draw(const LightPtr& light)
 {
-	glUseProgram(_shader->getProgram());
-
+	_shader->use();
 	_shader->passObject(_mesh.get_pointer());
 	_shader->passObject(light.get_pointer());
-	_shader->prepareForRender();
 
 	glEnableVertexAttribArray(0);
 	glEnableVertexAttribArray(1);
@@ -487,16 +484,14 @@ void Engine::VertexObject::_initColorBufferObject()
 
 void Engine::VertexObject::_initIndexBufferObject()
 {
-	std::vector<GLuint> indicies((_mesh->getFaces().size() * _indexStep), 0.0f);
+	std::vector<GLuint> indicies((_mesh->getPolygons().size() * _indexStep), 0.0f);
 	size_t i = 0;
 
-	for (auto it : _mesh->getFaces())
+	for (const auto poly : _mesh->getPolygons())
 	{
-		const Mesh::Face& f = it.second;
-
-		indicies[i++] = f.getFirst().getIndex();
-		indicies[i++] = f.getSecond().getIndex();
-		indicies[i++] = f.getThird().getIndex();
+		indicies[i++] = poly.getIdx1();
+		indicies[i++] = poly.getIdx2();
+		indicies[i++] = poly.getIdx3();
 	}
 	_indexType = _mesh->getIndexType();
 	_indicesSize = indicies.size() * sizeof(GLuint);

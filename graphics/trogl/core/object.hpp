@@ -19,6 +19,8 @@ class Object : public Component
 			CAMERA = 'C',
 		};
 
+		using vec = glm::vec3;
+
 		// Constructors / Destructor.
 		Object(const Type& type,
 			   const std::string& name = DEFAULT_NAME);
@@ -33,36 +35,42 @@ class Object : public Component
 		// Methods.
 		const Type& getObjectType() const;
 
-		const glm::vec3& getPosition() const;
-		const glm::vec3& getRotation() const;
-		const glm::vec3& getScale() const;
+		const vec& getPosition() const;
+		const vec& getRotation() const;
+		const vec& getScale() const;
+
+		Object& toObject();
+		const Object& toObject() const;
 
 		// Virtual methods.
-		virtual void setPosition(const glm::vec3& position);
-		virtual void setRotation(const glm::vec3& rotation);
-		virtual void setScale(const glm::vec3& scale);
+		virtual void setPosition(const vec& position);
+		virtual void setRotation(const vec& rotation);
+		virtual void setScale(const vec& scale);
 
 		virtual void applyPosition() = 0;
 		virtual void applyRotation() = 0;
 		virtual void applyScale() = 0;
 
+		// Friend functions.
+		friend std::ostream& operator<<(std::ostream& out, const Object& obj);
+
 	private:
-		Type _object_type;
+		Type _objectType;
 
 	protected:
 		// Static fields.
 		static const std::string DEFAULT_NAME;
-		static const glm::vec3 DEFAULT_POSITION;
-		static const glm::vec3 DEFAULT_ROTATION;
-		static const glm::vec3 DEFAULT_SCALE;
-		static const glm::vec3 AXIS_X;
-		static const glm::vec3 AXIS_Y;
-		static const glm::vec3 AXIS_Z;
+		static const vec DEFAULT_POSITION;
+		static const vec DEFAULT_ROTATION;
+		static const vec DEFAULT_SCALE;
+		static const vec AXIS_X;
+		static const vec AXIS_Y;
+		static const vec AXIS_Z;
 
 		// Fields.
-		glm::vec3 _position;
-		glm::vec3 _rotation;
-		glm::vec3 _scale;
+		vec _position;
+		vec _rotation;
+		vec _scale;
 
 	private:
 		// Static fields.
@@ -75,6 +83,12 @@ class Object : public Component
 };
 
 using ObjectPtr = SharedPointer<Object>;
+
+
+std::ostream& operator<<(std::ostream& out, const Object& obj);
+
+std::ostream& operator<<(std::ostream& out, const Object::vec& v);
+
 
 
 #endif // __OBJECT_HPP__
