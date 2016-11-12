@@ -4,7 +4,7 @@
 
 #include <vector>
 #include <list>
-#include <unordered_set>
+#include <unordered_map>
 #include <glm/glm.hpp>
 #include <sharedpointer.h>
 #include "common/color.hpp"
@@ -26,7 +26,51 @@ class Mesh : public Object
 			// TRIANGLES_STRIP = GL_TRIANGLE_STRIP,
 		};
 
+		class Vertex;
 		class Polygon;
+
+		class Triple
+		{
+			public:
+				// Inner classes.
+				class Hash
+				{
+					public:
+						size_t operator()(const Triple& p) const;
+				};
+
+				// Constructors / Destructor.
+				Triple(const size_t& i1,
+					   const size_t& i2,
+					   const size_t& i3);
+				Triple(const Triple& tr);
+				Triple(Triple&& tr);
+				~Triple();
+
+				// Operators.
+				Triple& operator=(const Triple& tr);
+				Triple& operator=(Triple&& tr);
+
+				bool operator==(const Triple& tr) const;
+				bool operator!=(const Triple& tr) const;
+				bool operator<(const Triple& tr) const;
+
+				// Methods.
+				size_t getFirst() const;
+				size_t getSecond() const;
+				size_t getThird() const;
+
+			private:
+				// Fields.
+				size_t idx1;
+				size_t idx2;
+				size_t idx3;
+
+				// Friend classes.
+				friend class Vertex;
+				friend class Polygon;
+		};
+
 		class Vertex
 		{
 			public:
@@ -37,13 +81,13 @@ class Mesh : public Object
 					   const double& z,
 					   const Color& color,
 					   Mesh* mesh);
-//				Vertex(const Vertex& v) = delete;
-//				Vertex(Vertex&& v) = delete;
+				Vertex(const Vertex& v);
+				Vertex(Vertex&& v);
 				~Vertex();
 
 				// Operators.
-//				Vertex& operator=(const Vertex& v) = delete;
-//				Vertex& operator=(Vertex&& v) = delete;
+				Vertex& operator=(const Vertex& v);
+				Vertex& operator=(Vertex&& v);
 
 				// Methods.
 				const size_t& getIndex() const;
@@ -62,44 +106,38 @@ class Mesh : public Object
 				// TODO: move color into material, assign vertices into material groups.
 				Color _color;
 
-				// Association link with Mesh.
+//				std::vector<Polygon*> _linkedPolygons;
+				std::vector<Triple> _linkedTriples; // Aggregation links with Polygons.
 				Mesh* _linkedMesh;
-				friend class Mesh;
-
-				// Aggregation link with Faces.
-				std::vector<Polygon*> _linkedPolygons;
-				friend class Polygon;
 
 				// Methods.
 				void _recalculateNormal();
-				void _linkPolygon(Polygon* poly);
-				void _unlinkPolygon(Polygon* poly);
+
+				// Friend classes.
+				friend class Mesh;
+				friend class Polygon;
 		};
 
 		class Polygon
 		{
 			public:
-				// Inner classes.
-				class Hash
-				{
-					public:
-						size_t operator()(const Polygon& p) const;
-				};
-
 				// Constructors / Destructor.
 				Polygon(const size_t& i1,
 						const size_t& i2,
-						const size_t& i3, Mesh* mesh);
-//				Polygon(const Polygon& p) = delete;
+						const size_t& i3,
+						Mesh* mesh);
+				Polygon(const Triple& tr,
+						Mesh* mesh);
+				Polygon(const Polygon& p);
+				Polygon(Polygon&& p);
 				~Polygon();
 
 				// Operators.
-//				Polygon& operator=(const Polygon& p) = delete;
-//				Polygon& operator=(Polygon&& p) = delete;
+				Polygon& operator=(const Polygon& p);
+				Polygon& operator=(Polygon&& p);
 
 				bool operator==(const Polygon& p) const;
 				bool operator!=(const Polygon& p) const;
-				bool operator<(const Polygon& p) const;
 
 				// Methods.
 				const size_t& getIdx1() const;
@@ -120,21 +158,19 @@ class Mesh : public Object
 
 			private:
 				// Fields.
-				size_t _idx1;
-				size_t _idx2;
-				size_t _idx3;
-				friend class Vertex;
-
-				// Association link with Mesh.
-				Mesh* _linkedMesh;
-				friend class Mesh;
+				Triple _triple;
+				Mesh* _linkedMesh; // Association link with Mesh.
 
 				void _linkVertices();
 				void _unlinkVertices();
+
+				// Friends classes.
+				friend class Mesh;
+				friend class Vertex;
 		};
 
 		using Vertices = std::vector<Vertex>;
-		using Polygons = std::unordered_set<Polygon, Polygon::Hash>;
+		using Polygons = std::unordered_map<Triple, Polygon, Triple::Hash>;
 
 		// Constructors / Destructor.
 		Mesh(const std::string& name = std::string(),
@@ -154,6 +190,7 @@ class Mesh : public Object
 		const Polygon& getPolygon(const size_t& i1,
 								  const size_t& i2,
 								  const size_t& i3) const;
+		const Polygon& getPolygon(const Triple& tr) const;
 
 		const Vertices& getVertices() const;
 		const Polygons& getPolygons() const;
@@ -164,7 +201,7 @@ class Mesh : public Object
 						 const double& y,
 						 const double& z,
 						 const Color& color);
-		void addPolygon(const size_t& i1,
+		bool addPolygon(const size_t& i1,
 						const size_t& i2,
 						const size_t& i3);
 		void removeVertex();
@@ -185,7 +222,7 @@ class Mesh : public Object
 		IndexingType _indexType;
 
 		// Methods.
-		void _reassignDataLinks();
+		void _reassignData();
 };
 
 using MeshPtr = SharedPointer<Mesh>;

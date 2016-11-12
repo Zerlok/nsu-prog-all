@@ -487,8 +487,9 @@ void Engine::VertexObject::_initIndexBufferObject()
 	std::vector<GLuint> indicies((_mesh->getPolygons().size() * _indexStep), 0.0f);
 	size_t i = 0;
 
-	for (const auto poly : _mesh->getPolygons())
+	for (const Mesh::Polygons::value_type& pair : _mesh->getPolygons())
 	{
+		const Mesh::Polygon& poly = pair.second;
 		indicies[i++] = poly.getIdx1();
 		indicies[i++] = poly.getIdx2();
 		indicies[i++] = poly.getIdx3();

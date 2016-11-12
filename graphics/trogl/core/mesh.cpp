@@ -1,4 +1,4 @@
-#include "mesh.hpp"
+﻿#include "mesh.hpp"
 
 
 #include <algorithm>
@@ -35,7 +35,7 @@ Mesh::Mesh(const Mesh& mesh)
 	  _material(mesh._material),
 	  _indexType(mesh._indexType)
 {
-	_reassignDataLinks();
+	_reassignData();
 	logDebug << "Mesh " << getName() << " copied from " << mesh.getName() << logEndl;
 }
 
@@ -47,7 +47,7 @@ Mesh::Mesh(Mesh&& mesh)
 	  _material(std::move(mesh._material)),
 	  _indexType(std::move(mesh._indexType))
 {
-	_reassignDataLinks();
+	_reassignData();
 	logDebug << "Mesh " << getName() << " moved." << logEndl;
 }
 
@@ -68,7 +68,7 @@ Mesh& Mesh::operator=(const Mesh& mesh)
 	_polygons = mesh._polygons;
 	_material = mesh._material;
 	_indexType = mesh._indexType;
-	_reassignDataLinks();
+	_reassignData();
 
 	logDebug << "Mesh " << getName() << " copied from " << mesh.getName() << logEndl;
 	return (*this);
@@ -82,7 +82,7 @@ Mesh& Mesh::operator=(Mesh&& mesh)
 	_polygons = std::move(mesh._polygons);
 	_material = std::move(mesh._material);
 	_indexType = std::move(mesh._indexType);
-	_reassignDataLinks();
+	_reassignData();
 
 	logDebug << "Mesh " << getName() << " moved." << logEndl;
 	return (*this);
@@ -102,10 +102,16 @@ const Mesh::Vertex& Mesh::getVertex(const size_t& i) const
 
 
 const Mesh::Polygon& Mesh::getPolygon(const size_t& i1,
-								const size_t& i2,
-								const size_t& i3) const
+									  const size_t& i2,
+									  const size_t& i3) const
 {
-	return *(_polygons.find({i1, i2, i3, nullptr}));
+	return getPolygon({i1, i2, i3});
+}
+
+
+const Mesh::Polygon& Mesh::getPolygon(const Mesh::Triple& tr) const
+{
+	return _polygons.find(tr)->second;
 }
 
 
@@ -144,11 +150,20 @@ size_t Mesh::addVertex(const double& x,
 }
 
 
-void Mesh::addPolygon(const size_t& i1,
-				   const size_t& i2,
-				   const size_t& i3)
+bool Mesh::addPolygon(const size_t& i1,
+					  const size_t& i2,
+					  const size_t& i3)
 {
-	_polygons.insert({i1, i2, i3, this});
+	const Triple tr {i1, i2, i3};
+	const Polygons::iterator it = _polygons.find(tr);
+	if (it != _polygons.end())
+		return false;
+
+	Polygon poly {tr, this};
+	_polygons.insert({tr, poly});
+	poly._linkVertices();
+
+	return true;
 }
 
 
@@ -160,9 +175,15 @@ void Mesh::setMaterial(const MaterialPtr& material)
 
 void Mesh::recalculateNormals()
 {
-	// TODO: invert bad faces (their normals watching inside of a mesh).
-	for (auto poly : _polygons)
+	// TODO: update normal recalculation algorithm.
+	/*
+	 * Choice 1: Find a good polygon (or polygon at center), then start to compare
+	 * angle between current polygon and adjacent with angle between therirs normals.
+	 * It will be easy to see then, which normal is good and which is bad.
+	 */
+	for (Polygons::value_type& it : _polygons)
 	{
+		Polygon& poly = it.second;
 		const float ratio = glm::dot(poly.calculateCenter(), poly.calculateNormal());
 		if (ratio < -0.5)
 			poly.flip();
@@ -212,13 +233,13 @@ void Mesh::applyScale()
 }
 
 
-void Mesh::_reassignDataLinks()
+void Mesh::_reassignData()
 {
 	for (Vertex& v : _vertices)
 		v._linkedMesh = this;
 
-	for (auto it : _polygons)
-		it._linkedMesh = this;
+	for (Polygons::value_type& it : _polygons)
+		it.second._linkedMesh = this;
 }
 
 
@@ -234,16 +255,62 @@ Mesh::Vertex::Vertex(const size_t& idx,
 	  _position(x, y, z),
 	  _normal(0.0, 0.0, 0.0),
 	  _color(color),
-	  _linkedMesh(mesh),
-	  _linkedPolygons({})
+	  _linkedTriples(),
+	  _linkedMesh(mesh)
+{
+}
+
+
+Mesh::Vertex::Vertex(const Mesh::Vertex& v)
+	: _idx(v._idx),
+	  _position(v._position),
+	  _normal(v._normal),
+	  _color(v._color),
+	  _linkedTriples(v._linkedTriples),
+	  _linkedMesh(v._linkedMesh)
+{
+}
+
+
+Mesh::Vertex::Vertex(Mesh::Vertex&& v)
+	: _idx(std::move(v._idx)),
+	  _position(std::move(v._position)),
+	  _normal(std::move(v._normal)),
+	  _color(std::move(v._color)),
+	  _linkedTriples(std::move(v._linkedTriples)),
+	  _linkedMesh(v._linkedMesh)
 {
 }
 
 
 Mesh::Vertex::~Vertex()
 {
-	for (Polygon* poly : _linkedPolygons)
-		poly->_unlinkVertices();
+}
+
+
+Mesh::Vertex& Mesh::Vertex::operator=(const Mesh::Vertex& v)
+{
+	_idx = v._idx;
+	_position = v._position;
+	_normal = v._normal;
+	_color = v._color;
+	_linkedTriples = v._linkedTriples;
+	_linkedMesh = v._linkedMesh;
+
+	return (*this);
+}
+
+
+Mesh::Vertex& Mesh::Vertex::operator=(Mesh::Vertex&& v)
+{
+	_idx = std::move(v._idx);
+	_position = std::move(v._position);
+	_normal = std::move(v._normal);
+	_color = std::move(v._color);
+	_linkedTriples = std::move(v._linkedTriples);
+	_linkedMesh = v._linkedMesh;
+
+	return (*this);
 }
 
 
@@ -288,27 +355,113 @@ const size_t& Mesh::Vertex::getIndex() const
 void Mesh::Vertex::_recalculateNormal()
 {
 	_normal = glm::vec3(0.0, 0.0, 0.0);
-	for (const Polygon* poly : _linkedPolygons)
-		_normal += poly->calculateNormal();
+	for (const Triple& tr : _linkedTriples)
+		_normal += _linkedMesh->getPolygon(tr).calculateNormal();
 
 	_normal = glm::normalize(_normal);
 }
 
 
-void Mesh::Vertex::_linkPolygon(Mesh::Polygon* poly)
+// ---------------------------- MESH::TRIPLE ---------------------------- //
+
+Mesh::Triple::Triple(const size_t& i1,
+					 const size_t& i2,
+					 const size_t& i3)
+	: idx1(i1),
+	  idx2(i2),
+	  idx3(i3)
 {
-	// FIXME: is it single poly in this vector? (Remove option may not work).
-	_linkedPolygons.push_back(poly);
 }
 
 
-void Mesh::Vertex::_unlinkPolygon(Mesh::Polygon* poly)
+Mesh::Triple::Triple(const Mesh::Triple& tr)
+	: idx1(tr.idx1),
+	  idx2(tr.idx2),
+	  idx3(tr.idx3)
 {
-	auto it = std::find(_linkedPolygons.begin(), _linkedPolygons.end(), poly);
-	if (it == _linkedPolygons.end())
-		return;
+}
 
-	_linkedPolygons.erase(it);
+
+Mesh::Triple::Triple(Mesh::Triple&& tr)
+	: idx1(std::move(tr.idx1)),
+	  idx2(std::move(tr.idx2)),
+	  idx3(std::move(tr.idx3))
+{
+}
+
+
+Mesh::Triple::~Triple()
+{
+}
+
+
+Mesh::Triple& Mesh::Triple::operator=(const Mesh::Triple& tr)
+{
+	idx1 = tr.idx1;
+	idx2 = tr.idx2;
+	idx3 = tr.idx3;
+
+	return (*this);
+}
+
+
+Mesh::Triple& Mesh::Triple::operator=(Mesh::Triple&& tr)
+{
+	idx1 = std::move(tr.idx1);
+	idx2 = std::move(tr.idx2);
+	idx3 = std::move(tr.idx3);
+
+	return (*this);
+}
+
+
+bool Mesh::Triple::operator==(const Mesh::Triple& tr) const
+{
+	return ((getFirst() == tr.getFirst())
+			&& (getSecond() == tr.getSecond())
+			&& (getThird() == tr.getThird()));
+}
+
+
+bool Mesh::Triple::operator!=(const Mesh::Triple& tr) const
+{
+	return (!this->operator==(tr));
+}
+
+
+bool Mesh::Triple::operator<(const Mesh::Triple& tr) const
+{
+	return ((getFirst() < tr.getFirst())
+			&& (getSecond() < tr.getSecond())
+			&& (getThird() < tr.getThird()));
+}
+
+
+size_t Mesh::Triple::getFirst() const
+{
+	return 	std::min(idx1, std::min(idx2, idx3));
+}
+
+
+size_t Mesh::Triple::getSecond() const
+{
+	return std::max(idx1, std::min(idx2, idx3));
+}
+
+
+size_t Mesh::Triple::getThird() const
+{
+	return std::max(idx1, std::max(idx2, idx3));
+}
+
+
+size_t Mesh::Triple::Hash::operator()(const Mesh::Triple& tr) const
+{
+	const size_t h1 = std::hash<size_t>()(tr.idx1);
+	const size_t h2 = std::hash<size_t>()(tr.idx2);
+	const size_t h3 = std::hash<size_t>()(tr.idx3);
+
+	return (h1 ^ h2 ^ h3);
 }
 
 
@@ -318,26 +471,60 @@ Mesh::Polygon::Polygon(const size_t& i1,
 					   const size_t& i2,
 					   const size_t& i3,
 					   Mesh* mesh)
-	: _idx1(std::min(i1, std::min(i2, i3))),
-	  _idx2(std::max(i1, std::min(i2, i3))),
-	  _idx3(std::max(i1, std::max(i2, i3))),
+	: _triple(i1, i2, i3),
 	  _linkedMesh(mesh)
 {
-	_linkVertices();
+}
+
+
+Mesh::Polygon::Polygon(const Mesh::Triple& tr,
+					   Mesh* mesh)
+	: _triple(tr),
+	  _linkedMesh(mesh)
+{
+}
+
+
+Mesh::Polygon::Polygon(const Mesh::Polygon& p)
+	: _triple(p._triple),
+	  _linkedMesh(p._linkedMesh)
+{
+}
+
+
+Mesh::Polygon::Polygon(Mesh::Polygon&& p)
+	: _triple(std::move(p._triple)),
+	  _linkedMesh(p._linkedMesh)
+{
 }
 
 
 Mesh::Polygon::~Polygon()
 {
-	_unlinkVertices();
+}
+
+
+Mesh::Polygon& Mesh::Polygon::operator=(const Mesh::Polygon& p)
+{
+	_triple = p._triple;
+	_linkedMesh = p._linkedMesh;
+
+	return (*this);
+}
+
+
+Mesh::Polygon& Mesh::Polygon::operator=(Mesh::Polygon&& p)
+{
+	_triple = std::move(p._triple);
+	_linkedMesh = p._linkedMesh;
+
+	return (*this);
 }
 
 
 bool Mesh::Polygon::operator==(const Mesh::Polygon& p) const
 {
-	return ((_idx1 == p._idx1)
-			&& (_idx2 == p._idx2)
-			&& (_idx3 == p._idx3));
+	return (_triple == p._triple);
 }
 
 
@@ -347,65 +534,57 @@ bool Mesh::Polygon::operator!=(const Mesh::Polygon& p) const
 }
 
 
-bool Mesh::Polygon::operator<(const Mesh::Polygon& p) const
-{
-	return ((_idx1 < p._idx1)
-			&& (_idx2 < p._idx2)
-			&& (_idx3 < p._idx3));
-}
-
-
 const size_t& Mesh::Polygon::getIdx1() const
 {
-	return _idx1;
+	return _triple.idx1;
 }
 
 
 const size_t& Mesh::Polygon::getIdx2() const
 {
-	return _idx2;
+	return _triple.idx2;
 }
 
 
 const size_t& Mesh::Polygon::getIdx3() const
 {
-	return _idx3;
+	return _triple.idx3;
 }
 
 
 const Mesh::Vertex& Mesh::Polygon::getV1() const
 {
-	return _linkedMesh->getVertex(_idx1);
+	return _linkedMesh->getVertex(_triple.idx1);
 }
 
 
 const Mesh::Vertex& Mesh::Polygon::getV2() const
 {
-	return _linkedMesh->getVertex(_idx2);
+	return _linkedMesh->getVertex(_triple.idx2);
 }
 
 
 const Mesh::Vertex& Mesh::Polygon::getV3() const
 {
-	return _linkedMesh->getVertex(_idx3);
+	return _linkedMesh->getVertex(_triple.idx3);
 }
 
 
 Mesh::Vertex& Mesh::Polygon::getV1()
 {
-	return _linkedMesh->getVertex(_idx1);
+	return _linkedMesh->getVertex(_triple.idx1);
 }
 
 
 Mesh::Vertex& Mesh::Polygon::getV2()
 {
-	return _linkedMesh->getVertex(_idx2);
+	return _linkedMesh->getVertex(_triple.idx2);
 }
 
 
 Mesh::Vertex& Mesh::Polygon::getV3()
 {
-	return _linkedMesh->getVertex(_idx3);
+	return _linkedMesh->getVertex(_triple.idx3);
 }
 
 
@@ -431,37 +610,13 @@ Object::vec Mesh::Polygon::calculateCenter() const
 
 void Mesh::Polygon::flip()
 {
-	std::swap(_idx2, _idx3);
+	std::swap(_triple.idx2, _triple.idx3);
 }
 
 
 void Mesh::Polygon::_linkVertices()
 {
-	if (_linkedMesh == nullptr)
-		return;
-
-	getV1()._linkPolygon(this);
-	getV2()._linkPolygon(this);
-	getV3()._linkPolygon(this);
-}
-
-
-void Mesh::Polygon::_unlinkVertices()
-{
-	if (_linkedMesh == nullptr)
-		return;
-
-	getV1()._unlinkPolygon(this);
-	getV2()._unlinkPolygon(this);
-	getV3()._unlinkPolygon(this);
-}
-
-
-size_t Mesh::Polygon::Hash::operator()(const Mesh::Polygon& p) const
-{
-	size_t h1 = std::hash<size_t>()(p._idx1);
-	size_t h2 = std::hash<size_t>()(p._idx2);
-	size_t h3 = std::hash<size_t>()(p._idx3);
-
-	return (h1 ^ h2 ^ h3);
+	getV1()._linkedTriples.push_back(_triple);
+	getV2()._linkedTriples.push_back(_triple);
+	getV3()._linkedTriples.push_back(_triple);
 }
