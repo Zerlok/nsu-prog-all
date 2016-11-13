@@ -17,7 +17,6 @@ const std::string Shader::DEFAULT_FS_FILE = path::join(Shader::SRC_DIR, "default
 
 std::string Shader::loadFile(const std::string& filename)
 {
-	logDebug << "Loading shader source from file: '" << filename << '\'' << logEndl;
 	std::stringstream ss;
 	std::ifstream in(filename);
 
@@ -27,14 +26,19 @@ std::string Shader::loadFile(const std::string& filename)
 		return std::move(ss.str());
 	}
 
+	size_t linesCount = 0;
 	std::string line;
 	while (!in.eof())
 	{
 		std::getline(in, line);
 		ss << line << std::endl;
+		++linesCount;
 	}
-
 	in.close();
+
+	logDebug << "Shader source code loaded from file: '" << filename
+			 << "', (" << linesCount << " lines)."
+			 << logEndl;
 	return std::move(ss.str());
 }
 

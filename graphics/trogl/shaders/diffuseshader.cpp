@@ -25,13 +25,7 @@ std::string DiffuseShader::FS_FILE()
 DiffuseShader::DiffuseShader()
 	: Shader("Diffuse Shader", VS_FILE(), FS_FILE()),
 	  _attrMeshPosition(0),
-	  _attrLampType(0),
-	  _attrLampPosition(0),
-	  _attrLampPower(0),
-	  _attrLampDirection(0),
-	  _attrLampColor(0),
-	  _attrLampInnerAngle(0),
-	  _attrLampOutterAngle(0)
+	  _attrLamp()
 {
 }
 
@@ -54,13 +48,13 @@ void DiffuseShader::passLight(Light const* light)
 	const glm::vec3& lightDir = light->getDirection();
 	const Color lightColor = light->getColor();
 
-	glUniform1i(_attrLampType, int(light->getLightType()));
-	glUniform4f(_attrLampPosition, lightPos.x, lightPos.y, lightPos.z, 1.0f);
-	glUniform1f(_attrLampPower, light->getPower());
-	glUniform4f(_attrLampDirection, lightDir.x, lightDir.y, lightDir.z, 0.0f);
-	glUniform4f(_attrLampColor, lightColor.getRedF(), lightColor.getGreenF(), lightColor.getBlueF(), 1.0f);
-	glUniform1f(_attrLampInnerAngle, light->getInnerAngle());
-	glUniform1f(_attrLampOutterAngle, light->getOutterAngle());
+	glUniform1i(_attrLamp.type, int(light->getLightType()));
+	glUniform4f(_attrLamp.position, lightPos.x, lightPos.y, lightPos.z, 1.0f);
+	glUniform1f(_attrLamp.power, light->getPower());
+	glUniform4f(_attrLamp.direction, lightDir.x, lightDir.y, lightDir.z, 0.0f);
+	glUniform4f(_attrLamp.color, lightColor.getRedF(), lightColor.getGreenF(), lightColor.getBlueF(), 1.0f);
+	glUniform1f(_attrLamp.innerAngle, light->getInnerAngle());
+	glUniform1f(_attrLamp.outterAngle, light->getOutterAngle());
 }
 
 
@@ -68,13 +62,13 @@ void DiffuseShader::initCustomVarsLocations()
 {
 	_attrMeshPosition = glGetUniformLocation(_glShaderProgram, "meshPosition");
 
-	_attrLampType = glGetUniformLocation(_glShaderProgram, "lampType");
-	_attrLampPosition = glGetUniformLocation(_glShaderProgram, "lampPosition");
-	_attrLampPower = glGetUniformLocation(_glShaderProgram, "lampPower");
-	_attrLampDirection = glGetUniformLocation(_glShaderProgram, "lampDirection");
-	_attrLampColor = glGetUniformLocation(_glShaderProgram, "lampColor");
-	_attrLampInnerAngle = glGetUniformLocation(_glShaderProgram, "lampIA");
-	_attrLampOutterAngle = glGetUniformLocation(_glShaderProgram, "lampOA");
+	_attrLamp.type = glGetUniformLocation(_glShaderProgram, "lamp.type");
+	_attrLamp.position = glGetUniformLocation(_glShaderProgram, "lamp.position");
+	_attrLamp.power = glGetUniformLocation(_glShaderProgram, "lamp.power");
+	_attrLamp.direction = glGetUniformLocation(_glShaderProgram, "lamp.direction");
+	_attrLamp.color = glGetUniformLocation(_glShaderProgram, "lamp.color");
+	_attrLamp.innerAngle = glGetUniformLocation(_glShaderProgram, "lamp.ia");
+	_attrLamp.outterAngle = glGetUniformLocation(_glShaderProgram, "lamp.oa");
 }
 
 

@@ -12,20 +12,20 @@ class Camera : public Object
 	public:
 		// Static fields.
 		static const float DEFAULT_FOV;
-		static const float DEFAULT_LOW_DISTANCE;
-		static const float DEFAULT_HIGH_DISTANCE;
 		static const size_t DEFAULT_WIDTH;
 		static const size_t DEFAULT_HEIGHT;
+		static const float DEFAULT_NEAR_DISTANCE;
+		static const float DEFAULT_FAR_DISTANCE;
 
 		// Constructors / Destructor.
 		Camera();
-		Camera(const Camera& c);
+		Camera(const Camera& cam);
 		Camera(Camera&& c);
 		~Camera();
 
 		// Operators.
-		Camera& operator=(const Camera& c);
-		Camera& operator=(Camera&& c);
+		Camera& operator=(const Camera& cam);
+		Camera& operator=(Camera&& cam);
 
 		operator bool() const;
 		bool operator!() const;
@@ -33,23 +33,23 @@ class Camera : public Object
 
 		// Methods.
 		const float& getFOV() const;
-		const float& getLowDistance() const;
-		const float& getHighDistance() const;
 		const size_t& getWidth() const;
 		const size_t& getHeight() const;
-		const glm::vec3& getLookingAtPosition() const;
-		const glm::vec3& getHeadDirection() const;
+		const vec& getLookingAtPosition() const;
+		const vec& getHeadDirection() const;
+		const float& getNearDistance() const;
+		const float& getFarDistance() const;
 
 		void setFOV(const float& fov);
-		void setLowDistance(const float& distance);
-		void setHighDistance(const float& distance);
 		void setWidth(const size_t& width);
 		void setHeight(const size_t& height);
-		void setLookingAtPosition(const glm::vec3& lookingAtPosition);
-		void setHeadDirection(const glm::vec3& headDirection);
+		void setLookingAtPosition(const vec& lookingAtPosition);
+		void setHeadDirection(const vec& headDirection);
+		void setNearDistance(const float& distance);
+		void setFarDistance(const float& distance);
 
 		// Overriden methods.
-		void setRotation(const glm::vec3& rotation) override;
+		void setRotation(const vec& rotation) override;
 
 		void applyPosition() override;
 		void applyRotation() override;
@@ -57,12 +57,12 @@ class Camera : public Object
 
 	private:
 		float _fov;
-		float _low_distance;
-		float _high_distance;
 		size_t _width;
 		size_t _height;
-		glm::vec3 _lookingAtPosition;
-		glm::vec3 _headDirection;
+		vec _lookingAtPosition;
+		vec _headDirection;
+		float _nearDistance;
+		float _farDistance;
 };
 
 using CameraPtr = SharedPointer<Camera>;

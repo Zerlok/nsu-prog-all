@@ -26,10 +26,26 @@ class Engine
 			POLYGONS = GL_POLYGON,
 		};
 
+		enum class Status
+		{
+			DIRTY = 0,
+			VALIDATION_FAILED,
+			VALIDATION_SUCCESSFUL,
+			RENDERING_STARTED,
+			RENDERING_FINISHED,
+		};
+
 		// Static methods.
 		static Engine& instance();
 
 		// Methods.
+		bool wasValidated() const;
+		bool isValid() const;
+		bool isInvalid() const;
+		bool isRunning() const;
+		bool isStopped() const;
+		const Status& getStatus() const;
+
 		void setGUI(const GUIPtr& gui);
 		void setActiveScene(const ScenePtr& scene);
 		void setRenderMode(const RenderMode& mode);
@@ -37,10 +53,10 @@ class Engine
 		void enableFPS();
 		void disableFPS();
 
-		bool validateScene();
+		bool validate();
 		void showScene();
 
-	protected:
+	private:
 		// Inner classes.
 		class VertexObject;
 		class LightObject;
@@ -48,27 +64,6 @@ class Engine
 		using EngineObjects = std::list<VertexObject>;
 		using GUIfpsPtr = SharedPointer<GUIfps>;
 
-		// Methods.
-		void drawGUI();
-		void drawGUILabel(const GUILabel& glabel);
-		void drawGUIPlane(const GUIPlane& gplane);
-
-		void renderFrame();
-
-		// Fields.
-		int _glWindow;
-		bool _wasValidated;
-
-		ScenePtr _scene;
-		GUIPtr _gui;
-		GUIfpsPtr _guiFPS;
-		EngineObjects _objects;
-		RenderMode _renderMode;
-
-		float _width;
-		float _height;
-
-	private:
 		// Static methods.
 		static void _displayFunc();
 		static void _idleFunc();
@@ -83,6 +78,30 @@ class Engine
 
 		// Operators.
 		Engine& operator=(const Engine&);
+
+		// Methods.
+		void drawGUI();
+		void drawGUILabel(const GUILabel& glabel);
+		void drawGUIPlane(const GUIPlane& gplane);
+
+		void renderFrame();
+
+		// Fields.
+		Status _status;
+
+		int _glWindow;
+		RenderMode _glRenderMode;
+
+		float _frameWidth;
+		float _frameHeight;
+
+		GUIPtr _gui;
+		GUIfpsPtr _guiFPS;
+
+		ScenePtr _scene;
+		CameraPtr _camera;
+
+		EngineObjects _objects;
 };
 
 

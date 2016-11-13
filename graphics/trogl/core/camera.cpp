@@ -8,83 +8,92 @@ logger_t loggerModules = loggerModule(Logger::Level::WARNING, loggerDescriptionF
 
 
 const float Camera::DEFAULT_FOV = 60.0;
-const float Camera::DEFAULT_LOW_DISTANCE = 0.01;
-const float Camera::DEFAULT_HIGH_DISTANCE = 100.0;
 const size_t Camera::DEFAULT_WIDTH = 640;
 const size_t Camera::DEFAULT_HEIGHT = 480;
+const float Camera::DEFAULT_NEAR_DISTANCE = 0.01;
+const float Camera::DEFAULT_FAR_DISTANCE = 100.0;
 
 
 Camera::Camera()
 	: Object(Object::Type::CAMERA),
 	  _fov(DEFAULT_FOV),
-	  _low_distance(DEFAULT_LOW_DISTANCE),
-	  _high_distance(DEFAULT_HIGH_DISTANCE),
 	  _width(DEFAULT_WIDTH),
 	  _height(DEFAULT_HEIGHT),
 	  _lookingAtPosition(Object::DEFAULT_POSITION),
-	  _headDirection(Object::AXIS_Y)
+	  _headDirection(Object::AXIS_Y),
+	  _nearDistance(DEFAULT_NEAR_DISTANCE),
+	  _farDistance(DEFAULT_FAR_DISTANCE)
 {
-	logDebug << "Camera " << getName() << " created" <<logEndl;
+	logDebug << "Camera " << getName() << " created." <<logEndl;
 }
 
 
-Camera::Camera(const Camera& c)
-	: Object(c),
-	  _fov(c._fov),
-	  _low_distance(c._low_distance),
-	  _high_distance(c._high_distance),
-	  _width(c._width),
-	  _height(c._height),
-	  _lookingAtPosition(c._lookingAtPosition),
-	  _headDirection(c._headDirection)
+Camera::Camera(const Camera& cam)
+	: Object(cam),
+	  _fov(cam._fov),
+	  _width(cam._width),
+	  _height(cam._height),
+	  _lookingAtPosition(cam._lookingAtPosition),
+	  _headDirection(cam._headDirection),
+	  _nearDistance(cam._nearDistance),
+	  _farDistance(cam._farDistance)
 {
+	logDebug << "Camera " << getName()
+			 << " copied from " << cam.getName()
+			 << logEndl;
 }
 
 
 Camera::Camera(Camera&& c)
 	: Object(std::move(c)),
 	  _fov(std::move(c._fov)),
-	  _low_distance(std::move(c._low_distance)),
-	  _high_distance(std::move(c._high_distance)),
 	  _width(std::move(c._width)),
 	  _height(std::move(c._height)),
 	  _lookingAtPosition(std::move(c._lookingAtPosition)),
-	  _headDirection(std::move(c._headDirection))
+	  _headDirection(std::move(c._headDirection)),
+	  _nearDistance(std::move(c._nearDistance)),
+	  _farDistance(std::move(c._farDistance))
 {
+	logDebug << "Camera " << getName() << " moved." << logEndl;
 }
 
 
 Camera::~Camera()
 {
+	logDebug << "Camera " << getName() << " deleted." << logEndl;
 }
 
 
-Camera& Camera::operator=(const Camera& c)
+Camera& Camera::operator=(const Camera& cam)
 {
-	Object::operator=(c);
-	_fov = c._fov;
-	_low_distance = c._low_distance;
-	_high_distance = c._high_distance;
-	_width = c._width;
-	_height = c._height;
-	_lookingAtPosition = c._lookingAtPosition;
-	_headDirection = c._headDirection;
+	Object::operator=(cam);
+	_fov = cam._fov;
+	_width = cam._width;
+	_height = cam._height;
+	_lookingAtPosition = cam._lookingAtPosition;
+	_headDirection = cam._headDirection;
+	_nearDistance = cam._nearDistance;
+	_farDistance = cam._farDistance;
 
+	logDebug << "Camera " << getName()
+			 << " copied from " << cam.getName()
+			 << logEndl;
 	return (*this);
 }
 
 
-Camera& Camera::operator=(Camera&& c)
+Camera& Camera::operator=(Camera&& cam)
 {
-	Object::operator=(c);
-	_fov = std::move(c._fov);
-	_low_distance = std::move(c._low_distance);
-	_high_distance = std::move(c._high_distance);
-	_width = std::move(c._width);
-	_height = std::move(c._height);
-	_lookingAtPosition = std::move(c._lookingAtPosition);
-	_headDirection = std::move(c._headDirection);
+	Object::operator=(cam);
+	_fov = std::move(cam._fov);
+	_width = std::move(cam._width);
+	_height = std::move(cam._height);
+	_lookingAtPosition = std::move(cam._lookingAtPosition);
+	_headDirection = std::move(cam._headDirection);
+	_nearDistance = std::move(cam._nearDistance);
+	_farDistance = std::move(cam._farDistance);
 
+	logDebug << "Camera " << getName() << " moved." << logEndl;
 	return (*this);
 }
 
@@ -113,18 +122,18 @@ bool Camera::isValid() const
 	}
 
 	// Check far and near distances ranges.
-	if (_high_distance < _low_distance)
+	if (_farDistance < _nearDistance)
 	{
 		logWarning << "Camera: Invalid distances parameters: "
-				   << _low_distance << " >= " << _high_distance
+				   << _nearDistance << " >= " << _farDistance
 				   << " (but must be less)" << logEndl;
 		return false;
 	}
 
 	// Check looking at position distance is in far and near distances range.
 	const glm::vec3::length_type lookingDistance = (_lookingAtPosition - _position).length();
-	if ((lookingDistance > _high_distance)
-			|| (lookingDistance < _low_distance))
+	if ((lookingDistance > _farDistance)
+			|| (lookingDistance < _nearDistance))
 	{
 		logWarning << "Camera: Invalid looking at distance: "
 				   << lookingDistance << " is not in range of [low distance, high distance]"
@@ -142,21 +151,9 @@ const float& Camera::getFOV() const
 }
 
 
-void Camera::setFOV(const float& fov)
-{
-	_fov = fov;
-}
-
-
 const size_t& Camera::getWidth() const
 {
 	return _width;
-}
-
-
-void Camera::setWidth(const size_t& width)
-{
-	_width = width;
 }
 
 
@@ -166,38 +163,74 @@ const size_t& Camera::getHeight() const
 }
 
 
+const Object::vec& Camera::getLookingAtPosition() const
+{
+	return _lookingAtPosition;
+}
+
+
+const Object::vec& Camera::getHeadDirection() const
+{
+	return _headDirection;
+}
+
+
+const float& Camera::getNearDistance() const
+{
+	return _nearDistance;
+}
+
+
+const float& Camera::getFarDistance() const
+{
+	return _farDistance;
+}
+
+
+void Camera::setFOV(const float& fov)
+{
+	_fov = fov;
+}
+
+
+void Camera::setWidth(const size_t& width)
+{
+	_width = width;
+}
+
+
 void Camera::setHeight(const size_t& height)
 {
 	_height = height;
 }
 
 
-const glm::vec3& Camera::getLookingAtPosition() const
-{
-    return _lookingAtPosition;
-}
-
-
-void Camera::setLookingAtPosition(const glm::vec3& lookingAtPosition)
+void Camera::setLookingAtPosition(const Object::vec& lookingAtPosition)
 {
 	// TODO: Rotate camera in direction of lookingAtPosition.
     _lookingAtPosition = lookingAtPosition;
 }
 
 
-const glm::vec3& Camera::getHeadDirection() const
-{
-    return _headDirection;
-}
-
-
-void Camera::setHeadDirection(const glm::vec3& headDirection)
+void Camera::setHeadDirection(const Object::vec& headDirection)
 {
 	_headDirection = headDirection;
 }
 
 
-void Camera::setRotation(const glm::vec3& rotation)
+void Camera::setNearDistance(const float& distance)
+{
+	_nearDistance = distance;
+}
+
+
+void Camera::setFarDistance(const float& distance)
+{
+	_farDistance = distance;
+}
+
+
+void Camera::setRotation(const Object::vec& rotation)
 {
 	// TODO: Rotate lookingAtPosition.
 	Object::setRotation(rotation);
@@ -216,28 +249,4 @@ void Camera::applyRotation()
 
 void Camera::applyScale()
 {
-}
-
-
-const float& Camera::getLowDistance() const
-{
-    return _low_distance;
-}
-
-
-void Camera::setLowDistance(const float& distance)
-{
-    _low_distance = distance;
-}
-
-
-const float& Camera::getHighDistance() const
-{
-	return _high_distance;
-}
-
-
-void Camera::setHighDistance(const float& distance)
-{
-	_high_distance = distance;
 }

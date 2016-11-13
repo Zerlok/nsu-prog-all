@@ -124,6 +124,18 @@ const Color& GUIComponent::getBgColor() const
 }
 
 
+GUIComponent& GUIComponent::toGUIComponent()
+{
+	return (*this);
+}
+
+
+const GUIComponent& GUIComponent::toGUIComponent() const
+{
+	return (*this);
+}
+
+
 void GUIComponent::setX(const size_t& x)
 {
 	_x = x;
@@ -157,6 +169,18 @@ void GUIComponent::setFgColor(const Color& fgColor)
 void GUIComponent::setBgColor(const Color& bgColor)
 {
 	_bgColor = bgColor;
+}
+
+
+GLfloat GUIComponent::_countXPos(const size_t& frameWidth) const
+{
+	return ((GLfloat(_x)/GLfloat(frameWidth)) - 0.5f) * 2.0f;
+}
+
+
+GLfloat GUIComponent::_countYPos(const size_t& frameHeight) const
+{
+	return ((GLfloat(_y)/GLfloat(frameHeight)) - 0.5f) * -2.0f;
 }
 
 

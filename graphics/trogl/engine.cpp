@@ -19,14 +19,15 @@ Engine& Engine::instance()
 
 
 Engine::Engine()
-	: _glWindow(0),
-	  _wasValidated(false),
-	  _scene(nullptr),
+	: _status(),
+	  _glWindow(0),
+	  _glRenderMode(RenderMode::POLYGONS),
+	  _frameWidth(0),
+	  _frameHeight(0),
 	  _gui(nullptr),
 	  _guiFPS(),
-	  _width(0),
-	  _height(0),
-	  _renderMode(RenderMode::POLYGONS)
+	  _scene(nullptr),
+	  _camera(nullptr)
 {
 	logDebug << "Engine created." << logEndl;
 }
@@ -42,12 +43,108 @@ Engine::~Engine()
 }
 
 
+bool Engine::wasValidated() const
+{
+	switch (_status)
+	{
+		case Status::VALIDATION_FAILED:
+		case Status::VALIDATION_SUCCESSFUL:
+		case Status::RENDERING_STARTED:
+		case Status::RENDERING_FINISHED:
+			return true;
+
+		case Status::DIRTY:
+			return false;
+	}
+
+	return false;
+}
+
+
+bool Engine::isValid() const
+{
+	switch (_status)
+	{
+		case Status::VALIDATION_SUCCESSFUL:
+		case Status::RENDERING_STARTED:
+		case Status::RENDERING_FINISHED:
+			return true;
+
+		case Status::DIRTY:
+		case Status::VALIDATION_FAILED:
+			return false;
+	}
+
+	return false;
+}
+
+
+bool Engine::isInvalid() const
+{
+	switch (_status)
+	{
+		case Status::DIRTY:
+		case Status::VALIDATION_FAILED:
+			return true;
+
+		case Status::VALIDATION_SUCCESSFUL:
+		case Status::RENDERING_STARTED:
+		case Status::RENDERING_FINISHED:
+			return false;
+	}
+
+	return false;
+}
+
+
+bool Engine::isRunning() const
+{
+	switch (_status)
+	{
+		case Status::RENDERING_STARTED:
+			return true;
+
+		case Status::DIRTY:
+		case Status::VALIDATION_FAILED:
+		case Status::VALIDATION_SUCCESSFUL:
+		case Status::RENDERING_FINISHED:
+			return false;
+	}
+
+	return false;
+}
+
+
+bool Engine::isStopped() const
+{
+	switch (_status)
+	{
+		case Status::RENDERING_FINISHED:
+			return true;
+
+		case Status::DIRTY:
+		case Status::VALIDATION_FAILED:
+		case Status::VALIDATION_SUCCESSFUL:
+		case Status::RENDERING_STARTED:
+			return false;
+	}
+
+	return false;
+}
+
+
+const Engine::Status&Engine::getStatus() const
+{
+	return _status;
+}
+
+
 void Engine::enableFPS()
 {
 	if (!_guiFPS.is_null())
 		return;
 
-	_guiFPS = new GUIfps(0, 0, 1, 1);
+	_guiFPS = new GUIfps(10, 15, 20, 20);
 }
 
 
@@ -65,19 +162,20 @@ void Engine::setGUI(const GUIPtr& gui)
 
 void Engine::setActiveScene(const ScenePtr& scene)
 {
+	_status = Status::DIRTY;
 	_scene = scene;
 }
 
 
 void Engine::setRenderMode(const Engine::RenderMode& mode)
 {
-	_renderMode = mode;
+	_glRenderMode = mode;
 }
 
 
-bool Engine::validateScene()
+bool Engine::validate()
 {
-	_wasValidated = true;
+	_status = Status::VALIDATION_FAILED;
 
 	if (!_scene)
 	{
@@ -128,14 +226,17 @@ bool Engine::validateScene()
 		}
 	}
 
+	_camera = _scene->getCamera();
+
+	_status = Status::VALIDATION_SUCCESSFUL;
 	return true;
 }
 
 
 void Engine::showScene()
 {
-	if (!_wasValidated
-			&& !validateScene())
+	if (!wasValidated()
+			&& !validate())
 		return;
 
 	glutDisplayFunc(_displayFunc);
@@ -143,21 +244,23 @@ void Engine::showScene()
 	glutIdleFunc(_idleFunc);
 
 	size_t verticesNum = 0;
-	size_t facesNum = 0;
+	size_t polygonsNum = 0;
 	for (const MeshPtr& m : _scene->getMeshes())
 	{
 		verticesNum += m->getVertices().size();
-		facesNum += m->getPolygons().size();
+		polygonsNum += m->getPolygons().size();
 	}
 
 	logInfo << "Engine rendering started (scene: " << _scene->getName() << ")" << logEndl;
 	logInfo << "Scene has "
 			<< _scene->getMeshes().size() << " meshes ("
 			<< verticesNum << " vertices, "
-			<< facesNum << " faces)"
+			<< polygonsNum << " polygons)"
 			<< logEndl;
 
+	_status = Status::RENDERING_STARTED;
 	glutMainLoop();
+	_status = Status::RENDERING_FINISHED;
 
 	logInfo << "Engine rendering finished." << logEndl;
 }
@@ -211,16 +314,7 @@ void Engine::drawGUI()
 
 void Engine::drawGUILabel(const GUILabel& glabel)
 {
-	// TODO: count position from gui component.
-	glRasterPos2f(-0.9, +0.9);
-	glColor4f(glabel.getFgColor().getRedF(),
-			  glabel.getFgColor().getGreenF(),
-			  glabel.getFgColor().getBlueF(),
-			  glabel.getFgColor().getAlphaF());
-	const char* p = glabel.getText().c_str();
-	do
-		glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12, *p);
-	while (*(++p));
+	glabel.draw(_frameWidth, _frameHeight);
 }
 
 
@@ -246,22 +340,22 @@ void Engine::renderFrame()
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_FRONT);
 
-	glPolygonMode(GL_FRONT_AND_BACK, _renderMode);
+	glPolygonMode(GL_FRONT_AND_BACK, _glRenderMode);
 
 	// Matrix View Projection.
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	const CameraPtr& cam = _scene->getCamera();
-	_width = cam->getWidth();
-	_height = cam->getHeight();
-	gluPerspective(cam->getFOV(),
-				   (GLdouble)_width/(GLdouble)_height,
-				   cam->getLowDistance(),
-				   cam->getHighDistance());
 
-	glm::mat4x4 matView  = glm::lookAt(cam->getPosition(),
-									   cam->getLookingAtPosition(),
-									   cam->getHeadDirection());
+	_frameWidth = _camera->getWidth();
+	_frameHeight = _camera->getHeight();
+	gluPerspective(_camera->getFOV(),
+				   (GLdouble)_frameWidth/(GLdouble)_frameHeight,
+				   _camera->getNearDistance(),
+				   _camera->getFarDistance());
+
+	glm::mat4x4 matView = glm::lookAt(_camera->getPosition(),
+									  _camera->getLookingAtPosition(),
+									  _camera->getHeadDirection());
 	// TODO: move into animation.
 //	matView = glm::rotate(matView, 3.0f, glm::vec3(0.0f, 1.0f, 0.0f));
 	matView = glm::rotate(matView, float(getTimeDouble() / 31.0), glm::vec3(0.0f, 1.0f, 0.0f));
@@ -297,9 +391,9 @@ void Engine::_idleFunc()
 
 void Engine::_reshapeFunc(int w, int h)
 {
-	float& width = instance()._width;
-	float& height = instance()._height;
-	const CameraPtr cam = instance()._scene->getCamera();
+	float& width = instance()._frameWidth;
+	float& height = instance()._frameHeight;
+	const CameraPtr cam = instance()._camera;
 
 	width = w;
 	height = h;
@@ -310,8 +404,8 @@ void Engine::_reshapeFunc(int w, int h)
 	glLoadIdentity();
 	gluPerspective(cam->getFOV(),
 				   (GLdouble)width/(GLdouble)height,
-				   cam->getLowDistance(),
-				   cam->getHighDistance());
+				   cam->getNearDistance(),
+				   cam->getFarDistance());
 }
 
 
@@ -508,6 +602,7 @@ void Engine::VertexObject::_initIndexBufferObject()
 	std::vector<GLuint> indicies((_mesh->getPolygons().size() * _indexStep), 0.0f);
 	size_t i = 0;
 
+	// TODO: get indicies from mesh method, which knows their order and indexing type.
 	for (const Mesh::Polygons::value_type& pair : _mesh->getPolygons())
 	{
 		const Mesh::Polygon& poly = pair.second;

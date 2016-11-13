@@ -26,21 +26,27 @@ class DiffuseShader : public Shader
 		void prepareForRender() override;
 
 	private:
+		// Inner classes.
+		struct LampAttrs
+		{
+			Attr type;
+			Attr position;
+			Attr power;
+			Attr direction;
+			Attr color;
+			Attr innerAngle;
+			Attr outterAngle;
+		};
+
 		// Static fields.
 		static std::string VS_FILE();
 		static std::string FS_FILE();
 
 		// Fields.
-		GLuint _attrMeshPosition;
-		GLuint _attrLampType;
-		GLuint _attrLampPosition;
-		GLuint _attrLampPower;
-		GLuint _attrLampDirection;
-		GLuint _attrLampColor;
-		GLuint _attrLampInnerAngle;
-		GLuint _attrLampOutterAngle;
+		Attr _attrMeshPosition;
+		LampAttrs _attrLamp;
 
-		GLuint _attrTestColor;
+		// TODO: pass material.
 };
 
 

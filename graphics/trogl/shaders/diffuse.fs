@@ -1,15 +1,20 @@
 #version 120
 
 
-uniform vec4 meshPosition;
+struct LampStruct
+{
+    int type;
+    vec4 position;
+    float power;
+    vec4 direction;
+    vec4 color;
+    float ia;
+    float oa;
+};
 
-uniform int lampType;
-uniform vec4 lampPosition;
-uniform float lampPower;
-uniform vec4 lampDirection;
-uniform vec4 lampColor;
-uniform float lampIA;
-uniform float lampOA;
+
+uniform vec4 meshPosition;
+uniform LampStruct lamp;
 
 
 varying vec4 vertexPosition;
@@ -36,7 +41,6 @@ void pointLight(
     color.g = vcol.g * dcol.g;
     color.b = vcol.b * dcol.b;
     color.a = vcol.a;
-    color = clamp(color, 0.0, 1.0);
 }
 
 
@@ -55,7 +59,6 @@ void directionLight(
     color.g = vcol.g * dcol.g;
     color.b = vcol.b * dcol.b;
     color.a = vcol.a;
-    color = clamp(color, 0.0, 1.0);
 }
 
 
@@ -64,24 +67,31 @@ void spotLight()
 }
 
 
-void ambientLight()
+void ambientLight(
+        in vec4 vcol,
+	in vec4 acol,
+	in float apow,
+	out vec4 color)
 {
+    color = mix(vcol, acol, clamp(apow, 0.0, 1.0));
+    color.a = vcol.a;
 }
 
 
 void main()
 {
-    vec4 lampPos = gl_ModelViewMatrix * lampPosition;
-    vec3 lampDir = -normalize(gl_ModelViewMatrix * lampDirection).xyz;
+    vec4 color;
+    vec4 lampPos = gl_ModelViewMatrix * lamp.position;
+    vec3 lampDir = -normalize(gl_ModelViewMatrix * lamp.direction).xyz;
 
-    switch (lampType)
+    switch (lamp.type)
     {
         // Point lamp light drawing.
 	case 1:
 	    pointLight(
 	            vertexPosition, vertexNormal, vertexColor,
-		    lampPos, lampColor, lampPower,
-		    gl_FragColor
+		    lampPos, lamp.color, lamp.power,
+		    color
 	    );
 	    break;
 
@@ -89,8 +99,8 @@ void main()
 	case 2:
 	    directionLight(
 	            vertexPosition, vertexNormal, vertexColor,
-		    lampDir, lampColor, lampPower,
-		    gl_FragColor
+		    lampDir, lamp.color, lamp.power,
+		    color
 	    );
 	    break;
 
@@ -101,11 +111,17 @@ void main()
 
         // Ambient (scene background) light drawing.
 	case 4:
-	    ambientLight();
+	    ambientLight(
+	            vertexColor,
+		    lamp.color, lamp.power,
+		    color
+	    );
 	    break;
 
         default:
-	    gl_FragColor = vertexColor;
+	    color = vertexColor;
 	    break;
     }
+
+    gl_FragColor = clamp(color, 0.0, 1.0);
 }

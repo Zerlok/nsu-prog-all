@@ -24,7 +24,7 @@ void GUIfps::tick()
 
 	if (currentTimestamp - startTimestamp >= 1)
 	{
-		clearText();
+		_clearText();
 		_textStream << LABEL << _frameCounter;
 		_frameCounter = 0;
 		startTimestamp = currentTimestamp;

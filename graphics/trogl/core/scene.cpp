@@ -88,6 +88,8 @@ LightPtr Scene::getAmbientLight() const
 	LightPtr light = new Light(Light::Type::AMBIENT);
 	light->setColor(_bgColor);
 	light->setPower(_ambientPower);
+
+	return std::move(light);
 }
 
 

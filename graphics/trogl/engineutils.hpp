@@ -57,6 +57,29 @@ class ObjectGenerator
 
 	    return std::move(objVector);
 	}
+
+	Objects directionArrangement(
+			const size_t& size,
+			const float& offset,
+			const glm::vec3& direction,
+			const ObjectType& parent
+			) const
+	{
+		const glm::vec3 directionOffset = glm::normalize(direction) * offset;
+		glm::vec3 pos {0.0, 0.0, 0.0};
+		ObjectPointer obj;
+		Objects objVector(size);
+
+		for (size_t i = 0; i < size; ++i)
+		{
+			obj = new ObjectType(parent);
+			obj->setPosition(pos);
+			objVector[i] = obj;
+			pos += directionOffset;
+		}
+
+		return std::move(objVector);
+	}
 };
 
 

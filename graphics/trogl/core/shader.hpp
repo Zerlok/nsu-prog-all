@@ -20,6 +20,8 @@ class Shader : public Component
 			COMPILATION_SUCCESSFUL,
 		};
 
+		using Attr = GLuint;
+
 		// Static fields.
 		static const std::string SRC_DIR;
 		static const std::string DEFAULT_VS_FILE;
