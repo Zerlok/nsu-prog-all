@@ -54,6 +54,9 @@ class GUIComponent
 		void setFgColor(const Color& fgColor);
 		void setBgColor(const Color& bgColor);
 
+		// Virtual methods.
+		virtual void draw(const size_t&, const size_t&) const = 0;
+
 	private:
 		// Fields.
 		Type _guiComponentType;

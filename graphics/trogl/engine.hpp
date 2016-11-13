@@ -2,6 +2,10 @@
 #define __ENGINGE_HPP__
 
 
+#include <list>
+#include <string>
+#include <sharedpointer.h>
+
 #include "core/opengls.hpp"
 #include "core/shader.hpp"
 #include "core/light.hpp"
@@ -13,6 +17,38 @@
 #include "gui/guilabel.hpp"
 #include "gui/guiplane.hpp"
 #include "gui/guifps.hpp"
+
+
+class Frame
+{
+	public:
+		Frame(const std::string& title,
+			  const size_t& width = 0,
+			  const size_t& height = 0);
+		~Frame();
+
+		const size_t& getWidth() const;
+		const size_t& getHeight() const;
+
+		bool validate() const;
+
+		void resize(const size_t& width,
+					const size_t& height);
+
+		void clear(const Color& color);
+		void flush();
+
+	private:
+		std::string _title;
+		size_t _width;
+		size_t _height;
+		int _glWindow;
+
+		GLuint _buffer;
+		GLuint _frameTexture;
+};
+
+using FramePtr = SharedPointer<Frame>;
 
 
 class Engine
@@ -41,7 +77,6 @@ class Engine
 		// Methods.
 		bool wasValidated() const;
 		bool isValid() const;
-		bool isInvalid() const;
 		bool isRunning() const;
 		bool isStopped() const;
 		const Status& getStatus() const;
@@ -54,7 +89,7 @@ class Engine
 		void disableFPS();
 
 		bool validate();
-		void showScene();
+		void showActiveScene();
 
 	private:
 		// Inner classes.
@@ -67,9 +102,9 @@ class Engine
 		// Static methods.
 		static void _displayFunc();
 		static void _idleFunc();
-		static void _reshapeFunc(int w, int h);
+		static void _reshapeFunc(int width, int height);
 		static bool _runGlewTest();
-		static std::string _generateWindowName(const Scene& scene);
+		static std::string _generateWindowTitle(const Scene& scene);
 
 		// Constructors / Destructor.
 		Engine();
@@ -80,28 +115,32 @@ class Engine
 		Engine& operator=(const Engine&);
 
 		// Methods.
-		void drawGUI();
-		void drawGUILabel(const GUILabel& glabel);
-		void drawGUIPlane(const GUIPlane& gplane);
+		void _logSceneStatistics() const;
 
-		void renderFrame();
+		int _validateScene();
+		int _validateFrame();
+		int _validateMeshes();
+
+		void _enableGLOptions();
+		void _initGLProjectionMatrix();
+
+		void _viewGUI();
+		void _viewFrame();
+
+		void _reshape(int width, int height);
 
 		// Fields.
 		Status _status;
 
-		int _glWindow;
 		RenderMode _glRenderMode;
-
-		float _frameWidth;
-		float _frameHeight;
 
 		GUIPtr _gui;
 		GUIfpsPtr _guiFPS;
-
 		ScenePtr _scene;
 		CameraPtr _camera;
-
 		EngineObjects _objects;
+
+		FramePtr _frame;
 };
 
 
@@ -127,12 +166,10 @@ class Engine::VertexObject
 		static const size_t _indexStep;
 
 		// OpenGL attributes.
-		GLuint _glVBO;				// Vertex Buffer Object
-		GLuint _glNBO;				// Vertex Normals Buffer Object
-		GLuint _glCBO;				// Color Buffer Object
-		GLuint _glIBO;				// Index Buffer Object
-
-		GLuint _attrTestColor;
+		GLuint _glVBO; // Vertex Buffer Object
+		GLuint _glNBO; // Vertex Normal Buffer Object
+		GLuint _glCBO; // Color Buffer Object
+		GLuint _glIBO; // Index Buffer Object
 
 		Mesh::IndexingType _indexType;
 		size_t _indicesSize;
@@ -148,23 +185,6 @@ class Engine::VertexObject
 		void _initColorBufferObject();
 		void _initIndexBufferObject();
 		void _deinitGLGeometry();
-};
-
-
-class Engine::LightObject
-{
-	public:
-		// Constructrs / Destructor.
-		LightObject(const LightPtr& light);
-		LightObject(LightObject&& obj);
-		~LightObject();
-
-		// Methods.
-		bool isValid() const;
-		void compileGLShaders();
-
-	private:
-		ShaderPtr _shader;
 };
 
 

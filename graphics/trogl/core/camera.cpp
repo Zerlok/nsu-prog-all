@@ -163,6 +163,12 @@ const size_t& Camera::getHeight() const
 }
 
 
+const float Camera::getWHRatio() const
+{
+	return (float(_width)/float(_height));
+}
+
+
 const Object::vec& Camera::getLookingAtPosition() const
 {
 	return _lookingAtPosition;

@@ -10,6 +10,9 @@ logger_t loggerModules = loggerModule(Logger::Level::DEBUG,
 										 loggerDescriptionFull);
 
 
+static const int WINDOW_POS_X = 2000;
+static const int WINDOW_POS_Y = 100;
+
 
 Engine& Engine::instance()
 {
@@ -20,10 +23,7 @@ Engine& Engine::instance()
 
 Engine::Engine()
 	: _status(),
-	  _glWindow(0),
 	  _glRenderMode(RenderMode::POLYGONS),
-	  _frameWidth(0),
-	  _frameHeight(0),
 	  _gui(nullptr),
 	  _guiFPS(),
 	  _scene(nullptr),
@@ -40,6 +40,105 @@ Engine::~Engine()
 //		glutDestroyWindow(_glWindow);
 
 	logDebug << "Engine removed." << logEndl;
+}
+
+
+void Engine::_logSceneStatistics() const
+{
+	size_t verticesNum = 0;
+	size_t polygonsNum = 0;
+	for (const MeshPtr& m : _scene->getMeshes())
+	{
+		verticesNum += m->getVertices().size();
+		polygonsNum += m->getPolygons().size();
+	}
+
+	logInfo << "Scene: " << _scene->getName()
+			<< " (" << _scene->getMeshes().size() << " meshes: "
+			<< verticesNum << " vertices, "
+			<< polygonsNum << " polygons)"
+			<< logEndl;
+}
+
+
+int Engine::_validateScene()
+{
+	if (!_scene)
+	{
+		logError << "Cannot show scene - it was not set yet!" << logEndl;
+		return 0;
+	}
+
+	_camera = _scene->getCamera();
+	if (!_camera->isValid())
+	{
+		logError << "Cannot show scene " << _scene->getName()
+				 << " with camera " << _camera->getName()
+				 << " which settings are invalid!" << logEndl;
+		return 0;
+	}
+
+	return 1;
+}
+
+
+int Engine::_validateFrame()
+{
+	_frame = new Frame(_generateWindowTitle(*_scene),
+					   _camera->getWidth(),
+					   _camera->getHeight());
+
+	return (_frame->validate()) ? 1 : 0;
+}
+
+
+int Engine::_validateMeshes()
+{
+	for (const MeshPtr& mesh : _scene->getMeshes())
+	{
+		_objects.push_back({mesh});
+		VertexObject& obj = _objects.back();
+		obj.initGLGeometry();
+		obj.compileGLShaders();
+
+		if (!obj.isValid())
+		{
+			logWarning << "Invalid object " << mesh->getName()
+					   << " will not be rendered." << logEndl;
+			_objects.pop_back();
+		}
+	}
+
+	if (_objects.empty())
+	{
+		logError << "None valid mesh found in scene " << _scene->getName() << logEndl;
+		return 0;
+	}
+
+	return 1;
+}
+
+
+void Engine::_enableGLOptions()
+{
+	glEnable(GL_DEPTH_TEST);
+
+	glEnable(GL_CULL_FACE);
+	glFrontFace(GL_CW);
+	glCullFace(GL_FRONT);
+
+	glPolygonMode(GL_FRONT_AND_BACK, _glRenderMode);
+}
+
+
+void Engine::_initGLProjectionMatrix()
+{
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	gluPerspective(_camera->getFOV(),
+				   _camera->getWHRatio(),
+				   _camera->getNearDistance(),
+				   _camera->getFarDistance());
 }
 
 
@@ -72,24 +171,6 @@ bool Engine::isValid() const
 
 		case Status::DIRTY:
 		case Status::VALIDATION_FAILED:
-			return false;
-	}
-
-	return false;
-}
-
-
-bool Engine::isInvalid() const
-{
-	switch (_status)
-	{
-		case Status::DIRTY:
-		case Status::VALIDATION_FAILED:
-			return true;
-
-		case Status::VALIDATION_SUCCESSFUL:
-		case Status::RENDERING_STARTED:
-		case Status::RENDERING_FINISHED:
 			return false;
 	}
 
@@ -175,98 +256,44 @@ void Engine::setRenderMode(const Engine::RenderMode& mode)
 
 bool Engine::validate()
 {
-	_status = Status::VALIDATION_FAILED;
+	int result = 0;
+	result += _validateScene();
+	result += _validateFrame();
+	result += _validateMeshes();
 
-	if (!_scene)
-	{
-		logError << "Cannot show scene - it was not set yet!" << logEndl;
-		return false;
-	}
+//	_frameBuffer.init(_camera->getWidth(), _camera->getHeight());
 
-	int argc = 1;
-	char* argv = "engine";
-	glutInit(&argc, &argv);
-	glutInitDisplayMode(GLUT_RGBA);
-	glutInitWindowPosition(2000, 100);
+	_status = (result == 3)
+			? Status::VALIDATION_SUCCESSFUL
+			: Status::VALIDATION_FAILED;
 
-	const CameraPtr& cam = _scene->getCamera();
-	glutInitWindowSize(
-				cam->getWidth(),
-				cam->getHeight());
-	_glWindow = glutCreateWindow(_generateWindowName(*_scene).c_str());
-
-	if (!_runGlewTest())
-	{
-		logError << "Cannot show scene " << _scene->getName()
-				 << " - glut initialization failed!" << logEndl;
-		return false;
-	}
-
-	if (!cam->isValid())
-	{
-		logError << "Cannot show scene " << _scene->getName()
-				 << " - camera settings are invalid" << logEndl;
-		return false;
-	}
-
-	// TODO: add light to scene.
-
-	for (const MeshPtr& mesh : _scene->getMeshes())
-	{
-		_objects.push_back({mesh});
-		VertexObject& obj = _objects.back();
-		obj.initGLGeometry();
-		obj.compileGLShaders();
-
-		if (!obj.isValid())
-		{
-			logWarning << "Invalid object " << mesh->getName()
-					   << " will not be rendered." << logEndl;
-			_objects.pop_back();
-		}
-	}
-
-	_camera = _scene->getCamera();
-
-	_status = Status::VALIDATION_SUCCESSFUL;
-	return true;
+	return isValid();
 }
 
 
-void Engine::showScene()
+void Engine::showActiveScene()
 {
 	if (!wasValidated()
 			&& !validate())
 		return;
 
+	_logSceneStatistics();
+	_status = Status::RENDERING_STARTED;
+
+	_enableGLOptions();
+	_initGLProjectionMatrix();
 	glutDisplayFunc(_displayFunc);
 	glutReshapeFunc(_reshapeFunc);
 	glutIdleFunc(_idleFunc);
 
-	size_t verticesNum = 0;
-	size_t polygonsNum = 0;
-	for (const MeshPtr& m : _scene->getMeshes())
-	{
-		verticesNum += m->getVertices().size();
-		polygonsNum += m->getPolygons().size();
-	}
-
-	logInfo << "Engine rendering started (scene: " << _scene->getName() << ")" << logEndl;
-	logInfo << "Scene has "
-			<< _scene->getMeshes().size() << " meshes ("
-			<< verticesNum << " vertices, "
-			<< polygonsNum << " polygons)"
-			<< logEndl;
-
-	_status = Status::RENDERING_STARTED;
 	glutMainLoop();
-	_status = Status::RENDERING_FINISHED;
 
+	_status = Status::RENDERING_FINISHED;
 	logInfo << "Engine rendering finished." << logEndl;
 }
 
 
-void Engine::drawGUI()
+void Engine::_viewGUI()
 {
 	// TODO: use GUI shader.
 	glUseProgram(0);
@@ -280,26 +307,19 @@ void Engine::drawGUI()
 	glLoadIdentity();
 	glDisable(GL_DEPTH_TEST); // also disable the depth test so renders on top
 
+	const size_t& width = _frame->getWidth();
+	const size_t& height = _frame->getHeight();
+
 	if (_guiFPS)
 	{
 		_guiFPS->tick();
-		drawGUILabel(*_guiFPS);
+		_guiFPS->draw(width, height);
 	}
 
 	if (_gui)
 	{
 		for (const GUIComponentPtr& comp : _gui->getComponents())
-		{
-			switch (comp->getGuiComponentType())
-			{
-				case GUIComponent::Type::LABEL:
-					drawGUILabel((const GUILabel&)(*comp));
-					break;
-				case GUIComponent::Type::PLANE:
-					drawGUIPlane((const GUIPlane&)(*comp));
-					break;
-			}
-		}
+			comp->draw(width, height);
 	}
 
 	glEnable(GL_DEPTH_TEST); // Turn depth testing back on
@@ -312,47 +332,11 @@ void Engine::drawGUI()
 }
 
 
-void Engine::drawGUILabel(const GUILabel& glabel)
+void Engine::_viewFrame()
 {
-	glabel.draw(_frameWidth, _frameHeight);
-}
+	_frame->clear(_scene->getBgColor());
 
-
-void Engine::drawGUIPlane(const GUIPlane& gplane)
-{
-}
-
-
-void Engine::renderFrame()
-{
-	// TODO: use one style coding (OpenGL)
-	// TODO: add comment description: what does each line do with GL.
-	glEnable(GL_DEPTH_TEST);
-	glDepthFunc(GL_LESS);
-	const Color& bg = _scene->getBgColor();
-	glClearColor(bg.getRedF(),
-				 bg.getGreenF(),
-				 bg.getBlueF(),
-				 bg.getAlphaF());
-	glClearDepth(1.0f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); //Clear the colour buffer (more buffers later on)
-	glFrontFace(GL_CW);
-	glEnable(GL_CULL_FACE);
-	glCullFace(GL_FRONT);
-
-	glPolygonMode(GL_FRONT_AND_BACK, _glRenderMode);
-
-	// Matrix View Projection.
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-
-	_frameWidth = _camera->getWidth();
-	_frameHeight = _camera->getHeight();
-	gluPerspective(_camera->getFOV(),
-				   (GLdouble)_frameWidth/(GLdouble)_frameHeight,
-				   _camera->getNearDistance(),
-				   _camera->getFarDistance());
-
+	// TODO: use one style matricies coding (OpenGL).
 	glm::mat4x4 matView = glm::lookAt(_camera->getPosition(),
 									  _camera->getLookingAtPosition(),
 									  _camera->getHeadDirection());
@@ -364,22 +348,24 @@ void Engine::renderFrame()
 	glMatrixMode(GL_MODELVIEW);
 	glLoadMatrixf(&matView[0][0]);
 
-	// Draw the objects.
 	for (VertexObject& obj : _objects)
-		// TODO: draw object for each light.
-		obj.draw(_scene->getLights().front());
+		for (const LightPtr& light : _scene->getLights())
+			obj.draw(light);
 
-	// Draw GUI at the end of frame (to overlay over every objects on scene).
-	drawGUI();
+	_viewGUI();
+	_frame->flush();
+}
 
-	// In the end.
-	glFlush();
+
+void Engine::_reshape(int width, int height)
+{
+	_frame->resize(width, height);
 }
 
 
 void Engine::_displayFunc()
 {
-	instance().renderFrame();
+	instance()._viewFrame();
 }
 
 
@@ -389,41 +375,13 @@ void Engine::_idleFunc()
 }
 
 
-void Engine::_reshapeFunc(int w, int h)
+void Engine::_reshapeFunc(int width, int height)
 {
-	float& width = instance()._frameWidth;
-	float& height = instance()._frameHeight;
-	const CameraPtr cam = instance()._camera;
-
-	width = w;
-	height = h;
-
-	glViewport(0, 0, (GLsizei)width, (GLsizei)height);
-
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	gluPerspective(cam->getFOV(),
-				   (GLdouble)width/(GLdouble)height,
-				   cam->getNearDistance(),
-				   cam->getFarDistance());
+	instance()._reshape(width, height);
 }
 
 
-bool Engine::_runGlewTest()
-{
-	GLenum err = glewInit();
-	if (err != GLEW_OK)
-	{
-		logFatal << "Error in glewInit, code: " << err
-				 << ", message: " << glewGetErrorString(err) << logEndl;
-		return false;
-	}
-
-	return true;
-}
-
-
-std::string Engine::_generateWindowName(const Scene& scene)
+std::string Engine::_generateWindowTitle(const Scene& scene)
 {
 	std::stringstream ss;
 	ss << "TroGL Engine [" << scene.getName() << ']';
@@ -638,30 +596,118 @@ void Engine::VertexObject::_deinitGLGeometry()
 }
 
 
-//Engine::LightObject::LightObject(const LightPtr& light)
-//	: _shader(light->getShader())
+Frame::Frame(const std::string& title,
+			 const size_t& width,
+			 const size_t& height)
+	: _title(title),
+	  _width(width),
+	  _height(height)
+{
+	int argc = 1;
+	char* argv[1] = {"engine"};
+
+	glutInit(&argc, argv);
+	glutInitDisplayMode(GLUT_RGBA);
+	glutInitWindowPosition(WINDOW_POS_X, WINDOW_POS_Y);
+	glutInitWindowSize(_width, _height);
+	_glWindow = glutCreateWindow(_title.c_str());
+}
+
+
+Frame::~Frame()
+{
+}
+
+
+const size_t& Frame::getWidth() const
+{
+	return _width;
+}
+
+
+const size_t& Frame::getHeight() const
+{
+	return _height;
+}
+
+
+bool Frame::validate() const
+{
+	GLenum err = glewInit();
+	if (err != GLEW_OK)
+	{
+		logFatal << "Error in glewInit, code: " << err
+				 << ", message: " << glewGetErrorString(err) << logEndl;
+		return false;
+	}
+
+	return true;
+}
+
+
+void Frame::resize(const size_t& width,
+				   const size_t& height)
+{
+	_width = width;
+	_height = height;
+
+	glViewport(0, 0, (GLsizei)width, (GLsizei)height);
+}
+
+
+void Frame::clear(const Color& color)
+{
+	// TODO: add comment description: what does each line do with GL.
+	glClearColor(color.getRedF(),
+				 color.getGreenF(),
+				 color.getBlueF(),
+				 color.getAlphaF());
+
+	glDepthFunc(GL_LESS);
+	glClearDepth(1.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+}
+
+
+void Frame::flush()
+{
+	glFlush();
+}
+
+
+//void Frame::init(const size_t& width,
+//							   const size_t& height)
 //{
+//	_width = width;
+//	_height = height;
+
+//	glGenFramebuffers(sizeof(_buffer), &_buffer);
+//	glBindFramebuffer(GL_FRAMEBUFFER, _buffer);
+
+//	glGenTextures(sizeof(_frameTexture), &_frameTexture);
+//	glBindTexture(GL_TEXTURE_2D, _frameTexture);
+//	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, _width, _height, 0, GL_RGB, GL_UNSIGNED_BYTE, 0);
+//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+
+//	// Set frame texture as our colour attachement #0
+//	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, _frameTexture, 0);
+//	GLenum drawBuffers[1] = {GL_COLOR_ATTACHMENT0};
+//	glDrawBuffers(sizeof(drawBuffers), drawBuffers); // "1" is the size of DrawBuffers
+
+//	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+//		logError << "Frame buffer creation failed." << logEndl;
 //}
 
 
-//Engine::LightObject::LightObject(Engine::LightObject&& obj)
-//	: _shader(std::move(obj._shader))
+//void Frame::bind()
 //{
+//	glBindFramebuffer(GL_FRAMEBUFFER, _buffer);
+//	glViewport(0, 0, _width, _height);
 //}
 
 
-//Engine::LightObject::~LightObject()
+//void Frame::unbind()
 //{
-//}
-
-
-//bool Engine::LightObject::isValid() const
-//{
-//	return _shader->isCompiledSuccessfuly();
-//}
-
-
-//void Engine::LightObject::compileGLShaders()
-//{
-//	_shader->compile();
+//	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 //}

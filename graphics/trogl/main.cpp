@@ -24,7 +24,7 @@ logger_t globalLogger = loggerInit(std::cout, Logger::Level::DEBUG, loggerDescri
 int main(int argc, char *argv[])
 {
 	// Meshes generation settings.
-	const size_t size = 3;
+	const size_t size = 5;
 	const float offset = 2.5;
 	const glm::vec3 direction {0.0, 0.0, 1.0};
 	const glm::vec3 cameraPos {(size)*offset, (size)*offset / 1.8, (size)*offset};
@@ -35,7 +35,7 @@ int main(int argc, char *argv[])
 //	using MyMesh = MegaCube;
 //	const MyMesh clonableMesh = MegaCube(Color::white, Color::black);
 	using MyMesh = Sphere;
-	MyMesh clonableMesh = MyMesh(2.0, 11);
+	MyMesh clonableMesh = MyMesh(1.0, 11);
 	using MeshGenerator = ObjectGenerator<MyMesh, ObjectGeneratorTraits<Mesh> >;
 
 	// Setup scene.
@@ -52,10 +52,10 @@ int main(int argc, char *argv[])
 		scene->addMesh(m);
 
 	// Add light.	
-//	LightPtr lamp = new Light(Light::Type::POINT);
-//	lamp->setPower(1000.0);
-	LightPtr lamp = new Light(Light::Type::SUN);
-	lamp->setPower(1.0);
+	LightPtr lamp = new Light(Light::Type::POINT);
+	lamp->setPower(1000.0);
+//	LightPtr lamp = new Light(Light::Type::SUN);
+//	lamp->setPower(1.0);
 //	LightPtr lamp = scene->getAmbientLight();
 	lamp->setPosition({0.0, 30.0, 0.0});
 	scene->addLight(lamp);
@@ -63,10 +63,9 @@ int main(int argc, char *argv[])
 	// Show scene.
 	Engine& engine = Engine::instance();
 	engine.enableFPS();
-	engine.setRenderMode(Engine::RenderMode::POLYGONS);
+//	engine.setRenderMode(Engine::RenderMode::EDGES);
 	engine.setActiveScene(scene);
-	engine.validate();
-	engine.showScene();
+	engine.showActiveScene();
 
 	return 0;
 }

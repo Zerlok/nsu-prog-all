@@ -16,3 +16,8 @@ GUIPlane::~GUIPlane()
 {
 }
 
+
+void GUIPlane::draw(const size_t&, const size_t&) const
+{
+}
+

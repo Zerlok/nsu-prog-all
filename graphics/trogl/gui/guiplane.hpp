@@ -15,6 +15,8 @@ class GUIPlane : public GUIComponent
 				 const Color& fgColor = Color::white,
 				 const Color& bgColor = Color::black);
 		virtual ~GUIPlane();
+
+		void draw(const size_t&, const size_t&) const override;
 };
 
 

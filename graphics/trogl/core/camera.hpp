@@ -35,6 +35,7 @@ class Camera : public Object
 		const float& getFOV() const;
 		const size_t& getWidth() const;
 		const size_t& getHeight() const;
+		const float getWHRatio() const;
 		const vec& getLookingAtPosition() const;
 		const vec& getHeadDirection() const;
 		const float& getNearDistance() const;

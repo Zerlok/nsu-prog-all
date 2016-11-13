@@ -45,8 +45,7 @@ void pointLight(
 
 
 void directionLight(
-        in vec4 vpos,
-	in vec3 vnor,
+        in vec3 vnor,
 	in vec4 vcol,
 	in vec3 ldir,
 	in vec4 lcol,
@@ -81,13 +80,12 @@ void ambientLight(
 void main()
 {
     vec4 color;
-    vec4 lampPos = gl_ModelViewMatrix * lamp.position;
-    vec3 lampDir = -normalize(gl_ModelViewMatrix * lamp.direction).xyz;
 
     switch (lamp.type)
     {
         // Point lamp light drawing.
 	case 1:
+	    vec4 lampPos = gl_ModelViewMatrix * lamp.position;
 	    pointLight(
 	            vertexPosition, vertexNormal, vertexColor,
 		    lampPos, lamp.color, lamp.power,
@@ -97,8 +95,9 @@ void main()
 
         // Directional lamp light drawing.
 	case 2:
+	    vec3 lampDir = -normalize(gl_ModelViewMatrix * lamp.direction).xyz;
 	    directionLight(
-	            vertexPosition, vertexNormal, vertexColor,
+	            vertexNormal, vertexColor,
 		    lampDir, lamp.color, lamp.power,
 		    color
 	    );

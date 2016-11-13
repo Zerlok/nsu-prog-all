@@ -51,7 +51,7 @@ class GUILabel : public GUIComponent
 
 		void setFont(const Font& font);
 		void draw(const size_t& frameWidth,
-				  const size_t& frameHeight) const;
+				  const size_t& frameHeight) const override;
 
 	protected:
 		// Fields.

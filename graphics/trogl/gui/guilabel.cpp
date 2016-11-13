@@ -93,9 +93,7 @@ void GUILabel::setFont(const GUILabel::Font& font)
 void GUILabel::draw(const size_t& frameWidth,
 					const size_t& frameHeight) const
 {
-	glRasterPos2f(_countXPos(frameWidth),
-				  _countYPos(frameHeight));
-
+	glRasterPos2f(_countXPos(frameWidth), _countYPos(frameHeight));
 	glColor4f(_fgColor.getRedF(),
 			  _fgColor.getGreenF(),
 			  _fgColor.getBlueF(),
