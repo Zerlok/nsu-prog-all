@@ -17,7 +17,7 @@ const std::string Shader::DEFAULT_FS_FILE = path::join(Shader::SRC_DIR, "default
 
 std::string Shader::loadFile(const std::string& filename)
 {
-	logDebug << "Loading shader from file: '" << filename << '\'' << logEndl;
+	logDebug << "Loading shader source from file: '" << filename << '\'' << logEndl;
 	std::stringstream ss;
 	std::ifstream in(filename);
 
@@ -51,7 +51,9 @@ Shader::Shader(const std::string& name,
 	  _glShaderProgram(),
 	  _status(Status::NOT_COMPILED)
 {
-	logDebug << "Inited " << name << " from" << vsFile << ' ' << fsFile << logEndl;
+	logDebug << "Shader " << getName()
+			 << " created from files (" << vsFile << ", " << fsFile << ')'
+			 << logEndl;
 }
 
 
@@ -65,6 +67,9 @@ Shader::Shader(const Shader& sh)
 	  _glShaderProgram(),
 	  _status(Status::NOT_COMPILED)
 {
+	logDebug << "Shader " << getName()
+			 << " copied from" << sh.getName()
+			 << logEndl;
 }
 
 
@@ -83,13 +88,16 @@ Shader::Shader(Shader&& sh)
 	sh._glFragmentShader = 0;
 	sh._glShaderProgram = 0;
 	sh._status = Status::NOT_COMPILED;
+
+	logDebug << "Shader " << getName() << " moved." << logEndl;
 }
 
 
 Shader::~Shader()
 {
-	logDebug << "Shaders compilation count: " << _shadersCompileCount << logEndl;
-	logDebug << "Removing: (";
+	logDebug << "Shaders compilation count: " << _shadersCompileCount
+			 << ", Status: " << _status
+			 << ", Removing: (";
 
 	switch (_shadersCompileCount)
 	{
@@ -110,11 +118,11 @@ Shader::~Shader()
 
 		case 0:
 		default:
-			logDebug << "none";
+			logDebug << "nothing";
 			break;
 	}
 
-	logDebug << ") => shaders removed." << logEndl;
+	logDebug << ") => shader removed." << logEndl;
 }
 
 
@@ -129,6 +137,7 @@ Shader& Shader::operator=(const Shader& sh)
 	_glShaderProgram = 0;
 	_status = Status::NOT_COMPILED;
 
+	logDebug << "Shader " << getName() << " copied from " << sh.getName() << logEndl;
 	return (*this);
 }
 
@@ -150,6 +159,7 @@ Shader& Shader::operator=(Shader&& sh)
 	sh._glShaderProgram = 0;
 	sh._status = Status::NOT_COMPILED;
 
+	logDebug << "Shader " << getName() << " moved." << logEndl;
 	return (*this);
 }
 
@@ -178,12 +188,6 @@ bool Shader::isCompiledSuccessfuly() const
 const Shader::Status& Shader::getStatus() const
 {
 	return _status;
-}
-
-
-const GLuint& Shader::getProgram() const
-{
-	return _glShaderProgram;
 }
 
 
@@ -221,6 +225,7 @@ Shader::Shader(const std::string& name)
 	  _glShaderProgram(),
 	  _status(Status::NOT_COMPILED)
 {
+	logDebug << "Shader " << getName() << " created" << logEndl;
 }
 
 
@@ -321,4 +326,18 @@ bool Shader::_compileShaderProgram()
 	++_shadersCompileCount;
 	logDebug << "Shader program is valid. Shaders compilation finished." << logEndl;
 	return true;
+}
+
+
+std::ostream& operator<<(std::ostream& out, const Shader::Status& st)
+{
+	switch (st)
+	{
+		case Shader::Status::NOT_COMPILED:
+			return out << "NOT COMPILED";
+		case Shader::Status::COMPILATION_FAILED:
+			return out << "COMPILATION FAILED";
+		case Shader::Status::COMPILATION_SUCCESSFUL:
+			return out << "COMPILATION SUCCESSFUL";
+	}
 }

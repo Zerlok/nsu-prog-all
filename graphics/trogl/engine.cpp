@@ -10,42 +10,50 @@ logger_t loggerModules = loggerModule(Logger::Level::DEBUG,
 										 loggerDescriptionFull);
 
 
-Engine* Engine::_current = nullptr;
+
+Engine& Engine::instance()
+{
+	static Engine e;
+	return e;
+}
 
 
-Engine::Engine(const bool& displayFPS)
+Engine::Engine()
 	: _glWindow(0),
 	  _wasValidated(false),
 	  _scene(nullptr),
 	  _gui(nullptr),
 	  _guiFPS(),
 	  _width(0),
-	  _height(0)
+	  _height(0),
+	  _renderMode(RenderMode::POLYGONS)
 {
-	logDebug << "Engine init started" << logEndl;
-
-	setDisplayFPS(displayFPS);
-
-	logDebug << "Engine created" << logEndl;
+	logDebug << "Engine created." << logEndl;
 }
 
 
 Engine::~Engine()
 {
-	if ((_wasValidated)
-			&& (_glWindow))
-		glutDestroyWindow(_glWindow);
+//	if ((_wasValidated)
+//			&& (_glWindow))
+//		glutDestroyWindow(_glWindow);
 
-	logDebug << "Engine removed" << logEndl;
+	logDebug << "Engine removed." << logEndl;
 }
 
 
-void Engine::setDisplayFPS(const bool& displayFPS)
+void Engine::enableFPS()
 {
-	if (displayFPS)
-		_guiFPS = new GUIfps(0, 0, 1, 1);
-	else
-		_guiFPS.release();
+	if (!_guiFPS.is_null())
+		return;
+
+	_guiFPS = new GUIfps(0, 0, 1, 1);
+}
+
+
+void Engine::disableFPS()
+{
+	_guiFPS.release();
 }
 
 
@@ -58,6 +66,12 @@ void Engine::setGUI(const GUIPtr& gui)
 void Engine::setActiveScene(const ScenePtr& scene)
 {
 	_scene = scene;
+}
+
+
+void Engine::setRenderMode(const Engine::RenderMode& mode)
+{
+	_renderMode = mode;
 }
 
 
@@ -77,20 +91,20 @@ bool Engine::validateScene()
 	glutInitDisplayMode(GLUT_RGBA);
 	glutInitWindowPosition(2000, 100);
 
-	const Camera& cam = _scene->getCamera().get_reference();
+	const CameraPtr& cam = _scene->getCamera();
 	glutInitWindowSize(
-				cam.getWidth(),
-				cam.getHeight());
+				cam->getWidth(),
+				cam->getHeight());
 	_glWindow = glutCreateWindow(_generateWindowName(*_scene).c_str());
 
 	if (!_runGlewTest())
 	{
 		logError << "Cannot show scene " << _scene->getName()
-				 << " - engine couldn't initialize" << logEndl;
+				 << " - glut initialization failed!" << logEndl;
 		return false;
 	}
 
-	if (!cam.isValid())
+	if (!cam->isValid())
 	{
 		logError << "Cannot show scene " << _scene->getName()
 				 << " - camera settings are invalid" << logEndl;
@@ -99,17 +113,17 @@ bool Engine::validateScene()
 
 	// TODO: add light to scene.
 
-	for (const MeshPtr& m : _scene->getMeshes())
+	for (const MeshPtr& mesh : _scene->getMeshes())
 	{
-		_objects.push_back(VertexObject(m));
+		_objects.push_back({mesh});
 		VertexObject& obj = _objects.back();
 		obj.initGLGeometry();
 		obj.compileGLShaders();
 
 		if (!obj.isValid())
 		{
-			logWarning << "Invalid object: " << m->getName()
-					   << " not assigned." << logEndl;
+			logWarning << "Invalid object " << mesh->getName()
+					   << " will not be rendered." << logEndl;
 			_objects.pop_back();
 		}
 	}
@@ -124,11 +138,9 @@ void Engine::showScene()
 			&& !validateScene())
 		return;
 
-	// TODO: make Engine as singleton.
-	_current = this;
-	glutDisplayFunc(_display);
-	glutReshapeFunc(_reshape);
-	glutIdleFunc(_cycle);
+	glutDisplayFunc(_displayFunc);
+	glutReshapeFunc(_reshapeFunc);
+	glutIdleFunc(_idleFunc);
 
 	size_t verticesNum = 0;
 	size_t facesNum = 0;
@@ -146,15 +158,17 @@ void Engine::showScene()
 			<< logEndl;
 
 	glutMainLoop();
+
 	logInfo << "Engine rendering finished." << logEndl;
 }
 
 
 void Engine::drawGUI()
 {
+	// TODO: use GUI shader.
 	glUseProgram(0);
 
-	// TODO: What does it do?
+	// TODO: add comment description: what does each line do with GL.
 	glMatrixMode(GL_PROJECTION);
 	glPushMatrix(); // save
 	glLoadIdentity();// and clear
@@ -232,8 +246,7 @@ void Engine::renderFrame()
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_FRONT);
 
-//	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-//	glPolygonMode(GL_FRONT_AND_BACK, GL_POINT);
+	glPolygonMode(GL_FRONT_AND_BACK, _renderMode);
 
 	// Matrix View Projection.
 	glMatrixMode(GL_PROJECTION);
@@ -251,7 +264,7 @@ void Engine::renderFrame()
 									   cam->getHeadDirection());
 	// TODO: move into animation.
 //	matView = glm::rotate(matView, 3.0f, glm::vec3(0.0f, 1.0f, 0.0f));
-	matView = glm::rotate(matView, float(getTimeDouble() / 50.0), glm::vec3(0.0f, 1.0f, 0.0f));
+	matView = glm::rotate(matView, float(getTimeDouble() / 31.0), glm::vec3(0.0f, 1.0f, 0.0f));
 //	matView = glm::rotate(matView, float(getTimeDouble() / 17.0), glm::vec3(0.0f, 0.0f, 1.0f));
 
 	glMatrixMode(GL_MODELVIEW);
@@ -270,11 +283,35 @@ void Engine::renderFrame()
 }
 
 
-std::string Engine::_generateWindowName(const Scene& scene)
+void Engine::_displayFunc()
 {
-	std::stringstream ss;
-	ss << "TroGL Engine [" << scene.getName() << ']';
-	return ss.str();
+	instance().renderFrame();
+}
+
+
+void Engine::_idleFunc()
+{
+	glutPostRedisplay();
+}
+
+
+void Engine::_reshapeFunc(int w, int h)
+{
+	float& width = instance()._width;
+	float& height = instance()._height;
+	const CameraPtr cam = instance()._scene->getCamera();
+
+	width = w;
+	height = h;
+
+	glViewport(0, 0, (GLsizei)width, (GLsizei)height);
+
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	gluPerspective(cam->getFOV(),
+				   (GLdouble)width/(GLdouble)height,
+				   cam->getLowDistance(),
+				   cam->getHighDistance());
 }
 
 
@@ -292,31 +329,11 @@ bool Engine::_runGlewTest()
 }
 
 
-void Engine::_display()
+std::string Engine::_generateWindowName(const Scene& scene)
 {
-	_current->renderFrame();
-}
-
-
-void Engine::_reshape(int w, int h)
-{
-	float& width = _current->_width;
-	float& height = _current->_height;
-
-	width = w;
-	height = h;
-
-	glViewport(0, 0, (GLsizei)width, (GLsizei)height);
-
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	gluPerspective(45.0, (GLdouble)width/(GLdouble)height, 0.01, 100.0);
-}
-
-
-void Engine::_cycle()
-{
-	glutPostRedisplay();
+	std::stringstream ss;
+	ss << "TroGL Engine [" << scene.getName() << ']';
+	return ss.str();
 }
 
 
@@ -336,14 +353,18 @@ Engine::VertexObject::VertexObject(const MeshPtr& mesh)
 	  _shader(mesh->getMaterial()->getShader()),
 	  _mesh(mesh)
 {
-	/* Apply mesh vertices positions from object attributes
+	/*
+	 * Apply mesh vertices positions from object attributes
 	 * (in reverse order: scale, rotation, position).
 	 */
+	Object::vec meshPos = _mesh->getPosition();
+
+	_mesh->recalculateNormals();
 	_mesh->applyScale();
 	_mesh->applyRotation();
 	_mesh->applyPosition();
 
-	_mesh->recalculateNormals();
+	_mesh->setPosition(meshPos);
 }
 
 

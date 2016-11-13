@@ -9,8 +9,8 @@ class Sphere : public Mesh
 {
 	public:
 		Sphere(const float& radius = 1.0,
-			   const size_t& rows = 16,
-			   const size_t& segments = 32);
+			   const size_t& rowsNum = 0,
+			   const size_t& segmentsNum = 0);
 		~Sphere();
 };
 

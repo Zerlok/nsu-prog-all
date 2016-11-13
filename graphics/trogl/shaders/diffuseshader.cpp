@@ -75,15 +75,6 @@ void DiffuseShader::initCustomVarsLocations()
 	_attrLampColor = glGetUniformLocation(_glShaderProgram, "lampColor");
 	_attrLampInnerAngle = glGetUniformLocation(_glShaderProgram, "lampIA");
 	_attrLampOutterAngle = glGetUniformLocation(_glShaderProgram, "lampOA");
-
-	logInfo << isCompiledSuccessfuly() << logEndl;
-	logInfo << _attrLampType << ' '
-			<< _attrLampPosition << ' '
-			<< _attrLampPower << ' '
-			<< _attrLampDirection << ' '
-			<< _attrLampColor << ' '
-			<< _attrLampInnerAngle << ' '
-			<< _attrLampOutterAngle << logEndl;
 }
 
 

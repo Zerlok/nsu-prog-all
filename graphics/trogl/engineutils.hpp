@@ -28,7 +28,7 @@ class ObjectGenerator
 	using ObjectPointer = typename GeneratorTraits::Pointer;
 	using Objects = typename GeneratorTraits::Array;
 
-	Objects cloneObjectsWithLatticeArrangement(
+	Objects latticeArrangement(
 				const int& latticeSize,
 				const float& latticeOffset,
 				const ObjectType& parent) const

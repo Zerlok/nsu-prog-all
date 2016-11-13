@@ -30,12 +30,13 @@ int main(int argc, char *argv[])
 										  (size)*offset / 1.8,
 										  (size)*offset);
 
+	// Mesh settings.
 //	using MyMesh = Cube;
 //	const MyMesh clonableMesh = Cube();
 //	using MyMesh = MegaCube;
 //	const MyMesh clonableMesh = MegaCube(Color::white, Color::black);
 	using MyMesh = Sphere;
-	MyMesh clonableMesh = MyMesh(2.0, 8, 16);
+	MyMesh clonableMesh = MyMesh(2.0, 11);
 	using MeshGenerator = ObjectGenerator<MyMesh, ObjectGeneratorTraits<Mesh> >;
 
 	// Setup scene.
@@ -46,20 +47,27 @@ int main(int argc, char *argv[])
 
 	// Generate meshes.
 	MeshGenerator meshGenerator;
-	const MeshGenerator::Objects meshes = meshGenerator.cloneObjectsWithLatticeArrangement(size, offset, clonableMesh);
+	const MeshGenerator::Objects meshes = meshGenerator.latticeArrangement(size, offset, clonableMesh);
 	for (const MeshGenerator::ObjectPointer& m : meshes)
 		scene->addMesh(m);
 
-	// Add light.
-	LightPtr lamp = new Light(Light::Type::POINT);
-	lamp->setPower(20.0);
-	lamp->setPosition({2.3, 2.3, 2.3});
+	MeshPtr meshClone = new Mesh(clonableMesh);
+	meshClone->setPosition({offset, 0.0f, 0.0f});
+	scene->addMesh(meshClone);
+
+	// Add light.	
+//	LightPtr lamp = new Light(Light::Type::POINT);
+//	lamp->setPower(1000.0);
+	LightPtr lamp = new Light(Light::Type::SUN);
+	lamp->setPower(1.0);
+	lamp->setPosition({0.0, 30.0, 0.0});
 	scene->addLight(lamp);
 
 	// Show scene.
-	Engine engine;
+	Engine& engine = Engine::instance();
+	engine.enableFPS();
+//	engine.setRenderMode(Engine::RenderMode::EDGES);
 	engine.setActiveScene(scene);
-	engine.setDisplayFPS(true);
 	engine.validateScene();
 	engine.showScene();
 

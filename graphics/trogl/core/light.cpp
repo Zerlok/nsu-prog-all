@@ -11,7 +11,7 @@ Light::Light(const Type& type)
 	: Object(Object::Type::LIGHT),
 	  _lightType(type),
 	  _power(1.0),
-	  _direction(0.0, 0.0, 0.0),
+	  _direction(-Object::AXIS_Y),
 	  _color(Color::white),
 	  _innerAngle(0.0),
 	  _outterAngle(0.0)
@@ -92,7 +92,7 @@ const float& Light::getPower() const
 }
 
 
-const glm::vec3& Light::getDirection() const
+const Object::vec& Light::getDirection() const
 {
 	return _direction;
 }
@@ -122,7 +122,7 @@ void Light::setPower(const float& power)
 }
 
 
-void Light::setDirection(const glm::vec3& direction)
+void Light::setDirection(const Object::vec& direction)
 {
 	if (_hasDirection(_lightType))
 		_direction = direction;
@@ -198,7 +198,7 @@ bool Light::_hasAngles(const Light::Type& type)
 }
 
 
-std::ostream&operator<<(std::ostream& out, const Light::Type& type)
+std::ostream& operator<<(std::ostream& out, const Light::Type& type)
 {
 	switch (type)
 	{

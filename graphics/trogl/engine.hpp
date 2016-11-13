@@ -18,14 +18,24 @@
 class Engine
 {
 	public:
-		// Constructors / Destructor.
-		Engine(const bool& displayFPS = false);
-		~Engine();
+		// Inner classes.
+		enum RenderMode
+		{
+			POINTS = GL_POINT,
+			EDGES = GL_LINE,
+			POLYGONS = GL_POLYGON,
+		};
+
+		// Static methods.
+		static Engine& instance();
 
 		// Methods.
 		void setGUI(const GUIPtr& gui);
-		void setDisplayFPS(const bool& displayFPS);
 		void setActiveScene(const ScenePtr& scene);
+		void setRenderMode(const RenderMode& mode);
+
+		void enableFPS();
+		void disableFPS();
 
 		bool validateScene();
 		void showScene();
@@ -52,29 +62,28 @@ class Engine
 		ScenePtr _scene;
 		GUIPtr _gui;
 		GUIfpsPtr _guiFPS;
-
 		EngineObjects _objects;
+		RenderMode _renderMode;
 
 		float _width;
 		float _height;
 
 	private:
-		// Static fields.
-		static const ShaderPtr DEFAULT_VERTEX_SHADER;
-		static const ShaderPtr DEFAULT_FRAGMENT_SHADER;
-
-		static Engine* _current;
-
 		// Static methods.
-		static void _display();
-		static void _cycle();
-		static void _reshape(int w, int h);
+		static void _displayFunc();
+		static void _idleFunc();
+		static void _reshapeFunc(int w, int h);
 		static bool _runGlewTest();
 		static std::string _generateWindowName(const Scene& scene);
-};
 
-void reshape(int w, int h);
-void cycle();
+		// Constructors / Destructor.
+		Engine();
+		Engine(const Engine&);
+		~Engine();
+
+		// Operators.
+		Engine& operator=(const Engine&);
+};
 
 
 class Engine::VertexObject

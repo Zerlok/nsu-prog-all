@@ -35,16 +35,18 @@ class Light : public Object
 		// Methods.
 		const Type& getLightType() const;
 		const float& getPower() const;
-		const glm::vec3& getDirection() const;
+		const vec& getDirection() const;
 		const Color& getColor() const;
 		const float& getInnerAngle() const;
 		const float& getOutterAngle() const;
 
 		void setPower(const float& power);
-		void setDirection(const glm::vec3& direction);
+		void setDirection(const vec& direction);
 		void setColor(const Color& color);
 		void setInnerAngle(const float& innerAngle);
 		void setOutterAngle(const float& outterAngle);
+
+		void faceDirectionTo(const vec& position);
 
 		// Overriden methods.
 		void applyPosition() override;
@@ -59,7 +61,7 @@ class Light : public Object
 		// Fields.
 		Type _lightType;
 		float _power;
-		glm::vec3 _direction;
+		vec _direction;
 		Color _color;
 		float _innerAngle;
 		float _outterAngle;

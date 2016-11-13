@@ -193,9 +193,10 @@ void Mesh::recalculateNormals()
 
 void Mesh::applyPosition()
 {
-	// TODO: reset current mesh position to default.
 	for (Vertex& v : _vertices)
 		v._position += _position;
+
+	_position = Object::DEFAULT_POSITION;
 }
 
 

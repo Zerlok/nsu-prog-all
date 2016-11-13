@@ -44,7 +44,6 @@ class Shader : public Component
 		bool isCompiled() const;
 		bool isCompiledSuccessfuly() const;
 		const Status& getStatus() const;
-		const GLuint& getProgram() const;
 
 		void compile();
 		void use();
@@ -79,6 +78,9 @@ class Shader : public Component
 };
 
 using ShaderPtr = SharedPointer<Shader>;
+
+
+std::ostream& operator<<(std::ostream& out, const Shader::Status& st);
 
 
 #endif // __SHADER_HPP__

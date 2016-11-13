@@ -10,13 +10,16 @@ logger_t loggerModules = loggerModule(Logger::Level::INFO,
 
 
 Sphere::Sphere(const float& radius,
-			   const size_t& rows,
-			   const size_t& segments)
+			   const size_t& rowsNum,
+			   const size_t& segmentsNum)
 	: Mesh("Sphere")
 {
-	static const Color c = Color(200, 200, 200);
+	static const Color c = Color(200, 20, 20);
 	static const double maxPsy = 2 * M_PI;
 	static const double maxPhi = M_PI;
+
+	const size_t rows = (rowsNum != 0) ? rowsNum : 8;
+	const size_t segments = (segmentsNum != 0) ? segmentsNum : rows*2;
 
 	const double psyStep = maxPsy / (segments);
 	const double phiStep = maxPhi / (rows+1);
@@ -95,4 +98,3 @@ Sphere::Sphere(const float& radius,
 Sphere::~Sphere()
 {
 }
-

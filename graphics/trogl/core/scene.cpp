@@ -8,7 +8,7 @@ logger_t loggerModules = loggerModule(Logger::Level::WARNING, loggerDescriptionF
 
 
 const std::string Scene::DEFAULT_NAME = "Scene";
-const CameraPtr Scene::DEFAULT_CAMERA = CameraPtr(new Camera());
+const CameraPtr Scene::DEFAULT_CAMERA = new Camera();
 
 
 Scene::Scene(const std::string& name,
@@ -20,8 +20,9 @@ Scene::Scene(const std::string& name,
 	  _bgColor(Color::grey),
 	  _ambientPower(0.0)
 {
-	logDebug << "Scene with camera "
-			 << _camera->getName() << " created" << logEndl;
+	logDebug << "Scene " << getName()
+			 << " with camera " << _camera->getName() << " created."
+			 << logEndl;
 }
 
 
@@ -33,13 +34,15 @@ Scene::Scene(const Scene& scene)
 	  _bgColor(scene._bgColor),
 	  _ambientPower(scene._ambientPower)
 {
-	logDebug << "Scene " << getName() << " copied" << logEndl;
+	logDebug << "Scene " << getName()
+			 << " copied from " << scene.getName()
+			 << logEndl;
 }
 
 
 Scene::~Scene()
 {
-	logDebug << "Scene " << getName() << " removed" << logEndl;
+	logDebug << "Scene " << getName() << " removed." << logEndl;
 }
 
 
@@ -77,6 +80,14 @@ const Color& Scene::getBgColor() const
 const CameraPtr& Scene::getCamera() const
 {
 	return _camera;
+}
+
+
+LightPtr Scene::getAmbientLight() const
+{
+	LightPtr light = new Light(Light::Type::AMBIENT);
+	light->setColor(_bgColor);
+	light->setPower(_ambientPower);
 }
 
 

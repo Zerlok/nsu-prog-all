@@ -28,6 +28,7 @@ class Scene : public Component
 		const Lights& getLights() const;
 		const Color& getBgColor() const;
 		const CameraPtr& getCamera() const;
+		LightPtr getAmbientLight() const;
 
 		void addMesh(const MeshPtr& mesh);
 		void addLight(const LightPtr& light);
