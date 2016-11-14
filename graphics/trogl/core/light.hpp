@@ -22,6 +22,11 @@ class Light : public Object
 			AMBIENT = 4,
 		};
 
+		// Static methods.
+		static Light createPoint();
+		static Light createSun();
+		static Light createSpot();
+
 		// Constructors / Destructor.
 		Light(const Type& type);
 		Light(const Light& light);

@@ -92,7 +92,7 @@ class Mesh : public Object
 				// Methods.
 				const size_t& getIndex() const;
 				const vec& getPosition() const;
-				const vec& getNormal() const;
+				vec getNormal() const;
 				const Color& getColor() const;
 
 				void setPosition(const glm::vec3& pos);
@@ -102,11 +102,9 @@ class Mesh : public Object
 				// Fields.
 				size_t _idx;
 				Object::vec _position;
-				Object::vec _normal;
 				// TODO: move color into material, assign vertices into material groups.
 				Color _color;
 
-//				std::vector<Polygon*> _linkedPolygons;
 				std::vector<Triple> _linkedTriples; // Aggregation links with Polygons.
 				Mesh* _linkedMesh;
 

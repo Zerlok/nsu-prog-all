@@ -15,7 +15,7 @@ Sphere::Sphere(const float& radius,
 	: Mesh("Sphere")
 {
 	static const Color c = Color(200, 20, 20);
-	static const double maxPsy = 2 * M_PI;
+	static const double maxPsy = 2.0 * M_PI;
 	static const double maxPhi = M_PI;
 
 	const size_t rows = (rowsNum != 0) ? rowsNum : 8;

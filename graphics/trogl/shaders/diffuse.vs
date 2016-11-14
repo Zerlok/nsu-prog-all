@@ -13,9 +13,9 @@ varying vec4 vertexColor;
 
 void main()
 {
-        gl_Position = gl_ModelViewProjectionMatrix * position;
+	gl_Position = gl_ModelViewProjectionMatrix * position;
 
-        vertexPosition = gl_ModelViewMatrix * position;
+	vertexPosition = gl_ModelViewMatrix * position;
 	vertexNormal = normalize(gl_ModelViewMatrix * normal).xyz;
 	vertexColor = color;
 }

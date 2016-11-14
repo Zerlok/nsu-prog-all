@@ -78,6 +78,10 @@ int Engine::_validateScene()
 		return 0;
 	}
 
+	if (_scene->getLights().empty())
+		logWarning << "No lamps found at scene " << _scene->getName()
+				   << logEndl;
+
 	return 1;
 }
 
@@ -260,8 +264,6 @@ bool Engine::validate()
 	result += _validateScene();
 	result += _validateFrame();
 	result += _validateMeshes();
-
-//	_frameBuffer.init(_camera->getWidth(), _camera->getHeight());
 
 	_status = (result == 3)
 			? Status::VALIDATION_SUCCESSFUL

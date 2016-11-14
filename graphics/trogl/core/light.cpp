@@ -7,6 +7,43 @@
 logger_t loggerModules = loggerModule(Logger::Level::WARNING, loggerDescriptionFull);
 
 
+static const Object::vec defaultLampPosition {0.0, 30.0, 0.0};
+
+
+Light Light::createPoint()
+{
+	Light lamp(Light::Type::POINT);
+	lamp.setPower(1000.0);
+	lamp.setPosition(defaultLampPosition);
+
+	return std::move(lamp);
+}
+
+
+Light Light::createSun()
+{
+	Light lamp(Light::Type::SUN);
+	lamp.setPower(1.0);
+	lamp.setDirection({0.0, -1.0, 0.0});
+	lamp.setPosition(defaultLampPosition);
+
+	return std::move(lamp);
+}
+
+
+Light Light::createSpot()
+{
+	Light lamp(Light::Type::SPOT);
+	lamp.setPower(1000.0);
+	lamp.setDirection({0.0, -1.0, 0.0});
+	lamp.setInnerAngle(M_PI_2 / 9.0);
+	lamp.setOutterAngle(M_PI_2 / 6.0);
+	lamp.setPosition(defaultLampPosition);
+
+	return std::move(lamp);
+}
+
+
 Light::Light(const Type& type)
 	: Object(Object::Type::LIGHT),
 	  _lightType(type),

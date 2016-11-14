@@ -212,10 +212,6 @@ void Mesh::applyRotation()
 		v._position = glm::vec3(xRotationMat * glm::vec4(v._position, 1.0));
 		v._position = glm::vec3(yRotationMat * glm::vec4(v._position, 1.0));
 		v._position = glm::vec3(zRotationMat * glm::vec4(v._position, 1.0));
-
-		v._normal = glm::vec3(xRotationMat * glm::vec4(v._position, 0.0));
-		v._normal = glm::vec3(yRotationMat * glm::vec4(v._position, 0.0));
-		v._normal = glm::vec3(zRotationMat * glm::vec4(v._position, 0.0));
 	}
 
 	_rotation = Object::DEFAULT_ROTATION;
@@ -227,7 +223,6 @@ void Mesh::applyScale()
 	for (Vertex& v : _vertices)
 	{
 		v._position *= _scale;
-		v._normal = glm::normalize(v._normal / _scale);
 	}
 
 	_scale = Object::DEFAULT_SCALE;
@@ -254,7 +249,6 @@ Mesh::Vertex::Vertex(const size_t& idx,
 					 Mesh* mesh)
 	: _idx(idx),
 	  _position(x, y, z),
-	  _normal(0.0, 0.0, 0.0),
 	  _color(color),
 	  _linkedTriples(),
 	  _linkedMesh(mesh)
@@ -265,7 +259,6 @@ Mesh::Vertex::Vertex(const size_t& idx,
 Mesh::Vertex::Vertex(const Mesh::Vertex& v)
 	: _idx(v._idx),
 	  _position(v._position),
-	  _normal(v._normal),
 	  _color(v._color),
 	  _linkedTriples(v._linkedTriples),
 	  _linkedMesh(v._linkedMesh)
@@ -276,7 +269,6 @@ Mesh::Vertex::Vertex(const Mesh::Vertex& v)
 Mesh::Vertex::Vertex(Mesh::Vertex&& v)
 	: _idx(std::move(v._idx)),
 	  _position(std::move(v._position)),
-	  _normal(std::move(v._normal)),
 	  _color(std::move(v._color)),
 	  _linkedTriples(std::move(v._linkedTriples)),
 	  _linkedMesh(v._linkedMesh)
@@ -293,7 +285,6 @@ Mesh::Vertex& Mesh::Vertex::operator=(const Mesh::Vertex& v)
 {
 	_idx = v._idx;
 	_position = v._position;
-	_normal = v._normal;
 	_color = v._color;
 	_linkedTriples = v._linkedTriples;
 	_linkedMesh = v._linkedMesh;
@@ -306,7 +297,6 @@ Mesh::Vertex& Mesh::Vertex::operator=(Mesh::Vertex&& v)
 {
 	_idx = std::move(v._idx);
 	_position = std::move(v._position);
-	_normal = std::move(v._normal);
 	_color = std::move(v._color);
 	_linkedTriples = std::move(v._linkedTriples);
 	_linkedMesh = v._linkedMesh;
@@ -321,16 +311,19 @@ const Object::vec& Mesh::Vertex::getPosition() const
 }
 
 
-const Object::vec& Mesh::Vertex::getNormal() const
+Object::vec Mesh::Vertex::getNormal() const
 {
-	return _normal;
+	vec normal = vec(0.0, 0.0, 0.0);
+	for (const Triple& tr : _linkedTriples)
+		normal += _linkedMesh->getPolygon(tr).calculateNormal();
+
+	return std::move(glm::normalize(normal));
 }
 
 
 void Mesh::Vertex::setPosition(const glm::vec3& pos)
 {
 	_position = pos;
-	_recalculateNormal();
 }
 
 
@@ -355,11 +348,6 @@ const size_t& Mesh::Vertex::getIndex() const
 
 void Mesh::Vertex::_recalculateNormal()
 {
-	_normal = glm::vec3(0.0, 0.0, 0.0);
-	for (const Triple& tr : _linkedTriples)
-		_normal += _linkedMesh->getPolygon(tr).calculateNormal();
-
-	_normal = glm::normalize(_normal);
 }
 
 

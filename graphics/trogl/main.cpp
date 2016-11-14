@@ -10,6 +10,7 @@
 #include "meshes/megacube.hpp"
 #include "meshes/cylinder.hpp"
 #include "meshes/sphere.hpp"
+#include "meshes/plane.hpp"
 
 #include "materials/diffusematerial.hpp"
 #include "shaders/diffuseshader.hpp"
@@ -45,19 +46,22 @@ int main(int argc, char *argv[])
 	scene->setBgColor(Color::grey);
 
 	// Generate meshes.
+	MeshPtr floor = new Plane(Color(100, 200, 100));
+	floor->setScale({30.0, 0.0, 30.0});
+	floor->setPosition({0.0, -2.0, 0.0});
+	scene->addMesh(floor);
+
 	MeshGenerator meshGenerator;
 //	const MeshGenerator::Objects meshes = meshGenerator.latticeArrangement(size, offset, clonableMesh);
 	const MeshGenerator::Objects meshes = meshGenerator.directionArrangement(size, offset, direction, clonableMesh);
 	for (const MeshGenerator::ObjectPointer& m : meshes)
 		scene->addMesh(m);
 
-	// Add light.	
-	LightPtr lamp = new Light(Light::Type::POINT);
-	lamp->setPower(1000.0);
-//	LightPtr lamp = new Light(Light::Type::SUN);
-//	lamp->setPower(1.0);
+	// Add light.
+	LightPtr lamp = new Light(Light::createPoint());
+//	LightPtr lamp = new Light(Light::createSun());
+//	LightPtr lamp = new Light(Light::createSpot());
 //	LightPtr lamp = scene->getAmbientLight();
-	lamp->setPosition({0.0, 30.0, 0.0});
 	scene->addLight(lamp);
 
 	// Show scene.
