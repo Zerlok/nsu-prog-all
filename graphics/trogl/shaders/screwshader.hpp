@@ -11,8 +11,8 @@ class ScrewShader : public Shader
 		ScrewShader();
 		~ScrewShader();
 
-		void initCustomVarsLocations() override;
-		void prepareForRender() override;
+		void registerInternalAttributes() override;
+		void passInternalAttributes() override;
 		void passObject(Object const*) override;
 
 	private:

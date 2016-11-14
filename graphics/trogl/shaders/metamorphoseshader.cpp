@@ -24,14 +24,14 @@ MetamorphoseShader::~MetamorphoseShader()
 }
 
 
-void MetamorphoseShader::initCustomVarsLocations()
+void MetamorphoseShader::registerInternalAttributes()
 {
 	_attrObjPosition = glGetUniformLocation(_glShaderProgram, "meshPosition");
 	_attrCosSqAlpha = glGetUniformLocation(_glShaderProgram, "cosSqAlpha");
 }
 
 
-void MetamorphoseShader::prepareForRender()
+void MetamorphoseShader::passInternalAttributes()
 {
 	glUniform1f(_attrCosSqAlpha, std::pow(std::cos(getTimeDouble() / 10.0), 2));
 }

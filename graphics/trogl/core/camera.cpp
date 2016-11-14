@@ -163,7 +163,7 @@ const size_t& Camera::getHeight() const
 }
 
 
-const float Camera::getWHRatio() const
+float Camera::getWHRatio() const
 {
 	return (float(_width)/float(_height));
 }

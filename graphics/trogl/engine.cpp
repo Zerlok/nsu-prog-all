@@ -470,7 +470,7 @@ void Engine::VertexObject::compileGLShaders()
 
 void Engine::VertexObject::draw(const LightPtr& light)
 {
-	_shader->use();
+	_shader->bind();
 	_shader->passObject(_mesh.get_pointer());
 	_shader->passObject(light.get_pointer());
 

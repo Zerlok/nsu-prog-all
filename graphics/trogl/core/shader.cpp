@@ -177,6 +177,8 @@ bool Shader::isCompiled() const
 
 		case Status::COMPILATION_FAILED:
 		case Status::COMPILATION_SUCCESSFUL:
+		case Status::NOT_BINDED:
+		case Status::BINDED:
 		default:
 			return true;
 	}
@@ -185,7 +187,35 @@ bool Shader::isCompiled() const
 
 bool Shader::isCompiledSuccessfuly() const
 {
-	return (_status == Status::COMPILATION_SUCCESSFUL);
+	switch (_status)
+	{
+		case Status::NOT_COMPILED:
+		case Status::COMPILATION_FAILED:
+			return false;
+
+		case Status::COMPILATION_SUCCESSFUL:
+		case Status::NOT_BINDED:
+		case Status::BINDED:
+		default:
+			return true;
+	}
+}
+
+
+bool Shader::isBinded() const
+{
+	switch (_status)
+	{
+		case Status::NOT_COMPILED:
+		case Status::COMPILATION_FAILED:
+		case Status::COMPILATION_SUCCESSFUL:
+		case Status::NOT_BINDED:
+			return false;
+
+		case Status::BINDED:
+		default:
+			return true;
+	}
 }
 
 
@@ -208,14 +238,41 @@ void Shader::compile()
 			? Status::COMPILATION_SUCCESSFUL
 			: Status::COMPILATION_FAILED;
 
-	initCustomVarsLocations();
+	if (!isCompiledSuccessfuly())
+		return;
+
+	registerInternalAttributes();
+	_status = Status::NOT_BINDED;
 }
 
 
-void Shader::use()
+void Shader::bind()
 {
 	glUseProgram(_glShaderProgram);
-	prepareForRender();
+	_status = Status::BINDED;
+	passInternalAttributes();
+}
+
+
+void Shader::unbind()
+{
+	glUseProgram(0);
+	_status = Status::NOT_BINDED;
+}
+
+
+bool Shader::registerAttribute(const std::string& name)
+{
+	Attrs::iterator it = _externalAttributes.find(name);
+	if (it != _externalAttributes.end())
+		return false;
+
+	Attr glAttr = glGetUniformLocation(_glShaderProgram, name.c_str());
+	if (glAttr == -1)
+		return false;
+
+	_externalAttributes.insert({name, glAttr});
+	return true;
 }
 
 
@@ -343,5 +400,53 @@ std::ostream& operator<<(std::ostream& out, const Shader::Status& st)
 			return out << "COMPILATION FAILED";
 		case Shader::Status::COMPILATION_SUCCESSFUL:
 			return out << "COMPILATION SUCCESSFUL";
+		case Shader::Status::NOT_BINDED:
+			return out << "NOT BINDED";
+		case Shader::Status::BINDED:
+			return out << "BINDED";
 	}
+
+	return out;
+}
+
+
+// -------------------------------- UTILS -------------------------------- //
+
+void glAttributeUtils::pass(GLuint glProg, const int& value)
+{
+	glUniform1i(glProg, value);
+}
+
+
+void glAttributeUtils::pass(GLuint glProg, const float& value)
+{
+	glUniform1f(glProg, value);
+}
+
+
+void glAttributeUtils::pass(GLuint glProg, const glm::vec2& value)
+{
+	glUniform2f(glProg, value.x, value.y);
+}
+
+
+void glAttributeUtils::pass(GLuint glProg, const glm::vec3& value)
+{
+	glUniform3f(glProg, value.x, value.y, value.z);
+}
+
+
+void glAttributeUtils::pass(GLuint glProg, const glm::vec4& value)
+{
+	glUniform4f(glProg, value.x, value.y, value.z, value.w);
+}
+
+
+void glAttributeUtils::pass(GLuint glProg, const Color& value)
+{
+	glUniform4f(glProg,
+				value.getRedF(),
+				value.getGreenF(),
+				value.getBlueF(),
+				value.getAlphaF());
 }

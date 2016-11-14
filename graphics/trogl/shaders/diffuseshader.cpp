@@ -58,7 +58,7 @@ void DiffuseShader::passLight(Light const* light)
 }
 
 
-void DiffuseShader::initCustomVarsLocations()
+void DiffuseShader::registerInternalAttributes()
 {
 	_attrMeshPosition = glGetUniformLocation(_glShaderProgram, "meshPosition");
 
@@ -88,6 +88,6 @@ void DiffuseShader::passObject(Object const* obj)
 }
 
 
-void DiffuseShader::prepareForRender()
+void DiffuseShader::passInternalAttributes()
 {
 }

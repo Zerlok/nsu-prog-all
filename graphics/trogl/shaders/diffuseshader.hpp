@@ -21,9 +21,9 @@ class DiffuseShader : public Shader
 		void passLight(Light const* light);
 
 		// Overriden methods.
-		void initCustomVarsLocations() override;
+		void registerInternalAttributes() override;
 		void passObject(Object const* obj) override;
-		void prepareForRender() override;
+		void passInternalAttributes() override;
 
 	private:
 		// Inner classes.
