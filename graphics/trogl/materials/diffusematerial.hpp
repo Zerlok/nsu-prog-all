@@ -15,9 +15,11 @@ class DiffuseMaterial : public Material
 		// Methods.
 		const float& getDiffuse() const;
 		const float& getSpecular() const;
+		const float& getHardness() const;
 
 		void setDiffuse(const float& diffuse);
 		void setSpecular(const float& specular);
+		void setHardness(const float& hardness);
 
 		// Overriden methods.
 		void passToShader() const override;
@@ -25,6 +27,7 @@ class DiffuseMaterial : public Material
 	private:
 		float _diffuse;
 		float _specular;
+		float _hardness;
 };
 
 

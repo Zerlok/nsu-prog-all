@@ -338,13 +338,24 @@ void Engine::_viewFrame()
 {
 	_frame->clear(_scene->getBgColor());
 
+	// Camera flying.
+	static const float a = std::sqrt(std::pow(_camera->getPosition().x, 2) + std::pow(_camera->getPosition().z, 2));
+	static const float h = _camera->getPosition().y;
+	const float phi = getTimeDouble() / 31.0;
+	const float psy = -getTimeDouble() / 29.0;
+//	_camera->setPosition({a*cos(phi), h, a*sin(phi)});
+
+	LightPtr light = _scene->getLights().front();
+	light->setPosition({a*cos(psy), light->getPosition().y, a*sin(psy)});
+	light->faceDirectionTo({cos(-psy), 0.0, sin(-psy)});
+
 	// TODO: use one style matricies coding (OpenGL).
 	glm::mat4x4 matView = glm::lookAt(_camera->getPosition(),
 									  _camera->getLookingAtPosition(),
 									  _camera->getHeadDirection());
 	// TODO: move into animation.
 //	matView = glm::rotate(matView, 3.0f, glm::vec3(0.0f, 1.0f, 0.0f));
-	matView = glm::rotate(matView, float(getTimeDouble() / 31.0), glm::vec3(0.0f, 1.0f, 0.0f));
+//	matView = glm::rotate(matView, float(getTimeDouble() / 31.0), glm::vec3(0.0f, 1.0f, 0.0f));
 //	matView = glm::rotate(matView, float(getTimeDouble() / 17.0), glm::vec3(0.0f, 0.0f, 1.0f));
 
 	glMatrixMode(GL_MODELVIEW);

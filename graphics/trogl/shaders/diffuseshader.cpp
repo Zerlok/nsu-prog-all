@@ -104,6 +104,7 @@ void DiffuseShader::_registerAttributes()
 	_externalAttributes.registerate("material.color");
 	_externalAttributes.registerate("material.diffuse");
 	_externalAttributes.registerate("material.specular");
+	_externalAttributes.registerate("material.hardness");
 }
 
 

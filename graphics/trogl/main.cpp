@@ -69,6 +69,7 @@ int main(int argc, char *argv[])
 //	LightPtr lamp = new Light(Light::createSun());
 //	LightPtr lamp = new Light(Light::createSpot());
 //	LightPtr lamp = scene->getAmbientLight();
+//	lamp->setColor({200, 200, 255});
 	scene->addLight(lamp);
 
 	// Show scene.

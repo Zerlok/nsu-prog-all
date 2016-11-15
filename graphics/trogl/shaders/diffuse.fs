@@ -3,16 +3,17 @@
 
 struct CameraStruct
 {
-        vec4 position;
+	vec4 position;
 	vec4 direction;
 };
 
 
 struct MaterialStruct
 {
-        vec4 color;
+	vec4 color;
 	float diffuse;
 	float specular;
+	float hardness;
 };
 
 
@@ -28,84 +29,62 @@ struct LampStruct
 };
 
 
-void pointLight(
-		in vec4 vpos,
-		in vec3 vnor,
-		in vec4 vcol,
-		in vec4 lpos,
-		in vec4 lcol,
+float lampIntensity(
 		in float lpow,
-		out vec4 color)
+		in vec4 lpos,
+		in vec4 vpos,
+		in vec3 vnor)
 {
 	vec3 dir = lpos.xyz - vpos.xyz;
 	float dis = length(dir);
 	dir = normalize(dir);
-
-	vec4 dcol = lcol * max(dot(vnor, dir), 0.0) * lpow / pow(dis, 2);
-
-	color.r = vcol.r * dcol.r;
-	color.g = vcol.g * dcol.g;
-	color.b = vcol.b * dcol.b;
-	color.a = vcol.a;
+	
+	return max(dot(vnor, dir), 0.0) * lpow / pow(dis, 2);	
 }
 
 
-void directionLight(
-		in vec3 vnor,
-		in vec4 vcol,
-		in vec3 ldir,
-		in vec4 lcol,
+float sunIntensity(
 		in float lpow,
-		out vec4 color)
+		in vec3 ldir,
+		in vec3 vnor)
 {
-	vec4 dcol = lcol * max(dot(vnor, ldir), 0.0) * lpow;
-
-	color.r = vcol.r * dcol.r;
-	color.g = vcol.g * dcol.g;
-	color.b = vcol.b * dcol.b;
-	color.a = vcol.a;
+	return max(dot(vnor, ldir), 0.0) * lpow;
 }
 
 
-void spotLight(
-		in vec4 vpos,
-		in vec3 vnor,
-		in vec4 vcol,
-		in vec4 lpos,
+float spotRatio(
+		in vec3 vdir,
 		in vec3 ldir,
-		in vec4 lcol,
-		in float lpow,
 		in float lia,
-		in float loa,
-		out vec4 color)
+		in float loa)
 {
-	vec3 dir = lpos.xyz - vpos.xyz;
-	float dis = length(dir);
-	dir = normalize(dir);
-	float cosA = (dot(dir, ldir)-cos(loa)) / (cos(lia) - cos(loa));
-
-	vec4 dcol = clamp(cosA, 0.0, 1.0) * lcol * max(dot(vnor, dir), 0.0) * lpow / pow(dis, 2);
-
-	color.r = vcol.r * dcol.r;
-	color.g = vcol.g * dcol.g;
-	color.b = vcol.b * dcol.b;
-	color.a = vcol.a;
+	return clamp((dot(vdir, ldir) - cos(loa)) / (cos(lia) - cos(loa)), 0.0, 1.0);
 }
 
 
-void ambientLight(
-		in vec4 vcol,
-		in vec4 acol,
-		in float apow,
-		out vec4 color)
+float specularIntensity(
+		in vec4 cpos,
+		in vec4 vpos,
+		in vec3 vnor,
+		in vec3 ldir,
+		in float mhar)
 {
-        float power = clamp(apow, 0.0, 1.0);
-
-	color.r = vcol.r * acol.r * power;
-	color.g = vcol.g * acol.g * power;
-	color.b = vcol.b * acol.b * power;
-	color.a = vcol.a;
+	vec3 cdir = normalize(vpos - cpos).xyz;
+	vec3 _ldir = reflect(ldir, vnor).xyz;
+	return pow(max(dot(cdir, _ldir), 0.0), mhar);
 }
+
+
+vec4 mixLighting(
+		in MaterialStruct mat,
+		in vec4 lcol,
+		in float lint,
+		in float sint)
+{
+	vec3 color = lcol.rgb * lint * (mat.color.rgb * mat.diffuse + sint * mat.specular);
+	return vec4(color, mat.color.a);
+}
+
 
 
 uniform CameraStruct camera;
@@ -118,52 +97,49 @@ varying vec3 vertexNormal;
 
 void main()
 {
-	vec4 color;
+	vec4 cameraPos = -gl_ModelViewMatrix * camera.position;
 	vec4 lampPos = gl_ModelViewMatrix * lamp.position;
 	vec3 lampDir = -normalize(gl_ModelViewMatrix * lamp.direction).xyz;
+	float lampInt;
+	float specularInt;
+	vec4 color;
 
 	switch (lamp.type)
 	{
 		// Point lamp light drawing.
 		case 1:
-			pointLight(
-			                vertexPosition, vertexNormal, material.color,
-					lampPos, lamp.color, lamp.power,
-					color
-			);
+			lampDir = normalize(lampPos.xyz - vertexPosition.xyz);
+			lampInt = lampIntensity(lamp.power, lampPos, vertexPosition, vertexNormal);
+			specularInt = specularIntensity(cameraPos, vertexPosition, vertexNormal, lampDir, material.hardness);
+			color = mixLighting(material, lamp.color, lampInt, specularInt);
 			break;
 
 		// Directional lamp light drawing.
 		case 2:
-			directionLight(
-			                vertexNormal, material.color,
-					lampDir, lamp.color, lamp.power,
-					color
-			);
+			lampInt = sunIntensity(lamp.power, lampDir, vertexNormal);
+			specularInt = specularIntensity(cameraPos, vertexPosition, vertexNormal, lampDir, material.hardness);
+			color = mixLighting(material, lamp.color, lampInt, specularInt);
 			break;
 
 		// Spot lamp light drawing.
 		case 3:
-			spotLight(
-			                vertexPosition, vertexNormal, material.color,
-					lampPos, lampDir, lamp.color, lamp.power, lamp.ia, lamp.oa,
-					color
-			);
+			vec3 dir = normalize(lampPos.xyz - vertexPosition.xyz);
+			lampInt = spotRatio(dir, lampDir, lamp.ia, lamp.oa) * lampIntensity(lamp.power, lampPos, vertexPosition, vertexNormal);
+			specularInt = specularIntensity(cameraPos, vertexPosition, vertexNormal, dir, material.hardness);
+			color = mixLighting(material, lamp.color, lampInt, specularInt);
 			break;
 
 		// Ambient (scene background) light drawing.
 		case 4:
-			ambientLight(
-			                material.color,
-					lamp.color, lamp.power,
-					color
-			);
+			color = material.color * lamp.color * clamp(lamp.power, 0.0, 1.0);
+			color.a = material.color.a;
 			break;
 
 		default:
-		        color = material.color;
+			color = material.color;
 			break;
 	}
 
-        gl_FragColor = clamp(color, 0.0, 1.0);
+		gl_FragColor = clamp(color, 0.0, 1.0);
 }
+

@@ -162,7 +162,7 @@ void Light::setPower(const float& power)
 void Light::setDirection(const Object::vec& direction)
 {
 	if (_hasDirection(_lightType))
-		_direction = direction;
+		_direction = glm::normalize(direction);
 }
 
 
@@ -183,6 +183,12 @@ void Light::setOutterAngle(const float& outterAngle)
 {
 	if (_hasAngles(_lightType))
 		_outterAngle = outterAngle;
+}
+
+
+void Light::faceDirectionTo(const Object::vec& position)
+{
+	setDirection(position - _position);
 }
 
 

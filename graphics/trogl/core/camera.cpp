@@ -236,9 +236,16 @@ void Camera::setFarDistance(const float& distance)
 }
 
 
+void Camera::setPosition(const Object::vec& position)
+{
+	// TODO: calculate new _rotation from _lookingAtPosition and new position.
+	Object::setPosition(position);
+}
+
+
 void Camera::setRotation(const Object::vec& rotation)
 {
-	// TODO: Rotate lookingAtPosition.
+	// TODO: calculate new _lookingAtPosition from new rotation.
 	Object::setRotation(rotation);
 }
 

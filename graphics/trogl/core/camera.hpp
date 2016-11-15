@@ -50,6 +50,7 @@ class Camera : public Object
 		void setFarDistance(const float& distance);
 
 		// Overriden methods.
+		void setPosition(const vec& position) override;
 		void setRotation(const vec& rotation) override;
 
 		void applyPosition() override;
