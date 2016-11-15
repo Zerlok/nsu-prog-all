@@ -9,7 +9,9 @@ logger_t lModule = loggerModule(Logger::Level::DEBUG, loggerDescriptionFull);
 
 
 DiffuseMaterial::DiffuseMaterial(const Color& color)
-	: Material("Diffusematerial", color, new DiffuseShader())
+	: Material("Diffusematerial", color, new DiffuseShader()),
+	  _diffuse(1.0),
+	  _specular(0.5)
 {
 	logDebug << getName() << " created." << logEndl;
 }
@@ -44,11 +46,11 @@ void DiffuseMaterial::setSpecular(const float& specular)
 }
 
 
-void DiffuseMaterial::passToShader()
+void DiffuseMaterial::passToShader() const
 {
-	logDebug << "Passing " << getName() << " parameters to "
-			 << _shader->getName()
-			 << logEndl;
+//	logDebug << "Passing " << getName() << " parameters to "
+//			 << _shader->getName()
+//			 << logEndl;
 
 	_shader->passAttribute("material.color", _color);
 	_shader->passAttribute("material.diffuse", _diffuse);

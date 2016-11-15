@@ -9,7 +9,7 @@
 class MegaCube : public Mesh
 {
 	public:
-		MegaCube(const Color& c1, const Color& c2);
+		MegaCube();
 		~MegaCube();
 };
 

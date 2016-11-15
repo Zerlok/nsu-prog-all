@@ -9,7 +9,7 @@
 class Cylinder : public Mesh
 {
 	public:
-		Cylinder(const Color& c1, const Color& c2);
+		Cylinder();
 		~Cylinder();
 };
 

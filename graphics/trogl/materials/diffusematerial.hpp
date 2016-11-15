@@ -20,7 +20,7 @@ class DiffuseMaterial : public Material
 		void setSpecular(const float& specular);
 
 		// Overriden methods.
-		void passToShader() override;
+		void passToShader() const override;
 
 	private:
 		float _diffuse;

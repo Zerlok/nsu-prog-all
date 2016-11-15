@@ -10,7 +10,6 @@ class Cube : public Mesh
 {
 	public:
 		Cube(const float& radius = 1.0,
-			 const Color& color = Color::grey,
 			 const size_t& subdivideLevel = 0);
 		~Cube();
 };

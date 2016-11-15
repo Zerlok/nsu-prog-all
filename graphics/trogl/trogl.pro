@@ -100,7 +100,6 @@ SOURCES += \
 # Custom meshes.
 SOURCES += \
     meshes/cube.cpp \
-    meshes/strangecube.cpp \
     meshes/megacube.cpp \
     meshes/cylinder.cpp \
     meshes/sphere.cpp

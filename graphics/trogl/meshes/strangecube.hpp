@@ -9,8 +9,7 @@
 class StrangeCube : public Mesh
 {
 	public:
-		StrangeCube(const Color& c1 = Color::white,
-					const Color& c2 = Color::black);
+		StrangeCube();
 		~StrangeCube();
 };
 

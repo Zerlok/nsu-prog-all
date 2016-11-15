@@ -14,7 +14,6 @@ Sphere::Sphere(const float& radius,
 			   const size_t& segmentsNum)
 	: Mesh("Sphere")
 {
-	static const Color c = Color(200, 20, 20);
 	static const double maxPsy = 2.0 * M_PI;
 	static const double maxPhi = M_PI;
 
@@ -29,7 +28,7 @@ Sphere::Sphere(const float& radius,
 
 	// Vertices.
 	{
-		polarPlusIdx = addVertex(0.0, radius, 0.0, c);
+		polarPlusIdx = addVertex(0.0, radius, 0.0);
 		for (double psy = 0; psy < maxPsy; psy += psyStep)
 		{
 			const double cosPsy = std::cos(psy) * radius;
@@ -40,11 +39,10 @@ Sphere::Sphere(const float& radius,
 				const double sinPhi = std::sin(phi);
 				addVertex(sinPhi * cosPsy,
 						  std::cos(phi) * radius,
-						  sinPhi * sinPsy,
-						  c);
+						  sinPhi * sinPsy);
 			}
 		}
-		polarMinusIdx = addVertex(0.0, -radius, 0.0, c);
+		polarMinusIdx = addVertex(0.0, -radius, 0.0);
 	}
 
 	// Faces.

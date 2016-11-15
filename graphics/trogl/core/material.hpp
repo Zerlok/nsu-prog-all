@@ -31,7 +31,7 @@ class Material : public Component
 		void setShader(const ShaderPtr& shader);
 
 		// Virtual methods.
-		virtual void passToShader() {}
+		virtual void passToShader() const {}
 
 	protected:
 		// Static fields.

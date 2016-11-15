@@ -23,9 +23,7 @@ std::string DiffuseShader::FS_FILE()
 
 
 DiffuseShader::DiffuseShader()
-	: Shader("Diffuse Shader", VS_FILE(), FS_FILE()),
-	  _attrMeshPosition(0),
-	  _attrLamp()
+	: Shader("Diffuse Shader", VS_FILE(), FS_FILE())
 {
 }
 
@@ -37,38 +35,34 @@ DiffuseShader::~DiffuseShader()
 
 void DiffuseShader::passMesh(Mesh const* mesh)
 {
-	const glm::vec3& meshPos = mesh->getPosition();
-	glUniform4f(_attrMeshPosition, meshPos.x, meshPos.y, meshPos.z, 1.0);
+	const glm::vec3& pos = mesh->getPosition();
+
+	_internalAttributes.pass("meshPosition", pos.x, pos.y, pos.z, 1.0f);
 }
 
 
 void DiffuseShader::passLight(Light const* light)
 {
-	const glm::vec3& lightPos = light->getPosition();
-	const glm::vec3& lightDir = light->getDirection();
-	const Color lightColor = light->getColor();
+	const glm::vec3& pos = light->getPosition();
+	const glm::vec3& dir = light->getDirection();
 
-	glUniform1i(_attrLamp.type, int(light->getLightType()));
-	glUniform4f(_attrLamp.position, lightPos.x, lightPos.y, lightPos.z, 1.0f);
-	glUniform1f(_attrLamp.power, light->getPower());
-	glUniform4f(_attrLamp.direction, lightDir.x, lightDir.y, lightDir.z, 0.0f);
-	glUniform4f(_attrLamp.color, lightColor.getRedF(), lightColor.getGreenF(), lightColor.getBlueF(), 1.0f);
-	glUniform1f(_attrLamp.innerAngle, light->getInnerAngle());
-	glUniform1f(_attrLamp.outterAngle, light->getOutterAngle());
+	_internalAttributes.pass("lamp.type", int(light->getLightType()));
+	_internalAttributes.pass("lamp.power", light->getPower());
+	_internalAttributes.pass("lamp.color", light->getColor());
+	_internalAttributes.pass("lamp.position", pos.x, pos.y, pos.z, 1.0f);
+	_internalAttributes.pass("lamp.direction", dir.x, dir.y, dir.z, 0.0f);
+	_internalAttributes.pass("lamp.ia", light->getInnerAngle());
+	_internalAttributes.pass("lamp.oa", light->getOutterAngle());
 }
 
 
-void DiffuseShader::registerInternalAttributes()
+void DiffuseShader::passCamera(const Camera* camera)
 {
-	_attrMeshPosition = glGetUniformLocation(_glShaderProgram, "meshPosition");
+	const glm::vec3& pos = camera->getPosition();
+	const glm::vec3& dir = camera->getLookingAtPosition();
 
-	_attrLamp.type = glGetUniformLocation(_glShaderProgram, "lamp.type");
-	_attrLamp.position = glGetUniformLocation(_glShaderProgram, "lamp.position");
-	_attrLamp.power = glGetUniformLocation(_glShaderProgram, "lamp.power");
-	_attrLamp.direction = glGetUniformLocation(_glShaderProgram, "lamp.direction");
-	_attrLamp.color = glGetUniformLocation(_glShaderProgram, "lamp.color");
-	_attrLamp.innerAngle = glGetUniformLocation(_glShaderProgram, "lamp.ia");
-	_attrLamp.outterAngle = glGetUniformLocation(_glShaderProgram, "lamp.oa");
+	_internalAttributes.pass("camera.position", pos.x, pos.y, pos.z, 1.0f);
+	_internalAttributes.pass("camera.direction", dir.x, dir.y, dir.z, 0.0f);
 }
 
 
@@ -82,12 +76,37 @@ void DiffuseShader::passObject(Object const* obj)
 		case Object::Type::LIGHT:
 			passLight((Light*)obj);
 			break;
+		case Object::Type::CAMERA:
+			passCamera((Camera*)obj);
 		default:
 			break;
 	}
 }
 
 
-void DiffuseShader::passInternalAttributes()
+void DiffuseShader::_registerAttributes()
+{
+	// Internal.
+	_internalAttributes.registerate("meshPosition");
+
+	_internalAttributes.registerate("camera.position");
+	_internalAttributes.registerate("camera.direction");
+
+	_internalAttributes.registerate("lamp.type");
+	_internalAttributes.registerate("lamp.power");
+	_internalAttributes.registerate("lamp.color");
+	_internalAttributes.registerate("lamp.position");
+	_internalAttributes.registerate("lamp.direction");
+	_internalAttributes.registerate("lamp.ia");
+	_internalAttributes.registerate("lamp.oa");
+
+	// External
+	_externalAttributes.registerate("material.color");
+	_externalAttributes.registerate("material.diffuse");
+	_externalAttributes.registerate("material.specular");
+}
+
+
+void DiffuseShader::_passInternalAttributes()
 {
 }

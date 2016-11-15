@@ -12,8 +12,8 @@ class MetamorphoseShader : public Shader
 		MetamorphoseShader();
 		~MetamorphoseShader();
 
-		void registerInternalAttributes() override;
-		void passInternalAttributes() override;
+		void _registerAttributes() override;
+		void _passInternalAttributes() override;
 		void passObject(Object const*obj) override;
 
 	private:

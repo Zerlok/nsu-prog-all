@@ -32,9 +32,9 @@ int main(int argc, char *argv[])
 
 	// Mesh settings.
 //	using MyMesh = Cube;
-//	const MyMesh clonableMesh = Cube(4.0, Color::red);
+//	const MyMesh clonableMesh = Cube(4.0);
 //	using MyMesh = MegaCube;
-//	const MyMesh clonableMesh = MegaCube(Color::white, Color::black);
+//	const MyMesh clonableMesh = MegaCube();
 	using MyMesh = Sphere;
 	MyMesh clonableMesh = MyMesh(1.0, 11);
 	using MeshGenerator = ObjectGenerator<MyMesh, ObjectGeneratorTraits<Mesh> >;
@@ -44,11 +44,18 @@ int main(int argc, char *argv[])
 	camera->setPosition(cameraPos);
 	ScenePtr scene = new Scene("My Scene", camera);
 	scene->setBgColor(Color::grey);
+	scene->setAmbient(0.7);
+
+	// Generate mesh materials.
+	MaterialPtr floorMat = new DiffuseMaterial({120, 200, 120});
+	MaterialPtr objectsMat = new DiffuseMaterial({200, 100, 100});
+	clonableMesh.setMaterial(objectsMat);
 
 	// Generate meshes.
-	MeshPtr floor = new Plane(Color(100, 200, 100));
-	floor->setScale({30.0, 0.0, 30.0});
+	MeshPtr floor = new Plane();
+	floor->setMaterial(floorMat);
 	floor->setPosition({0.0, -2.0, 0.0});
+	floor->setScale({30.0, 0.0, 30.0});
 	scene->addMesh(floor);
 
 	MeshGenerator meshGenerator;
@@ -67,7 +74,7 @@ int main(int argc, char *argv[])
 	// Show scene.
 	Engine& engine = Engine::instance();
 	engine.enableFPS();
-//	engine.setRenderMode(Engine::RenderMode::EDGES);
+	engine.setRenderMode(Engine::RenderMode::POLYGONS);
 	engine.setActiveScene(scene);
 	engine.showActiveScene();
 

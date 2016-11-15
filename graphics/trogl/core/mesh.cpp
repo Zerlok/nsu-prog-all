@@ -141,11 +141,10 @@ const Mesh::IndexingType& Mesh::getIndexType() const
 
 size_t Mesh::addVertex(const double& x,
 					   const double& y,
-					   const double& z,
-					   const Color& color)
+					   const double& z)
 {
 	const size_t idx = _vertices.size();
-	_vertices.push_back({idx, x, y, z, color, this});
+	_vertices.push_back({idx, x, y, z, this});
 	return idx;
 }
 
@@ -245,11 +244,9 @@ Mesh::Vertex::Vertex(const size_t& idx,
 					 const double& x,
 					 const double& y,
 					 const double& z,
-					 const Color& color,
 					 Mesh* mesh)
 	: _idx(idx),
 	  _position(x, y, z),
-	  _color(color),
 	  _linkedTriples(),
 	  _linkedMesh(mesh)
 {
@@ -259,7 +256,6 @@ Mesh::Vertex::Vertex(const size_t& idx,
 Mesh::Vertex::Vertex(const Mesh::Vertex& v)
 	: _idx(v._idx),
 	  _position(v._position),
-	  _color(v._color),
 	  _linkedTriples(v._linkedTriples),
 	  _linkedMesh(v._linkedMesh)
 {
@@ -269,7 +265,6 @@ Mesh::Vertex::Vertex(const Mesh::Vertex& v)
 Mesh::Vertex::Vertex(Mesh::Vertex&& v)
 	: _idx(std::move(v._idx)),
 	  _position(std::move(v._position)),
-	  _color(std::move(v._color)),
 	  _linkedTriples(std::move(v._linkedTriples)),
 	  _linkedMesh(v._linkedMesh)
 {
@@ -285,7 +280,6 @@ Mesh::Vertex& Mesh::Vertex::operator=(const Mesh::Vertex& v)
 {
 	_idx = v._idx;
 	_position = v._position;
-	_color = v._color;
 	_linkedTriples = v._linkedTriples;
 	_linkedMesh = v._linkedMesh;
 
@@ -297,11 +291,16 @@ Mesh::Vertex& Mesh::Vertex::operator=(Mesh::Vertex&& v)
 {
 	_idx = std::move(v._idx);
 	_position = std::move(v._position);
-	_color = std::move(v._color);
 	_linkedTriples = std::move(v._linkedTriples);
 	_linkedMesh = v._linkedMesh;
 
 	return (*this);
+}
+
+
+const size_t& Mesh::Vertex::getIndex() const
+{
+	return _idx;
 }
 
 
@@ -324,30 +323,6 @@ Object::vec Mesh::Vertex::getNormal() const
 void Mesh::Vertex::setPosition(const glm::vec3& pos)
 {
 	_position = pos;
-}
-
-
-const Color& Mesh::Vertex::getColor() const
-{
-	// TODO: get color from material.
-	return _color;
-}
-
-
-void Mesh::Vertex::setColor(const Color& color)
-{
-	_color = color;
-}
-
-
-const size_t& Mesh::Vertex::getIndex() const
-{
-	return _idx;
-}
-
-
-void Mesh::Vertex::_recalculateNormal()
-{
 }
 
 

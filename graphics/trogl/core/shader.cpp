@@ -47,13 +47,15 @@ Shader::Shader(const std::string& name,
 			   const std::string& vsFile,
 			   const std::string& fsFile)
 	: Component(Component::Type::SHADER, name),
+	  _status(Status::NOT_COMPILED),
 	  _vertexSrc(loadFile(vsFile)),
 	  _fragmentSrc(loadFile(fsFile)),
 	  _shadersCompileCount(0),
 	  _glVertexShader(),
 	  _glFragmentShader(),
 	  _glShaderProgram(),
-	  _status(Status::NOT_COMPILED)
+	  _internalAttributes(),
+	  _externalAttributes()
 {
 	logDebug << "Shader " << getName()
 			 << " created from files (" << vsFile << ", " << fsFile << ')'
@@ -63,13 +65,15 @@ Shader::Shader(const std::string& name,
 
 Shader::Shader(const Shader& sh)
 	: Component(sh),
+	  _status(Status::NOT_COMPILED),
 	  _vertexSrc(sh._vertexSrc),
 	  _fragmentSrc(sh._fragmentSrc),
 	  _shadersCompileCount(0),
 	  _glVertexShader(),
 	  _glFragmentShader(),
 	  _glShaderProgram(),
-	  _status(Status::NOT_COMPILED)
+	  _internalAttributes(),
+	  _externalAttributes()
 {
 	logDebug << "Shader " << getName()
 			 << " copied from" << sh.getName()
@@ -79,19 +83,23 @@ Shader::Shader(const Shader& sh)
 
 Shader::Shader(Shader&& sh)
 	: Component(sh),
+	  _status(std::move(sh._status)),
 	  _vertexSrc(std::move(sh._vertexSrc)),
 	  _fragmentSrc(std::move(sh._fragmentSrc)),
 	  _shadersCompileCount(std::move(sh._shadersCompileCount)),
 	  _glVertexShader(std::move(sh._glVertexShader)),
 	  _glFragmentShader(std::move(sh._glFragmentShader)),
 	  _glShaderProgram(std::move(sh._glShaderProgram)),
-	  _status(std::move(sh._status))
+	  _internalAttributes(std::move(sh._internalAttributes)),
+	  _externalAttributes(std::move(sh._externalAttributes))
 {
+	sh._status = Status::NOT_COMPILED;
 	sh._shadersCompileCount = 0;
 	sh._glVertexShader = 0;
 	sh._glFragmentShader = 0;
 	sh._glShaderProgram = 0;
-	sh._status = Status::NOT_COMPILED;
+	sh._internalAttributes.clear();
+	sh._externalAttributes.clear();
 
 	logDebug << "Shader " << getName() << " moved." << logEndl;
 }
@@ -133,13 +141,15 @@ Shader::~Shader()
 Shader& Shader::operator=(const Shader& sh)
 {
 	Component::operator=(sh);
+	_status = Status::NOT_COMPILED;
 	_vertexSrc = sh._vertexSrc;
 	_fragmentSrc = sh._fragmentSrc;
 	_shadersCompileCount = 0;
 	_glVertexShader = 0;
 	_glFragmentShader = 0;
 	_glShaderProgram = 0;
-	_status = Status::NOT_COMPILED;
+	_internalAttributes.clear();
+	_externalAttributes.clear();
 
 	logDebug << "Shader " << getName() << " copied from " << sh.getName() << logEndl;
 	return (*this);
@@ -149,19 +159,21 @@ Shader& Shader::operator=(const Shader& sh)
 Shader& Shader::operator=(Shader&& sh)
 {
 	Component::operator=(sh);
+	_status = std::move(sh._status);
 	_vertexSrc = std::move(sh._vertexSrc);
 	_fragmentSrc = std::move(sh._fragmentSrc);
 	_shadersCompileCount = std::move(sh._shadersCompileCount);
 	_glVertexShader = std::move(sh._glVertexShader);
 	_glFragmentShader = std::move(sh._glFragmentShader);
 	_glShaderProgram = std::move(sh._glShaderProgram);
-	_status = std::move(sh._status);
 
+	sh._status = Status::NOT_COMPILED;
 	sh._shadersCompileCount = 0;
 	sh._glVertexShader = 0;
 	sh._glFragmentShader = 0;
 	sh._glShaderProgram = 0;
-	sh._status = Status::NOT_COMPILED;
+	sh._internalAttributes.clear();
+	sh._externalAttributes.clear();
 
 	logDebug << "Shader " << getName() << " moved." << logEndl;
 	return (*this);
@@ -185,7 +197,7 @@ bool Shader::isCompiled() const
 }
 
 
-bool Shader::isCompiledSuccessfuly() const
+bool Shader::isCompiledSuccessfully() const
 {
 	switch (_status)
 	{
@@ -238,10 +250,13 @@ void Shader::compile()
 			? Status::COMPILATION_SUCCESSFUL
 			: Status::COMPILATION_FAILED;
 
-	if (!isCompiledSuccessfuly())
+	if (!isCompiledSuccessfully())
 		return;
 
-	registerInternalAttributes();
+	_internalAttributes.setShaderProgram(_glShaderProgram);
+	_externalAttributes.setShaderProgram(_glShaderProgram);
+	_registerAttributes();
+
 	_status = Status::NOT_BINDED;
 }
 
@@ -250,7 +265,8 @@ void Shader::bind()
 {
 	glUseProgram(_glShaderProgram);
 	_status = Status::BINDED;
-	passInternalAttributes();
+
+	_passInternalAttributes();
 }
 
 
@@ -261,30 +277,17 @@ void Shader::unbind()
 }
 
 
-bool Shader::registerAttribute(const std::string& name)
-{
-	Attrs::iterator it = _externalAttributes.find(name);
-	if (it != _externalAttributes.end())
-		return false;
-
-	Attr glAttr = glGetUniformLocation(_glShaderProgram, name.c_str());
-	if (glAttr == -1)
-		return false;
-
-	_externalAttributes.insert({name, glAttr});
-	return true;
-}
-
-
 Shader::Shader(const std::string& name)
 	: Component(Component::Type::SHADER, name),
+	  _status(Status::NOT_COMPILED),
 	  _vertexSrc(),
 	  _fragmentSrc(),
 	  _shadersCompileCount(0),
 	  _glVertexShader(),
 	  _glFragmentShader(),
 	  _glShaderProgram(),
-	  _status(Status::NOT_COMPILED)
+	  _internalAttributes(),
+	  _externalAttributes()
 {
 	logDebug << "Shader " << getName() << " created" << logEndl;
 }
@@ -412,39 +415,120 @@ std::ostream& operator<<(std::ostream& out, const Shader::Status& st)
 
 // -------------------------------- UTILS -------------------------------- //
 
-void glAttributeUtils::pass(GLuint glProg, const int& value)
+Attributes::Attributes()
+	: _attrsMap(),
+	  _glShaderProg()
 {
-	glUniform1i(glProg, value);
 }
 
 
-void glAttributeUtils::pass(GLuint glProg, const float& value)
+Attributes::Attributes(const Attributes& attrs)
+	: _attrsMap(attrs._attrsMap),
+	  _glShaderProg(attrs._glShaderProg)
 {
-	glUniform1f(glProg, value);
 }
 
 
-void glAttributeUtils::pass(GLuint glProg, const glm::vec2& value)
+Attributes::Attributes(Attributes&& attrs)
+	: _attrsMap(std::move(attrs._attrsMap)),
+	  _glShaderProg(std::move(attrs._glShaderProg))
 {
-	glUniform2f(glProg, value.x, value.y);
 }
 
 
-void glAttributeUtils::pass(GLuint glProg, const glm::vec3& value)
+Attributes::~Attributes()
 {
-	glUniform3f(glProg, value.x, value.y, value.z);
 }
 
 
-void glAttributeUtils::pass(GLuint glProg, const glm::vec4& value)
+Attributes& Attributes::operator=(const Attributes& attrs)
 {
-	glUniform4f(glProg, value.x, value.y, value.z, value.w);
+	_attrsMap = attrs._attrsMap;
+	_glShaderProg = attrs._glShaderProg;
+
+	return (*this);
 }
 
 
-void glAttributeUtils::pass(GLuint glProg, const Color& value)
+Attributes& Attributes::operator=(Attributes&& attrs)
 {
-	glUniform4f(glProg,
+	_attrsMap = std::move(attrs._attrsMap);
+	_glShaderProg = std::move(attrs._glShaderProg);
+
+	return (*this);
+}
+
+
+void Attributes::clear()
+{
+	_attrsMap.clear();
+}
+
+
+void Attributes::setShaderProgram(const GLuint& glProg)
+{
+	_glShaderProg = glProg;
+}
+
+
+bool Attributes::registerate(const std::string& name)
+{
+	AttrsMap::iterator it = _attrsMap.find(name);
+	if (it != _attrsMap.end())
+		return false;
+
+	Attr glAttr = glGetUniformLocation(_glShaderProg, name.c_str());
+	if (glAttr == -1)
+		return false;
+
+	_attrsMap.insert({name, glAttr});
+	return true;
+}
+
+
+bool Attributes::pass(const std::string& name,
+					  const float& val1,
+					  const float& val2,
+					  const float& val3,
+					  const float& val4) const
+{
+	return pass<glm::vec4>(name, glm::vec4(val1, val2, val3, val4));
+}
+
+
+void Attributes::_pass(const GLuint& glLoc, const int& value)
+{
+	glUniform1i(glLoc, value);
+}
+
+
+void Attributes::_pass(const GLuint& glLoc, const float& value)
+{
+	glUniform1f(glLoc, value);
+}
+
+
+void Attributes::_pass(const GLuint& glLoc, const glm::vec2& value)
+{
+	glUniform2f(glLoc, value.x, value.y);
+}
+
+
+void Attributes::_pass(const GLuint& glLoc, const glm::vec3& value)
+{
+	glUniform3f(glLoc, value.x, value.y, value.z);
+}
+
+
+void Attributes::_pass(const GLuint& glLoc, const glm::vec4& value)
+{
+	glUniform4f(glLoc, value.x, value.y, value.z, value.w);
+}
+
+
+void Attributes::_pass(const GLuint& glLoc, const Color& value)
+{
+	glUniform4f(glLoc,
 				value.getRedF(),
 				value.getGreenF(),
 				value.getBlueF(),

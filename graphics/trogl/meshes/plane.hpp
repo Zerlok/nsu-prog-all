@@ -9,7 +9,7 @@
 class Plane : public Mesh
 {
 	public:
-		Plane(const Color& color = Color::white);
+		Plane();
 		~Plane();
 };
 

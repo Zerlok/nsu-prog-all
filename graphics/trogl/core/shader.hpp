@@ -11,14 +11,52 @@
 #include "object.hpp"
 
 
-namespace glAttributeUtils
+
+class Attributes
 {
-	void pass(GLuint glProg, const int& value);
-	void pass(GLuint glProg, const float& value);
-	void pass(GLuint glProg, const glm::vec2& value);
-	void pass(GLuint glProg, const glm::vec3& value);
-	void pass(GLuint glProg, const glm::vec4& value);
-	void pass(GLuint glProg, const Color& value);
+	public:
+		using Attr = GLuint;
+		using AttrsMap = std::unordered_map<std::string, Attr>;
+
+		Attributes();
+		Attributes(const Attributes& attrs);
+		Attributes(Attributes&& attrs);
+		~Attributes();
+
+		Attributes& operator=(const Attributes& attrs);
+		Attributes& operator=(Attributes&& attrs);
+
+		void clear();
+		void setShaderProgram(const GLuint& glProg);
+		bool registerate(const std::string& name);
+
+		template<class T>
+		bool pass(const std::string& name, const T& value) const
+		{
+			AttrsMap::const_iterator it = _attrsMap.find(name);
+			if (it == _attrsMap.cend())
+				return false;
+
+			_pass((*it).second, value);
+			return true;
+		}
+
+		bool pass(const std::string& name,
+				  const float& val1,
+				  const float& val2,
+				  const float& val3,
+				  const float& val4) const;
+
+	private:
+		AttrsMap _attrsMap;
+		GLuint _glShaderProg;
+
+		static void _pass(const GLuint& loc, const int& value);
+		static void _pass(const GLuint& loc, const float& value);
+		static void _pass(const GLuint& loc, const glm::vec2& value);
+		static void _pass(const GLuint& loc, const glm::vec3& value);
+		static void _pass(const GLuint& loc, const glm::vec4& value);
+		static void _pass(const GLuint& loc, const Color& value);
 };
 
 
@@ -35,8 +73,7 @@ class Shader : public Component
 			BINDED,
 		};
 
-		using Attr = GLuint;
-		using Attrs = std::unordered_map<std::string, Attr>;
+		using Attr = Attributes::Attr;
 
 		// Static fields.
 		static const std::string SRC_DIR;
@@ -60,7 +97,7 @@ class Shader : public Component
 
 		// Methods.
 		bool isCompiled() const;
-		bool isCompiledSuccessfuly() const;
+		bool isCompiledSuccessfully() const;
 		bool isBinded() const;
 		const Status& getStatus() const;
 
@@ -68,28 +105,25 @@ class Shader : public Component
 		void bind();
 		void unbind();
 
-		bool registerAttribute(const std::string& name);
 		template<class T>
 		bool passAttribute(const std::string& name,
-						   const T& value)
+						   const T& value) const
 		{
-			Attrs::iterator it = _externalAttributes.find(name);
-			if (it == _externalAttributes.end())
-				return false;
-
-			glAttributeUtils::pass(_glShaderProgram, value);
-			return true;
+			return _externalAttributes.pass(name, value);
 		}
 
 		// Virtual methods.
 		virtual void passObject(Object const*) = 0;
-		virtual void registerInternalAttributes() = 0;
-		virtual void passInternalAttributes() = 0;
 
 	protected:
 		// Constructor.
 		Shader(const std::string& name);
 
+	private:
+		// Fields.
+		Status _status;
+
+	protected:
 		// Fields.
 		std::string _vertexSrc;
 		std::string _fragmentSrc;
@@ -99,12 +133,14 @@ class Shader : public Component
 		GLuint _glFragmentShader;	// Faces rendering.
 		GLuint _glShaderProgram;	// Total shadering program.
 
-		Attrs _externalAttributes;
+		Attributes _internalAttributes;
+		Attributes _externalAttributes;
+
+		// Virtual methods.
+		virtual void _registerAttributes() = 0;
+		virtual void _passInternalAttributes() = 0;
 
 	private:
-		// Fields.
-		Status _status;
-
 		// Methods.
 		bool _compileVertexShader();
 		bool _compileFragmentShader();

@@ -4,81 +4,80 @@
 #include "shaders/screwshader.hpp"
 
 
-Cylinder::Cylinder(const Color& c1,
-				   const Color& c2)
+Cylinder::Cylinder()
 	: Mesh("Cylinder")
 {
-	static const MaterialPtr mat = new Material("CylMaterial", Color::white, new ScrewShader());
+	static const MaterialPtr mat = new Material("ScrewMaterial", Color::white, new ScrewShader());
 	setMaterial(mat);
 
 	// Vertices.
 	{
-		addVertex(0.0, -1.0, 1.0, c2);
-		addVertex(0.0, 1.0, 1.0, c1);
-		addVertex(0.195, -1.0, 0.981, c2);
-		addVertex(0.195, 1.0, 0.981, c2);
-		addVertex(0.383, -1.0, 0.924, c2);
-		addVertex(0.383, 1.0, 0.924, c1);
-		addVertex(0.556, -1.0, 0.831, c1);
-		addVertex(0.556, 1.0, 0.831, c2);
-		addVertex(0.707, -1.0, 0.707, c1);
-		addVertex(0.707, 1.0, 0.707, c2);
-		addVertex(0.831, -1.0, 0.556, c1);
-		addVertex(0.831, 1.0, 0.556, c1);
-		addVertex(0.924, -1.0, 0.383, c2);
-		addVertex(0.924, 1.0, 0.383, c1);
-		addVertex(0.981, -1.0, 0.195, c2);
-		addVertex(0.981, 1.0, 0.195, c2);
-		addVertex(1.0, -1.0, 0.0, c2);
-		addVertex(1.0, 1.0, 0.0, c1);
-		addVertex(0.981, -1.0, -0.195, c2);
-		addVertex(0.981, 1.0, -0.195, c2);
-		addVertex(0.924, -1.0, -0.383, c1);
-		addVertex(0.924, 1.0, -0.383, c1);
-		addVertex(0.831, -1.0, -0.556, c1);
-		addVertex(0.831, 1.0, -0.556, c2);
-		addVertex(0.707, -1.0, -0.707, c1);
-		addVertex(0.707, 1.0, -0.707, c1);
-		addVertex(0.556, -1.0, -0.831, c1);
-		addVertex(0.556, 1.0, -0.831, c1);
-		addVertex(0.383, -1.0, -0.924, c1);
-		addVertex(0.383, 1.0, -0.924, c1);
-		addVertex(0.195, -1.0, -0.981, c2);
-		addVertex(0.195, 1.0, -0.981, c1);
-		addVertex(-0.0, -1.0, -1.0, c1);
-		addVertex(-0.0, 1.0, -1.0, c1);
-		addVertex(-0.195, -1.0, -0.981, c1);
-		addVertex(-0.195, 1.0, -0.981, c2);
-		addVertex(-0.383, -1.0, -0.924, c1);
-		addVertex(-0.383, 1.0, -0.924, c1);
-		addVertex(-0.556, -1.0, -0.831, c1);
-		addVertex(-0.556, 1.0, -0.831, c2);
-		addVertex(-0.707, -1.0, -0.707, c1);
-		addVertex(-0.707, 1.0, -0.707, c2);
-		addVertex(-0.831, -1.0, -0.556, c2);
-		addVertex(-0.831, 1.0, -0.556, c1);
-		addVertex(-0.924, -1.0, -0.383, c1);
-		addVertex(-0.924, 1.0, -0.383, c2);
-		addVertex(-0.981, -1.0, -0.195, c1);
-		addVertex(-0.981, 1.0, -0.195, c2);
-		addVertex(-1.0, -1.0, 0.0, c2);
-		addVertex(-1.0, 1.0, 0.0, c1);
-		addVertex(-0.981, -1.0, 0.195, c1);
-		addVertex(-0.981, 1.0, 0.195, c2);
-		addVertex(-0.924, -1.0, 0.383, c2);
-		addVertex(-0.924, 1.0, 0.383, c1);
-		addVertex(-0.831, -1.0, 0.556, c2);
-		addVertex(-0.831, 1.0, 0.556, c1);
-		addVertex(-0.707, -1.0, 0.707, c1);
-		addVertex(-0.707, 1.0, 0.707, c2);
-		addVertex(-0.556, -1.0, 0.831, c1);
-		addVertex(-0.556, 1.0, 0.831, c2);
-		addVertex(-0.383, -1.0, 0.924, c1);
-		addVertex(-0.383, 1.0, 0.924, c2);
-		addVertex(-0.195, -1.0, 0.981, c1);
-		addVertex(-0.195, 1.0, 0.981, c1);
-		addVertex(0.0, -1.0, 0.0, c1);
-		addVertex(0.0, 1.0, 0.0, c2);
+		addVertex(0.0, -1.0, 1.0);
+		addVertex(0.0, 1.0, 1.0);
+		addVertex(0.195, -1.0, 0.981);
+		addVertex(0.195, 1.0, 0.981);
+		addVertex(0.383, -1.0, 0.924);
+		addVertex(0.383, 1.0, 0.924);
+		addVertex(0.556, -1.0, 0.831);
+		addVertex(0.556, 1.0, 0.831);
+		addVertex(0.707, -1.0, 0.707);
+		addVertex(0.707, 1.0, 0.707);
+		addVertex(0.831, -1.0, 0.556);
+		addVertex(0.831, 1.0, 0.556);
+		addVertex(0.924, -1.0, 0.383);
+		addVertex(0.924, 1.0, 0.383);
+		addVertex(0.981, -1.0, 0.195);
+		addVertex(0.981, 1.0, 0.195);
+		addVertex(1.0, -1.0, 0.0);
+		addVertex(1.0, 1.0, 0.0);
+		addVertex(0.981, -1.0, -0.195);
+		addVertex(0.981, 1.0, -0.195);
+		addVertex(0.924, -1.0, -0.383);
+		addVertex(0.924, 1.0, -0.383);
+		addVertex(0.831, -1.0, -0.556);
+		addVertex(0.831, 1.0, -0.556);
+		addVertex(0.707, -1.0, -0.707);
+		addVertex(0.707, 1.0, -0.707);
+		addVertex(0.556, -1.0, -0.831);
+		addVertex(0.556, 1.0, -0.831);
+		addVertex(0.383, -1.0, -0.924);
+		addVertex(0.383, 1.0, -0.924);
+		addVertex(0.195, -1.0, -0.981);
+		addVertex(0.195, 1.0, -0.981);
+		addVertex(-0.0, -1.0, -1.0);
+		addVertex(-0.0, 1.0, -1.0);
+		addVertex(-0.195, -1.0, -0.981);
+		addVertex(-0.195, 1.0, -0.981);
+		addVertex(-0.383, -1.0, -0.924);
+		addVertex(-0.383, 1.0, -0.924);
+		addVertex(-0.556, -1.0, -0.831);
+		addVertex(-0.556, 1.0, -0.831);
+		addVertex(-0.707, -1.0, -0.707);
+		addVertex(-0.707, 1.0, -0.707);
+		addVertex(-0.831, -1.0, -0.556);
+		addVertex(-0.831, 1.0, -0.556);
+		addVertex(-0.924, -1.0, -0.383);
+		addVertex(-0.924, 1.0, -0.383);
+		addVertex(-0.981, -1.0, -0.195);
+		addVertex(-0.981, 1.0, -0.195);
+		addVertex(-1.0, -1.0, 0.0);
+		addVertex(-1.0, 1.0, 0.0);
+		addVertex(-0.981, -1.0, 0.195);
+		addVertex(-0.981, 1.0, 0.195);
+		addVertex(-0.924, -1.0, 0.383);
+		addVertex(-0.924, 1.0, 0.383);
+		addVertex(-0.831, -1.0, 0.556);
+		addVertex(-0.831, 1.0, 0.556);
+		addVertex(-0.707, -1.0, 0.707);
+		addVertex(-0.707, 1.0, 0.707);
+		addVertex(-0.556, -1.0, 0.831);
+		addVertex(-0.556, 1.0, 0.831);
+		addVertex(-0.383, -1.0, 0.924);
+		addVertex(-0.383, 1.0, 0.924);
+		addVertex(-0.195, -1.0, 0.981);
+		addVertex(-0.195, 1.0, 0.981);
+		addVertex(0.0, -1.0, 0.0);
+		addVertex(0.0, 1.0, 0.0);
 	}
 
 	// Faces.

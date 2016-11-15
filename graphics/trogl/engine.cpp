@@ -352,7 +352,7 @@ void Engine::_viewFrame()
 
 	for (VertexObject& obj : _objects)
 		for (const LightPtr& light : _scene->getLights())
-			obj.draw(light);
+			obj.draw(light, _camera);
 
 	_viewGUI();
 	_frame->flush();
@@ -447,7 +447,7 @@ Engine::VertexObject::~VertexObject()
 bool Engine::VertexObject::isValid() const
 {
 	return (_isGLGeometryValid()
-			&& _shader->isCompiledSuccessfuly());
+			&& _shader->isCompiledSuccessfully());
 }
 
 
@@ -457,7 +457,6 @@ void Engine::VertexObject::initGLGeometry()
 		return;
 
 	_initVertexBufferObject();
-	_initColorBufferObject();
 	_initIndexBufferObject();
 }
 
@@ -468,15 +467,17 @@ void Engine::VertexObject::compileGLShaders()
 }
 
 
-void Engine::VertexObject::draw(const LightPtr& light)
+void Engine::VertexObject::draw(const LightPtr& light,
+								const CameraPtr& camera)
 {
 	_shader->bind();
-	_shader->passObject(_mesh.get_pointer());
-	_shader->passObject(light.get_pointer());
+	_mesh->getMaterial()->passToShader();
+	_shader->passObject(_mesh.get_cpointer());
+	_shader->passObject(light.get_cpointer());
+	_shader->passObject(camera.get_cpointer());
 
 	glEnableVertexAttribArray(0);
 	glEnableVertexAttribArray(1);
-	glEnableVertexAttribArray(2);
 
 	glBindBuffer(GL_ARRAY_BUFFER, _glVBO);
 	glVertexAttribPointer(0, _vertexStep, GL_FLOAT, GL_FALSE, 0, 0);
@@ -484,13 +485,9 @@ void Engine::VertexObject::draw(const LightPtr& light)
 	glBindBuffer(GL_ARRAY_BUFFER, _glNBO);
 	glVertexAttribPointer(1, _vertexStep, GL_FLOAT, GL_FALSE, 0, 0);
 
-	glBindBuffer(GL_ARRAY_BUFFER, _glCBO);
-	glVertexAttribPointer(2, _colorStep, GL_FLOAT, GL_FALSE, 0, 0);
-
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _glIBO);
 	glDrawElements(GL_TRIANGLES, _indicesSize, GL_UNSIGNED_INT, 0);
 
-	glDisableVertexAttribArray(2);
 	glDisableVertexAttribArray(1);
 	glDisableVertexAttribArray(0);
 }
@@ -500,7 +497,6 @@ bool Engine::VertexObject::_isGLGeometryValid() const
 {
 	return ((_glVBO != 0)
 			&& (_glNBO != 0)
-			&& (_glCBO != 0)
 			&& (_glIBO != 0));
 }
 
@@ -536,27 +532,6 @@ void Engine::VertexObject::_initVertexBufferObject()
 }
 
 
-void Engine::VertexObject::_initColorBufferObject()
-{
-	std::vector<GLfloat> colors((_mesh->getVertices().size() * _colorStep), 1.0f);
-	size_t idx = 0;
-
-	for (size_t i = 0; i < colors.size(); i += _colorStep)
-	{
-		const Mesh::Vertex& v = _mesh->getVertex(idx++);
-
-		colors[i] = v.getColor().getRedF();
-		colors[i+1] = v.getColor().getGreenF();
-		colors[i+2] = v.getColor().getBlueF();
-		colors[i+3] = v.getColor().getAlphaF();
-	}
-
-	glGenBuffers(1, &_glCBO);
-	glBindBuffer(GL_ARRAY_BUFFER, _glCBO);
-	glBufferData(GL_ARRAY_BUFFER, colors.size() * sizeof(GLuint), colors.data(), GL_STATIC_DRAW);
-}
-
-
 void Engine::VertexObject::_initIndexBufferObject()
 {
 	std::vector<GLuint> indicies((_mesh->getPolygons().size() * _indexStep), 0.0f);
@@ -589,9 +564,6 @@ void Engine::VertexObject::_deinitGLGeometry()
 
 	if (_glNBO != 0)
 		glDeleteBuffers(sizeof(_glNBO), &_glNBO);
-
-	if (_glCBO != 0)
-		glDeleteBuffers(sizeof(_glCBO), &_glCBO);
 
 	if (_glIBO != 0)
 		glDeleteBuffers(sizeof(_glIBO), &_glIBO);

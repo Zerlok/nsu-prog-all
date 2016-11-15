@@ -6,19 +6,18 @@
 
 
 Cube::Cube(const float& radius,
-		   const Color& color,
 		   const size_t& subdivideLevel)
-	: Mesh("Cube", Mesh::DEFAULT_MATERIAL)
+	: Mesh("Cube")
 {
-	addVertex(-radius, -radius, -radius, color);
-	addVertex(-radius, +radius, -radius, color);
-	addVertex(+radius, +radius, -radius, color);
-	addVertex(+radius, -radius, -radius, color);
+	addVertex(-radius, -radius, -radius);
+	addVertex(-radius, +radius, -radius);
+	addVertex(+radius, +radius, -radius);
+	addVertex(+radius, -radius, -radius);
 
-	addVertex(-radius, -radius, +radius, color);
-	addVertex(-radius, +radius, +radius, color);
-	addVertex(+radius, +radius, +radius, color);
-	addVertex(+radius, -radius, +radius, color);
+	addVertex(-radius, -radius, +radius);
+	addVertex(-radius, +radius, +radius);
+	addVertex(+radius, +radius, +radius);
+	addVertex(+radius, -radius, +radius);
 
 	addPolygon(0, 1, 2);
 	addPolygon(0, 2, 3);

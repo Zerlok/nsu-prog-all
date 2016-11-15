@@ -6,6 +6,7 @@
 #include "core/object.hpp"
 #include "core/mesh.hpp"
 #include "core/light.hpp"
+#include "core/camera.hpp"
 #include "core/shader.hpp"
 
 
@@ -19,34 +20,19 @@ class DiffuseShader : public Shader
 		// Methods.
 		void passMesh(Mesh const* mesh);
 		void passLight(Light const* light);
+		void passCamera(Camera const* camera);
 
 		// Overriden methods.
-		void registerInternalAttributes() override;
 		void passObject(Object const* obj) override;
-		void passInternalAttributes() override;
+
+	protected:
+		void _registerAttributes() override;
+		void _passInternalAttributes() override;
 
 	private:
-		// Inner classes.
-		struct LampAttrs
-		{
-			Attr type;
-			Attr position;
-			Attr power;
-			Attr direction;
-			Attr color;
-			Attr innerAngle;
-			Attr outterAngle;
-		};
-
 		// Static fields.
 		static std::string VS_FILE();
 		static std::string FS_FILE();
-
-		// Fields.
-		Attr _attrMeshPosition;
-		LampAttrs _attrLamp;
-
-		// TODO: pass material.
 };
 
 

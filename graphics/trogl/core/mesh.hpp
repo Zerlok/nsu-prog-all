@@ -79,7 +79,6 @@ class Mesh : public Object
 					   const double& x,
 					   const double& y,
 					   const double& z,
-					   const Color& color,
 					   Mesh* mesh);
 				Vertex(const Vertex& v);
 				Vertex(Vertex&& v);
@@ -93,23 +92,16 @@ class Mesh : public Object
 				const size_t& getIndex() const;
 				const vec& getPosition() const;
 				vec getNormal() const;
-				const Color& getColor() const;
 
 				void setPosition(const glm::vec3& pos);
-				void setColor(const Color& color);
 
 			private:
 				// Fields.
 				size_t _idx;
 				Object::vec _position;
-				// TODO: move color into material, assign vertices into material groups.
-				Color _color;
 
 				std::vector<Triple> _linkedTriples; // Aggregation links with Polygons.
 				Mesh* _linkedMesh;
-
-				// Methods.
-				void _recalculateNormal();
 
 				// Friend classes.
 				friend class Mesh;
@@ -197,8 +189,7 @@ class Mesh : public Object
 
 		size_t addVertex(const double& x,
 						 const double& y,
-						 const double& z,
-						 const Color& color);
+						 const double& z);
 		bool addPolygon(const size_t& i1,
 						const size_t& i2,
 						const size_t& i3);

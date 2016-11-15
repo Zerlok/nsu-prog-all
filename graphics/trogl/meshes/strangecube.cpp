@@ -8,70 +8,69 @@
 logger_t loggerModules = loggerModule(Logger::Level::WARNING, loggerDescriptionFull);
 
 
-StrangeCube::StrangeCube(const Color& c1,
-						 const Color& c2)
+StrangeCube::StrangeCube()
 	: Mesh("StrangeCube")
 {
 	const double start = getTimeDouble();
 
 	// Vertices.
 	{
-		addVertex(-1.0, -1.0, -1.0, c1);
-		addVertex(-1.0, -1.0, 1.0, c1);
-		addVertex(-1.0, 1.0, -1.0, c1);
-		addVertex(-1.0, 1.0, 1.0, c1);
-		addVertex(1.0, -1.0, -1.0, c1);
-		addVertex(1.0, -1.0, 1.0, c1);
-		addVertex(1.0, 1.0, -1.0, c1);
-		addVertex(1.0, 1.0, 1.0, c1);
-		addVertex(-1.0, -1.0, -0.333, c1);
-		addVertex(-1.0, -1.0, 0.333, c1);
-		addVertex(-1.0, -0.333, 1.0, c1);
-		addVertex(-1.0, 0.333, 1.0, c1);
-		addVertex(-1.0, 1.0, 0.333, c1);
-		addVertex(-1.0, 1.0, -0.333, c1);
-		addVertex(-1.0, 0.333, -1.0, c1);
-		addVertex(-1.0, -0.333, -1.0, c1);
-		addVertex(-0.333, 1.0, 1.0, c1);
-		addVertex(0.333, 1.0, 1.0, c1);
-		addVertex(1.0, 1.0, 0.333, c1);
-		addVertex(1.0, 1.0, -0.333, c1);
-		addVertex(0.333, 1.0, -1.0, c1);
-		addVertex(-0.333, 1.0, -1.0, c1);
-		addVertex(1.0, 0.333, 1.0, c1);
-		addVertex(1.0, -0.333, 1.0, c1);
-		addVertex(1.0, -1.0, 0.333, c1);
-		addVertex(1.0, -1.0, -0.333, c1);
-		addVertex(1.0, -0.333, -1.0, c1);
-		addVertex(1.0, 0.333, -1.0, c1);
-		addVertex(0.333, -1.0, 1.0, c1);
-		addVertex(-0.333, -1.0, 1.0, c1);
-		addVertex(-0.333, -1.0, -1.0, c1);
-		addVertex(0.333, -1.0, -1.0, c1);
-		addVertex(0.333, -0.333, 1.0, c2);
-		addVertex(-0.333, -0.333, 1.0, c2);
-		addVertex(0.333, 0.333, 1.0, c2);
-		addVertex(-0.333, 0.333, 1.0, c2);
-		addVertex(-0.333, -0.333, -1.0, c2);
-		addVertex(0.333, -0.333, -1.0, c2);
-		addVertex(-0.333, 0.333, -1.0, c2);
-		addVertex(0.333, 0.333, -1.0, c2);
-		addVertex(0.333, -1.0, 0.333, c2);
-		addVertex(0.333, -1.0, -0.333, c2);
-		addVertex(-0.333, -1.0, 0.333, c2);
-		addVertex(-0.333, -1.0, -0.333, c2);
-		addVertex(1.0, 0.333, 0.333, c2);
-		addVertex(1.0, 0.333, -0.333, c2);
-		addVertex(1.0, -0.333, 0.333, c2);
-		addVertex(1.0, -0.333, -0.333, c2);
-		addVertex(-0.333, 1.0, 0.333, c2);
-		addVertex(-0.333, 1.0, -0.333, c2);
-		addVertex(0.333, 1.0, 0.333, c2);
-		addVertex(0.333, 1.0, -0.333, c2);
-		addVertex(-1.0, -0.333, 0.333, c2);
-		addVertex(-1.0, -0.333, -0.333, c2);
-		addVertex(-1.0, 0.333, 0.333, c2);
-		addVertex(-1.0, 0.333, -0.333, c2);
+		addVertex(-1.0, -1.0, -1.0);
+		addVertex(-1.0, -1.0, 1.0);
+		addVertex(-1.0, 1.0, -1.0);
+		addVertex(-1.0, 1.0, 1.0);
+		addVertex(1.0, -1.0, -1.0);
+		addVertex(1.0, -1.0, 1.0);
+		addVertex(1.0, 1.0, -1.0);
+		addVertex(1.0, 1.0, 1.0);
+		addVertex(-1.0, -1.0, -0.333);
+		addVertex(-1.0, -1.0, 0.333);
+		addVertex(-1.0, -0.333, 1.0);
+		addVertex(-1.0, 0.333, 1.0);
+		addVertex(-1.0, 1.0, 0.333);
+		addVertex(-1.0, 1.0, -0.333);
+		addVertex(-1.0, 0.333, -1.0);
+		addVertex(-1.0, -0.333, -1.0);
+		addVertex(-0.333, 1.0, 1.0);
+		addVertex(0.333, 1.0, 1.0);
+		addVertex(1.0, 1.0, 0.333);
+		addVertex(1.0, 1.0, -0.333);
+		addVertex(0.333, 1.0, -1.0);
+		addVertex(-0.333, 1.0, -1.0);
+		addVertex(1.0, 0.333, 1.0);
+		addVertex(1.0, -0.333, 1.0);
+		addVertex(1.0, -1.0, 0.333);
+		addVertex(1.0, -1.0, -0.333);
+		addVertex(1.0, -0.333, -1.0);
+		addVertex(1.0, 0.333, -1.0);
+		addVertex(0.333, -1.0, 1.0);
+		addVertex(-0.333, -1.0, 1.0);
+		addVertex(-0.333, -1.0, -1.0);
+		addVertex(0.333, -1.0, -1.0);
+		addVertex(0.333, -0.333, 1.0);
+		addVertex(-0.333, -0.333, 1.0);
+		addVertex(0.333, 0.333, 1.0);
+		addVertex(-0.333, 0.333, 1.0);
+		addVertex(-0.333, -0.333, -1.0);
+		addVertex(0.333, -0.333, -1.0);
+		addVertex(-0.333, 0.333, -1.0);
+		addVertex(0.333, 0.333, -1.0);
+		addVertex(0.333, -1.0, 0.333);
+		addVertex(0.333, -1.0, -0.333);
+		addVertex(-0.333, -1.0, 0.333);
+		addVertex(-0.333, -1.0, -0.333);
+		addVertex(1.0, 0.333, 0.333);
+		addVertex(1.0, 0.333, -0.333);
+		addVertex(1.0, -0.333, 0.333);
+		addVertex(1.0, -0.333, -0.333);
+		addVertex(-0.333, 1.0, 0.333);
+		addVertex(-0.333, 1.0, -0.333);
+		addVertex(0.333, 1.0, 0.333);
+		addVertex(0.333, 1.0, -0.333);
+		addVertex(-1.0, -0.333, 0.333);
+		addVertex(-1.0, -0.333, -0.333);
+		addVertex(-1.0, 0.333, 0.333);
+		addVertex(-1.0, 0.333, -0.333);
 	}
 
 	// Faces.

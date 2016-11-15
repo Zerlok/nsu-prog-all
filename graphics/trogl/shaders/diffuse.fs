@@ -1,6 +1,21 @@
 #version 130
 
 
+struct CameraStruct
+{
+        vec4 position;
+	vec4 direction;
+};
+
+
+struct MaterialStruct
+{
+        vec4 color;
+	float diffuse;
+	float specular;
+};
+
+
 struct LampStruct
 {
 	int type;
@@ -11,15 +26,6 @@ struct LampStruct
 	float ia;
 	float oa;
 };
-
-
-uniform vec4 meshPosition;
-uniform LampStruct lamp;
-
-
-varying vec4 vertexPosition;
-varying vec3 vertexNormal;
-varying vec4 vertexColor;
 
 
 void pointLight(
@@ -93,12 +99,21 @@ void ambientLight(
 		in float apow,
 		out vec4 color)
 {
-	float power = clamp(apow, 0.0, 1.0);
+        float power = clamp(apow, 0.0, 1.0);
+
 	color.r = vcol.r * acol.r * power;
 	color.g = vcol.g * acol.g * power;
 	color.b = vcol.b * acol.b * power;
 	color.a = vcol.a;
 }
+
+
+uniform CameraStruct camera;
+uniform MaterialStruct material;
+uniform LampStruct lamp;
+
+varying vec4 vertexPosition;
+varying vec3 vertexNormal;
 
 
 void main()
@@ -112,7 +127,7 @@ void main()
 		// Point lamp light drawing.
 		case 1:
 			pointLight(
-					vertexPosition, vertexNormal, vertexColor,
+			                vertexPosition, vertexNormal, material.color,
 					lampPos, lamp.color, lamp.power,
 					color
 			);
@@ -121,7 +136,7 @@ void main()
 		// Directional lamp light drawing.
 		case 2:
 			directionLight(
-					vertexNormal, vertexColor,
+			                vertexNormal, material.color,
 					lampDir, lamp.color, lamp.power,
 					color
 			);
@@ -130,7 +145,7 @@ void main()
 		// Spot lamp light drawing.
 		case 3:
 			spotLight(
-					vertexPosition, vertexNormal, vertexColor,
+			                vertexPosition, vertexNormal, material.color,
 					lampPos, lampDir, lamp.color, lamp.power, lamp.ia, lamp.oa,
 					color
 			);
@@ -139,16 +154,16 @@ void main()
 		// Ambient (scene background) light drawing.
 		case 4:
 			ambientLight(
-					vertexColor,
+			                material.color,
 					lamp.color, lamp.power,
 					color
 			);
 			break;
 
 		default:
-			color = vertexColor;
+		        color = material.color;
 			break;
 	}
 
-	gl_FragColor = clamp(color, 0.0, 1.0);
+        gl_FragColor = clamp(color, 0.0, 1.0);
 }
