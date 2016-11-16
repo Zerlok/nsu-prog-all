@@ -9,7 +9,7 @@ class DiffuseMaterial : public Material
 {
 	public:
 		// Constructors / Destructor.
-		DiffuseMaterial(const Color& color = Material::DEFAULT_COLOR);
+		DiffuseMaterial(const Color& color);
 		~DiffuseMaterial();
 
 		// Methods.

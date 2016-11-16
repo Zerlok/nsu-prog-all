@@ -182,7 +182,18 @@ std::ostream& operator<<(std::ostream& out, const Logger::Level& level);
 
 
 #define logger_t static const int
-#define loggerDescriptionFull (Logger::Description::LEVEL\
+
+#define loggerLDebug (Logger::Level::DEBUG)
+#define loggerLInfo (Logger::Level::INFO)
+#define loggerLWarning (Logger::Level::WARNING)
+#define loggerLError (Logger::Level::ERROR)
+#define loggerLFatal (Logger::Level::FATAL)
+
+#define loggerDLevel (Logger::Description::LEVEL)
+#define loggerDFunc (Logger::Description::FUNCTION)
+#define loggerDModul (Logger::Description::MODULE)
+#define loggerDTime (Logger::Description::TIMESTAMP)
+#define loggerDFull (Logger::Description::LEVEL\
 	| Logger::Description::FUNCTION\
 	| Logger::Description::MODULE\
 	| Logger::Description::TIMESTAMP)
@@ -191,13 +202,6 @@ std::ostream& operator<<(std::ostream& out, const Logger::Level& level);
 #define loggerDefault(level, descr) (Logger::setDefalt(level, descr))
 #define loggerModule(level, descr) (Logger::setModule(__FILE__, level, descr))
 #define loggerGlobal(level, descr) (Logger::setGlobal(level, descr))
-
-//#define __HERE__ __FILE__, __LINE__, __FUNCTION__
-//#define lDebug (debug(__HERE__))
-//#define lInfo (info(__HERE__))
-//#define lWarning (warning(__HERE__))
-//#define lError (error(__HERE__))
-//#define lFatal (fatal(__HERE__))
 
 #define logDebug (Logger::out(__FILE__, __LINE__, __FUNCTION__, Logger::Level::DEBUG))
 #define logInfo (Logger::out(__FILE__, __LINE__, __FUNCTION__, Logger::Level::INFO))

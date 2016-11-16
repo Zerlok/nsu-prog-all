@@ -224,7 +224,7 @@ Logger::Level Logger::_validateLevel(const Logger::Level& level)
 
 Logger::Format& Logger::_defaultFormat()
 {
-	static Format instance {Level::INFO, loggerDescriptionFull, true};
+	static Format instance {Level::INFO, loggerDFull, true};
 	return instance;
 }
 

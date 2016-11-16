@@ -6,7 +6,7 @@
 #include <logger.hpp>
 
 
-logger_t modulesLogger = loggerModule(Logger::Level::WARNING, loggerDescriptionFull);
+logger_t moduleLogger = loggerModule(loggerLWarning, loggerDFull);
 
 
 size_t Component::_globID = 0;

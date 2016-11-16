@@ -5,7 +5,7 @@
 #include <logger.hpp>
 
 
-logger_t loggerModules = loggerModule(Logger::Level::WARNING, loggerDescriptionFull);
+logger_t moduleLogger = loggerModule(loggerLWarning, loggerDFull);
 
 
 size_t Object::_meshID = 0;

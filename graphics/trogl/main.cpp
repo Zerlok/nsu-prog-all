@@ -6,7 +6,6 @@
 #include "common/color.hpp"
 
 #include "meshes/cube.hpp"
-#include "meshes/strangecube.hpp"
 #include "meshes/megacube.hpp"
 #include "meshes/cylinder.hpp"
 #include "meshes/sphere.hpp"
@@ -19,7 +18,7 @@
 #include "engineutils.hpp"
 
 
-logger_t globalLogger = loggerInit(std::cout, Logger::Level::DEBUG, loggerDescriptionFull);
+logger_t globalLogger = loggerInit(std::cout, loggerLDebug, loggerDFull);
 
 
 int main(int argc, char *argv[])

@@ -5,11 +5,7 @@
 #include "shaders/diffuseshader.hpp"
 
 
-logger_t loggerModules = loggerModule(Logger::Level::WARNING, loggerDescriptionFull);
-
-
-const Color Material::DEFAULT_COLOR = Color(210, 210, 210);
-const ShaderPtr Material::DEFAULT_SHADER = new DiffuseShader();
+logger_t moduleLogger = loggerModule(loggerLWarning, loggerDFull);
 
 
 Material::Material(const std::string& name,
@@ -19,8 +15,8 @@ Material::Material(const std::string& name,
 	  _color(color),
 	  _shader(shader)
 {
-	logDebug << "Material: " << name << " with "
-			  << shader->getName() << " created"
+	logDebug << "Material: " << getName() << " with "
+			  << ((_shader) ? _shader->getName() : "null shader") << " created"
 			  << logEndl;
 }
 

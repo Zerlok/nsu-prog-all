@@ -4,7 +4,7 @@
 #include <logger.hpp>
 
 
-logger_t modulesLogger = loggerModule(Logger::Level::WARNING, loggerDescriptionFull);
+logger_t moduleLogger = loggerModule(loggerLWarning, loggerDFull);
 
 
 GUILabel::GUILabel(const std::string& text,

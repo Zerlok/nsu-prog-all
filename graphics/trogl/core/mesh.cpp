@@ -6,12 +6,12 @@
 #include "materials/diffusematerial.hpp"
 
 
-logger_t modulesLogger = loggerModule(Logger::Level::WARNING, loggerDescriptionFull);
+logger_t moduleLogger = loggerModule(loggerLWarning, loggerDFull);
 
 
 // ---------------------------- MESH ---------------------------- //
 
-const MaterialPtr Mesh::DEFAULT_MATERIAL = new DiffuseMaterial();
+const MaterialPtr Mesh::DEFAULT_MATERIAL = new DiffuseMaterial(Color(200, 200, 200));
 
 
 Mesh::Mesh(const std::string& name,

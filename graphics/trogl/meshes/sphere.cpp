@@ -5,8 +5,8 @@
 #include <logger.hpp>
 
 
-logger_t loggerModules = loggerModule(Logger::Level::INFO,
-										 loggerDescriptionFull);
+logger_t moduleLogger = loggerModule(loggerLInfo,
+										 loggerDFull);
 
 
 Sphere::Sphere(const float& radius,

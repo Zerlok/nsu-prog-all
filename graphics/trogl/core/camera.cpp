@@ -4,7 +4,7 @@
 #include <logger.hpp>
 
 
-logger_t loggerModules = loggerModule(Logger::Level::WARNING, loggerDescriptionFull);
+logger_t moduleLogger = loggerModule(loggerLWarning, loggerDFull);
 
 
 const float Camera::DEFAULT_FOV = 60.0;

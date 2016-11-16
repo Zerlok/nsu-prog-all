@@ -5,8 +5,8 @@
 #include "common/utils.hpp"
 
 
-logger_t loggerModules = loggerModule(Logger::Level::WARNING,
-										 loggerDescriptionFull);
+logger_t moduleLogger = loggerModule(loggerLWarning,
+										 loggerDFull);
 
 
 const std::string MetamorphoseShader::VS_FILE = path::join(Shader::SRC_DIR, "metamorph.vs");

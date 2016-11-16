@@ -36,8 +36,7 @@ HEADERS += \
     core/camera.hpp \
     core/scene.hpp \
     core/gui.hpp \
-    engine.hpp \
-    meshes/plane.hpp
+    engine.hpp
 
 # Custom shaders.
 HEADERS += \
@@ -52,10 +51,10 @@ HEADERS += \
 # Custom meshes.
 HEADERS += \
     meshes/cube.hpp \
-    meshes/strangecube.hpp \
     meshes/megacube.hpp \
     meshes/cylinder.hpp \
-    meshes/sphere.hpp
+    meshes/sphere.hpp \
+    meshes/plane.hpp
 
 # Custom GUI components.
 HEADERS += \
@@ -84,8 +83,7 @@ SOURCES += \
     core/scene.cpp \
     core/gui.cpp \
     engine.cpp \
-    main.cpp \
-    meshes/plane.cpp
+    main.cpp
 
 # Custom shaders.
 SOURCES += \
@@ -102,7 +100,8 @@ SOURCES += \
     meshes/cube.cpp \
     meshes/megacube.cpp \
     meshes/cylinder.cpp \
-    meshes/sphere.cpp
+    meshes/sphere.cpp \
+    meshes/plane.cpp
 
 # Custom GUI components.
 SOURCES += \

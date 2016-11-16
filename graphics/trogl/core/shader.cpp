@@ -7,7 +7,7 @@
 #include "common/utils.hpp"
 
 
-logger_t loggerModules = loggerModule(Logger::Level::DEBUG, loggerDescriptionFull);
+logger_t moduleLogger = loggerModule(loggerLInfo, loggerDFull);
 
 
 const std::string Shader::SRC_DIR = path::join(path::dirname(path::dirname(__FILE__)), "shaders");
@@ -36,9 +36,9 @@ std::string Shader::loadFile(const std::string& filename)
 	}
 	in.close();
 
-	logDebug << "Shader source code loaded from file: '" << filename
-			 << "', (" << linesCount << " lines)."
-			 << logEndl;
+	logInfo << "Shader source code loaded from file: '" << filename
+			<< "', (" << linesCount << " lines)."
+			<< logEndl;
 	return std::move(ss.str());
 }
 

@@ -12,9 +12,9 @@ class Material : public Component
 {
 	public:
 		// Constructors / Destructor.
-		Material(const std::string& name = "",
-				 const Color& color = DEFAULT_COLOR,
-				 const ShaderPtr& shader = DEFAULT_SHADER);
+		Material(const std::string& name,
+				 const Color& color,
+				 const ShaderPtr& shader = nullptr);
 		Material(const Material& mat);
 		Material(Material&& mat);
 		virtual ~Material();
@@ -34,10 +34,6 @@ class Material : public Component
 		virtual void passToShader() const {}
 
 	protected:
-		// Static fields.
-		static const Color DEFAULT_COLOR;
-		static const ShaderPtr DEFAULT_SHADER;
-
 		// Fields.
 		Color _color;
 		ShaderPtr _shader;

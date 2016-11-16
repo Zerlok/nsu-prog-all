@@ -6,8 +6,7 @@
 #include "common/utils.hpp"
 
 
-logger_t loggerModules = loggerModule(Logger::Level::DEBUG,
-										 loggerDescriptionFull);
+logger_t moduleLogger = loggerModule(loggerLDebug, loggerDLevel | loggerDTime);
 
 
 static const int WINDOW_POS_X = 2000;

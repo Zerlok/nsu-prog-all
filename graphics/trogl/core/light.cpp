@@ -4,7 +4,7 @@
 #include <logger.hpp>
 
 
-logger_t loggerModules = loggerModule(Logger::Level::WARNING, loggerDescriptionFull);
+logger_t moduleLogger = loggerModule(loggerLWarning, loggerDFull);
 
 
 static const Object::vec defaultLampPosition {0.0, 30.0, 0.0};

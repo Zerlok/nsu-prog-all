@@ -5,21 +5,24 @@
 #include "shaders/diffuseshader.hpp"
 
 
-logger_t lModule = loggerModule(Logger::Level::DEBUG, loggerDescriptionFull);
+logger_t lModule = loggerModule(loggerLWarning, loggerDFull);
 
 
 DiffuseMaterial::DiffuseMaterial(const Color& color)
-	: Material("Diffusematerial", color, new DiffuseShader()),
+	: Material("Diffusematerial", color),
 	  _diffuse(1.0),
 	  _specular(0.5),
 	  _hardness(7.0)
 {
+	static const ShaderPtr diffuseShader = new DiffuseShader();
+	setShader(diffuseShader);
 	logDebug << getName() << " created." << logEndl;
 }
 
 
 DiffuseMaterial::~DiffuseMaterial()
 {
+	logDebug << getName() << " removed." << logEndl;
 }
 
 
@@ -61,10 +64,6 @@ void DiffuseMaterial::setHardness(const float& hardness)
 
 void DiffuseMaterial::passToShader() const
 {
-//	logDebug << "Passing " << getName() << " parameters to "
-//			 << _shader->getName()
-//			 << logEndl;
-
 	_shader->passAttribute("material.color", _color);
 	_shader->passAttribute("material.diffuse", _diffuse);
 	_shader->passAttribute("material.specular", _specular);

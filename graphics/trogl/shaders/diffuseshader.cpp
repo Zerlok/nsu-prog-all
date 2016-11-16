@@ -5,7 +5,7 @@
 #include "common/utils.hpp"
 
 
-logger_t loggerModules = loggerModule(Logger::Level::DEBUG, loggerDescriptionFull);
+logger_t moduleLogger = loggerModule(Logger::Level::DEBUG, loggerDFull);
 
 
 std::string DiffuseShader::VS_FILE()
