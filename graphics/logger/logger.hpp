@@ -142,6 +142,7 @@ class Logger
 		static std::string _basename(const std::string& filename);
 		static std::ostream& _timestamp(std::ostream& out);
 		static Level _validateLevel(const Level& level);
+		static size_t _getLongestModulePath();
 
 		static Format& _defaultFormat();
 		static Modules& _getModules();

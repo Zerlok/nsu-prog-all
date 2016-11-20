@@ -8,11 +8,14 @@
 logger_t lModule = loggerModule(loggerLWarning, loggerDFull);
 
 
-DiffuseMaterial::DiffuseMaterial(const Color& color)
+DiffuseMaterial::DiffuseMaterial(const Color& color,
+								 const float& diffuse,
+								 const float& specular,
+								 const float& hardness)
 	: Material("Diffusematerial", color),
-	  _diffuse(1.0),
-	  _specular(0.5),
-	  _hardness(7.0)
+	  _diffuse(diffuse),
+	  _specular(specular),
+	  _hardness(hardness)
 {
 	static const ShaderPtr diffuseShader = new DiffuseShader();
 	setShader(diffuseShader);

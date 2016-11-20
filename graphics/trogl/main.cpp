@@ -5,65 +5,57 @@
 #include "common/utils.hpp"
 #include "common/color.hpp"
 
-#include "meshes/cube.hpp"
-#include "meshes/megacube.hpp"
-#include "meshes/cylinder.hpp"
+#include "shaders/diffuseshader.hpp"
+#include "materials/diffusematerial.hpp"
+
 #include "meshes/sphere.hpp"
 #include "meshes/plane.hpp"
-
-#include "materials/diffusematerial.hpp"
-#include "shaders/diffuseshader.hpp"
 
 #include "engine.hpp"
 #include "engineutils.hpp"
 
 
+logger_t globalLogging = loggerGlobal(loggerLDebug, loggerDFull);
 logger_t globalLogger = loggerInit(std::cout, loggerLDebug, loggerDFull);
 
 
 int main(int argc, char *argv[])
 {
-	// Meshes generation settings.
+	// Some mesh generation attributes.
 	const size_t size = 5;
 	const float offset = 2.5;
 	const glm::vec3 direction {0.0, 0.0, 1.0};
 	const glm::vec3 cameraPos {(size)*offset, (size)*offset / 1.8, (size)*offset};
 
-	// Mesh settings.
-//	using MyMesh = Cube;
-//	const MyMesh clonableMesh = Cube(4.0);
-//	using MyMesh = MegaCube;
-//	const MyMesh clonableMesh = MegaCube();
-	using MyMesh = Sphere;
-	MyMesh clonableMesh = MyMesh(1.0, 11);
-	using MeshGenerator = ObjectGenerator<MyMesh, ObjectGeneratorTraits<Mesh> >;
-
 	// Setup scene.
 	CameraPtr camera = new Camera();
 	camera->setPosition(cameraPos);
+
 	ScenePtr scene = new Scene("My Scene", camera);
 	scene->setBgColor(Color::grey);
 	scene->setAmbient(0.7);
 
-	// Generate mesh materials.
-	MaterialPtr floorMat = new DiffuseMaterial({120, 200, 120});
-	MaterialPtr objectsMat = new DiffuseMaterial({200, 100, 100});
-	clonableMesh.setMaterial(objectsMat);
-
-	// Generate meshes.
+	// Add floor to the scene.
+	MaterialPtr floorMat = new DiffuseMaterial(Color(120, 200, 120), 1.0, 0.2, 2.0);
 	MeshPtr floor = new Plane();
 	floor->setMaterial(floorMat);
 	floor->setPosition({0.0, -2.0, 0.0});
 	floor->setScale({30.0, 0.0, 30.0});
 	scene->addMesh(floor);
 
+	// Add meshes to the scene.
+	MaterialPtr spheresMat = new DiffuseMaterial(Color(250, 100, 100), 1.0, 0.7);
+	Sphere baseSphere = Sphere(1.0, 11);
+	baseSphere.setMaterial(spheresMat);
+
+	using MeshGenerator = ObjectGenerator<Sphere, ObjectGeneratorTraits<Mesh> >;
 	MeshGenerator meshGenerator;
-//	const MeshGenerator::Objects meshes = meshGenerator.latticeArrangement(size, offset, clonableMesh);
-	const MeshGenerator::Objects meshes = meshGenerator.directionArrangement(size, offset, direction, clonableMesh);
+//	const MeshGenerator::Objects meshes = meshGenerator.latticeArrangement(size, offset, baseSphere);
+	const MeshGenerator::Objects meshes = meshGenerator.directionArrangement(size, offset, direction, baseSphere);
 	for (const MeshGenerator::ObjectPointer& m : meshes)
 		scene->addMesh(m);
 
-	// Add light.
+	// Add light to the scene.
 	LightPtr lamp = new Light(Light::createPoint());
 //	LightPtr lamp = new Light(Light::createSun());
 //	LightPtr lamp = new Light(Light::createSpot());

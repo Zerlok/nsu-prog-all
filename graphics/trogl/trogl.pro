@@ -36,6 +36,8 @@ HEADERS += \
     core/camera.hpp \
     core/scene.hpp \
     core/gui.hpp \
+    core/frame.hpp \
+    core/primitive.hpp \
     engine.hpp
 
 # Custom shaders.
@@ -82,6 +84,8 @@ SOURCES += \
     core/camera.cpp \
     core/scene.cpp \
     core/gui.cpp \
+    core/frame.cpp \
+    core/primitive.cpp \
     engine.cpp \
     main.cpp
 

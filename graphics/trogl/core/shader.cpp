@@ -315,7 +315,7 @@ bool Shader::_compileVertexShader()
 	}
 
 	++_shadersCompileCount;
-	logDebug << getName() << " vertex compiled successfuly." << logEndl;
+	logDebug << getName() << " vs compiled successfuly." << logEndl;
 	return true;
 }
 
@@ -345,7 +345,7 @@ bool Shader::_compileFragmentShader()
 	}
 
 	++_shadersCompileCount;
-	logDebug << getName() << " fragment compiled successfuly." << logEndl;
+	logDebug << getName() << " fs compiled successfuly." << logEndl;
 	return true;
 }
 
@@ -415,6 +415,10 @@ std::ostream& operator<<(std::ostream& out, const Shader::Status& st)
 
 // -------------------------------- UTILS -------------------------------- //
 
+
+const Attributes::Attr Attributes::NOT_FOUND = Attributes::Attr(-1);
+
+
 Attributes::Attributes()
 	: _attrsMap(),
 	  _glShaderProg()
@@ -478,7 +482,7 @@ bool Attributes::registerate(const std::string& name)
 		return false;
 
 	Attr glAttr = glGetUniformLocation(_glShaderProg, name.c_str());
-	if (glAttr == -1)
+	if (glAttr == NOT_FOUND)
 		return false;
 
 	_attrsMap.insert({name, glAttr});

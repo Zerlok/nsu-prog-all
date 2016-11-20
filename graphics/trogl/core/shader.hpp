@@ -11,21 +11,24 @@
 #include "object.hpp"
 
 
-
 class Attributes
 {
 	public:
+		// Inner classes.
 		using Attr = GLuint;
 		using AttrsMap = std::unordered_map<std::string, Attr>;
 
+		// Constructors / Destructor.
 		Attributes();
 		Attributes(const Attributes& attrs);
 		Attributes(Attributes&& attrs);
 		~Attributes();
 
+		// Operators.
 		Attributes& operator=(const Attributes& attrs);
 		Attributes& operator=(Attributes&& attrs);
 
+		// Methods.
 		void clear();
 		void setShaderProgram(const GLuint& glProg);
 		bool registerate(const std::string& name);
@@ -48,15 +51,20 @@ class Attributes
 				  const float& val4) const;
 
 	private:
-		AttrsMap _attrsMap;
-		GLuint _glShaderProg;
+		// Static fields.
+		static const Attr NOT_FOUND;
 
+		// Static methods.
 		static void _pass(const GLuint& loc, const int& value);
 		static void _pass(const GLuint& loc, const float& value);
 		static void _pass(const GLuint& loc, const glm::vec2& value);
 		static void _pass(const GLuint& loc, const glm::vec3& value);
 		static void _pass(const GLuint& loc, const glm::vec4& value);
 		static void _pass(const GLuint& loc, const Color& value);
+
+		// Fields.
+		AttrsMap _attrsMap;
+		GLuint _glShaderProg;
 };
 
 

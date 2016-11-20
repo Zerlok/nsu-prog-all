@@ -166,6 +166,8 @@ size_t Component::_getTypeId(const Component& c)
 		case Type::GUI:
 			return _guiID;
 	}
+
+	return 0;
 }
 
 

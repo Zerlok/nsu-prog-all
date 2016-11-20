@@ -1,6 +1,7 @@
 #include "logger.hpp"
 
 
+#include <iomanip>
 #include <sys/time.h>
 
 
@@ -141,9 +142,11 @@ Logger::~Logger()
 	  << "Global format: " << gf.getLevel() << ", " << gf.getDescription() << std::endl
 	  << "Registred modules (" << mf.size() << "):" << std::endl;
 
+	size_t maxModuleLen = _getLongestModulePath();
+
 	for (auto it : mf)
-		l << it.first << " --- "
-		  << (it.second).getLevel() << ", "
+		l << std::setw(maxModuleLen) << it.first << " --- "
+		  << std::setw(7) << (it.second).getLevel() << ", "
 		  << (it.second).getDescription()
 		  << std::endl;
 
@@ -219,6 +222,18 @@ Logger::Level Logger::_validateLevel(const Logger::Level& level)
 		default:
 			return Level::DEBUG;
 	}
+}
+
+
+size_t Logger::_getLongestModulePath()
+{
+	Modules& modules = _getModules();
+	size_t maxLen = 0;
+	for (const Modules::value_type& it : modules)
+		if (it.first.size() > maxLen)
+			maxLen = it.first.size();
+
+	return maxLen;
 }
 
 

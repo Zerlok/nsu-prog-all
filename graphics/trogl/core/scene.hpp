@@ -9,6 +9,7 @@
 #include "camera.hpp"
 #include "mesh.hpp"
 #include "light.hpp"
+#include "frame.hpp"
 
 
 class Scene : public Component
@@ -29,6 +30,7 @@ class Scene : public Component
 		const Color& getBgColor() const;
 		const CameraPtr& getCamera() const;
 		LightPtr getAmbientLight() const;
+		FramePtr getFrame() const;
 
 		void addMesh(const MeshPtr& mesh);
 		void addLight(const LightPtr& light);

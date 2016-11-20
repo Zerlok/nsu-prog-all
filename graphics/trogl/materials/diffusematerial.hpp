@@ -9,7 +9,10 @@ class DiffuseMaterial : public Material
 {
 	public:
 		// Constructors / Destructor.
-		DiffuseMaterial(const Color& color);
+		DiffuseMaterial(const Color& color,
+						const float& diffuse = 1.0,
+						const float& specular = 0.5,
+						const float& hardness = 7.0);
 		~DiffuseMaterial();
 
 		// Methods.

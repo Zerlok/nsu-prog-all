@@ -37,7 +37,7 @@ void DiffuseShader::passMesh(Mesh const* mesh)
 {
 	const glm::vec3& pos = mesh->getPosition();
 
-	_internalAttributes.pass("meshPosition", pos.x, pos.y, pos.z, 1.0f);
+	_externalAttributes.pass("meshPosition", pos.x, pos.y, pos.z, 1.0f);
 }
 
 
@@ -87,8 +87,6 @@ void DiffuseShader::passObject(Object const* obj)
 void DiffuseShader::_registerAttributes()
 {
 	// Internal.
-	_internalAttributes.registerate("meshPosition");
-
 	_internalAttributes.registerate("camera.position");
 	_internalAttributes.registerate("camera.direction");
 
@@ -100,7 +98,8 @@ void DiffuseShader::_registerAttributes()
 	_internalAttributes.registerate("lamp.ia");
 	_internalAttributes.registerate("lamp.oa");
 
-	// External
+	// External.
+	_externalAttributes.registerate("meshPosition");
 	_externalAttributes.registerate("material.color");
 	_externalAttributes.registerate("material.diffuse");
 	_externalAttributes.registerate("material.specular");
