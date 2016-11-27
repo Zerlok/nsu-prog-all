@@ -15,7 +15,7 @@
 #include "engineutils.hpp"
 
 
-logger_t globalLogging = loggerGlobal(loggerLDebug, loggerDFull);
+//logger_t globalLogging = loggerGlobal(loggerLDebug, loggerDFull);
 logger_t globalLogger = loggerInit(std::cout, loggerLDebug, loggerDFull);
 
 
@@ -44,7 +44,7 @@ int main(int argc, char *argv[])
 	scene->addMesh(floor);
 
 	// Add meshes to the scene.
-	MaterialPtr spheresMat = new DiffuseMaterial(Color(250, 100, 100), 1.0, 0.7);
+	MaterialPtr spheresMat = new DiffuseMaterial(Color(250, 100, 100), 1.0, 2.0, 20.0);
 	Sphere baseSphere = Sphere(1.0, 11);
 	baseSphere.setMaterial(spheresMat);
 

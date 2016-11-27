@@ -12,19 +12,13 @@ Frame::Frame(const std::string& title,
 			 const size_t& posY,
 			 const size_t& width,
 			 const size_t& height)
-	: _width(width),
-	  _height(height),
-	  _glWindow(0)
+	: _title(title),
+	  _posX(posX),
+	  _posY(posY),
+	  _width(width),
+	  _height(height)
 {
-	int argc = 1;
-	char* argv[1] = {"engine"};
-
-	glutInit(&argc, argv);
-	glutInitDisplayMode(GLUT_RGBA);
-	glutInitWindowPosition(posX, posY);
-	glutInitWindowSize(_width, _height);
-
-	_glWindow = glutCreateWindow(title.c_str());
+	init();
 }
 
 
@@ -42,6 +36,20 @@ const size_t& Frame::getWidth() const
 const size_t& Frame::getHeight() const
 {
 	return _height;
+}
+
+
+void Frame::setPos(const size_t& posX, const size_t& posY)
+{
+	_posX = posX;
+	_posY = posY;
+}
+
+
+void Frame::init()
+{
+	static GLFrame glFrame(_title, _posX, _posY, _width, _height);
+	_glWindow = glFrame.getGLWindowNum();
 }
 
 
@@ -70,7 +78,7 @@ void Frame::resize(const size_t& width,
 	_width = width;
 	_height = height;
 
-	glViewport(0, 0, (GLsizei)_width, (GLsizei)_height);
+	glViewport(_posX, _posY, (GLsizei)_width, (GLsizei)_height);
 }
 
 
@@ -93,39 +101,31 @@ void Frame::flush()
 }
 
 
-//void Frame::init(const size_t& width,
-//							   const size_t& height)
-//{
-//	_width = width;
-//	_height = height;
+Frame::GLFrame::GLFrame(const std::string& title,
+						const size_t& posX,
+						const size_t& posY,
+						const size_t& width,
+						const size_t& height)
+{
+	int argc = 1;
+	char* argv[1] = {"engine"};
 
-//	glGenFramebuffers(sizeof(_buffer), &_buffer);
-//	glBindFramebuffer(GL_FRAMEBUFFER, _buffer);
+	glutInit(&argc, argv);
+	glutInitDisplayMode(GLUT_RGBA);
+	glutInitWindowPosition(posX, posY);
+	glutInitWindowSize(width, height);
 
-//	glGenTextures(sizeof(_frameTexture), &_frameTexture);
-//	glBindTexture(GL_TEXTURE_2D, _frameTexture);
-//	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, _width, _height, 0, GL_RGB, GL_UNSIGNED_BYTE, 0);
-//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-
-//	// Set frame texture as our colour attachement #0
-//	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, _frameTexture, 0);
-//	GLenum drawBuffers[1] = {GL_COLOR_ATTACHMENT0};
-//	glDrawBuffers(sizeof(drawBuffers), drawBuffers); // "1" is the size of DrawBuffers
-
-//	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-//		logError << "Frame buffer creation failed." << logEndl;
-//}
+	_glWindow = glutCreateWindow(title.c_str());
+}
 
 
-//void Frame::bind()
-//{
-//	glBindFramebuffer(GL_FRAMEBUFFER, _buffer);
-//	glViewport(0, 0, _width, _height);
-//}
+Frame::GLFrame::~GLFrame()
+{
+	// TODO: destroy GL window.
+}
 
 
-//void Frame::unbind()
-//{
-//	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-//}
+int Frame::GLFrame::getGLWindowNum() const
+{
+	return _glWindow;
+}

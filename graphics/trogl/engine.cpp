@@ -251,6 +251,7 @@ void Engine::setActiveFrame(const FramePtr& frame)
 {
 	_status = Status::DIRTY;
 	_frame = frame;
+	_frame->setPos(2000, 0);
 }
 
 

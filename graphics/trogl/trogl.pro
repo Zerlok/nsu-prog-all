@@ -23,7 +23,7 @@ QMAKE_CXXFLAGS_DEBUG -= -O1 -O2 -O3
 
 
 # Main modules.
-# (custom modules should be in same order).
+# (custom modules should be defined in same order).
 HEADERS += \
     core/opengls.hpp \
     core/component.hpp \
@@ -34,11 +34,12 @@ HEADERS += \
     core/mesh.hpp \
     core/light.hpp \
     core/camera.hpp \
+	core/frame.hpp \
     core/scene.hpp \
     core/gui.hpp \
-    core/frame.hpp \
     core/primitive.hpp \
-    engine.hpp
+    engine.hpp \
+    core/bufferframe.hpp
 
 # Custom shaders.
 HEADERS += \
@@ -82,12 +83,13 @@ SOURCES += \
     core/mesh.cpp \
     core/light.cpp \
     core/camera.cpp \
+	core/frame.cpp \
     core/scene.cpp \
     core/gui.cpp \
-    core/frame.cpp \
     core/primitive.cpp \
     engine.cpp \
-    main.cpp
+    main.cpp \
+    core/bufferframe.cpp
 
 # Custom shaders.
 SOURCES += \
