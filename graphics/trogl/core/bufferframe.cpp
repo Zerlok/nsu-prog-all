@@ -43,7 +43,7 @@ void BufferFrame::init()
 }
 
 
-bool BufferFrame::validate() const
+bool BufferFrame::validate()
 {
 	if (!Frame::validate())
 		return false;

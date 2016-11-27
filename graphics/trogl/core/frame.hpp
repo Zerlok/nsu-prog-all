@@ -16,7 +16,8 @@ class Frame
 			  const size_t& posX = 0,
 			  const size_t& posY = 0,
 			  const size_t& width = 512,
-			  const size_t& height = 512);
+			  const size_t& height = 512,
+			  const unsigned int& displayMode = GLUT_RGBA);
 		virtual ~Frame();
 
 		// Methods.
@@ -31,7 +32,7 @@ class Frame
 		// Virtual methods.
 		virtual void init();
 
-		virtual bool validate() const;
+		virtual bool validate();
 		virtual void resize(const size_t& width,
 							const size_t& height);
 
@@ -45,6 +46,7 @@ class Frame
 		size_t _posY;
 		size_t _width;
 		size_t _height;
+		unsigned int _displayMode;
 		int _glWindow;
 
 	private:
@@ -55,7 +57,8 @@ class Frame
 						const size_t& posX,
 						const size_t& posY,
 						const size_t& width,
-						const size_t& height);
+						const size_t& height,
+						const unsigned int& displayMode);
 				GLFrame(const GLFrame&) = delete;
 				~GLFrame();
 
@@ -69,6 +72,20 @@ class Frame
 };
 
 using FramePtr = SharedPointer<Frame>;
+
+
+class DoubleBufferedFrame : public Frame
+{
+	public:
+		DoubleBufferedFrame(const std::string& title,
+							const size_t& posX = 0,
+							const size_t& posY = 0,
+							const size_t& width = 512,
+							const size_t& height = 512);
+		~DoubleBufferedFrame();
+
+		void flush() override;
+};
 
 
 #endif // __FRAME_HPP__

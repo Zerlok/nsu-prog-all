@@ -93,9 +93,9 @@ LightPtr Scene::getAmbientLight() const
 }
 
 
-FramePtr Scene::getFrame() const
+FramePtr Scene::getFrameOfView() const
 {
-	FramePtr frame = new Frame(getName(), 0, 0, _camera->getWidth(), _camera->getHeight());
+	FramePtr frame = new DoubleBufferedFrame(getName(), 0, 0, _camera->getWidth(), _camera->getHeight());
 	return std::move(frame);
 }
 

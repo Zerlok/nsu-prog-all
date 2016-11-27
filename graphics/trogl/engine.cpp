@@ -219,7 +219,7 @@ const Engine::Status&Engine::getStatus() const
 
 void Engine::enableFPS()
 {
-	if (!_guiFPS)
+	if (_guiFPS)
 		return;
 
 	_guiFPS = new GUIfps(10, 15, 20, 20);
@@ -243,7 +243,7 @@ void Engine::setActiveScene(const ScenePtr& scene)
 {
 	_status = Status::DIRTY;
 	_scene = scene;
-	setActiveFrame(_scene->getFrame());
+	setActiveFrame(_scene->getFrameOfView());
 }
 
 
@@ -251,7 +251,7 @@ void Engine::setActiveFrame(const FramePtr& frame)
 {
 	_status = Status::DIRTY;
 	_frame = frame;
-	_frame->setPos(2000, 0);
+	_frame->setPos(WINDOW_POS_X, WINDOW_POS_Y);
 }
 
 

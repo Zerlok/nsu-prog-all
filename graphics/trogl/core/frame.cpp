@@ -4,26 +4,31 @@
 #include <logger.hpp>
 
 
-logger_t moduleLogger = loggerModule(loggerLWarning, loggerDFull);
+logger_t moduleLogger = loggerModule(loggerLDebug, loggerDFull);
 
 
 Frame::Frame(const std::string& title,
 			 const size_t& posX,
 			 const size_t& posY,
 			 const size_t& width,
-			 const size_t& height)
+			 const size_t& height,
+			 const unsigned int& displayMode)
 	: _title(title),
 	  _posX(posX),
 	  _posY(posY),
 	  _width(width),
-	  _height(height)
+	  _height(height),
+	  _displayMode(displayMode)
 {
-	init();
+	logDebug << "Frame " << _title
+			 << " [" << _width << "x" << _height << "] created."
+			 << logEndl;
 }
 
 
 Frame::~Frame()
 {
+	logDebug << "Frame " << _title << " removed." << logEndl;
 }
 
 
@@ -48,13 +53,15 @@ void Frame::setPos(const size_t& posX, const size_t& posY)
 
 void Frame::init()
 {
-	static GLFrame glFrame(_title, _posX, _posY, _width, _height);
+	static GLFrame glFrame(_title, _posX, _posY, _width, _height, _displayMode);
 	_glWindow = glFrame.getGLWindowNum();
 }
 
 
-bool Frame::validate() const
+bool Frame::validate()
 {
+	init();
+
 	GLenum err = glewInit();
 	if (err != GLEW_OK)
 	{
@@ -78,7 +85,7 @@ void Frame::resize(const size_t& width,
 	_width = width;
 	_height = height;
 
-	glViewport(_posX, _posY, (GLsizei)_width, (GLsizei)_height);
+	glViewport(0, 0, (GLsizei)_width, (GLsizei)_height);
 }
 
 
@@ -105,27 +112,54 @@ Frame::GLFrame::GLFrame(const std::string& title,
 						const size_t& posX,
 						const size_t& posY,
 						const size_t& width,
-						const size_t& height)
+						const size_t& height,
+						const unsigned int& displayMode)
 {
+	logDebug << "Starting GL frame initialization started." << logEndl;
+
 	int argc = 1;
 	char* argv[1] = {"engine"};
 
 	glutInit(&argc, argv);
-	glutInitDisplayMode(GLUT_RGBA);
+	glutInitDisplayMode(displayMode);
 	glutInitWindowPosition(posX, posY);
 	glutInitWindowSize(width, height);
 
 	_glWindow = glutCreateWindow(title.c_str());
+
+	logDebug << "GL frame initialization finished." << logEndl;
 }
 
 
 Frame::GLFrame::~GLFrame()
 {
-	// TODO: destroy GL window.
+//	glutDestroyWindow(_glWindow);
+	logDebug << "GL frame deinitialized." << logEndl;
 }
 
 
 int Frame::GLFrame::getGLWindowNum() const
 {
 	return _glWindow;
+}
+
+
+DoubleBufferedFrame::DoubleBufferedFrame(const std::string& title,
+										 const size_t& posX,
+										 const size_t& posY,
+										 const size_t& width,
+										 const size_t& height)
+	: Frame(title, posX, posY, width, height, (GLUT_RGBA | GLUT_DOUBLE))
+{
+}
+
+
+DoubleBufferedFrame::~DoubleBufferedFrame()
+{
+}
+
+
+void DoubleBufferedFrame::flush()
+{
+	glutSwapBuffers();
 }

@@ -22,7 +22,7 @@ class BufferFrame : public Frame
 
 		// Overriden methods.
 		void init() override;
-		bool validate() const override;
+		bool validate() override;
 
 		void clear(const Color& color) override;
 		void flush() override;
