@@ -10,7 +10,7 @@ class BufferFrame : public Frame
 {
 	public:
 		// Constructors / Destructor.
-		BufferFrame(const std::string& name,
+		BufferFrame(const std::string& title,
 					const size_t& posX = 0,
 					const size_t& posY = 0,
 					const size_t& width = 512,

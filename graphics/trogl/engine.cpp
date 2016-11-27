@@ -4,6 +4,7 @@
 #include <sstream>
 #include <logger.hpp>
 #include "common/utils.hpp"
+#include "core/bufferframe.hpp"
 
 
 logger_t moduleLogger = loggerModule(loggerLDebug, loggerDLevel | loggerDTime);
@@ -118,6 +119,8 @@ int Engine::_validatePrimitives()
 
 void Engine::_enableGLOptions()
 {
+	glEnable(GL_TEXTURE_2D);
+
 	glEnable(GL_DEPTH_TEST);
 
 	glEnable(GL_CULL_FACE);
@@ -243,7 +246,7 @@ void Engine::setActiveScene(const ScenePtr& scene)
 {
 	_status = Status::DIRTY;
 	_scene = scene;
-	setActiveFrame(_scene->getFrameOfView());
+	setActiveFrame(_scene->getFrameOfView<DoubleBufferedFrame>());
 }
 
 
