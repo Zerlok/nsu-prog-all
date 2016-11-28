@@ -38,8 +38,7 @@ HEADERS += \
     core/scene.hpp \
     core/gui.hpp \
     core/primitive.hpp \
-    engine.hpp \
-    core/bufferframe.hpp
+    engine.hpp
 
 # Custom shaders.
 HEADERS += \
@@ -88,8 +87,7 @@ SOURCES += \
     core/gui.cpp \
     core/primitive.cpp \
     engine.cpp \
-    main.cpp \
-    core/bufferframe.cpp
+    main.cpp
 
 # Custom shaders.
 SOURCES += \

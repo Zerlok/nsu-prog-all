@@ -9,8 +9,8 @@ varying vec3 vertexNormal;
 
 void main()
 {
-	gl_Position = gl_ModelViewProjectionMatrix * position;
-
 	vertexPosition = gl_ModelViewMatrix * position;
-	vertexNormal = normalize(gl_ModelViewMatrix * normal).xyz;
+	vertexNormal = (gl_ModelViewMatrix * normal).xyz;
+
+	gl_Position = gl_ModelViewProjectionMatrix * position;
 }

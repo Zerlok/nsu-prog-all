@@ -14,11 +14,12 @@ const float Camera::DEFAULT_NEAR_DISTANCE = 0.01;
 const float Camera::DEFAULT_FAR_DISTANCE = 100.0;
 
 
-Camera::Camera()
+Camera::Camera(const size_t& width,
+			   const size_t& height)
 	: Object(Object::Type::CAMERA),
 	  _fov(DEFAULT_FOV),
-	  _width(DEFAULT_WIDTH),
-	  _height(DEFAULT_HEIGHT),
+	  _width(width),
+	  _height(height),
 	  _lookingAtPosition(Object::DEFAULT_POSITION),
 	  _headDirection(Object::AXIS_Y),
 	  _nearDistance(DEFAULT_NEAR_DISTANCE),

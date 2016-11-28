@@ -16,6 +16,7 @@ size_t Component::_materialID = 0;
 size_t Component::_textureID = 0;
 size_t Component::_sceneID = 0;
 size_t Component::_guiID = 0;
+size_t Component::_frameID = 0;
 
 
 Component::Component(const Component::Type& t,
@@ -165,6 +166,8 @@ size_t Component::_getTypeId(const Component& c)
 			return _sceneID;
 		case Type::GUI:
 			return _guiID;
+		case Type::FRAME:
+			return _frameID;
 	}
 
 	return 0;
@@ -192,6 +195,9 @@ void Component::_incrementTypeId(const Component& c)
 			break;
 		case Type::GUI:
 			++_guiID;
+			break;
+		case Type::FRAME:
+			++_frameID;
 			break;
 	}
 }
@@ -236,6 +242,10 @@ void Component::_applyNameFromType(Component& c)
 		case Type::GUI:
 			id = _guiID;
 			ss << "GUI";
+			break;
+		case Type::FRAME:
+			id = _frameID;
+			ss << "Frame";
 			break;
 	}
 

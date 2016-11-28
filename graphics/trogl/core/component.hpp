@@ -19,6 +19,7 @@ class Component
 			TEXTURE,
 			SCENE,
 			GUI,
+			FRAME,
 		};
 
 		class Hash
@@ -68,6 +69,7 @@ class Component
 		static size_t _textureID;
 		static size_t _sceneID;
 		static size_t _guiID;
+		static size_t _frameID;
 
 		// Static methods.
 		static size_t _getTypeId(const Component& type);

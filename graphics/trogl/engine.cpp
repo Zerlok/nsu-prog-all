@@ -4,10 +4,13 @@
 #include <sstream>
 #include <logger.hpp>
 #include "common/utils.hpp"
-#include "core/bufferframe.hpp"
 
 
-logger_t moduleLogger = loggerModule(loggerLDebug, loggerDLevel | loggerDTime);
+#define TROGL_FRAME_TYPE DoubleBufferFrame
+//#define TROGL_FRAME_TYPE RTRFrame
+
+
+logger_t moduleLogger = loggerModule(loggerLDebug, (loggerDLevel | loggerDTime));
 
 
 static const int WINDOW_POS_X = 2000;
@@ -37,11 +40,27 @@ Engine::Engine()
 
 Engine::~Engine()
 {
-//	if ((_wasValidated)
-//			&& (_glWindow))
-//		glutDestroyWindow(_glWindow);
-
 	logDebug << "Engine removed." << logEndl;
+}
+
+
+void Engine::_logEngineOptions() const
+{
+	logInfo << "TroGL engine uses OpenGL:"
+			<< std::endl << "   OpenGL version: " << glGetString(GL_VERSION)
+			<< std::endl << "   Vendor version: " << glGetString(GL_VENDOR)
+			<< std::endl << "   Renderer version: " << glGetString(GL_RENDERER)
+			<< std::endl << "   GLSL version: " << glGetString(GL_SHADING_LANGUAGE_VERSION)
+			<< logEndl;
+
+	GLint glslVersionsNum;
+	glGetIntegerv(GL_NUM_SHADING_LANGUAGE_VERSIONS, &glslVersionsNum);
+
+	Logger& log = logInfo << "Available GLSL versions (" << glslVersionsNum << "):";
+	for (GLint i = 0; i < glslVersionsNum; ++i)
+		log << std::endl << "   " << glGetStringi(GL_SHADING_LANGUAGE_VERSION, i);
+
+	log << logEndl;
 }
 
 
@@ -128,6 +147,8 @@ void Engine::_enableGLOptions()
 	glCullFace(GL_FRONT);
 
 	glPolygonMode(GL_FRONT_AND_BACK, _glRenderMode);
+
+	glShadeModel(GL_SMOOTH);
 }
 
 
@@ -246,7 +267,7 @@ void Engine::setActiveScene(const ScenePtr& scene)
 {
 	_status = Status::DIRTY;
 	_scene = scene;
-	setActiveFrame(_scene->getFrameOfView<DoubleBufferedFrame>());
+	setActiveFrame(_scene->getFrameOfView<TROGL_FRAME_TYPE>());
 }
 
 
@@ -286,6 +307,7 @@ void Engine::showActiveScene()
 			&& !validate())
 		return;
 
+	_logEngineOptions();
 	_logSceneStatistics();
 	_status = Status::RENDERING_STARTED;
 
@@ -348,8 +370,8 @@ void Engine::_viewFrame()
 	// Camera flying.
 	static const float a = std::sqrt(std::pow(_camera->getPosition().x, 2) + std::pow(_camera->getPosition().z, 2));
 	static const float h = _camera->getPosition().y;
-	const float phi = getTimeDouble() / 31.0;
 	const float psy = -getTimeDouble() / 29.0;
+	const float phi = getTimeDouble() / 31.0;
 //	_camera->setPosition({a*cos(phi), h, a*sin(phi)});
 
 	LightPtr light = _scene->getLights().front();

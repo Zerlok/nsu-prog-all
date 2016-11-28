@@ -28,7 +28,7 @@ int main(int argc, char *argv[])
 	const glm::vec3 cameraPos {(size)*offset, (size)*offset / 1.8, (size)*offset};
 
 	// Setup scene.
-	CameraPtr camera = new Camera();
+	CameraPtr camera = new Camera(1000, 800);
 	camera->setPosition(cameraPos);
 
 	ScenePtr scene = new Scene("My Scene", camera);

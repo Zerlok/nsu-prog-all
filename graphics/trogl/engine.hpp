@@ -84,6 +84,7 @@ class Engine
 		Engine& operator=(const Engine&);
 
 		// Methods.
+		void _logEngineOptions() const;
 		void _logSceneStatistics() const;
 
 		int _validateScene();

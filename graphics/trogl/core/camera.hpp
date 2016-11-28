@@ -18,7 +18,8 @@ class Camera : public Object
 		static const float DEFAULT_FAR_DISTANCE;
 
 		// Constructors / Destructor.
-		Camera();
+		Camera(const size_t& width = DEFAULT_WIDTH,
+			   const size_t& height = DEFAULT_HEIGHT);
 		Camera(const Camera& cam);
 		Camera(Camera&& c);
 		~Camera();
