@@ -86,6 +86,7 @@ class Shader : public Component
 		// Static fields.
 		static const std::string SRC_DIR;
 		static const std::string DEFAULT_VS_FILE;
+		static const std::string DEFAULT_GS_FILE;
 		static const std::string DEFAULT_FS_FILE;
 
 		// Static methods.
@@ -94,6 +95,7 @@ class Shader : public Component
 		// Constructors / Destructor.
 		Shader(const std::string& name,
 			   const std::string& vsFile = DEFAULT_VS_FILE,
+			   const std::string& gsFile = DEFAULT_GS_FILE,
 			   const std::string& fsFile = DEFAULT_FS_FILE);
 		Shader(const Shader& sh);
 		Shader(Shader&& sh);
@@ -134,12 +136,14 @@ class Shader : public Component
 	protected:
 		// Fields.
 		std::string _vertexSrc;
+		std::string _geometrySrc;
 		std::string _fragmentSrc;
 
-		size_t _shadersCompileCount;
-		GLuint _glVertexShader;		// Vertices rendering
-		GLuint _glFragmentShader;	// Faces rendering.
-		GLuint _glShaderProgram;	// Total shadering program.
+		GLuint _glvs;		// Vertex shader.
+		GLuint _glgs;		// Geometry shader.
+		GLuint _glfs;		// Pixel shader.
+		GLuint _glShader;	// Total shader program.
+		size_t _validSubprogramsCount;
 
 		Attributes _internalAttributes;
 		Attributes _externalAttributes;
@@ -150,9 +154,8 @@ class Shader : public Component
 
 	private:
 		// Methods.
-		bool _compileVertexShader();
-		bool _compileFragmentShader();
-		bool _compileShaderProgram();
+		bool _compileSubprogram(GLuint& subProg, const std::string& codeSrc, const GLenum& type);
+		bool _linkShaderProgram();
 };
 
 using ShaderPtr = SharedPointer<Shader>;

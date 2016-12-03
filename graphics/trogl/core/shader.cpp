@@ -12,6 +12,7 @@ logger_t moduleLogger = loggerModule(loggerLInfo, loggerDFull);
 
 const std::string Shader::SRC_DIR = path::join(path::dirname(path::dirname(__FILE__)), "shaders");
 const std::string Shader::DEFAULT_VS_FILE = path::join(Shader::SRC_DIR, "default.vs");
+const std::string Shader::DEFAULT_GS_FILE = path::join(Shader::SRC_DIR, "default.gs");
 const std::string Shader::DEFAULT_FS_FILE = path::join(Shader::SRC_DIR, "default.fs");
 
 
@@ -45,20 +46,23 @@ std::string Shader::loadFile(const std::string& filename)
 
 Shader::Shader(const std::string& name,
 			   const std::string& vsFile,
+			   const std::string& gsFile,
 			   const std::string& fsFile)
 	: Component(Component::Type::SHADER, name),
 	  _status(Status::NOT_COMPILED),
 	  _vertexSrc(loadFile(vsFile)),
+	  _geometrySrc(loadFile(gsFile)),
 	  _fragmentSrc(loadFile(fsFile)),
-	  _shadersCompileCount(0),
-	  _glVertexShader(),
-	  _glFragmentShader(),
-	  _glShaderProgram(),
+	  _glvs(0),
+	  _glgs(0),
+	  _glfs(0),
+	  _glShader(0),
+	  _validSubprogramsCount(0),
 	  _internalAttributes(),
 	  _externalAttributes()
 {
 	logDebug << "Shader " << getName()
-			 << " created from files (" << vsFile << ", " << fsFile << ')'
+			 << " created from files (" << vsFile << ", " << gsFile << ", " << fsFile << ")."
 			 << logEndl;
 }
 
@@ -67,11 +71,13 @@ Shader::Shader(const Shader& sh)
 	: Component(sh),
 	  _status(Status::NOT_COMPILED),
 	  _vertexSrc(sh._vertexSrc),
+	  _geometrySrc(sh._geometrySrc),
 	  _fragmentSrc(sh._fragmentSrc),
-	  _shadersCompileCount(0),
-	  _glVertexShader(),
-	  _glFragmentShader(),
-	  _glShaderProgram(),
+	  _glvs(0),
+	  _glgs(0),
+	  _glfs(0),
+	  _glShader(0),
+	  _validSubprogramsCount(0),
 	  _internalAttributes(),
 	  _externalAttributes()
 {
@@ -85,19 +91,22 @@ Shader::Shader(Shader&& sh)
 	: Component(sh),
 	  _status(std::move(sh._status)),
 	  _vertexSrc(std::move(sh._vertexSrc)),
+	  _geometrySrc(std::move(sh._geometrySrc)),
 	  _fragmentSrc(std::move(sh._fragmentSrc)),
-	  _shadersCompileCount(std::move(sh._shadersCompileCount)),
-	  _glVertexShader(std::move(sh._glVertexShader)),
-	  _glFragmentShader(std::move(sh._glFragmentShader)),
-	  _glShaderProgram(std::move(sh._glShaderProgram)),
+	  _glvs(std::move(sh._glvs)),
+	  _glgs(std::move(sh._glgs)),
+	  _glfs(std::move(sh._glfs)),
+	  _glShader(std::move(sh._glShader)),
+	  _validSubprogramsCount(std::move(sh._validSubprogramsCount)),
 	  _internalAttributes(std::move(sh._internalAttributes)),
 	  _externalAttributes(std::move(sh._externalAttributes))
 {
 	sh._status = Status::NOT_COMPILED;
-	sh._shadersCompileCount = 0;
-	sh._glVertexShader = 0;
-	sh._glFragmentShader = 0;
-	sh._glShaderProgram = 0;
+	sh._glvs = 0;
+	sh._glgs = 0;
+	sh._glfs = 0;
+	sh._glShader = 0;
+	sh._validSubprogramsCount = 0;
 	sh._internalAttributes.clear();
 	sh._externalAttributes.clear();
 
@@ -107,25 +116,29 @@ Shader::Shader(Shader&& sh)
 
 Shader::~Shader()
 {
-	logDebug << "Shaders compilation count: " << _shadersCompileCount
+	logDebug << "Shaders compilation count: " << _validSubprogramsCount
 			 << ", Status: " << _status
 			 << ", Removing: (";
 
-	switch (_shadersCompileCount)
+	switch (_validSubprogramsCount)
 	{
-		case 3:
-			glDetachShader(_glShaderProgram, _glVertexShader);
-			glDetachShader(_glShaderProgram, _glFragmentShader);
-			glDeleteProgram(_glShaderProgram);
+		case 4:
+			glDetachShader(_glShader, _glvs);
+			glDetachShader(_glShader, _glfs);
+			glDeleteProgram(_glShader);
 			logDebug << "Shader program, ";
 
+		case 3:
+			glDeleteShader(_glfs);
+			logDebug << "FS, ";
+
 		case 2:
-			glDeleteShader(_glFragmentShader);
-			logDebug << "Fragment shader, ";
+			glDeleteShader(_glgs);
+			logDebug << "GS, ";
 
 		case 1:
-			glDeleteShader(_glVertexShader);
-			logDebug << "Vertex shader";
+			glDeleteShader(_glvs);
+			logDebug << "VS";
 			break;
 
 		case 0:
@@ -143,11 +156,13 @@ Shader& Shader::operator=(const Shader& sh)
 	Component::operator=(sh);
 	_status = Status::NOT_COMPILED;
 	_vertexSrc = sh._vertexSrc;
+	_geometrySrc = sh._geometrySrc;
 	_fragmentSrc = sh._fragmentSrc;
-	_shadersCompileCount = 0;
-	_glVertexShader = 0;
-	_glFragmentShader = 0;
-	_glShaderProgram = 0;
+	_glvs = 0;
+	_glgs = 0;
+	_glfs = 0;
+	_glShader = 0;
+	_validSubprogramsCount = 0;
 	_internalAttributes.clear();
 	_externalAttributes.clear();
 
@@ -161,17 +176,20 @@ Shader& Shader::operator=(Shader&& sh)
 	Component::operator=(sh);
 	_status = std::move(sh._status);
 	_vertexSrc = std::move(sh._vertexSrc);
+	_geometrySrc = std::move(sh._geometrySrc);
 	_fragmentSrc = std::move(sh._fragmentSrc);
-	_shadersCompileCount = std::move(sh._shadersCompileCount);
-	_glVertexShader = std::move(sh._glVertexShader);
-	_glFragmentShader = std::move(sh._glFragmentShader);
-	_glShaderProgram = std::move(sh._glShaderProgram);
+	_glvs = std::move(sh._glvs);
+	_glgs = std::move(sh._glgs);
+	_glfs = std::move(sh._glfs);
+	_validSubprogramsCount = std::move(sh._validSubprogramsCount);
+	_glShader = std::move(sh._glShader);
 
 	sh._status = Status::NOT_COMPILED;
-	sh._shadersCompileCount = 0;
-	sh._glVertexShader = 0;
-	sh._glFragmentShader = 0;
-	sh._glShaderProgram = 0;
+	sh._glvs = 0;
+	sh._glgs = 0;
+	sh._glfs = 0;
+	sh._glShader = 0;
+	sh._validSubprogramsCount = 0;
 	sh._internalAttributes.clear();
 	sh._externalAttributes.clear();
 
@@ -242,19 +260,20 @@ void Shader::compile()
 	if (isCompiled())
 		return;
 
-	_compileVertexShader();
-	_compileFragmentShader();
-	_compileShaderProgram();
+	_compileSubprogram(_glvs, _vertexSrc, GL_VERTEX_SHADER);
+//	_compileSubprogram(_glgs, _geometrySrc, GL_GEOMETRY_SHADER);
+	_compileSubprogram(_glfs, _fragmentSrc, GL_FRAGMENT_SHADER);
+	_linkShaderProgram();
 
-	_status = (_shadersCompileCount == 3)
+	_status = (_validSubprogramsCount == 3)
 			? Status::COMPILATION_SUCCESSFUL
 			: Status::COMPILATION_FAILED;
 
 	if (!isCompiledSuccessfully())
 		return;
 
-	_internalAttributes.setShaderProgram(_glShaderProgram);
-	_externalAttributes.setShaderProgram(_glShaderProgram);
+	_internalAttributes.setShaderProgram(_glShader);
+	_externalAttributes.setShaderProgram(_glShader);
 	_registerAttributes();
 
 	_status = Status::NOT_BINDED;
@@ -263,7 +282,7 @@ void Shader::compile()
 
 void Shader::bind()
 {
-	glUseProgram(_glShaderProgram);
+	glUseProgram(_glShader);
 	_status = Status::BINDED;
 
 	_passInternalAttributes();
@@ -281,113 +300,86 @@ Shader::Shader(const std::string& name)
 	: Component(Component::Type::SHADER, name),
 	  _status(Status::NOT_COMPILED),
 	  _vertexSrc(),
+	  _geometrySrc(),
 	  _fragmentSrc(),
-	  _shadersCompileCount(0),
-	  _glVertexShader(),
-	  _glFragmentShader(),
-	  _glShaderProgram(),
+	  _glvs(),
+	  _glgs(),
+	  _glfs(),
+	  _glShader(),
+	  _validSubprogramsCount(0),
 	  _internalAttributes(),
 	  _externalAttributes()
 {
-	logDebug << "Shader " << getName() << " created" << logEndl;
+	logDebug << "Shader " << getName() << " created." << logEndl;
 }
 
 
-bool Shader::_compileVertexShader()
+bool Shader::_compileSubprogram(GLuint& subProg,
+								const std::string& codeSrc,
+								const GLenum& type)
 {
-	int success = 0;
-	const char* src = _vertexSrc.data();
-
-	_glVertexShader = glCreateShader(GL_VERTEX_SHADER);
-	glShaderSource(_glVertexShader, 1, &(src), NULL);
-	glCompileShader(_glVertexShader);
-	glGetShaderiv(_glVertexShader, GL_COMPILE_STATUS, &success);
-
-	if (!success)
-	{
-		const int MAX_INFO_LOG_SIZE = 1024;
-		GLchar infoLog[MAX_INFO_LOG_SIZE];
-		glGetShaderInfoLog(_glVertexShader, MAX_INFO_LOG_SIZE, NULL, infoLog);
-		logError << "Error in " << getName()
-				 << " vertex compilation:\n" << infoLog << logEndl;
-
-		return false;
-	}
-
-	++_shadersCompileCount;
-	logDebug << getName() << " vs compiled successfuly." << logEndl;
-	return true;
-}
-
-
-bool Shader::_compileFragmentShader()
-{
-	if (_shadersCompileCount < 1)
-		return false;
-
-	int success = 0;
-	const char* src = _fragmentSrc.data();
-
-	_glFragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-	glShaderSource(_glFragmentShader, 1, &(src), NULL);
-	glCompileShader(_glFragmentShader);
-	glGetShaderiv(_glFragmentShader, GL_COMPILE_STATUS, &success);
-
-	if (!success)
-	{
-		const int MAX_INFO_LOG_SIZE = 1024;
-		GLchar infoLog[MAX_INFO_LOG_SIZE];
-		glGetShaderInfoLog(_glFragmentShader, MAX_INFO_LOG_SIZE, NULL, infoLog);
-		logError << "Error in " << getName()
-				 << " fragment compilation:\n" << infoLog << logEndl;
-
-		return false;
-	}
-
-	++_shadersCompileCount;
-	logDebug << getName() << " fs compiled successfuly." << logEndl;
-	return true;
-}
-
-
-bool Shader::_compileShaderProgram()
-{
-	if (_shadersCompileCount < 2)
-		return false;
-
 	int success = 0;
 	const int MAX_INFO_LOG_SIZE = 1024;
 	GLchar infoLog[MAX_INFO_LOG_SIZE];
 
-	_glShaderProgram = glCreateProgram();
-	glAttachShader(_glShaderProgram, _glVertexShader);
-	glAttachShader(_glShaderProgram, _glFragmentShader);
+	const char* src = codeSrc.data();
 
-	glBindAttribLocation(_glShaderProgram, 0, "position");
-	glBindAttribLocation(_glShaderProgram, 1, "normal");
-	glBindAttribLocation(_glShaderProgram, 2, "color");
+	subProg = glCreateShader(type);
+	glShaderSource(subProg, 1, &(src), NULL);
+	glCompileShader(subProg);
+	glGetShaderiv(subProg, GL_COMPILE_STATUS, &success);
 
-	glLinkProgram(_glShaderProgram);
-	glGetProgramiv(_glShaderProgram, GL_LINK_STATUS, &success);
 	if (!success)
 	{
-		glGetProgramInfoLog(_glShaderProgram, MAX_INFO_LOG_SIZE, NULL, infoLog);
+		glGetShaderInfoLog(subProg, MAX_INFO_LOG_SIZE, NULL, infoLog);
+		logError << "Error in " << getName()
+				 << " subprogram compilation: " << std::endl << infoLog
+				 << logEndl;
+		return false;
+	}
+
+	++_validSubprogramsCount;
+	logDebug << getName() << " subprogram compiled successfuly." << logEndl;
+	return true;
+}
+
+
+bool Shader::_linkShaderProgram()
+{
+	int success = 0;
+	const int MAX_INFO_LOG_SIZE = 1024;
+	GLchar infoLog[MAX_INFO_LOG_SIZE];
+
+	_glShader = glCreateProgram();
+	glAttachShader(_glShader, _glvs);
+//	glAttachShader(_glShader, _glgs);
+	glAttachShader(_glShader, _glfs);
+
+	glBindAttribLocation(_glShader, 0, "position");
+	glBindAttribLocation(_glShader, 1, "normal");
+	glBindAttribLocation(_glShader, 2, "color");
+
+	glLinkProgram(_glShader);
+	glGetProgramiv(_glShader, GL_LINK_STATUS, &success);
+	if (!success)
+	{
+		glGetProgramInfoLog(_glShader, MAX_INFO_LOG_SIZE, NULL, infoLog);
 		logError << "Error in shader program linkage: " << infoLog << logEndl;
 		return false;
 	}
 
 	logDebug << "Shader program linked successfuly." << logEndl;
 
-	glValidateProgram(_glShaderProgram);
-	glGetProgramiv(_glShaderProgram, GL_VALIDATE_STATUS, &success);
+	glValidateProgram(_glShader);
+	glGetProgramiv(_glShader, GL_VALIDATE_STATUS, &success);
 	if (!success)
 	{
-		glGetProgramInfoLog(_glShaderProgram, MAX_INFO_LOG_SIZE, NULL, infoLog);
+		glGetProgramInfoLog(_glShader, MAX_INFO_LOG_SIZE, NULL, infoLog);
 		logError << "Error in shader program validation: " << infoLog << logEndl;
 		return false;
 	}
 
-	++_shadersCompileCount;
+	++_validSubprogramsCount;
 	logDebug << "Shader program is valid. Shaders compilation finished." << logEndl;
 	return true;
 }

@@ -121,6 +121,7 @@ SOURCES += \
 
 DISTFILES += \
     shaders/default.vs \
+	shaders/default.gs \
     shaders/default.fs \
     shaders/metamorph.vs \
     shaders/screw.vs \
