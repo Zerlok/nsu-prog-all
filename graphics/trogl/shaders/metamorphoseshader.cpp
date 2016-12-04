@@ -37,6 +37,16 @@ void MetamorphoseShader::_passInternalAttributes()
 }
 
 
+void MetamorphoseShader::passComponent(const Component* comp)
+{
+	if ((comp == nullptr)
+			|| (comp->getType() != Component::Type::OBJECT))
+		return;
+
+	passObject((Object*)comp);
+}
+
+
 void MetamorphoseShader::passObject(Object const* obj)
 {
 	if ((obj == nullptr)

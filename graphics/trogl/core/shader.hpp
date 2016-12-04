@@ -150,6 +150,7 @@ class Shader : public Component
 		}
 
 		// Virtual methods.
+		virtual void passComponent(Component const*) = 0;
 		virtual void passObject(Object const*) = 0;
 
 	protected:

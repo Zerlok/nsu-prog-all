@@ -65,8 +65,10 @@ void DiffuseMaterial::setHardness(const float& hardness)
 }
 
 
-void DiffuseMaterial::passToShader() const
+void DiffuseMaterial::passToShader()
 {
+	Material::passToShader();
+
 	_shader->passAttribute("material.color", _color);
 	_shader->passAttribute("material.diffuse", _diffuse);
 	_shader->passAttribute("material.specular", _specular);

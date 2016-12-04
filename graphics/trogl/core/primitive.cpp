@@ -8,11 +8,13 @@ logger_t moduleLogger = loggerModule(loggerLWarning, loggerDFull);
 
 
 const size_t Primitive::_vertexStep = 4;
+const size_t Primitive::_uvStep = 2;
 const size_t Primitive::_indexStep = 3;
 
 
 Primitive::Primitive(const MeshPtr& mesh)
 	: _glVBO(0),
+	  _glUVBO(0),
 	  _glNBO(0),
 	  _glIBO(0),
 	  _indicesSize(0),
@@ -40,6 +42,7 @@ Primitive::Primitive(const MeshPtr& mesh)
 
 Primitive::Primitive(Primitive&& obj)
 	: _glVBO(std::move(obj._glVBO)),
+	  _glUVBO(std::move(obj._glUVBO)),
 	  _glNBO(std::move(obj._glNBO)),
 	  _glIBO(std::move(obj._glIBO)),
 	  _indicesSize(std::move(obj._indicesSize)),
@@ -48,11 +51,12 @@ Primitive::Primitive(Primitive&& obj)
 	  _shader(std::move(obj._shader))
 {
 	obj._glVBO = 0;
+	obj._glUVBO = 0;
 	obj._glNBO = 0;
 	obj._glIBO = 0;
 
-	logDebug << "Primitive moved (VBO, NBO, IBO): "
-			 << _glVBO << ", " << _glNBO << ", " << _glIBO
+	logDebug << "Primitive moved (VBO, UVBO, NBO, IBO): "
+			 << _glVBO << ", " << _glUVBO << ", " << _glNBO << ", " << _glIBO
 			 << " [" << _indicesSize << ']'
 			 << logEndl;
 }
@@ -63,8 +67,8 @@ Primitive::~Primitive()
 	_deinitGLGeometry();
 
 	if (isValid())
-		logDebug << "Primitive removed (VBO, NBO, IBO): "
-				 << _glVBO << ", " << _glNBO << ", " << _glIBO
+		logDebug << "Primitive removed (VBO, UVBO, NBO, IBO): "
+				 << _glVBO << ", " << _glUVBO << ", " << _glNBO << ", " << _glIBO
 				 << " [" << _indicesSize << ']'
 				 << logEndl;
 }
@@ -83,6 +87,7 @@ void Primitive::initGLGeometry(const MeshPtr& mesh)
 		return;
 
 	_initVertexBufferObject(mesh);
+	_initUVBufferObject(mesh);
 	_initIndexBufferObject(mesh);
 }
 
@@ -97,6 +102,7 @@ void Primitive::draw(const LightPtr& light,
 					 const CameraPtr& camera)
 {
 	_shader->bind();
+
 	_material->passToShader();
 	_shader->passAttribute("meshPosition", _position);
 	_shader->passObject(light);
@@ -104,6 +110,7 @@ void Primitive::draw(const LightPtr& light,
 
 	glEnableVertexAttribArray(0);
 	glEnableVertexAttribArray(1);
+//	glEnableVertexAttribArray(2);
 
 	glBindBuffer(GL_ARRAY_BUFFER, _glVBO);
 	glVertexAttribPointer(0, _vertexStep, GL_FLOAT, GL_FALSE, 0, 0);
@@ -111,9 +118,13 @@ void Primitive::draw(const LightPtr& light,
 	glBindBuffer(GL_ARRAY_BUFFER, _glNBO);
 	glVertexAttribPointer(1, _vertexStep, GL_FLOAT, GL_FALSE, 0, 0);
 
+//	glBindBuffer(GL_ARRAY_BUFFER, _glUVBO);
+//	glVertexAttribPointer(1, _uvStep, GL_FLOAT, GL_FALSE, 0, 0);
+
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _glIBO);
 	glDrawElements(GL_TRIANGLES, _indicesSize, GL_UNSIGNED_INT, 0);
 
+//	glDisableVertexAttribArray(2);
 	glDisableVertexAttribArray(1);
 	glDisableVertexAttribArray(0);
 }
@@ -122,6 +133,7 @@ void Primitive::draw(const LightPtr& light,
 bool Primitive::_isGLGeometryValid() const
 {
 	return ((_glVBO != 0)
+			&& (_glUVBO != 0)
 			&& (_glNBO != 0)
 			&& (_glIBO != 0));
 }
@@ -158,6 +170,25 @@ void Primitive::_initVertexBufferObject(const MeshPtr& mesh)
 }
 
 
+void Primitive::_initUVBufferObject(const MeshPtr &mesh)
+{
+	std::vector<GLfloat> maps((mesh->getVertices().size() * _uvStep), 0.0f);
+	size_t idx = 0;
+
+	for (size_t i = 0; i < maps.size(); i += _uvStep)
+	{
+		const Mesh::Vertex& v = mesh->getVertex(idx++);
+
+		maps[i] = v.getUVMapping().x;
+		maps[i+1] = v.getUVMapping().y;
+	}
+
+	glGenBuffers(1, &_glUVBO);
+	glBindBuffer(GL_ARRAY_BUFFER, _glUVBO);
+	glBufferData(GL_ARRAY_BUFFER, maps.size() * sizeof(GLfloat), maps.data(), GL_STATIC_DRAW);
+}
+
+
 void Primitive::_initIndexBufferObject(const MeshPtr& mesh)
 {
 	std::vector<GLuint> indicies((mesh->getPolygons().size() * _indexStep), 0.0f);
@@ -184,6 +215,9 @@ void Primitive::_deinitGLGeometry()
 {
 	if (_glVBO != 0)
 		glDeleteBuffers(sizeof(_glVBO), &_glVBO);
+
+	if (_glUVBO != 0)
+		glDeleteBuffers(sizeof(_glUVBO), &_glUVBO);
 
 	if (_glNBO != 0)
 		glDeleteBuffers(sizeof(_glNBO), &_glNBO);

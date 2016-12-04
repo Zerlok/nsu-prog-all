@@ -4,6 +4,7 @@
 
 #include <sharedpointer.h>
 #include "common/color.hpp"
+#include "texture.hpp"
 #include "shader.hpp"
 #include "component.hpp"
 
@@ -26,16 +27,20 @@ class Material : public Component
 		// Methods.
 		const Color& getColor() const;
 		const ShaderPtr& getShader() const;
+		const Textures& getTextures() const;
+
+		void addTexture(const TexturePtr& texture);
 
 		void setColor(const Color& color);
 		void setShader(const ShaderPtr& shader);
 
 		// Virtual methods.
-		virtual void passToShader() const {}
+		virtual void passToShader();
 
 	protected:
 		// Fields.
 		Color _color;
+		Textures _textures;
 		ShaderPtr _shader;
 };
 

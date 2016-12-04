@@ -14,7 +14,9 @@ class MetamorphoseShader : public Shader
 
 		void _registerAttributes() override;
 		void _passInternalAttributes() override;
-		void passObject(Object const*obj) override;
+
+		void passComponent(Component const* comp) override;
+		void passObject(Object const* obj) override;
 
 	private:
 		static const std::string VS_FILE;

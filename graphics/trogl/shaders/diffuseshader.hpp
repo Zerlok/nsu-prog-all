@@ -3,6 +3,7 @@
 
 
 #include <string>
+#include "core/component.hpp"
 #include "core/object.hpp"
 #include "core/mesh.hpp"
 #include "core/light.hpp"
@@ -18,11 +19,13 @@ class DiffuseShader : public Shader
 		~DiffuseShader();
 
 		// Methods.
+		void passTexture(Texture const* texture);
 		void passMesh(Mesh const* mesh);
 		void passLight(Light const* light);
 		void passCamera(Camera const* camera);
 
 		// Overriden methods.
+		void passComponent(Component const* comp) override;
 		void passObject(Object const* obj) override;
 
 	protected:

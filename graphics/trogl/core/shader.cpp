@@ -232,7 +232,7 @@ bool Shader::_linkShaderProgram()
 
 	glBindAttribLocation(_glShader, 0, "position");
 	glBindAttribLocation(_glShader, 1, "normal");
-	glBindAttribLocation(_glShader, 2, "color");
+//	glBindAttribLocation(_glShader, 2, "uvMap");
 
 	glLinkProgram(_glShader);
 	glGetProgramiv(_glShader, GL_LINK_STATUS, &success);

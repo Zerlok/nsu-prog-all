@@ -19,10 +19,10 @@ class Mesh : public Object
 		static const MaterialPtr DEFAULT_MATERIAL;
 
 		// Inner classes.
+		// TODO: write function which returns indicies for IBO by indexing type.
 		enum IndexingType
 		{
 			TRIANGLES = GL_TRIANGLES,
-			// TODO: write function which returns indicies for IBO by indexing type.
 			// TRIANGLES_STRIP = GL_TRIANGLE_STRIP,
 		};
 
@@ -76,9 +76,11 @@ class Mesh : public Object
 			public:
 				// Constructors / Destructor.
 				Vertex(const size_t& idx,
-					   const double& x,
-					   const double& y,
-					   const double& z,
+					   const float& x,
+					   const float& y,
+					   const float& z,
+					   const float& u,
+					   const float& v,
 					   Mesh* mesh);
 				Vertex(const Vertex& v);
 				Vertex(Vertex&& v);
@@ -92,6 +94,7 @@ class Mesh : public Object
 				const size_t& getIndex() const;
 				const vec& getPosition() const;
 				vec getNormal() const;
+				const glm::vec2& getUVMapping() const;
 
 				void setPosition(const glm::vec3& pos);
 
@@ -99,6 +102,7 @@ class Mesh : public Object
 				// Fields.
 				size_t _idx;
 				Object::vec _position;
+				glm::vec2 _uvMapping;
 
 				std::vector<Triple> _linkedTriples; // Aggregation links with Polygons.
 				Mesh* _linkedMesh;
@@ -187,9 +191,11 @@ class Mesh : public Object
 		const MaterialPtr& getMaterial() const;
 		const IndexingType& getIndexType() const;
 
-		size_t addVertex(const double& x,
-						 const double& y,
-						 const double& z);
+		size_t addVertex(const float& x,
+						 const float& y,
+						 const float& z,
+						 const float& u = 0.0f,
+						 const float& v = 0.0f);
 		bool addPolygon(const size_t& i1,
 						const size_t& i2,
 						const size_t& i3);

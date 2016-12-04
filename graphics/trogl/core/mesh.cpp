@@ -139,12 +139,14 @@ const Mesh::IndexingType& Mesh::getIndexType() const
 }
 
 
-size_t Mesh::addVertex(const double& x,
-					   const double& y,
-					   const double& z)
+size_t Mesh::addVertex(const float& x,
+					   const float& y,
+					   const float& z,
+					   const float& u,
+					   const float& v)
 {
 	const size_t idx = _vertices.size();
-	_vertices.push_back({idx, x, y, z, this});
+	_vertices.push_back({idx, x, y, z, u, v, this});
 	return idx;
 }
 
@@ -241,12 +243,15 @@ void Mesh::_reassignData()
 // ---------------------------- MESH::VERTEX ---------------------------- //
 
 Mesh::Vertex::Vertex(const size_t& idx,
-					 const double& x,
-					 const double& y,
-					 const double& z,
+					 const float& x,
+					 const float& y,
+					 const float& z,
+					 const float& u,
+					 const float& v,
 					 Mesh* mesh)
 	: _idx(idx),
 	  _position(x, y, z),
+	  _uvMapping(u, v),
 	  _linkedTriples(),
 	  _linkedMesh(mesh)
 {
@@ -256,6 +261,7 @@ Mesh::Vertex::Vertex(const size_t& idx,
 Mesh::Vertex::Vertex(const Mesh::Vertex& v)
 	: _idx(v._idx),
 	  _position(v._position),
+	  _uvMapping(v._uvMapping),
 	  _linkedTriples(v._linkedTriples),
 	  _linkedMesh(v._linkedMesh)
 {
@@ -265,6 +271,7 @@ Mesh::Vertex::Vertex(const Mesh::Vertex& v)
 Mesh::Vertex::Vertex(Mesh::Vertex&& v)
 	: _idx(std::move(v._idx)),
 	  _position(std::move(v._position)),
+	  _uvMapping(std::move(v._uvMapping)),
 	  _linkedTriples(std::move(v._linkedTriples)),
 	  _linkedMesh(v._linkedMesh)
 {
@@ -280,6 +287,7 @@ Mesh::Vertex& Mesh::Vertex::operator=(const Mesh::Vertex& v)
 {
 	_idx = v._idx;
 	_position = v._position;
+	_uvMapping = v._uvMapping;
 	_linkedTriples = v._linkedTriples;
 	_linkedMesh = v._linkedMesh;
 
@@ -291,6 +299,7 @@ Mesh::Vertex& Mesh::Vertex::operator=(Mesh::Vertex&& v)
 {
 	_idx = std::move(v._idx);
 	_position = std::move(v._position);
+	_uvMapping = std::move(v._uvMapping);
 	_linkedTriples = std::move(v._linkedTriples);
 	_linkedMesh = v._linkedMesh;
 
@@ -317,6 +326,12 @@ Object::vec Mesh::Vertex::getNormal() const
 		normal += _linkedMesh->getPolygon(tr).calculateNormal();
 
 	return std::move(glm::normalize(normal));
+}
+
+
+const glm::vec2& Mesh::Vertex::getUVMapping() const
+{
+	return _uvMapping;
 }
 
 

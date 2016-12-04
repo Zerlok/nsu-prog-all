@@ -33,6 +33,14 @@ DiffuseShader::~DiffuseShader()
 }
 
 
+void DiffuseShader::passTexture(const Texture* texture)
+{
+	_externalAttributes.pass("text.map", texture->getUVOffset());
+	_externalAttributes.pass("text.colorMix", texture->getColorMix());
+	_externalAttributes.pass("text.data", 0); // TODO: get sample number from texture.
+}
+
+
 void DiffuseShader::passMesh(Mesh const* mesh)
 {
 	const glm::vec3& pos = mesh->getPosition();
@@ -63,6 +71,20 @@ void DiffuseShader::passCamera(const Camera* camera)
 
 	_internalAttributes.pass("camera.position", pos.x, pos.y, pos.z, 1.0f);
 	_internalAttributes.pass("camera.direction", dir.x, dir.y, dir.z, 0.0f);
+}
+
+
+void DiffuseShader::passComponent(const Component* comp)
+{
+	switch (comp->getType())
+	{
+		case Component::Type::OBJECT:
+			passObject((Object*)comp);
+			break;
+		case Component::Type::TEXTURE:
+			passTexture((Texture*)comp);
+			break;
+	}
 }
 
 
@@ -99,7 +121,12 @@ void DiffuseShader::_registerAttributes()
 	_internalAttributes.registerate("lamp.oa");
 
 	// External.
+	_externalAttributes.registerate("text.map");
+	_externalAttributes.registerate("text.colorMix");
+	_externalAttributes.registerate("text.data");
+
 	_externalAttributes.registerate("meshPosition");
+
 	_externalAttributes.registerate("material.color");
 	_externalAttributes.registerate("material.diffuse");
 	_externalAttributes.registerate("material.specular");

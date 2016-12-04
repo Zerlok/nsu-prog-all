@@ -86,13 +86,14 @@ vec4 mixLighting(
 }
 
 
+varying vec4 vertexColor;
+varying float vertexColorMix;
+varying vec4 vertexPosition;
+varying vec3 vertexNormal;
 
 uniform CameraStruct camera;
 uniform MaterialStruct material;
 uniform LampStruct lamp;
-
-varying vec4 vertexPosition;
-varying vec3 vertexNormal;
 
 
 void main()
@@ -131,8 +132,7 @@ void main()
 
 		// Ambient (scene background) light drawing.
 		case 4:
-			color = material.color * lamp.color * clamp(lamp.power, 0.0, 1.0);
-			color.a = material.color.a;
+		        color = mixLighting(material, lamp.color, clamp(lamp.power, 0.0, 1.0), 0.0);
 			break;
 
 		default:
@@ -140,6 +140,6 @@ void main()
 			break;
 	}
 
-		gl_FragColor = clamp(color, 0.0, 1.0);
+        gl_FragColor = mix(clamp(color, 0.0, 1.0), vertexColor, vertexColorMix);
 }
 

@@ -29,12 +29,14 @@ class Primitive
 	private:
 		// Static fields.
 		static const size_t _vertexStep;
+		static const size_t _uvStep;
 		static const size_t _indexStep;
 
 		// OpenGL attributes.
-		GLuint _glVBO; // Vertex Buffer Object
-		GLuint _glNBO; // Vertex Normal Buffer Object
-		GLuint _glIBO; // Index Buffer Object
+		GLuint _glVBO;	// Vertex Buffer Object
+		GLuint _glUVBO;	// vertex UV map Buffer Object
+		GLuint _glNBO;	// vertex Normal Buffer Object
+		GLuint _glIBO;	// Index Buffer Object
 
 		Mesh::IndexingType _indexType;
 		size_t _indicesSize;
@@ -46,8 +48,11 @@ class Primitive
 		bool _isGLGeometryValid() const;
 
 		void _initVertexBufferObject(const MeshPtr& mesh);
+		void _initUVBufferObject(const MeshPtr& mesh);
 		void _initIndexBufferObject(const MeshPtr& mesh);
 		void _deinitGLGeometry();
+
+		void _passShaderAttributes();
 };
 
 

@@ -13,6 +13,8 @@ class ScrewShader : public Shader
 
 		void _registerAttributes() override;
 		void _passInternalAttributes() override;
+
+		void passComponent(Component const*) override;
 		void passObject(Object const*) override;
 
 	private:

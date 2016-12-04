@@ -5,6 +5,7 @@
 #include "common/utils.hpp"
 #include "common/color.hpp"
 
+#include "core/texture.hpp"
 #include "shaders/diffuseshader.hpp"
 #include "materials/diffusematerial.hpp"
 
@@ -37,6 +38,8 @@ int main(int argc, char *argv[])
 
 	// Add floor to the scene.
 	MaterialPtr floorMat = new DiffuseMaterial(Color(120, 200, 120), 1.0, 0.2, 2.0);
+//	TexturePtr opethTexture = new Texture("/home/zerlok/Pictures/pic.jpg");
+//	floorMat->addTexture(opethTexture);
 	MeshPtr floor = new Plane();
 	floor->setMaterial(floorMat);
 	floor->setPosition({0.0, -2.0, 0.0});

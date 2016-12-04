@@ -74,6 +74,19 @@ const ShaderPtr& Material::getShader() const
 }
 
 
+const Textures&Material::getTextures() const
+{
+	return _textures;
+}
+
+
+void Material::addTexture(const TexturePtr& texture)
+{
+	_textures.push_back(texture);
+	_textures.back()->generate(); // TODO: generate texture buffer in scene validation.
+}
+
+
 void Material::setColor(const Color& color)
 {
 	_color = color;
@@ -83,4 +96,14 @@ void Material::setColor(const Color& color)
 void Material::setShader(const ShaderPtr& shader)
 {
 	_shader = shader;
+}
+
+
+void Material::passToShader()
+{
+	for (TexturePtr& texture : _textures)
+	{
+		texture->bind(); // TODO: unbind textures after object compilation.
+		_shader->passComponent(texture);
+	}
 }
