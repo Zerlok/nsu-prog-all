@@ -7,7 +7,7 @@
 logger_t moduleLogger = loggerModule(loggerLWarning, loggerDFull);
 
 
-const float Camera::DEFAULT_FOV = 60.0;
+const float Camera::DEFAULT_FOV = 45.0;
 const size_t Camera::DEFAULT_WIDTH = 640;
 const size_t Camera::DEFAULT_HEIGHT = 480;
 const float Camera::DEFAULT_NEAR_DISTANCE = 0.01;

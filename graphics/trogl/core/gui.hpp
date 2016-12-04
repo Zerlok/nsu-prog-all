@@ -99,7 +99,7 @@ class GUI : public Component
 		Components _components;
 };
 
-using GUIPtr = SharedPointer<GUI>;
+using GUIPtr = SharedPointer<GUI, Component>;
 
 
 #endif // __GUI_HPP__

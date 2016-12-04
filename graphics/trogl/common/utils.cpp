@@ -31,6 +31,14 @@ std::string path::basename(const std::string& path)
 }
 
 
+std::string path::extension(const std::string& path)
+{
+	const size_t pos = path.rfind('.') + 1;
+	const std::string ext = path.substr(pos, path.length() - pos);
+	return ext;
+}
+
+
 std::string path::clearname(const std::string& path)
 {
 	const std::string filename = basename(path);

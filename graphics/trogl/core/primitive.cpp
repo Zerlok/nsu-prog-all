@@ -99,8 +99,8 @@ void Primitive::draw(const LightPtr& light,
 	_shader->bind();
 	_material->passToShader();
 	_shader->passAttribute("meshPosition", _position);
-	_shader->passObject(light.get_cpointer());
-	_shader->passObject(camera.get_cpointer());
+	_shader->passObject(light);
+	_shader->passObject(camera);
 
 	glEnableVertexAttribArray(0);
 	glEnableVertexAttribArray(1);

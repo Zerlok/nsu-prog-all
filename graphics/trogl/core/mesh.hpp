@@ -214,7 +214,7 @@ class Mesh : public Object
 		void _reassignData();
 };
 
-using MeshPtr = SharedPointer<Mesh>;
+using MeshPtr = SharedPointer<Mesh, Object>;
 using Meshes = std::list<MeshPtr>;
 
 

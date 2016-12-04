@@ -32,12 +32,13 @@ HEADERS += \
     core/texture.hpp \
     core/material.hpp \
     core/mesh.hpp \
+    core/primitive.hpp \
     core/light.hpp \
     core/camera.hpp \
-	core/frame.hpp \
+    core/frame.hpp \
     core/scene.hpp \
     core/gui.hpp \
-    core/primitive.hpp \
+    core/animation.hpp \
     engine.hpp
 
 # Custom shaders.
@@ -80,12 +81,13 @@ SOURCES += \
     core/texture.cpp \
     core/material.cpp \
     core/mesh.cpp \
+    core/primitive.cpp \
     core/light.cpp \
     core/camera.cpp \
-	core/frame.cpp \
+    core/frame.cpp \
     core/scene.cpp \
     core/gui.cpp \
-    core/primitive.cpp \
+    core/animation.cpp \
     engine.cpp \
     main.cpp
 
@@ -121,7 +123,7 @@ SOURCES += \
 
 DISTFILES += \
     shaders/default.vs \
-	shaders/default.gs \
+    shaders/default.gs \
     shaders/default.fs \
     shaders/metamorph.vs \
     shaders/screw.vs \

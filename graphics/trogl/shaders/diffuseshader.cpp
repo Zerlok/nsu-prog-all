@@ -23,7 +23,7 @@ std::string DiffuseShader::FS_FILE()
 
 
 DiffuseShader::DiffuseShader()
-	: Shader("Diffuse Shader", VS_FILE(), DEFAULT_GS_FILE, FS_FILE())
+	: Shader("Diffuse Shader", {VS_FILE(), FS_FILE()})
 {
 }
 

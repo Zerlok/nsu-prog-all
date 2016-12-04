@@ -16,7 +16,7 @@ Material::Material(const std::string& name,
 	  _shader(shader)
 {
 	logDebug << "Material: " << getName() << " with "
-			  << ((_shader) ? _shader->getName() : "null shader") << " created"
+			  << ((!_shader.is_null()) ? _shader->getName() : "null shader") << " created"
 			  << logEndl;
 }
 

@@ -74,7 +74,7 @@ class Light : public Object
 
 std::ostream& operator<<(std::ostream& out, const Light::Type& type);
 
-using LightPtr = SharedPointer<Light>;
+using LightPtr = SharedPointer<Light, Object>;
 using Lights = std::list<LightPtr>;
 
 

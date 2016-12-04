@@ -59,7 +59,7 @@ class Scene : public Component
 		float _ambientPower;
 };
 
-using ScenePtr = SharedPointer<Scene>;
+using ScenePtr = SharedPointer<Scene, Component>;
 
 
 #endif // __SCENE_HPP__

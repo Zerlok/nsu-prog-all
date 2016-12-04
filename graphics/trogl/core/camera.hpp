@@ -68,7 +68,7 @@ class Camera : public Object
 		float _farDistance;
 };
 
-using CameraPtr = SharedPointer<Camera>;
+using CameraPtr = SharedPointer<Camera, Object>;
 
 
 #endif // __CAMERA_HPP__

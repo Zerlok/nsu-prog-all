@@ -6,7 +6,19 @@
 #include <utility>
 
 
-template<class Type>
+template<bool B, class T1, class T2 = void>
+struct declare_if {};
+
+
+template<class T1, class T2>
+struct declare_if<true, T1, T2> { using type = T1; };
+
+
+template<class T1, class T2>
+struct declare_if<false, T1, T2> { using type = T2; };
+
+
+template<class Type, class Base = void>
 class SharedPointer
 {
 	public:
@@ -15,6 +27,9 @@ class SharedPointer
 		using reference_t = Type&;
 		using cpointer_t = Type const*;
 		using creference_t = const Type&;
+
+		using baseptr_t = Base*;
+		using cbaseptr_t = Base const*;
 
 		// Constructors / Destructor.
 		SharedPointer(pointer_t ptr = nullptr)
@@ -99,6 +114,36 @@ class SharedPointer
 		operator bool() const
 		{
 			return !is_null();
+		}
+		bool operator!() const
+		{
+			return is_null();
+		}
+
+		operator pointer_t()
+		{
+			return get_pointer();
+		}
+		operator cpointer_t() const
+		{
+			return get_cpointer();
+		}
+		operator reference_t()
+		{
+			return get_reference();
+		}
+		operator creference_t() const
+		{
+			return get_creference();
+		}
+
+		operator baseptr_t()
+		{
+			return get_pointer();
+		}
+		operator cbaseptr_t() const
+		{
+			return get_cpointer();
 		}
 
 		creference_t operator*() const

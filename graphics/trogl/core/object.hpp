@@ -82,7 +82,7 @@ class Object : public Component
 		static std::string _generateNameFromObjType(const Type& type);
 };
 
-using ObjectPtr = SharedPointer<Object>;
+using ObjectPtr = SharedPointer<Object, Component>;
 
 
 std::ostream& operator<<(std::ostream& out, const Object& obj);

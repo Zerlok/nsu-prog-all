@@ -3,6 +3,7 @@
 
 
 #include <string>
+#include <vector>
 #include <unordered_map>
 #include <sharedpointer.h>
 #include "common/color.hpp"
@@ -81,6 +82,37 @@ class Shader : public Component
 			BINDED,
 		};
 
+		class Subprogram
+		{
+			public:
+				// Static methods.
+				static Subprogram loadFile(const std::string& filename);
+
+				// Constructors / Destructor.
+				Subprogram();
+				Subprogram(const Subprogram& sp);
+				Subprogram(Subprogram&& sp);
+				~Subprogram();
+
+				// Operators.
+				Subprogram& operator=(const Subprogram& sp);
+				Subprogram& operator=(Subprogram&& sp);
+
+				// Methods.
+				bool compile();
+				void getTypeFromFilename(const std::string& filename);
+				void link(GLuint& glShader);
+				void unlink(GLuint& glShader);
+
+			private:
+				// Fields.
+				GLuint id;
+				GLenum type;
+				std::string src;
+				std::string version;
+				bool valid;
+		};
+
 		using Attr = Attributes::Attr;
 
 		// Static fields.
@@ -89,14 +121,9 @@ class Shader : public Component
 		static const std::string DEFAULT_GS_FILE;
 		static const std::string DEFAULT_FS_FILE;
 
-		// Static methods.
-		static std::string loadFile(const std::string& filename);
-
 		// Constructors / Destructor.
 		Shader(const std::string& name,
-			   const std::string& vsFile = DEFAULT_VS_FILE,
-			   const std::string& gsFile = DEFAULT_GS_FILE,
-			   const std::string& fsFile = DEFAULT_FS_FILE);
+			   const std::vector<std::string>& filenames);
 		Shader(const Shader& sh);
 		Shader(Shader&& sh);
 		virtual ~Shader();
@@ -128,6 +155,7 @@ class Shader : public Component
 	protected:
 		// Constructor.
 		Shader(const std::string& name);
+		void _loadSubprograms(const std::vector<std::string>& filenames);
 
 	private:
 		// Fields.
@@ -135,15 +163,8 @@ class Shader : public Component
 
 	protected:
 		// Fields.
-		std::string _vertexSrc;
-		std::string _geometrySrc;
-		std::string _fragmentSrc;
-
-		GLuint _glvs;		// Vertex shader.
-		GLuint _glgs;		// Geometry shader.
-		GLuint _glfs;		// Pixel shader.
 		GLuint _glShader;	// Total shader program.
-		size_t _validSubprogramsCount;
+		std::vector<Subprogram> _subprograms;
 
 		Attributes _internalAttributes;
 		Attributes _externalAttributes;
@@ -154,11 +175,10 @@ class Shader : public Component
 
 	private:
 		// Methods.
-		bool _compileSubprogram(GLuint& subProg, const std::string& codeSrc, const GLenum& type);
 		bool _linkShaderProgram();
 };
 
-using ShaderPtr = SharedPointer<Shader>;
+using ShaderPtr = SharedPointer<Shader, Component>;
 
 std::ostream& operator<<(std::ostream& out, const Shader::Status& st);
 

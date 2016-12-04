@@ -12,11 +12,12 @@
 #include "meshes/megacube.hpp"
 
 
-template<class T>
-class ObjectGeneratorTraits
+template<class T, class B = Object>
+struct ObjectGeneratorTraits
 {
-    public:
-	using Pointer = SharedPointer<T>;
+	using Type = T;
+	using Base = Object;
+	using Pointer = SharedPointer<T, Object>;
 	using Array = std::vector<Pointer>;
 };
 
@@ -25,61 +26,61 @@ template<class ObjectType, class GeneratorTraits=ObjectGeneratorTraits<ObjectTyp
 class ObjectGenerator
 {
     public:
-	using ObjectPointer = typename GeneratorTraits::Pointer;
-	using Objects = typename GeneratorTraits::Array;
+		using ObjectPointer = typename GeneratorTraits::Pointer;
+		using Objects = typename GeneratorTraits::Array;
 
-	Objects latticeArrangement(
-				const int& latticeSize,
-				const float& latticeOffset,
-				const ObjectType& parent) const
-	{
-	    glm::vec3 pos;
-	    ObjectPointer obj;
-	    Objects objVector(std::pow(2*latticeSize-1, 3));
-	    size_t idx = 0;
+		Objects latticeArrangement(
+					const int& latticeSize,
+					const float& latticeOffset,
+					const ObjectType& parent) const
+		{
+			glm::vec3 pos;
+			ObjectPointer obj;
+			Objects objVector(std::pow(2*latticeSize-1, 3));
+			size_t idx = 0;
 
-	    for (int z = -latticeSize+1; z < latticeSize; ++z)
-	    {
-			for (int y = -latticeSize+1; y < latticeSize; ++y)
+			for (int z = -latticeSize+1; z < latticeSize; ++z)
 			{
-				for (int x = -latticeSize+1; x < latticeSize; ++x)
+				for (int y = -latticeSize+1; y < latticeSize; ++y)
 				{
-					pos.x = x*latticeOffset;
-					pos.y = y*latticeOffset;
-					pos.z = z*latticeOffset;
+					for (int x = -latticeSize+1; x < latticeSize; ++x)
+					{
+						pos.x = x*latticeOffset;
+						pos.y = y*latticeOffset;
+						pos.z = z*latticeOffset;
 
-					obj = new ObjectType(parent);
-					obj->setPosition(pos);
-					objVector[idx++] = obj;
+						obj = new ObjectType(parent);
+						obj->setPosition(pos);
+						objVector[idx++] = obj;
+					}
 				}
 			}
-	    }
 
-	    return std::move(objVector);
-	}
-
-	Objects directionArrangement(
-			const size_t& size,
-			const float& offset,
-			const glm::vec3& direction,
-			const ObjectType& parent
-			) const
-	{
-		const glm::vec3 directionOffset = glm::normalize(direction) * offset;
-		glm::vec3 pos {0.0, 0.0, 0.0};
-		ObjectPointer obj;
-		Objects objVector(size);
-
-		for (size_t i = 0; i < size; ++i)
-		{
-			obj = new ObjectType(parent);
-			obj->setPosition(pos);
-			objVector[i] = obj;
-			pos += directionOffset;
+			return std::move(objVector);
 		}
 
-		return std::move(objVector);
-	}
+		Objects directionArrangement(
+				const size_t& size,
+				const float& offset,
+				const glm::vec3& direction,
+				const ObjectType& parent
+				) const
+		{
+			const glm::vec3 directionOffset = glm::normalize(direction) * offset;
+			glm::vec3 pos {0.0, 0.0, 0.0};
+			ObjectPointer obj;
+			Objects objVector(size);
+
+			for (size_t i = 0; i < size; ++i)
+			{
+				obj = new ObjectType(parent);
+				obj->setPosition(pos);
+				objVector[i] = obj;
+				pos += directionOffset;
+			}
+
+			return std::move(objVector);
+		}
 };
 
 

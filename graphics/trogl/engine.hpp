@@ -74,6 +74,7 @@ class Engine
 		static void _idleFunc();
 		static void _reshapeFunc(int width, int height);
 		static std::string _generateWindowTitle(const Scene& scene);
+		static std::string _toString(const GLenum& type);
 
 		// Constructors / Destructor.
 		Engine();
@@ -91,8 +92,9 @@ class Engine
 		int _validateFrame();
 		int _validatePrimitives();
 
-		void _enableGLOptions();
-		void _initGLProjectionMatrix();
+		void _glEnableOptions();
+		void _glInitProjectionMatrix();
+		void _glInitModelViewMatrix();
 
 		void _viewGUI();
 		void _viewFrame();
@@ -103,6 +105,8 @@ class Engine
 		Status _status;
 
 		RenderMode _glRenderMode;
+		std::string _glVersion;
+		std::string _glShaderVersion;
 
 		GUIPtr _gui;
 		GUIfpsPtr _guiFPS;

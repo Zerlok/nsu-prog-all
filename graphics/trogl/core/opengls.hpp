@@ -4,7 +4,7 @@
 
 /*
  * This is a right order of including OpenGLs' headers.
- * DO NOTCHANGE IT!
+ * DO NOT CHANGE IT!
  */
 #include <GL/glew.h>
 #include <GL/gl.h>

@@ -16,53 +16,18 @@ const std::string Shader::DEFAULT_GS_FILE = path::join(Shader::SRC_DIR, "default
 const std::string Shader::DEFAULT_FS_FILE = path::join(Shader::SRC_DIR, "default.fs");
 
 
-std::string Shader::loadFile(const std::string& filename)
-{
-	std::stringstream ss;
-	std::ifstream in(filename);
-
-	if (!in.is_open())
-	{
-		logError << "Can't open file: " << filename << logEndl;
-		return std::move(ss.str());
-	}
-
-	size_t linesCount = 0;
-	std::string line;
-	while (!in.eof())
-	{
-		std::getline(in, line);
-		ss << line << std::endl;
-		++linesCount;
-	}
-	in.close();
-
-	logInfo << "Shader source code loaded from file: '" << filename
-			<< "', (" << linesCount << " lines)."
-			<< logEndl;
-	return std::move(ss.str());
-}
-
-
 Shader::Shader(const std::string& name,
-			   const std::string& vsFile,
-			   const std::string& gsFile,
-			   const std::string& fsFile)
+			   const std::vector<std::string>& filenames)
 	: Component(Component::Type::SHADER, name),
 	  _status(Status::NOT_COMPILED),
-	  _vertexSrc(loadFile(vsFile)),
-	  _geometrySrc(loadFile(gsFile)),
-	  _fragmentSrc(loadFile(fsFile)),
-	  _glvs(0),
-	  _glgs(0),
-	  _glfs(0),
 	  _glShader(0),
-	  _validSubprogramsCount(0),
+	  _subprograms({}),
 	  _internalAttributes(),
 	  _externalAttributes()
 {
+	_loadSubprograms(filenames);
 	logDebug << "Shader " << getName()
-			 << " created from files (" << vsFile << ", " << gsFile << ", " << fsFile << ")."
+			 << " created from files " << filenames << ")."
 			 << logEndl;
 }
 
@@ -70,14 +35,8 @@ Shader::Shader(const std::string& name,
 Shader::Shader(const Shader& sh)
 	: Component(sh),
 	  _status(Status::NOT_COMPILED),
-	  _vertexSrc(sh._vertexSrc),
-	  _geometrySrc(sh._geometrySrc),
-	  _fragmentSrc(sh._fragmentSrc),
-	  _glvs(0),
-	  _glgs(0),
-	  _glfs(0),
 	  _glShader(0),
-	  _validSubprogramsCount(0),
+	  _subprograms(sh._subprograms),
 	  _internalAttributes(),
 	  _externalAttributes()
 {
@@ -90,23 +49,13 @@ Shader::Shader(const Shader& sh)
 Shader::Shader(Shader&& sh)
 	: Component(sh),
 	  _status(std::move(sh._status)),
-	  _vertexSrc(std::move(sh._vertexSrc)),
-	  _geometrySrc(std::move(sh._geometrySrc)),
-	  _fragmentSrc(std::move(sh._fragmentSrc)),
-	  _glvs(std::move(sh._glvs)),
-	  _glgs(std::move(sh._glgs)),
-	  _glfs(std::move(sh._glfs)),
 	  _glShader(std::move(sh._glShader)),
-	  _validSubprogramsCount(std::move(sh._validSubprogramsCount)),
+	  _subprograms(std::move(sh._subprograms)),
 	  _internalAttributes(std::move(sh._internalAttributes)),
 	  _externalAttributes(std::move(sh._externalAttributes))
 {
 	sh._status = Status::NOT_COMPILED;
-	sh._glvs = 0;
-	sh._glgs = 0;
-	sh._glfs = 0;
 	sh._glShader = 0;
-	sh._validSubprogramsCount = 0;
 	sh._internalAttributes.clear();
 	sh._externalAttributes.clear();
 
@@ -116,38 +65,12 @@ Shader::Shader(Shader&& sh)
 
 Shader::~Shader()
 {
-	logDebug << "Shaders compilation count: " << _validSubprogramsCount
-			 << ", Status: " << _status
-			 << ", Removing: (";
+	for (Subprogram& prog : _subprograms)
+		prog.unlink(_glShader);
 
-	switch (_validSubprogramsCount)
-	{
-		case 4:
-			glDetachShader(_glShader, _glvs);
-			glDetachShader(_glShader, _glfs);
-			glDeleteProgram(_glShader);
-			logDebug << "Shader program, ";
+	glDeleteProgram(_glShader);
 
-		case 3:
-			glDeleteShader(_glfs);
-			logDebug << "FS, ";
-
-		case 2:
-			glDeleteShader(_glgs);
-			logDebug << "GS, ";
-
-		case 1:
-			glDeleteShader(_glvs);
-			logDebug << "VS";
-			break;
-
-		case 0:
-		default:
-			logDebug << "nothing";
-			break;
-	}
-
-	logDebug << ") => shader removed." << logEndl;
+	logDebug << getName() << " removed." << logEndl;
 }
 
 
@@ -155,14 +78,8 @@ Shader& Shader::operator=(const Shader& sh)
 {
 	Component::operator=(sh);
 	_status = Status::NOT_COMPILED;
-	_vertexSrc = sh._vertexSrc;
-	_geometrySrc = sh._geometrySrc;
-	_fragmentSrc = sh._fragmentSrc;
-	_glvs = 0;
-	_glgs = 0;
-	_glfs = 0;
+	_subprograms = sh._subprograms;
 	_glShader = 0;
-	_validSubprogramsCount = 0;
 	_internalAttributes.clear();
 	_externalAttributes.clear();
 
@@ -175,21 +92,11 @@ Shader& Shader::operator=(Shader&& sh)
 {
 	Component::operator=(sh);
 	_status = std::move(sh._status);
-	_vertexSrc = std::move(sh._vertexSrc);
-	_geometrySrc = std::move(sh._geometrySrc);
-	_fragmentSrc = std::move(sh._fragmentSrc);
-	_glvs = std::move(sh._glvs);
-	_glgs = std::move(sh._glgs);
-	_glfs = std::move(sh._glfs);
-	_validSubprogramsCount = std::move(sh._validSubprogramsCount);
+	_subprograms = std::move(sh._subprograms);
 	_glShader = std::move(sh._glShader);
 
 	sh._status = Status::NOT_COMPILED;
-	sh._glvs = 0;
-	sh._glgs = 0;
-	sh._glfs = 0;
 	sh._glShader = 0;
-	sh._validSubprogramsCount = 0;
 	sh._internalAttributes.clear();
 	sh._externalAttributes.clear();
 
@@ -260,12 +167,10 @@ void Shader::compile()
 	if (isCompiled())
 		return;
 
-	_compileSubprogram(_glvs, _vertexSrc, GL_VERTEX_SHADER);
-//	_compileSubprogram(_glgs, _geometrySrc, GL_GEOMETRY_SHADER);
-	_compileSubprogram(_glfs, _fragmentSrc, GL_FRAGMENT_SHADER);
-	_linkShaderProgram();
+	for (Subprogram& prog : _subprograms)
+		prog.compile();
 
-	_status = (_validSubprogramsCount == 3)
+	_status = (_linkShaderProgram())
 			? Status::COMPILATION_SUCCESSFUL
 			: Status::COMPILATION_FAILED;
 
@@ -299,14 +204,8 @@ void Shader::unbind()
 Shader::Shader(const std::string& name)
 	: Component(Component::Type::SHADER, name),
 	  _status(Status::NOT_COMPILED),
-	  _vertexSrc(),
-	  _geometrySrc(),
-	  _fragmentSrc(),
-	  _glvs(),
-	  _glgs(),
-	  _glfs(),
 	  _glShader(),
-	  _validSubprogramsCount(0),
+	  _subprograms({}),
 	  _internalAttributes(),
 	  _externalAttributes()
 {
@@ -314,33 +213,10 @@ Shader::Shader(const std::string& name)
 }
 
 
-bool Shader::_compileSubprogram(GLuint& subProg,
-								const std::string& codeSrc,
-								const GLenum& type)
+void Shader::_loadSubprograms(const std::vector<std::string>& filenames)
 {
-	int success = 0;
-	const int MAX_INFO_LOG_SIZE = 1024;
-	GLchar infoLog[MAX_INFO_LOG_SIZE];
-
-	const char* src = codeSrc.data();
-
-	subProg = glCreateShader(type);
-	glShaderSource(subProg, 1, &(src), NULL);
-	glCompileShader(subProg);
-	glGetShaderiv(subProg, GL_COMPILE_STATUS, &success);
-
-	if (!success)
-	{
-		glGetShaderInfoLog(subProg, MAX_INFO_LOG_SIZE, NULL, infoLog);
-		logError << "Error in " << getName()
-				 << " subprogram compilation: " << std::endl << infoLog
-				 << logEndl;
-		return false;
-	}
-
-	++_validSubprogramsCount;
-	logDebug << getName() << " subprogram compiled successfuly." << logEndl;
-	return true;
+	for (const std::string& filename : filenames)
+		_subprograms.push_back(Subprogram::loadFile(filename));
 }
 
 
@@ -351,9 +227,8 @@ bool Shader::_linkShaderProgram()
 	GLchar infoLog[MAX_INFO_LOG_SIZE];
 
 	_glShader = glCreateProgram();
-	glAttachShader(_glShader, _glvs);
-//	glAttachShader(_glShader, _glgs);
-	glAttachShader(_glShader, _glfs);
+	for (Subprogram& prog : _subprograms)
+		prog.link(_glShader);
 
 	glBindAttribLocation(_glShader, 0, "position");
 	glBindAttribLocation(_glShader, 1, "normal");
@@ -379,7 +254,6 @@ bool Shader::_linkShaderProgram()
 		return false;
 	}
 
-	++_validSubprogramsCount;
 	logDebug << "Shader program is valid. Shaders compilation finished." << logEndl;
 	return true;
 }
@@ -405,7 +279,7 @@ std::ostream& operator<<(std::ostream& out, const Shader::Status& st)
 }
 
 
-// -------------------------------- UTILS -------------------------------- //
+// -------------------------------- Shader Attributes -------------------------------- //
 
 
 const Attributes::Attr Attributes::NOT_FOUND = Attributes::Attr(-1);
@@ -529,4 +403,165 @@ void Attributes::_pass(const GLuint& glLoc, const Color& value)
 				value.getGreenF(),
 				value.getBlueF(),
 				value.getAlphaF());
+}
+
+
+// -------------------------------- Shader::Subprogram -------------------------------- //
+
+Shader::Subprogram Shader::Subprogram::loadFile(const std::string& filename)
+{
+	Subprogram subprog;
+	std::stringstream ss;
+	std::ifstream in(filename);
+
+	if (!in.is_open())
+	{
+		logError << "Can't open file: " << filename << logEndl;
+		return std::move(subprog);
+	}
+
+	size_t linesCount = 0;
+	std::string line;
+	while (!in.eof())
+	{
+		std::getline(in, line);
+		ss << line << std::endl;
+
+		if (linesCount == 0)
+		{
+			size_t pos = line.find(' ') + 1;
+			subprog.version = line.substr(pos, line.size() - pos);
+		}
+
+		++linesCount;
+	}
+	in.close();
+
+	subprog.getTypeFromFilename(filename);
+	subprog.src = ss.str();
+
+	logInfo << "Shader source code loaded from file: '" << filename
+			<< "', (" << linesCount << " lines)."
+			<< logEndl;
+	return std::move(subprog);
+}
+
+
+Shader::Subprogram::Subprogram()
+	: id(0),
+	  type(0),
+	  src(),
+	  version(),
+	  valid(false)
+{
+}
+
+
+Shader::Subprogram::Subprogram(const Shader::Subprogram& sp)
+	: id(0),
+	  type(sp.type),
+	  src(sp.src),
+	  version(sp.version),
+	  valid(false)
+{
+}
+
+
+Shader::Subprogram::Subprogram(Shader::Subprogram&& sp)
+	: id(std::move(sp.id)),
+	  type(std::move(sp.type)),
+	  src(std::move(sp.src)),
+	  version(std::move(sp.version)),
+	  valid(std::move(sp.valid))
+{
+}
+
+
+Shader::Subprogram::~Subprogram()
+{
+	if (!valid)
+		return;
+
+	glDeleteShader(id);
+}
+
+
+Shader::Subprogram& Shader::Subprogram::operator=(const Shader::Subprogram& sp)
+{
+	id = 0;
+	type = sp.type;
+	src = sp.src;
+	version = sp.version;
+	valid = false;
+
+	return (*this);
+}
+
+
+Shader::Subprogram& Shader::Subprogram::operator=(Shader::Subprogram&& sp)
+{
+	id = std::move(sp.id);
+	type = std::move(sp.type);
+	src = std::move(sp.src);
+	version = std::move(sp.version);
+	valid = std::move(sp.valid);
+
+	return (*this);
+}
+
+
+bool Shader::Subprogram::compile()
+{
+	int success = 0;
+	const int MAX_INFO_LOG_SIZE = 1024;
+	GLchar infoLog[MAX_INFO_LOG_SIZE];
+
+	const char* code = src.data();
+
+	id = glCreateShader(type);
+	glShaderSource(id, 1, &(code), NULL);
+	glCompileShader(id);
+	glGetShaderiv(id, GL_COMPILE_STATUS, &success);
+
+	if (!success)
+	{
+		glGetShaderInfoLog(id, MAX_INFO_LOG_SIZE, NULL, infoLog);
+		logError << "Error in subprogram compilation: " << infoLog << logEndl;
+		return false;
+	}
+
+	valid = true;
+	logDebug << "Subprogram compiled successfuly." << logEndl;
+	return true;
+}
+
+
+void Shader::Subprogram::getTypeFromFilename(const std::string& filename)
+{
+	const std::string ext = path::extension(filename);
+
+	if (ext == "vs")
+		type = GL_VERTEX_SHADER;
+	else if (ext == "gs")
+		type = GL_GEOMETRY_SHADER;
+	else if (ext == "fs")
+		type = GL_FRAGMENT_SHADER;
+}
+
+
+void Shader::Subprogram::link(GLuint& glShader)
+{
+	if (!valid)
+		return;
+
+	glAttachShader(glShader, id);
+}
+
+
+void Shader::Subprogram::unlink(GLuint& glShader)
+{
+	if (!valid)
+		return;
+
+	glDetachShader(glShader, id);
 }

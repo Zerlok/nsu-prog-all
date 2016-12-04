@@ -76,7 +76,7 @@ class Frame : public Component
 		};
 };
 
-using FramePtr = SharedPointer<Frame>;
+using FramePtr = SharedPointer<Frame, Component>;
 using SingleFrame = Frame;
 
 

@@ -39,7 +39,7 @@ class Material : public Component
 		ShaderPtr _shader;
 };
 
-using MaterialPtr = SharedPointer<Material>;
+using MaterialPtr = SharedPointer<Material, Component>;
 
 
 #endif // __MATERIAL_HPP__

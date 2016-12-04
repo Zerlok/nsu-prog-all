@@ -2,6 +2,7 @@
 
 
 #include <sstream>
+#include <cctype>
 #include <logger.hpp>
 #include "common/utils.hpp"
 
@@ -47,10 +48,10 @@ Engine::~Engine()
 void Engine::_logEngineOptions() const
 {
 	logInfo << "TroGL engine uses OpenGL:"
-			<< std::endl << "   OpenGL version: " << glGetString(GL_VERSION)
+			<< std::endl << "   OpenGL version: " << glGetString(GL_VERSION) << " (" << _glVersion << ')'
 			<< std::endl << "   Vendor version: " << glGetString(GL_VENDOR)
 			<< std::endl << "   Renderer version: " << glGetString(GL_RENDERER)
-			<< std::endl << "   GLSL version: " << glGetString(GL_SHADING_LANGUAGE_VERSION)
+			<< std::endl << "   GLSL version: " << glGetString(GL_SHADING_LANGUAGE_VERSION) << " (" << _glShaderVersion << ')'
 			<< logEndl;
 
 	GLint glslVersionsNum;
@@ -84,7 +85,7 @@ void Engine::_logSceneStatistics() const
 
 int Engine::_validateScene()
 {
-	if (!_scene)
+	if (_scene.is_null())
 	{
 		logError << "Cannot show scene - it was not set yet!" << logEndl;
 		return 0;
@@ -109,7 +110,12 @@ int Engine::_validateScene()
 
 int Engine::_validateFrame()
 {
-	return (_frame->validate()) ? 1 : 0;
+	bool result = _frame->validate();
+
+	_glVersion = _toString(GL_VERSION);
+	_glShaderVersion = _toString(GL_SHADING_LANGUAGE_VERSION);
+
+	return (result) ? 1 : 0;
 }
 
 
@@ -136,7 +142,7 @@ int Engine::_validatePrimitives()
 }
 
 
-void Engine::_enableGLOptions()
+void Engine::_glEnableOptions()
 {
 	glEnable(GL_TEXTURE_2D);
 
@@ -152,14 +158,33 @@ void Engine::_enableGLOptions()
 }
 
 
-void Engine::_initGLProjectionMatrix()
+void Engine::_glInitProjectionMatrix()
 {
+	glm::mat4x4 mat = glm::perspective(_camera->getFOV(),
+									   _camera->getWHRatio(),
+									   _camera->getNearDistance(),
+									   _camera->getFarDistance());
+	glMatrixMode(GL_PROJECTION);
+	glLoadMatrixf(&mat[0][0]);
+
+	/* Old way
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	gluPerspective(_camera->getFOV(),
 				   _camera->getWHRatio(),
 				   _camera->getNearDistance(),
 				   _camera->getFarDistance());
+	*/
+}
+
+
+void Engine::_glInitModelViewMatrix()
+{
+	glm::mat4x4 mat = glm::lookAt(_camera->getPosition(),
+								  _camera->getLookingAtPosition(),
+								  _camera->getHeadDirection());
+	glMatrixMode(GL_MODELVIEW);
+	glLoadMatrixf(&mat[0][0]);
 }
 
 
@@ -243,7 +268,7 @@ const Engine::Status&Engine::getStatus() const
 
 void Engine::enableFPS()
 {
-	if (_guiFPS)
+	if (!_guiFPS.is_null())
 		return;
 
 	_guiFPS = new GUIfps(10, 15, 20, 20);
@@ -311,8 +336,10 @@ void Engine::showActiveScene()
 	_logSceneStatistics();
 	_status = Status::RENDERING_STARTED;
 
-	_enableGLOptions();
-	_initGLProjectionMatrix();
+	_glEnableOptions();
+	_glInitProjectionMatrix();
+	_glInitModelViewMatrix();
+
 	glutDisplayFunc(_displayFunc);
 	glutReshapeFunc(_reshapeFunc);
 	glutIdleFunc(_idleFunc);
@@ -341,13 +368,13 @@ void Engine::_viewGUI()
 	const size_t& width = _frame->getWidth();
 	const size_t& height = _frame->getHeight();
 
-	if (_guiFPS)
+	if (!_guiFPS.is_null())
 	{
 		_guiFPS->tick();
 		_guiFPS->draw(width, height);
 	}
 
-	if (_gui)
+	if (!_gui.is_null())
 	{
 		for (const GUIComponentPtr& comp : _gui->getComponents())
 			comp->draw(width, height);
@@ -367,28 +394,18 @@ void Engine::_viewFrame()
 {
 	_frame->clear(_scene->getBgColor());
 
+	// TODO: move into animation.
 	// Camera flying.
 	static const float a = std::sqrt(std::pow(_camera->getPosition().x, 2) + std::pow(_camera->getPosition().z, 2));
 	static const float h = _camera->getPosition().y;
 	const float psy = -getTimeDouble() / 29.0;
 	const float phi = getTimeDouble() / 31.0;
 //	_camera->setPosition({a*cos(phi), h, a*sin(phi)});
+	_glInitModelViewMatrix();
 
 	LightPtr light = _scene->getLights().front();
 	light->setPosition({a*cos(psy), light->getPosition().y, a*sin(psy)});
 	light->faceDirectionTo({cos(-psy), 0.0, sin(-psy)});
-
-	// TODO: use one style matricies coding (OpenGL).
-	glm::mat4x4 matView = glm::lookAt(_camera->getPosition(),
-									  _camera->getLookingAtPosition(),
-									  _camera->getHeadDirection());
-	// TODO: move into animation.
-//	matView = glm::rotate(matView, 3.0f, glm::vec3(0.0f, 1.0f, 0.0f));
-//	matView = glm::rotate(matView, float(getTimeDouble() / 31.0), glm::vec3(0.0f, 1.0f, 0.0f));
-//	matView = glm::rotate(matView, float(getTimeDouble() / 17.0), glm::vec3(0.0f, 0.0f, 1.0f));
-
-	glMatrixMode(GL_MODELVIEW);
-	glLoadMatrixf(&matView[0][0]);
 
 	for (Primitive& obj : _primitives)
 		for (const LightPtr& light : _scene->getLights())
@@ -428,4 +445,23 @@ std::string Engine::_generateWindowTitle(const Scene& scene)
 	std::stringstream ss;
 	ss << "TroGL Engine [" << scene.getName() << ']';
 	return ss.str();
+}
+
+
+std::string Engine::_toString(const GLenum& type)
+{
+	std::string str;
+
+	const GLubyte* ptr = glGetString(type);
+	while ((ptr != nullptr)
+		   && ((*ptr) != '\0')
+		   && ((*ptr) != ' '))
+	{
+		if (std::isalnum(*ptr))
+			str.push_back(*ptr);
+
+		++ptr;
+	}
+
+	return std::move(str);
 }
