@@ -34,7 +34,7 @@ Primitive::Primitive(const MeshPtr& mesh)
 
 	initGLGeometry(mesh);
 	if (_isGLGeometryValid())
-		compileGLShaders();
+		_material->compile();
 
 	logDebug << "Primitive from mesh " << mesh->getName() << " created." << logEndl;
 }
@@ -92,12 +92,6 @@ void Primitive::initGLGeometry(const MeshPtr& mesh)
 }
 
 
-void Primitive::compileGLShaders()
-{
-	_shader->compile();
-}
-
-
 void Primitive::draw(const LightPtr& light,
 					 const CameraPtr& camera)
 {
@@ -110,7 +104,7 @@ void Primitive::draw(const LightPtr& light,
 
 	glEnableVertexAttribArray(0);
 	glEnableVertexAttribArray(1);
-//	glEnableVertexAttribArray(2);
+	glEnableVertexAttribArray(2);
 
 	glBindBuffer(GL_ARRAY_BUFFER, _glVBO);
 	glVertexAttribPointer(0, _vertexStep, GL_FLOAT, GL_FALSE, 0, 0);
@@ -118,13 +112,13 @@ void Primitive::draw(const LightPtr& light,
 	glBindBuffer(GL_ARRAY_BUFFER, _glNBO);
 	glVertexAttribPointer(1, _vertexStep, GL_FLOAT, GL_FALSE, 0, 0);
 
-//	glBindBuffer(GL_ARRAY_BUFFER, _glUVBO);
-//	glVertexAttribPointer(1, _uvStep, GL_FLOAT, GL_FALSE, 0, 0);
+	glBindBuffer(GL_ARRAY_BUFFER, _glUVBO);
+	glVertexAttribPointer(2, _uvStep, GL_FLOAT, GL_FALSE, 0, 0);
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _glIBO);
 	glDrawElements(GL_TRIANGLES, _indicesSize, GL_UNSIGNED_INT, 0);
 
-//	glDisableVertexAttribArray(2);
+	glDisableVertexAttribArray(2);
 	glDisableVertexAttribArray(1);
 	glDisableVertexAttribArray(0);
 }

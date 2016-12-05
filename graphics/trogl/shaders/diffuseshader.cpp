@@ -35,6 +35,7 @@ DiffuseShader::~DiffuseShader()
 
 void DiffuseShader::passTexture(const Texture* texture)
 {
+	_externalAttributes.pass("text.binded", 1.0f);
 	_externalAttributes.pass("text.map", texture->getUVOffset());
 	_externalAttributes.pass("text.colorMix", texture->getColorMix());
 	_externalAttributes.pass("text.data", 0); // TODO: get sample number from texture.
@@ -84,6 +85,8 @@ void DiffuseShader::passComponent(const Component* comp)
 		case Component::Type::TEXTURE:
 			passTexture((Texture*)comp);
 			break;
+		default:
+			break;
 	}
 }
 
@@ -121,6 +124,7 @@ void DiffuseShader::_registerAttributes()
 	_internalAttributes.registerate("lamp.oa");
 
 	// External.
+	_externalAttributes.registerate("text.binded");
 	_externalAttributes.registerate("text.map");
 	_externalAttributes.registerate("text.colorMix");
 	_externalAttributes.registerate("text.data");

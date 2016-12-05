@@ -74,16 +74,23 @@ const ShaderPtr& Material::getShader() const
 }
 
 
-const Textures&Material::getTextures() const
+const Textures& Material::getTextures() const
 {
 	return _textures;
+}
+
+
+void Material::compile()
+{
+	_shader->compile();
+	for (TexturePtr& texture : _textures)
+		texture->generate();
 }
 
 
 void Material::addTexture(const TexturePtr& texture)
 {
 	_textures.push_back(texture);
-	_textures.back()->generate(); // TODO: generate texture buffer in scene validation.
 }
 
 
@@ -101,6 +108,12 @@ void Material::setShader(const ShaderPtr& shader)
 
 void Material::passToShader()
 {
+	if (_textures.empty())
+	{
+		_shader->passAttribute("text.binded", 0.0f);
+		return;
+	}
+
 	for (TexturePtr& texture : _textures)
 	{
 		texture->bind(); // TODO: unbind textures after object compilation.

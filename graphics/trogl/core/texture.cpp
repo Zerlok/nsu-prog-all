@@ -4,15 +4,19 @@
 #include <logger.hpp>
 
 
-logger_t moduleLogger = loggerModule(loggerLWarning, loggerDFull);
+logger_t moduleLogger = loggerModule(loggerLDebug, loggerDFull);
 
 
-Texture::Texture(const std::string& filename)
-	: Component(Component::Type::TEXTURE, filename),
+size_t Texture::textureID = 0;
+
+
+Texture::Texture(const std::string& name)
+	: Component(Component::Type::TEXTURE, name),
+	  _id(textureID++),
+	  _glTexture(0),
 	  _uvOffset(0.0f, 0.0f),
 	  _colorMix(0.5f),
-	  _normal(0.0f),
-	  _image(filename.c_str())
+	  _normal(0.0f)
 {
 	logDebug << getName() << " texture created." << logEndl;
 }
@@ -42,20 +46,35 @@ const float& Texture::getNormal() const
 }
 
 
+const size_t& Texture::getSampler() const
+{
+	return _id;
+}
+
+
 void Texture::generate()
 {
+	if (_glTexture != 0)
+		return;
+
 	glGenTextures(1, &_glTexture);
 	bind();
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, _image.width(), _image.height(), 0, GL_RGB, GL_FLOAT, _image.bits());
-	unbind();
+
+	logDebug << getName() << " generated." << logEndl;
 }
 
 
 void Texture::bind()
 {
 	glBindTexture(GL_TEXTURE_2D, _glTexture);
+	glActiveTexture(GL_TEXTURE0 + _id);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+//	logDebug << getName() << " binded." << logEndl;
 }
 
 

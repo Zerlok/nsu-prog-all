@@ -5,7 +5,9 @@
 #include "common/utils.hpp"
 #include "common/color.hpp"
 
-#include "core/texture.hpp"
+#include "textures/imagetexture.hpp"
+#include "textures/squaredwbtexture.hpp"
+
 #include "shaders/diffuseshader.hpp"
 #include "materials/diffusematerial.hpp"
 
@@ -38,8 +40,9 @@ int main(int argc, char *argv[])
 
 	// Add floor to the scene.
 	MaterialPtr floorMat = new DiffuseMaterial(Color(120, 200, 120), 1.0, 0.2, 2.0);
-//	TexturePtr opethTexture = new Texture("/home/zerlok/Pictures/pic.jpg");
-//	floorMat->addTexture(opethTexture);
+//	TexturePtr floorTexture = new ImageTexture("/home/zerlok/Pictures/me.jpg");
+	TexturePtr floorTexture = new SquaredWBTexture(100, 100);
+	floorMat->addTexture(floorTexture);
 	MeshPtr floor = new Plane();
 	floor->setMaterial(floorMat);
 	floor->setPosition({0.0, -2.0, 0.0});
@@ -59,8 +62,8 @@ int main(int argc, char *argv[])
 		scene->addMesh(m);
 
 	// Add light to the scene.
-	LightPtr lamp = new Light(Light::createPoint());
-//	LightPtr lamp = new Light(Light::createSun());
+//	LightPtr lamp = new Light(Light::createPoint());
+	LightPtr lamp = new Light(Light::createSun());
 //	LightPtr lamp = new Light(Light::createSpot());
 //	LightPtr lamp = scene->getAmbientLight();
 //	lamp->setColor({200, 200, 255});

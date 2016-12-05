@@ -57,6 +57,7 @@ class Attributes
 
 		// Static methods.
 		static void _pass(const GLuint& loc, const int& value);
+		static void _pass(const GLuint& loc, const unsigned int& value);
 		static void _pass(const GLuint& loc, const float& value);
 		static void _pass(const GLuint& loc, const glm::vec2& value);
 		static void _pass(const GLuint& loc, const glm::vec3& value);

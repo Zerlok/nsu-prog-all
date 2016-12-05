@@ -232,7 +232,7 @@ bool Shader::_linkShaderProgram()
 
 	glBindAttribLocation(_glShader, 0, "position");
 	glBindAttribLocation(_glShader, 1, "normal");
-//	glBindAttribLocation(_glShader, 2, "uvMap");
+	glBindAttribLocation(_glShader, 2, "uvMap");
 
 	glLinkProgram(_glShader);
 	glGetProgramiv(_glShader, GL_LINK_STATUS, &success);
@@ -369,6 +369,12 @@ bool Attributes::pass(const std::string& name,
 void Attributes::_pass(const GLuint& glLoc, const int& value)
 {
 	glUniform1i(glLoc, value);
+}
+
+
+void Attributes::_pass(const GLuint& glLoc, const unsigned int& value)
+{
+	glUniform1ui(glLoc, value);
 }
 
 

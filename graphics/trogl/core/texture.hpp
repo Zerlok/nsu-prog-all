@@ -3,7 +3,6 @@
 
 
 #include <vector>
-#include <QImage>
 #include <sharedpointer.h>
 #include "opengls.hpp"
 #include "component.hpp"
@@ -13,27 +12,31 @@ class Texture : public Component
 {
 	public:
 		// Constructors / Destructor.
-		Texture(const std::string& filename);
+		Texture(const std::string& name);
 		virtual ~Texture();
 
 		// Methods.
 		const glm::vec2& getUVOffset() const;
 		const float& getColorMix() const;
 		const float& getNormal() const;
+		const size_t& getSampler() const;
 
-		void generate();
 		void bind();
 		void unbind();
 
+		// Virtual methods.
+		virtual void generate();
+
 	protected:
 		// Fields.
+		size_t _id;
 		GLuint _glTexture;
-
 		glm::vec2 _uvOffset;
 		float _colorMix;
 		float _normal;
 
-		QImage _image;
+	private:
+		static size_t textureID;
 };
 
 using TexturePtr = SharedPointer<Texture, Component>;

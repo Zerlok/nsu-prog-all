@@ -29,6 +29,8 @@ class Material : public Component
 		const ShaderPtr& getShader() const;
 		const Textures& getTextures() const;
 
+		void compile();
+
 		void addTexture(const TexturePtr& texture);
 
 		void setColor(const Color& color);

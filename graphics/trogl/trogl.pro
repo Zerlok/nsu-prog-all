@@ -28,8 +28,8 @@ HEADERS += \
     core/opengls.hpp \
     core/component.hpp \
     core/object.hpp \
+	core/texture.hpp \
     core/shader.hpp \
-    core/texture.hpp \
     core/material.hpp \
     core/mesh.hpp \
     core/primitive.hpp \
@@ -39,7 +39,12 @@ HEADERS += \
     core/scene.hpp \
     core/gui.hpp \
     core/animation.hpp \
-    engine.hpp
+	engine.hpp
+
+# Custom textures.
+HEADERS += \
+	textures/squaredwbtexture.hpp \
+	textures/imagetexture.hpp
 
 # Custom shaders.
 HEADERS += \
@@ -57,7 +62,8 @@ HEADERS += \
     meshes/megacube.hpp \
     meshes/cylinder.hpp \
     meshes/sphere.hpp \
-    meshes/plane.hpp
+	meshes/icosphere.hpp \
+	meshes/plane.hpp
 
 # Custom GUI components.
 HEADERS += \
@@ -77,8 +83,8 @@ HEADERS += \
 SOURCES += \
     core/component.cpp \
     core/object.cpp \
+	core/texture.cpp \
     core/shader.cpp \
-    core/texture.cpp \
     core/material.cpp \
     core/mesh.cpp \
     core/primitive.cpp \
@@ -89,7 +95,12 @@ SOURCES += \
     core/gui.cpp \
     core/animation.cpp \
     engine.cpp \
-    main.cpp
+	main.cpp
+
+# Custom textures.
+SOURCES += \
+	textures/squaredwbtexture.cpp \
+	textures/imagetexture.cpp
 
 # Custom shaders.
 SOURCES += \
@@ -106,7 +117,8 @@ SOURCES += \
     meshes/cube.cpp \
     meshes/megacube.cpp \
     meshes/cylinder.cpp \
-    meshes/sphere.cpp \
+	meshes/sphere.cpp \
+	meshes/icosphere.cpp \
     meshes/plane.cpp
 
 # Custom GUI components.

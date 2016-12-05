@@ -73,6 +73,7 @@ class Engine
 		static void _displayFunc();
 		static void _idleFunc();
 		static void _reshapeFunc(int width, int height);
+		static void _debugGL();
 		static std::string _generateWindowTitle(const Scene& scene);
 		static std::string _toString(const GLenum& type);
 

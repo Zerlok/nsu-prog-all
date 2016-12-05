@@ -145,16 +145,20 @@ int Engine::_validatePrimitives()
 void Engine::_glEnableOptions()
 {
 	glEnable(GL_TEXTURE_2D);
+	logInfo << "GL Textures enabled." << logEndl;
 
 	glEnable(GL_DEPTH_TEST);
+	logInfo << "GL Depth enabled." << logEndl;
 
 	glEnable(GL_CULL_FACE);
 	glFrontFace(GL_CW);
 	glCullFace(GL_FRONT);
+	logInfo << "GL Face Culling enabled." << logEndl;
 
 	glPolygonMode(GL_FRONT_AND_BACK, _glRenderMode);
 
 	glShadeModel(GL_SMOOTH);
+	logInfo << "GL Shading model SMOOTH set." << logEndl;
 }
 
 
@@ -344,6 +348,9 @@ void Engine::showActiveScene()
 	glutReshapeFunc(_reshapeFunc);
 	glutIdleFunc(_idleFunc);
 
+	if (glGetError() == GL_INVALID_OPERATION)
+		logError << "WTF Error" << logEndl;
+
 	glutMainLoop();
 
 	_status = Status::RENDERING_FINISHED;
@@ -392,6 +399,13 @@ void Engine::_viewGUI()
 
 void Engine::_viewFrame()
 {
+//	static size_t frCntr = 0;
+
+//	if (glGetError() == GL_INVALID_OPERATION)
+//		logError << "WTF Error " << frCntr << logEndl;
+
+//	++frCntr;
+
 	_frame->clear(_scene->getBgColor());
 
 	// TODO: move into animation.
@@ -401,7 +415,7 @@ void Engine::_viewFrame()
 	const float psy = -getTimeDouble() / 29.0;
 	const float phi = getTimeDouble() / 31.0;
 //	_camera->setPosition({a*cos(phi), h, a*sin(phi)});
-	_glInitModelViewMatrix();
+//	_glInitModelViewMatrix();
 
 	LightPtr light = _scene->getLights().front();
 	light->setPosition({a*cos(psy), light->getPosition().y, a*sin(psy)});
@@ -425,6 +439,7 @@ void Engine::_reshape(int width, int height)
 void Engine::_displayFunc()
 {
 	instance()._viewFrame();
+//	_debugGL();
 }
 
 
@@ -437,6 +452,24 @@ void Engine::_idleFunc()
 void Engine::_reshapeFunc(int width, int height)
 {
 	instance()._reshape(width, height);
+}
+
+
+void Engine::_debugGL()
+{
+	static GLenum err;
+	err = glGetError();
+
+	if (err != GL_NO_ERROR)
+	{
+		Logger& l = logError << "OpenGL errors:";
+		do
+		{
+			l << std::endl << "   " << glewGetErrorString(err);
+		}
+		while ((err = glGetError()) != GL_NO_ERROR);
+		l << logEndl;
+	}
 }
 
 
@@ -462,6 +495,9 @@ std::string Engine::_toString(const GLenum& type)
 
 		++ptr;
 	}
+
+	for (size_t i = str.length(); i < 3; ++i)
+		str.push_back('0');
 
 	return std::move(str);
 }

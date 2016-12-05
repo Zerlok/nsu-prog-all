@@ -128,6 +128,7 @@ class RTRFrame : public Frame
 
 /*
  * Double buffer with attached textures.
+ * http://www.opengl-tutorial.org/intermediate-tutorials/tutorial-14-render-to-texture/
  */
 class TextureBufferFrame : public Frame
 {

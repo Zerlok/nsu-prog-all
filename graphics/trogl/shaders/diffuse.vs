@@ -3,7 +3,8 @@
 
 struct TextureStruct
 {
-        vec2 map;
+	float binded;
+	vec2 map;
 	float colorMix;
 	sampler2D data;
 };
@@ -23,8 +24,9 @@ uniform TextureStruct text;
 
 void main()
 {
-        vertexColor = texture2D(text.data, uvMap + text.map);
-	vertexColorMix = text.colorMix;
+	vertexColor = mix(vec4(1.0f, 1.0f, 1.0, 1.0f), texture(text.data, uvMap + text.map), text.binded);
+	//vertexColor = mix(vec4(1.0f, 1.0f, 1.0, 1.0f), vec4(uvMap, 0.5f, 1.0f), text.binded);
+	vertexColorMix = text.colorMix * text.binded;
 	vertexPosition = gl_ModelViewMatrix * position;
 	vertexNormal = (gl_ModelViewMatrix * normal).xyz;
 
