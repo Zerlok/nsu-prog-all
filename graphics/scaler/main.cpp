@@ -12,8 +12,10 @@ static const std::string ERR_CANNOT_OPEN_INPUT_FILE = "ERROR: Cannot open file i
 static const std::string ERR_CANNOT_OPEN_OUTPUT_FILE = "ERROR: Cannot open file in write mode: ";
 static const std::string ERR_FLAG_PARAMETR_REQUIRED = "ERROR: A parametr is required for flag: ";
 static const std::string ERR_FLOAT_REQUIRED = "ERROR: A float parametr is required for flag: ";
+
 static const std::string WARN_UNKNOWN_FLAG_OR_PARAMETR = "WARNING: Unkown flag given or flag parametr was messed: ";
-static const std::string WARN_SCALE_WAS_NOT_SET = "ERROR: Output image scale was not set - using default 1.0 ratio (the same size)";
+static const std::string WARN_SCALE_WAS_NOT_SET = "WARNING: Output image scale was not set - using default 1.0 ratio (the same size)";
+
 static const std::string IMG_AVAILABLE_FORMATS = "JPG, PNG, BMP";
 
 
