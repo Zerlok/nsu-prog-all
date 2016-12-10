@@ -4,14 +4,18 @@
 #include <vector>
 #include <algorithm>
 
+#include "image.hpp"
+
 
 using Args = std::vector<std::string>;
 
 
 static const std::string ERR_CANNOT_OPEN_INPUT_FILE = "ERROR: Cannot open file in read mode: ";
 static const std::string ERR_CANNOT_OPEN_OUTPUT_FILE = "ERROR: Cannot open file in write mode: ";
+static const std::string ERR_PATH_TO_IMAGE_REQUIRED = "ERROR: A path to image is required, got: ";
 static const std::string ERR_FLAG_PARAMETR_REQUIRED = "ERROR: A parametr is required for flag: ";
 static const std::string ERR_FLOAT_REQUIRED = "ERROR: A float parametr is required for flag: ";
+static const std::string ERR_EMPTY_INPUT_IMAGE = "ERROR: Input image is empty!";
 
 static const std::string WARN_UNKNOWN_FLAG_OR_PARAMETR = "WARNING: Unkown flag given or flag parametr was messed: ";
 static const std::string WARN_SCALE_WAS_NOT_SET = "WARNING: Output image scale was not set - using default 1.0 ratio (the same size)";
@@ -37,6 +41,7 @@ void help(const std::string& name)
 			  << "FLAGS:" << std::endl
 			  << "   -r, --ratio [ratio] - image scale ratio (scales image width and height by given ratio)" << std::endl
 			  << "   -c, --scale [width] [heigth] - specify the scale ratio for width and height" << std::endl
+				 // TODO: add 'auto' keyword.
 			  << "   -z, --size [width] [height] - specify width and height of output image (in pixels)" << std::endl
 			  << "   -h, --help - shows this message."
 			  << std::endl;
@@ -103,13 +108,13 @@ int main(int argc, char *argv[])
 		return 0;
 	}
 
-	std::ifstream inputData;
-	std::ofstream outputData;
+	std::ifstream input;
+	std::ofstream output;
 	float scaleRatio = 0.0;
 	float widthScaleRatio = 0.0;
 	float heightScaleRatio = 0.0;
-	float widthOutputPixels = 0.0;
-	float heightOutputPixels = 0.0;
+	float scaledWidth = 0.0;
+	float scaledHeight = 0.0;
 
 	for (size_t i = 1; i < args.size(); ++i)
 	{
@@ -118,8 +123,14 @@ int main(int argc, char *argv[])
 			// TODO: check images formats!
 			case 1:
 				// TODO: open in 'rb' mode.
-				inputData.open(args[i]);
-				if (!inputData.is_open())
+				if (isFlag(args[i]))
+				{
+					std::cerr << ERR_PATH_TO_IMAGE_REQUIRED << args[i] << std::endl;
+					return 1;
+				}
+
+				input.open(args[i]);
+				if (!input.is_open())
 				{
 					std::cerr << ERR_CANNOT_OPEN_INPUT_FILE << args[i] << std::endl;
 					return 1;
@@ -127,8 +138,14 @@ int main(int argc, char *argv[])
 				break;
 			case 2:
 				// TODO: open in 'wb' mode.
-				outputData.open(args[i]);
-				if (!outputData.is_open())
+				if (isFlag(args[i]))
+				{
+					std::cerr << ERR_PATH_TO_IMAGE_REQUIRED << args[i] << std::endl;
+					return 1;
+				}
+
+				output.open(args[i]);
+				if (!output.is_open())
 				{
 					std::cerr << ERR_CANNOT_OPEN_OUTPUT_FILE << args[i] << std::endl;
 					return 1;
@@ -151,8 +168,8 @@ int main(int argc, char *argv[])
 				else if ((args[i] == "-z")
 						 || (args[i] == "--size"))
 				{
-					widthOutputPixels = getFlagFloatValue(i+1, args[i], args);
-					heightOutputPixels = getFlagFloatValue(i+2, args[i], args);
+					scaledWidth = getFlagFloatValue(i+1, args[i], args);
+					scaledHeight = getFlagFloatValue(i+2, args[i], args);
 				}
 				else
 				{
@@ -162,15 +179,39 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	if (((scaleRatio + widthScaleRatio + widthOutputPixels) == 0.0)
-			|| ((scaleRatio + heightScaleRatio + heightOutputPixels) == 0.0))
+	if (((scaleRatio + widthScaleRatio + scaledWidth) == 0.0)
+			|| ((scaleRatio + heightScaleRatio + scaledHeight) == 0.0))
 	{
 		std::cerr << WARN_SCALE_WAS_NOT_SET << std::endl;
 		scaleRatio = 1.0;
 	}
 
-	// TODO: make simple scaling for ratio and width, height sizes.
+	Image img(input);
 
+	if (img.isEmpty())
+	{
+		std::cerr << ERR_EMPTY_INPUT_IMAGE << std::endl;
+		return 1;
+	}
+
+	if (scaleRatio != 0.0)
+	{
+		scaledWidth = img.getWidth() * scaleRatio;
+		scaledHeight = img.getHeight() * scaleRatio;
+	}
+	else if ((widthScaleRatio != 0.0)
+			 || (heightScaleRatio != 0.0))
+	{
+		scaledWidth = img.getWidth() * widthScaleRatio;
+		scaledHeight = img.getHeight() * heightScaleRatio;
+	}
+
+	Image scaledImg;
+	scaledImg = img.resize(scaledWidth, scaledHeight);
+	scaledImg.save(output);
+//	img.save(output);
+
+	std::cout << "Done." << std::endl;
 	return 0;
 }
 

@@ -4,7 +4,10 @@ CONFIG -= app_bundle
 CONFIG -= qt
 
 
-QMAKE_CXXFLAGS += -std=c++11
+LIBS += -lpng
+QMAKE_CXXFLAGS +=\
+    -std=c++11 \
+    -lpng
 
 
 SOURCES += main.cpp \

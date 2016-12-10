@@ -1,39 +1,20 @@
 #include "image.hpp"
 
 
-Image::Image(const Format& format)
-	: _format(format),
-	  _width(0),
-	  _height(0),
-	  _data()
+Image::Image()
+	: super()
 {
 }
 
 
-Image::Image(std::istream& in, const Image::Format& format)
-	: _format(format),
-	  _width(0),
-	  _height(0),
-	  _data()
-{
-	load(in);
-}
-
-
-Image::Image(const Image& img)
-	: _format(img._format),
-	  _width(img._width),
-	  _height(img._height),
-	  _data(img._data)
+Image::Image(const size_t& width, const size_t& height)
+	: super(width, height)
 {
 }
 
 
-Image::Image(Image&& img)
-	: _format(std::move(img._format)),
-	  _width(std::move(img._width)),
-	  _height(std::move(img._height)),
-	  _data(std::move(img._data))
+Image::Image(std::istream& in)
+	: super(in)
 {
 }
 
@@ -43,118 +24,57 @@ Image::~Image()
 }
 
 
-Image& Image::operator=(const Image& img)
-{
-	_format = img._format;
-	_width = img._width;
-	_height = img._height;
-	_data = img._data;
-}
-
-
-Image& Image::operator=(Image&& img)
-{
-	_format = std::move(img._format);
-	_width = std::move(img._width);
-	_height = std::move(img._height);
-	_data = std::move(img._data);
-
-	return (*this);
-}
-
-
 bool Image::isEmpty() const
 {
-	return ((_data.get() == nullptr)
-			|| (_data.get()->empty()));
+	return (get_row(0).empty());
 }
 
 
-const Image::Format& Image::getFormat() const
+size_t Image::getWidth() const
 {
-	return _format;
+	return get_width();
 }
 
 
-const size_t& Image::getWidth() const
+size_t Image::getHeight() const
 {
-	return _width;
+	return get_height();
 }
 
 
-const size_t& Image::getHeight() const
+void Image::load(std::istream& in)
 {
-	return _height;
+	read_stream(in);
 }
 
 
-const size_t& Image::getPixelsCount() const
+void Image::save(std::ostream& out)
 {
-	return _data->size();
+	write_stream<std::ostream>(out);
 }
 
 
-const size_t& Image::getPixelsSize() const
+Image Image::resize(const size_t& width, const size_t& height)
 {
-	return (_data->size() * sizeof(Pixel));
-}
+	Image resized(width, height);
 
+	resized.set_compression_type(get_compression_type());
+	resized.set_filter_type(get_filter_type());
+	resized.set_interlace_type(get_interlace_type());
+	resized.set_palette(get_palette());
+	resized.set_tRNS(get_tRNS());
 
-void Image::setFormat(const Image::Format& format)
-{
-	_format = format;
-}
+	const float wr = float(get_width()) / float(width);
+	const float hr = float(get_height()) / float(height);
 
-
-bool Image::load(std::istream& in)
-{
-	// TODO: load JPG, PNG, BMP.
-	switch (_format)
+	for (size_t y = 0; y < height; ++y)
 	{
-		case Format::JPG:
-			return _loadJPGImage(in, *this);
-		case Format::PNG:
-			return _loadPNGImage(in, *this);
-		case Format::BMP:
-			return _loadBMPImage(in, *this);
-		default:
-			return false;
+		for (size_t x = 0; x < width; ++x)
+		{
+			resized.set_pixel(x, y, get_pixel(x * wr, y * hr));
+		}
 	}
-}
 
-
-bool Image::save(std::ostream& out) const
-{
-
-}
-
-
-Image Image::copy() const
-{
-
-}
-
-
-Image Image::scale(const size_t& width, const size_t& height) const
-{
-
-}
-
-
-bool Image::_loadJPGImage(std::istream& in, Image& img)
-{
-	return true;
-}
-
-
-bool Image::_loadPNGImage(std::istream& in, Image& img)
-{
-	return true;
-}
-
-
-bool Image::_loadBMPImage(std::istream& in, Image& img)
-{
-	return true;
+	return resized;
 }
 

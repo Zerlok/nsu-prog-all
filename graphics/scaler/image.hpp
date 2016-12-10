@@ -7,104 +7,61 @@
 #include <memory>
 
 
-class Image
+#include <png++/image.hpp>
+#include <png++/rgb_pixel.hpp>
+
+
+class Image : public png::image<png::rgb_pixel>
 {
 	public:
-		// Inner classes.
-		enum class Format
-		{
-			JPG,
-			PNG,
-			BMP,
-		};
-
-		/*
-		struct ByteRgb
-		{
-			unsigned char r;
-			unsigned char g;
-			unsigned char b;
-		};
-
-		struct ByteRgba
-		{
-			unsigned char r;
-			unsigned char g;
-			unsigned char b;
-			unsigned char a;
-		};
-
-		struct FloatRgb
-		{
-			float r;
-			float g;
-			float b;
-		};
-
-		struct FloatRgba
-		{
-			float r;
-			float g;
-			float b;
-			float a;
-		};
-
-		union Pixel
-		{
-			ByteRgb px;
-			ByteRgba px;
-			FloatRgb px;
-			FloatRgba px;
-		};
-		*/
-
-		struct Pixel
-		{
-			unsigned char r;
-			unsigned char g;
-			unsigned char b;
-		};
-
-		// Constructors / Destructor.
-		Image(const Format& format = Format::JPG);
-		Image(std::istream& in, const Format& format = Format::JPG);
-		Image(const Image& img);
-		Image(Image&& img);
+		Image();
+		Image(const size_t& width, const size_t& height);
+		Image(std::istream& in);
 		~Image();
 
-		// Operators.
-		Image& operator=(const Image& img);
-		Image& operator=(Image&& img);
-
-		// Methods.
 		bool isEmpty() const;
+		size_t getWidth() const;
+		size_t getHeight() const;
 
-		const Format& getFormat() const;
-		const size_t& getWidth() const;
-		const size_t& getHeight() const;
-		const size_t& getPixelsCount() const;
-		const size_t& getPixelsSize() const;
+		void load(std::istream& in);
+		void save(std::ostream& out);
 
-		void setFormat(const Format& format);
-
-		bool load(std::istream& in);
-		bool save(std::ostream& out) const;
-
-		Image copy() const;
-		Image scale(const size_t& width, const size_t& height) const;
+		Image resize(const size_t& width, const size_t& height);
 
 	private:
-		// Static methods.
-		static bool _loadJPGImage(std::istream& in, Image& img);
-		static bool _loadPNGImage(std::istream& in, Image& img);
-		static bool _loadBMPImage(std::istream& in, Image& img);
-
-		// Fields.
-		Format _format;
-		size_t _width;
-		size_t _height;
-		std::shared_ptr<std::vector<Pixel>> _data;
+		using super = png::image<png::rgb_pixel>;
 };
+
+
+/*
+template<class Img>
+struct ImageTratis {};
+
+
+template<>
+struct ImageTratis<png::image<png::rgb_pixel>>
+{
+	using pixel = png::rgb_pixel;
+	using image = png::image<png::rgb_pixel>;
+
+	static const size_t pixelDepth = 3;
+};
+
+
+template<class Img, class Traits = ImageTratis<Img>>
+class ImageWrap
+{
+	public:
+		Image(std::istream& in);
+		~Image();
+
+		Image resize(const size_t& width,
+					 const size_t& height);
+
+	private:
+		Img _data;
+};
+*/
 
 
 #endif // __IMAGE_HPP__
