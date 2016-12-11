@@ -1,18 +1,21 @@
 TEMPLATE = app
 CONFIG += console c++11
 CONFIG -= app_bundle
-CONFIG -= qt
+#CONFIG -= qt
 
 
-LIBS += -lpng
+LIBS += -lpng -lpthread -lgtest
 QMAKE_CXXFLAGS +=\
     -std=c++11 \
     -lpng
 
 
 SOURCES += main.cpp \
-    image.cpp
+    image.cpp \
+    grid.cpp \
+    gtest.cpp
 
 HEADERS += \
-    image.hpp
+    image.hpp \
+    grid.hpp
 

@@ -1,3 +1,5 @@
+#ifdef __RELEASE__
+
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -108,8 +110,10 @@ int main(int argc, char *argv[])
 		return 0;
 	}
 
-	std::ifstream input;
-	std::ofstream output;
+//	std::ifstream input;
+//	std::ofstream output;
+	QString input;
+	QString output;
 	float scaleRatio = 0.0;
 	float widthScaleRatio = 0.0;
 	float heightScaleRatio = 0.0;
@@ -128,13 +132,14 @@ int main(int argc, char *argv[])
 					std::cerr << ERR_PATH_TO_IMAGE_REQUIRED << args[i] << std::endl;
 					return 1;
 				}
+				input = QString::fromUtf8(args[i].c_str());
 
-				input.open(args[i]);
-				if (!input.is_open())
-				{
-					std::cerr << ERR_CANNOT_OPEN_INPUT_FILE << args[i] << std::endl;
-					return 1;
-				}
+//				input.open(args[i]);
+//				if (!input.is_open())
+//				{
+//					std::cerr << ERR_CANNOT_OPEN_INPUT_FILE << args[i] << std::endl;
+//					return 1;
+//				}
 				break;
 			case 2:
 				// TODO: open in 'wb' mode.
@@ -143,13 +148,14 @@ int main(int argc, char *argv[])
 					std::cerr << ERR_PATH_TO_IMAGE_REQUIRED << args[i] << std::endl;
 					return 1;
 				}
+				output = QString::fromUtf8(args[i].c_str());
 
-				output.open(args[i]);
-				if (!output.is_open())
-				{
-					std::cerr << ERR_CANNOT_OPEN_OUTPUT_FILE << args[i] << std::endl;
-					return 1;
-				}
+//				output.open(args[i]);
+//				if (!output.is_open())
+//				{
+//					std::cerr << ERR_CANNOT_OPEN_OUTPUT_FILE << args[i] << std::endl;
+//					return 1;
+//				}
 				break;
 			default:
 				if ((args[i] == "-r")
@@ -186,9 +192,10 @@ int main(int argc, char *argv[])
 		scaleRatio = 1.0;
 	}
 
-	Image img(input);
+	Image img;
+	img.load(input);
 
-	if (img.isEmpty())
+	if (img.isNull())
 	{
 		std::cerr << ERR_EMPTY_INPUT_IMAGE << std::endl;
 		return 1;
@@ -196,22 +203,22 @@ int main(int argc, char *argv[])
 
 	if (scaleRatio != 0.0)
 	{
-		scaledWidth = img.getWidth() * scaleRatio;
-		scaledHeight = img.getHeight() * scaleRatio;
+		scaledWidth = img.width() * scaleRatio;
+		scaledHeight = img.height() * scaleRatio;
 	}
 	else if ((widthScaleRatio != 0.0)
 			 || (heightScaleRatio != 0.0))
 	{
-		scaledWidth = img.getWidth() * widthScaleRatio;
-		scaledHeight = img.getHeight() * heightScaleRatio;
+		scaledWidth = img.width() * widthScaleRatio;
+		scaledHeight = img.height() * heightScaleRatio;
 	}
 
 	Image scaledImg;
 	scaledImg = img.resize(scaledWidth, scaledHeight);
 	scaledImg.save(output);
-//	img.save(output);
 
 	std::cout << "Done." << std::endl;
 	return 0;
 }
 
+#endif
