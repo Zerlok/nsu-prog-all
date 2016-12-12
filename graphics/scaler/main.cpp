@@ -1,9 +1,9 @@
 #ifdef __RELEASE__
 
 #include <iostream>
-#include <fstream>
 #include <string>
 #include <vector>
+#include <cmath>
 #include <algorithm>
 
 #include "image.hpp"
@@ -110,8 +110,6 @@ int main(int argc, char *argv[])
 		return 0;
 	}
 
-//	std::ifstream input;
-//	std::ofstream output;
 	QString input;
 	QString output;
 	float scaleRatio = 0.0;
@@ -124,9 +122,7 @@ int main(int argc, char *argv[])
 	{
 		switch (i)
 		{
-			// TODO: check images formats!
 			case 1:
-				// TODO: open in 'rb' mode.
 				if (isFlag(args[i]))
 				{
 					std::cerr << ERR_PATH_TO_IMAGE_REQUIRED << args[i] << std::endl;
@@ -142,7 +138,6 @@ int main(int argc, char *argv[])
 //				}
 				break;
 			case 2:
-				// TODO: open in 'wb' mode.
 				if (isFlag(args[i]))
 				{
 					std::cerr << ERR_PATH_TO_IMAGE_REQUIRED << args[i] << std::endl;
@@ -176,6 +171,7 @@ int main(int argc, char *argv[])
 				{
 					scaledWidth = getFlagFloatValue(i+1, args[i], args);
 					scaledHeight = getFlagFloatValue(i+2, args[i], args);
+					i += 2;
 				}
 				else
 				{
@@ -183,13 +179,6 @@ int main(int argc, char *argv[])
 				}
 				break;
 		}
-	}
-
-	if (((scaleRatio + widthScaleRatio + scaledWidth) == 0.0)
-			|| ((scaleRatio + heightScaleRatio + scaledHeight) == 0.0))
-	{
-		std::cerr << WARN_SCALE_WAS_NOT_SET << std::endl;
-		scaleRatio = 1.0;
 	}
 
 	Image img;
@@ -203,18 +192,26 @@ int main(int argc, char *argv[])
 
 	if (scaleRatio != 0.0)
 	{
-		scaledWidth = img.width() * scaleRatio;
-		scaledHeight = img.height() * scaleRatio;
+		scaledWidth = std::ceil(img.width() * scaleRatio);
+		scaledHeight = std::ceil(img.height() * scaleRatio);
 	}
 	else if ((widthScaleRatio != 0.0)
 			 || (heightScaleRatio != 0.0))
 	{
-		scaledWidth = img.width() * widthScaleRatio;
-		scaledHeight = img.height() * heightScaleRatio;
+		scaledWidth = std::ceil(img.width() * widthScaleRatio);
+		scaledHeight = std::ceil(img.height() * heightScaleRatio);
+	}
+	else if ((scaledWidth == 0.0)
+			 && (scaledHeight == 0.0))
+	{
+		std::cerr << WARN_SCALE_WAS_NOT_SET << std::endl;
+
+		scaledWidth = img.width();
+		scaledHeight = img.height();
 	}
 
 	Image scaledImg;
-	scaledImg = img.resize(scaledWidth, scaledHeight);
+	scaledImg = img.resize(scaledWidth, scaledHeight, Image::ResizeType::SLOW);
 	scaledImg.save(output);
 
 	std::cout << "Done." << std::endl;
