@@ -97,23 +97,7 @@ TEST(Grid, Iterator)
 }
 
 
-TEST(Grid, CellResizeWhenOverlaying)
-{
-	Grid g2x2(2, 2);
-	EXPECT_EQ(Grid::Cell::normal, g2x2.getCell());
-
-	g2x2.resizeCellsToOverlay(g5x5);
-
-	const Grid::Cell cell(2.5, 2.5);
-	EXPECT_EQ(cell, g2x2.getCell());
-
-	const Grid g2(2, 2, 2.0, 2.0);
-	g2x2.resizeCellsToOverlay(g2);
-	EXPECT_EQ(g2.getCell(), g2x2.getCell());
-}
-
-
-TEST(Grid, Overlay)
+TEST(Overlay, Func)
 {
 	const std::vector<Grid::Cell> cells = {
 		{1.0, 1.0}, {1.0, 1.0}, {0.5, 1.0},
@@ -136,14 +120,36 @@ TEST(Grid, Overlay)
 	Grid g2x2(2, 2);
 	EXPECT_EQ(Grid::Cell::normal, g2x2.getCell());
 
-	Grid::LayingIterator it = g2x2.overlay(g5x5);
+	OverlayIterator it1 = overlay(g2x2, g5x5);
 	for (size_t i = 0; i < cells.size(); ++i)
 	{
-		EXPECT_EQ(cells[i], it.getCell()) << "Idx: " << i;
-//		std::cout << i << ": " << it.getCell() << std::endl;
-		++it;
+		EXPECT_EQ(cells[i], it1.getCell()) << "Idx: " << i;
+		++it1;
 	}
 }
+
+
+TEST(Overlay, Iterator)
+{
+	Grid g1x3(1, 3, 3, 1);
+	Grid g3x1(3, 1, 1, 3);
+	const std::vector<Grid::Cell> cells2 = std::vector<Grid::Cell>(9, {1.0, 1.0});
+
+	size_t idx2 = 0;
+	OverlayIterator it2 = overlay(g1x3, g3x1);
+	for (Grid::iterator& o = it2.getOutter(); o != it2.getOutterEnd(); ++it2)
+	{
+		for (Grid::iterator& i = it2.getInner(); i != it2.getInnerEnd(); ++it2)
+		{
+			EXPECT_EQ(cells2[idx2], it2.getCell()) << "Idx: " << idx2;
+			++idx2;
+		}
+
+		EXPECT_EQ(0, idx2 % 3);
+	}
+	EXPECT_EQ(cells2.size(), idx2);
+}
+
 
 
 

@@ -33,7 +33,7 @@ class Grid
 		class iterator
 		{
 			public:
-				iterator(Grid const* g,
+				iterator(const Grid* g,
 						 const float& x = 0.0,
 						 const float& y = 0.0);
 				iterator(const iterator& it);
@@ -61,35 +61,18 @@ class Grid
 				float _y;
 		};
 
-		class LayingIterator
-		{
-			public:
-				LayingIterator(const Grid* grid1,
-							   const Grid* grid2,
-							   const float& x = 0.0,
-							   const float& y = 0.0);
-				~LayingIterator();
-
-				LayingIterator& operator++();
-
-				Cell getCell() const;
-
-			private:
-				Grid const* _grid1;
-				Grid const* _grid2;
-				iterator _it1;
-				iterator _it2;
-		};
-
 		Grid(const size_t& columns = 0,
 			 const size_t& rows = 0,
 			 const float& width = Cell::normal.width,
-			 const float& height = Cell::normal.height);
+			 const float& height = Cell::normal.height,
+			 const float& x = 0.0f,
+			 const float& y = 0.0f);
 		~Grid();
 
+		const float& getOffsetX() const;
+		const float& getOffsetY() const;
 		const size_t& getRows() const;
 		const size_t& getColumns() const;
-
 		const Cell& getCell() const;
 
 		Cell getLeftTop(const float& x, const float& y) const;
@@ -100,17 +83,63 @@ class Grid
 		iterator begin() const;
 		iterator end() const;
 
+		void setOffset(const float& x, const float& y);
 		void setCellSize(const float& width, const float& height);
 		void resize(const size_t& rows, const size_t& columns);
-		void resizeCellsToOverlay(const Grid& g);
-
-		Grid::LayingIterator overlay(const Grid& g);
 
 	private:
+		float _x;
+		float _y;
 		size_t _columns;
 		size_t _rows;
 		Cell _cell;
 };
+
+
+class OverlayIterator
+{
+	public:
+		OverlayIterator(const Grid* grid1,
+						   const Grid* grid2);
+		OverlayIterator(const OverlayIterator& it);
+		OverlayIterator(OverlayIterator&& it);
+		~OverlayIterator();
+
+		OverlayIterator& operator=(const OverlayIterator& it);
+		OverlayIterator& operator=(OverlayIterator&& it);
+
+		OverlayIterator& operator++();
+
+		Grid::Cell getCell() const;
+
+		Grid::iterator& getInner();
+		Grid::iterator& getOutter();
+
+		const Grid::iterator& getInnerEnd() const;
+		const Grid::iterator& getOutterEnd() const;
+
+	private:
+		static const Grid* _getFirstGrid(const Grid* g1,
+								   const Grid* g2);
+		static const Grid* _getSecondGrid(const Grid* g1,
+									const Grid* g2);
+		static Grid _calcInnerGrid(const Grid* g1, const Grid* g2, const Grid::iterator& outter);
+		static Grid::iterator _calcInnerEnd(const Grid* g1,
+											const Grid* g2,
+											const Grid::iterator& outter);
+
+		Grid const* _grid1;
+		Grid const* _grid2;
+
+		Grid::iterator _outterIt;
+		Grid::iterator _outterEnd;
+		Grid _innerGrid;
+		Grid::iterator _innerIt;
+		Grid::iterator _innerEnd;
+};
+
+
+OverlayIterator overlay(Grid& g1, const Grid& g2);
 
 
 std::ostream& operator<<(std::ostream& out, const Grid::Cell& cell);
