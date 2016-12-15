@@ -94,6 +94,20 @@ float getFlagFloatValue(const size_t& i, const std::string& flag, const Args& ar
 }
 
 
+void showWorkBeginWith(
+		const QString& inputName,
+		const Image& src,
+		const size_t& width,
+		const size_t& height,
+		const QString& outputName)
+{
+	std::cout << "Input image: " << inputName.toStdString() << " (" << src.width() << 'x' << src.height() << ')' << std::endl
+			  << "Output image: " << outputName.toStdString() << " (" << width << 'x' << height << ')' << std::endl
+			  << "Processing... ";
+	std::cout.flush();
+}
+
+
 int main(int argc, char *argv[])
 {
 	const Args args = toArgs(argc, argv);
@@ -209,6 +223,8 @@ int main(int argc, char *argv[])
 		scaledWidth = img.width();
 		scaledHeight = img.height();
 	}
+
+	showWorkBeginWith(input, img, scaledWidth, scaledHeight, output);
 
 	Image scaledImg;
 	scaledImg = img.resize(scaledWidth, scaledHeight, Image::ResizeType::SLOW);

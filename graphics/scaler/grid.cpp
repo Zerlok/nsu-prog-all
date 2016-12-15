@@ -28,6 +28,12 @@ Grid::~Grid()
 }
 
 
+bool Grid::hasInside(const Grid::iterator& it) const
+{
+	return (it.getCell() != Cell::zero);
+}
+
+
 const float& Grid::getOffsetX() const
 {
 	return _x;
@@ -116,15 +122,18 @@ Grid::Cell Grid::getRightBottom(
 		const float& x,
 		const float& y) const
 {
-	if ((x < _x) || (y < _y)
-			|| (x >= _columns * _cell.width + _x)
-			|| (y >= _rows * _cell.height + _y))
+	const float dx = x - _x;
+	const float dy = y - _y;
+
+	if ((dx < 0) || (dy < 0)
+			|| (dx >= _columns * _cell.width)
+			|| (dy >= _rows * _cell.height))
 		return Cell::zero;
 
-	const int xSteps = std::floor((x - _x) / _cell.width) + 1;
-	const int ySteps = std::floor((y - _y) / _cell.height) + 1;
-	const float w = xSteps * _cell.width - x;
-	const float h = ySteps * _cell.height - y;
+	const int xSteps = std::floor(dx / _cell.width) + 1;
+	const int ySteps = std::floor(dy / _cell.height) + 1;
+	const float w = xSteps * _cell.width - dx;
+	const float h = ySteps * _cell.height - dy;
 
 	return {w, h};
 }
@@ -234,12 +243,12 @@ Grid::iterator& Grid::iterator::operator++()
 {
 	_x += _grid->_cell.width;
 
-	if (getCell() == Cell::zero)
+	if (!_grid->hasInside(*this))
 	{
 		_x = _grid->_x;
 		_y += _grid->_cell.height;
 
-		if (getCell() == Cell::zero)
+		if (!_grid->hasInside(*this))
 		{
 			_x = _grid->_cell.width * _grid->_columns + _grid->_x;
 			_y = _grid->_cell.height * _grid->_rows + _grid->_y;
@@ -254,12 +263,12 @@ Grid::iterator& Grid::iterator::operator--()
 {
 	_x -= _grid->_cell.width;
 
-	if (getCell() == Cell::zero)
+	if (!_grid->hasInside(*this))
 	{
 		_x = _grid->_cell.width * _grid->_columns + _grid->_x;
 		_y -= _grid->_cell.height;
 
-		if (getCell() == Cell::zero)
+		if (!_grid->hasInside(*this))
 		{
 			_x = _grid->_x;
 			_y = _grid->_y;
@@ -311,11 +320,9 @@ OverlayIterator::OverlayIterator(
 		const Grid* grid2)
 	: _grid1(_getFirstGrid(grid1, grid2)),
 	  _grid2(_getSecondGrid(grid1, grid2)),
-	  _outterIt(_grid2->begin()),
-	  _outterEnd(_grid2->end()),
-	  _innerGrid(_calcInnerGrid(_grid1, _grid2, _outterIt)),
-	  _innerIt(_innerGrid.begin()),
-	  _innerEnd(_innerGrid.end())
+	  _outter(_grid2->begin()),
+	  _innerGrid(_calcInnerGrid(_grid1, _grid2, _outter)),
+	  _inner(_innerGrid.begin())
 {
 }
 
@@ -327,23 +334,32 @@ OverlayIterator::~OverlayIterator()
 
 OverlayIterator& OverlayIterator::operator++()
 {
-	if (_innerIt != _innerEnd)
-		++_innerIt;
+	++_inner;
 
-	if (_innerIt == _innerEnd)
+	if (isInnerEnd())
 	{
-		if (_outterIt != _outterEnd)
-			++_outterIt;
+		++_outter;
 
-		if (_outterIt != _outterEnd)
+		if (!isOutterEnd())
 		{
-			_innerGrid = _calcInnerGrid(_grid1, _grid2, _outterIt);
-			_innerIt = _innerGrid.begin();
-			_innerEnd = _innerGrid.end();
+			_innerGrid = _calcInnerGrid(_grid1, _grid2, _outter);
+			_inner = _innerGrid.begin();
 		}
 	}
 
 	return (*this);
+}
+
+
+bool OverlayIterator::isInnerEnd() const
+{
+	return !_innerGrid.hasInside(_inner);
+}
+
+
+bool OverlayIterator::isOutterEnd() const
+{
+	return !_grid2->hasInside(_outter);
 }
 
 
@@ -352,10 +368,10 @@ Grid::Cell OverlayIterator::getCell() const
 	const Grid::Cell& innerCell = _grid1->getCell();
 	const Grid::Cell& outterCell = _grid2->getCell();
 
-	const float a = std::max(_innerIt.getX(), _outterIt.getX());
-	const float b = std::max(_innerIt.getY(), _outterIt.getY());
-	const float c = std::min(innerCell.width + _innerIt.getX(), outterCell.width + _outterIt.getX());
-	const float d = std::min(innerCell.height + _innerIt.getY(), outterCell.height + _outterIt.getY());
+	const float a = std::max(_inner.getX(), _outter.getX());
+	const float b = std::max(_inner.getY(), _outter.getY());
+	const float c = std::min(innerCell.width + _inner.getX(), outterCell.width + _outter.getX());
+	const float d = std::min(innerCell.height + _inner.getY(), outterCell.height + _outter.getY());
 
 	const float w = std::min(c - a, _innerGrid.getCell().width);
 	const float h = std::min(d - b, _innerGrid.getCell().height);
@@ -364,27 +380,21 @@ Grid::Cell OverlayIterator::getCell() const
 }
 
 
+const Grid& OverlayIterator::getInnerGrid() const
+{
+	return _innerGrid;
+}
+
+
 Grid::iterator& OverlayIterator::getInner()
 {
-	return _innerIt;
+	return _inner;
 }
 
 
 Grid::iterator& OverlayIterator::getOutter()
 {
-	return _outterIt;
-}
-
-
-const Grid::iterator& OverlayIterator::getInnerEnd() const
-{
-	return _innerEnd;
-}
-
-
-const Grid::iterator& OverlayIterator::getOutterEnd() const
-{
-	return _outterEnd;
+	return _outter;
 }
 
 
@@ -392,7 +402,17 @@ const Grid* OverlayIterator::_getFirstGrid(
 		const Grid* g1,
 		const Grid* g2)
 {
-	if (g1->getCell().width <= g2->getCell().width)
+	const Grid::Cell& c1 = g1->getCell();
+	const Grid::Cell& c2 = g2->getCell();
+
+	if (c1.width == c2.width)
+	{
+		if (c1.height < c2.height)
+			return g1;
+		else
+			return g2;
+	}
+	else if (c1.width < c2.width)
 		return g1;
 	else
 		return g2;
@@ -403,7 +423,17 @@ const Grid* OverlayIterator::_getSecondGrid(
 		const Grid* g1,
 		const Grid* g2)
 {
-	if (g1->getCell().width > g2->getCell().width)
+	const Grid::Cell& c1 = g1->getCell();
+	const Grid::Cell& c2 = g2->getCell();
+
+	if (c1.width == c2.width)
+	{
+		if (c1.height > c2.height)
+			return g1;
+		else
+			return g2;
+	}
+	else if (c1.width > c2.width)
 		return g1;
 	else
 		return g2;
@@ -434,23 +464,6 @@ Grid OverlayIterator::_calcInnerGrid(const Grid* g1, const Grid* g2, const Grid:
 }
 
 
-Grid::iterator OverlayIterator::_calcInnerEnd(
-		const Grid* g1,
-		const Grid* g2,
-		const Grid::iterator& outter)
-{
-	const Grid::Cell& cell1 = g1->getCell();
-	const Grid::Cell& cell2 = g2->getCell();
-	const int cols = std::floor((outter.getX() + cell2.width) / cell1.width);
-	const int rows = std::floor((outter.getY() + cell2.height) / cell1.height);
-	const float x = cols * cell1.width;
-	const float y = rows * cell1.height;
-
-	Grid::iterator it {g1, x, y};
-	return ++it;
-}
-
-
 std::ostream& operator<<(std::ostream& out, const Grid::Cell& cell)
 {
 	out << '(' << cell.width << " x " << cell.height << ')';
@@ -465,11 +478,11 @@ std::ostream& operator<<(std::ostream& out, const Grid& grid)
 }
 
 
-OverlayIterator overlay(Grid& g1, const Grid& g2)
+OverlayIterator overlay(Grid& layWhich, const Grid& layOnto)
 {
-	g1.setOffset(g2.getOffsetX(), g2.getOffsetY());
-	g1.setCellSize(g2.getCell().width * g2.getColumns() / g1.getColumns(),
-				   g2.getCell().height * g2.getRows() / g1.getRows());
+	layWhich.setOffset(layOnto.getOffsetX(), layOnto.getOffsetY());
+	layWhich.setCellSize(layOnto.getCell().width * layOnto.getColumns() / layWhich.getColumns(),
+						 layOnto.getCell().height * layOnto.getRows() / layWhich.getRows());
 
-	return {&g1, &g2};
+	return {&layWhich, &layOnto};
 }
