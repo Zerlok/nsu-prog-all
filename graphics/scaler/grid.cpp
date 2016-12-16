@@ -23,8 +23,42 @@ Grid::Grid(
 }
 
 
+Grid::Grid(const Grid& g)
+	: _x(g._x),
+	  _y(g._y),
+	  _columns(g._columns),
+	  _rows(g._rows),
+	  _cell(g._cell)
+{
+}
+
+
 Grid::~Grid()
 {
+}
+
+
+Grid& Grid::operator=(const Grid& g)
+{
+	_x = g._x;
+	_y = g._y;
+	_columns = g._columns;
+	_rows = g._rows;
+	_cell = g._cell;
+
+	return (*this);
+}
+
+
+Grid& Grid::operator=(Grid&& g)
+{
+	_x = std::move(g._x);
+	_y = std::move(g._y);
+	_columns = std::move(g._columns);
+	_rows = std::move(g._rows);
+	_cell = std::move(g._cell);
+
+	return (*this);
 }
 
 
@@ -250,8 +284,8 @@ Grid::iterator& Grid::iterator::operator++()
 
 		if (!_grid->hasInside(*this))
 		{
-			_x = _grid->_cell.width * _grid->_columns + _grid->_x;
-			_y = _grid->_cell.height * _grid->_rows + _grid->_y;
+			_x = _grid->_cell.width * _grid->_columns + _grid->_x + 1.0;
+			_y = _grid->_cell.height * _grid->_rows + _grid->_y + 1.0;
 		}
 	}
 

@@ -45,6 +45,7 @@ void help(const std::string& name)
 			  << "   -c, --scale [width] [heigth] - specify the scale ratio for width and height" << std::endl
 				 // TODO: add 'auto' keyword.
 			  << "   -z, --size [width] [height] - specify width and height of output image (in pixels)" << std::endl
+			  << "   -e0, -e1 - (optional, -e0 enabled by default) specify the function to use (e0 - fast resize without interpolation, e1 - slow resize with pixel area color correction)" << std::endl
 			  << "   -h, --help - shows this message."
 			  << std::endl;
 }
@@ -131,6 +132,7 @@ int main(int argc, char *argv[])
 	float heightScaleRatio = 0.0;
 	float scaledWidth = 0.0;
 	float scaledHeight = 0.0;
+	Image::ResizeType type = Image::ResizeType::FAST;
 
 	for (size_t i = 1; i < args.size(); ++i)
 	{
@@ -143,13 +145,6 @@ int main(int argc, char *argv[])
 					return 1;
 				}
 				input = QString::fromUtf8(args[i].c_str());
-
-//				input.open(args[i]);
-//				if (!input.is_open())
-//				{
-//					std::cerr << ERR_CANNOT_OPEN_INPUT_FILE << args[i] << std::endl;
-//					return 1;
-//				}
 				break;
 			case 2:
 				if (isFlag(args[i]))
@@ -158,13 +153,6 @@ int main(int argc, char *argv[])
 					return 1;
 				}
 				output = QString::fromUtf8(args[i].c_str());
-
-//				output.open(args[i]);
-//				if (!output.is_open())
-//				{
-//					std::cerr << ERR_CANNOT_OPEN_OUTPUT_FILE << args[i] << std::endl;
-//					return 1;
-//				}
 				break;
 			default:
 				if ((args[i] == "-r")
@@ -186,6 +174,14 @@ int main(int argc, char *argv[])
 					scaledWidth = getFlagFloatValue(i+1, args[i], args);
 					scaledHeight = getFlagFloatValue(i+2, args[i], args);
 					i += 2;
+				}
+				else if (args[i] == "-e0")
+				{
+					type = Image::ResizeType::FAST;
+				}
+				else if (args[i] == "-e1")
+				{
+					type = Image::ResizeType::SLOW;
 				}
 				else
 				{
@@ -227,7 +223,7 @@ int main(int argc, char *argv[])
 	showWorkBeginWith(input, img, scaledWidth, scaledHeight, output);
 
 	Image scaledImg;
-	scaledImg = img.resize(scaledWidth, scaledHeight, Image::ResizeType::SLOW);
+	scaledImg = img.resize(scaledWidth, scaledHeight, type);
 	scaledImg.save(output);
 
 	std::cout << "Done." << std::endl;

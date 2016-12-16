@@ -371,17 +371,49 @@ TEST(Overlay, g3x3_g4x4)
 }
 
 
+TEST(Overlay, g8x8_g18x18)
+{
+	Grid g8x8(8, 8);
+	Grid g18x18(18, 18);
+
+	OverlayIterator it = overlay(g18x18, g8x8);
+
+	size_t outterCntr = 0;
+	size_t innerCntr = 0;
+	for (Grid::iterator& out = it.getOutter(); !it.isOutterEnd(); ++it)
+	{
+		EXPECT_TRUE(g8x8.hasInside(out));
+		EXPECT_TRUE(g18x18.hasInside(out));
+
+		for (Grid::iterator& in = it.getInner(); !it.isInnerEnd(); ++in)
+		{
+			EXPECT_TRUE(g8x8.hasInside(in));
+			EXPECT_TRUE(g18x18.hasInside(in));
+			++innerCntr;
+		}
+
+		++outterCntr;
+	}
+
+	EXPECT_EQ(64, outterCntr);
+	EXPECT_EQ(625, innerCntr);
+
+	EXPECT_TRUE(it.isInnerEnd());
+	EXPECT_TRUE(it.isOutterEnd());
+}
+
+
 TEST(Overlay, Iterator)
 {
 	Grid g1x3(1, 3, 3, 1);
 	Grid g3x1(3, 1, 1, 3);
 	const std::vector<Grid::Cell> cells = std::vector<Grid::Cell>(9, {1.0, 1.0});
 
-	size_t idx = 0;
+	size_t outterCntr = 0;
+	size_t innerCntr = 0;
 	OverlayIterator it = overlay(g1x3, g3x1);
 	const Grid::iterator& out = it.getOutter();
 	const Grid& inGrid = it.getInnerGrid();
-	const Grid::iterator& in = it.getInner();
 
 	EXPECT_EQ(0.0, inGrid.getOffsetX());
 	EXPECT_EQ(0.0, inGrid.getOffsetY());
@@ -392,26 +424,28 @@ TEST(Overlay, Iterator)
 		EXPECT_TRUE(g1x3.hasInside(out));
 		EXPECT_TRUE(g3x1.hasInside(out));
 
-		for (; !it.isInnerEnd(); ++it)
+		for (Grid::iterator& in = it.getInner(); !it.isInnerEnd(); ++in)
 		{
 			EXPECT_TRUE(g1x3.hasInside(in));
 			EXPECT_TRUE(g3x1.hasInside(in));
-			EXPECT_EQ(cells[idx], it.getCell());
-			++idx;
+			EXPECT_EQ(cells[innerCntr], it.getCell());
+			++innerCntr;
 		}
 
-		EXPECT_EQ(0, idx % 3);
+		++outterCntr;
+		EXPECT_EQ(outterCntr, innerCntr / 3);
 	}
 
-	EXPECT_FALSE(inGrid.hasInside(in));
+	EXPECT_EQ(3, outterCntr);
+	EXPECT_EQ(cells.size(), innerCntr);
 
-	EXPECT_FALSE(g1x3.hasInside(in));
-	EXPECT_FALSE(g3x1.hasInside(in));
+//	EXPECT_FALSE(inGrid.hasInside(in));
+
+//	EXPECT_FALSE(g1x3.hasInside(in));
+//	EXPECT_FALSE(g3x1.hasInside(in));
 
 	EXPECT_FALSE(g1x3.hasInside(out));
 	EXPECT_FALSE(g3x1.hasInside(out));
-
-	EXPECT_EQ(cells.size(), idx);
 }
 
 

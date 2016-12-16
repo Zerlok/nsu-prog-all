@@ -67,7 +67,11 @@ class Grid
 			 const float& height = Cell::normal.height,
 			 const float& x = 0.0f,
 			 const float& y = 0.0f);
+		Grid(const Grid& g);
 		~Grid();
+
+		Grid& operator=(const Grid& g);
+		Grid& operator=(Grid&& g);
 
 		bool hasInside(const iterator& it) const;
 
