@@ -39,9 +39,9 @@ int main(int argc, char *argv[])
 	scene->setAmbient(0.7);
 
 	// Add floor to the scene.
-	MaterialPtr floorMat = new DiffuseMaterial(Color(120, 200, 120), 1.0, 0.2, 2.0);
+	MaterialPtr floorMat = new DiffuseMaterial(Color::white, 1.0, 0.2, 2.0);
 //	TexturePtr floorTexture = new ImageTexture("/home/zerlok/Pictures/me.jpg");
-	TexturePtr floorTexture = new SquaredWBTexture(100, 100);
+	TexturePtr floorTexture = new SquaredWBTexture(10, 10);
 	floorMat->addTexture(floorTexture);
 	MeshPtr floor = new Plane();
 	floor->setMaterial(floorMat);
@@ -62,8 +62,8 @@ int main(int argc, char *argv[])
 		scene->addMesh(m);
 
 	// Add light to the scene.
-//	LightPtr lamp = new Light(Light::createPoint());
-	LightPtr lamp = new Light(Light::createSun());
+	LightPtr lamp = new Light(Light::createPoint());
+//	LightPtr lamp = new Light(Light::createSun());
 //	LightPtr lamp = new Light(Light::createSpot());
 //	LightPtr lamp = scene->getAmbientLight();
 //	lamp->setColor({200, 200, 255});

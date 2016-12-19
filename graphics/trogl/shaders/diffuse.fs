@@ -29,6 +29,15 @@ struct LampStruct
 };
 
 
+struct TextureStruct
+{
+	sampler2D data;
+	vec2 map;
+	float colorMix;
+	float binded;
+};
+
+
 float lampIntensity(
 		in float lpow,
 		in vec4 lpos,
@@ -86,14 +95,14 @@ vec4 mixLighting(
 }
 
 
-varying vec4 vertexColor;
-varying float vertexColorMix;
 varying vec4 vertexPosition;
 varying vec3 vertexNormal;
+varying vec2 vertexUV;
 
 uniform CameraStruct camera;
 uniform MaterialStruct material;
 uniform LampStruct lamp;
+uniform TextureStruct text;
 
 
 void main()
@@ -140,6 +149,5 @@ void main()
 			break;
 	}
 
-        gl_FragColor = mix(clamp(color, 0.0, 1.0), vertexColor, vertexColorMix);
+	gl_FragColor = mix(clamp(color, 0.0, 1.0), texture2D(text.data, vertexUV + text.map), text.binded * text.colorMix);
 }
-

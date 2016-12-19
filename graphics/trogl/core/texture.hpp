@@ -19,7 +19,7 @@ class Texture : public Component
 		const glm::vec2& getUVOffset() const;
 		const float& getColorMix() const;
 		const float& getNormal() const;
-		const size_t& getSampler() const;
+		const int& getSamplerId() const;
 
 		void bind();
 		void unbind();
@@ -29,14 +29,14 @@ class Texture : public Component
 
 	protected:
 		// Fields.
-		size_t _id;
+		int _id;
 		GLuint _glTexture;
 		glm::vec2 _uvOffset;
 		float _colorMix;
 		float _normal;
 
 	private:
-		static size_t textureID;
+		static int textureID;
 };
 
 using TexturePtr = SharedPointer<Texture, Component>;

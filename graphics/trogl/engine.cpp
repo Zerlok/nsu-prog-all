@@ -399,13 +399,6 @@ void Engine::_viewGUI()
 
 void Engine::_viewFrame()
 {
-//	static size_t frCntr = 0;
-
-//	if (glGetError() == GL_INVALID_OPERATION)
-//		logError << "WTF Error " << frCntr << logEndl;
-
-//	++frCntr;
-
 	_frame->clear(_scene->getBgColor());
 
 	// TODO: move into animation.

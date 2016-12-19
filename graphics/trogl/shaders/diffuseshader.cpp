@@ -35,14 +35,14 @@ DiffuseShader::~DiffuseShader()
 
 void DiffuseShader::passTexture(const Texture* texture)
 {
-	_externalAttributes.pass("text.binded", 1.0f);
+	_externalAttributes.pass("text.data", texture->getSamplerId());
 	_externalAttributes.pass("text.map", texture->getUVOffset());
 	_externalAttributes.pass("text.colorMix", texture->getColorMix());
-	_externalAttributes.pass("text.data", 0); // TODO: get sample number from texture.
+	_externalAttributes.pass("text.binded", 1.0f);
 }
 
 
-void DiffuseShader::passMesh(Mesh const* mesh)
+void DiffuseShader::passMesh(const Mesh* mesh)
 {
 	const glm::vec3& pos = mesh->getPosition();
 
@@ -50,18 +50,18 @@ void DiffuseShader::passMesh(Mesh const* mesh)
 }
 
 
-void DiffuseShader::passLight(Light const* light)
+void DiffuseShader::passLight(const Light* light)
 {
 	const glm::vec3& pos = light->getPosition();
 	const glm::vec3& dir = light->getDirection();
 
-	_internalAttributes.pass("lamp.type", int(light->getLightType()));
-	_internalAttributes.pass("lamp.power", light->getPower());
-	_internalAttributes.pass("lamp.color", light->getColor());
-	_internalAttributes.pass("lamp.position", pos.x, pos.y, pos.z, 1.0f);
-	_internalAttributes.pass("lamp.direction", dir.x, dir.y, dir.z, 0.0f);
-	_internalAttributes.pass("lamp.ia", light->getInnerAngle());
-	_internalAttributes.pass("lamp.oa", light->getOutterAngle());
+	_externalAttributes.pass("lamp.type", int(light->getLightType()));
+	_externalAttributes.pass("lamp.power", light->getPower());
+	_externalAttributes.pass("lamp.color", light->getColor());
+	_externalAttributes.pass("lamp.position", pos.x, pos.y, pos.z, 1.0f);
+	_externalAttributes.pass("lamp.direction", dir.x, dir.y, dir.z, 0.0f);
+	_externalAttributes.pass("lamp.ia", light->getInnerAngle());
+	_externalAttributes.pass("lamp.oa", light->getOutterAngle());
 }
 
 
@@ -70,8 +70,8 @@ void DiffuseShader::passCamera(const Camera* camera)
 	const glm::vec3& pos = camera->getPosition();
 	const glm::vec3& dir = camera->getLookingAtPosition();
 
-	_internalAttributes.pass("camera.position", pos.x, pos.y, pos.z, 1.0f);
-	_internalAttributes.pass("camera.direction", dir.x, dir.y, dir.z, 0.0f);
+	_externalAttributes.pass("camera.position", pos.x, pos.y, pos.z, 1.0f);
+	_externalAttributes.pass("camera.direction", dir.x, dir.y, dir.z, 0.0f);
 }
 
 
@@ -91,7 +91,7 @@ void DiffuseShader::passComponent(const Component* comp)
 }
 
 
-void DiffuseShader::passObject(Object const* obj)
+void DiffuseShader::passObject(const Object* obj)
 {
 	switch (obj->getObjectType())
 	{
@@ -111,23 +111,22 @@ void DiffuseShader::passObject(Object const* obj)
 
 void DiffuseShader::_registerAttributes()
 {
-	// Internal.
-	_internalAttributes.registerate("camera.position");
-	_internalAttributes.registerate("camera.direction");
-
-	_internalAttributes.registerate("lamp.type");
-	_internalAttributes.registerate("lamp.power");
-	_internalAttributes.registerate("lamp.color");
-	_internalAttributes.registerate("lamp.position");
-	_internalAttributes.registerate("lamp.direction");
-	_internalAttributes.registerate("lamp.ia");
-	_internalAttributes.registerate("lamp.oa");
-
 	// External.
-	_externalAttributes.registerate("text.binded");
+	_externalAttributes.registerate("camera.position");
+	_externalAttributes.registerate("camera.direction");
+
+	_externalAttributes.registerate("lamp.type");
+	_externalAttributes.registerate("lamp.power");
+	_externalAttributes.registerate("lamp.color");
+	_externalAttributes.registerate("lamp.position");
+	_externalAttributes.registerate("lamp.direction");
+	_externalAttributes.registerate("lamp.ia");
+	_externalAttributes.registerate("lamp.oa");
+
+	_externalAttributes.registerate("text.data");
 	_externalAttributes.registerate("text.map");
 	_externalAttributes.registerate("text.colorMix");
-	_externalAttributes.registerate("text.data");
+	_externalAttributes.registerate("text.binded");
 
 	_externalAttributes.registerate("meshPosition");
 

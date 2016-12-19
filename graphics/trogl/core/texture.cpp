@@ -7,7 +7,7 @@
 logger_t moduleLogger = loggerModule(loggerLDebug, loggerDFull);
 
 
-size_t Texture::textureID = 0;
+int Texture::textureID = 0;
 
 
 Texture::Texture(const std::string& name)
@@ -46,7 +46,7 @@ const float& Texture::getNormal() const
 }
 
 
-const size_t& Texture::getSampler() const
+const int& Texture::getSamplerId() const
 {
 	return _id;
 }
@@ -66,15 +66,15 @@ void Texture::generate()
 
 void Texture::bind()
 {
-	glBindTexture(GL_TEXTURE_2D, _glTexture);
 	glActiveTexture(GL_TEXTURE0 + _id);
+	glBindTexture(GL_TEXTURE_2D, _glTexture);
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-//	logDebug << getName() << " binded." << logEndl;
+//	logDebug << getName() << " id: " << _id << ", TBO: " << _glTexture <<  " binded." << logEndl;
 }
 
 

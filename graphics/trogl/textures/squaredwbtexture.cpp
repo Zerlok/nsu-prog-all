@@ -16,7 +16,7 @@ SquaredWBTexture::SquaredWBTexture(const size_t& width,
 	: Texture("WAB"),
 	  _width(width),
 	  _height(height),
-	  _pixels((_width * _height), whitePixel)
+	  _pixels((_width * _height * 3), 0.0f)
 {
 	size_t i = 0;
 	for (size_t y = 0; y < _height; ++y)
@@ -24,8 +24,13 @@ SquaredWBTexture::SquaredWBTexture(const size_t& width,
 		for (size_t x = 0; x < _width; ++x)
 		{
 			if (((x+y) % 2) == 0)
-				_pixels[i] = blackPixel;
-			++i;
+			{
+				_pixels[i] = whitePixel.r;
+				_pixels[i+1] = whitePixel.g;
+				_pixels[i+2] = whitePixel.b;
+			}
+
+			i += 3;
 		}
 	}
 
@@ -46,7 +51,7 @@ void SquaredWBTexture::generate()
 	Texture::generate();
 
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, _width, _height, 0, GL_RGB, GL_FLOAT, _pixels.data());
-//	unbind();
+	unbind();
 
 	logDebug << getName() << " squared texture generated." << logEndl;
 }

@@ -19,14 +19,14 @@ class DiffuseShader : public Shader
 		~DiffuseShader();
 
 		// Methods.
-		void passTexture(Texture const* texture);
-		void passMesh(Mesh const* mesh);
-		void passLight(Light const* light);
-		void passCamera(Camera const* camera);
+		void passTexture(const Texture* texture);
+		void passMesh(const Mesh* mesh);
+		void passLight(const Light* light);
+		void passCamera(const Camera* camera);
 
 		// Overriden methods.
-		void passComponent(Component const* comp) override;
-		void passObject(Object const* obj) override;
+		void passComponent(const Component* comp) override;
+		void passObject(const Object* obj) override;
 
 	protected:
 		void _registerAttributes() override;

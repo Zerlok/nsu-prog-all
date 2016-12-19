@@ -31,7 +31,7 @@ class SquaredWBTexture : public Texture
 	private:
 		size_t _width;
 		size_t _height;
-		std::vector<PixelRGB> _pixels;
+		std::vector<float> _pixels;
 };
 
 
