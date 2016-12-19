@@ -14,7 +14,7 @@ ImageTexture::ImageTexture(const std::string& filename)
 	logDebug << getName() << " image texture created ("
 			 << "null: " << _image.isNull()
 			 << ", size: " << _image.width() << 'x' << _image.height()
-			 << ", px(0, 0): " << _image.pixel(0, 0)
+			 << ')'
 			 << logEndl;
 }
 
@@ -27,8 +27,12 @@ ImageTexture::~ImageTexture()
 
 void ImageTexture::generate()
 {
+	create();
+	bind();
+
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, _image.width(), _image.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, _image.bits());
 	Texture::generate();
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, _image.width(), _image.height(), 0, GL_RGB, GL_UNSIGNED_INT, _image.bits());
+
 	unbind();
 
 	logDebug << getName() << " generated." << logEndl;

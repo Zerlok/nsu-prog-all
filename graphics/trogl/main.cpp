@@ -25,45 +25,61 @@ logger_t globalLogger = loggerInit(std::cout, loggerLDebug, loggerDFull);
 int main(int argc, char *argv[])
 {
 	// Some mesh generation attributes.
-	const size_t size = 5;
+	const size_t size = 4;
 	const float offset = 2.5;
-	const glm::vec3 direction {0.0, 0.0, 1.0};
-	const glm::vec3 cameraPos {(size)*offset, (size)*offset / 1.8, (size)*offset};
 
 	// Setup scene.
 	CameraPtr camera = new Camera(1000, 800);
-	camera->setPosition(cameraPos);
+	camera->setPosition({0.0, 5.0, 15.0});
 
 	ScenePtr scene = new Scene("My Scene", camera);
 	scene->setBgColor(Color::grey);
 	scene->setAmbient(0.7);
 
-	// Add floor to the scene.
-	MaterialPtr floorMat = new DiffuseMaterial(Color::white, 1.0, 0.2, 2.0);
-//	TexturePtr floorTexture = new ImageTexture("/home/zerlok/Pictures/me.jpg");
-	TexturePtr floorTexture = new SquaredWBTexture(10, 10);
-	floorMat->addTexture(floorTexture);
-	MeshPtr floor = new Plane();
-	floor->setMaterial(floorMat);
-	floor->setPosition({0.0, -2.0, 0.0});
-	floor->setScale({30.0, 0.0, 30.0});
-	scene->addMesh(floor);
-
-	// Add meshes to the scene.
-	MaterialPtr spheresMat = new DiffuseMaterial(Color(250, 100, 100), 1.0, 2.0, 20.0);
-	Sphere baseSphere = Sphere(1.0, 11);
-	baseSphere.setMaterial(spheresMat);
-
-	using MeshGenerator = ObjectGenerator<Sphere, ObjectGeneratorTraits<Mesh> >;
+	Plane basePlane = Plane();
+	basePlane.setPosition({-5.0, 0.0, -5.0});
+	basePlane.setScale({2.0, 1.0, 30.0});
+	const glm::vec3 direction {1.0, 0.0, 0.0};
+	using MeshGenerator = ObjectGenerator<Plane, ObjectGeneratorTraits<Mesh> >;
 	MeshGenerator meshGenerator;
-//	const MeshGenerator::Objects meshes = meshGenerator.latticeArrangement(size, offset, baseSphere);
-	const MeshGenerator::Objects meshes = meshGenerator.directionArrangement(size, offset, direction, baseSphere);
-	for (const MeshGenerator::ObjectPointer& m : meshes)
-		scene->addMesh(m);
+	MeshGenerator::Objects meshes = meshGenerator.directionArrangement(size, offset, direction, basePlane);
+
+	TexturePtr tex;
+	MaterialPtr mat;
+	for (size_t i = 0; i < meshes.size(); ++i)
+	{
+		tex = new ImageTexture("/home/zerlok/Pictures/me.jpg");
+//		tex = new SquaredWBTexture(100, 100);
+		tex->setColorMix(1.0);
+		tex->setUVScale({1.0, 1.0/15.0});
+
+		switch (i)
+		{
+			case 3:
+//				tex->setFiltering(Texture::Filtering::ANISOTROPHIC);
+				break;
+			case 2:
+				tex->setFiltering(Texture::Filtering::TRILINEAR);
+				break;
+			case 1:
+				tex->setFiltering(Texture::Filtering::BILINEAR);
+				break;
+			case 0:
+			default:
+				tex->setFiltering(Texture::Filtering::NONE);
+				break;
+		}
+
+		mat = new DiffuseMaterial(Color::white, 1.0, 0.2, 2.0);
+		mat->addTexture(tex);
+
+		meshes[i]->setMaterial(mat);
+		scene->addMesh(meshes[i]);
+	}
 
 	// Add light to the scene.
-	LightPtr lamp = new Light(Light::createPoint());
-//	LightPtr lamp = new Light(Light::createSun());
+//	LightPtr lamp = new Light(Light::createPoint());
+	LightPtr lamp = new Light(Light::createSun());
 //	LightPtr lamp = new Light(Light::createSpot());
 //	LightPtr lamp = scene->getAmbientLight();
 //	lamp->setColor({200, 200, 255});

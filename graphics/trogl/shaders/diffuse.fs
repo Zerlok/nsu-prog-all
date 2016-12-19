@@ -32,7 +32,8 @@ struct LampStruct
 struct TextureStruct
 {
 	sampler2D data;
-	vec2 map;
+	vec2 offset;
+	vec2 scale;
 	float colorMix;
 	float binded;
 };
@@ -141,13 +142,15 @@ void main()
 
 		// Ambient (scene background) light drawing.
 		case 4:
-		        color = mixLighting(material, lamp.color, clamp(lamp.power, 0.0, 1.0), 0.0);
+			color = mixLighting(material, lamp.color, clamp(lamp.power, 0.0, 1.0), 0.0);
+			lampInt = lamp.power;
 			break;
 
 		default:
 			color = material.color;
+			lampInt = 1.0;
 			break;
 	}
 
-	gl_FragColor = mix(clamp(color, 0.0, 1.0), texture2D(text.data, vertexUV + text.map), text.binded * text.colorMix);
+	gl_FragColor = mix(clamp(color, 0.0, 1.0), texture2D(text.data, vertexUV / text.scale + text.offset) * lampInt, text.binded * text.colorMix);
 }

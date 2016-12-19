@@ -34,7 +34,7 @@ class ObjectGenerator
 					const float& latticeOffset,
 					const ObjectType& parent) const
 		{
-			glm::vec3 pos;
+			glm::vec3 pos = parent.getPosition();
 			ObjectPointer obj;
 			Objects objVector(std::pow(2*latticeSize-1, 3));
 			size_t idx = 0;
@@ -67,7 +67,7 @@ class ObjectGenerator
 				) const
 		{
 			const glm::vec3 directionOffset = glm::normalize(direction) * offset;
-			glm::vec3 pos {0.0, 0.0, 0.0};
+			glm::vec3 pos = parent.getPosition();
 			ObjectPointer obj;
 			Objects objVector(size);
 

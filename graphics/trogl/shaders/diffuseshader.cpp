@@ -36,7 +36,8 @@ DiffuseShader::~DiffuseShader()
 void DiffuseShader::passTexture(const Texture* texture)
 {
 	_externalAttributes.pass("text.data", texture->getSamplerId());
-	_externalAttributes.pass("text.map", texture->getUVOffset());
+	_externalAttributes.pass("text.offset", texture->getUVOffset());
+	_externalAttributes.pass("text.scale", texture->getUVScale());
 	_externalAttributes.pass("text.colorMix", texture->getColorMix());
 	_externalAttributes.pass("text.binded", 1.0f);
 }
@@ -124,7 +125,8 @@ void DiffuseShader::_registerAttributes()
 	_externalAttributes.registerate("lamp.oa");
 
 	_externalAttributes.registerate("text.data");
-	_externalAttributes.registerate("text.map");
+	_externalAttributes.registerate("text.offset");
+	_externalAttributes.registerate("text.scale");
 	_externalAttributes.registerate("text.colorMix");
 	_externalAttributes.registerate("text.binded");
 
