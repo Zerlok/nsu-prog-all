@@ -47,19 +47,30 @@ Engine::~Engine()
 
 void Engine::_logEngineOptions() const
 {
-	logInfo << "TroGL engine uses OpenGL:"
-			<< std::endl << "   OpenGL version: " << glGetString(GL_VERSION) << " (" << _glVersion << ')'
-			<< std::endl << "   Vendor version: " << glGetString(GL_VENDOR)
-			<< std::endl << "   Renderer version: " << glGetString(GL_RENDERER)
-			<< std::endl << "   GLSL version: " << glGetString(GL_SHADING_LANGUAGE_VERSION) << " (" << _glShaderVersion << ')'
-			<< logEndl;
+	Logger& log = logInfo;
+
+	log << "TroGL engine uses OpenGL:"
+		<< std::endl << "   OpenGL version: " << glGetString(GL_VERSION) << " (" << _glVersion << ')'
+		<< std::endl << "   Vendor version: " << glGetString(GL_VENDOR)
+		<< std::endl << "   Renderer version: " << glGetString(GL_RENDERER)
+		<< std::endl << "   GLSL version: " << glGetString(GL_SHADING_LANGUAGE_VERSION) << " (" << _glShaderVersion << ')'
+		<< std::endl;
+
+	GLint glslLocationsCount;
+	glGetIntegerv(GL_MAX_UNIFORM_LOCATIONS, &glslLocationsCount);
+
+	log << "GLSL settings:"
+		<< std::endl << "   GLSL max locations amount: " << glslLocationsCount
+		<< std::endl;
 
 	GLint glslVersionsNum;
 	glGetIntegerv(GL_NUM_SHADING_LANGUAGE_VERSIONS, &glslVersionsNum);
-
-	Logger& log = logInfo << "Available GLSL versions (" << glslVersionsNum << "):";
-	for (GLint i = 0; i < glslVersionsNum; ++i)
-		log << std::endl << "   " << glGetStringi(GL_SHADING_LANGUAGE_VERSION, i);
+	if (glslVersionsNum > 0)
+	{
+		log << "   versions (" << glslVersionsNum << "):";
+		for (GLint i = 0; i < glslVersionsNum; ++i)
+			log << std::endl << "      " << glGetStringi(GL_SHADING_LANGUAGE_VERSION, i);
+	}
 
 	log << logEndl;
 }
@@ -264,7 +275,7 @@ bool Engine::isStopped() const
 }
 
 
-const Engine::Status&Engine::getStatus() const
+const Engine::Status& Engine::getStatus() const
 {
 	return _status;
 }

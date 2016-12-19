@@ -11,11 +11,13 @@ class ScrewShader : public Shader
 		ScrewShader();
 		~ScrewShader();
 
+		void passObject(const Object*) const;
+
 		void _registerAttributes() override;
 		void _passInternalAttributes() override;
 
-		void passComponent(Component const*) override;
-		void passObject(Object const*) override;
+		void passComponent(const Component*) const override;
+		void passArrayOfComponents(const ComponentsPtrs&) const override;
 
 	private:
 		static const std::string VS_FILE;

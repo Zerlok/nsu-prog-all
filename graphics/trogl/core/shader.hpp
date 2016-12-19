@@ -17,7 +17,8 @@ class Attributes
 	public:
 		// Inner classes.
 		using Attr = GLuint;
-		using AttrsMap = std::unordered_map<std::string, Attr>;
+		using Attrs = std::vector<Attr>;
+		using AttrsMap = std::unordered_map<std::string, Attrs>;
 
 		// Constructors / Destructor.
 		Attributes();
@@ -33,6 +34,7 @@ class Attributes
 		void clear();
 		void setShaderProgram(const GLuint& glProg);
 		bool registerate(const std::string& name);
+		bool registerateArray(const std::string& name, const size_t& len);
 
 		template<class T>
 		bool pass(const std::string& name, const T& value) const
@@ -41,7 +43,36 @@ class Attributes
 			if (it == _attrsMap.cend())
 				return false;
 
-			_pass((*it).second, value);
+			_pass((*it).second.front(), value);
+			return true;
+		}
+
+		template<class T>
+		bool passEl(const std::string& name, const int& idx, const T& value) const
+		{
+			AttrsMap::const_iterator it = _attrsMap.find(name);
+			if (it == _attrsMap.cend())
+				return false;
+
+			const Attrs& locations = (*it).second;
+			if (locations.size() < idx)
+				return false;
+
+			_pass(locations[idx], value);
+			return true;
+		}
+
+		template<class T>
+		bool passArray(const std::string& name, const std::vector<T> values) const
+		{
+			AttrsMap::const_iterator it = _attrsMap.find(name);
+			if (it == _attrsMap.cend())
+				return false;
+
+			const Attrs& locations = (*it).second;
+			for (size_t i = 0; i < std::min(locations.size(), values.size()); ++i)
+				_pass(locations[i], values[i]);
+
 			return true;
 		}
 
@@ -151,8 +182,8 @@ class Shader : public Component
 		}
 
 		// Virtual methods.
-		virtual void passComponent(Component const*) = 0;
-		virtual void passObject(Object const*) = 0;
+		virtual void passComponent(const Component*) const = 0;
+		virtual void passArrayOfComponents(const ComponentsPtrs&) const = 0;
 
 	protected:
 		// Constructor.

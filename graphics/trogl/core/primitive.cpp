@@ -19,8 +19,7 @@ Primitive::Primitive(const MeshPtr& mesh)
 	  _glIBO(0),
 	  _indicesSize(0),
 	  _position(mesh->getPosition()),
-	  _material(mesh->getMaterial()),
-	  _shader(_material->getShader())
+	  _material(mesh->getMaterial())
 {
 	/*
 	 * Apply mesh vertices positions from object attributes
@@ -47,8 +46,7 @@ Primitive::Primitive(Primitive&& obj)
 	  _glIBO(std::move(obj._glIBO)),
 	  _indicesSize(std::move(obj._indicesSize)),
 	  _position(std::move(obj._position)),
-	  _material(std::move(obj._material)),
-	  _shader(std::move(obj._shader))
+	  _material(std::move(obj._material))
 {
 	obj._glVBO = 0;
 	obj._glUVBO = 0;
@@ -77,7 +75,7 @@ Primitive::~Primitive()
 bool Primitive::isValid() const
 {
 	return (_isGLGeometryValid()
-			&& _shader->isCompiledSuccessfully());
+			&& _material->isValid());
 }
 
 
@@ -95,12 +93,12 @@ void Primitive::initGLGeometry(const MeshPtr& mesh)
 void Primitive::draw(const LightPtr& light,
 					 const CameraPtr& camera)
 {
-	_shader->bind();
+	_material->use();
 
-	_material->passToShader();
-	_shader->passAttribute("meshPosition", _position);
-	_shader->passObject(light);
-	_shader->passObject(camera);
+	const ShaderPtr& sh = _material->getShader();
+	sh->passAttribute("meshPosition", _position);
+	sh->passComponent(light);
+	sh->passComponent(camera);
 
 	glEnableVertexAttribArray(0);
 	glEnableVertexAttribArray(1);

@@ -18,7 +18,7 @@ DiffuseMaterial::DiffuseMaterial(const Color& color,
 	  _hardness(hardness)
 {
 	static const ShaderPtr diffuseShader = new DiffuseShader();
-	setShader(diffuseShader);
+	_setShader(diffuseShader);
 	logDebug << getName() << " created." << logEndl;
 }
 
@@ -65,11 +65,10 @@ void DiffuseMaterial::setHardness(const float& hardness)
 }
 
 
-void DiffuseMaterial::passToShader()
+void DiffuseMaterial::use()
 {
-	Material::passToShader();
+	Material::use();
 
-	_shader->passAttribute("material.color", _color);
 	_shader->passAttribute("material.diffuse", _diffuse);
 	_shader->passAttribute("material.specular", _specular);
 	_shader->passAttribute("material.hardness", _hardness);

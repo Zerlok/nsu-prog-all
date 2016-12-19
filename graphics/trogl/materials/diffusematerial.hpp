@@ -25,7 +25,7 @@ class DiffuseMaterial : public Material
 		void setHardness(const float& hardness);
 
 		// Overriden methods.
-		void passToShader() override;
+		void use() override;
 
 	private:
 		float _diffuse;

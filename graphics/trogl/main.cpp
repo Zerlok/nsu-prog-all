@@ -50,7 +50,7 @@ int main(int argc, char *argv[])
 	{
 		tex = new ImageTexture("/home/zerlok/Pictures/me.jpg");
 //		tex = new SquaredWBTexture(100, 100);
-		tex->setColorMix(1.0);
+		tex->setMixing(1.0);
 		tex->setUVScale({1.0, 1.0/15.0});
 
 		switch (i)

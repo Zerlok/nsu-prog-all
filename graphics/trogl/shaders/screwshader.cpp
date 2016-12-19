@@ -31,12 +31,17 @@ void ScrewShader::_passInternalAttributes()
 }
 
 
-void ScrewShader::passComponent(const Component*)
+void ScrewShader::passComponent(const Component*) const
 {
 }
 
 
-void ScrewShader::passObject(Object const*)
+void ScrewShader::passArrayOfComponents(const ComponentsPtrs&) const
+{
+}
+
+
+void ScrewShader::passObject(const Object*) const
 {
 }
 

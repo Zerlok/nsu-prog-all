@@ -37,7 +37,7 @@ void MetamorphoseShader::_passInternalAttributes()
 }
 
 
-void MetamorphoseShader::passComponent(const Component* comp)
+void MetamorphoseShader::passComponent(const Component* comp) const
 {
 	if ((comp == nullptr)
 			|| (comp->getType() != Component::Type::OBJECT))
@@ -47,7 +47,12 @@ void MetamorphoseShader::passComponent(const Component* comp)
 }
 
 
-void MetamorphoseShader::passObject(Object const* obj)
+void MetamorphoseShader::passArrayOfComponents(const ComponentsPtrs& components) const
+{
+}
+
+
+void MetamorphoseShader::passObject(const Object* obj) const
 {
 	if ((obj == nullptr)
 			|| (obj->getObjectType() != Object::Type::MESH))

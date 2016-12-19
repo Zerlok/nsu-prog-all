@@ -349,9 +349,51 @@ bool Attributes::registerate(const std::string& name)
 
 	Attr glAttr = glGetUniformLocation(_glShaderProg, name.c_str());
 	if (glAttr == NOT_FOUND)
+	{
+		logWarning << "Uniform: " << name << " were not found!" << logEndl;
+		return false;
+	}
+
+	_attrsMap.insert({name, {glAttr}});
+	return true;
+}
+
+
+bool Attributes::registerateArray(const std::string& name, const size_t& len)
+{
+	AttrsMap::iterator it = _attrsMap.find(name);
+	if (it != _attrsMap.end())
 		return false;
 
-	_attrsMap.insert({name, glAttr});
+	size_t idxPos = name.find("[]");
+	if (idxPos == std::string::npos)
+		return false;
+
+	const std::string left = name.substr(0, idxPos+1);
+	const std::string right = name.substr(idxPos+1, name.length() - idxPos - 1);
+
+	Attrs glAttrs;
+	std::string locName;
+	std::stringstream ss;
+	for (size_t i = 0; i < len; ++i)
+	{
+		ss.str("");
+		ss << left << i << right;
+		locName = ss.str();
+
+		Attr glAttr = glGetUniformLocation(_glShaderProg, locName.c_str());
+		if (glAttr == NOT_FOUND)
+			break;
+
+		glAttrs.push_back(glAttr);
+	}
+
+	if (glAttrs.size() < len)
+		logWarning << "Uniform: " << name << ", "
+				   << glAttrs.size() << '/' << len << " array attributes were located!"
+				   << logEndl;
+
+	_attrsMap.insert({name, glAttrs});
 	return true;
 }
 
@@ -532,7 +574,7 @@ bool Shader::Subprogram::compile()
 	if (!success)
 	{
 		glGetShaderInfoLog(id, MAX_INFO_LOG_SIZE, NULL, infoLog);
-		logError << "Error in subprogram compilation: " << infoLog << logEndl;
+		logError << "Error in " << type << " subprogram compilation: " << infoLog << logEndl;
 		return false;
 	}
 

@@ -48,7 +48,7 @@ SquaredWBTexture::~SquaredWBTexture()
 
 void SquaredWBTexture::generate()
 {
-	create();
+	_create();
 	bind();
 
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, _width, _height, 0, GL_RGB, GL_FLOAT, _pixels.data());

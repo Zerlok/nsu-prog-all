@@ -25,25 +25,31 @@ class Material : public Component
 		Material& operator=(Material&& mat);
 
 		// Methods.
+		bool isValid() const;
+
 		const Color& getColor() const;
-		const ShaderPtr& getShader() const;
+		const float& getTextureMixing() const;
 		const Textures& getTextures() const;
+		const ShaderPtr& getShader() const;
 
 		void compile();
 
+		void setColor(const Color& color);
+		void setTextureMixing(const float& mixing);
 		void addTexture(const TexturePtr& texture);
 
-		void setColor(const Color& color);
-		void setShader(const ShaderPtr& shader);
-
 		// Virtual methods.
-		virtual void passToShader();
+		virtual void use();
 
 	protected:
 		// Fields.
 		Color _color;
+		int _texturesLen;
 		Textures _textures;
+		float _texturesMixing;
 		ShaderPtr _shader;
+
+		void _setShader(const ShaderPtr& shader);
 };
 
 using MaterialPtr = SharedPointer<Material, Component>;

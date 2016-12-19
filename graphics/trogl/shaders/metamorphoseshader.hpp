@@ -12,11 +12,13 @@ class MetamorphoseShader : public Shader
 		MetamorphoseShader();
 		~MetamorphoseShader();
 
+		void passObject(const Object* obj) const;
+
 		void _registerAttributes() override;
 		void _passInternalAttributes() override;
 
-		void passComponent(Component const* comp) override;
-		void passObject(Object const* obj) override;
+		void passComponent(const Component* comp) const override;
+		void passArrayOfComponents(const ComponentsPtrs& components) const override;
 
 	private:
 		static const std::string VS_FILE;

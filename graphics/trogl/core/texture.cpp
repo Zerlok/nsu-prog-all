@@ -7,17 +7,16 @@
 logger_t moduleLogger = loggerModule(loggerLDebug, loggerDFull);
 
 
-int Texture::textureIDs = 0;
+int Texture::textureID = 0;
 
 
 Texture::Texture(const std::string& name)
 	: Component(Component::Type::TEXTURE, name),
-	  _id(textureIDs++),
+	  _id(textureID++),
 	  _glTexture(0),
 	  _uvOffset(0.0f, 0.0f),
 	  _uvScale(1.0f, 1.0f),
-	  _colorMix(0.5f),
-	  _normal(0.0f),
+	  _mixing(0.5f),
 	  _filtering(Filtering::NONE),
 	  _wrapping(Wrapping::REPEATING),
 	  _useMipmaps(false)
@@ -29,6 +28,7 @@ Texture::Texture(const std::string& name)
 Texture::~Texture()
 {
 	unbind();
+
 	glDeleteTextures(1, &_glTexture);
 	_glTexture = 0;
 
@@ -54,15 +54,9 @@ const glm::vec2& Texture::getUVScale() const
 }
 
 
-const float& Texture::getColorMix() const
+const float& Texture::getMixing() const
 {
-	return _colorMix;
-}
-
-
-const float& Texture::getNormal() const
-{
-	return _normal;
+	return _mixing;
 }
 
 
@@ -78,15 +72,9 @@ void Texture::setUVScale(const glm::vec2& scale)
 }
 
 
-void Texture::setColorMix(const float& mixing)
+void Texture::setMixing(const float& mixing)
 {
-	_colorMix = mixing;
-}
-
-
-void Texture::setNormal(const float& normal)
-{
-	_normal = normal;
+	_mixing = mixing;
 }
 
 
@@ -118,7 +106,7 @@ void Texture::unbind()
 
 void Texture::generate()
 {
-	create();
+	_create();
 
 	if (_useMipmaps)
 		glGenerateMipmap(GL_TEXTURE_2D);
@@ -129,7 +117,7 @@ void Texture::generate()
 }
 
 
-void Texture::create()
+void Texture::_create()
 {
 	if (_glTexture != 0)
 		return;
