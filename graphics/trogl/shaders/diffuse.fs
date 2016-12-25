@@ -102,9 +102,9 @@ vec4 mixTextures(
 		in vec2 uv)
 {
     vec4 color = vec4(1.0, 1.0, 1.0, 1.0);
-    for (int i = 0; i < texturesLen; ++i)
+    for (int i = 0; i < TEXLIM; ++i)
     {
-        color *= texture2D(textures[1].data, uv / textures[1].scale + textures[1].offset);
+        color *= texture2D(textures[i].data, uv / textures[i].scale + textures[i].offset);
     }
 
     return color;
@@ -157,15 +157,17 @@ void main()
 
                 case 4: // Ambient (scene background) light drawing.
 		        lampInt = clamp(lamp.power, 0.0, 1.0);
+			specularInt = 0.0;
 			color = mixLighting(material, lamp.color, lampInt, 0.0);
 			break;
 
                 default: // Unkown lamp type.
 		        lampInt = 1.0;
+			specularInt = 0.0;
 			color = material.color;
 			break;
 	}
 
-        vec4 textureColors = mixTextures(textures, texturesLen, vertexUV) * lampInt;
+        vec4 textureColors = mixTextures(textures, texturesLen, vertexUV) * lamp.color * (lampInt + specularInt);
 	gl_FragColor = mix(clamp(color, 0.0, 1.0), textureColors, texturesMixing);
 }

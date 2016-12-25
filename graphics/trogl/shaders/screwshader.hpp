@@ -17,7 +17,7 @@ class ScrewShader : public Shader
 		void _passInternalAttributes() override;
 
 		void passComponent(const Component*) const override;
-		void passArrayOfComponents(const ComponentsPtrs&) const override;
+		void passTextures(const Textures&) const override;
 
 	private:
 		static const std::string VS_FILE;

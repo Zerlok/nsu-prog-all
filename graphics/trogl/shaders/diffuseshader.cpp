@@ -35,14 +35,6 @@ DiffuseShader::~DiffuseShader()
 }
 
 
-void DiffuseShader::passTexture(const int idx, const Texture* texture) const
-{
-	_externalAttributes.passEl("textures[].data", idx, texture->getSamplerId());
-	_externalAttributes.passEl("textures[].offset", idx, texture->getUVOffset());
-	_externalAttributes.passEl("textures[].scale", idx, texture->getUVScale());
-}
-
-
 void DiffuseShader::passObject(const Object* obj) const
 {
 	switch (obj->getObjectType())
@@ -109,12 +101,17 @@ void DiffuseShader::passComponent(const Component* comp) const
 }
 
 
-void DiffuseShader::passArrayOfComponents(const ComponentsPtrs& components) const
+void DiffuseShader::passTextures(const Textures& textures) const
 {
-	size_t i = 0;
-	for (const ComponentPtr& c : components)
-		if (c->getType() == Component::Type::TEXTURE)
-			passTexture(i++, ((const Texture*)c.get_cpointer()));
+	size_t idx = 0;
+	for (const TexturePtr& texture : textures)
+	{
+		_externalAttributes.passEl("textures[].data", idx, texture->getSamplerId());
+		_externalAttributes.passEl("textures[].offset", idx, texture->getUVOffset());
+		_externalAttributes.passEl("textures[].scale", idx, texture->getUVScale());
+
+		++idx;
+	}
 }
 
 

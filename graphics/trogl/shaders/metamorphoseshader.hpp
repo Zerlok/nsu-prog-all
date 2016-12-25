@@ -18,7 +18,7 @@ class MetamorphoseShader : public Shader
 		void _passInternalAttributes() override;
 
 		void passComponent(const Component* comp) const override;
-		void passArrayOfComponents(const ComponentsPtrs& components) const override;
+		void passTextures(const Textures&) const override;
 
 	private:
 		static const std::string VS_FILE;

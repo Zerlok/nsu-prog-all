@@ -10,6 +10,7 @@
 #include "opengls.hpp"
 #include "component.hpp"
 #include "object.hpp"
+#include "texture.hpp"
 
 
 class Attributes
@@ -48,7 +49,7 @@ class Attributes
 		}
 
 		template<class T>
-		bool passEl(const std::string& name, const int& idx, const T& value) const
+		bool passEl(const std::string& name, const size_t& idx, const T& value) const
 		{
 			AttrsMap::const_iterator it = _attrsMap.find(name);
 			if (it == _attrsMap.cend())
@@ -183,7 +184,7 @@ class Shader : public Component
 
 		// Virtual methods.
 		virtual void passComponent(const Component*) const = 0;
-		virtual void passArrayOfComponents(const ComponentsPtrs&) const = 0;
+		virtual void passTextures(const Textures&) const = 0;
 
 	protected:
 		// Constructor.

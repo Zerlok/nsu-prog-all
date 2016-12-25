@@ -44,7 +44,6 @@ class Material : public Component
 	protected:
 		// Fields.
 		Color _color;
-		int _texturesLen;
 		Textures _textures;
 		float _texturesMixing;
 		ShaderPtr _shader;

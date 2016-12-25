@@ -47,7 +47,7 @@ void MetamorphoseShader::passComponent(const Component* comp) const
 }
 
 
-void MetamorphoseShader::passArrayOfComponents(const ComponentsPtrs& components) const
+void MetamorphoseShader::passTextures(const Textures&) const
 {
 }
 

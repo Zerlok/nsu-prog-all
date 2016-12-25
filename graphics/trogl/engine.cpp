@@ -89,7 +89,8 @@ void Engine::_logSceneStatistics() const
 	logInfo << "Scene: " << _scene->getName()
 			<< " (" << _scene->getMeshes().size() << " meshes: "
 			<< verticesNum << " vertices, "
-			<< polygonsNum << " polygons)"
+			<< polygonsNum << " polygons, "
+			<< _scene->getLights().size() << " lamps)"
 			<< logEndl;
 }
 
@@ -103,17 +104,37 @@ int Engine::_validateScene()
 	}
 
 	_camera = _scene->getCamera();
+	if (_camera.is_null())
+	{
+		logError << "Cannot show scene " << _scene->getName()
+				 << ", camera is null!"
+				 << logEndl;
+		return 0;
+	}
+
 	if (!_camera->isValid())
 	{
 		logError << "Cannot show scene " << _scene->getName()
-				 << " with camera " << _camera->getName()
-				 << " which settings are invalid!" << logEndl;
+				 << " with invalid camera " << _camera->getName()
+				 << logEndl;
+		return 0;
+	}
+
+	if (_scene->getMeshes().empty())
+	{
+		logError << "No meshes were found at scene " << _scene->getName()
+				 << ", at least 1 mesh is required!"
+				 << logEndl;
 		return 0;
 	}
 
 	if (_scene->getLights().empty())
-		logWarning << "No lamps found at scene " << _scene->getName()
-				   << logEndl;
+	{
+		logError << "No lamps were found at scene " << _scene->getName()
+				 << ", at least 1 lamp is required!"
+				 << logEndl;
+		return 0;
+	}
 
 	return 1;
 }
@@ -347,9 +368,11 @@ void Engine::showActiveScene()
 			&& !validate())
 		return;
 
+	_status = Status::RENDERING_STARTED;
+	logInfo << "Engine starts rendering..." << std::endl << logEndl;
+
 	_logEngineOptions();
 	_logSceneStatistics();
-	_status = Status::RENDERING_STARTED;
 
 	_glEnableOptions();
 	_glInitProjectionMatrix();
@@ -358,9 +381,6 @@ void Engine::showActiveScene()
 	glutDisplayFunc(_displayFunc);
 	glutReshapeFunc(_reshapeFunc);
 	glutIdleFunc(_idleFunc);
-
-	if (glGetError() == GL_INVALID_OPERATION)
-		logError << "WTF Error" << logEndl;
 
 	glutMainLoop();
 

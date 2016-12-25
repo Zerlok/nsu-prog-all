@@ -23,12 +23,12 @@ QMAKE_CXXFLAGS_DEBUG -= -O1 -O2 -O3
 
 
 # Main modules.
-# (custom modules should be defined in same order).
+# (derived modules should be defined in same order as base modules).
 HEADERS += \
     core/opengls.hpp \
     core/component.hpp \
     core/object.hpp \
-	core/texture.hpp \
+    core/texture.hpp \
     core/shader.hpp \
     core/material.hpp \
     core/mesh.hpp \
@@ -39,12 +39,12 @@ HEADERS += \
     core/scene.hpp \
     core/gui.hpp \
     core/animation.hpp \
-	engine.hpp
+    engine.hpp
 
 # Custom textures.
 HEADERS += \
-	textures/squaredwbtexture.hpp \
-	textures/imagetexture.hpp
+    textures/squaredwbtexture.hpp \
+    textures/imagetexture.hpp
 
 # Custom shaders.
 HEADERS += \
@@ -62,8 +62,8 @@ HEADERS += \
     meshes/megacube.hpp \
     meshes/cylinder.hpp \
     meshes/sphere.hpp \
-	meshes/icosphere.hpp \
-	meshes/plane.hpp
+    meshes/icosphere.hpp \
+    meshes/plane.hpp
 
 # Custom GUI components.
 HEADERS += \
@@ -78,12 +78,16 @@ HEADERS += \
     common/utils.hpp \
     engineutils.hpp
 
+# Tasks (graphics tasks with custom scenes)
+HEADERS += tasks/task.hpp \
+    tasks/task04.hpp
+
 
 # Main sources of modules.
 SOURCES += \
     core/component.cpp \
     core/object.cpp \
-	core/texture.cpp \
+    core/texture.cpp \
     core/shader.cpp \
     core/material.cpp \
     core/mesh.cpp \
@@ -95,12 +99,12 @@ SOURCES += \
     core/gui.cpp \
     core/animation.cpp \
     engine.cpp \
-	main.cpp
+    main.cpp
 
 # Custom textures.
 SOURCES += \
-	textures/squaredwbtexture.cpp \
-	textures/imagetexture.cpp
+    textures/squaredwbtexture.cpp \
+    textures/imagetexture.cpp
 
 # Custom shaders.
 SOURCES += \
@@ -117,8 +121,8 @@ SOURCES += \
     meshes/cube.cpp \
     meshes/megacube.cpp \
     meshes/cylinder.cpp \
-	meshes/sphere.cpp \
-	meshes/icosphere.cpp \
+    meshes/sphere.cpp \
+    meshes/icosphere.cpp \
     meshes/plane.cpp
 
 # Custom GUI components.
@@ -132,6 +136,11 @@ SOURCES += \
 SOURCES += \
     common/color.cpp \
     common/utils.cpp
+
+# Tasks (graphics tasks with custom scenes)
+SOURCES += tasks/task.cpp \
+    tasks/task04.cpp
+
 
 DISTFILES += \
     shaders/default.vs \

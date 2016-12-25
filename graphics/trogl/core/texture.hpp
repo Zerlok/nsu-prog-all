@@ -16,7 +16,7 @@ class Texture : public Component
 			NONE,
 			BILINEAR,
 			TRILINEAR,
-			ANISOTROPHIC,
+			ANISOTROPIC,
 		};
 
 		enum class Wrapping
@@ -37,14 +37,8 @@ class Texture : public Component
 		const glm::vec2& getUVOffset() const;
 		const glm::vec2& getUVScale() const;
 
-		const float& getMixing() const;
-		const float& getNormal() const;
-
 		void setUVOffset(const glm::vec2& offset);
 		void setUVScale(const glm::vec2& scale);
-
-		void setMixing(const float& mixing);
-		void setNormal(const float& normal);
 
 		void setFiltering(const Filtering& type);
 		void setWrapping(const Wrapping& type);
@@ -61,7 +55,6 @@ class Texture : public Component
 		GLuint _glTexture;
 		glm::vec2 _uvOffset;
 		glm::vec2 _uvScale;
-		float _mixing;
 		float _normal;
 		Filtering _filtering;
 		Wrapping _wrapping;
@@ -71,8 +64,6 @@ class Texture : public Component
 
 	private:
 		static int textureID;
-
-		void _setupGLTexture();
 };
 
 

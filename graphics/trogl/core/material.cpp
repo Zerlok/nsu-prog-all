@@ -12,7 +12,6 @@ Material::Material(const std::string& name,
 				   const ShaderPtr& shader)
 	: Component(Component::Type::MATERIAL, name),
 	  _color(color),
-	  _texturesLen(0.0),
 	  _textures(),
 	  _texturesMixing(0.5),
 	  _shader(shader)
@@ -26,7 +25,6 @@ Material::Material(const std::string& name,
 Material::Material(const Material& mat)
 	: Component(mat),
 	  _color(mat._color),
-	  _texturesLen(mat._texturesLen),
 	  _textures(mat._textures),
 	  _texturesMixing(mat._texturesMixing),
 	  _shader(mat._shader)
@@ -38,7 +36,6 @@ Material::Material(const Material& mat)
 Material::Material(Material&& mat)
 	: Component(mat),
 	  _color(std::move(mat._color)),
-	  _texturesLen(std::move(mat._texturesLen)),
 	  _textures(std::move(mat._textures)),
 	  _texturesMixing(std::move(mat._texturesMixing)),
 	  _shader(std::move(mat._shader))
@@ -58,7 +55,6 @@ Material& Material::operator=(const Material& mat)
 	Component::operator=(mat);
 	_color = mat._color;
 	_texturesMixing = mat._texturesMixing;
-	_texturesLen = mat._texturesLen;
 	_textures = mat._textures;
 	_shader = mat._shader;
 
@@ -72,7 +68,6 @@ Material& Material::operator=(Material&& mat)
 	Component::operator=(mat);
 	_color = std::move(mat._color);
 	_texturesMixing = std::move(mat._texturesMixing);
-	_texturesLen = std::move(mat._texturesLen);
 	_textures = std::move(mat._textures);
 	_shader = std::move(mat._shader);
 
@@ -116,7 +111,6 @@ void Material::compile()
 	_shader->compile();
 
 	_texturesMixing = (!_textures.empty()) ? _texturesMixing : 0.0;
-	_texturesLen = _textures.size();
 	for (TexturePtr& texture : _textures)
 		texture->generate();
 
@@ -148,15 +142,13 @@ void Material::use()
 {
 	_shader->bind();
 
-	for (TexturePtr& texture : _textures)
-	{
-		texture->bind();
-		_shader->passComponent(texture);
-	}
-
 	_shader->passAttribute("material.color", _color);
 	_shader->passAttribute("texturesMixing", _texturesMixing);
-	_shader->passAttribute("texturesLen", _texturesLen);
+
+	for (TexturePtr& texture : _textures)
+		texture->bind();
+
+	_shader->passTextures(_textures);
 }
 
 

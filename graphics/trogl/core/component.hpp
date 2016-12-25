@@ -87,7 +87,6 @@ class Component
 };
 
 using ComponentPtr = SharedPointer<Component>;
-using ComponentsPtrs = std::vector<ComponentPtr>;
 
 std::ostream& operator<<(std::ostream& out, const Component& c);
 

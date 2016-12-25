@@ -36,7 +36,7 @@ void ScrewShader::passComponent(const Component*) const
 }
 
 
-void ScrewShader::passArrayOfComponents(const ComponentsPtrs&) const
+void ScrewShader::passTextures(const Textures&) const
 {
 }
 
