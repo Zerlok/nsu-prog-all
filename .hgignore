@@ -28,6 +28,7 @@ syntax: glob
 *target/test*
 *_samples*
 */build/*
+*/build-*
 oop/task3/argvparser.h
 *.metadata
 *.settings

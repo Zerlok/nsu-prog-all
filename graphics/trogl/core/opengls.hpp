@@ -4,7 +4,11 @@
 
 /*
  * This is a right order of including OpenGLs' headers.
- * DO NOT CHANGE IT!
+ * DO NOT CHANGE IT, WHATEVER! Even if I've told you.
+ *
+ * Linux OpenGL installation:
+ *    - https://en.wikibooks.org/wiki/OpenGL_Programming/Installation/Linux
+ *    - $ sudo apt-get install freeglut3 freeglut3-dev
  */
 #include <GL/glew.h>
 #include <GL/gl.h>

@@ -7,6 +7,7 @@
 #include "common/utils.hpp"
 
 
+//#define TROGL_FRAME_TYPE SingleFrame
 #define TROGL_FRAME_TYPE DoubleBufferFrame
 //#define TROGL_FRAME_TYPE RTRFrame
 
@@ -63,6 +64,8 @@ void Engine::_logEngineOptions() const
 		<< std::endl << "   GLSL max locations amount: " << glslLocationsCount
 		<< std::endl;
 
+	// FIXME: unknown fails, when trying to run this code on HP-book.
+	/* glslVersionsNum is strange.
 	GLint glslVersionsNum;
 	glGetIntegerv(GL_NUM_SHADING_LANGUAGE_VERSIONS, &glslVersionsNum);
 	if (glslVersionsNum > 0)
@@ -71,6 +74,7 @@ void Engine::_logEngineOptions() const
 		for (GLint i = 0; i < glslVersionsNum; ++i)
 			log << std::endl << "      " << glGetStringi(GL_SHADING_LANGUAGE_VERSION, i);
 	}
+	*/
 
 	log << logEndl;
 }
