@@ -347,6 +347,18 @@ void Engine::setRenderMode(const Engine::RenderMode& mode)
 }
 
 
+void Engine::enableCameraRotation()
+{
+	_rotateCamera = true;
+}
+
+
+void Engine::disableCameraRotation()
+{
+	_rotateCamera = false;
+}
+
+
 bool Engine::validate()
 {
 	int result = 0;
@@ -438,8 +450,12 @@ void Engine::_viewFrame()
 	static const float h = _camera->getPosition().y;
 	const float psy = -getTimeDouble() / 29.0;
 	const float phi = getTimeDouble() / 31.0;
-//	_camera->setPosition({a*cos(phi), h, a*sin(phi)});
-//	_glInitModelViewMatrix();
+
+	if (_rotateCamera)
+	{
+		_camera->setPosition({a*cos(phi), h, a*sin(phi)});
+		_glInitModelViewMatrix();
+	}
 
 	LightPtr light = _scene->getLights().front();
 	light->setPosition({a*cos(psy), light->getPosition().y, a*sin(psy)});

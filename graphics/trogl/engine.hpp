@@ -58,6 +58,9 @@ class Engine
 		void setActiveFrame(const FramePtr& frame);
 		void setRenderMode(const RenderMode& mode);
 
+		void enableCameraRotation();
+		void disableCameraRotation();
+
 		void enableFPS();
 		void disableFPS();
 
@@ -115,6 +118,8 @@ class Engine
 		CameraPtr _camera;
 		Primitives _primitives;
 		FramePtr _frame;
+
+		bool _rotateCamera;
 };
 
 

@@ -112,6 +112,8 @@ void DiffuseShader::passTextures(const Textures& textures) const
 
 		++idx;
 	}
+
+	_externalAttributes.pass("texturesLen", int(idx));
 }
 
 
@@ -132,6 +134,7 @@ void DiffuseShader::_registerAttributes()
 	_externalAttributes.registerateArray("textures[].data", 5);
 	_externalAttributes.registerateArray("textures[].offset", 5);
 	_externalAttributes.registerateArray("textures[].scale", 5);
+	_externalAttributes.registerate("texturesLen");
 
 	_externalAttributes.registerate("meshPosition");
 

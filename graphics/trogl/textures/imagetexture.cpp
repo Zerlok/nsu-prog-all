@@ -31,7 +31,7 @@ void ImageTexture::generate()
 {
 	_create();
 
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, _image.width(), _image.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, _image.bits());
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, _image.width(), _image.height(), 0, GL_BGRA, GL_UNSIGNED_BYTE, _image.bits());
 	Texture::generate();
 
 	logDebug << getName() << " generated." << logEndl;

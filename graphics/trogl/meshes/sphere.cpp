@@ -27,21 +27,30 @@ Sphere::Sphere(const float& radius,
 
 	// Vertices.
 	{
-		polarPlusIdx = addVertex(0.0, radius, 0.0);
+		float x = 0.0;
+		float y = 1.0;
+		float z = 0.0;
+
+		polarPlusIdx = addVertex(x, y, z, mapU(x, y, z), mapV(x, y, z));
 		for (double psy = 0; psy < maxPsy; psy += psyStep)
 		{
-			const double cosPsy = std::cos(psy) * radius;
-			const double sinPsy = std::sin(psy) * radius;
+			const double cosPsy = std::cos(psy);
+			const double sinPsy = std::sin(psy);
 
 			for (double phi = phiStep; phi < maxPhi; phi += phiStep)
 			{
-				const double sinPhi = std::sin(phi);
-				addVertex(sinPhi * cosPsy,
-						  std::cos(phi) * radius,
-						  sinPhi * sinPsy);
+				x = std::sin(phi) * cosPsy;
+				y = std::cos(phi) * 1.0;
+				z = std::sin(phi) * sinPsy;
+
+				addVertex(x, y, z, mapU(x, y, z), mapV(x, y, z));
 			}
 		}
-		polarMinusIdx = addVertex(0.0, -radius, 0.0);
+
+		x = 0.0;
+		y = -1.0;
+		z = 0.0;
+		polarMinusIdx = addVertex(x, y, z, mapU(x, y, z), mapV(x, y, z));
 	}
 
 	// Faces.
@@ -89,9 +98,24 @@ Sphere::Sphere(const float& radius,
 		addPolygon(polarPlusIdx, 1, currOffset);
 		addPolygon(polarMinusIdx, polarMinusIdx - 1, rows);
 	}
+
+	setScale({radius, radius, radius});
+	applyScale();
 }
 
 
 Sphere::~Sphere()
 {
+}
+
+
+float Sphere::mapU(const float& x, const float& y, const float& z)
+{
+	return 0.5 + (std::atan2(z, x) / (2.0 * M_PI));
+}
+
+
+float Sphere::mapV(const float& x, const float& y, const float& z)
+{
+	return 0.5 - (std::asin(y) / M_PI);
 }

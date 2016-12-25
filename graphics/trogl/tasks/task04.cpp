@@ -72,21 +72,32 @@ Task04TexturesFiltering::Task04TexturesFiltering()
 Task04TexturesMixingRoad::Task04TexturesMixingRoad()
 	: Task("Task04 - Textures Mixing (Road)")
 {
-	camera->setPosition({0.0, 6.0, 20.0});
+	const float width = 16.0;
+	const float length = 32.0;
 
-	TexturePtr roadTexture = new ImageTexture("/home/zerlok/nsu_prog/graphics/trogl/data");
-	TexturePtr sidesTexture = new ImageTexture("/home/zerlok/nsu_prog/graphics/trogl/data");
-	TexturePtr crossingsTexture = new ImageTexture("/home/zerlok/nsu_prog/graphics/trogl/data");
+	camera->setPosition({0.0, 12.0, 22.0});
 
-	MaterialPtr roadMaterial = new DiffuseMaterial(Color::grey, 1.0, 0.2);
-	roadMaterial->setTextureMixing(1.0);
-	roadMaterial->addTexture(roadTexture);
-	roadMaterial->addTexture(sidesTexture);
+	TexturePtr crossingsTexture = new ImageTexture("/home/zerlok/nsu_prog/graphics/trogl/data/road_1.jpg");
+	crossingsTexture->setFiltering(Texture::Filtering::ANISOTROPIC);
+	crossingsTexture->setUVScale({1.0, 1.0/length});
+
+	TexturePtr sandsTexture = new ImageTexture("/home/zerlok/nsu_prog/graphics/trogl/data/road_2.jpg");
+	sandsTexture->setFiltering(Texture::Filtering::ANISOTROPIC);
+	sandsTexture->setUVScale({4.0/width, 4.0/length});
+
+	TexturePtr murbluesTexture = new ImageTexture("/home/zerlok/nsu_prog/graphics/trogl/data/road_3.jpg");
+	murbluesTexture->setFiltering(Texture::Filtering::ANISOTROPIC);
+	murbluesTexture->setUVScale({8.0/width, 8.0/length});
+
+	MaterialPtr roadMaterial = new DiffuseMaterial(Color::grey, 0.98, 0.8, 4.0);
+	roadMaterial->setTextureMixing(0.9);
 	roadMaterial->addTexture(crossingsTexture);
+	roadMaterial->addTexture(sandsTexture);
+	roadMaterial->addTexture(murbluesTexture);
 
 	MeshPtr road = new Plane();
-	road->setPosition({-3.0, 0.0, -1.0});
-	road->setScale({4.0, 1.0, 30.0});
+	road->setPosition({0.0, 0.0, -2.0});
+	road->setScale({width, 1.0, length});
 	road->setMaterial(roadMaterial);
 
 	scene->addMesh(road);
@@ -98,4 +109,13 @@ Task04EarthSphereUVMapping::Task04EarthSphereUVMapping()
 {
 	camera->setPosition({0.0, 6.0, 20.0});
 
+	TexturePtr tex = new ImageTexture("/home/zerlok/nsu_prog/graphics/trogl/data/earth.jpg");
+	MaterialPtr mat = new DiffuseMaterial(Color::blue, 1.0, 0.0, 50.0);
+	mat->addTexture(tex);
+	mat->setTextureMixing(1.0);
+
+	MeshPtr earth = new Sphere(4.0, 31);
+	earth->setMaterial(mat);
+
+	scene->addMesh(earth);
 }

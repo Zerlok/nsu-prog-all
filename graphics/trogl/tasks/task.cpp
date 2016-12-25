@@ -29,10 +29,16 @@ Task::~Task()
 ScenePtr& Task::getScene()
 {
 	if (scene->getMeshes().empty())
+	{
 		scene->addMesh(new Sphere());
+		logInfo << "Sphere added to empty scene." << logEndl;
+	}
 
 	if (scene->getLights().empty())
+	{
 		scene->addLight(new Light(Light::createSun()));
+		logInfo << "Light added to empty scene." << logEndl;
+	}
 
 	return scene;
 }
