@@ -26,7 +26,7 @@ Task05NormalMappingEarth::Task05NormalMappingEarth()
 	normalTex->setFiltering(Texture::Filtering::BILINEAR);
 	mat->addTexture(normalTex);
 
-	MeshPtr earth = new Sphere(4.0, 31);
+	MeshPtr earth = new Sphere(4.0, 13, 17);
 	earth->setMaterial(mat);
 
 	scene->addMesh(earth);

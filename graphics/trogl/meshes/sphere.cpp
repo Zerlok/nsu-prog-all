@@ -32,12 +32,13 @@ Sphere::Sphere(const float& radius,
 		float z = 0.0;
 
 		polarPlusIdx = addVertex(x, y, z, mapU(x, y, z), mapV(x, y, z));
+		double psy = 0.0;
 		for (double psy = 0; psy < maxPsy; psy += psyStep)
 		{
 			const double cosPsy = std::cos(psy);
 			const double sinPsy = std::sin(psy);
 
-			for (double phi = phiStep; phi < maxPhi; phi += phiStep)
+			for (double phi = phiStep; phi < maxPhi - phiStep; phi += phiStep)
 			{
 				x = std::sin(phi) * cosPsy;
 				y = std::cos(phi) * 1.0;
@@ -60,7 +61,7 @@ Sphere::Sphere(const float& radius,
 		size_t nextOffset = currOffset + rows;
 		for (size_t segNum = 0; segNum < segments-1; ++segNum)
 		{
-			for (size_t rowNum = 0; rowNum < rows-1; ++rowNum)
+			for (size_t rowNum = 1; rowNum < rows-1; ++rowNum)
 			{
 				addPolygon(nextOffset + rowNum,
 						nextOffset + rowNum + 1,
@@ -74,7 +75,7 @@ Sphere::Sphere(const float& radius,
 			nextOffset = currOffset + rows;
 		}
 
-		for (size_t rowNum = 0; rowNum < rows-1; ++rowNum)
+		for (size_t rowNum = 1; rowNum < rows-1; ++rowNum)
 		{
 			addPolygon(rowNum + 1,
 					rowNum + 2,

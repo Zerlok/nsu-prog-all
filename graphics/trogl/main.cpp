@@ -26,8 +26,8 @@ int main(int argc, char *argv[])
 	// Show task scene in engine.
 	Engine& engine = Engine::instance();
 	engine.enableFPS();
-//	engine.enableCameraRotation();
-	engine.setRenderMode(Engine::RenderMode::POLYGONS);
+	engine.enableCameraRotation();
+	engine.setRenderMode(Engine::RenderMode::EDGES);
 	engine.setActiveScene(task->getScene());
 	engine.showActiveScene();
 

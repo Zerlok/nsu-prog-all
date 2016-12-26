@@ -40,7 +40,8 @@ HEADERS += \
     core/gui.hpp \
     core/animation.hpp \
     engine.hpp \
-    tasks/task05.hpp
+    tasks/task05.hpp \
+    tasks/task06.hpp
 
 # Custom textures.
 HEADERS += \
@@ -101,7 +102,8 @@ SOURCES += \
     core/animation.cpp \
     engine.cpp \
     main.cpp \
-    tasks/task05.cpp
+    tasks/task05.cpp \
+    tasks/task06.cpp
 
 # Custom textures.
 SOURCES += \
