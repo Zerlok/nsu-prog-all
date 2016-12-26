@@ -54,7 +54,7 @@ Task04TexturesFiltering::Task04TexturesFiltering()
 				break;
 		}
 
-		mat = new DiffuseMaterial(Color::white, 1.0, 0.2, 2.0);
+		mat = new DiffuseMaterial(Color::grey, 1.0, 0.2, 2.0);
 		mat->setTextureMixing(1.0);
 		mat->addTexture(tex);
 
@@ -89,8 +89,8 @@ Task04TexturesMixingRoad::Task04TexturesMixingRoad()
 	murbluesTexture->setFiltering(Texture::Filtering::ANISOTROPIC);
 	murbluesTexture->setUVScale({8.0/width, 8.0/length});
 
-	MaterialPtr roadMaterial = new DiffuseMaterial(Color::grey, 0.98, 0.8, 4.0);
-	roadMaterial->setTextureMixing(0.9);
+	MaterialPtr roadMaterial = new DiffuseMaterial(Color::grey, 0.98, 0.1, 4.0);
+	roadMaterial->setTextureMixing(1.0);
 	roadMaterial->addTexture(crossingsTexture);
 	roadMaterial->addTexture(sandsTexture);
 	roadMaterial->addTexture(murbluesTexture);
