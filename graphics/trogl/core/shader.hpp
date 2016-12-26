@@ -56,7 +56,7 @@ class Attributes
 				return false;
 
 			const Attrs& locations = (*it).second;
-			if (locations.size() < idx)
+			if (locations.size() <= idx)
 				return false;
 
 			_pass(locations[idx], value);

@@ -36,9 +36,13 @@ class Texture : public Component
 
 		const glm::vec2& getUVOffset() const;
 		const glm::vec2& getUVScale() const;
+		const float& getColorMix() const;
+		const float& getNormal() const;
 
 		void setUVOffset(const glm::vec2& offset);
 		void setUVScale(const glm::vec2& scale);
+		void setColorMix(const float& color);
+		void setNormal(const float& normal);
 
 		void setFiltering(const Filtering& type);
 		void setWrapping(const Wrapping& type);
@@ -53,9 +57,12 @@ class Texture : public Component
 		// Fields.
 		int _id;
 		GLuint _glTexture;
+
 		glm::vec2 _uvOffset;
 		glm::vec2 _uvScale;
+		float _color;
 		float _normal;
+
 		Filtering _filtering;
 		Wrapping _wrapping;
 		bool _useMipmaps;

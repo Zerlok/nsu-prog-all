@@ -25,6 +25,8 @@ struct TextureStruct
     sampler2D data;
 	vec2 offset;
 	vec2 scale;
+	float color;
+	float normal;
 };
 const int TEXLIM = 5;
 
@@ -96,21 +98,27 @@ vec4 mixLighting(
 }
 
 
-vec4 mixTextures(
+void mixTextures(
         in TextureStruct textures[TEXLIM],
 		in int texturesLen,
-		in vec2 uv)
+		in vec2 uv,
+		in vec3 n,
+		out vec4 color,
+		out vec3 normal)
 {
-    vec4 color = vec4(1.0, 1.0, 1.0, 1.0);
+    color = vec4(1.0, 1.0, 1.0, 1.0);
+	normal = vec3(n.x, n.y, n.z);
+
 	for (int i = 0; i < TEXLIM; ++i)
 	{
 	    if (i == texturesLen)
 		    break;
 
-        color *= texture2D(textures[i].data, uv / textures[i].scale + textures[i].offset);
-    }
+        vec4 texell = texture2D(textures[i].data, uv / textures[i].scale + textures[i].offset);
+		color = mix(vec4(1.0, 1.0, 1.0, 1.0), texell, textures[i].color);
+		normal = vec3(color.r, 1.0, 1.0);
+	}
 
-    return color;
 }
 
 
@@ -134,27 +142,32 @@ void main()
 	vec3 lampDir = -normalize(gl_ModelViewMatrix * lamp.direction).xyz;
 	float lampInt;
 	float specularInt;
-	vec4 color;
+
+    vec4 color;
+	vec4 textureColors;
+	vec3 normal;
+
+    mixTextures(textures, texturesLen, vertexUV, vertexNormal, textureColors, normal);
 
 	switch (lamp.type)
 	{
 	    case 1: // Point lamp light drawing.
 			lampDir = normalize(lampPos.xyz - vertexPosition.xyz);
-			lampInt = lampIntensity(lamp.power, lampPos, vertexPosition, vertexNormal);
-			specularInt = specularIntensity(cameraPos, vertexPosition, vertexNormal, lampDir, material.hardness);
+			lampInt = lampIntensity(lamp.power, lampPos, vertexPosition, normal);
+			specularInt = specularIntensity(cameraPos, vertexPosition, normal, lampDir, material.hardness);
 			color = mixLighting(material, lamp.color, lampInt, specularInt);
 			break;
 
         case 2: // Directional lamp light drawing.
-			lampInt = sunIntensity(lamp.power, lampDir, vertexNormal);
-			specularInt = specularIntensity(cameraPos, vertexPosition, vertexNormal, lampDir, material.hardness);
+		    lampInt = sunIntensity(lamp.power, lampDir, normal);
+			specularInt = specularIntensity(cameraPos, vertexPosition, normal, lampDir, material.hardness);
 			color = mixLighting(material, lamp.color, lampInt, specularInt);
 			break;
 
         case 3: // Spot lamp light drawing.
 			vec3 dir = normalize(lampPos.xyz - vertexPosition.xyz);
-			lampInt = spotRatio(dir, lampDir, lamp.ia, lamp.oa) * lampIntensity(lamp.power, lampPos, vertexPosition, vertexNormal);
-			specularInt = specularIntensity(cameraPos, vertexPosition, vertexNormal, dir, material.hardness);
+			lampInt = spotRatio(dir, lampDir, lamp.ia, lamp.oa) * lampIntensity(lamp.power, lampPos, vertexPosition, normal);
+			specularInt = specularIntensity(cameraPos, vertexPosition, normal, dir, material.hardness);
 			color = mixLighting(material, lamp.color, lampInt, specularInt);
 			break;
 
@@ -171,6 +184,5 @@ void main()
 			break;
 	}
 
-    vec4 textureColors = mixTextures(textures, texturesLen, vertexUV) * lamp.color * (lampInt + specularInt);
-	gl_FragColor = mix(clamp(color, 0.0, 1.0), textureColors, texturesMixing);
+    gl_FragColor = mix(clamp(color, 0.0, 1.0), textureColors * lamp.color * (lampInt + specularInt), texturesMixing);
 }

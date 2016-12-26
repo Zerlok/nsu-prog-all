@@ -3,6 +3,7 @@
 #include <logger.hpp>
 
 #include "tasks/task04.hpp"
+#include "tasks/task05.hpp"
 
 #include "engine.hpp"
 
@@ -16,9 +17,11 @@ int main(int argc, char *argv[])
 	TaskPtr task;
 
 	// Choose task.
-	task = new Task04TexturesFiltering();
+//	task = new Task04TexturesFiltering();
 //	task = new Task04TexturesMixingRoad();
 //	task = new Task04EarthSphereUVMapping();
+
+	task = new Task05NormalMappingEarth();
 
 	// Show task scene in engine.
 	Engine& engine = Engine::instance();

@@ -16,6 +16,8 @@ Texture::Texture(const std::string& name)
 	  _glTexture(0),
 	  _uvOffset(0.0f, 0.0f),
 	  _uvScale(1.0f, 1.0f),
+	  _color(1.0),
+	  _normal(0.0),
 	  _filtering(Filtering::NONE),
 	  _wrapping(Wrapping::REPEATING),
 	  _useMipmaps(false)
@@ -56,6 +58,18 @@ const glm::vec2& Texture::getUVScale() const
 }
 
 
+const float& Texture::getColorMix() const
+{
+	return _color;
+}
+
+
+const float& Texture::getNormal() const
+{
+	return _normal;
+}
+
+
 void Texture::setUVOffset(const glm::vec2& offset)
 {
 	_uvOffset = offset;
@@ -65,6 +79,18 @@ void Texture::setUVOffset(const glm::vec2& offset)
 void Texture::setUVScale(const glm::vec2& scale)
 {
 	_uvScale = scale;
+}
+
+
+void Texture::setColorMix(const float& color)
+{
+	_color = color;
+}
+
+
+void Texture::setNormal(const float& normal)
+{
+	_normal = normal;
 }
 
 

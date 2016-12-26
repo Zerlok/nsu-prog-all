@@ -109,6 +109,8 @@ void DiffuseShader::passTextures(const Textures& textures) const
 		_externalAttributes.passEl("textures[].data", idx, texture->getSamplerId());
 		_externalAttributes.passEl("textures[].offset", idx, texture->getUVOffset());
 		_externalAttributes.passEl("textures[].scale", idx, texture->getUVScale());
+		_externalAttributes.passEl("textures[].color", idx, texture->getColorMix());
+		_externalAttributes.passEl("textures[].normal", idx, texture->getNormal());
 
 		++idx;
 	}
@@ -131,9 +133,12 @@ void DiffuseShader::_registerAttributes()
 	_externalAttributes.registerate("lamp.ia");
 	_externalAttributes.registerate("lamp.oa");
 
-	_externalAttributes.registerateArray("textures[].data", 5);
-	_externalAttributes.registerateArray("textures[].offset", 5);
-	_externalAttributes.registerateArray("textures[].scale", 5);
+	static const size_t maxTexturesLen = 5; // TODO: get this const from shader source code.
+	_externalAttributes.registerateArray("textures[].data", maxTexturesLen);
+	_externalAttributes.registerateArray("textures[].offset", maxTexturesLen);
+	_externalAttributes.registerateArray("textures[].scale", maxTexturesLen);
+	_externalAttributes.registerateArray("textures[].color", maxTexturesLen);
+	_externalAttributes.registerateArray("textures[].normal", maxTexturesLen);
 	_externalAttributes.registerate("texturesLen");
 
 	_externalAttributes.registerate("meshPosition");
