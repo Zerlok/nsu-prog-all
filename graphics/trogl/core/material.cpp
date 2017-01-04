@@ -142,8 +142,8 @@ void Material::use()
 {
 	_shader->bind();
 
-	_shader->passAttribute("material.color", _color);
-	_shader->passAttribute("texturesMixing", _texturesMixing);
+	_shader->passUniform("material.color", _color);
+	_shader->passUniform("texturesMixing", _texturesMixing);
 
 	for (TexturePtr& texture : _textures)
 		texture->bind();

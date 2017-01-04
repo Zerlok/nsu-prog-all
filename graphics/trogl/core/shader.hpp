@@ -13,23 +13,23 @@
 #include "texture.hpp"
 
 
-class Attributes
+class Uniforms
 {
 	public:
 		// Inner classes.
-		using Attr = GLuint;
-		using Attrs = std::vector<Attr>;
-		using AttrsMap = std::unordered_map<std::string, Attrs>;
+		using UniLoc = GLuint;
+		using UniLocs = std::vector<UniLoc>;
+		using UniLocsMap = std::unordered_map<std::string, UniLocs>;
 
 		// Constructors / Destructor.
-		Attributes();
-		Attributes(const Attributes& attrs);
-		Attributes(Attributes&& attrs);
-		~Attributes();
+		Uniforms();
+		Uniforms(const Uniforms& unis);
+		Uniforms(Uniforms&& unis);
+		~Uniforms();
 
 		// Operators.
-		Attributes& operator=(const Attributes& attrs);
-		Attributes& operator=(Attributes&& attrs);
+		Uniforms& operator=(const Uniforms& unis);
+		Uniforms& operator=(Uniforms&& unis);
 
 		// Methods.
 		void clear();
@@ -40,8 +40,8 @@ class Attributes
 		template<class T>
 		bool pass(const std::string& name, const T& value) const
 		{
-			AttrsMap::const_iterator it = _attrsMap.find(name);
-			if (it == _attrsMap.cend())
+			UniLocsMap::const_iterator it = _uniLocationsMap.find(name);
+			if (it == _uniLocationsMap.cend())
 				return false;
 
 			_pass((*it).second.front(), value);
@@ -51,11 +51,11 @@ class Attributes
 		template<class T>
 		bool passEl(const std::string& name, const size_t& idx, const T& value) const
 		{
-			AttrsMap::const_iterator it = _attrsMap.find(name);
-			if (it == _attrsMap.cend())
+			UniLocsMap::const_iterator it = _uniLocationsMap.find(name);
+			if (it == _uniLocationsMap.cend())
 				return false;
 
-			const Attrs& locations = (*it).second;
+			const UniLocs& locations = (*it).second;
 			if (locations.size() <= idx)
 				return false;
 
@@ -66,11 +66,11 @@ class Attributes
 		template<class T>
 		bool passArray(const std::string& name, const std::vector<T> values) const
 		{
-			AttrsMap::const_iterator it = _attrsMap.find(name);
-			if (it == _attrsMap.cend())
+			UniLocsMap::const_iterator it = _uniLocationsMap.find(name);
+			if (it == _uniLocationsMap.cend())
 				return false;
 
-			const Attrs& locations = (*it).second;
+			const UniLocs& locations = (*it).second;
 			for (size_t i = 0; i < std::min(locations.size(), values.size()); ++i)
 				_pass(locations[i], values[i]);
 
@@ -85,7 +85,7 @@ class Attributes
 
 	private:
 		// Static fields.
-		static const Attr NOT_FOUND;
+		static const UniLoc NOT_FOUND;
 
 		// Static methods.
 		static void _pass(const GLuint& loc, const int& value);
@@ -94,10 +94,13 @@ class Attributes
 		static void _pass(const GLuint& loc, const glm::vec2& value);
 		static void _pass(const GLuint& loc, const glm::vec3& value);
 		static void _pass(const GLuint& loc, const glm::vec4& value);
+		static void _pass(const GLuint& loc, const glm::mat2x2& value);
+		static void _pass(const GLuint& loc, const glm::mat3x3& value);
+		static void _pass(const GLuint& loc, const glm::mat4x4& value);
 		static void _pass(const GLuint& loc, const Color& value);
 
 		// Fields.
-		AttrsMap _attrsMap;
+		UniLocsMap _uniLocationsMap;
 		GLuint _glShaderProg;
 };
 
@@ -146,8 +149,6 @@ class Shader : public Component
 				bool valid;
 		};
 
-		using Attr = Attributes::Attr;
-
 		// Static fields.
 		static const std::string SRC_DIR;
 		static const std::string DEFAULT_VS_FILE;
@@ -176,10 +177,10 @@ class Shader : public Component
 		void unbind();
 
 		template<class T>
-		bool passAttribute(const std::string& name,
-						   const T& value) const
+		bool passUniform(const std::string& name,
+						 const T& value) const
 		{
-			return _externalAttributes.pass(name, value);
+			return _uniforms.pass(name, value);
 		}
 
 		// Virtual methods.
@@ -189,27 +190,28 @@ class Shader : public Component
 	protected:
 		// Constructor.
 		Shader(const std::string& name);
+
+		// Methods.
 		void _loadSubprograms(const std::vector<std::string>& filenames);
+
+		// Virtual methods.
+		virtual void _registerUniforms() = 0;
+		virtual void _passInternalUniforms() = 0;
 
 	private:
 		// Fields.
 		Status _status;
 
+		// Methods.
+		bool _linkShaderProgram();
+		void _registerGLUniforms();
+
 	protected:
 		// Fields.
 		GLuint _glShader;	// Total shader program.
 		std::vector<Subprogram> _subprograms;
+		Uniforms _uniforms;
 
-		Attributes _internalAttributes;
-		Attributes _externalAttributes;
-
-		// Virtual methods.
-		virtual void _registerAttributes() = 0;
-		virtual void _passInternalAttributes() = 0;
-
-	private:
-		// Methods.
-		bool _linkShaderProgram();
 };
 
 using ShaderPtr = SharedPointer<Shader, Component>;

@@ -198,33 +198,28 @@ void Engine::_glEnableOptions()
 }
 
 
-void Engine::_glInitProjectionMatrix()
+void Engine::_glUpdateMatrices()
 {
-	glm::mat4x4 mat = glm::perspective(_camera->getFOV(),
-									   _camera->getWHRatio(),
-									   _camera->getNearDistance(),
-									   _camera->getFarDistance());
-	glMatrixMode(GL_PROJECTION);
-	glLoadMatrixf(&mat[0][0]);
-
-	/* Old way
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	gluPerspective(_camera->getFOV(),
-				   _camera->getWHRatio(),
-				   _camera->getNearDistance(),
-				   _camera->getFarDistance());
-	*/
+	_updateMV();
+	_updateMVP();
 }
 
 
-void Engine::_glInitModelViewMatrix()
+void Engine::_updateMV()
 {
-	glm::mat4x4 mat = glm::lookAt(_camera->getPosition(),
-								  _camera->getLookingAtPosition(),
-								  _camera->getHeadDirection());
-	glMatrixMode(GL_MODELVIEW);
-	glLoadMatrixf(&mat[0][0]);
+	_glMV = glm::lookAt(_camera->getPosition(),
+						_camera->getLookingAtPosition(),
+						_camera->getHeadDirection());
+}
+
+
+void Engine::_updateMVP()
+{
+	_glMVP = glm::perspective(_camera->getFOV(),
+							  _camera->getWHRatio(),
+							  _camera->getNearDistance(),
+							  _camera->getFarDistance());
+	_glMVP *= _glMV;
 }
 
 
@@ -391,8 +386,7 @@ void Engine::showActiveScene()
 	_logSceneStatistics();
 
 	_glEnableOptions();
-	_glInitProjectionMatrix();
-	_glInitModelViewMatrix();
+	_glUpdateMatrices();
 
 	glutDisplayFunc(_displayFunc);
 	glutReshapeFunc(_reshapeFunc);
@@ -452,13 +446,14 @@ void Engine::_viewFrame()
 	// Camera flying.
 	static const float a = std::sqrt(std::pow(_camera->getPosition().x, 2) + std::pow(_camera->getPosition().z, 2));
 	static const float h = _camera->getPosition().y;
-	const float psy = -getTimeDouble() / 29.0;
-	const float phi = getTimeDouble() / 31.0;
+	const float psy = -getTimeDouble() / 11.0;
+	const float phi = getTimeDouble() / 51.0;
+	const float hi = 0.0; //psy / 2.0;
 
 	if (_rotateCamera)
 	{
-		_camera->setPosition({a*cos(phi), h, a*sin(phi)});
-		_glInitModelViewMatrix();
+		_camera->setPosition({a*cos(phi), h * sin(hi) + 2*h, a*sin(phi)});
+		_glUpdateMatrices();
 	}
 
 	LightPtr light = _scene->getLights().front();
@@ -467,7 +462,7 @@ void Engine::_viewFrame()
 
 	for (Primitive& obj : _primitives)
 		for (const LightPtr& light : _scene->getLights())
-			obj.draw(light, _camera);
+			obj.draw(light, _camera, _glMV, _glMVP);
 
 	_viewGUI();
 	_frame->flush();

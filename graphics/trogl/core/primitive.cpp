@@ -91,12 +91,16 @@ void Primitive::initGLGeometry(const MeshPtr& mesh)
 
 
 void Primitive::draw(const LightPtr& light,
-					 const CameraPtr& camera)
+					 const CameraPtr& camera,
+					 const glm::mat4x4& mv,
+					 const glm::mat4x4& mvp)
 {
 	_material->use();
 
 	const ShaderPtr& sh = _material->getShader();
-	sh->passAttribute("meshPosition", _position);
+	sh->passUniform("MV", mv);
+	sh->passUniform("MVP", mvp);
+	sh->passUniform("meshPosition", _position);
 	sh->passComponent(light);
 	sh->passComponent(camera);
 

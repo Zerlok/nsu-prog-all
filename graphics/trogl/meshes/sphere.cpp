@@ -22,8 +22,8 @@ Sphere::Sphere(const float& radius,
 	const double psyStep = maxPsy / (segments);
 	const double phiStep = maxPhi / (rows+1);
 
-	size_t polarPlusIdx;
-	size_t polarMinusIdx;
+	size_t northIdx;
+	size_t southIdx;
 
 	// Vertices.
 	{
@@ -31,18 +31,17 @@ Sphere::Sphere(const float& radius,
 		float y = 1.0;
 		float z = 0.0;
 
-		polarPlusIdx = addVertex(x, y, z, mapU(x, y, z), mapV(x, y, z));
-		double psy = 0.0;
-		for (double psy = 0; psy < maxPsy; psy += psyStep)
+		northIdx = addVertex(x, y, z, mapU(x, y, z), mapV(x, y, z));
+		for (size_t s = 0; s < segments; ++s)
 		{
-			const double cosPsy = std::cos(psy);
-			const double sinPsy = std::sin(psy);
+			const double cosPsy = std::cos(psyStep * s);
+			const double sinPsy = std::sin(psyStep * s);
 
-			for (double phi = phiStep; phi < maxPhi - phiStep; phi += phiStep)
+			for (size_t r = 1; r <= rows; ++r)
 			{
-				x = std::sin(phi) * cosPsy;
-				y = std::cos(phi) * 1.0;
-				z = std::sin(phi) * sinPsy;
+				x = std::sin(phiStep * r) * cosPsy;
+				y = std::cos(phiStep * r);
+				z = std::sin(phiStep * r) * sinPsy;
 
 				addVertex(x, y, z, mapU(x, y, z), mapV(x, y, z));
 			}
@@ -51,7 +50,7 @@ Sphere::Sphere(const float& radius,
 		x = 0.0;
 		y = -1.0;
 		z = 0.0;
-		polarMinusIdx = addVertex(x, y, z, mapU(x, y, z), mapV(x, y, z));
+		southIdx = addVertex(x, y, z, mapU(x, y, z), mapV(x, y, z));
 	}
 
 	// Faces.
@@ -90,14 +89,14 @@ Sphere::Sphere(const float& radius,
 		nextOffset = currOffset + rows;
 		for (size_t segNum = 0; segNum < segments-1; ++segNum)
 		{
-			addPolygon(polarPlusIdx, nextOffset, currOffset);
+			addPolygon(northIdx, nextOffset, currOffset);
 			currOffset = nextOffset;
 			nextOffset = currOffset + rows;
-			addPolygon(polarMinusIdx, currOffset-1, nextOffset-1);
+			addPolygon(southIdx, currOffset-1, nextOffset-1);
 		}
 
-		addPolygon(polarPlusIdx, 1, currOffset);
-		addPolygon(polarMinusIdx, polarMinusIdx - 1, rows);
+		addPolygon(northIdx, 1, currOffset);
+		addPolygon(southIdx, southIdx - 1, rows);
 	}
 
 	setScale({radius, radius, radius});

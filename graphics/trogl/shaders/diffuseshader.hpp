@@ -29,8 +29,8 @@ class DiffuseShader : public Shader
 		void passTextures(const Textures& textures) const override;
 
 	protected:
-		void _registerAttributes() override;
-		void _passInternalAttributes() override;
+		void _registerUniforms() override;
+		void _passInternalUniforms() override;
 
 	private:
 		// Static fields.

@@ -9,6 +9,9 @@
 Task05NormalMappingEarth::Task05NormalMappingEarth()
 	: Task("Task05 - Normal Mapping (Earth)")
 {
+	engine.enableCameraRotation();
+//	engine.setRenderMode(Engine::RenderMode::EDGES);
+
 	camera->setPosition({0.0, 3.0, 10.0});
 
 	MaterialPtr mat = new DiffuseMaterial(Color::blue, 1.0, 0.0, 50.0);
@@ -26,7 +29,7 @@ Task05NormalMappingEarth::Task05NormalMappingEarth()
 	normalTex->setFiltering(Texture::Filtering::BILINEAR);
 	mat->addTexture(normalTex);
 
-	MeshPtr earth = new Sphere(4.0, 13, 17);
+	MeshPtr earth = new Sphere(4.0, 31, 62);
 	earth->setMaterial(mat);
 
 	scene->addMesh(earth);

@@ -9,7 +9,8 @@ logger_t moduleLogger = loggerModule(loggerLInfo, loggerDFull);
 
 
 Task::Task(const std::string& name)
-	: meshes({}),
+	: engine(Engine::instance()),
+	  meshes({}),
 	  lights({}),
 	  camera(new Camera(1000, 800)),
 	  scene(new Scene(name, camera))
@@ -41,4 +42,12 @@ ScenePtr& Task::getScene()
 	}
 
 	return scene;
+}
+
+
+void Task::run()
+{
+	engine.enableFPS();
+	engine.setActiveScene(getScene());
+	engine.showActiveScene();
 }

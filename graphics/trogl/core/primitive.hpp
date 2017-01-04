@@ -24,7 +24,7 @@ class Primitive
 		void compileGLShaders();
 		void initGLGeometry(const MeshPtr& mesh);
 
-		void draw(const LightPtr& light, const CameraPtr& camera);
+		void draw(const LightPtr& light, const CameraPtr& camera, const glm::mat4x4& mv, const glm::mat4x4& mvp);
 
 	private:
 		// Static fields.

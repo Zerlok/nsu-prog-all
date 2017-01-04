@@ -1,20 +1,23 @@
-#version 130
+#version 330
 
 
-attribute vec4 position;
-attribute vec4 normal;
-attribute vec2 uvMap;
+in vec4 position;
+in vec4 normal;
+in vec2 uvMap;
 
-varying vec4 vertexPosition;
-varying vec3 vertexNormal;
-varying vec2 vertexUV;
+uniform mat4 MV;
+uniform mat4 MVP;
+
+out vec4 vertexPosition;
+out vec3 vertexNormal;
+out vec2 vertexUV;
 
 
 void main()
 {
-	vertexPosition = gl_ModelViewMatrix * position;
-	vertexNormal = (gl_ModelViewMatrix * normal).xyz;
+    vertexPosition = MV * position;
+	vertexNormal = (MV * normal).xyz;
 	vertexUV = uvMap;
 
-	gl_Position = gl_ModelViewProjectionMatrix * position;
+    gl_Position = MVP * position;
 }

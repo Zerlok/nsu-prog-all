@@ -9,6 +9,8 @@
 #include "core/camera.hpp"
 #include "core/scene.hpp"
 
+#include "engine.hpp"
+
 
 class Task
 {
@@ -17,8 +19,10 @@ class Task
 		virtual ~Task();
 
 		ScenePtr& getScene();
+		void run();
 
 	protected:
+		Engine& engine;
 		Meshes meshes;
 		Lights lights;
 		CameraPtr camera;

@@ -19,13 +19,13 @@ ScrewShader::~ScrewShader()
 }
 
 
-void ScrewShader::_registerAttributes()
+void ScrewShader::_registerUniforms()
 {
 	_attrAlpha = glGetUniformLocation(_glShader, "alpha");
 }
 
 
-void ScrewShader::_passInternalAttributes()
+void ScrewShader::_passInternalUniforms()
 {
 	glUniform1f(_attrAlpha, std::cos(getTimeDouble() / 10.0) * 1.21);
 }

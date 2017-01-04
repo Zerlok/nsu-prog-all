@@ -69,7 +69,7 @@ void DiffuseMaterial::use()
 {
 	Material::use();
 
-	_shader->passAttribute("material.diffuse", _diffuse);
-	_shader->passAttribute("material.specular", _specular);
-	_shader->passAttribute("material.hardness", _hardness);
+	_shader->passUniform("material.diffuse", _diffuse);
+	_shader->passUniform("material.specular", _specular);
+	_shader->passUniform("material.hardness", _hardness);
 }

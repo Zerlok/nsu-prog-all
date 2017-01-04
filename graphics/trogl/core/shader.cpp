@@ -7,7 +7,7 @@
 #include "common/utils.hpp"
 
 
-logger_t moduleLogger = loggerModule(loggerLInfo, loggerDFull);
+logger_t moduleLogger = loggerModule(loggerLDebug, loggerDFull);
 
 
 const std::string Shader::SRC_DIR = path::join(path::dirname(path::dirname(__FILE__)), "shaders");
@@ -16,14 +16,24 @@ const std::string Shader::DEFAULT_GS_FILE = path::join(Shader::SRC_DIR, "default
 const std::string Shader::DEFAULT_FS_FILE = path::join(Shader::SRC_DIR, "default.fs");
 
 
+Shader::Shader(const std::string& name)
+	: Component(Component::Type::SHADER, name),
+	  _status(Status::NOT_COMPILED),
+	  _glShader(0),
+	  _subprograms({}),
+	  _uniforms()
+{
+	logDebug << "Shader " << getName() << " created (inherited)." << logEndl;
+}
+
+
 Shader::Shader(const std::string& name,
 			   const std::vector<std::string>& filenames)
 	: Component(Component::Type::SHADER, name),
 	  _status(Status::NOT_COMPILED),
 	  _glShader(0),
 	  _subprograms({}),
-	  _internalAttributes(),
-	  _externalAttributes()
+	  _uniforms()
 {
 	_loadSubprograms(filenames);
 	logDebug << "Shader " << getName()
@@ -37,11 +47,10 @@ Shader::Shader(const Shader& sh)
 	  _status(Status::NOT_COMPILED),
 	  _glShader(0),
 	  _subprograms(sh._subprograms),
-	  _internalAttributes(),
-	  _externalAttributes()
+	  _uniforms()
 {
 	logDebug << "Shader " << getName()
-			 << " copied from" << sh.getName()
+			 << " copied from " << sh.getName()
 			 << logEndl;
 }
 
@@ -51,13 +60,10 @@ Shader::Shader(Shader&& sh)
 	  _status(std::move(sh._status)),
 	  _glShader(std::move(sh._glShader)),
 	  _subprograms(std::move(sh._subprograms)),
-	  _internalAttributes(std::move(sh._internalAttributes)),
-	  _externalAttributes(std::move(sh._externalAttributes))
+	  _uniforms(std::move(sh._uniforms))
 {
 	sh._status = Status::NOT_COMPILED;
 	sh._glShader = 0;
-	sh._internalAttributes.clear();
-	sh._externalAttributes.clear();
 
 	logDebug << "Shader " << getName() << " moved." << logEndl;
 }
@@ -68,7 +74,8 @@ Shader::~Shader()
 	for (Subprogram& prog : _subprograms)
 		prog.unlink(_glShader);
 
-	glDeleteProgram(_glShader);
+	if (_glShader != 0)
+		glDeleteProgram(_glShader);
 
 	logDebug << getName() << " removed." << logEndl;
 }
@@ -78,10 +85,9 @@ Shader& Shader::operator=(const Shader& sh)
 {
 	Component::operator=(sh);
 	_status = Status::NOT_COMPILED;
-	_subprograms = sh._subprograms;
 	_glShader = 0;
-	_internalAttributes.clear();
-	_externalAttributes.clear();
+	_subprograms = sh._subprograms;
+	_uniforms.clear();
 
 	logDebug << "Shader " << getName() << " copied from " << sh.getName() << logEndl;
 	return (*this);
@@ -92,13 +98,12 @@ Shader& Shader::operator=(Shader&& sh)
 {
 	Component::operator=(sh);
 	_status = std::move(sh._status);
-	_subprograms = std::move(sh._subprograms);
 	_glShader = std::move(sh._glShader);
+	_subprograms = std::move(sh._subprograms);
+	_uniforms = std::move(sh._uniforms);
 
 	sh._status = Status::NOT_COMPILED;
 	sh._glShader = 0;
-	sh._internalAttributes.clear();
-	sh._externalAttributes.clear();
 
 	logDebug << "Shader " << getName() << " moved." << logEndl;
 	return (*this);
@@ -177,9 +182,9 @@ void Shader::compile()
 	if (!isCompiledSuccessfully())
 		return;
 
-	_internalAttributes.setShaderProgram(_glShader);
-	_externalAttributes.setShaderProgram(_glShader);
-	_registerAttributes();
+	_uniforms.setShaderProgram(_glShader);
+	_registerGLUniforms();
+	_registerUniforms();
 
 	_status = Status::NOT_BINDED;
 }
@@ -190,7 +195,7 @@ void Shader::bind()
 	glUseProgram(_glShader);
 	_status = Status::BINDED;
 
-	_passInternalAttributes();
+	_passInternalUniforms();
 }
 
 
@@ -198,18 +203,6 @@ void Shader::unbind()
 {
 	glUseProgram(0);
 	_status = Status::NOT_BINDED;
-}
-
-
-Shader::Shader(const std::string& name)
-	: Component(Component::Type::SHADER, name),
-	  _status(Status::NOT_COMPILED),
-	  _glShader(),
-	  _subprograms({}),
-	  _internalAttributes(),
-	  _externalAttributes()
-{
-	logDebug << "Shader " << getName() << " created." << logEndl;
 }
 
 
@@ -239,7 +232,8 @@ bool Shader::_linkShaderProgram()
 	if (!success)
 	{
 		glGetProgramInfoLog(_glShader, MAX_INFO_LOG_SIZE, NULL, infoLog);
-		logError << "Error in shader program linkage: " << infoLog << logEndl;
+		logError << "Error in shader program linkage:" << std::endl
+				 << infoLog << logEndl;
 		return false;
 	}
 
@@ -250,12 +244,20 @@ bool Shader::_linkShaderProgram()
 	if (!success)
 	{
 		glGetProgramInfoLog(_glShader, MAX_INFO_LOG_SIZE, NULL, infoLog);
-		logError << "Error in shader program validation: " << infoLog << logEndl;
+		logError << "Error in shader program validation:"<< std::endl
+				 << infoLog << logEndl;
 		return false;
 	}
 
 	logDebug << "Shader program is valid. Shaders compilation finished." << logEndl;
 	return true;
+}
+
+
+void Shader::_registerGLUniforms()
+{
+	_uniforms.registerate("MV");
+	_uniforms.registerate("MVP");
 }
 
 
@@ -276,181 +278,6 @@ std::ostream& operator<<(std::ostream& out, const Shader::Status& st)
 	}
 
 	return out;
-}
-
-
-// -------------------------------- Shader Attributes -------------------------------- //
-
-
-const Attributes::Attr Attributes::NOT_FOUND = Attributes::Attr(-1);
-
-
-Attributes::Attributes()
-	: _attrsMap(),
-	  _glShaderProg()
-{
-}
-
-
-Attributes::Attributes(const Attributes& attrs)
-	: _attrsMap(attrs._attrsMap),
-	  _glShaderProg(attrs._glShaderProg)
-{
-}
-
-
-Attributes::Attributes(Attributes&& attrs)
-	: _attrsMap(std::move(attrs._attrsMap)),
-	  _glShaderProg(std::move(attrs._glShaderProg))
-{
-}
-
-
-Attributes::~Attributes()
-{
-}
-
-
-Attributes& Attributes::operator=(const Attributes& attrs)
-{
-	_attrsMap = attrs._attrsMap;
-	_glShaderProg = attrs._glShaderProg;
-
-	return (*this);
-}
-
-
-Attributes& Attributes::operator=(Attributes&& attrs)
-{
-	_attrsMap = std::move(attrs._attrsMap);
-	_glShaderProg = std::move(attrs._glShaderProg);
-
-	return (*this);
-}
-
-
-void Attributes::clear()
-{
-	_attrsMap.clear();
-}
-
-
-void Attributes::setShaderProgram(const GLuint& glProg)
-{
-	_glShaderProg = glProg;
-}
-
-
-bool Attributes::registerate(const std::string& name)
-{
-	AttrsMap::iterator it = _attrsMap.find(name);
-	if (it != _attrsMap.end())
-		return false;
-
-	Attr glAttr = glGetUniformLocation(_glShaderProg, name.c_str());
-	if (glAttr == NOT_FOUND)
-	{
-		logWarning << "Uniform: " << name << " were not found!" << logEndl;
-		return false;
-	}
-
-	_attrsMap.insert({name, {glAttr}});
-	return true;
-}
-
-
-bool Attributes::registerateArray(const std::string& name, const size_t& len)
-{
-	AttrsMap::iterator it = _attrsMap.find(name);
-	if (it != _attrsMap.end())
-		return false;
-
-	size_t idxPos = name.find("[]");
-	if (idxPos == std::string::npos)
-		return false;
-
-	const std::string left = name.substr(0, idxPos+1);
-	const std::string right = name.substr(idxPos+1, name.length() - idxPos - 1);
-
-	Attrs glAttrs;
-	std::string locName;
-	std::stringstream ss;
-	for (size_t i = 0; i < len; ++i)
-	{
-		ss.str("");
-		ss << left << i << right;
-		locName = ss.str();
-
-		Attr glAttr = glGetUniformLocation(_glShaderProg, locName.c_str());
-		if (glAttr == NOT_FOUND)
-			break;
-
-		glAttrs.push_back(glAttr);
-	}
-
-	if (glAttrs.size() < len)
-		logWarning << "Uniform: " << name << ", "
-				   << glAttrs.size() << '/' << len << " array attributes were located!"
-				   << logEndl;
-
-	_attrsMap.insert({name, glAttrs});
-	return true;
-}
-
-
-bool Attributes::pass(const std::string& name,
-					  const float& val1,
-					  const float& val2,
-					  const float& val3,
-					  const float& val4) const
-{
-	return pass<glm::vec4>(name, glm::vec4(val1, val2, val3, val4));
-}
-
-
-void Attributes::_pass(const GLuint& glLoc, const int& value)
-{
-	glUniform1i(glLoc, value);
-}
-
-
-void Attributes::_pass(const GLuint& glLoc, const unsigned int& value)
-{
-	glUniform1ui(glLoc, value);
-}
-
-
-void Attributes::_pass(const GLuint& glLoc, const float& value)
-{
-	glUniform1f(glLoc, value);
-}
-
-
-void Attributes::_pass(const GLuint& glLoc, const glm::vec2& value)
-{
-	glUniform2f(glLoc, value.x, value.y);
-}
-
-
-void Attributes::_pass(const GLuint& glLoc, const glm::vec3& value)
-{
-	glUniform3f(glLoc, value.x, value.y, value.z);
-}
-
-
-void Attributes::_pass(const GLuint& glLoc, const glm::vec4& value)
-{
-	glUniform4f(glLoc, value.x, value.y, value.z, value.w);
-}
-
-
-void Attributes::_pass(const GLuint& glLoc, const Color& value)
-{
-	glUniform4f(glLoc,
-				value.getRedF(),
-				value.getGreenF(),
-				value.getBlueF(),
-				value.getAlphaF());
 }
 
 
@@ -489,7 +316,8 @@ Shader::Subprogram Shader::Subprogram::loadFile(const std::string& filename)
 	subprog.src = ss.str();
 
 	logInfo << "Shader source code loaded from file: '" << filename
-			<< "', (" << linesCount << " lines)."
+			<< "', (lines: " << linesCount << ", GLSL: " << subprog.version
+			<< ")."
 			<< logEndl;
 	return std::move(subprog);
 }
@@ -574,7 +402,8 @@ bool Shader::Subprogram::compile()
 	if (!success)
 	{
 		glGetShaderInfoLog(id, MAX_INFO_LOG_SIZE, NULL, infoLog);
-		logError << "Error in " << type << " subprogram compilation: " << infoLog << logEndl;
+		logError << "Error in " << type << " subprogram compilation:" << std::endl
+				 << infoLog << logEndl;
 		return false;
 	}
 
@@ -612,4 +441,201 @@ void Shader::Subprogram::unlink(GLuint& glShader)
 		return;
 
 	glDetachShader(glShader, id);
+}
+
+
+// -------------------------------- Shader Uniforms -------------------------------- //
+
+const Uniforms::UniLoc Uniforms::NOT_FOUND = Uniforms::UniLoc(-1);
+
+
+Uniforms::Uniforms()
+	: _uniLocationsMap(),
+	  _glShaderProg()
+{
+}
+
+
+Uniforms::Uniforms(const Uniforms& unis)
+	: _uniLocationsMap(unis._uniLocationsMap),
+	  _glShaderProg(unis._glShaderProg)
+{
+}
+
+
+Uniforms::Uniforms(Uniforms&& unis)
+	: _uniLocationsMap(std::move(unis._uniLocationsMap)),
+	  _glShaderProg(std::move(unis._glShaderProg))
+{
+	unis._glShaderProg = 0;
+}
+
+
+Uniforms::~Uniforms()
+{
+}
+
+
+Uniforms& Uniforms::operator=(const Uniforms& unis)
+{
+	_uniLocationsMap = unis._uniLocationsMap;
+	_glShaderProg = unis._glShaderProg;
+
+	return (*this);
+}
+
+
+Uniforms& Uniforms::operator=(Uniforms&& unis)
+{
+	_uniLocationsMap = std::move(unis._uniLocationsMap);
+	_glShaderProg = std::move(unis._glShaderProg);
+
+	unis._glShaderProg = 0;
+
+	return (*this);
+}
+
+
+void Uniforms::clear()
+{
+	_uniLocationsMap.clear();
+	_glShaderProg = 0;
+}
+
+
+void Uniforms::setShaderProgram(const GLuint& glProg)
+{
+	_glShaderProg = glProg;
+}
+
+
+bool Uniforms::registerate(const std::string& name)
+{
+	UniLocsMap::iterator it = _uniLocationsMap.find(name);
+	if (it != _uniLocationsMap.end())
+		return false;
+
+	UniLoc glLoc = glGetUniformLocation(_glShaderProg, name.c_str());
+	if (glLoc == NOT_FOUND)
+	{
+		logWarning << "Uniform: " << name << " were not found!" << logEndl;
+		return false;
+	}
+
+	_uniLocationsMap.insert({name, {glLoc}});
+	return true;
+}
+
+
+bool Uniforms::registerateArray(const std::string& name, const size_t& len)
+{
+	UniLocsMap::iterator it = _uniLocationsMap.find(name);
+	if (it != _uniLocationsMap.end())
+		return false;
+
+	size_t idxPos = name.find("[]");
+	if (idxPos == std::string::npos)
+		return false;
+
+	const std::string leftPartName = name.substr(0, idxPos+1);
+	const std::string rightPartName = name.substr(idxPos+1, name.length() - idxPos - 1);
+
+	UniLoc glLoc;
+	UniLocs glLocs;
+	std::string locName;
+	std::stringstream ss;
+	for (size_t i = 0; i < len; ++i)
+	{
+		ss.str("");
+		ss << leftPartName << i << rightPartName;
+		locName = ss.str();
+
+		glLoc = glGetUniformLocation(_glShaderProg, locName.c_str());
+		if (glLoc == NOT_FOUND)
+			break;
+
+		glLocs.push_back(glLoc);
+	}
+
+	if (glLocs.size() < len)
+		logWarning << "Uniform: " << name << ", "
+				   << glLocs.size() << '/' << len << " array attributes were located!"
+				   << logEndl;
+
+	_uniLocationsMap.insert({name, glLocs});
+	return true;
+}
+
+
+bool Uniforms::pass(const std::string& name,
+					  const float& val1,
+					  const float& val2,
+					  const float& val3,
+					  const float& val4) const
+{
+	return pass<glm::vec4>(name, glm::vec4(val1, val2, val3, val4));
+}
+
+
+void Uniforms::_pass(const GLuint& glLoc, const int& value)
+{
+	glUniform1i(glLoc, value);
+}
+
+
+void Uniforms::_pass(const GLuint& glLoc, const unsigned int& value)
+{
+	glUniform1ui(glLoc, value);
+}
+
+
+void Uniforms::_pass(const GLuint& glLoc, const float& value)
+{
+	glUniform1f(glLoc, value);
+}
+
+
+void Uniforms::_pass(const GLuint& glLoc, const glm::vec2& value)
+{
+	glUniform2f(glLoc, value.x, value.y);
+}
+
+
+void Uniforms::_pass(const GLuint& glLoc, const glm::vec3& value)
+{
+	glUniform3f(glLoc, value.x, value.y, value.z);
+}
+
+
+void Uniforms::_pass(const GLuint& glLoc, const glm::vec4& value)
+{
+	glUniform4f(glLoc, value.x, value.y, value.z, value.w);
+}
+
+
+void Uniforms::_pass(const GLuint& glLoc, const glm::mat2x2& value)
+{
+	glUniformMatrix2fv(glLoc, 1, GL_FALSE, &value[0][0]);
+}
+
+
+void Uniforms::_pass(const GLuint& glLoc, const glm::mat3x3& value)
+{
+	glUniformMatrix3fv(glLoc, 1, GL_FALSE, &value[0][0]);
+}
+
+
+void Uniforms::_pass(const GLuint& glLoc, const glm::mat4x4& value)
+{
+	glUniformMatrix4fv(glLoc, 1, GL_FALSE, &value[0][0]);
+}
+
+
+void Uniforms::_pass(const GLuint& glLoc, const Color& value)
+{
+	glUniform4f(glLoc,
+				value.getRedF(),
+				value.getGreenF(),
+				value.getBlueF(),
+				value.getAlphaF());
 }

@@ -97,8 +97,9 @@ class Engine
 		int _validatePrimitives();
 
 		void _glEnableOptions();
-		void _glInitProjectionMatrix();
-		void _glInitModelViewMatrix();
+		void _glUpdateMatrices();
+		void _updateMV();
+		void _updateMVP();
 
 		void _viewGUI();
 		void _viewFrame();
@@ -111,6 +112,8 @@ class Engine
 		RenderMode _glRenderMode;
 		std::string _glVersion;
 		std::string _glShaderVersion;
+		glm::mat4x4 _glMV;
+		glm::mat4x4 _glMVP;
 
 		GUIPtr _gui;
 		GUIfpsPtr _guiFPS;

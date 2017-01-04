@@ -5,8 +5,6 @@
 #include "tasks/task04.hpp"
 #include "tasks/task05.hpp"
 
-#include "engine.hpp"
-
 
 //logger_t globalLogging = loggerGlobal(loggerLDebug, loggerDFull);
 logger_t globalLogger = loggerInit(std::cout, loggerLDebug, loggerDFull);
@@ -23,13 +21,7 @@ int main(int argc, char *argv[])
 
 	task = new Task05NormalMappingEarth();
 
-	// Show task scene in engine.
-	Engine& engine = Engine::instance();
-	engine.enableFPS();
-	engine.enableCameraRotation();
-	engine.setRenderMode(Engine::RenderMode::EDGES);
-	engine.setActiveScene(task->getScene());
-	engine.showActiveScene();
+	task->run();
 
 	return 0;
 }

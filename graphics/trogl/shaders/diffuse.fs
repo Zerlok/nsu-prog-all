@@ -1,4 +1,4 @@
-#version 130
+#version 330
 
 
 struct CameraStruct
@@ -22,13 +22,12 @@ struct LampStruct
 
 struct TextureStruct
 {
-    sampler2D data;
-	vec2 offset;
+    vec2 offset;
 	vec2 scale;
 	float color;
 	float normal;
 };
-const int TEXLIM = 5;
+const int TEXLIM = 16;
 
 
 struct MaterialStruct
@@ -39,6 +38,23 @@ struct MaterialStruct
 	float hardness;
 	float textureMixing;
 };
+
+
+in vec4 vertexPosition;
+in vec3 vertexNormal;
+in vec2 vertexUV;
+
+uniform mat4 MV;
+uniform mat4 MVP;
+
+uniform CameraStruct camera;
+uniform LampStruct lamp;
+uniform MaterialStruct material;
+
+uniform sampler2D samples[TEXLIM];
+uniform TextureStruct textures[TEXLIM];
+uniform int texturesLen;
+uniform float texturesMixing;
 
 
 float lampIntensity(
@@ -88,8 +104,6 @@ float specularIntensity(
 
 
 void mixTextures(
-        in TextureStruct textures[TEXLIM],
-		in int texturesLen,
 		in vec2 uv,
 		in vec3 n,
 		out vec4 color,
@@ -103,47 +117,34 @@ void mixTextures(
 
     vec3 t, b, nloc, nglob;
 	vec4 texel;
-	for (int i = 0; i < TEXLIM; ++i)
+	for (int i = 0; i < texturesLen; ++i)
 	{
-	    if (i == texturesLen)
-		    break;
-
-        texel = texture2D(textures[i].data, uv / textures[i].scale + textures[i].offset);
+	    texel = texture2D(samples[i], uv / textures[i].scale + textures[i].offset);
 		color += mix(e, texel, textures[i].color) / texturesLen;
 
         nloc = texel.rgb * 2.0 - 1.0;
 		t = cross(n, q);
 		b = cross(n, t);
 		nglob = nloc.x * t + nloc.y * b + nloc.z * n;
-		normal += mix(e.rgb, nglob, textures[i].normal);
+		normal += nglob * textures[i].normal;
 	}
 
     normal = normalize(normal);
 }
 
 
-varying vec4 vertexPosition;
-varying vec3 vertexNormal;
-varying vec2 vertexUV;
-
-uniform CameraStruct camera;
-uniform LampStruct lamp;
-uniform MaterialStruct material;
-
-uniform TextureStruct textures[TEXLIM];
-uniform int texturesLen;
-uniform float texturesMixing;
+out vec4 color;
 
 
 void main()
 {
-	vec4 cameraPos = -gl_ModelViewMatrix * camera.position;
-	vec4 lampPos = gl_ModelViewMatrix * lamp.position;
-	vec3 lampDir = -normalize(gl_ModelViewMatrix * lamp.direction).xyz;
+    vec4 cameraPos = -MV * camera.position;
+	vec4 lampPos = MV * lamp.position;
+	vec3 lampDir = -normalize(MV * lamp.direction).xyz;
 
-    vec4 color;
+    vec4 textureColor;
 	vec3 normal;
-	mixTextures(textures, texturesLen, vertexUV, vertexNormal, color, normal);
+	mixTextures(vertexUV, vertexNormal, textureColor, normal);
 
     float lampInt;
 	float specularInt;
@@ -175,13 +176,13 @@ void main()
         default: // Unkown lamp type.
 		    lampInt = 1.0;
 			specularInt = 0.0;
-			color = material.color;
+			textureColor = material.color;
 			break;
 	}
 
     lampInt *= material.diffuse;
 	specularInt *= material.specular;
 
-    color = mix(material.color, color, texturesMixing) * lamp.color * (lampInt + specularInt);
-	gl_FragColor = clamp(color, 0.0, 1.0);
+    color = mix(material.color, textureColor, texturesMixing) * lamp.color * (lampInt + specularInt);
+	color = clamp(color, 0.0, 1.0);
 }
