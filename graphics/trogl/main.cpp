@@ -4,6 +4,7 @@
 
 #include "tasks/task04.hpp"
 #include "tasks/task05.hpp"
+#include "tasks/task06.hpp"
 
 
 //logger_t globalLogging = loggerGlobal(loggerLDebug, loggerDFull);
@@ -19,7 +20,9 @@ int main(int argc, char *argv[])
 //	task = new Task04TexturesMixingRoad();
 //	task = new Task04EarthSphereUVMapping();
 
-	task = new Task05NormalMappingEarth();
+//	task = new Task05NormalMappingEarth();
+
+	task = new Task06ObjFileImportExport();
 
 	task->run();
 

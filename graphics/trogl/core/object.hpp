@@ -8,6 +8,13 @@
 #include "component.hpp"
 
 
+namespace zero
+{
+	static const glm::vec2 xy(0.0f, 0.0f);
+	static const glm::vec3 xyz(0.0f, 0.0f, 0.0f);
+}
+
+
 class Object : public Component
 {
 	public:

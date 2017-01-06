@@ -98,8 +98,6 @@ class Engine
 
 		void _glEnableOptions();
 		void _glUpdateMatrices();
-		void _updateMV();
-		void _updateMVP();
 
 		void _viewGUI();
 		void _viewFrame();

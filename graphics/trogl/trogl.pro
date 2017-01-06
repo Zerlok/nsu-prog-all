@@ -22,44 +22,36 @@ QMAKE_CXXFLAGS_DEBUG += -O0
 QMAKE_CXXFLAGS_DEBUG -= -O1 -O2 -O3
 
 
-# Main modules.
+# Main headers
 # (derived modules should be defined in same order as base modules).
+# Common classes.
 HEADERS += \
-    core/opengls.hpp \
-    core/component.hpp \
-    core/object.hpp \
-    core/texture.hpp \
-    core/shader.hpp \
-    core/material.hpp \
-    core/mesh.hpp \
-    core/primitive.hpp \
-    core/light.hpp \
-    core/camera.hpp \
-    core/frame.hpp \
-    core/scene.hpp \
-    core/gui.hpp \
-    core/animation.hpp \
-    engine.hpp \
-    tasks/task05.hpp \
-    tasks/task06.hpp
+    common/color.hpp \
+    common/utils.hpp
 
-# Custom textures.
-HEADERS += \
+# Base engine classes.
+HEADERS += core/opengls.hpp \
+    core/component.hpp \
+    core/object.hpp
+
+# Textures.
+HEADERS += core/texture.hpp \
     textures/squaredwbtexture.hpp \
     textures/imagetexture.hpp
 
-# Custom shaders.
-HEADERS += \
+# Shaders.
+HEADERS += core/shader.hpp \
     shaders/diffuseshader.hpp \
     shaders/metamorphoseshader.hpp \
     shaders/screwshader.hpp
 
-# Custom materials.
-HEADERS += \
+# Materials.
+HEADERS += core/material.hpp \
     materials/diffusematerial.hpp
 
-# Custom meshes.
-HEADERS += \
+# Meshes.
+HEADERS += core/mesh.hpp \
+    meshes/importexport.hpp \
     meshes/cube.hpp \
     meshes/megacube.hpp \
     meshes/cylinder.hpp \
@@ -67,61 +59,63 @@ HEADERS += \
     meshes/icosphere.hpp \
     meshes/plane.hpp
 
-# Custom GUI components.
-HEADERS += \
+# GUI components.
+HEADERS += core/gui.hpp \
     gui/guilabel.hpp \
     gui/guiplane.hpp \
     gui/guifps.hpp \
     gui/guiconsole.hpp
 
-# Other.
+# Rest core classes.
 HEADERS += \
-    common/color.hpp \
-    common/utils.hpp \
+    core/primitive.hpp \
+    core/light.hpp \
+    core/camera.hpp \
+    core/frame.hpp \
+    core/animation.hpp \
+    core/scene.hpp
+
+# Engine.
+HEADERS += \
+    engine.hpp \
     engineutils.hpp
 
 # Tasks (graphics tasks with custom scenes)
 HEADERS += tasks/task.hpp \
-    tasks/task04.hpp
+    tasks/task04.hpp \
+    tasks/task05.hpp \
+    tasks/task06.hpp
 
 
 # Main sources of modules.
+# Common.
+SOURCES += \
+    common/color.cpp \
+    common/utils.cpp \
+
+# Base engine classes.
 SOURCES += \
     core/component.cpp \
-    core/object.cpp \
-    core/texture.cpp \
-    core/shader.cpp \
-    core/material.cpp \
-    core/mesh.cpp \
-    core/primitive.cpp \
-    core/light.cpp \
-    core/camera.cpp \
-    core/frame.cpp \
-    core/scene.cpp \
-    core/gui.cpp \
-    core/animation.cpp \
-    engine.cpp \
-    main.cpp \
-    tasks/task05.cpp \
-    tasks/task06.cpp
+    core/object.cpp
 
-# Custom textures.
-SOURCES += \
+# Textures.
+SOURCES += core/texture.cpp \
     textures/squaredwbtexture.cpp \
     textures/imagetexture.cpp
 
-# Custom shaders.
-SOURCES += \
+# Shaders.
+SOURCES += core/shader.cpp \
     shaders/metamorphoseshader.cpp \
     shaders/screwshader.cpp \
     shaders/diffuseshader.cpp
 
-# Custom materials.
-SOURCES += \
+# Materials.
+SOURCES += core/material.cpp \
     materials/diffusematerial.cpp
 
-# Custom meshes.
-SOURCES += \
+# Meshes.
+SOURCES += core/mesh.cpp \
+    meshes/importexport.cpp \
     meshes/cube.cpp \
     meshes/megacube.cpp \
     meshes/cylinder.cpp \
@@ -129,23 +123,36 @@ SOURCES += \
     meshes/icosphere.cpp \
     meshes/plane.cpp
 
-# Custom GUI components.
-SOURCES += \
+# GUI components.
+SOURCES += core/gui.cpp \
     gui/guilabel.cpp \
     gui/guiplane.cpp \
     gui/guifps.cpp \
     gui/guiconsole.cpp
 
-# Other.
+# Rest core classes.
 SOURCES += \
-    common/color.cpp \
-    common/utils.cpp
+    core/primitive.cpp \
+    core/light.cpp \
+    core/camera.cpp \
+    core/frame.cpp \
+    core/animation.cpp \
+    core/scene.cpp
+
+# Engine.
+SOURCES += engine.cpp
 
 # Tasks (graphics tasks with custom scenes)
 SOURCES += tasks/task.cpp \
-    tasks/task04.cpp
+    tasks/task04.cpp \
+    tasks/task05.cpp \
+    tasks/task06.cpp
+
+# Main
+SOURCES += main.cpp
 
 
+# Shaders source files.
 DISTFILES += \
     shaders/default.vs \
     shaders/default.gs \

@@ -16,13 +16,13 @@ template<class T, class B = Object>
 struct ObjectGeneratorTraits
 {
 	using Type = T;
-	using Base = Object;
-	using Pointer = SharedPointer<T, Object>;
+	using Base = B;
+	using Pointer = SharedPointer<T, B>;
 	using Array = std::vector<Pointer>;
 };
 
 
-template<class ObjectType, class GeneratorTraits=ObjectGeneratorTraits<ObjectType> >
+template<class T, class GeneratorTraits = ObjectGeneratorTraits<T> >
 class ObjectGenerator
 {
     public:
@@ -32,7 +32,7 @@ class ObjectGenerator
 		Objects latticeArrangement(
 					const int& latticeSize,
 					const float& latticeOffset,
-					const ObjectType& parent) const
+					const T& parent) const
 		{
 			glm::vec3 pos = parent.getPosition();
 			ObjectPointer obj;
@@ -49,7 +49,7 @@ class ObjectGenerator
 						pos.y = y*latticeOffset;
 						pos.z = z*latticeOffset;
 
-						obj = new ObjectType(parent);
+						obj = new T(parent);
 						obj->setPosition(pos);
 						objVector[idx++] = obj;
 					}
@@ -63,7 +63,7 @@ class ObjectGenerator
 				const size_t& size,
 				const float& offset,
 				const glm::vec3& direction,
-				const ObjectType& parent
+				const T& parent
 				) const
 		{
 			const glm::vec3 directionOffset = glm::normalize(direction) * offset;
@@ -73,7 +73,7 @@ class ObjectGenerator
 
 			for (size_t i = 0; i < size; ++i)
 			{
-				obj = new ObjectType(parent);
+				obj = new T(parent);
 				obj->setPosition(pos);
 				objVector[i] = obj;
 				pos += directionOffset;

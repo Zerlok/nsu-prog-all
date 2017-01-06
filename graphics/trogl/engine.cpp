@@ -200,21 +200,9 @@ void Engine::_glEnableOptions()
 
 void Engine::_glUpdateMatrices()
 {
-	_updateMV();
-	_updateMVP();
-}
-
-
-void Engine::_updateMV()
-{
 	_glMV = glm::lookAt(_camera->getPosition(),
 						_camera->getLookingAtPosition(),
 						_camera->getHeadDirection());
-}
-
-
-void Engine::_updateMVP()
-{
 	_glMVP = glm::perspective(_camera->getFOV(),
 							  _camera->getWHRatio(),
 							  _camera->getNearDistance(),
@@ -478,7 +466,6 @@ void Engine::_reshape(int width, int height)
 void Engine::_displayFunc()
 {
 	instance()._viewFrame();
-//	_debugGL();
 }
 
 

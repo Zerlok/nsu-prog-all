@@ -11,7 +11,7 @@ logger_t moduleLogger = loggerModule(loggerLWarning, loggerDFull);
 
 // ---------------------------- MESH ---------------------------- //
 
-const MaterialPtr Mesh::DEFAULT_MATERIAL = new DiffuseMaterial(Color(200, 200, 200));
+const MaterialPtr Mesh::DEFAULT_MATERIAL = new DiffuseMaterial(Color::white, 0.8, 0.8, 10.0);
 
 
 Mesh::Mesh(const std::string& name,
@@ -142,12 +142,33 @@ const Mesh::IndexingType& Mesh::getIndexType() const
 size_t Mesh::addVertex(const float& x,
 					   const float& y,
 					   const float& z,
+					   const float& nx,
+					   const float& ny,
+					   const float& nz,
 					   const float& u,
 					   const float& v)
 {
+	return addVertex(Vertex(x, y, z, nx, ny, nz, u, v, this));
+}
+
+
+size_t Mesh::addVertex(const Mesh::Vertex& v)
+{
 	const size_t idx = _vertices.size();
-	_vertices.push_back({idx, x, y, z, u, v, this});
+	_vertices.push_back(v);
+	_vertices.back()._idx = idx;
+
 	return idx;
+}
+
+
+size_t Mesh::addUVVertex(const float& x,
+						 const float& y,
+						 const float& z,
+						 const float& u,
+						 const float& v)
+{
+	return addVertex(x, y, z, 0.0f, 0.0f, 0.0f, u, v);
 }
 
 
@@ -155,16 +176,27 @@ bool Mesh::addPolygon(const size_t& i1,
 					  const size_t& i2,
 					  const size_t& i3)
 {
-	const Triple tr {i1, i2, i3};
+	return addPolygon(Triple(i1, i2, i3));
+}
+
+
+bool Mesh::addPolygon(const Mesh::Triple& tr)
+{
 	const Polygons::iterator it = _polygons.find(tr);
 	if (it != _polygons.end())
 		return false;
 
-	Polygon poly {tr, this};
-	_polygons.insert({tr, poly});
-	poly._linkVertices();
+	_polygons.insert({tr, Polygon(tr, this)});
+	Polygon& p = _polygons.at(tr);
+	p._linkVertices();
 
 	return true;
+}
+
+
+bool Mesh::addPolygon(const Mesh::Polygon& p)
+{
+	return addPolygon(p._triple);
 }
 
 
@@ -213,6 +245,10 @@ void Mesh::applyRotation()
 		v._position = glm::vec3(xRotationMat * glm::vec4(v._position, 1.0));
 		v._position = glm::vec3(yRotationMat * glm::vec4(v._position, 1.0));
 		v._position = glm::vec3(zRotationMat * glm::vec4(v._position, 1.0));
+
+		v._normal = glm::vec3(xRotationMat * glm::vec4(v._normal, 0.0));
+		v._normal = glm::vec3(yRotationMat * glm::vec4(v._normal, 0.0));
+		v._normal = glm::vec3(zRotationMat * glm::vec4(v._normal, 0.0));
 	}
 
 	_rotation = Object::DEFAULT_ROTATION;
@@ -224,6 +260,9 @@ void Mesh::applyScale()
 	for (Vertex& v : _vertices)
 	{
 		v._position *= _scale;
+
+		if (v._normal != zero::xyz)
+			v._normal = glm::normalize(v._normal / _scale);
 	}
 
 	_scale = Object::DEFAULT_SCALE;
@@ -242,16 +281,33 @@ void Mesh::_reassignData()
 
 // ---------------------------- MESH::VERTEX ---------------------------- //
 
-Mesh::Vertex::Vertex(const size_t& idx,
-					 const float& x,
+Mesh::Vertex::Vertex(const float& x,
 					 const float& y,
 					 const float& z,
+					 const float& nx,
+					 const float& ny,
+					 const float& nz,
 					 const float& u,
 					 const float& v,
 					 Mesh* mesh)
-	: _idx(idx),
+	: _idx(-1),
 	  _position(x, y, z),
-	  _uvMapping(u, v),
+	  _normal(nx, ny, nz),
+	  _uv(u, v),
+	  _linkedTriples(),
+	  _linkedMesh(mesh)
+{
+}
+
+
+Mesh::Vertex::Vertex(const Object::vec& position,
+					 const Object::vec& normal,
+					 const glm::vec2& uv,
+					 Mesh* mesh)
+	: _idx(-1),
+	  _position(position),
+	  _normal(normal),
+	  _uv(uv),
 	  _linkedTriples(),
 	  _linkedMesh(mesh)
 {
@@ -261,7 +317,8 @@ Mesh::Vertex::Vertex(const size_t& idx,
 Mesh::Vertex::Vertex(const Mesh::Vertex& v)
 	: _idx(v._idx),
 	  _position(v._position),
-	  _uvMapping(v._uvMapping),
+	  _normal(v._normal),
+	  _uv(v._uv),
 	  _linkedTriples(v._linkedTriples),
 	  _linkedMesh(v._linkedMesh)
 {
@@ -271,7 +328,8 @@ Mesh::Vertex::Vertex(const Mesh::Vertex& v)
 Mesh::Vertex::Vertex(Mesh::Vertex&& v)
 	: _idx(std::move(v._idx)),
 	  _position(std::move(v._position)),
-	  _uvMapping(std::move(v._uvMapping)),
+	  _normal(std::move(v._normal)),
+	  _uv(std::move(v._uv)),
 	  _linkedTriples(std::move(v._linkedTriples)),
 	  _linkedMesh(v._linkedMesh)
 {
@@ -287,7 +345,8 @@ Mesh::Vertex& Mesh::Vertex::operator=(const Mesh::Vertex& v)
 {
 	_idx = v._idx;
 	_position = v._position;
-	_uvMapping = v._uvMapping;
+	_normal = v._normal;
+	_uv = v._uv;
 	_linkedTriples = v._linkedTriples;
 	_linkedMesh = v._linkedMesh;
 
@@ -299,7 +358,8 @@ Mesh::Vertex& Mesh::Vertex::operator=(Mesh::Vertex&& v)
 {
 	_idx = std::move(v._idx);
 	_position = std::move(v._position);
-	_uvMapping = std::move(v._uvMapping);
+	_normal = std::move(v._normal);
+	_uv = std::move(v._uv);
 	_linkedTriples = std::move(v._linkedTriples);
 	_linkedMesh = v._linkedMesh;
 
@@ -319,8 +379,23 @@ const Object::vec& Mesh::Vertex::getPosition() const
 }
 
 
-Object::vec Mesh::Vertex::getNormal() const
+const Object::vec& Mesh::Vertex::getNormal() const
 {
+	return _normal;
+}
+
+
+const glm::vec2& Mesh::Vertex::getUV() const
+{
+	return _uv;
+}
+
+
+Object::vec Mesh::Vertex::calculateNormal() const
+{
+	if (_linkedMesh == nullptr)
+		return _normal;
+
 	vec normal = vec(0.0, 0.0, 0.0);
 	for (const Triple& tr : _linkedTriples)
 		normal += _linkedMesh->getPolygon(tr).calculateNormal();
@@ -329,15 +404,21 @@ Object::vec Mesh::Vertex::getNormal() const
 }
 
 
-const glm::vec2& Mesh::Vertex::getUVMapping() const
-{
-	return _uvMapping;
-}
-
-
 void Mesh::Vertex::setPosition(const glm::vec3& pos)
 {
 	_position = pos;
+}
+
+
+void Mesh::Vertex::setNormal(const glm::vec3& nor)
+{
+	_normal = nor;
+}
+
+
+void Mesh::Vertex::setUV(const glm::vec2& uv)
+{
+	_uv = uv;
 }
 
 
@@ -569,6 +650,9 @@ Mesh::Vertex& Mesh::Polygon::getV3()
 
 Object::vec Mesh::Polygon::calculateNormal() const
 {
+	if (_linkedMesh == nullptr)
+		return std::move(Object::vec(0.0f, 0.0f, 0.0f));
+
 	const vec& v1 = getV1().getPosition();
 	const vec& v2 = getV2().getPosition();
 	const vec& v3 = getV3().getPosition();
@@ -579,6 +663,9 @@ Object::vec Mesh::Polygon::calculateNormal() const
 
 Object::vec Mesh::Polygon::calculateCenter() const
 {
+	if (_linkedMesh == nullptr)
+		return std::move(Object::vec(0.0f, 0.0f, 0.0f));
+
 	const vec& v1 = getV1().getPosition();
 	const vec& v2 = getV2().getPosition();
 	const vec& v3 = getV3().getPosition();
@@ -595,6 +682,9 @@ void Mesh::Polygon::flip()
 
 void Mesh::Polygon::_linkVertices()
 {
+	if (_linkedMesh == nullptr)
+		return;
+
 	getV1()._linkedTriples.push_back(_triple);
 	getV2()._linkedTriples.push_back(_triple);
 	getV3()._linkedTriples.push_back(_triple);

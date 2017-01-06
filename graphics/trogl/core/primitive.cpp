@@ -26,7 +26,7 @@ Primitive::Primitive(const MeshPtr& mesh)
 	 * (in reverse order: scale, rotation, position).
 	 */
 	MeshPtr mesh0 = mesh;
-	mesh0->recalculateNormals();
+//	mesh0->recalculateNormals();
 	mesh0->applyScale();
 	mesh0->applyRotation();
 	mesh0->applyPosition();
@@ -137,9 +137,12 @@ bool Primitive::_isGLGeometryValid() const
 
 void Primitive::_initVertexBufferObject(const MeshPtr& mesh)
 {
+	static const glm::vec3 zero(0.0f, 0.0f, 0.0f);
+
 	std::vector<GLfloat> vertices((mesh->getVertices().size() * _vertexStep), 0.0f);
 	std::vector<GLfloat> normals((mesh->getVertices().size() * _vertexStep), 0.0f);
 	size_t idx = 0;
+	glm::vec3 normal;
 
 	for (size_t i = 0; i < vertices.size(); i += _vertexStep)
 	{
@@ -150,9 +153,13 @@ void Primitive::_initVertexBufferObject(const MeshPtr& mesh)
 		vertices[i+2] = v.getPosition().z;
 		vertices[i+3] = 1.0f;
 
-		normals[i] = v.getNormal().x;
-		normals[i+1] = v.getNormal().y;
-		normals[i+2] = v.getNormal().z;
+		normal = v.getNormal();
+		if (normal == zero)
+			normal = v.calculateNormal();
+
+		normals[i] = normal.x;
+		normals[i+1] = normal.y;
+		normals[i+2] = normal.z;
 		normals[i+3] = 0.0f;
 	}
 
@@ -175,8 +182,8 @@ void Primitive::_initUVBufferObject(const MeshPtr &mesh)
 	{
 		const Mesh::Vertex& v = mesh->getVertex(idx++);
 
-		maps[i] = v.getUVMapping().x;
-		maps[i+1] = v.getUVMapping().y;
+		maps[i] = v.getUV().x;
+		maps[i+1] = v.getUV().y;
 	}
 
 	glGenBuffers(1, &_glUVBO);

@@ -75,13 +75,19 @@ class Mesh : public Object
 		{
 			public:
 				// Constructors / Destructor.
-				Vertex(const size_t& idx,
-					   const float& x,
+				Vertex(const float& x,
 					   const float& y,
 					   const float& z,
+					   const float& nx,
+					   const float& ny,
+					   const float& nz,
 					   const float& u,
 					   const float& v,
-					   Mesh* mesh);
+					   Mesh* mesh = nullptr);
+				Vertex(const vec& position,
+					   const vec& normal,
+					   const glm::vec2& uv,
+					   Mesh* mesh = nullptr);
 				Vertex(const Vertex& v);
 				Vertex(Vertex&& v);
 				~Vertex();
@@ -93,16 +99,21 @@ class Mesh : public Object
 				// Methods.
 				const size_t& getIndex() const;
 				const vec& getPosition() const;
-				vec getNormal() const;
-				const glm::vec2& getUVMapping() const;
+				const vec& getNormal() const;
+				const glm::vec2& getUV() const;
+
+				vec calculateNormal() const;
 
 				void setPosition(const glm::vec3& pos);
+				void setNormal(const glm::vec3& nor);
+				void setUV(const glm::vec2& uv);
 
 			private:
 				// Fields.
 				size_t _idx;
 				Object::vec _position;
-				glm::vec2 _uvMapping;
+				Object::vec _normal;
+				glm::vec2 _uv;
 
 				std::vector<Triple> _linkedTriples; // Aggregation links with Polygons.
 				Mesh* _linkedMesh;
@@ -119,9 +130,9 @@ class Mesh : public Object
 				Polygon(const size_t& i1,
 						const size_t& i2,
 						const size_t& i3,
-						Mesh* mesh);
+						Mesh* mesh = nullptr);
 				Polygon(const Triple& tr,
-						Mesh* mesh);
+						Mesh* mesh = nullptr);
 				Polygon(const Polygon& p);
 				Polygon(Polygon&& p);
 				~Polygon();
@@ -185,7 +196,6 @@ class Mesh : public Object
 								  const size_t& i2,
 								  const size_t& i3) const;
 		const Polygon& getPolygon(const Triple& tr) const;
-
 		const Vertices& getVertices() const;
 		const Polygons& getPolygons() const;
 		const MaterialPtr& getMaterial() const;
@@ -194,13 +204,25 @@ class Mesh : public Object
 		size_t addVertex(const float& x,
 						 const float& y,
 						 const float& z,
+						 const float& nx = 0.0f,
+						 const float& ny = 0.0f,
+						 const float& nz = 0.0f,
 						 const float& u = 0.0f,
 						 const float& v = 0.0f);
+		size_t addUVVertex(const float& x,
+						   const float& y,
+						   const float& z,
+						   const float& u = 0.0f,
+						   const float& v = 0.0f);
+		size_t addVertex(const Vertex& v);
 		bool addPolygon(const size_t& i1,
 						const size_t& i2,
 						const size_t& i3);
-		void removeVertex();
-		void removePolygon();
+		bool addPolygon(const Triple& tr);
+		bool addPolygon(const Polygon& p);
+
+		// void removeVertex();
+		// void removePolygon();
 		void setMaterial(const MaterialPtr& material);
 
 		void recalculateNormals();
