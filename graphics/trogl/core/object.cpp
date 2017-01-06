@@ -126,6 +126,24 @@ const Object& Object::toObject() const
 }
 
 
+void Object::setPosition(const float& x, const float& y, const float& z)
+{
+	setPosition(vec(x, y, z));
+}
+
+
+void Object::setRotation(const float& x, const float& y, const float& z)
+{
+	setRotation(vec(x, y, z));
+}
+
+
+void Object::setScale(const float& x, const float& y, const float& z)
+{
+	setScale({x, y, z});
+}
+
+
 void Object::setPosition(const Object::vec& position)
 {
 	_position = position;

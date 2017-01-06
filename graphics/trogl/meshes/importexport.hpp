@@ -52,7 +52,7 @@ class Importer
 
 //		void setFormat();
 
-		Mesh parse(std::istream& in);
+		MeshPtr parse(std::istream& in);
 
 	private:
 		void _parseVertexPosition(const std::string& values);
@@ -70,8 +70,7 @@ class Importer
 		size_t _normalCntr;
 
 		meshIEformats::Vertices _parsedVertices;
-		meshIEformats::Vertices _vertices;
-		meshIEformats::Polygons _polygons;
+		MeshPtr _mesh;
 };
 
 

@@ -31,7 +31,7 @@ Sphere::Sphere(const float& radius,
 		float y = 1.0;
 		float z = 0.0;
 
-		northIdx = addUVVertex(x, y, z, mapU(x, y, z), mapV(x, y, z));
+		northIdx = addVertex(x, y, z, x, y, z, mapU(x, y, z), mapV(x, y, z));
 		for (size_t s = 0; s < segments; ++s)
 		{
 			const double cosPsy = std::cos(psyStep * s);
@@ -43,14 +43,14 @@ Sphere::Sphere(const float& radius,
 				y = std::cos(phiStep * r);
 				z = std::sin(phiStep * r) * sinPsy;
 
-				addUVVertex(x, y, z, mapU(x, y, z), mapV(x, y, z));
+				addVertex(x, y, z, x, y, z, mapU(x, y, z), mapV(x, y, z));
 			}
 		}
 
 		x = 0.0;
 		y = -1.0;
 		z = 0.0;
-		southIdx = addUVVertex(x, y, z, mapU(x, y, z), mapV(x, y, z));
+		southIdx = addVertex(x, y, z, x, y, z, mapU(x, y, z), mapV(x, y, z));
 	}
 
 	// Faces.

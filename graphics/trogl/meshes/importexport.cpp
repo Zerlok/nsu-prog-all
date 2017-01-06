@@ -46,7 +46,7 @@ namespace stringutils
 using namespace meshIEformats;
 
 
-logger_t moduleLogger = loggerModule(loggerLDebug, (loggerDLevel | loggerDModul));
+logger_t moduleLogger = loggerModule(loggerLWarning, loggerDFull);
 
 
 // ----------------------------- IMPORTER ----------------------------- //
@@ -62,8 +62,9 @@ Importer::~Importer()
 }
 
 
-Mesh Importer::parse(std::istream& in)
+MeshPtr Importer::parse(std::istream& in)
 {
+	_mesh = new Mesh("obj");
 	std::string name;
 	std::string values;
 
@@ -109,15 +110,8 @@ Mesh Importer::parse(std::istream& in)
 		++_lineNum;
 	}
 
-	Mesh mesh;
-	for (const Vertex& v : _vertices)
-		mesh.addVertex(v);
-
-	for (const Polygon& p : _polygons)
-		mesh.addPolygon(p);
-
 	_refresh();
-	return std::move(mesh);
+	return std::move(_mesh);
 }
 
 
@@ -189,8 +183,8 @@ void Importer::_parsePolygon(const std::string& values)
 		return;
 	}
 
-	const size_t last = _vertices.size();
 	Integers indices;
+	std::vector<size_t> vi;
 
 	for (const std::string& val : tmps)
 	{
@@ -211,15 +205,16 @@ void Importer::_parsePolygon(const std::string& values)
 				 << ": '" << _line << "'"
 				 << logEndl;
 
-		_vertices.push_back(Vertex(
+		const size_t idx = _mesh->addVertex(
 				_parsedVertices[indices[0]].getPosition(),
 				_parsedVertices[indices[2]].getNormal(),
 				_parsedVertices[indices[1]].getUV()
-		));
+		);
+		vi.push_back(idx);
 	}
 
-	for (size_t i = last+1; i < _vertices.size(); ++i)
-		_polygons.push_back({last, i, i+1});
+	for (size_t i = 1; i < vi.size() - 1; ++i)
+		_mesh->addPolygon(vi[0], vi[i], vi[i+1]);
 }
 
 
@@ -259,8 +254,6 @@ void Importer::_refresh()
 	_normalCntr = 0;
 
 	_parsedVertices.clear();
-	_vertices.clear();
-	_polygons.clear();
 }
 
 

@@ -214,6 +214,9 @@ class Mesh : public Object
 						   const float& z,
 						   const float& u = 0.0f,
 						   const float& v = 0.0f);
+		size_t addVertex(const vec& position,
+						 const vec& normal,
+						 const glm::vec2& uv);
 		size_t addVertex(const Vertex& v);
 		bool addPolygon(const size_t& i1,
 						const size_t& i2,

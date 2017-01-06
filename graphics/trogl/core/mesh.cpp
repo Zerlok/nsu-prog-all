@@ -148,7 +148,15 @@ size_t Mesh::addVertex(const float& x,
 					   const float& u,
 					   const float& v)
 {
-	return addVertex(Vertex(x, y, z, nx, ny, nz, u, v, this));
+	return addVertex({x, y, z}, {nx, ny, nz}, {u, v});
+}
+
+
+size_t Mesh::addVertex(const Object::vec& position,
+					   const Object::vec& normal,
+					   const glm::vec2& uv)
+{
+	return addVertex(Vertex(position, normal, uv, this));
 }
 
 
@@ -213,13 +221,30 @@ void Mesh::recalculateNormals()
 	 * Choice 1: Find a good polygon (or polygon at center), then start to compare
 	 * angle between current polygon and adjacent with angle between therirs normals.
 	 * It will be easy to see then, which normal is good and which is bad.
+	 *
+	 * Choice 2: Find out is face normal directed as total normal of its verticecs.
 	 */
+	vec vn;
+	vec pn;
+	float ratio;
 	for (Polygons::value_type& it : _polygons)
 	{
 		Polygon& poly = it.second;
-		const float ratio = glm::dot(poly.calculateCenter(), poly.calculateNormal());
-		if (ratio < -0.5)
-			poly.flip();
+		pn = poly.calculateNormal();
+		vn = poly.getV1().getNormal() + poly.getV2().getNormal() + poly.getV3().getNormal();
+
+		if (vn == zero::xyz)
+		{
+			ratio = glm::dot(poly.calculateCenter(), pn);
+			if (ratio < -0.5)
+				poly.flip();
+		}
+		else
+		{
+			ratio = glm::dot(glm::normalize(vn), pn);
+			if (ratio < 0.0)
+				poly.flip();
+		}
 	}
 }
 
