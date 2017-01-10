@@ -49,7 +49,6 @@ class Object : public Component
 		Object& toObject();
 		const Object& toObject() const;
 
-		// Virtual methods.
 		void setPosition(const float& x,
 						 const float& y,
 						 const float& z);
@@ -59,6 +58,8 @@ class Object : public Component
 		void setScale(const float& x,
 					  const float& y,
 					  const float& z);
+
+		// Virtual methods.
 		virtual void setPosition(const vec& position);
 		virtual void setRotation(const vec& rotation);
 		virtual void setScale(const vec& scale);

@@ -27,7 +27,9 @@ QMAKE_CXXFLAGS_DEBUG -= -O1 -O2 -O3
 # Common classes.
 HEADERS += \
     common/color.hpp \
-    common/utils.hpp
+    common/utils.hpp \
+    common/event.hpp \
+    common/peripherals.hpp
 
 # Base engine classes.
 HEADERS += core/opengls.hpp \
@@ -84,7 +86,8 @@ HEADERS += \
 HEADERS += tasks/task.hpp \
     tasks/task04.hpp \
     tasks/task05.hpp \
-    tasks/task06.hpp
+    tasks/task06.hpp \
+    tasks/task07.hpp
 
 
 # Main sources of modules.
@@ -92,6 +95,7 @@ HEADERS += tasks/task.hpp \
 SOURCES += \
     common/color.cpp \
     common/utils.cpp \
+    common/peripherals.cpp
 
 # Base engine classes.
 SOURCES += \
@@ -146,7 +150,8 @@ SOURCES += engine.cpp
 SOURCES += tasks/task.cpp \
     tasks/task04.cpp \
     tasks/task05.cpp \
-    tasks/task06.cpp
+    tasks/task06.cpp \
+    tasks/task07.cpp
 
 # Main
 SOURCES += main.cpp

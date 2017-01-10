@@ -16,6 +16,7 @@
 
 #include "core/frame.hpp"
 #include "core/primitive.hpp"
+#include "common/peripherals.hpp"
 
 #include "core/gui.hpp"
 #include "gui/guilabel.hpp"
@@ -64,6 +65,8 @@ class Engine
 		void enableFPS();
 		void disableFPS();
 
+		Keyboard& getKeyboard();
+
 		bool validate();
 		void showActiveScene();
 
@@ -76,6 +79,10 @@ class Engine
 		static void _displayFunc();
 		static void _idleFunc();
 		static void _reshapeFunc(int width, int height);
+		static void _kbLetterDownFunc(unsigned char key, int, int);
+		static void _kbLetterUpFunc(unsigned char key, int x, int);
+		static void _kbSpecialDownFunc(int key, int, int);
+		static void _kbSpecialUpFunc(int key, int, int);
 		static void _debugGL();
 		static std::string _generateWindowTitle(const Scene& scene);
 		static std::string _toString(const GLenum& type);
@@ -95,6 +102,8 @@ class Engine
 		int _validateScene();
 		int _validateFrame();
 		int _validatePrimitives();
+		int _validateKeyboard();
+		int _validateMouse();
 
 		void _glEnableOptions();
 		void _glUpdateMatrices();
@@ -102,7 +111,10 @@ class Engine
 		void _viewGUI();
 		void _viewFrame();
 
+		void _prepareNextFrame();
 		void _reshape(int width, int height);
+		void _kbKeyDown(const int& key);
+		void _kbKeyUp(const int& key);
 
 		// Fields.
 		Status _status;
@@ -119,6 +131,8 @@ class Engine
 		CameraPtr _camera;
 		Primitives _primitives;
 		FramePtr _frame;
+
+		Keyboard& _keyboard;
 
 		bool _rotateCamera;
 };

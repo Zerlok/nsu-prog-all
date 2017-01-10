@@ -34,7 +34,8 @@ Engine::Engine()
 	  _scene(nullptr),
 	  _camera(nullptr),
 	  _primitives(),
-	  _frame(nullptr)
+	  _frame(nullptr),
+	  _keyboard(Keyboard::instance())
 {
 	logDebug << "Engine created." << logEndl;
 }
@@ -178,6 +179,33 @@ int Engine::_validatePrimitives()
 }
 
 
+int Engine::_validateKeyboard()
+{
+	Keyboard::Code2KeyMap table;
+	const int alphaLen = 'Z' - 'A' + 1;
+	const int keyA = int(Keyboard::Key::A);
+	for (int i = 0; i < alphaLen; ++i)
+	{
+		table['A' + i] = Keyboard::Key(keyA + i);
+		table['a' + i] = Keyboard::Key(keyA + i);
+	}
+
+	table[GLUT_KEY_UP + 255] = Keyboard::Key::ARROW_UP;
+	table[GLUT_KEY_DOWN + 255] = Keyboard::Key::ARROW_DOWN;
+	table[GLUT_KEY_LEFT + 255] = Keyboard::Key::ARROW_LEFT;
+	table[GLUT_KEY_RIGHT + 255] = Keyboard::Key::ARROW_RIGHT;
+
+	_keyboard.setTranslationTable(table);
+	return 1;
+}
+
+
+int Engine::_validateMouse()
+{
+	return 1;
+}
+
+
 void Engine::_glEnableOptions()
 {
 	glEnable(GL_TEXTURE_2D);
@@ -304,6 +332,12 @@ void Engine::disableFPS()
 }
 
 
+Keyboard& Engine::getKeyboard()
+{
+	return _keyboard;
+}
+
+
 void Engine::setGUI(const GUIPtr& gui)
 {
 	_status = Status::DIRTY;
@@ -352,8 +386,10 @@ bool Engine::validate()
 	result += _validateScene();
 	result += _validateFrame();
 	result += _validatePrimitives();
+	result += _validateKeyboard();
+	result += _validateMouse();
 
-	_status = (result == 3)
+	_status = (result == 5)
 			? Status::VALIDATION_SUCCESSFUL
 			: Status::VALIDATION_FAILED;
 
@@ -379,6 +415,15 @@ void Engine::showActiveScene()
 	glutDisplayFunc(_displayFunc);
 	glutReshapeFunc(_reshapeFunc);
 	glutIdleFunc(_idleFunc);
+
+	glutKeyboardFunc(_kbLetterDownFunc);
+	glutKeyboardUpFunc(_kbLetterUpFunc);
+	glutSpecialFunc(_kbSpecialDownFunc);
+	glutSpecialUpFunc(_kbSpecialUpFunc);
+
+//	glutMouseFunc(GL20MouseButtonsFunc);
+//	glutPassiveMotionFunc(GL20MouseMotionFunc);
+//	glutMotionFunc(GL20MouseMotionFunc);
 
 	glutMainLoop();
 
@@ -435,14 +480,8 @@ void Engine::_viewFrame()
 	static const float a = std::sqrt(std::pow(_camera->getPosition().x, 2) + std::pow(_camera->getPosition().z, 2));
 	static const float h = _camera->getPosition().y;
 	const float psy = -getTimeDouble() / 11.0;
-	const float phi = getTimeDouble() / 51.0;
-	const float hi = 0.0; //psy / 2.0;
 
-	if (_rotateCamera)
-	{
-		_camera->setPosition({a*cos(phi), h * sin(hi) + 2*h, a*sin(phi)});
-		_glUpdateMatrices();
-	}
+	_glUpdateMatrices();
 
 	LightPtr light = _scene->getLights().front();
 	light->setPosition({a*cos(psy), light->getPosition().y, a*sin(psy)});
@@ -457,9 +496,30 @@ void Engine::_viewFrame()
 }
 
 
+void Engine::_prepareNextFrame()
+{
+	_keyboard.getHandler().handleEvents();
+//	_mouse.getHandler().handleEvents();
+}
+
+
 void Engine::_reshape(int width, int height)
 {
 	_frame->resize(width, height);
+}
+
+
+void Engine::_kbKeyDown(const int& key)
+{
+//	logInfo << "KB pressed: " << key << " " << char(key) << logEndl;
+	_keyboard.setKeyPressed(key);
+}
+
+
+void Engine::_kbKeyUp(const int& key)
+{
+//	logInfo << "KB released: " << key << " " << char(key) << logEndl;
+	_keyboard.setKeyReleased(key);
 }
 
 
@@ -471,6 +531,7 @@ void Engine::_displayFunc()
 
 void Engine::_idleFunc()
 {
+	instance()._prepareNextFrame();
 	glutPostRedisplay();
 }
 
@@ -478,6 +539,32 @@ void Engine::_idleFunc()
 void Engine::_reshapeFunc(int width, int height)
 {
 	instance()._reshape(width, height);
+}
+
+
+void Engine::_kbLetterDownFunc(unsigned char key, int, int)
+{
+	instance()._kbKeyDown(int(key));
+}
+
+
+void Engine::_kbLetterUpFunc(unsigned char key, int, int)
+{
+	instance()._kbKeyUp(int(key));
+}
+
+
+void Engine::_kbSpecialDownFunc(int key, int, int)
+{
+	key += 255;
+	instance()._kbKeyDown(key);
+}
+
+
+void Engine::_kbSpecialUpFunc(int key, int, int)
+{
+	key += 255;
+	instance()._kbKeyUp(key);
 }
 
 
