@@ -1,8 +1,8 @@
 #include "component.hpp"
 
 
-#include <sstream>
 #include <iomanip>
+#include <sstream>
 #include <logger.hpp>
 
 
@@ -10,31 +10,48 @@ logger_t moduleLogger = loggerModule(loggerLWarning, loggerDFull);
 
 
 size_t Component::_globID = 0;
+Component::Types Component::_types = {
+	{"TEXTURE", 0},
+	{"SHADER", 0},
+	{"MATERIAL", 0},
+	{"MESH", 0},
+	{"LIGHT", 0},
+	{"CAMERA", 0},
+	{"ANIMATION", 0},
+	{"FRAME", 0},
+	{"SCENE", 0},
+	{"GUI", 0},
+};
+std::hash<Component::Type> Component::_typeHash;
+std::hash<size_t> Component::_idHash;
 
 
-Component::Component(const Component::Type& t,
+Component::Component(const Component::Type& type,
 					 const std::string& name)
-	: Animatable(name),
-	  _type(t),
-	  _id(++_globID)
+	: _type(type),
+	  _id(_createIdFor(_type)),
+	  _name(name)
 {
+	++_globID;
+	_renameIfEmptyName(_name, _type);
 	logDebug << (*this) << " created." << logEndl;
 }
 
 
 Component::Component(const Component& c)
-	: Animatable(c),
-	  _type(c._type),
-	  _id(++_globID)
+	: _type(c._type),
+	  _id(_createIdFor(_type)),
+	  _name(_nextNumberOf(c._name))
 {
+	++_globID;
 	logDebug << (*this) << " copied from " << c << logEndl;
 }
 
 
 Component::Component(Component&& c)
-	: Animatable(std::move(c)),
-	  _type(std::move(c._type)),
-	  _id(std::move(c._id))
+	: _type(std::move(c._type)),
+	  _id(std::move(c._id)),
+	  _name(std::move(c._name))
 {
 	logDebug << (*this) << " moved." << logEndl;
 }
@@ -46,75 +63,16 @@ Component::~Component()
 }
 
 
-Component& Component::operator=(const Component& c)
+bool Component::sameType(const Component& c) const
 {
-	Animatable::operator=(c);
-	_type = c._type;
-	_id = c._id;
-
-	logDebug << (*this) << " copied from " << c << logEndl;
-	return (*this);
+	return (_type == c._type);
 }
 
 
-Component& Component::operator=(Component&& c)
+bool Component::sameType(Component&& c) const
 {
-	Animatable::operator=(std::move(c));
-	_type = std::move(c._type);
-	_id = std::move(c._id);
-
-	logDebug << (*this) << " moved." << logEndl;
-	return (*this);
+	return (_type == c._type);
 }
-
-
-bool Component::operator==(const Component& c) const
-{
-	return (_id == c._id);
-}
-
-
-bool Component::operator!=(const Component& c) const
-{
-	return (_id != c._id);
-}
-
-
-bool Component::operator<(const Component& c) const
-{
-	return (_id < c._id);
-}
-
-
-bool Component::operator>(const Component& c) const
-{
-	return (_id > c._id);
-}
-
-
-/*
-Component& Component::operator+=(const Component& c)
-{
-	return (*this);
-}
-
-Component& Component::operator*=(const float& ratio)
-{
-	return (*this);
-}
-
-
-Component Component::operator+(const Component& c) const
-{
-	return (*this);
-}
-
-
-Component Component::operator*(const float& ratio) const
-{
-	return (*this);
-}
-*/
 
 
 const size_t& Component::getId() const
@@ -129,15 +87,23 @@ const Component::Type& Component::getType() const
 }
 
 
-Component& Component::toComponent()
+const std::string& Component::getName() const
 {
-	return (*this);
+	return _name;
 }
 
 
-const Component& Component::toComponent() const
+size_t Component::getHash() const
 {
-	return (*this);
+	size_t typeHash = _typeHash(_type);
+	size_t idHash = _idHash(_id);
+	return (typeHash ^ (idHash << 1));
+}
+
+
+void Component::rename(const std::string& name)
+{
+	_name = name;
 }
 
 
@@ -147,17 +113,59 @@ std::string Component::toString() const
 }
 
 
+const size_t& Component::_createIdFor(const Component::Type& type)
+{
+	Types::iterator it = _types.find(type);
+	if (it == _types.cend())
+	{
+		logWarning << "Unknown component type: " << type << logEndl;
+		return ++_types["Undefined"];
+	}
+
+	return ++(it->second);
+}
+
+
+std::string Component::_nextNumberOf(const std::string& name)
+{
+	size_t pos = name.find('.');
+	if (pos == std::string::npos)
+		return _nameWithId(name, 1);
+
+	size_t idx;
+	std::stringstream ss;
+	ss << name.substr(pos+1, name.length() - pos - 1);
+	ss >> idx;
+
+	return _nameWithId(name.substr(0, pos+1), idx+1);
+}
+
+
+std::string Component::_nameWithId(const std::string& name, const size_t& id)
+{
+	std::stringstream ss;
+	ss << name << std::setw(3) << std::setfill('0') << id;
+	return ss.str();
+}
+
+
+void Component::_renameIfEmptyName(const Component::Type& type, std::string& name)
+{
+	if (name.empty())
+		name = _nameWithId(name, _types[type]);
+}
+
+
 std::ostream& operator<<(std::ostream& out, const Component& c)
 {
-	out << "<Component"
-		<< c._id << " "
-		<< c.getName() << ">";
-
+	out << "<c-" << std::uppercase << c._type
+		<< " #" << std::setw(4) << std::setfill('0') << c._id
+		<< " '" << c._name << "'>";
 	return out;
 }
 
 
 size_t Component::Hash::operator()(const Component& c) const
 {
-	return std::hash<size_t>()(c.getId());
+	return c.getHash();
 }

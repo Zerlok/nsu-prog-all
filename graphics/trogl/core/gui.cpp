@@ -187,7 +187,7 @@ GLfloat GUIComponent::_countYPos(const size_t& frameHeight) const
 // ------------ GUI ------------ //
 
 GUI::GUI()
-	: Nameable("GUI"),
+	: Component("GUI", "GUI"),
       _components()
 {
 }

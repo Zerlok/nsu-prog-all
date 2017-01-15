@@ -12,7 +12,7 @@ static const vec3 defaultLampPosition {0.0, 30.0, 0.0};
 
 Light Light::createPoint()
 {
-	Light lamp(Light::Type::POINT);
+	Light lamp(Light::Type::POINT, "Point");
 	lamp.setPower(1000.0);
 	lamp.setPosition(defaultLampPosition);
 
@@ -22,9 +22,9 @@ Light Light::createPoint()
 
 Light Light::createSun()
 {
-	Light lamp(Light::Type::SUN);
+	Light lamp(Light::Type::SUN, "Sun");
 	lamp.setPower(1.0);
-	lamp.setDirection(-space::axis::y);
+	lamp.setDirection(-space::xyz::y);
 	lamp.setPosition(defaultLampPosition);
 
 	return std::move(lamp);
@@ -33,7 +33,7 @@ Light Light::createSun()
 
 Light Light::createSpot()
 {
-	Light lamp(Light::Type::SPOT);
+	Light lamp(Light::Type::SPOT, "Spot");
 	lamp.setPower(1000.0);
 	lamp.setDirection({0.0, -1.0, 0.0});
 	lamp.setInnerAngle(M_PI_2 / 9.0);
@@ -44,11 +44,11 @@ Light Light::createSpot()
 }
 
 
-Light::Light(const Type& type)
-	: Object(Object::Type::LIGHT),
+Light::Light(const Type& type, const std::string& name)
+	: Object("LIGHT", name),
 	  _lightType(type),
 	  _power(1.0),
-	  _direction(-space::axis::y),
+	  _direction(-space::xyz::y),
 	  _color(Color::white),
 	  _innerAngle(0.0),
 	  _outterAngle(0.0)
@@ -118,50 +118,6 @@ Light& Light::operator=(Light&& light)
 
 	return (*this);
 }
-
-
-/*
-Light& Light::operator+=(const Light& light)
-{
-	Object::operator+=(light);
-	_power += light._power;
-	_direction += light._direction;
-	_color += light._color;
-	_innerAngle += light._innerAngle;
-	_outterAngle += light._outterAngle;
-
-	return (*this);
-}
-
-
-Light& Light::operator*=(const float& ratio)
-{
-	Object::operator*=(ratio);
-	_power *= ratio;
-	_direction *= ratio;
-	_color *= ratio;
-	_innerAngle *= ratio;
-	_outterAngle *= ratio;
-
-	return (*this);
-}
-
-
-Light Light::operator+(const Light& light) const
-{
-	Light tmp(*this);
-	tmp += light;
-	return std::move(tmp);
-}
-
-
-Light Light::operator*(const float& ratio) const
-{
-	Light tmp(*this);
-	tmp *= ratio;
-	return std::move(tmp);
-}
-*/
 
 
 const Light::Type& Light::getLightType() const

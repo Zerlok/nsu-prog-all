@@ -18,7 +18,7 @@ const MaterialPtr Mesh::DEFAULT_MATERIAL = new DiffuseMaterial(Color::white, 0.8
 Mesh::Mesh(const std::string& name,
 		   const MaterialPtr& mat,
 		   const IndexingType& indexType)
-	: Object(Object::Type::MESH, name),
+	: Object("MESH", name),
 	  _vertices(),
 	  _polygons(),
 	  _material(mat),
@@ -183,13 +183,13 @@ const Mesh::IndexingType& Mesh::getIndexType() const
 
 glm::mat4x4 Mesh::calculateWorldMatrix() const
 {
-	glm::mat4x4 mw(space::identic::m4x4);
+	glm::mat4x4 mw(matrix::identic::m4x4);
 
-	mw *= glm::translate(space::identic::m4x4, _position);
-	mw *= glm::rotate(space::identic::m4x4, _rotation.z, space::axis::z);
-	mw *= glm::rotate(space::identic::m4x4, _rotation.x, space::axis::x);
-	mw *= glm::rotate(space::identic::m4x4, _rotation.y, space::axis::y);
-	mw *= glm::scale(space::identic::m4x4, _scale);
+	mw *= glm::translate(matrix::identic::m4x4, _position);
+	mw *= glm::rotate(matrix::identic::m4x4, _rotation.z, space::xyz::z);
+	mw *= glm::rotate(matrix::identic::m4x4, _rotation.x, space::xyz::x);
+	mw *= glm::rotate(matrix::identic::m4x4, _rotation.y, space::xyz::y);
+	mw *= glm::scale(matrix::identic::m4x4, _scale);
 
 	return std::move(mw);
 }
@@ -289,7 +289,7 @@ void Mesh::recalculateNormals()
 		pn = poly.calculateNormal();
 		vn = poly.getV1().getNormal() + poly.getV2().getNormal() + poly.getV3().getNormal();
 
-		if (vn == space::zero::xyz)
+		if (vn == space::xyz::zero)
 		{
 			ratio = glm::dot(poly.calculateCenter(), pn);
 			if (ratio < -0.5)
@@ -316,10 +316,7 @@ void Mesh::applyPosition()
 
 void Mesh::applyRotation()
 {
-	const glm::mat4 rotationMat = (
-			glm::rotate(space::identic::m4x4, _rotation.z, space::axis::z)
-			* glm::rotate(space::identic::m4x4, _rotation.x, space::axis::x)
-			* glm::rotate(space::identic::m4x4, _rotation.y, space::axis::y));
+	const glm::mat4 rotationMat = glm::rotationMatrix(_rotation);
 
 	for (Vertex& v : _vertices)
 	{
@@ -337,7 +334,7 @@ void Mesh::applyScale()
 	{
 		v._position *= _scale;
 
-		if (v._normal != space::zero::xyz)
+		if (v._normal != space::xyz::zero)
 			v._normal = glm::normalize(v._normal / _scale);
 	}
 

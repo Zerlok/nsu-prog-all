@@ -8,7 +8,7 @@
 #include <sharedpointer.h>
 #include "common/utils.hpp"
 #include "opengls.hpp"
-#include "nameable.hpp"
+#include "component.hpp"
 
 
 class AnimationTransformation
@@ -16,36 +16,34 @@ class AnimationTransformation
 	public:
 		AnimationTransformation() {}
 		virtual ~AnimationTransformation() {}
+
+		virtual float calculate(const size_t& current,
+								const size_t& previous,
+								const size_t& next) const = 0;
 };
 
 
-class LinearTransformation
+class LinearTransformation : public AnimationTransformation
 {
 	public:
 		LinearTransformation() {}
 		~LinearTransformation() {}
 
-		template<class T>
-		T calculate(const float& alpha,
-					const T& previousValue,
-					const T& nextValue);
+		float calculate(const size_t& current,
+						const size_t& previous,
+						const size_t& next) const override;
 };
 
 
-class SmoothTransformation
+class SmoothTransformation : public AnimationTransformation
 {
 	public:
 		SmoothTransformation() {}
 		~SmoothTransformation() {}
 
-		template<class T>
-		T calculate(const float& alpha,
-					const T& previousValue,
-					const T& nextValue)
-		{
-			const float ratio = std::pow(std::cos(alpha * M_PI_2), 2.0f);
-			return (ratio*previousValue + (1.0 - ratio)*nextValue);
-		}
+		float calculate(const size_t& current,
+						const size_t& previous,
+						const size_t& next) const override;
 };
 
 
@@ -59,7 +57,7 @@ class AbstractProperty
 		virtual AbstractProperty* clone() = 0;
 		virtual bool equals(const AbstractProperty& prop) const = 0;
 		virtual void fixValue(const size_t& frameNum) = 0;
-		virtual void calculateValue(const size_t& curr,
+		virtual void calculateValue(const float& alpha,
 									const size_t& prev,
 									const size_t& next) = 0;
 };
@@ -95,19 +93,11 @@ class Property : public AbstractProperty
 			_states[frameNum] = _ref;
 		}
 
-		void calculateValue(const size_t& curr,
+		void calculateValue(const float& alpha,
 							const size_t& prev,
 							const size_t& next)
 		{
-			const float& alpha = std::min(std::max((float(curr - prev) / float(next - prev)), 0.0f), 1.0f);
-			T prevState = _states[prev];
-			T nextState = _states[next];
-
-			prevState *= (1.0 - alpha);
-			nextState *= alpha;
-
-			_ref = prevState + nextState;
-//			_ref = (_states[prev]*alpha + _states[next]*(1.0 - alpha));
+			_ref = (_states[next]*alpha + _states[prev]*(1.0 - alpha));
 		}
 
 	private:
@@ -125,23 +115,24 @@ class Property : public AbstractProperty
 };
 
 
-class Animatable : public Nameable
+class Animatable : public Component
 {
 	public:
 		using Properties = std::list<AbstractProperty*>;
 		using Inners = std::list<Animatable*>;
 		using Keyframes = std::list<size_t>;
 
-		Animatable(const std::string& name);
+		Animatable(const Type& type, const std::string& name);
 		Animatable(const Animatable& anim);
 		Animatable(Animatable&& anim);
 		virtual ~Animatable();
 
-		Animatable& operator=(const Animatable& anim);
-		Animatable& operator=(Animatable&& anim);
+		Animatable& operator=(const Animatable& anim) = delete;
+		Animatable& operator=(Animatable&& anim) = delete;
 
 		void addKeyframe(const size_t& frameNum);
-		void setKeyframe(const size_t& frameNum);
+		void setKeyframe(const size_t& frameNum,
+						 const AnimationTransformation* tr);
 
 	protected:
 		void _regInnerProperty(Animatable* anim)
@@ -185,10 +176,10 @@ class Animatable : public Nameable
 		void _clearProperties();
 };
 
-using AnimatablePtr = SharedPointer<Animatable, Nameable>;
+using AnimatablePtr = SharedPointer<Animatable, Component>;
 
 
-class Animation : public Nameable
+class Animation : public Component
 {
 	public:
 		enum class Transformation
@@ -200,12 +191,11 @@ class Animation : public Nameable
 		using Components = std::list<AnimatablePtr>;
 
 		Animation(const std::string& name);
-		~Animation();
+		virtual ~Animation();
 
 		size_t getFrame() const;
 
 		void add(Animatable* anim);
-
 		template<class T>
 		void add(SharedPointer<T>& ptr)
 		{
@@ -221,12 +211,12 @@ class Animation : public Nameable
 
 	private:
 		Components _components;
-		Transformation _transformation;
+		AnimationTransformation* _transformation;
 		size_t _cntr;
 		size_t _length;
 };
 
-using AnimationPtr = SharedPointer<Animation, Nameable>;
+using AnimationPtr = SharedPointer<Animation, Component>;
 using Animations = std::list<AnimationPtr>;
 
 

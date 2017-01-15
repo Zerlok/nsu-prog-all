@@ -6,10 +6,10 @@
 #include "common/color.hpp"
 #include "texture.hpp"
 #include "shader.hpp"
-#include "component.hpp"
+#include "animation.hpp"
 
 
-class Material : public Component
+class Material : public Animatable
 {
 	public:
 		// Constructors / Destructor.
@@ -23,11 +23,6 @@ class Material : public Component
 		// Operators.
 		Material& operator=(const Material& mat);
 		Material& operator=(Material&& mat);
-
-		Material& operator+=(const Material& mat);
-		Material& operator*=(const float& ratio);
-		Material operator+(const Material& mat) const;
-		Material operator*(const float& ratio) const;
 
 		// Methods.
 		bool isValid() const;
@@ -57,7 +52,7 @@ class Material : public Component
 		void _regProperties() override;
 };
 
-using MaterialPtr = SharedPointer<Material, Component>;
+using MaterialPtr = SharedPointer<Material, Animatable>;
 
 
 #endif // __MATERIAL_HPP__

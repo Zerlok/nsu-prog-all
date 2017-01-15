@@ -63,34 +63,58 @@ class Keyboard
 class Mouse
 {
 	public:
-		enum class Code : int
+		enum class Type : int
 		{
-			NONE = 0,
-			LEFT = 1,
-			RIGHT = 2,
-			MIDDLE = 3,
-//			SCROLL_UP,
-//			SCROLL_DOWN,
+			MOVE,
+			PRESS,
+			RELEASE,
 		};
 
-		using ButtonEvent = Event<Code>;
-		using ButtonListener = EventListener<ButtonEvent>;
-		using Handler = EventsHandler<ButtonEvent, ButtonListener>;
+		enum class Button : int
+		{
+			NONE,
+			LEFT,
+			RIGHT,
+			MIDDLE,
+			SCROLL_UP,
+			SCROLL_DOWN,
+		};
+
+		class ClickEvent : public Event<Button, EventTraits<int>>
+		{
+			public:
+				ClickEvent(const Type& type, const Button& btn, const int& x, const int& y);
+				virtual ~ClickEvent() {}
+
+				const int x;
+				const int y;
+		};
+		using Listener = EventListener<ClickEvent>;
+		using Handler = EventsHandler<ClickEvent, Listener>;
 
 		static Mouse& instance();
 
+		void bind(const Type& type, Listener* listener);
+
 		int getX() const;
 		int getY() const;
-		const Code& getState() const;
+
+		void setPos(const int& x, const int& y);
+
+		void moveTo(const int& x,
+					const int& y);
+
+		void reset(const int& button,
+				   const int& state,
+				   const int& x,
+				   const int& y);
 
 		Handler& getHandler();
 
-		void reset(const int& x, const int& y, const Code& code);
-
 	private:
+		Button _activeBtn;
 		int _x;
 		int _y;
-		Code _code;
 		Handler _handler;
 
 		Mouse();

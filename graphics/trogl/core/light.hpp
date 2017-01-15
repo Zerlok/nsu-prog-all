@@ -28,7 +28,8 @@ class Light : public Object
 		static Light createSpot();
 
 		// Constructors / Destructor.
-		Light(const Type& type);
+		Light(const Type& type,
+			  const std::string& name = "");
 		Light(const Light& light);
 		Light(Light&& light);
 		~Light();

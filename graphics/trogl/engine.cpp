@@ -149,6 +149,7 @@ int Engine::_validateScene()
 		l << "Scene " << _scene->getName() << " has " << _animations.size() << " animations:";
 		for (const AnimationPtr& anim : _animations)
 			l << std::endl << "   " << anim->getName();
+		l << logEndl;
 	}
 
 	return 1;
@@ -212,6 +213,11 @@ int Engine::_validateKeyboard()
 
 int Engine::_validateMouse()
 {
+	int x = _frame->getWidth() / 2;
+	int y = _frame->getHeight() / 2;
+	glutWarpPointer(x, y);
+	_mouse.setPos(x, y);
+
 	return 1;
 }
 
@@ -347,6 +353,12 @@ Keyboard& Engine::getKeyboard()
 }
 
 
+Mouse&Engine::getMouse()
+{
+	return _mouse;
+}
+
+
 void Engine::setGUI(const GUIPtr& gui)
 {
 	_status = Status::DIRTY;
@@ -418,9 +430,9 @@ void Engine::showActiveScene()
 	glutSpecialFunc(_kbSpecialDownFunc);
 	glutSpecialUpFunc(_kbSpecialUpFunc);
 
-//	glutMouseFunc(GL20MouseButtonsFunc);
-//	glutPassiveMotionFunc(GL20MouseMotionFunc);
-//	glutMotionFunc(GL20MouseMotionFunc);
+	glutMouseFunc(_mouseClickFunc);
+	glutMotionFunc(_mouseActiveMotionFunc);
+	glutPassiveMotionFunc(_mousePassiveMotionFunc);
 
 	glutMainLoop();
 
@@ -555,6 +567,35 @@ void Engine::_kbSpecialUpFunc(int key, int, int)
 {
 	key += 255;
 	instance()._kbKeyUp(key);
+}
+
+
+void Engine::_mouseClickFunc(int button, int state, int x, int y)
+{
+	logInfo << "Click: " << button << " " << state << " " << x << " " << y << logEndl;
+	instance()._mouse.reset(button, state, x, y);
+}
+
+
+void Engine::_mouseActiveMotionFunc(int x, int y)
+{
+	logInfo << "Active motion: " << x << " " << y << logEndl;
+
+//	x %= instance()._frame->getWidth();
+//	y %= instance()._frame->getHeight();
+//	glutWarpPointer(x, y);
+	instance()._mouse.moveTo(x, y);
+}
+
+
+void Engine::_mousePassiveMotionFunc(int x, int y)
+{
+	logInfo << "Passive motion: " << x << " " << y << logEndl;
+
+//	x %= instance()._frame->getWidth();
+//	y %= instance()._frame->getHeight();
+//	glutWarpPointer(x, y);
+	instance()._mouse.moveTo(x, y);
 }
 
 

@@ -16,15 +16,16 @@ const float Camera::DEFAULT_FAR_DISTANCE = 100.0;
 
 Camera::Camera(const size_t& width,
 			   const size_t& height)
-	: Object(Object::Type::CAMERA),
+	: Object("CAMERA", "Camera"),
 	  _fov(DEFAULT_FOV),
 	  _width(width),
 	  _height(height),
 	  _lookingAtPosition(Object::DEFAULT_POSITION),
-	  _headDirection(space::axis::y),
+	  _headDirection(space::xyz::y),
 	  _nearDistance(DEFAULT_NEAR_DISTANCE),
 	  _farDistance(DEFAULT_FAR_DISTANCE)
 {
+	_position = {5.0f, 3.0f, 0.0f};
 	_regProperties();
 	logDebug << "Camera " << getName() << " created." <<logEndl;
 }
@@ -100,56 +101,6 @@ Camera& Camera::operator=(Camera&& cam)
 	logDebug << "Camera " << getName() << " moved." << logEndl;
 	return (*this);
 }
-
-
-/*
-Camera& Camera::operator+=(const Camera& cam)
-{
-	Object::operator+=(cam);
-	_fov += cam._fov;
-	_width += cam._width;
-	_height += cam._height;
-	_lookingAtPosition += cam._lookingAtPosition;
-	_headDirection += cam._headDirection;
-	_nearDistance += cam._nearDistance;
-	_farDistance += cam._farDistance;
-
-	return (*this);
-}
-
-
-Camera& Camera::operator*=(const float& ratio)
-{
-	Object::operator*=(ratio);
-	_fov *= ratio;
-	_width *= ratio;
-	_height *= ratio;
-	_lookingAtPosition *= ratio;
-	_headDirection *= ratio;
-	_nearDistance *= ratio;
-	_farDistance *= ratio;
-
-	return (*this);
-}
-
-
-Camera Camera::operator+(const Camera& cam) const
-{
-	Camera tmp(*this);
-	tmp += cam;
-
-	return std::move(tmp);
-}
-
-
-Camera Camera::operator*(const float& ratio) const
-{
-	Camera tmp(*this);
-	tmp *= ratio;
-
-	return std::move(tmp);
-}
-*/
 
 
 Camera::operator bool() const
@@ -267,8 +218,9 @@ void Camera::setHeight(const size_t& height)
 
 void Camera::setLookingAtPosition(const vec3& lookingAtPosition)
 {
-	// TODO: Rotate camera in direction of lookingAtPosition.
-    _lookingAtPosition = lookingAtPosition;
+	_lookingAtPosition = lookingAtPosition;
+	const vec3 direction = _lookingAtPosition - _position;
+	_rotation = glm::angles(direction);
 }
 
 
@@ -292,15 +244,15 @@ void Camera::setFarDistance(const float& distance)
 
 void Camera::setPosition(const vec3& position)
 {
-	// TODO: calculate new _rotation from _lookingAtPosition and new position.
+	_lookingAtPosition += (position - _position);
 	Object::setPosition(position);
 }
 
 
 void Camera::setRotation(const vec3& rotation)
 {
-	// TODO: calculate new _lookingAtPosition from new rotation.
 	Object::setRotation(rotation);
+	applyRotation();
 }
 
 
@@ -311,11 +263,10 @@ void Camera::applyPosition()
 
 void Camera::applyRotation()
 {
-}
+	const glm::mat4x4 rotM = glm::rotationMatrix(_rotation);
+	_lookingAtPosition = _position + vec3(rotM * vec4(_lookingAtPosition - _position, 1.0f));
 
-
-void Camera::applyScale()
-{
+	Object::applyRotation();
 }
 
 

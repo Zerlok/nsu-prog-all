@@ -188,11 +188,6 @@ class Mesh : public Object
 		Mesh& operator=(const Mesh& mesh);
 		Mesh& operator=(Mesh&& mesh);
 
-		Mesh& operator+=(const Mesh& mesh);
-		Mesh& operator*=(const float& ratio);
-		Mesh operator+(const Mesh& mesh) const;
-		Mesh operator*(const float& ratio) const;
-
 		// Methods.
 		Vertex& getVertex(const size_t& i);
 		const Vertex& getVertex(const size_t& i) const;

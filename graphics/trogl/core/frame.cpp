@@ -17,7 +17,7 @@ Frame::Frame(const std::string& title,
 			 const size_t& width,
 			 const size_t& height,
 			 const unsigned int& displayMode)
-	: Nameable(title),
+	: Component("FRAME", title),
 	  _title(title),
 	  _posX(posX),
 	  _posY(posY),

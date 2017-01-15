@@ -5,10 +5,10 @@
 #include <vector>
 #include <sharedpointer.h>
 #include "opengls.hpp"
-#include "component.hpp"
+#include "animation.hpp"
 
 
-class Texture : public Component
+class Texture : public Animatable
 {
 	public:
 		enum class Filtering
@@ -36,11 +36,6 @@ class Texture : public Component
 		// Operators.
 		Texture& operator=(const Texture& text);
 		Texture& operator=(Texture&& text);
-
-		Texture& operator+=(const Texture& text);
-		Texture& operator*=(const float& ratio);
-		Texture operator+(const Texture& text) const;
-		Texture operator*(const float& ratio) const;
 
 		// Methods.
 		const int& getSamplerId() const;
@@ -83,7 +78,7 @@ class Texture : public Component
 };
 
 
-using TexturePtr = SharedPointer<Texture, Component>;
+using TexturePtr = SharedPointer<Texture, Animatable>;
 using Textures = std::vector<TexturePtr>;
 
 

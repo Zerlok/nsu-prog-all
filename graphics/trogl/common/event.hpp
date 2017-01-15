@@ -33,7 +33,7 @@ class Event
 				}
 		};
 
-		Event(const size_t& id,
+		Event(const typename Traits::Id& id,
 			  const Value& value,
 			  typename Traits::EventParent* parent = nullptr)
 			: _id(id),

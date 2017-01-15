@@ -4,11 +4,12 @@
 #include <logger.hpp>
 
 
-logger_t moduleLogger = loggerModule(loggerLDebug, loggerDFull);
+logger_t moduleLogger = loggerModule(loggerLWarning, loggerDFull);
 
 
-Animatable::Animatable(const std::string& name)
-	: Nameable(name),
+Animatable::Animatable(const Component::Type& type,
+					   const std::string& name)
+	: Component(type, name),
 	  _keyframes(),
 	  _properties(),
 	  _inners()
@@ -17,7 +18,7 @@ Animatable::Animatable(const std::string& name)
 
 
 Animatable::Animatable(const Animatable& anim)
-	: Nameable(anim),
+	: Component(anim),
 	  _keyframes(anim._keyframes),
 	  _properties(),
 	  _inners()
@@ -26,7 +27,7 @@ Animatable::Animatable(const Animatable& anim)
 
 
 Animatable::Animatable(Animatable&& anim)
-	: Nameable(std::move(anim)),
+	: Component(std::move(anim)),
 	  _keyframes(std::move(anim._keyframes)),
 	  _properties(),
 	  _inners()
@@ -40,26 +41,50 @@ Animatable::~Animatable()
 }
 
 
-Animatable& Animatable::operator=(const Animatable& anim)
-{
-	Nameable::operator=(anim);
-	_keyframes = anim._keyframes;
-//	_clearProperties();
-//	_inners.clear();
+//Animatable& Animatable::operator=(const Animatable& anim)
+//{
+//	if (!sameType(anim))
+//		return (*this);
 
-	return (*this);
-}
+//	_keyframes = anim._keyframes;
+
+//	Properties::const_iterator animIt = anim._properties.cbegin();
+//	for (Properties::iterator it = _properties.begin();
+//		 it != _properties.end();
+//		 ++it, ++animIt)
+//		it->copy(*animIt);
+
+//	Inners::const_iterator animInIt = anim._inners.cbegin();
+//	for (Properties::iterator it = _properties.begin();
+//		 it != _properties.end();
+//		 ++it, ++animInIt)
+//		it->operator=(*(*animIt));
+
+//	return (*this);
+//}
 
 
-Animatable& Animatable::operator=(Animatable&& anim)
-{
-	Nameable::operator=(std::move(anim));
-	_keyframes = std::move(anim._keyframes);
-//	_clearProperties();
-//	_inners.clear();
+//Animatable& Animatable::operator=(Animatable&& anim)
+//{
+//	if (!sameType(anim))
+//		return (*this);
 
-	return (*this);
-}
+//	_keyframes = std::move(anim._keyframes);
+
+//	Properties::const_iterator animIt = anim._properties.cbegin();
+//	for (Properties::iterator it = _properties.begin();
+//		 it != _properties.end();
+//		 ++it, ++animIt)
+//		it->copy(*animIt);
+
+//	Inners::const_iterator animInIt = anim._inners.cbegin();
+//	for (Properties::iterator it = _properties.begin();
+//		 it != _properties.end();
+//		 ++it, ++animInIt)
+//		it->operator=(*(*animIt));
+
+//	return (*this);
+//}
 
 
 void Animatable::addKeyframe(const size_t& frameNum)
@@ -89,19 +114,20 @@ void Animatable::addKeyframe(const size_t& frameNum)
 }
 
 
-void Animatable::setKeyframe(const size_t& frameNum)
+void Animatable::setKeyframe(const size_t& frameNum, const AnimationTransformation* tr)
 {
 	if (_keyframes.empty())
 		return;
 
 	const size_t prev = _getPrevious(frameNum);
 	const size_t next = _getNext(frameNum);
+	const float& alpha = tr->calculate(frameNum, prev, next);
 
 	for (AbstractProperty* p : _properties)
-		p->calculateValue(frameNum, prev, next);
+		p->calculateValue(alpha, prev, next);
 
 	for (Animatable* in : _inners)
-		in->setKeyframe(frameNum);
+		in->setKeyframe(frameNum, tr);
 }
 
 
@@ -144,9 +170,9 @@ void Animatable::_clearProperties()
 
 
 Animation::Animation(const std::string& name)
-	: Nameable(name),
+	: Component("ANIMATION", name),
 	  _components(),
-	  _transformation(Transformation::LINEAR),
+	  _transformation(new LinearTransformation()),
 	  _cntr(0),
 	  _length(0)
 {
@@ -157,7 +183,8 @@ Animation::Animation(const std::string& name)
 
 Animation::~Animation()
 {
-	logDebug << "animation removed." << logEndl;
+	delete _transformation;
+	logDebug << getName() << " animation removed." << logEndl;
 }
 
 
@@ -182,7 +209,7 @@ void Animation::applyFrame(const size_t& num)
 	const size_t n = ((_length != 0) ? (num % _length) : num);
 
 	for (AnimatablePtr& c : _components)
-		c->setKeyframe(n);
+		c->setKeyframe(n, _transformation);
 }
 
 
@@ -200,6 +227,38 @@ void Animation::nextFrame()
 
 void Animation::setTransformation(const Animation::Transformation& tr)
 {
-	_transformation = tr;
+	delete _transformation;
+
+	switch (tr)
+	{
+		case Transformation::LINEAR:
+			_transformation = new LinearTransformation();
+			break;
+		case Transformation::SMOOTH:
+			_transformation = new SmoothTransformation();
+			break;
+	}
 }
 
+
+float clamp(const float& x, const float& a, const float& b)
+{
+	return std::min(std::max(x, a), b);
+}
+
+
+float LinearTransformation::calculate(const size_t& current,
+									  const size_t& previous,
+									  const size_t& next) const
+{
+	return clamp((float(current - previous) / float(next - previous)), 0.0, 1.0);
+}
+
+
+float SmoothTransformation::calculate(const size_t& current,
+									  const size_t& previous,
+									  const size_t& next) const
+{
+	const float& alpha = clamp((float(current - previous) / float(next - previous)), 0.0, 1.0);
+	return std::pow(std::sin(alpha * M_PI_2), 2.0f);
+}

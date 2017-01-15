@@ -73,6 +73,7 @@ void Task::addDefaultCameraRotation()
 	AnimationPtr cameraRotation = new Animation("Camera rotation");
 	cameraRotation->add(camera);
 	cameraRotation->setLength(T);
+	cameraRotation->setTransformation(Animation::Transformation::SMOOTH);
 	scene->addAnimation(cameraRotation);
 	camera->setPosition({a, h, 0.0});
 }

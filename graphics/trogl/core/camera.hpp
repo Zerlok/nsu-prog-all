@@ -28,11 +28,6 @@ class Camera : public Object
 		Camera& operator=(const Camera& cam);
 		Camera& operator=(Camera&& cam);
 
-		Camera& operator+=(const Camera& cam);
-		Camera& operator*=(const float& ratio);
-		Camera operator+(const Camera& cam) const;
-		Camera operator*(const float& ratio) const;
-
 		operator bool() const;
 		bool operator!() const;
 		bool isValid() const;
@@ -61,7 +56,6 @@ class Camera : public Object
 
 		void applyPosition() override;
 		void applyRotation() override;
-		void applyScale() override;
 
 	protected:
 		void _regProperties() override;

@@ -7,6 +7,8 @@
 #include <sharedpointer.h>
 
 #include "core/opengls.hpp"
+#include "core/component.hpp"
+#include "core/animation.hpp"
 #include "core/shader.hpp"
 #include "core/material.hpp"
 #include "core/mesh.hpp"
@@ -16,7 +18,6 @@
 #include "core/camera.hpp"
 #include "core/scene.hpp"
 #include "core/frame.hpp"
-#include "core/animation.hpp"
 
 #include "core/gui.hpp"
 #include "gui/guilabel.hpp"
@@ -83,6 +84,9 @@ class Engine
 		static void _kbLetterUpFunc(unsigned char key, int x, int);
 		static void _kbSpecialDownFunc(int key, int, int);
 		static void _kbSpecialUpFunc(int key, int, int);
+		static void _mouseClickFunc(int button, int state, int x, int y);
+		static void _mouseActiveMotionFunc(int x, int y);
+		static void _mousePassiveMotionFunc(int x, int y);
 		static void _debugGL();
 
 		static std::string _generateWindowTitle(const Scene& scene);

@@ -7,13 +7,12 @@
 logger_t moduleLogger = loggerModule(loggerLWarning, loggerDFull);
 
 
-const std::string Scene::DEFAULT_NAME = "Scene";
 const CameraPtr Scene::DEFAULT_CAMERA = new Camera();
 
 
 Scene::Scene(const std::string& name,
 			 const CameraPtr& camera)
-	: Nameable(name),
+	: Component("SCENE", name),
 	  _camera(camera),
 	  _meshes(),
 	  _lights(),
@@ -28,7 +27,7 @@ Scene::Scene(const std::string& name,
 
 
 Scene::Scene(const Scene& scene)
-	: Nameable(scene),
+	: Component(scene),
 	  _camera(scene._camera),
 	  _meshes(scene._meshes),
 	  _lights(scene._lights),
@@ -50,7 +49,6 @@ Scene::~Scene()
 
 Scene& Scene::operator=(const Scene& scene)
 {
-	Nameable::operator=(scene);
 	_camera = scene._camera;
 	_meshes = scene._meshes;
 	_lights = scene._lights;

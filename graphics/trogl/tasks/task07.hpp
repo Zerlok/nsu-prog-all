@@ -6,17 +6,41 @@
 #include "common/peripherals.hpp"
 
 
-class CameraController : public Keyboard::KeyListener
+class CameraController
 {
 	public:
-		CameraController(const CameraPtr& camera);
-		~CameraController();
+		class KBListener : public Keyboard::KeyListener
+		{
+			public:
+				KBListener(const CameraPtr& cam);
 
-		void onKeyPressed(const Keyboard::Key& key);
-		void onKeyReleased(const Keyboard::Key& key);
+				void onKeyPressed(const Keyboard::Key& key);
+				void onKeyReleased(const Keyboard::Key& key);
+
+			private:
+				CameraPtr _camera;
+		};
+
+		class MListener : public Mouse::Listener
+		{
+			public:
+				MListener(const CameraPtr& cam);
+
+				void onPerformed(const Mouse::ClickEvent& click) override;
+
+			private:
+				CameraPtr _camera;
+		};
+
+		CameraController(const CameraPtr& camera);
+		~CameraController() {}
+
+		KBListener* getKBListener();
+		MListener* getMListener();
 
 	private:
-		CameraPtr _camera;
+		KBListener* _kb;
+		MListener* _m;
 };
 
 
@@ -27,7 +51,7 @@ class Task07ActionInput : public Task
 		~Task07ActionInput() {}
 
 	private:
-		CameraController* _cameraCntrl;
+		CameraController _cameraCntrl;
 };
 
 

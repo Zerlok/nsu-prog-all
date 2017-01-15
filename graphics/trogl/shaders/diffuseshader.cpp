@@ -5,7 +5,7 @@
 #include "common/utils.hpp"
 
 
-logger_t moduleLogger = loggerModule(loggerLDebug, loggerDFull);
+logger_t moduleLogger = loggerModule(loggerLWarning, loggerDFull);
 
 
 std::string DiffuseShader::VS_FILE()
@@ -37,25 +37,18 @@ DiffuseShader::~DiffuseShader()
 
 void DiffuseShader::passObject(const Object* obj) const
 {
-	switch (obj->getObjectType())
-	{
-		case Object::Type::MESH:
-			passMesh((Mesh*)obj);
-			break;
-		case Object::Type::LIGHT:
-			passLight((Light*)obj);
-			break;
-		case Object::Type::CAMERA:
-			passCamera((Camera*)obj);
-		default:
-			break;
-	}
+	const Object::Type& type = obj->getType();
+
+	if (type == "MESH")
+		passMesh((Mesh*)obj);
+	else if (type == "LIGHT")
+		passLight((Light*)obj);
+	else if (type == "CAMERA")
+		passCamera((Camera*)obj);
 }
 
 
 void DiffuseShader::passCamera(const Camera* camera) const
-
-
 {
 	const glm::vec3& pos = camera->getPosition();
 	const glm::vec3& dir = camera->getLookingAtPosition();
@@ -90,14 +83,14 @@ void DiffuseShader::passMesh(const Mesh* mesh) const
 
 void DiffuseShader::passComponent(const Component* comp) const
 {
-	switch (comp->getType())
-	{
-		case Component::Type::OBJECT:
-			passObject((Object*)comp);
-			break;
-		default:
-			break;
-	}
+	const Object::Type& type = comp->getType();
+
+	if (type == "MESH")
+		passMesh((Mesh*)comp);
+	else if (type == "LIGHT")
+		passLight((Light*)comp);
+	else if (type == "CAMERA")
+		passCamera((Camera*)comp);
 }
 
 

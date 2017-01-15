@@ -29,13 +29,12 @@ HEADERS += \
     common/color.hpp \
     common/utils.hpp \
     common/event.hpp \
-    common/peripherals.hpp \
+    common/peripherals.hpp
 
 # Base engine classes.
 HEADERS += core/opengls.hpp \
-    core/nameable.hpp \
-    core/animation.hpp \
     core/component.hpp \
+    core/animation.hpp \
     core/object.hpp
 
 # Textures.
@@ -100,9 +99,8 @@ SOURCES += \
 
 # Base engine classes.
 SOURCES += core/opengls.cpp \
-    core/nameable.cpp \
-    core/animation.cpp \
     core/component.cpp \
+    core/animation.cpp \
     core/object.cpp
 
 # Textures.

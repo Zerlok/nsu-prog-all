@@ -17,7 +17,7 @@ const std::string Shader::DEFAULT_FS_FILE = path::join(Shader::SRC_DIR, "default
 
 
 Shader::Shader(const std::string& name)
-	: Nameable(name),
+	: Component("SHADER", name),
 	  _status(Status::NOT_COMPILED),
 	  _glShader(0),
 	  _subprograms({}),
@@ -29,7 +29,7 @@ Shader::Shader(const std::string& name)
 
 Shader::Shader(const std::string& name,
 			   const std::vector<std::string>& filenames)
-	: Nameable(name),
+	: Component("SHADER", name),
 	  _status(Status::NOT_COMPILED),
 	  _glShader(0),
 	  _subprograms({}),
@@ -43,7 +43,7 @@ Shader::Shader(const std::string& name,
 
 
 Shader::Shader(const Shader& sh)
-	: Nameable(sh),
+	: Component(sh),
 	  _status(Status::NOT_COMPILED),
 	  _glShader(0),
 	  _subprograms(sh._subprograms),
@@ -56,7 +56,7 @@ Shader::Shader(const Shader& sh)
 
 
 Shader::Shader(Shader&& sh)
-	: Nameable(std::move(sh)),
+	: Component(std::move(sh)),
 	  _status(std::move(sh._status)),
 	  _glShader(std::move(sh._glShader)),
 	  _subprograms(std::move(sh._subprograms)),
@@ -83,7 +83,6 @@ Shader::~Shader()
 
 Shader& Shader::operator=(const Shader& sh)
 {
-	Nameable::operator=(sh);
 	_status = Status::NOT_COMPILED;
 	_glShader = 0;
 	_subprograms = sh._subprograms;
@@ -96,7 +95,6 @@ Shader& Shader::operator=(const Shader& sh)
 
 Shader& Shader::operator=(Shader&& sh)
 {
-	Nameable::operator=(sh);
 	_status = std::move(sh._status);
 	_glShader = std::move(sh._glShader);
 	_subprograms = std::move(sh._subprograms);

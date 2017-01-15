@@ -10,7 +10,7 @@ logger_t moduleLogger = loggerModule(loggerLWarning, loggerDFull);
 Material::Material(const std::string& name,
 				   const Color& color,
 				   const ShaderPtr& shader)
-	: Component(Component::Type::MATERIAL, name),
+	: Animatable("MATERIAL", name),
 	  _color(color),
 	  _textures(),
 	  _texturesMixing(0.5),
@@ -24,7 +24,7 @@ Material::Material(const std::string& name,
 
 
 Material::Material(const Material& mat)
-	: Component(mat),
+	: Animatable(mat),
 	  _color(mat._color),
 	  _textures(mat._textures),
 	  _texturesMixing(mat._texturesMixing),
@@ -36,7 +36,7 @@ Material::Material(const Material& mat)
 
 
 Material::Material(Material&& mat)
-	: Component(mat),
+	: Animatable(mat),
 	  _color(std::move(mat._color)),
 	  _textures(std::move(mat._textures)),
 	  _texturesMixing(std::move(mat._texturesMixing)),
@@ -55,7 +55,6 @@ Material::~Material()
 
 Material& Material::operator=(const Material& mat)
 {
-	Component::operator=(mat);
 	_color = mat._color;
 	_texturesMixing = mat._texturesMixing;
 	_textures = mat._textures;
@@ -68,7 +67,6 @@ Material& Material::operator=(const Material& mat)
 
 Material& Material::operator=(Material&& mat)
 {
-	Component::operator=(mat);
 	_color = std::move(mat._color);
 	_texturesMixing = std::move(mat._texturesMixing);
 	_textures = std::move(mat._textures);
@@ -77,52 +75,6 @@ Material& Material::operator=(Material&& mat)
 	logDebug << getName() << " material moved." << logEndl;
 	return (*this);
 }
-
-
-/*
-Material& Material::operator+=(const Material& mat)
-{
-	Component::operator+=(mat);
-	_color += mat._color;
-	_texturesMixing += mat._texturesMixing;
-
-	for (size_t i = 0; std::min(_textures.size(), mat._textures.size()); ++i)
-		_textures[i]->operator+=(mat._textures[i]);
-
-	return (*this);
-}
-
-
-Material& Material::operator*=(const float& ratio)
-{
-	Component::operator*=(ratio);
-	_color *= ratio;
-	_texturesMixing *= ratio;
-
-	for (TexturePtr& text : _textures)
-		text->operator*=(ratio);
-
-	return (*this);
-}
-
-
-Material Material::operator+(const Material& mat) const
-{
-	Material tmp(*this);
-	tmp += mat;
-
-	return std::move(tmp);
-}
-
-
-Material Material::operator*(const float& ratio) const
-{
-	Material tmp(*this);
-	tmp *= ratio;
-
-	return std::move(tmp);
-}
-*/
 
 
 bool Material::isValid() const

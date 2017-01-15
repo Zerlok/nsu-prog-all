@@ -6,14 +6,14 @@
 #include <list>
 #include <sharedpointer.h>
 #include "common/color.hpp"
-#include "nameable.hpp"
+#include "component.hpp"
 #include "mesh.hpp"
 #include "light.hpp"
 #include "camera.hpp"
 #include "frame.hpp"
 
 
-class Scene : public Nameable
+class Scene : public Component
 {
 	public:
 		// Constructors / Destructor.
@@ -62,7 +62,7 @@ class Scene : public Nameable
 		float _ambientPower;
 };
 
-using ScenePtr = SharedPointer<Scene, Nameable>;
+using ScenePtr = SharedPointer<Scene, Component>;
 
 
 #endif // __SCENE_HPP__

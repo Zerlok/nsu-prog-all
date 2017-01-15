@@ -2,23 +2,18 @@
 #define __COMPONENT_HPP__
 
 
-#include <string>
-#include <vector>
 #include <iostream>
+#include <string>
+#include <unordered_map>
 #include <sharedpointer.h>
-#include "animation.hpp"
 
 
-class Component : public Animatable
+class Component
 {
 	public:
 		// Inner classes.
-		enum class Type
-		{
-			TEXTURE,
-			MATERIAL,
-			OBJECT,
-		};
+		using Type = std::string;
+		using Types = std::unordered_map<Type, size_t>;
 
 		class Hash
 		{
@@ -34,25 +29,19 @@ class Component : public Animatable
 		virtual ~Component();
 
 		// Operators.
-		Component& operator=(const Component& c);
-		Component& operator=(Component&& c);
-
-		bool operator==(const Component& c) const;
-		bool operator!=(const Component& c) const;
-		bool operator<(const Component& c) const;
-		bool operator>(const Component& c) const;
-
-//		Component& operator+=(const Component& c);
-//		Component& operator*=(const float& ratio);
-//		Component operator+(const Component& c) const;
-//		Component operator*(const float& ratio) const;
+		Component& operator=(const Component&) = delete;
+		Component& operator=(Component&&) = delete;
 
 		// Methods.
-		const size_t& getId() const;
-		const Type& getType() const;
+		bool sameType(const Component& c) const;
+		bool sameType(Component&& c) const;
 
-		Component& toComponent();
-		const Component& toComponent() const;
+		const Type& getType() const;
+		const size_t& getId() const;
+		const std::string& getName() const;
+		size_t getHash() const;
+
+		void rename(const std::string& name);
 
 		// Virtual methods.
 		virtual std::string toString() const;
@@ -63,13 +52,24 @@ class Component : public Animatable
 	private:
 		// Static fields.
 		static size_t _globID;
+		static Types _types;
+		static std::hash<Type> _typeHash;
+		static std::hash<size_t> _idHash;
+
+		// Statuc methods.
+		static const size_t& _createIdFor(const Type& type);
+		static std::string _nextNumberOf(const std::string& name);
+		static std::string _nameWithId(const std::string& name, const size_t& id);
+		static void _appendWithNumber(std::string& name);
+		static void _renameIfEmptyName(const Type& type, std::string& name);
 
 		// Fields.
 		Type _type;
 		size_t _id;
+		std::string _name;
 };
 
-using ComponentPtr = SharedPointer<Component, Animatable>;
+using ComponentPtr = SharedPointer<Component>;
 
 std::ostream& operator<<(std::ostream& out, const Component& c);
 

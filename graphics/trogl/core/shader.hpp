@@ -8,13 +8,12 @@
 #include <sharedpointer.h>
 #include "common/color.hpp"
 #include "opengls.hpp"
-#include "nameable.hpp"
 #include "component.hpp"
 #include "object.hpp"
 #include "texture.hpp"
 
 
-class Shader : public Nameable
+class Shader : public Component
 {
 	public:
 		// Inner classes.
@@ -218,7 +217,7 @@ class Shader : public Nameable
 
 };
 
-using ShaderPtr = SharedPointer<Shader, Nameable>;
+using ShaderPtr = SharedPointer<Shader, Component>;
 
 std::ostream& operator<<(std::ostream& out, const Shader::Status& st);
 

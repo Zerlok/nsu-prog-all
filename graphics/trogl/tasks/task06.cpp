@@ -3,6 +3,7 @@
 
 #include <fstream>
 #include "meshes/importexport.hpp"
+#include "meshes/plane.hpp"
 
 
 Task06ObjFileImportExport::Task06ObjFileImportExport()
@@ -16,6 +17,11 @@ Task06ObjFileImportExport::Task06ObjFileImportExport()
 	Importer meshImporter;
 	MeshPtr obj = meshImporter.parse(input);
 	scene->addMesh(obj);
+
+	MeshPtr floor = new Plane();
+	floor->setPosition({0.0, -5.0, 0.0});
+	floor->setScale({20.0, 1.0, 20.0});
+	scene->addMesh(floor);
 
 	addDefaultCameraRotation();
 	addDefaultSunRotation();

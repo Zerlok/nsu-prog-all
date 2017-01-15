@@ -40,7 +40,7 @@ void MetamorphoseShader::_passInternalUniforms()
 void MetamorphoseShader::passComponent(const Component* comp) const
 {
 	if ((comp == nullptr)
-			|| (comp->getType() != Component::Type::OBJECT))
+			|| (comp->getType() != "OBJECT"))
 		return;
 
 	passObject((Object*)comp);
@@ -54,10 +54,6 @@ void MetamorphoseShader::passTextures(const Textures&) const
 
 void MetamorphoseShader::passObject(const Object* obj) const
 {
-	if ((obj == nullptr)
-			|| (obj->getObjectType() != Object::Type::MESH))
-		return;
-
 	const glm::vec3& pos = obj->getPosition();
 	glUniform3f(_attrObjPosition, pos.x, pos.y, pos.z);
 }

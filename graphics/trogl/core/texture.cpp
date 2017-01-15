@@ -8,7 +8,7 @@ logger_t moduleLogger = loggerModule(loggerLWarning, loggerDFull);
 
 
 Texture::Texture(const std::string& name)
-	: Component(Component::Type::TEXTURE, name),
+	: Animatable("TEXTURE", name),
 	  _id(0),
 	  _glTexture(0),
 	  _uvOffset(0.0f, 0.0f),
@@ -24,7 +24,7 @@ Texture::Texture(const std::string& name)
 
 
 Texture::Texture(const Texture& text)
-	: Component(text),
+	: Animatable(text),
 	  _id(text._id),
 	  _glTexture(text._glTexture),
 	  _uvOffset(text._uvOffset),
@@ -39,7 +39,7 @@ Texture::Texture(const Texture& text)
 }
 
 Texture::Texture(Texture&& text)
-	: Component(std::move(text)),
+	: Animatable(std::move(text)),
 	  _id(std::move(text._id)),
 	  _glTexture(std::move(text._glTexture)),
 	  _uvOffset(std::move(text._uvOffset)),
@@ -70,7 +70,6 @@ Texture::~Texture()
 
 Texture& Texture::operator=(const Texture& text)
 {
-	Component::operator=(text);
 	_id = text._id;
 	_glTexture = text._glTexture;
 	_uvOffset = text._uvOffset;
@@ -88,7 +87,6 @@ Texture& Texture::operator=(const Texture& text)
 
 Texture& Texture::operator=(Texture&& text)
 {
-	Component::operator=(std::move(text));
 	_id = text._id;
 	_glTexture = text._glTexture;
 	_uvOffset = std::move(text._uvOffset);
@@ -105,49 +103,6 @@ Texture& Texture::operator=(Texture&& text)
 	logDebug << getName() << " moved." << logEndl;
 	return (*this);
 }
-
-/*
-Texture& Texture::operator+=(const Texture& text)
-{
-	Component::operator+=(text);
-	_uvOffset += text._uvOffset;
-	_uvScale += text._uvScale;
-	_color += text._color;
-	_normal += text._normal;
-
-	return (*this);
-}
-
-
-Texture& Texture::operator*=(const float& ratio)
-{
-	Component::operator*=(ratio);
-	_uvOffset *= ratio;
-	_uvScale *= ratio;
-	_color *= ratio;
-	_normal *= ratio;
-
-	return (*this);
-}
-
-
-Texture Texture::operator+(const Texture& text) const
-{
-	Texture tmp(*this);
-	tmp += text;
-
-	return std::move(tmp);
-}
-
-
-Texture Texture::operator*(const float& ratio) const
-{
-	Texture tmp(*this);
-	tmp *= ratio;
-
-	return std::move(tmp);
-}
-*/
 
 
 const int& Texture::getSamplerId() const
