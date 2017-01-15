@@ -10,18 +10,20 @@
 #include "core/shader.hpp"
 #include "core/material.hpp"
 #include "core/mesh.hpp"
+#include "core/primitive.hpp"
+
 #include "core/light.hpp"
 #include "core/camera.hpp"
 #include "core/scene.hpp"
-
 #include "core/frame.hpp"
-#include "core/primitive.hpp"
-#include "common/peripherals.hpp"
+#include "core/animation.hpp"
 
 #include "core/gui.hpp"
 #include "gui/guilabel.hpp"
 #include "gui/guiplane.hpp"
 #include "gui/guifps.hpp"
+
+#include "common/peripherals.hpp"
 
 
 class Engine
@@ -59,13 +61,11 @@ class Engine
 		void setActiveFrame(const FramePtr& frame);
 		void setRenderMode(const RenderMode& mode);
 
-		void enableCameraRotation();
-		void disableCameraRotation();
-
 		void enableFPS();
 		void disableFPS();
 
 		Keyboard& getKeyboard();
+		Mouse& getMouse();
 
 		bool validate();
 		void showActiveScene();
@@ -84,6 +84,7 @@ class Engine
 		static void _kbSpecialDownFunc(int key, int, int);
 		static void _kbSpecialUpFunc(int key, int, int);
 		static void _debugGL();
+
 		static std::string _generateWindowTitle(const Scene& scene);
 		static std::string _toString(const GLenum& type);
 
@@ -123,7 +124,7 @@ class Engine
 		std::string _glVersion;
 		std::string _glShaderVersion;
 		glm::mat4x4 _glMV;
-		glm::mat4x4 _glMVP;
+		glm::mat4x4 _glMP;
 
 		GUIPtr _gui;
 		GUIfpsPtr _guiFPS;
@@ -133,8 +134,9 @@ class Engine
 		FramePtr _frame;
 
 		Keyboard& _keyboard;
+		Mouse& _mouse;
 
-		bool _rotateCamera;
+		Animations _animations;
 };
 
 

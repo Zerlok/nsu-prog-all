@@ -23,10 +23,96 @@ DiffuseMaterial::DiffuseMaterial(const Color& color,
 }
 
 
+DiffuseMaterial::DiffuseMaterial(const DiffuseMaterial& mat)
+	: Material(mat),
+	  _diffuse(mat._diffuse),
+	  _specular(mat._specular),
+	  _hardness(mat._hardness)
+{
+	logDebug << getName() << " copied from " << mat.getName() << logEndl;
+}
+
+
+DiffuseMaterial::DiffuseMaterial(DiffuseMaterial&& mat)
+	: Material(std::move(mat)),
+	  _diffuse(std::move(mat._diffuse)),
+	  _specular(std::move(mat._specular)),
+	  _hardness(std::move(mat._hardness))
+{
+	logDebug << getName() << " moved." << logEndl;
+}
+
+
 DiffuseMaterial::~DiffuseMaterial()
 {
 	logDebug << getName() << " removed." << logEndl;
 }
+
+
+DiffuseMaterial& DiffuseMaterial::operator=(const DiffuseMaterial& mat)
+{
+	Material::operator=(mat);
+	_diffuse = mat._diffuse;
+	_specular = mat._specular;
+	_hardness = mat._hardness;
+
+	logDebug << getName() << " copied from " << mat.getName() << logEndl;
+	return (*this);
+}
+
+
+DiffuseMaterial& DiffuseMaterial::operator=(DiffuseMaterial&& mat)
+{
+	Material::operator=(std::move(mat));
+	_diffuse = std::move(mat._diffuse);
+	_specular = std::move(mat._specular);
+	_hardness = std::move(mat._hardness);
+
+	logDebug << getName() << " moved." << logEndl;
+	return (*this);
+}
+
+
+/*
+DiffuseMaterial& DiffuseMaterial::operator+=(const DiffuseMaterial& mat)
+{
+	Material::operator+=(mat);
+	_diffuse += mat._diffuse;
+	_specular += mat._specular;
+	_hardness += mat._hardness;
+
+	return (*this);
+}
+
+
+DiffuseMaterial& DiffuseMaterial::operator*=(const float& ratio)
+{
+	Material::operator*=(ratio);
+	_diffuse *= ratio;
+	_specular *= ratio;
+	_hardness *= ratio;
+
+	return (*this);
+}
+
+
+DiffuseMaterial DiffuseMaterial::operator+(const DiffuseMaterial& mat) const
+{
+	DiffuseMaterial tmp(*this);
+	tmp += mat;
+
+	return std::move(tmp);
+}
+
+
+DiffuseMaterial DiffuseMaterial::operator*(const float& ratio) const
+{
+	DiffuseMaterial tmp(*this);
+	tmp *= ratio;
+
+	return std::move(tmp);
+}
+*/
 
 
 const float& DiffuseMaterial::getDiffuse() const
@@ -41,7 +127,7 @@ const float& DiffuseMaterial::getSpecular() const
 }
 
 
-const float&DiffuseMaterial::getHardness() const
+const float& DiffuseMaterial::getHardness() const
 {
 	return _hardness;
 }

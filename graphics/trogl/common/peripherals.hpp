@@ -63,7 +63,7 @@ class Keyboard
 class Mouse
 {
 	public:
-		enum class Code
+		enum class Code : int
 		{
 			NONE = 0,
 			LEFT = 1,
@@ -73,11 +73,17 @@ class Mouse
 //			SCROLL_DOWN,
 		};
 
+		using ButtonEvent = Event<Code>;
+		using ButtonListener = EventListener<ButtonEvent>;
+		using Handler = EventsHandler<ButtonEvent, ButtonListener>;
+
 		static Mouse& instance();
 
 		int getX() const;
 		int getY() const;
 		const Code& getState() const;
+
+		Handler& getHandler();
 
 		void reset(const int& x, const int& y, const Code& code);
 
@@ -85,6 +91,7 @@ class Mouse
 		int _x;
 		int _y;
 		Code _code;
+		Handler _handler;
 
 		Mouse();
 		~Mouse();

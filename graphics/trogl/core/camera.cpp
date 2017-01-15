@@ -21,10 +21,11 @@ Camera::Camera(const size_t& width,
 	  _width(width),
 	  _height(height),
 	  _lookingAtPosition(Object::DEFAULT_POSITION),
-	  _headDirection(Object::AXIS_Y),
+	  _headDirection(space::axis::y),
 	  _nearDistance(DEFAULT_NEAR_DISTANCE),
 	  _farDistance(DEFAULT_FAR_DISTANCE)
 {
+	_regProperties();
 	logDebug << "Camera " << getName() << " created." <<logEndl;
 }
 
@@ -39,6 +40,7 @@ Camera::Camera(const Camera& cam)
 	  _nearDistance(cam._nearDistance),
 	  _farDistance(cam._farDistance)
 {
+	_regProperties();
 	logDebug << "Camera " << getName()
 			 << " copied from " << cam.getName()
 			 << logEndl;
@@ -55,6 +57,7 @@ Camera::Camera(Camera&& c)
 	  _nearDistance(std::move(c._nearDistance)),
 	  _farDistance(std::move(c._farDistance))
 {
+	_regProperties();
 	logDebug << "Camera " << getName() << " moved." << logEndl;
 }
 
@@ -97,6 +100,56 @@ Camera& Camera::operator=(Camera&& cam)
 	logDebug << "Camera " << getName() << " moved." << logEndl;
 	return (*this);
 }
+
+
+/*
+Camera& Camera::operator+=(const Camera& cam)
+{
+	Object::operator+=(cam);
+	_fov += cam._fov;
+	_width += cam._width;
+	_height += cam._height;
+	_lookingAtPosition += cam._lookingAtPosition;
+	_headDirection += cam._headDirection;
+	_nearDistance += cam._nearDistance;
+	_farDistance += cam._farDistance;
+
+	return (*this);
+}
+
+
+Camera& Camera::operator*=(const float& ratio)
+{
+	Object::operator*=(ratio);
+	_fov *= ratio;
+	_width *= ratio;
+	_height *= ratio;
+	_lookingAtPosition *= ratio;
+	_headDirection *= ratio;
+	_nearDistance *= ratio;
+	_farDistance *= ratio;
+
+	return (*this);
+}
+
+
+Camera Camera::operator+(const Camera& cam) const
+{
+	Camera tmp(*this);
+	tmp += cam;
+
+	return std::move(tmp);
+}
+
+
+Camera Camera::operator*(const float& ratio) const
+{
+	Camera tmp(*this);
+	tmp *= ratio;
+
+	return std::move(tmp);
+}
+*/
 
 
 Camera::operator bool() const
@@ -170,13 +223,13 @@ float Camera::getWHRatio() const
 }
 
 
-const Object::vec& Camera::getLookingAtPosition() const
+const vec3& Camera::getLookingAtPosition() const
 {
 	return _lookingAtPosition;
 }
 
 
-const Object::vec& Camera::getHeadDirection() const
+const vec3& Camera::getHeadDirection() const
 {
 	return _headDirection;
 }
@@ -212,14 +265,14 @@ void Camera::setHeight(const size_t& height)
 }
 
 
-void Camera::setLookingAtPosition(const Object::vec& lookingAtPosition)
+void Camera::setLookingAtPosition(const vec3& lookingAtPosition)
 {
 	// TODO: Rotate camera in direction of lookingAtPosition.
     _lookingAtPosition = lookingAtPosition;
 }
 
 
-void Camera::setHeadDirection(const Object::vec& headDirection)
+void Camera::setHeadDirection(const vec3& headDirection)
 {
 	_headDirection = headDirection;
 }
@@ -237,14 +290,14 @@ void Camera::setFarDistance(const float& distance)
 }
 
 
-void Camera::setPosition(const Object::vec& position)
+void Camera::setPosition(const vec3& position)
 {
 	// TODO: calculate new _rotation from _lookingAtPosition and new position.
 	Object::setPosition(position);
 }
 
 
-void Camera::setRotation(const Object::vec& rotation)
+void Camera::setRotation(const vec3& rotation)
 {
 	// TODO: calculate new _lookingAtPosition from new rotation.
 	Object::setRotation(rotation);
@@ -263,4 +316,17 @@ void Camera::applyRotation()
 
 void Camera::applyScale()
 {
+}
+
+
+void Camera::_regProperties()
+{
+	Object::_regProperties();
+	_regProperty(_fov);
+	_regProperty(_width);
+	_regProperty(_height);
+	_regProperty(_lookingAtPosition);
+	_regProperty(_headDirection);
+	_regProperty(_nearDistance);
+	_regProperty(_farDistance);
 }

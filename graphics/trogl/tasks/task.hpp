@@ -27,6 +27,9 @@ class Task
 		Lights lights;
 		CameraPtr camera;
 		ScenePtr scene;
+
+		void addDefaultCameraRotation();
+		void addDefaultSunRotation();
 };
 
 

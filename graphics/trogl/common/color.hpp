@@ -13,22 +13,22 @@ class Color
 		static const Color green;
 		static const Color blue;
 
-		static Color makeRGB(const unsigned char& r,
-							 const unsigned char& g,
-							 const unsigned char& b);
-		static Color makeRGBA(const unsigned char& r,
-							  const unsigned char& g,
-							  const unsigned char& b,
-							  const unsigned char& a);
-		static Color makeHSV(const unsigned char& h,
-							 const unsigned char& s,
-							 const unsigned char& v);
+		static Color makeRGB(const int& r,
+							 const int& g,
+							 const int& b);
+		static Color makeRGBA(const int& r,
+							  const int& g,
+							  const int& b,
+							  const int& a);
+		static Color makeHSV(const int& h,
+							 const int& s,
+							 const int& v);
 //		static Color makeHEX(const std::string& hex);
 
-		Color(const unsigned char& red = 0,
-			  const unsigned char& green = 0,
-			  const unsigned char& blue = 0,
-			  const unsigned char& alpha = 255);
+		Color(const int& red = 0,
+			  const int& green = 0,
+			  const int& blue = 0,
+			  const int& alpha = 255);
 		Color(const Color& c);
 		Color(Color&& c);
 		~Color();
@@ -36,10 +36,15 @@ class Color
 		Color& operator=(const Color& c);
 		Color& operator=(Color&& c);
 
-		const unsigned char& getRed() const;
-		const unsigned char& getGreen() const;
-		const unsigned char& getBlue() const;
-		const unsigned char& getAlpha() const;
+		Color& operator+=(const Color& c);
+		Color& operator*=(const float& ratio);
+		Color operator+(const Color& c) const;
+		Color operator*(const float& ratio) const;
+
+		const int& getRed() const;
+		const int& getGreen() const;
+		const int& getBlue() const;
+		const int& getAlpha() const;
 
 		float getRedF() const;
 		float getGreenF() const;
@@ -47,10 +52,10 @@ class Color
 		float getAlphaF() const;
 
 	private:
-		unsigned char _red;
-		unsigned char _green;
-		unsigned char _blue;
-		unsigned char _alpha;
+		int _red;
+		int _green;
+		int _blue;
+		int _alpha;
 };
 
 

@@ -28,6 +28,11 @@ class Camera : public Object
 		Camera& operator=(const Camera& cam);
 		Camera& operator=(Camera&& cam);
 
+		Camera& operator+=(const Camera& cam);
+		Camera& operator*=(const float& ratio);
+		Camera operator+(const Camera& cam) const;
+		Camera operator*(const float& ratio) const;
+
 		operator bool() const;
 		bool operator!() const;
 		bool isValid() const;
@@ -37,33 +42,36 @@ class Camera : public Object
 		const size_t& getWidth() const;
 		const size_t& getHeight() const;
 		float getWHRatio() const;
-		const vec& getLookingAtPosition() const;
-		const vec& getHeadDirection() const;
+		const vec3& getLookingAtPosition() const;
+		const vec3& getHeadDirection() const;
 		const float& getNearDistance() const;
 		const float& getFarDistance() const;
 
 		void setFOV(const float& fov);
 		void setWidth(const size_t& width);
 		void setHeight(const size_t& height);
-		void setLookingAtPosition(const vec& lookingAtPosition);
-		void setHeadDirection(const vec& headDirection);
+		void setLookingAtPosition(const vec3& lookingAtPosition);
+		void setHeadDirection(const vec3& headDirection);
 		void setNearDistance(const float& distance);
 		void setFarDistance(const float& distance);
 
 		// Overriden methods.
-		void setPosition(const vec& position) override;
-		void setRotation(const vec& rotation) override;
+		void setPosition(const vec3& position) override;
+		void setRotation(const vec3& rotation) override;
 
 		void applyPosition() override;
 		void applyRotation() override;
 		void applyScale() override;
 
+	protected:
+		void _regProperties() override;
+
 	private:
 		float _fov;
 		size_t _width;
 		size_t _height;
-		vec _lookingAtPosition;
-		vec _headDirection;
+		vec3 _lookingAtPosition;
+		vec3 _headDirection;
 		float _nearDistance;
 		float _farDistance;
 };

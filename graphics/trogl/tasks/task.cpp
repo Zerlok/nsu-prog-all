@@ -51,3 +51,55 @@ void Task::run()
 	engine.setActiveScene(getScene());
 	engine.showActiveScene();
 }
+
+
+void Task::addDefaultCameraRotation()
+{
+	size_t T = 900;
+	float h = 5.0;
+	float a = 10.0;
+
+	camera->setPosition({a, h, 0.0});
+	camera->addKeyframe(T);
+	camera->setPosition({0.0, h, -a});
+	camera->addKeyframe(3*T/4);
+	camera->setPosition({-a, h, 0.0});
+	camera->addKeyframe(T/2);
+	camera->setPosition({0.0, h, a});
+	camera->addKeyframe(T/4);
+	camera->setPosition({a, h, 0.0});
+	camera->addKeyframe(0);
+
+	AnimationPtr cameraRotation = new Animation("Camera rotation");
+	cameraRotation->add(camera);
+	cameraRotation->setLength(T);
+	scene->addAnimation(cameraRotation);
+	camera->setPosition({a, h, 0.0});
+}
+
+
+void Task::addDefaultSunRotation()
+{
+	size_t T = 400;
+	float h = -1.0;
+	float a = 1.0;
+
+	LightPtr sun = new Light(Light::createSun());
+	scene->addLight(sun);
+
+	sun->setDirection({a, h, 0.0});
+	sun->addKeyframe(T);
+	sun->setDirection({0.0, h, -a});
+	sun->addKeyframe(3*T/4);
+	sun->setDirection({-a, h, 0.0});
+	sun->addKeyframe(T/2);
+	sun->setDirection({0.0, h, a});
+	sun->addKeyframe(T/4);
+	sun->setDirection({a, h, 0.0});
+	sun->addKeyframe(0);
+
+	AnimationPtr sunRotation = new Animation("Sun rotation");
+	sunRotation->add(sun);
+	sunRotation->setLength(T);
+	scene->addAnimation(sunRotation);
+}

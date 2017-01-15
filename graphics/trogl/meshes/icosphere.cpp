@@ -10,7 +10,7 @@ logger_t moduleLogger = loggerModule(loggerLDebug, loggerDFull);
 const float Icosphere::X = 0.525731112119133606f;
 const float Icosphere::Y = 0.0f;
 const float Icosphere::Z = 0.850650808352039932f;
-const std::vector<Object::vec> Icosphere::baseVertices = {
+const std::vector<vec3> Icosphere::baseVertices = {
 	{-X, +Y, +Z},
 	{+X, +Y, +Z},
 	{-X, +Y, -Z},
@@ -36,7 +36,7 @@ Icosphere::Icosphere(const float& radius,
 					 const size_t& subdivide)
 {
 	// TODO: add subdivision (https://schneide.wordpress.com/2016/07/15/generating-an-icosphere-in-c/).
-	for (vec coords : baseVertices)
+	for (vec3 coords : baseVertices)
 	{
 		coords *= radius;
 		addVertex(coords.x, coords.y, coords.z);

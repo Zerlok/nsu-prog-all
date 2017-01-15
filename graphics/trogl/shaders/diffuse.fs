@@ -44,8 +44,9 @@ in vec4 vertexPosition;
 in vec3 vertexNormal;
 in vec2 vertexUV;
 
+uniform mat4 MW;
 uniform mat4 MV;
-uniform mat4 MVP;
+uniform mat4 MP;
 
 uniform CameraStruct camera;
 uniform LampStruct lamp;

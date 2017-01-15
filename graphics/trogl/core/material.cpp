@@ -16,6 +16,7 @@ Material::Material(const std::string& name,
 	  _texturesMixing(0.5),
 	  _shader(shader)
 {
+	_regProperties();
 	logDebug << "Material: " << getName() << " with "
 			  << ((!_shader.is_null()) ? _shader->getName() : "null shader") << " created."
 			  << logEndl;
@@ -29,6 +30,7 @@ Material::Material(const Material& mat)
 	  _texturesMixing(mat._texturesMixing),
 	  _shader(mat._shader)
 {
+	_regProperties();
 	logDebug << getName() << " material copied from " << mat.getName() << logEndl;
 }
 
@@ -40,6 +42,7 @@ Material::Material(Material&& mat)
 	  _texturesMixing(std::move(mat._texturesMixing)),
 	  _shader(std::move(mat._shader))
 {
+	_regProperties();
 	logDebug << getName() << " material moved." << logEndl;
 }
 
@@ -76,6 +79,52 @@ Material& Material::operator=(Material&& mat)
 }
 
 
+/*
+Material& Material::operator+=(const Material& mat)
+{
+	Component::operator+=(mat);
+	_color += mat._color;
+	_texturesMixing += mat._texturesMixing;
+
+	for (size_t i = 0; std::min(_textures.size(), mat._textures.size()); ++i)
+		_textures[i]->operator+=(mat._textures[i]);
+
+	return (*this);
+}
+
+
+Material& Material::operator*=(const float& ratio)
+{
+	Component::operator*=(ratio);
+	_color *= ratio;
+	_texturesMixing *= ratio;
+
+	for (TexturePtr& text : _textures)
+		text->operator*=(ratio);
+
+	return (*this);
+}
+
+
+Material Material::operator+(const Material& mat) const
+{
+	Material tmp(*this);
+	tmp += mat;
+
+	return std::move(tmp);
+}
+
+
+Material Material::operator*(const float& ratio) const
+{
+	Material tmp(*this);
+	tmp *= ratio;
+
+	return std::move(tmp);
+}
+*/
+
+
 bool Material::isValid() const
 {
 	return _shader->isCompiledSuccessfully();
@@ -100,7 +149,7 @@ const Textures& Material::getTextures() const
 }
 
 
-const ShaderPtr&Material::getShader() const
+const ShaderPtr& Material::getShader() const
 {
 	return _shader;
 }
@@ -135,6 +184,7 @@ void Material::setTextureMixing(const float& mixing)
 void Material::addTexture(const TexturePtr& texture)
 {
 	_textures.push_back(texture);
+	_regInnerProperty(_textures.back());
 }
 
 
@@ -155,4 +205,14 @@ void Material::use()
 void Material::_setShader(const ShaderPtr& shader)
 {
 	_shader = shader;
+}
+
+
+void Material::_regProperties()
+{
+	_regProperty(_color);
+	_regProperty(_texturesMixing);
+
+	for (TexturePtr& text : _textures)
+		_regInnerProperty(text.get_pointer());
 }

@@ -6,7 +6,7 @@
 #include <sharedpointer.h>
 #include "core/opengls.hpp"
 #include "common/color.hpp"
-#include "component.hpp"
+#include "nameable.hpp"
 
 
 class GUIComponent
@@ -79,7 +79,7 @@ class GUIComponent
 using GUIComponentPtr = SharedPointer<GUIComponent>;
 
 
-class GUI : public Component
+class GUI : public Nameable
 {
 	public:
 		// Inner classes.
@@ -99,7 +99,7 @@ class GUI : public Component
 		Components _components;
 };
 
-using GUIPtr = SharedPointer<GUI, Component>;
+using GUIPtr = SharedPointer<GUI, Nameable>;
 
 
 #endif // __GUI_HPP__

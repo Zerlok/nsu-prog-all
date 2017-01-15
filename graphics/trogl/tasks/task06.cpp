@@ -3,7 +3,6 @@
 
 #include <fstream>
 #include "meshes/importexport.hpp"
-#include "meshes/plane.hpp"
 
 
 Task06ObjFileImportExport::Task06ObjFileImportExport()
@@ -15,11 +14,11 @@ Task06ObjFileImportExport::Task06ObjFileImportExport()
 		std::cerr << "Cannot open file for " << scene->getName() << std::endl;
 
 	Importer meshImporter;
-	MeshPtr m = meshImporter.parse(input);
-//	m->setRotation(0.0, 0.0, 1.07);
-	scene->addMesh(m);
+	MeshPtr obj = meshImporter.parse(input);
+	scene->addMesh(obj);
 
-	camera->setPosition({0.0, 2.0, 6.0});
-	engine.enableCameraRotation();
+	addDefaultCameraRotation();
+	addDefaultSunRotation();
+
 //	engine.setRenderMode(Engine::RenderMode::EDGES);
 }

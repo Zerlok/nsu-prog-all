@@ -2,6 +2,7 @@
 
 
 #include <algorithm>
+#include <glm/glm.hpp>
 #include <logger.hpp>
 #include "materials/diffusematerial.hpp"
 
@@ -24,6 +25,7 @@ Mesh::Mesh(const std::string& name,
 	  _indexType(indexType)
 
 {
+	_regProperties();
 	logDebug << "Mesh " << getName() << " created." << logEndl;
 }
 
@@ -36,6 +38,7 @@ Mesh::Mesh(const Mesh& mesh)
 	  _indexType(mesh._indexType)
 {
 	_reassignData();
+	_regProperties();
 	logDebug << "Mesh " << getName() << " copied from " << mesh.getName() << logEndl;
 }
 
@@ -48,6 +51,7 @@ Mesh::Mesh(Mesh&& mesh)
 	  _indexType(std::move(mesh._indexType))
 {
 	_reassignData();
+	_regProperties();
 	logDebug << "Mesh " << getName() << " moved." << logEndl;
 }
 
@@ -87,6 +91,44 @@ Mesh& Mesh::operator=(Mesh&& mesh)
 	logDebug << "Mesh " << getName() << " moved." << logEndl;
 	return (*this);
 }
+
+
+/*
+Mesh& Mesh::operator+=(const Mesh& mesh)
+{
+	Object::operator+=(mesh);
+	_material->operator+=(mesh._material);
+
+	return (*this);
+}
+
+
+Mesh& Mesh::operator*=(const float& ratio)
+{
+	Object::operator*=(ratio);
+	_material->operator*=(ratio);
+
+	return (*this);
+}
+
+
+Mesh Mesh::operator+(const Mesh& mesh) const
+{
+	Mesh tmp(*this);
+	tmp += mesh;
+
+	return std::move(tmp);
+}
+
+
+Mesh Mesh::operator*(const float& ratio) const
+{
+	Mesh tmp(*this);
+	tmp *= ratio;
+
+	return std::move(tmp);
+}
+*/
 
 
 Mesh::Vertex& Mesh::getVertex(const size_t& i)
@@ -139,6 +181,20 @@ const Mesh::IndexingType& Mesh::getIndexType() const
 }
 
 
+glm::mat4x4 Mesh::calculateWorldMatrix() const
+{
+	glm::mat4x4 mw(space::identic::m4x4);
+
+	mw *= glm::translate(space::identic::m4x4, _position);
+	mw *= glm::rotate(space::identic::m4x4, _rotation.z, space::axis::z);
+	mw *= glm::rotate(space::identic::m4x4, _rotation.x, space::axis::x);
+	mw *= glm::rotate(space::identic::m4x4, _rotation.y, space::axis::y);
+	mw *= glm::scale(space::identic::m4x4, _scale);
+
+	return std::move(mw);
+}
+
+
 size_t Mesh::addVertex(const float& x,
 					   const float& y,
 					   const float& z,
@@ -152,9 +208,9 @@ size_t Mesh::addVertex(const float& x,
 }
 
 
-size_t Mesh::addVertex(const Object::vec& position,
-					   const Object::vec& normal,
-					   const glm::vec2& uv)
+size_t Mesh::addVertex(const vec3& position,
+					   const vec3& normal,
+					   const vec2& uv)
 {
 	return addVertex(Vertex(position, normal, uv, this));
 }
@@ -224,8 +280,8 @@ void Mesh::recalculateNormals()
 	 *
 	 * Choice 2: Find out is face normal directed as total normal of its verticecs.
 	 */
-	vec vn;
-	vec pn;
+	vec3 vn;
+	vec3 pn;
 	float ratio;
 	for (Polygons::value_type& it : _polygons)
 	{
@@ -233,7 +289,7 @@ void Mesh::recalculateNormals()
 		pn = poly.calculateNormal();
 		vn = poly.getV1().getNormal() + poly.getV2().getNormal() + poly.getV3().getNormal();
 
-		if (vn == zero::xyz)
+		if (vn == space::zero::xyz)
 		{
 			ratio = glm::dot(poly.calculateCenter(), pn);
 			if (ratio < -0.5)
@@ -260,20 +316,15 @@ void Mesh::applyPosition()
 
 void Mesh::applyRotation()
 {
-	static const glm::mat4 I(1);
-	const glm::mat4 xRotationMat = glm::rotate(I, _rotation.x, AXIS_X);
-	const glm::mat4 yRotationMat = glm::rotate(I, _rotation.y, AXIS_Y);
-	const glm::mat4 zRotationMat = glm::rotate(I, _rotation.z, AXIS_Z);
+	const glm::mat4 rotationMat = (
+			glm::rotate(space::identic::m4x4, _rotation.z, space::axis::z)
+			* glm::rotate(space::identic::m4x4, _rotation.x, space::axis::x)
+			* glm::rotate(space::identic::m4x4, _rotation.y, space::axis::y));
 
 	for (Vertex& v : _vertices)
 	{
-		v._position = glm::vec3(xRotationMat * glm::vec4(v._position, 1.0));
-		v._position = glm::vec3(yRotationMat * glm::vec4(v._position, 1.0));
-		v._position = glm::vec3(zRotationMat * glm::vec4(v._position, 1.0));
-
-		v._normal = glm::vec3(xRotationMat * glm::vec4(v._normal, 0.0));
-		v._normal = glm::vec3(yRotationMat * glm::vec4(v._normal, 0.0));
-		v._normal = glm::vec3(zRotationMat * glm::vec4(v._normal, 0.0));
+		v._position = vec3(rotationMat * glm::vec4(v._position, 1.0));
+		v._normal = vec3(rotationMat * glm::vec4(v._normal, 0.0));
 	}
 
 	_rotation = Object::DEFAULT_ROTATION;
@@ -286,7 +337,7 @@ void Mesh::applyScale()
 	{
 		v._position *= _scale;
 
-		if (v._normal != zero::xyz)
+		if (v._normal != space::zero::xyz)
 			v._normal = glm::normalize(v._normal / _scale);
 	}
 
@@ -301,6 +352,13 @@ void Mesh::_reassignData()
 
 	for (Polygons::value_type& it : _polygons)
 		it.second._linkedMesh = this;
+}
+
+
+void Mesh::_regProperties()
+{
+	Object::_regProperties();
+	_regInnerProperty(_material.get_pointer());
 }
 
 
@@ -325,9 +383,9 @@ Mesh::Vertex::Vertex(const float& x,
 }
 
 
-Mesh::Vertex::Vertex(const Object::vec& position,
-					 const Object::vec& normal,
-					 const glm::vec2& uv,
+Mesh::Vertex::Vertex(const vec3& position,
+					 const vec3& normal,
+					 const vec2& uv,
 					 Mesh* mesh)
 	: _idx(-1),
 	  _position(position),
@@ -398,30 +456,30 @@ const size_t& Mesh::Vertex::getIndex() const
 }
 
 
-const Object::vec& Mesh::Vertex::getPosition() const
+const vec3& Mesh::Vertex::getPosition() const
 {
 	return _position;
 }
 
 
-const Object::vec& Mesh::Vertex::getNormal() const
+const vec3& Mesh::Vertex::getNormal() const
 {
 	return _normal;
 }
 
 
-const glm::vec2& Mesh::Vertex::getUV() const
+const vec2& Mesh::Vertex::getUV() const
 {
 	return _uv;
 }
 
 
-Object::vec Mesh::Vertex::calculateNormal() const
+vec3 Mesh::Vertex::calculateNormal() const
 {
 	if (_linkedMesh == nullptr)
 		return _normal;
 
-	vec normal = vec(0.0, 0.0, 0.0);
+	vec3 normal = vec3(0.0, 0.0, 0.0);
 	for (const Triple& tr : _linkedTriples)
 		normal += _linkedMesh->getPolygon(tr).calculateNormal();
 
@@ -441,7 +499,7 @@ void Mesh::Vertex::setNormal(const glm::vec3& nor)
 }
 
 
-void Mesh::Vertex::setUV(const glm::vec2& uv)
+void Mesh::Vertex::setUV(const vec2& uv)
 {
 	_uv = uv;
 }
@@ -673,27 +731,27 @@ Mesh::Vertex& Mesh::Polygon::getV3()
 }
 
 
-Object::vec Mesh::Polygon::calculateNormal() const
+vec3 Mesh::Polygon::calculateNormal() const
 {
 	if (_linkedMesh == nullptr)
-		return std::move(Object::vec(0.0f, 0.0f, 0.0f));
+		return std::move(vec3(0.0f, 0.0f, 0.0f));
 
-	const vec& v1 = getV1().getPosition();
-	const vec& v2 = getV2().getPosition();
-	const vec& v3 = getV3().getPosition();
+	const vec3& v1 = getV1().getPosition();
+	const vec3& v2 = getV2().getPosition();
+	const vec3& v3 = getV3().getPosition();
 
 	return std::move(glm::normalize(glm::cross((v2 - v1), (v3 - v1))));
 }
 
 
-Object::vec Mesh::Polygon::calculateCenter() const
+vec3 Mesh::Polygon::calculateCenter() const
 {
 	if (_linkedMesh == nullptr)
-		return std::move(Object::vec(0.0f, 0.0f, 0.0f));
+		return std::move(vec3(0.0f, 0.0f, 0.0f));
 
-	const vec& v1 = getV1().getPosition();
-	const vec& v2 = getV2().getPosition();
-	const vec& v3 = getV3().getPosition();
+	const vec3& v1 = getV1().getPosition();
+	const vec3& v2 = getV2().getPosition();
+	const vec3& v3 = getV3().getPosition();
 
 	return std::move((v1 + v2 + v3) / 3.0f);
 }

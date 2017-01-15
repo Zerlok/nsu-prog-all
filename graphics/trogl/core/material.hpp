@@ -24,6 +24,11 @@ class Material : public Component
 		Material& operator=(const Material& mat);
 		Material& operator=(Material&& mat);
 
+		Material& operator+=(const Material& mat);
+		Material& operator*=(const float& ratio);
+		Material operator+(const Material& mat) const;
+		Material operator*(const float& ratio) const;
+
 		// Methods.
 		bool isValid() const;
 
@@ -49,6 +54,7 @@ class Material : public Component
 		ShaderPtr _shader;
 
 		void _setShader(const ShaderPtr& shader);
+		void _regProperties() override;
 };
 
 using MaterialPtr = SharedPointer<Material, Component>;

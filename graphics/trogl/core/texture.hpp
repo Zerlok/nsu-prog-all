@@ -29,7 +29,18 @@ class Texture : public Component
 
 		// Constructors / Destructor.
 		Texture(const std::string& name);
+		Texture(const Texture& text);
+		Texture(Texture&& text);
 		virtual ~Texture();
+
+		// Operators.
+		Texture& operator=(const Texture& text);
+		Texture& operator=(Texture&& text);
+
+		Texture& operator+=(const Texture& text);
+		Texture& operator*=(const float& ratio);
+		Texture operator+(const Texture& text) const;
+		Texture operator*(const float& ratio) const;
 
 		// Methods.
 		const int& getSamplerId() const;
@@ -68,9 +79,7 @@ class Texture : public Component
 		bool _useMipmaps;
 
 		void _create();
-
-	private:
-		static int textureID;
+		void _regProperties() override;
 };
 
 

@@ -17,7 +17,7 @@ const std::string Shader::DEFAULT_FS_FILE = path::join(Shader::SRC_DIR, "default
 
 
 Shader::Shader(const std::string& name)
-	: Component(Component::Type::SHADER, name),
+	: Nameable(name),
 	  _status(Status::NOT_COMPILED),
 	  _glShader(0),
 	  _subprograms({}),
@@ -29,7 +29,7 @@ Shader::Shader(const std::string& name)
 
 Shader::Shader(const std::string& name,
 			   const std::vector<std::string>& filenames)
-	: Component(Component::Type::SHADER, name),
+	: Nameable(name),
 	  _status(Status::NOT_COMPILED),
 	  _glShader(0),
 	  _subprograms({}),
@@ -43,7 +43,7 @@ Shader::Shader(const std::string& name,
 
 
 Shader::Shader(const Shader& sh)
-	: Component(sh),
+	: Nameable(sh),
 	  _status(Status::NOT_COMPILED),
 	  _glShader(0),
 	  _subprograms(sh._subprograms),
@@ -56,7 +56,7 @@ Shader::Shader(const Shader& sh)
 
 
 Shader::Shader(Shader&& sh)
-	: Component(sh),
+	: Nameable(std::move(sh)),
 	  _status(std::move(sh._status)),
 	  _glShader(std::move(sh._glShader)),
 	  _subprograms(std::move(sh._subprograms)),
@@ -83,7 +83,7 @@ Shader::~Shader()
 
 Shader& Shader::operator=(const Shader& sh)
 {
-	Component::operator=(sh);
+	Nameable::operator=(sh);
 	_status = Status::NOT_COMPILED;
 	_glShader = 0;
 	_subprograms = sh._subprograms;
@@ -96,7 +96,7 @@ Shader& Shader::operator=(const Shader& sh)
 
 Shader& Shader::operator=(Shader&& sh)
 {
-	Component::operator=(sh);
+	Nameable::operator=(sh);
 	_status = std::move(sh._status);
 	_glShader = std::move(sh._glShader);
 	_subprograms = std::move(sh._subprograms);
@@ -206,6 +206,16 @@ void Shader::unbind()
 }
 
 
+void Shader::passBasicMatrices(const glm::mat4x4& mw,
+							   const glm::mat4x4& mv,
+							   const glm::mat4x4& mp) const
+{
+	_uniforms.pass("MW", mw);
+	_uniforms.pass("MV", mv);
+	_uniforms.pass("MP", mp);
+}
+
+
 void Shader::_loadSubprograms(const std::vector<std::string>& filenames)
 {
 	for (const std::string& filename : filenames)
@@ -256,8 +266,9 @@ bool Shader::_linkShaderProgram()
 
 void Shader::_registerGLUniforms()
 {
+	_uniforms.registerate("MW");
 	_uniforms.registerate("MV");
-	_uniforms.registerate("MVP");
+	_uniforms.registerate("MP");
 }
 
 
@@ -446,24 +457,24 @@ void Shader::Subprogram::unlink(GLuint& glShader)
 
 // -------------------------------- Shader Uniforms -------------------------------- //
 
-const Uniforms::UniLoc Uniforms::NOT_FOUND = Uniforms::UniLoc(-1);
+const Shader::Uniforms::UniLoc Shader::Uniforms::NOT_FOUND(-1);
 
 
-Uniforms::Uniforms()
+Shader::Uniforms::Uniforms()
 	: _uniLocationsMap(),
 	  _glShaderProg()
 {
 }
 
 
-Uniforms::Uniforms(const Uniforms& unis)
+Shader::Uniforms::Uniforms(const Shader::Uniforms& unis)
 	: _uniLocationsMap(unis._uniLocationsMap),
 	  _glShaderProg(unis._glShaderProg)
 {
 }
 
 
-Uniforms::Uniforms(Uniforms&& unis)
+Shader::Uniforms::Uniforms(Shader::Uniforms&& unis)
 	: _uniLocationsMap(std::move(unis._uniLocationsMap)),
 	  _glShaderProg(std::move(unis._glShaderProg))
 {
@@ -471,12 +482,12 @@ Uniforms::Uniforms(Uniforms&& unis)
 }
 
 
-Uniforms::~Uniforms()
+Shader::Uniforms::~Uniforms()
 {
 }
 
 
-Uniforms& Uniforms::operator=(const Uniforms& unis)
+Shader::Uniforms& Shader::Uniforms::operator=(const Shader::Uniforms& unis)
 {
 	_uniLocationsMap = unis._uniLocationsMap;
 	_glShaderProg = unis._glShaderProg;
@@ -485,7 +496,7 @@ Uniforms& Uniforms::operator=(const Uniforms& unis)
 }
 
 
-Uniforms& Uniforms::operator=(Uniforms&& unis)
+Shader::Uniforms& Shader::Uniforms::operator=(Shader::Uniforms&& unis)
 {
 	_uniLocationsMap = std::move(unis._uniLocationsMap);
 	_glShaderProg = std::move(unis._glShaderProg);
@@ -496,20 +507,20 @@ Uniforms& Uniforms::operator=(Uniforms&& unis)
 }
 
 
-void Uniforms::clear()
+void Shader::Uniforms::clear()
 {
 	_uniLocationsMap.clear();
 	_glShaderProg = 0;
 }
 
 
-void Uniforms::setShaderProgram(const GLuint& glProg)
+void Shader::Uniforms::setShaderProgram(const GLuint& glProg)
 {
 	_glShaderProg = glProg;
 }
 
 
-bool Uniforms::registerate(const std::string& name)
+bool Shader::Uniforms::registerate(const std::string& name)
 {
 	UniLocsMap::iterator it = _uniLocationsMap.find(name);
 	if (it != _uniLocationsMap.end())
@@ -527,7 +538,7 @@ bool Uniforms::registerate(const std::string& name)
 }
 
 
-bool Uniforms::registerateArray(const std::string& name, const size_t& len)
+bool Shader::Uniforms::registerateArray(const std::string& name, const size_t& len)
 {
 	UniLocsMap::iterator it = _uniLocationsMap.find(name);
 	if (it != _uniLocationsMap.end())
@@ -567,7 +578,7 @@ bool Uniforms::registerateArray(const std::string& name, const size_t& len)
 }
 
 
-bool Uniforms::pass(const std::string& name,
+bool Shader::Uniforms::pass(const std::string& name,
 					  const float& val1,
 					  const float& val2,
 					  const float& val3,
@@ -577,61 +588,61 @@ bool Uniforms::pass(const std::string& name,
 }
 
 
-void Uniforms::_pass(const GLuint& glLoc, const int& value)
+void Shader::Uniforms::_pass(const GLuint& glLoc, const int& value)
 {
 	glUniform1i(glLoc, value);
 }
 
 
-void Uniforms::_pass(const GLuint& glLoc, const unsigned int& value)
+void Shader::Uniforms::_pass(const GLuint& glLoc, const unsigned int& value)
 {
 	glUniform1ui(glLoc, value);
 }
 
 
-void Uniforms::_pass(const GLuint& glLoc, const float& value)
+void Shader::Uniforms::_pass(const GLuint& glLoc, const float& value)
 {
 	glUniform1f(glLoc, value);
 }
 
 
-void Uniforms::_pass(const GLuint& glLoc, const glm::vec2& value)
+void Shader::Uniforms::_pass(const GLuint& glLoc, const glm::vec2& value)
 {
 	glUniform2f(glLoc, value.x, value.y);
 }
 
 
-void Uniforms::_pass(const GLuint& glLoc, const glm::vec3& value)
+void Shader::Uniforms::_pass(const GLuint& glLoc, const glm::vec3& value)
 {
 	glUniform3f(glLoc, value.x, value.y, value.z);
 }
 
 
-void Uniforms::_pass(const GLuint& glLoc, const glm::vec4& value)
+void Shader::Uniforms::_pass(const GLuint& glLoc, const glm::vec4& value)
 {
 	glUniform4f(glLoc, value.x, value.y, value.z, value.w);
 }
 
 
-void Uniforms::_pass(const GLuint& glLoc, const glm::mat2x2& value)
+void Shader::Uniforms::_pass(const GLuint& glLoc, const glm::mat2x2& value)
 {
 	glUniformMatrix2fv(glLoc, 1, GL_FALSE, &value[0][0]);
 }
 
 
-void Uniforms::_pass(const GLuint& glLoc, const glm::mat3x3& value)
+void Shader::Uniforms::_pass(const GLuint& glLoc, const glm::mat3x3& value)
 {
 	glUniformMatrix3fv(glLoc, 1, GL_FALSE, &value[0][0]);
 }
 
 
-void Uniforms::_pass(const GLuint& glLoc, const glm::mat4x4& value)
+void Shader::Uniforms::_pass(const GLuint& glLoc, const glm::mat4x4& value)
 {
 	glUniformMatrix4fv(glLoc, 1, GL_FALSE, &value[0][0]);
 }
 
 
-void Uniforms::_pass(const GLuint& glLoc, const Color& value)
+void Shader::Uniforms::_pass(const GLuint& glLoc, const Color& value)
 {
 	glUniform4f(glLoc,
 				value.getRedF(),

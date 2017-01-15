@@ -36,21 +36,21 @@ CameraController::~CameraController()
 void CameraController::onKeyPressed(const Keyboard::Key& key)
 {
 	static const float velocity = 1.0;
-	Object::vec pos;
+	vec3 pos;
 
 	switch (key)
 	{
 		case Keyboard::Key::ARROW_UP:
-			pos = Object::vec(0.0, 0.0, velocity);
+			pos = vec3(0.0, 0.0, velocity);
 			break;
 		case Keyboard::Key::ARROW_DOWN:
-			pos = Object::vec(0.0, 0.0, -velocity);
+			pos = vec3(0.0, 0.0, -velocity);
 			break;
 		case Keyboard::Key::ARROW_LEFT:
-			pos = Object::vec(velocity, 0.0, 0.0);
+			pos = vec3(velocity, 0.0, 0.0);
 			break;
 		case Keyboard::Key::ARROW_RIGHT:
-			pos = Object::vec(-velocity, 0.0, 0.0);
+			pos = vec3(-velocity, 0.0, 0.0);
 			break;
 		default:
 			return;

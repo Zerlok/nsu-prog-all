@@ -5,7 +5,6 @@
 #include <vector>
 #include <list>
 #include <unordered_map>
-#include <glm/glm.hpp>
 #include <sharedpointer.h>
 #include "common/color.hpp"
 #include "material.hpp"
@@ -84,9 +83,9 @@ class Mesh : public Object
 					   const float& u,
 					   const float& v,
 					   Mesh* mesh = nullptr);
-				Vertex(const vec& position,
-					   const vec& normal,
-					   const glm::vec2& uv,
+				Vertex(const vec3& position,
+					   const vec3& normal,
+					   const vec2& uv,
 					   Mesh* mesh = nullptr);
 				Vertex(const Vertex& v);
 				Vertex(Vertex&& v);
@@ -98,22 +97,22 @@ class Mesh : public Object
 
 				// Methods.
 				const size_t& getIndex() const;
-				const vec& getPosition() const;
-				const vec& getNormal() const;
-				const glm::vec2& getUV() const;
+				const vec3& getPosition() const;
+				const vec3& getNormal() const;
+				const vec2& getUV() const;
 
-				vec calculateNormal() const;
+				vec3 calculateNormal() const;
 
-				void setPosition(const glm::vec3& pos);
-				void setNormal(const glm::vec3& nor);
-				void setUV(const glm::vec2& uv);
+				void setPosition(const vec3& pos);
+				void setNormal(const vec3& nor);
+				void setUV(const vec2& uv);
 
 			private:
 				// Fields.
 				size_t _idx;
-				Object::vec _position;
-				Object::vec _normal;
-				glm::vec2 _uv;
+				vec3 _position;
+				vec3 _normal;
+				vec2 _uv;
 
 				std::vector<Triple> _linkedTriples; // Aggregation links with Polygons.
 				Mesh* _linkedMesh;
@@ -157,8 +156,8 @@ class Mesh : public Object
 				Vertex& getV2();
 				Vertex& getV3();
 
-				vec calculateNormal() const;
-				vec calculateCenter() const;
+				vec3 calculateNormal() const;
+				vec3 calculateCenter() const;
 				void flip();
 
 			private:
@@ -178,7 +177,7 @@ class Mesh : public Object
 		using Polygons = std::unordered_map<Triple, Polygon, Triple::Hash>;
 
 		// Constructors / Destructor.
-		Mesh(const std::string& name = std::string(),
+		Mesh(const std::string& name = "",
 			 const MaterialPtr& mat = Mesh::DEFAULT_MATERIAL,
 			 const IndexingType& indexType = IndexingType::TRIANGLES);
 		Mesh(const Mesh& mesh);
@@ -188,6 +187,11 @@ class Mesh : public Object
 		// Operators.
 		Mesh& operator=(const Mesh& mesh);
 		Mesh& operator=(Mesh&& mesh);
+
+		Mesh& operator+=(const Mesh& mesh);
+		Mesh& operator*=(const float& ratio);
+		Mesh operator+(const Mesh& mesh) const;
+		Mesh operator*(const float& ratio) const;
 
 		// Methods.
 		Vertex& getVertex(const size_t& i);
@@ -200,6 +204,8 @@ class Mesh : public Object
 		const Polygons& getPolygons() const;
 		const MaterialPtr& getMaterial() const;
 		const IndexingType& getIndexType() const;
+
+		glm::mat4x4 calculateWorldMatrix() const;
 
 		size_t addVertex(const float& x,
 						 const float& y,
@@ -214,9 +220,9 @@ class Mesh : public Object
 						   const float& z,
 						   const float& u = 0.0f,
 						   const float& v = 0.0f);
-		size_t addVertex(const vec& position,
-						 const vec& normal,
-						 const glm::vec2& uv);
+		size_t addVertex(const vec3& position,
+						 const vec3& normal,
+						 const vec2& uv);
 		size_t addVertex(const Vertex& v);
 		bool addPolygon(const size_t& i1,
 						const size_t& i2,
@@ -243,6 +249,8 @@ class Mesh : public Object
 
 		// Methods.
 		void _reassignData();
+
+		void _regProperties() override;
 };
 
 using MeshPtr = SharedPointer<Mesh, Object>;

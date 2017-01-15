@@ -37,26 +37,34 @@ class Light : public Object
 		Light& operator=(const Light& light);
 		Light& operator=(Light&& light);
 
+		Light& operator+=(const Light& light);
+		Light& operator*=(const float& ratio);
+		Light operator+(const Light& light) const;
+		Light operator*(const float& ratio) const;
+
 		// Methods.
 		const Type& getLightType() const;
 		const float& getPower() const;
-		const vec& getDirection() const;
+		const vec3& getDirection() const;
 		const Color& getColor() const;
 		const float& getInnerAngle() const;
 		const float& getOutterAngle() const;
 
 		void setPower(const float& power);
-		void setDirection(const vec& direction);
+		void setDirection(const vec3& direction);
 		void setColor(const Color& color);
 		void setInnerAngle(const float& innerAngle);
 		void setOutterAngle(const float& outterAngle);
 
-		void faceDirectionTo(const vec& position);
+		void faceDirectionTo(const vec3& position);
 
 		// Overriden methods.
 		void applyPosition() override;
 		void applyRotation() override;
 		void applyScale() override;
+
+	protected:
+		void _regProperties() override;
 
 	private:
 		// Static methods.
@@ -66,7 +74,7 @@ class Light : public Object
 		// Fields.
 		Type _lightType;
 		float _power;
-		vec _direction;
+		vec3 _direction;
 		Color _color;
 		float _innerAngle;
 		float _outterAngle;

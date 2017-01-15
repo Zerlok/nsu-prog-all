@@ -6,13 +6,13 @@
 #include <sharedpointer.h>
 #include "common/color.hpp"
 #include "opengls.hpp"
-#include "component.hpp"
+#include "nameable.hpp"
 
 
 /*
  * Abstract frame. Implements a single buffer frame.
  */
-class Frame : public Component
+class Frame : public Nameable
 {
 	public:
 		// Constructors / Destructor.
@@ -76,7 +76,7 @@ class Frame : public Component
 		};
 };
 
-using FramePtr = SharedPointer<Frame, Component>;
+using FramePtr = SharedPointer<Frame, Nameable>;
 using SingleFrame = Frame;
 
 

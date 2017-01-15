@@ -12,7 +12,7 @@ class Icosphere : public Mesh
 		static const float X;
 		static const float Y;
 		static const float Z;
-		static const std::vector<Object::vec> baseVertices;
+		static const std::vector<vec3> baseVertices;
 		static const std::vector<Triple> basePolygons;
 
 		Icosphere(const float& radius = 1.0,

@@ -115,6 +115,12 @@ Mouse& Mouse::instance()
 }
 
 
+Mouse::Handler& Mouse::getHandler()
+{
+	return _handler;
+}
+
+
 Mouse::Mouse()
 {
 }

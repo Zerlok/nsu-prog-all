@@ -6,13 +6,14 @@
 #include <list>
 #include <sharedpointer.h>
 #include "common/color.hpp"
-#include "camera.hpp"
+#include "nameable.hpp"
 #include "mesh.hpp"
 #include "light.hpp"
+#include "camera.hpp"
 #include "frame.hpp"
 
 
-class Scene : public Component
+class Scene : public Nameable
 {
 	public:
 		// Constructors / Destructor.
@@ -30,10 +31,11 @@ class Scene : public Component
 		const Color& getBgColor() const;
 		const CameraPtr& getCamera() const;
 		LightPtr getAmbientLight() const;
-		FramePtr getFrameOfView() const;
+		const Animations& getAnimations() const;
 
 		void addMesh(const MeshPtr& mesh);
 		void addLight(const LightPtr& light);
+		void addAnimation(const AnimationPtr& animation);
 		void setCamera(const CameraPtr& camera);
 		void setBgColor(const Color& color);
 		void setAmbient(const float& power);
@@ -54,12 +56,13 @@ class Scene : public Component
 		CameraPtr _camera;
 		Meshes _meshes;
 		Lights _lights;
+		Animations _animations;
 
 		Color _bgColor;
 		float _ambientPower;
 };
 
-using ScenePtr = SharedPointer<Scene, Component>;
+using ScenePtr = SharedPointer<Scene, Nameable>;
 
 
 #endif // __SCENE_HPP__

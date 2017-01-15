@@ -24,7 +24,10 @@ class Primitive
 		void compileGLShaders();
 		void initGLGeometry(const MeshPtr& mesh);
 
-		void draw(const LightPtr& light, const CameraPtr& camera, const glm::mat4x4& mv, const glm::mat4x4& mvp);
+		void draw(const LightPtr& light,
+				  const CameraPtr& camera,
+				  const glm::mat4x4& mv,
+				  const glm::mat4x4& mp);
 
 	private:
 		// Static fields.
@@ -32,15 +35,16 @@ class Primitive
 		static const size_t _uvStep;
 		static const size_t _indexStep;
 
+		MeshPtr _mesh;
+
 		// OpenGL attributes.
 		GLuint _glVBO;	// Vertex Buffer Object
 		GLuint _glUVBO;	// vertex UV map Buffer Object
 		GLuint _glNBO;	// vertex Normal Buffer Object
 		GLuint _glIBO;	// Index Buffer Object
 
-		Mesh::IndexingType _indexType;
 		size_t _indicesSize;
-		Object::vec _position;
+		vec3 _position;
 		MaterialPtr _material;
 		ShaderPtr _shader;
 

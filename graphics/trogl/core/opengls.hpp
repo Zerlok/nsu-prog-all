@@ -17,4 +17,17 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 
+
+namespace glm
+{
+	glm::vec2 operator*(const float& val, const glm::vec2& vec);
+	glm::vec2 operator*(const glm::vec2& vec, const float& val);
+	glm::vec2 operator+(const glm::vec2& val1, const glm::vec2& val2);
+
+	glm::vec3 operator*(const float& val, const glm::vec3& vec);
+	glm::vec3 operator*(const glm::vec3& vec, const float& val);
+	glm::vec3 operator+(const glm::vec3& val1, const glm::vec3& val2);
+}
+
+
 #endif // __OPENGLS_HPP__

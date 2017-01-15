@@ -87,6 +87,30 @@ namespace vectorutils
 }
 
 
+namespace castutils
+{
+	template<class F, class T>
+	class Castor
+	{
+		public:
+			using From = F;
+			using To = T;
+
+			Castor() {}
+			~Castor() {}
+
+			T& ref(F& x) { return x; }
+			T* ptr(F* x) { return x; }
+			T* ptr(F& x) { return &x; }
+			T& ref(F* x) { return (*x); }
+			const T& ref(const F& x) { return x; }
+			const T* ptr(const F* x) { return x; }
+			const T* ptr(const F& x) { return &x; }
+			const T& ref(const F* x) { return (*x); }
+	};
+}
+
+
 template<class T>
 std::ostream& operator<<(std::ostream& out, const std::vector<T>& values)
 {

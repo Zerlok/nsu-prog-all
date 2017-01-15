@@ -13,7 +13,18 @@ class DiffuseMaterial : public Material
 						const float& diffuse = 1.0,
 						const float& specular = 0.5,
 						const float& hardness = 7.0);
+		DiffuseMaterial(const DiffuseMaterial& mat);
+		DiffuseMaterial(DiffuseMaterial&& mat);
 		~DiffuseMaterial();
+
+		// Operators.
+		DiffuseMaterial& operator=(const DiffuseMaterial& mat);
+		DiffuseMaterial& operator=(DiffuseMaterial&& mat);
+
+		DiffuseMaterial& operator+=(const DiffuseMaterial& mat);
+		DiffuseMaterial& operator*=(const float& ratio);
+		DiffuseMaterial operator+(const DiffuseMaterial& mat) const;
+		DiffuseMaterial operator*(const float& ratio) const;
 
 		// Methods.
 		const float& getDiffuse() const;

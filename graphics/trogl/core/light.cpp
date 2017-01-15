@@ -7,7 +7,7 @@
 logger_t moduleLogger = loggerModule(loggerLWarning, loggerDFull);
 
 
-static const Object::vec defaultLampPosition {0.0, 30.0, 0.0};
+static const vec3 defaultLampPosition {0.0, 30.0, 0.0};
 
 
 Light Light::createPoint()
@@ -24,7 +24,7 @@ Light Light::createSun()
 {
 	Light lamp(Light::Type::SUN);
 	lamp.setPower(1.0);
-	lamp.setDirection({0.0, -1.0, 0.0});
+	lamp.setDirection(-space::axis::y);
 	lamp.setPosition(defaultLampPosition);
 
 	return std::move(lamp);
@@ -48,11 +48,12 @@ Light::Light(const Type& type)
 	: Object(Object::Type::LIGHT),
 	  _lightType(type),
 	  _power(1.0),
-	  _direction(-Object::AXIS_Y),
+	  _direction(-space::axis::y),
 	  _color(Color::white),
 	  _innerAngle(0.0),
 	  _outterAngle(0.0)
 {
+	_regProperties();
 	logDebug << "Light [" << _lightType << "] created." << logEndl;
 }
 
@@ -66,6 +67,7 @@ Light::Light(const Light& light)
 	  _innerAngle(light._innerAngle),
 	  _outterAngle(light._outterAngle)
 {
+	_regProperties();
 	logDebug << "Light [" << _lightType << "] copied." << logEndl;
 }
 
@@ -79,6 +81,7 @@ Light::Light(Light&& light)
 	  _innerAngle(std::move(light._innerAngle)),
 	  _outterAngle(std::move(light._outterAngle))
 {
+	_regProperties();
 	logDebug << "Light [" << _lightType << "] moved." << logEndl;
 }
 
@@ -117,6 +120,50 @@ Light& Light::operator=(Light&& light)
 }
 
 
+/*
+Light& Light::operator+=(const Light& light)
+{
+	Object::operator+=(light);
+	_power += light._power;
+	_direction += light._direction;
+	_color += light._color;
+	_innerAngle += light._innerAngle;
+	_outterAngle += light._outterAngle;
+
+	return (*this);
+}
+
+
+Light& Light::operator*=(const float& ratio)
+{
+	Object::operator*=(ratio);
+	_power *= ratio;
+	_direction *= ratio;
+	_color *= ratio;
+	_innerAngle *= ratio;
+	_outterAngle *= ratio;
+
+	return (*this);
+}
+
+
+Light Light::operator+(const Light& light) const
+{
+	Light tmp(*this);
+	tmp += light;
+	return std::move(tmp);
+}
+
+
+Light Light::operator*(const float& ratio) const
+{
+	Light tmp(*this);
+	tmp *= ratio;
+	return std::move(tmp);
+}
+*/
+
+
 const Light::Type& Light::getLightType() const
 {
 	return _lightType;
@@ -129,7 +176,7 @@ const float& Light::getPower() const
 }
 
 
-const Object::vec& Light::getDirection() const
+const vec3& Light::getDirection() const
 {
 	return _direction;
 }
@@ -159,7 +206,7 @@ void Light::setPower(const float& power)
 }
 
 
-void Light::setDirection(const Object::vec& direction)
+void Light::setDirection(const vec3& direction)
 {
 	if (_hasDirection(_lightType))
 		_direction = glm::normalize(direction);
@@ -186,7 +233,7 @@ void Light::setOutterAngle(const float& outterAngle)
 }
 
 
-void Light::faceDirectionTo(const Object::vec& position)
+void Light::faceDirectionTo(const vec3& position)
 {
 	setDirection(position - _position);
 }
@@ -204,6 +251,17 @@ void Light::applyRotation()
 
 void Light::applyScale()
 {
+}
+
+
+void Light::_regProperties()
+{
+	Object::_regProperties();
+	_regProperty(_power);
+	_regProperty(_direction);
+	_regProperty(_color);
+	_regProperty(_innerAngle);
+	_regProperty(_outterAngle);
 }
 
 

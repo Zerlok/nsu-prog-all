@@ -13,10 +13,11 @@ const CameraPtr Scene::DEFAULT_CAMERA = new Camera();
 
 Scene::Scene(const std::string& name,
 			 const CameraPtr& camera)
-	: Component(Component::Type::SCENE, name),
+	: Nameable(name),
 	  _camera(camera),
 	  _meshes(),
 	  _lights(),
+	  _animations(),
 	  _bgColor(Color::grey),
 	  _ambientPower(0.0)
 {
@@ -27,10 +28,11 @@ Scene::Scene(const std::string& name,
 
 
 Scene::Scene(const Scene& scene)
-	: Component(scene),
+	: Nameable(scene),
 	  _camera(scene._camera),
 	  _meshes(scene._meshes),
 	  _lights(scene._lights),
+	  _animations(scene._animations),
 	  _bgColor(scene._bgColor),
 	  _ambientPower(scene._ambientPower)
 {
@@ -48,10 +50,11 @@ Scene::~Scene()
 
 Scene& Scene::operator=(const Scene& scene)
 {
-	Component::operator=(scene);
+	Nameable::operator=(scene);
 	_camera = scene._camera;
 	_meshes = scene._meshes;
 	_lights = scene._lights;
+	_animations = scene._animations;
 	_bgColor = scene._bgColor;
 	_ambientPower = scene._ambientPower;
 
@@ -93,6 +96,12 @@ LightPtr Scene::getAmbientLight() const
 }
 
 
+const Animations&Scene::getAnimations() const
+{
+	return _animations;
+}
+
+
 void Scene::addMesh(const MeshPtr& mesh)
 {
 	_meshes.push_back(mesh);
@@ -106,6 +115,12 @@ void Scene::addLight(const LightPtr& light)
 	_lights.push_back(light);
 	logDebug << "Lamp: " << _lights.back()->getName()
 			 << " added to scene " << getName() << logEndl;
+}
+
+
+void Scene::addAnimation(const AnimationPtr& animation)
+{
+	_animations.push_back(animation);
 }
 
 

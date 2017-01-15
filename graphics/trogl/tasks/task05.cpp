@@ -9,7 +9,7 @@
 Task05NormalMappingEarth::Task05NormalMappingEarth()
 	: Task("Task05 - Normal Mapping (Earth)")
 {
-	engine.enableCameraRotation();
+//	engine.enableCameraRotation();
 //	engine.setRenderMode(Engine::RenderMode::EDGES);
 
 	camera->setPosition({0.0, 3.0, 10.0});
@@ -34,8 +34,6 @@ Task05NormalMappingEarth::Task05NormalMappingEarth()
 
 	scene->addMesh(earth);
 
-	LightPtr sun = new Light(Light::createSun());
-	sun->setDirection({0.0, 0.0, 0.0});
-	sun->setPosition({0.0, 0.0, 100.0});
-	scene->addLight(sun);
+	addDefaultCameraRotation();
+	addDefaultSunRotation();
 }

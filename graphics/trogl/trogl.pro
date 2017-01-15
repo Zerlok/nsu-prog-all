@@ -29,10 +29,12 @@ HEADERS += \
     common/color.hpp \
     common/utils.hpp \
     common/event.hpp \
-    common/peripherals.hpp
+    common/peripherals.hpp \
 
 # Base engine classes.
 HEADERS += core/opengls.hpp \
+    core/nameable.hpp \
+    core/animation.hpp \
     core/component.hpp \
     core/object.hpp
 
@@ -74,7 +76,6 @@ HEADERS += \
     core/light.hpp \
     core/camera.hpp \
     core/frame.hpp \
-    core/animation.hpp \
     core/scene.hpp
 
 # Engine.
@@ -95,10 +96,12 @@ HEADERS += tasks/task.hpp \
 SOURCES += \
     common/color.cpp \
     common/utils.cpp \
-    common/peripherals.cpp
+    common/peripherals.cpp \
 
 # Base engine classes.
-SOURCES += \
+SOURCES += core/opengls.cpp \
+    core/nameable.cpp \
+    core/animation.cpp \
     core/component.cpp \
     core/object.cpp
 
@@ -140,7 +143,6 @@ SOURCES += \
     core/light.cpp \
     core/camera.cpp \
     core/frame.cpp \
-    core/animation.cpp \
     core/scene.cpp
 
 # Engine.

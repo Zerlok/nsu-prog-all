@@ -35,7 +35,8 @@ Engine::Engine()
 	  _camera(nullptr),
 	  _primitives(),
 	  _frame(nullptr),
-	  _keyboard(Keyboard::instance())
+	  _keyboard(Keyboard::instance()),
+	  _mouse(Mouse::instance())
 {
 	logDebug << "Engine created." << logEndl;
 }
@@ -141,6 +142,15 @@ int Engine::_validateScene()
 		return 0;
 	}
 
+	if (!_scene->getAnimations().empty())
+	{
+		_animations = _scene->getAnimations();
+		Logger& l = logInfo;
+		l << "Scene " << _scene->getName() << " has " << _animations.size() << " animations:";
+		for (const AnimationPtr& anim : _animations)
+			l << std::endl << "   " << anim->getName();
+	}
+
 	return 1;
 }
 
@@ -231,11 +241,10 @@ void Engine::_glUpdateMatrices()
 	_glMV = glm::lookAt(_camera->getPosition(),
 						_camera->getLookingAtPosition(),
 						_camera->getHeadDirection());
-	_glMVP = glm::perspective(_camera->getFOV(),
-							  _camera->getWHRatio(),
-							  _camera->getNearDistance(),
-							  _camera->getFarDistance());
-	_glMVP *= _glMV;
+	_glMP = glm::perspective(_camera->getFOV(),
+							 _camera->getWHRatio(),
+							 _camera->getNearDistance(),
+							 _camera->getFarDistance());
 }
 
 
@@ -368,18 +377,6 @@ void Engine::setRenderMode(const Engine::RenderMode& mode)
 }
 
 
-void Engine::enableCameraRotation()
-{
-	_rotateCamera = true;
-}
-
-
-void Engine::disableCameraRotation()
-{
-	_rotateCamera = false;
-}
-
-
 bool Engine::validate()
 {
 	int result = 0;
@@ -475,21 +472,11 @@ void Engine::_viewFrame()
 {
 	_frame->clear(_scene->getBgColor());
 
-	// TODO: move into animation.
-	// Camera flying.
-	static const float a = std::sqrt(std::pow(_camera->getPosition().x, 2) + std::pow(_camera->getPosition().z, 2));
-	static const float h = _camera->getPosition().y;
-	const float psy = -getTimeDouble() / 11.0;
-
 	_glUpdateMatrices();
-
-	LightPtr light = _scene->getLights().front();
-	light->setPosition({a*cos(psy), light->getPosition().y, a*sin(psy)});
-	light->faceDirectionTo({cos(-psy), 0.0, sin(-psy)});
 
 	for (Primitive& obj : _primitives)
 		for (const LightPtr& light : _scene->getLights())
-			obj.draw(light, _camera, _glMV, _glMVP);
+			obj.draw(light, _camera, _glMV, _glMP);
 
 	_viewGUI();
 	_frame->flush();
@@ -499,7 +486,10 @@ void Engine::_viewFrame()
 void Engine::_prepareNextFrame()
 {
 	_keyboard.getHandler().handleEvents();
-//	_mouse.getHandler().handleEvents();
+	_mouse.getHandler().handleEvents();
+
+	for (AnimationPtr& anim : _animations)
+		anim->nextFrame();
 }
 
 
@@ -511,14 +501,14 @@ void Engine::_reshape(int width, int height)
 
 void Engine::_kbKeyDown(const int& key)
 {
-//	logInfo << "KB pressed: " << key << " " << char(key) << logEndl;
+//	logInfo << "KB pressed: " << key << logEndl;
 	_keyboard.setKeyPressed(key);
 }
 
 
 void Engine::_kbKeyUp(const int& key)
 {
-//	logInfo << "KB released: " << key << " " << char(key) << logEndl;
+//	logInfo << "KB released: " << key << logEndl;
 	_keyboard.setKeyReleased(key);
 }
 

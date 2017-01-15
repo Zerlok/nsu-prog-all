@@ -8,11 +8,34 @@
 #include "component.hpp"
 
 
-namespace zero
+namespace space
 {
-	static const glm::vec2 xy(0.0f, 0.0f);
-	static const glm::vec3 xyz(0.0f, 0.0f, 0.0f);
+	namespace zero
+	{
+		static const glm::vec2 xy(0.0f, 0.0f);
+		static const glm::vec3 xyz(0.0f, 0.0f, 0.0f);
+
+		static const glm::mat4x4 m3x3(0);
+		static const glm::mat4x4 m4x4(0);
+	}
+
+	namespace identic
+	{
+		static const glm::mat4x4 m3x3(1);
+		static const glm::mat4x4 m4x4(1);
+	}
+
+	namespace axis
+	{
+		static const glm::vec3 x(1.0f, 0.0f, 0.0f);
+		static const glm::vec3 y(0.0f, 1.0f, 0.0f);
+		static const glm::vec3 z(0.0f, 0.0f, 1.0f);
+	}
 }
+
+
+using vec2 = glm::vec2;
+using vec3 = glm::vec3;
 
 
 class Object : public Component
@@ -26,8 +49,6 @@ class Object : public Component
 			CAMERA = 'C',
 		};
 
-		using vec = glm::vec3;
-
 		// Constructors / Destructor.
 		Object(const Type& type,
 			   const std::string& name = DEFAULT_NAME);
@@ -39,12 +60,17 @@ class Object : public Component
 		Object& operator=(const Object& obj);
 		Object& operator=(Object&& obj);
 
+		Object& operator+=(const Object& obj);
+		Object& operator*=(const float& ratio);
+		Object operator+(const Object& obj) const;
+		Object operator*(const float& ratio) const;
+
 		// Methods.
 		const Type& getObjectType() const;
 
-		const vec& getPosition() const;
-		const vec& getRotation() const;
-		const vec& getScale() const;
+		const vec3& getPosition() const;
+		const vec3& getRotation() const;
+		const vec3& getScale() const;
 
 		Object& toObject();
 		const Object& toObject() const;
@@ -60,13 +86,13 @@ class Object : public Component
 					  const float& z);
 
 		// Virtual methods.
-		virtual void setPosition(const vec& position);
-		virtual void setRotation(const vec& rotation);
-		virtual void setScale(const vec& scale);
+		virtual void setPosition(const vec3& position);
+		virtual void setRotation(const vec3& rotation);
+		virtual void setScale(const vec3& scale);
 
-		virtual void applyPosition() = 0;
-		virtual void applyRotation() = 0;
-		virtual void applyScale() = 0;
+		virtual void applyPosition();
+		virtual void applyRotation();
+		virtual void applyScale();
 
 		// Friend functions.
 		friend std::ostream& operator<<(std::ostream& out, const Object& obj);
@@ -77,17 +103,17 @@ class Object : public Component
 	protected:
 		// Static fields.
 		static const std::string DEFAULT_NAME;
-		static const vec DEFAULT_POSITION;
-		static const vec DEFAULT_ROTATION;
-		static const vec DEFAULT_SCALE;
-		static const vec AXIS_X;
-		static const vec AXIS_Y;
-		static const vec AXIS_Z;
+		static const vec3 DEFAULT_POSITION;
+		static const vec3 DEFAULT_ROTATION;
+		static const vec3 DEFAULT_SCALE;
 
 		// Fields.
-		vec _position;
-		vec _rotation;
-		vec _scale;
+		vec3 _position;
+		vec3 _rotation;
+		vec3 _scale;
+
+		// Methods.
+		virtual void _regProperties() override;
 
 	private:
 		// Static fields.
@@ -103,8 +129,8 @@ using ObjectPtr = SharedPointer<Object, Component>;
 
 
 std::ostream& operator<<(std::ostream& out, const Object& obj);
-
-std::ostream& operator<<(std::ostream& out, const Object::vec& v);
+std::ostream& operator<<(std::ostream& out, const vec2& v);
+std::ostream& operator<<(std::ostream& out, const vec3& v);
 
 
 

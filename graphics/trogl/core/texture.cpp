@@ -7,12 +7,9 @@
 logger_t moduleLogger = loggerModule(loggerLWarning, loggerDFull);
 
 
-int Texture::textureID = 0;
-
-
 Texture::Texture(const std::string& name)
 	: Component(Component::Type::TEXTURE, name),
-	  _id(textureID++),
+	  _id(0),
 	  _glTexture(0),
 	  _uvOffset(0.0f, 0.0f),
 	  _uvScale(1.0f, 1.0f),
@@ -23,6 +20,37 @@ Texture::Texture(const std::string& name)
 	  _useMipmaps(false)
 {
 	logDebug << getName() << " texture created." << logEndl;
+}
+
+
+Texture::Texture(const Texture& text)
+	: Component(text),
+	  _id(text._id),
+	  _glTexture(text._glTexture),
+	  _uvOffset(text._uvOffset),
+	  _uvScale(text._uvScale),
+	  _color(text._color),
+	  _normal(text._normal),
+	  _filtering(text._filtering),
+	  _wrapping(text._wrapping),
+	  _useMipmaps(text._useMipmaps)
+{
+	logDebug << getName() << " copied from " << text.getName() << logEndl;
+}
+
+Texture::Texture(Texture&& text)
+	: Component(std::move(text)),
+	  _id(std::move(text._id)),
+	  _glTexture(std::move(text._glTexture)),
+	  _uvOffset(std::move(text._uvOffset)),
+	  _uvScale(std::move(text._uvScale)),
+	  _color(std::move(text._color)),
+	  _normal(std::move(text._normal)),
+	  _filtering(std::move(text._filtering)),
+	  _wrapping(std::move(text._wrapping)),
+	  _useMipmaps(std::move(text._useMipmaps))
+{
+	logDebug << getName() << " texture moved." << logEndl;
 }
 
 
@@ -38,6 +66,88 @@ Texture::~Texture()
 
 	logDebug << getName() << " texture removed." << logEndl;
 }
+
+
+Texture& Texture::operator=(const Texture& text)
+{
+	Component::operator=(text);
+	_id = text._id;
+	_glTexture = text._glTexture;
+	_uvOffset = text._uvOffset;
+	_uvScale = text._uvScale;
+	_color = text._color;
+	_normal = text._normal;
+	_filtering = text._filtering;
+	_wrapping = text._wrapping;
+	_useMipmaps = text._useMipmaps;
+
+	logDebug << getName() << " copied from " << text.getName() << logEndl;
+	return (*this);
+}
+
+
+Texture& Texture::operator=(Texture&& text)
+{
+	Component::operator=(std::move(text));
+	_id = text._id;
+	_glTexture = text._glTexture;
+	_uvOffset = std::move(text._uvOffset);
+	_uvScale = std::move(text._uvScale);
+	_color = std::move(text._color);
+	_normal = std::move(text._normal);
+	_filtering = std::move(text._filtering);
+	_wrapping = std::move(text._wrapping);
+	_useMipmaps = std::move(text._useMipmaps);
+
+	text._id = 0;
+	text._glTexture = 0;
+
+	logDebug << getName() << " moved." << logEndl;
+	return (*this);
+}
+
+/*
+Texture& Texture::operator+=(const Texture& text)
+{
+	Component::operator+=(text);
+	_uvOffset += text._uvOffset;
+	_uvScale += text._uvScale;
+	_color += text._color;
+	_normal += text._normal;
+
+	return (*this);
+}
+
+
+Texture& Texture::operator*=(const float& ratio)
+{
+	Component::operator*=(ratio);
+	_uvOffset *= ratio;
+	_uvScale *= ratio;
+	_color *= ratio;
+	_normal *= ratio;
+
+	return (*this);
+}
+
+
+Texture Texture::operator+(const Texture& text) const
+{
+	Texture tmp(*this);
+	tmp += text;
+
+	return std::move(tmp);
+}
+
+
+Texture Texture::operator*(const float& ratio) const
+{
+	Texture tmp(*this);
+	tmp *= ratio;
+
+	return std::move(tmp);
+}
+*/
 
 
 const int& Texture::getSamplerId() const
@@ -152,9 +262,6 @@ void Texture::generate()
 	GLuint magFiltering;
 	if (_filtering == Filtering::ANISOTROPIC)
 	{
-//		if (!gltIsExtSupported("GL_EXT_texture_filter_anisotropic"))
-//			logWarning << "OpenGL does not supports anisotropic filtering, switching to trilinear filtering" << logEndl;
-
 		float maxAnisotropicLevel;
 		glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &maxAnisotropicLevel);
 		logInfo << "OpenGL anisotropic filtering is supported, max level: " << maxAnisotropicLevel << logEndl;
@@ -192,9 +299,20 @@ void Texture::generate()
 
 void Texture::_create()
 {
+	static int textureID;
 	if (_glTexture != 0)
 		return;
 
+	_id = textureID++;
 	glGenTextures(1, &_glTexture);
 	bind();
+}
+
+
+void Texture::_regProperties()
+{
+	_regProperty(_uvOffset);
+	_regProperty(_uvScale);
+	_regProperty(_color);
+	_regProperty(_normal);
 }

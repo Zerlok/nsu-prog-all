@@ -13,39 +13,30 @@ const size_t Primitive::_indexStep = 3;
 
 
 Primitive::Primitive(const MeshPtr& mesh)
-	: _glVBO(0),
+	: _mesh(mesh),
+	  _glVBO(0),
 	  _glUVBO(0),
 	  _glNBO(0),
 	  _glIBO(0),
 	  _indicesSize(0),
-	  _position(mesh->getPosition()),
 	  _material(mesh->getMaterial())
 {
-	/*
-	 * Apply mesh vertices positions from object attributes
-	 * (in reverse order: scale, rotation, position).
-	 */
-	MeshPtr mesh0 = mesh;
-//	mesh0->recalculateNormals();
-	mesh0->applyScale();
-	mesh0->applyRotation();
-	mesh0->applyPosition();
-
-	initGLGeometry(mesh);
+	_mesh->recalculateNormals();
+	initGLGeometry(_mesh);
 	if (_isGLGeometryValid())
 		_material->compile();
 
-	logDebug << "Primitive from mesh " << mesh->getName() << " created." << logEndl;
+	logDebug << "Primitive from " << mesh->getName() << " created." << logEndl;
 }
 
 
 Primitive::Primitive(Primitive&& obj)
-	: _glVBO(std::move(obj._glVBO)),
+	: _mesh(std::move(obj._mesh)),
+	  _glVBO(std::move(obj._glVBO)),
 	  _glUVBO(std::move(obj._glUVBO)),
 	  _glNBO(std::move(obj._glNBO)),
 	  _glIBO(std::move(obj._glIBO)),
 	  _indicesSize(std::move(obj._indicesSize)),
-	  _position(std::move(obj._position)),
 	  _material(std::move(obj._material))
 {
 	obj._glVBO = 0;
@@ -93,14 +84,11 @@ void Primitive::initGLGeometry(const MeshPtr& mesh)
 void Primitive::draw(const LightPtr& light,
 					 const CameraPtr& camera,
 					 const glm::mat4x4& mv,
-					 const glm::mat4x4& mvp)
+					 const glm::mat4x4& mp)
 {
 	_material->use();
-
 	const ShaderPtr& sh = _material->getShader();
-	sh->passUniform("MV", mv);
-	sh->passUniform("MVP", mvp);
-	sh->passUniform("meshPosition", _position);
+	sh->passBasicMatrices(_mesh->calculateWorldMatrix(), mv, mp);
 	sh->passComponent(light);
 	sh->passComponent(camera);
 
@@ -205,7 +193,6 @@ void Primitive::_initIndexBufferObject(const MeshPtr& mesh)
 		indicies[i++] = poly.getIdx2();
 		indicies[i++] = poly.getIdx3();
 	}
-	_indexType = mesh->getIndexType();
 	_indicesSize = indicies.size() * sizeof(GLuint);
 
 	glGenBuffers(1, &_glIBO);

@@ -13,30 +13,30 @@ const Color Color::green = Color(0, 255, 0);
 const Color Color::blue = Color(0, 0, 255);
 
 
-Color Color::makeRGB(const unsigned char& r,
-					 const unsigned char& g,
-					 const unsigned char& b)
+Color Color::makeRGB(const int& r,
+					 const int& g,
+					 const int& b)
 {
 	return std::move(Color(r, g, b));
 }
 
 
-Color Color::makeRGBA(const unsigned char& r,
-					  const unsigned char& g,
-					  const unsigned char& b,
-					  const unsigned char& a)
+Color Color::makeRGBA(const int& r,
+					  const int& g,
+					  const int& b,
+					  const int& a)
 {
 	return std::move(Color(r, g, b, a));
 }
 
 
-Color Color::makeHSV(const unsigned char& h,
-					 const unsigned char& s,
-					 const unsigned char& v)
+Color Color::makeHSV(const int& h,
+					 const int& s,
+					 const int& v)
 {
-	unsigned char r;
-	unsigned char g;
-	unsigned char b;
+	int r;
+	int g;
+	int b;
 
 	unsigned char region, remainder, p, q, t;
 
@@ -81,17 +81,23 @@ Color Color::makeHSV(const unsigned char& h,
 }
 
 
-Color::Color(const unsigned char& red,
-			 const unsigned char& green,
-			 const unsigned char& blue,
-			 const unsigned char& alpha)
-	: _red(red), _green(green), _blue(blue), _alpha(alpha)
+Color::Color(const int& red,
+			 const int& green,
+			 const int& blue,
+			 const int& alpha)
+	: _red(red),
+	  _green(green),
+	  _blue(blue),
+	  _alpha(alpha)
 {
 }
 
 
 Color::Color(const Color& c)
-	: _red(c._red), _green(c._green), _blue(c._blue), _alpha(c._alpha)
+	: _red(c._red),
+	  _green(c._green),
+	  _blue(c._blue),
+	  _alpha(c._alpha)
 {
 }
 
@@ -132,25 +138,65 @@ Color& Color::operator=(Color&& c)
 }
 
 
-const unsigned char& Color::getRed() const
+Color& Color::operator+=(const Color& c)
+{
+	_red += c._red;
+	_green += c._green;
+	_blue += c._blue;
+	_alpha += c._alpha;
+
+	return (*this);
+}
+
+
+Color& Color::operator*=(const float& ratio)
+{
+	_red *= ratio;
+	_green *= ratio;
+	_blue *= ratio;
+	_alpha *= ratio;
+
+	return (*this);
+}
+
+
+Color Color::operator+(const Color& c) const
+{
+	Color tmp(*this);
+	tmp += c;
+
+	return std::move(tmp);
+}
+
+
+Color Color::operator*(const float& ratio) const
+{
+	Color tmp(*this);
+	tmp *= ratio;
+
+	return std::move(tmp);
+}
+
+
+const int& Color::getRed() const
 {
 	return _red;
 }
 
 
-const unsigned char& Color::getGreen() const
+const int& Color::getGreen() const
 {
 	return _green;
 }
 
 
-const unsigned char& Color::getBlue() const
+const int& Color::getBlue() const
 {
 	return _blue;
 }
 
 
-const unsigned char& Color::getAlpha() const
+const int& Color::getAlpha() const
 {
 	return _alpha;
 }
@@ -158,23 +204,23 @@ const unsigned char& Color::getAlpha() const
 
 float Color::getRedF() const
 {
-	return float(_red) / 255.0f;
+	return float(_red % 256) / 255.0f;
 }
 
 
 float Color::getGreenF() const
 {
-	return float(_green) / 255.0f;
+	return float(_green % 256) / 255.0f;
 }
 
 
 float Color::getBlueF() const
 {
-	return float(_blue) / 255.0f;
+	return float(_blue % 256) / 255.0f;
 }
 
 
 float Color::getAlphaF() const
 {
-	return float(_alpha) / 255.0f;
+	return float(_alpha % 256) / 255.0f;
 }
