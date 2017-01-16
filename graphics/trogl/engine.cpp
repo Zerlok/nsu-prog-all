@@ -495,36 +495,6 @@ void Engine::_viewFrame()
 }
 
 
-void Engine::_prepareNextFrame()
-{
-	_keyboard.getHandler().handleEvents();
-	_mouse.getHandler().handleEvents();
-
-	for (AnimationPtr& anim : _animations)
-		anim->nextFrame();
-}
-
-
-void Engine::_reshape(int width, int height)
-{
-	_frame->resize(width, height);
-}
-
-
-void Engine::_kbKeyDown(const int& key)
-{
-//	logInfo << "KB pressed: " << key << logEndl;
-	_keyboard.setKeyPressed(key);
-}
-
-
-void Engine::_kbKeyUp(const int& key)
-{
-//	logInfo << "KB released: " << key << logEndl;
-	_keyboard.setKeyReleased(key);
-}
-
-
 void Engine::_displayFunc()
 {
 	instance()._viewFrame();
@@ -533,68 +503,64 @@ void Engine::_displayFunc()
 
 void Engine::_idleFunc()
 {
-	instance()._prepareNextFrame();
+	Engine& e = instance();
+
+	e._keyboard.getHandler().handleEvents();
+	e._mouse.getHandler().handleEvents();
+
+	for (AnimationPtr& anim : e._animations)
+		anim->nextFrame();
+
 	glutPostRedisplay();
 }
 
 
 void Engine::_reshapeFunc(int width, int height)
 {
-	instance()._reshape(width, height);
+	instance()._frame->resize(width, height);
 }
 
 
 void Engine::_kbLetterDownFunc(unsigned char key, int, int)
 {
-	instance()._kbKeyDown(int(key));
+	instance()._keyboard.setKeyPressed(int(key));
 }
 
 
 void Engine::_kbLetterUpFunc(unsigned char key, int, int)
 {
-	instance()._kbKeyUp(int(key));
+	instance()._keyboard.setKeyReleased(int(key));
 }
 
 
 void Engine::_kbSpecialDownFunc(int key, int, int)
 {
 	key += 255;
-	instance()._kbKeyDown(key);
+	instance()._keyboard.setKeyPressed(key);
 }
 
 
 void Engine::_kbSpecialUpFunc(int key, int, int)
 {
 	key += 255;
-	instance()._kbKeyUp(key);
+	instance()._keyboard.setKeyReleased(key);
 }
 
 
 void Engine::_mouseClickFunc(int button, int state, int x, int y)
 {
-	logInfo << "Click: " << button << " " << state << " " << x << " " << y << logEndl;
 	instance()._mouse.reset(button, state, x, y);
 }
 
 
 void Engine::_mouseActiveMotionFunc(int x, int y)
 {
-	logInfo << "Active motion: " << x << " " << y << logEndl;
-
-//	x %= instance()._frame->getWidth();
-//	y %= instance()._frame->getHeight();
-//	glutWarpPointer(x, y);
 	instance()._mouse.moveTo(x, y);
 }
 
 
 void Engine::_mousePassiveMotionFunc(int x, int y)
 {
-	logInfo << "Passive motion: " << x << " " << y << logEndl;
-
-//	x %= instance()._frame->getWidth();
-//	y %= instance()._frame->getHeight();
-//	glutWarpPointer(x, y);
 	instance()._mouse.moveTo(x, y);
 }
 

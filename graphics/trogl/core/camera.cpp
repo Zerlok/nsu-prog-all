@@ -25,7 +25,7 @@ Camera::Camera(const size_t& width,
 	  _nearDistance(DEFAULT_NEAR_DISTANCE),
 	  _farDistance(DEFAULT_FAR_DISTANCE)
 {
-	_position = {5.0f, 3.0f, 0.0f};
+	_position = {0.0f, 0.0f, 5.0f};
 	_regProperties();
 	logDebug << "Camera " << getName() << " created." <<logEndl;
 }
@@ -265,8 +265,6 @@ void Camera::applyRotation()
 {
 	const glm::mat4x4 rotM = glm::rotationMatrix(_rotation);
 	_lookingAtPosition = _position + vec3(rotM * vec4(_lookingAtPosition - _position, 1.0f));
-
-	Object::applyRotation();
 }
 
 

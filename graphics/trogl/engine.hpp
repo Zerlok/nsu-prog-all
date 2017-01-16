@@ -116,11 +116,6 @@ class Engine
 		void _viewGUI();
 		void _viewFrame();
 
-		void _prepareNextFrame();
-		void _reshape(int width, int height);
-		void _kbKeyDown(const int& key);
-		void _kbKeyUp(const int& key);
-
 		// Fields.
 		Status _status;
 

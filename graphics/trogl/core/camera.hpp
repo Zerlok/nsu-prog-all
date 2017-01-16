@@ -45,6 +45,7 @@ class Camera : public Object
 		void setFOV(const float& fov);
 		void setWidth(const size_t& width);
 		void setHeight(const size_t& height);
+		// Caution: this method changes camera rotation.
 		void setLookingAtPosition(const vec3& lookingAtPosition);
 		void setHeadDirection(const vec3& headDirection);
 		void setNearDistance(const float& distance);
@@ -52,6 +53,7 @@ class Camera : public Object
 
 		// Overriden methods.
 		void setPosition(const vec3& position) override;
+		// Caution: this method changes camera lookingAtPosition.
 		void setRotation(const vec3& rotation) override;
 
 		void applyPosition() override;
