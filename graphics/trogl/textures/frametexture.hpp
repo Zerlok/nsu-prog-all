@@ -8,7 +8,14 @@
 class FrameTexture : public Texture
 {
 	public:
-		FrameTexture(const size_t& width,
+		enum class Type
+		{
+			COLOR,
+			DEPTH,
+		};
+
+		FrameTexture(const Type& type,
+					 const size_t& width,
 					 const size_t& height);
 		~FrameTexture();
 
@@ -17,6 +24,7 @@ class FrameTexture : public Texture
 		void generate() override;
 
 	private:
+		Type _type;
 		size_t _width;
 		size_t _height;
 };

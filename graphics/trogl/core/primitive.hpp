@@ -2,6 +2,7 @@
 #define __PRIMITIVE_HPP__
 
 
+#include <list>
 #include "opengls.hpp"
 #include "object.hpp"
 #include "shader.hpp"
@@ -24,6 +25,8 @@ class Primitive
 		const MaterialPtr& getMaterial() const;
 		const ShaderPtr& getShader() const;
 		const MeshPtr& getMesh() const;
+
+		glm::mat4x4 calculateWorldMatrix() const;
 
 		void compileGLShaders();
 		void initGLGeometry(const MeshPtr& mesh);
@@ -58,6 +61,8 @@ class Primitive
 
 		void _passShaderAttributes();
 };
+
+using Primitives = std::list<Primitive>;
 
 
 #endif // __PRIMITIVE_HPP__

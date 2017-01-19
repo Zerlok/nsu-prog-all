@@ -16,8 +16,7 @@ const int LIGHTTEXTLIM = 16;
 
 
 in vec4 vertexPosition;
-
-uniform mat4 MV;
+in vec4 vertexNormal;
 
 uniform LampStruct lamp;
 
@@ -26,11 +25,11 @@ uniform int texturesLen;
 
 
 out vec4 color;
+out float depth;
 
 
 void main()
 {
-    float ndcDepth = (2.0 * gl_FragCoord.z - gl_DepthRange.near - gl_DepthRange.far) / (gl_DepthRange.far - gl_DepthRange.near);
-	float clipDepth = ndcDepth / gl_FragCoord.w;
-	color = vec4((clipDepth * 0.5) + 0.5);
+    color = clamp(dot(vertexNormal, vec4(0.0, 0.0, 1.0, 0.0)), 0.0, 1.0) * lamp.power * lamp.color;
+	depth = gl_FragCoord.z;
 }

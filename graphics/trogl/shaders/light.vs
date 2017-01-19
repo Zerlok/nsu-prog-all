@@ -7,12 +7,15 @@ in vec2 uvMap;
 
 uniform mat4 MW;
 uniform mat4 MV;
+uniform mat4 MP;
 
 out vec4 vertexPosition;
+out vec4 vertexNormal;
 
 
 void main()
 {
-    vertexPosition = MV * MW * position;
+    vertexPosition = MP * MV * MW * position;
+	vertexNormal = MV * MW * normal;
 	gl_Position = vertexPosition;
 }

@@ -156,6 +156,12 @@ const float& Light::getOutterAngle() const
 }
 
 
+const glm::mat4x4& Light::getViewMatrix() const
+{
+	return _viewMat;
+}
+
+
 const glm::mat4x4& Light::getOrthoMatrix() const
 {
 	return _orthoMat;
@@ -231,8 +237,8 @@ void Light::setPosition(const vec3& position)
 
 void Light::applyPosition()
 {
-	_orthoMat = glm::lookAt(_position, _direction, space::xyz::y)
-			* glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, 0.0f, glm::length(_direction));
+	_viewMat = glm::lookAt(_position, _direction, space::xyz::y);
+	_orthoMat = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, -10.0f, 100.0f);
 }
 
 
@@ -254,6 +260,8 @@ void Light::_regProperties()
 	_regProperty(_color);
 	_regProperty(_innerAngle);
 	_regProperty(_outterAngle);
+	_regProperty(_viewMat);
+	_regProperty(_orthoMat);
 }
 
 

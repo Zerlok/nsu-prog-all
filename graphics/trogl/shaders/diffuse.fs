@@ -44,6 +44,9 @@ in vec4 vertexPosition;
 in vec3 vertexNormal;
 in vec2 vertexUV;
 
+in vec4 shadowCoord;
+
+
 uniform mat4 MW;
 uniform mat4 MV;
 uniform mat4 MP;
@@ -59,8 +62,7 @@ uniform float texturesMixing;
 
 uniform float shadows;
 uniform sampler2D shadowMap;
-uniform float screenW;
-uniform float screenH;
+uniform sampler2D intensityMap;
 
 
 float lampIntensity(
@@ -194,6 +196,12 @@ void main()
 
     lampInt *= material.specular;
 	specularInt *= material.specular;
+
+    if (texture2D(shadowMap, shadowCoord.xy).z < shadowCoord.z - 0.005)
+	{
+	    lampInt *= 0.5;
+		specularInt *= 0.5;
+	}
 
     color = mix(material.color, textureColor, texturesMixing) * lamp.color * (lampInt + specularInt);
 	color = clamp(color, 0.0, 1.0);

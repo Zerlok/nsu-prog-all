@@ -50,6 +50,8 @@ class Light : public Object
 		const Color& getColor() const;
 		const float& getInnerAngle() const;
 		const float& getOutterAngle() const;
+
+		const glm::mat4x4& getViewMatrix() const;
 		const glm::mat4x4& getOrthoMatrix() const;
 
 		ShaderPtr& getShader();
@@ -86,6 +88,8 @@ class Light : public Object
 		Color _color;
 		float _innerAngle;
 		float _outterAngle;
+
+		glm::mat4x4 _viewMat;
 		glm::mat4x4 _orthoMat;
 
 		ShaderPtr _shader;

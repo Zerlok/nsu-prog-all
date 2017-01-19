@@ -530,17 +530,6 @@ void Engine::_viewGUI()
 	glPopMatrix();
 }
 
-//	RTTFrame& f = (RTTFrame&)_frame.get_reference();
-//	LightPtr light = _scene->getLights().front();
-//	Primitive& cube = _primitives.front();
-//	Primitive& house = _primitives.back();
-
-	// Render house into FBO.
-//	glBindFramebuffer(GL_FRAMEBUFFER, f->getFBO());
-//	house.draw(light, _camera, _glMV, _glMP);
-
-//	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-//	cube.draw(light, _camera, _glMV, _glMP);
 
 void Engine::_viewFrame()
 {
@@ -549,14 +538,7 @@ void Engine::_viewFrame()
 	_glUpdateMatrices();
 	_frame->setViewMatrix(_glMV);
 	_frame->setProjectionMatrix(_glMP);
-
-	for (Primitive& obj : _primitives)
-	{
-		for (const LightPtr& light : _lights)
-		{
-			_frame->draw(obj, light, _camera);
-		}
-	}
+	_frame->draw(_primitives, _lights, _camera);
 
 	_viewGUI();
 

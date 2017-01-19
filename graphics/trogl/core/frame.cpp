@@ -34,7 +34,7 @@ Frame::Frame(const std::string& title,
 
 Frame::~Frame()
 {
-	logDebug << "Frame " << _title << " removed." << logEndl;
+	logDebug << "Frame " << getName() << " removed." << logEndl;
 }
 
 
@@ -103,20 +103,23 @@ void Frame::clear(const Color& color)
 }
 
 
-void Frame::draw(const Primitive& primitive,
-				 const LightPtr& light,
+void Frame::draw(const Primitives& primitives,
+				 const Lights& lights,
 				 const CameraPtr& camera)
 {
-	MaterialPtr mat = primitive.getMaterial();
-	mat->use();
+	const LightPtr& light = lights.front();
+	for (const Primitive& primitive : primitives)
+	{
+		MaterialPtr mat = primitive.getMaterial();
+		mat->use();
 
-	const ShaderPtr& sh = primitive.getShader();
-	sh->passViewMatrix(_MV);
-	sh->passProjectionMatrix(_MP);
-	sh->passComponent(light);
-	sh->passComponent(camera);
+		const ShaderPtr& sh = primitive.getShader();
+		sh->passBasicMatrices(primitive.calculateWorldMatrix(), _MV, _MP);
+		sh->passComponent(light);
+		sh->passComponent(camera);
 
-	primitive.draw();
+		primitive.draw();
+	}
 }
 
 
@@ -254,7 +257,7 @@ void DoubleBufferFrame::flush()
 }
 
 
-// -------------------------- RTRFrame -------------------------- //
+// -------------------------- RenderToTexture Frame -------------------------- //
 
 RTTFrame::RTTFrame(const std::string& title,
 				   const size_t& posX,
@@ -263,7 +266,8 @@ RTTFrame::RTTFrame(const std::string& title,
 				   const size_t& height)
 	: Frame(title, posX, posY, width, height, (GLUT_RGBA | GLUT_DEPTH)),
 	  _fboId(0),
-	  _colorTexture(width, height),
+	  _colorTexture(FrameTexture::Type::COLOR, width, height),
+	  _depthTexture(FrameTexture::Type::DEPTH, width, height),
 	  _depthRboId(0)
 {
 	init();
@@ -283,21 +287,24 @@ void RTTFrame::init()
 	glGenFramebuffers(1, &_fboId);
 	glBindFramebuffer(GL_FRAMEBUFFER, _fboId);
 
+	_colorTexture.setFiltering(Texture::Filtering::BILINEAR);
 	_colorTexture.generate();
-	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, _colorTexture.getBuffId(), NULL);
+	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, _colorTexture.getBuffId(), 0);
 
-	glGenRenderbuffers(1, &_depthRboId);
-	glBindRenderbuffer(GL_RENDERBUFFER, _depthRboId);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, _width, _height);
-	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, _depthRboId);
+	_depthTexture.setFiltering(Texture::Filtering::BILINEAR);
+	_depthTexture.generate();
+	glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, _depthTexture.getBuffId(), 0);
+
+//	glGenRenderbuffers(1, &_depthRboId);
+//	glBindRenderbuffer(GL_RENDERBUFFER, _depthRboId);
+//	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, _width, _height);
+//	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, _depthRboId);
 
 	MeshPtr plane = new Plane();
-	plane->setPosition(0.5, 0.5, 0.0);
-	plane->setRotation(1.0, 0.0, 0.0);
-	plane->setScale(5.0, 1.0, 5.0);
+	plane->setScale(2.0, 1.0, 2.0);
 	plane->applyScale();
+	plane->setRotation(M_PI_2, 0.0, 0.0);
 	plane->applyRotation();
-	plane->applyPosition();
 	_screenPlane = new Primitive(plane);
 
 	_ttsShader = new TTSShader();
@@ -307,9 +314,8 @@ void RTTFrame::init()
 
 bool RTTFrame::validate()
 {
-	bool r = Frame::validate();
-	_checkFBO(_fboId); // TODO: use result.
-	return r;
+	return (Frame::validate()
+			&& _checkFBO(_fboId));
 }
 
 
@@ -321,59 +327,76 @@ void RTTFrame::use()
 
 void RTTFrame::clear(const Color& color)
 {
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glClearColor(color.getRedF(),
-				 color.getGreenF(),
-				 color.getBlueF(),
-				 color.getAlphaF());
-	glClearDepth(1.0f);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	Frame::clear(color);
+	glBindFramebuffer(GL_FRAMEBUFFER, _fboId);
+	Frame::clear(Color::black);
 }
 
 
-void RTTFrame::draw(const Primitive& primitive,
-					const LightPtr& light,
+void RTTFrame::draw(const Primitives& primitives,
+					const Lights& lights,
 					const CameraPtr& camera)
 {
-//	ShaderPtr lsh = light->getShader();
-//	if (!lsh.is_null())
-//	{
-//		lsh->bind();
-
-//		lsh->passViewMatrix(light->getOrthoMatrix());
-//		lsh->passComponent(light);
-//		primitive.draw();
-
-//		lsh->unbind();
-//	}
-
 	glBindFramebuffer(GL_FRAMEBUFFER, _fboId);
-	MaterialPtr mat = primitive.getMaterial();
-	mat->use();
+//	glCullFace(GL_BACK);
 
-	const ShaderPtr& sh = primitive.getShader();
-	sh->passViewMatrix(_MV);
-	sh->passProjectionMatrix(_MP);
-	sh->passComponent(light);
-	sh->passComponent(camera);
-	primitive.draw();
+	const LightPtr& light = lights.front();
+	ShaderPtr lsh = light->getShader();
+	const glm::mat4x4 lightView = light->getViewMatrix();
+	const glm::mat4x4 lightOrtho = light->getOrthoMatrix();
 
-//	if (!lsh.is_null())
-//	{
-//		_colorTexture.bind();
-//		sh->passUniform("shadows", 1.0f);
-//		sh->passUniform("shadowMap", _colorTexture.getSamplerId());
-//		sh->passUniform("screenW", float(_width));
-//		sh->passUniform("screenH", float(_height));
-//	}
+	if (!lsh.is_null())
+	{
+		lsh->bind();
+
+		for (const Primitive& primitive : primitives)
+		{
+			lsh->passWorldMatrix(primitive.calculateWorldMatrix());
+			lsh->passViewMatrix(light->getViewMatrix());
+			lsh->passProjectionMatrix(light->getOrthoMatrix());
+			lsh->passComponent(light);
+			primitive.draw();
+		}
+
+		lsh->unbind();
+	}
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	_ttsShader->bind();
-	glActiveTexture(GL_TEXTURE0 + 1);
-	glBindTexture(GL_TEXTURE_2D, _colorTexture.getBuffId());
-	_ttsShader->passUniform("text", 1);
-	_ttsShader->passViewMatrix(_MV);
-	_ttsShader->passProjectionMatrix(_MP);
-	_screenPlane->draw();
+//	glCullFace(GL_FRONT);
+	for (const Primitive& primitive : primitives)
+	{
+		MaterialPtr mat = primitive.getMaterial();
+		mat->use();
+
+		const ShaderPtr& sh = primitive.getShader();
+		sh->passBasicMatrices(primitive.calculateWorldMatrix(), _MV, _MP);
+		sh->passComponent(light);
+		sh->passComponent(camera);
+
+		if (!lsh.is_null())
+		{
+			sh->passUniform("shadowMV", lightView);
+			sh->passUniform("shadowMP", lightOrtho);
+
+			_colorTexture.bind();
+			_depthTexture.bind();
+			sh->passUniform("shadows", 1.0f);
+			sh->passUniform("intensityMap", _colorTexture.getSamplerId());
+			sh->passUniform("shadowMap", _depthTexture.getSamplerId());
+		}
+		else
+			sh->passUniform("shadows", 0.0f);
+
+		primitive.draw();
+	}
+
+//	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+//	_ttsShader->bind();
+////	glBindTexture(GL_TEXTURE_2D, _colorTexture.getBuffId());
+//	glBindTexture(GL_TEXTURE_2D, _depthTexture.getBuffId());
+//	_ttsShader->passUniform("text", 1);
+//	_screenPlane->draw();
 }
 
 

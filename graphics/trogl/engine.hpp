@@ -80,7 +80,6 @@ class Engine
 
 	private:
 		// Inner classes.
-		using Primitives = std::list<Primitive>;
 		using GUIfpsPtr = SharedPointer<GUIfps>;
 
 		// Static methods.

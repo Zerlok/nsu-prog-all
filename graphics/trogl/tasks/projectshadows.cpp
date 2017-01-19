@@ -42,32 +42,35 @@ void Tester::run()
 
 
 TestRTT::TestRTT()
-	: Task("Shadows - render to texture test.")
+	: Task("Shadows - render to texture test."),
+	  _cameraCntrl(camera)
 {
+	Keyboard& kb = engine.getKeyboard();
+	kb.bind(Keyboard::Key::ANY, _cameraCntrl.getKBListener());
+	Mouse& m = engine.getMouse();
+	m.bind(Mouse::Type::MOVE, _cameraCntrl.getMListener());
+
 	engine.setFrame(Engine::FrameType::RTT);
 
 	Importer meshGen;
 	std::ifstream houseFile("/home/zerlok/nsu_prog/graphics/trogl/data/house.obj");
 	MeshPtr house = meshGen.parse(houseFile);
 	scene->addMesh(house);
-	MeshPtr house2 = new Mesh(house.get_creference());
-	house2->setPosition(-5.0f, -5.0f, -5.0f);
-//	scene->addMesh(house2);
 
 	MeshPtr plane = new Plane();
-//	ShaderPtr sh = new Shader("Specialsh", {Shader::pathTo("tts.vs"), Shader::pathTo("tts.fs")}, {"position", "normal", "uvMap"});
-	MaterialPtr mat = new DiffuseMaterial(Color::white, 0.0, 0.0, 0.0);
+	MaterialPtr mat = new DiffuseMaterial(Color::white, 1.0, 1.0, 5.0);
 	plane->setMaterial(mat);
+	plane->setPosition(0.0, -5.0, 0.0);
 	plane->setScale(20.0f, 1.0f, 20.0f);
-	plane->setRotation(1.57f, 0.0f, 0.0f);
-	plane->setPosition(-10.0f, 0.0f, -10.0f);
 	scene->addMesh(plane);
 
 	LightPtr sun = new Light(Light::createSun());
 	sun->setShader(new LightShader());
-	sun->setPosition(camera->getPosition());
-	sun->faceDirectionTo({0.0f, 1.0f, 1.0f});
+	sun->setPosition({5.0f, 5.0f, 5.0f});
+	sun->faceDirectionTo({0.0f, 0.0f, 0.0f});
 	scene->addLight(sun);
+
+//	addDefaultSunRotation();
 }
 
 

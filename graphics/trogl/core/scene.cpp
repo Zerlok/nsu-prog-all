@@ -17,7 +17,7 @@ Scene::Scene(const std::string& name,
 	  _meshes(),
 	  _lights(),
 	  _animations(),
-	  _bgColor(Color::grey),
+	  _bgColor(Color::blue),
 	  _ambientPower(0.0)
 {
 	logDebug << "Scene " << getName()

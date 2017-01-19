@@ -113,3 +113,11 @@ glm::mat4x4 glm::rotationMatrix(const glm::vec3& angles)
 					 * glm::rotate(matrix::identic::m4x4, angles.x, space::xyz::x)
 					 * glm::rotate(matrix::identic::m4x4, angles.y, space::xyz::y));
 }
+
+
+glm::mat4x4 glm::operator*(const glm::mat4x4& mat, const float& val)
+{
+	glm::mat4x4 tmp(mat);
+	tmp *= val;
+	return std::move(mat);
+}

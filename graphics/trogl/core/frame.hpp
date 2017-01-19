@@ -49,8 +49,8 @@ class Frame : public Component
 
 		virtual void use();
 		virtual void clear(const Color& color);
-		virtual void draw(const Primitive& primitive,
-						  const LightPtr& light,
+		virtual void draw(const Primitives& primitives,
+						  const Lights& lights,
 						  const CameraPtr& camera);
 		virtual void flush();
 
@@ -173,8 +173,8 @@ class RTTFrame : public Frame
 
 		void use() override;
 		void clear(const Color& color) override;
-		void draw(const Primitive &primitive,
-				  const LightPtr &light,
+		void draw(const Primitives& primitives,
+				  const Lights& lights,
 				  const CameraPtr &camera) override;
 		void flush() override;
 
@@ -182,6 +182,7 @@ class RTTFrame : public Frame
 		// Fields.
 		GLuint _fboId;
 		FrameTexture _colorTexture;
+		FrameTexture _depthTexture;
 		GLuint _depthRboId;
 		Primitive* _screenPlane;
 		ShaderPtr _ttsShader;

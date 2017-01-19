@@ -9,9 +9,22 @@ uniform mat4 MW;
 uniform mat4 MV;
 uniform mat4 MP;
 
+uniform mat4 shadowMV;
+uniform mat4 shadowMP;
+
 out vec4 vertexPosition;
 out vec3 vertexNormal;
 out vec2 vertexUV;
+
+out vec4 shadowCoord;
+
+
+const mat4 biasM = mat4(
+0.5, 0.0, 0.0, 0.0,
+0.0, 0.5, 0.0, 0.0,
+0.0, 0.0, 0.5, 0.0,
+0.5, 0.5, 0.5, 1.0
+);
 
 
 void main()
@@ -21,4 +34,5 @@ void main()
 	vertexUV = uvMap;
 
     gl_Position = MP * MV * MW * position;
+	shadowCoord = biasM * shadowMP * shadowMV * position;
 }

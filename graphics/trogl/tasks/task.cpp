@@ -85,8 +85,12 @@ void Task::addDefaultSunRotation()
 	float h = -1.0;
 	float a = 1.0;
 
-	LightPtr sun = new Light(Light::createSun());
-	scene->addLight(sun);
+	if (scene->getLights().empty())
+	{
+		scene->addLight(new Light(Light::createSun()));
+	}
+
+	LightPtr sun = scene->getLights().front();
 
 	sun->setDirection({a, h, 0.0});
 	sun->addKeyframe(T);

@@ -119,8 +119,8 @@ void DiffuseShader::_registerUniforms()
 
 	_uniforms.registerate("shadows");
 	_uniforms.registerate("shadowMap");
-	_uniforms.registerate("screenW");
-	_uniforms.registerate("screenH");
+	_uniforms.registerate("shadowMV");
+	_uniforms.registerate("shadowMP");
 }
 
 

@@ -10,10 +10,7 @@ Task07ActionInput::Task07ActionInput()
 	  _cameraCntrl(scene->getCamera())
 {
 	Keyboard& kb = engine.getKeyboard();
-	kb.bind(Keyboard::Key::W, _cameraCntrl.getKBListener());
-	kb.bind(Keyboard::Key::S, _cameraCntrl.getKBListener());
-	kb.bind(Keyboard::Key::A, _cameraCntrl.getKBListener());
-	kb.bind(Keyboard::Key::D, _cameraCntrl.getKBListener());
+	kb.bind(Keyboard::Key::ANY, _cameraCntrl.getKBListener());
 
 	Mouse& m = engine.getMouse();
 	m.bind(Mouse::Type::MOVE, _cameraCntrl.getMListener());

@@ -5,6 +5,7 @@
 #include <string>
 #include <list>
 #include "task.hpp"
+#include "task07.hpp"
 
 
 class Tester : public Task
@@ -28,6 +29,9 @@ class TestRTT : public Task
 	public:
 		TestRTT();
 		~TestRTT() {}
+
+	private:
+		CameraController _cameraCntrl;
 };
 
 

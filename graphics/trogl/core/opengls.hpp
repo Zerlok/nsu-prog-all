@@ -36,6 +36,8 @@ namespace glm
 	float angle(const float& acos, const float& asin);
 	glm::vec3 angles(const glm::vec3& v);
 
+	glm::mat4x4 operator*(const glm::mat4x4& vec, const float& val);
+
 	glm::mat4x4 rotationMatrix(const glm::vec3& angles);
 }
 

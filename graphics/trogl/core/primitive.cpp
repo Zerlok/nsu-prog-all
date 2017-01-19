@@ -90,6 +90,12 @@ const MeshPtr& Primitive::getMesh() const
 }
 
 
+glm::mat4x4 Primitive::calculateWorldMatrix() const
+{
+	return _mesh->calculateWorldMatrix();
+}
+
+
 void Primitive::initGLGeometry(const MeshPtr& mesh)
 {
 	if (_isGLGeometryValid())
@@ -103,8 +109,6 @@ void Primitive::initGLGeometry(const MeshPtr& mesh)
 
 void Primitive::draw() const
 {
-	_shader->passWorldMatrix(_mesh->calculateWorldMatrix());
-
 	glEnableVertexAttribArray(0);
 	glEnableVertexAttribArray(1);
 	glEnableVertexAttribArray(2);
