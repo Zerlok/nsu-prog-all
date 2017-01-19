@@ -2,11 +2,11 @@
 
 
 #include <logger.hpp>
+#include "shaders/ttsshader.hpp"
+#include "meshes/plane.hpp"
 
 
-logger_t moduleLogger = loggerModule(loggerLWarning, loggerDFull);
-
-
+logger_t moduleLogger = loggerModule(loggerLDebug, loggerDFull);
 
 
 // -------------------------- Abstract Frame -------------------------- //
@@ -25,6 +25,7 @@ Frame::Frame(const std::string& title,
 	  _height(height),
 	  _displayMode(displayMode)
 {
+	init();
 	logDebug << "Frame " << getName()
 			 << " [" << _width << "x" << _height << "] created."
 			 << logEndl;
@@ -56,6 +57,18 @@ void Frame::setPos(const size_t& posX, const size_t& posY)
 }
 
 
+void Frame::setViewMatrix(const glm::mat4x4& mv)
+{
+	_MV = mv;
+}
+
+
+void Frame::setProjectionMatrix(const glm::mat4x4& mp)
+{
+	_MP = mp;
+}
+
+
 void Frame::init()
 {
 	static GLFrame glFrame(_title, _posX, _posY, _width, _height, _displayMode);
@@ -65,7 +78,6 @@ void Frame::init()
 
 bool Frame::validate()
 {
-	init();
 	return (_glWindow != 0);
 }
 
@@ -91,9 +103,85 @@ void Frame::clear(const Color& color)
 }
 
 
+void Frame::draw(const Primitive& primitive,
+				 const LightPtr& light,
+				 const CameraPtr& camera)
+{
+	MaterialPtr mat = primitive.getMaterial();
+	mat->use();
+
+	const ShaderPtr& sh = primitive.getShader();
+	sh->passViewMatrix(_MV);
+	sh->passProjectionMatrix(_MP);
+	sh->passComponent(light);
+	sh->passComponent(camera);
+
+	primitive.draw();
+}
+
+
 void Frame::flush()
 {
 	glFlush();
+}
+
+
+void Frame::use()
+{
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+
+bool Frame::_checkFBO(GLuint& fbo) const
+{
+	bool result;
+	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+	GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+	switch(status)
+	{
+		case GL_FRAMEBUFFER_COMPLETE:
+			logInfo <<  "Framebuffer complete." << logEndl;
+			result = true;
+			break;
+
+		case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
+			logError <<  "Framebuffer incomplete: Attachment is NOT complete." << logEndl;
+			result = false;
+			break;
+
+		case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
+			logError <<  "Framebuffer incomplete: No image is attached to FBO." << logEndl;
+			result = false;
+			break;
+
+		case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER:
+			logError <<  "Framebuffer incomplete: Draw buffer." << logEndl;
+			result = false;
+			break;
+
+		case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER:
+			logError <<  "Framebuffer incomplete: Read buffer." << logEndl;
+			result = false;
+			break;
+
+		case GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE:
+			logError <<  "Framebuffer incomplete: Multisample." << logEndl;
+			result = false;
+			break;
+
+		case GL_FRAMEBUFFER_UNSUPPORTED:
+			logError <<  "Framebuffer incomplete: Unsupported by FBO implementation." << logEndl;
+			result = false;
+			break;
+
+		default:
+			logError <<  "Framebuffer incomplete: Unknown error." << logEndl;
+			result = false;
+			break;
+	}
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	return result;
 }
 
 
@@ -106,7 +194,7 @@ Frame::GLFrame::GLFrame(const std::string& title,
 						const size_t& height,
 						const unsigned int& displayMode)
 {
-	logDebug << "Starting GL frame initialization started." << logEndl;
+	logDebug << "GL frame initialization started." << logEndl;
 
 	int argc = 1;
 	char* argv[1] = {"engine"};
@@ -118,7 +206,6 @@ Frame::GLFrame::GLFrame(const std::string& title,
 
 	_glWindow = glutCreateWindow(title.c_str());
 
-//	glewExperimental = true;
 	GLenum err = glewInit();
 	if (err != GLEW_OK)
 		logFatal << "Error in glewInit, code: " << err
@@ -169,46 +256,71 @@ void DoubleBufferFrame::flush()
 
 // -------------------------- RTRFrame -------------------------- //
 
-RTRFrame::RTRFrame(const std::string& title,
+RTTFrame::RTTFrame(const std::string& title,
 				   const size_t& posX,
 				   const size_t& posY,
 				   const size_t& width,
 				   const size_t& height)
-	: Frame(title, posX, posY, width, height),
+	: Frame(title, posX, posY, width, height, (GLUT_RGBA | GLUT_DEPTH)),
 	  _fboId(0),
-	  _colorBuffer(0)
+	  _colorTexture(width, height),
+	  _depthRboId(0)
 {
+	init();
 }
 
 
-RTRFrame::~RTRFrame()
+RTTFrame::~RTTFrame()
 {
+	delete _screenPlane;
 }
 
 
-void RTRFrame::init()
+void RTTFrame::init()
 {
 	Frame::init();
-	// frame buffer object
+
 	glGenFramebuffers(1, &_fboId);
 	glBindFramebuffer(GL_FRAMEBUFFER, _fboId);
 
-	// render buffer as color buffer
-	glGenRenderbuffers(1, &_colorBuffer);
-	glBindRenderbuffer(GL_RENDERBUFFER, _colorBuffer);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_RGBA, _width, _height);
-	glBindRenderbuffer(GL_RENDERBUFFER, 0);
-	// attach render buffer to the fbo as color buffer
-	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, _colorBuffer);
+	_colorTexture.generate();
+	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, _colorTexture.getBuffId(), NULL);
 
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glGenRenderbuffers(1, &_depthRboId);
+	glBindRenderbuffer(GL_RENDERBUFFER, _depthRboId);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, _width, _height);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, _depthRboId);
+
+	MeshPtr plane = new Plane();
+	plane->setPosition(0.5, 0.5, 0.0);
+	plane->setRotation(1.0, 0.0, 0.0);
+	plane->setScale(5.0, 1.0, 5.0);
+	plane->applyScale();
+	plane->applyRotation();
+	plane->applyPosition();
+	_screenPlane = new Primitive(plane);
+
+	_ttsShader = new TTSShader();
+	_ttsShader->compile();
 }
 
 
-void RTRFrame::clear(const Color& color)
+bool RTTFrame::validate()
+{
+	bool r = Frame::validate();
+	_checkFBO(_fboId); // TODO: use result.
+	return r;
+}
+
+
+void RTTFrame::use()
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, _fboId);
+}
 
+
+void RTTFrame::clear(const Color& color)
+{
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glClearColor(color.getRedF(),
 				 color.getGreenF(),
@@ -218,7 +330,54 @@ void RTRFrame::clear(const Color& color)
 }
 
 
-void RTRFrame::flush()
+void RTTFrame::draw(const Primitive& primitive,
+					const LightPtr& light,
+					const CameraPtr& camera)
+{
+//	ShaderPtr lsh = light->getShader();
+//	if (!lsh.is_null())
+//	{
+//		lsh->bind();
+
+//		lsh->passViewMatrix(light->getOrthoMatrix());
+//		lsh->passComponent(light);
+//		primitive.draw();
+
+//		lsh->unbind();
+//	}
+
+	glBindFramebuffer(GL_FRAMEBUFFER, _fboId);
+	MaterialPtr mat = primitive.getMaterial();
+	mat->use();
+
+	const ShaderPtr& sh = primitive.getShader();
+	sh->passViewMatrix(_MV);
+	sh->passProjectionMatrix(_MP);
+	sh->passComponent(light);
+	sh->passComponent(camera);
+	primitive.draw();
+
+//	if (!lsh.is_null())
+//	{
+//		_colorTexture.bind();
+//		sh->passUniform("shadows", 1.0f);
+//		sh->passUniform("shadowMap", _colorTexture.getSamplerId());
+//		sh->passUniform("screenW", float(_width));
+//		sh->passUniform("screenH", float(_height));
+//	}
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	_ttsShader->bind();
+	glActiveTexture(GL_TEXTURE0 + 1);
+	glBindTexture(GL_TEXTURE_2D, _colorTexture.getBuffId());
+	_ttsShader->passUniform("text", 1);
+	_ttsShader->passViewMatrix(_MV);
+	_ttsShader->passProjectionMatrix(_MP);
+	_screenPlane->draw();
+}
+
+
+void RTTFrame::flush()
 {
 	glFlush();
 }

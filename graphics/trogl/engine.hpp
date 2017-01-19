@@ -31,13 +31,6 @@ class Engine
 {
 	public:
 		// Inner classes.
-		enum RenderMode
-		{
-			POINTS = GL_POINT,
-			EDGES = GL_LINE,
-			POLYGONS = GL_POLYGON,
-		};
-
 		enum class Status
 		{
 			DIRTY = 0,
@@ -45,6 +38,20 @@ class Engine
 			VALIDATION_SUCCESSFUL,
 			RENDERING_STARTED,
 			RENDERING_FINISHED,
+		};
+
+		enum RenderMode
+		{
+			POINTS = GL_POINT,
+			EDGES = GL_LINE,
+			POLYGONS = GL_POLYGON,
+		};
+
+		enum class FrameType
+		{
+			SINGLE,
+			DOUBLE,
+			RTT,
 		};
 
 		// Static methods.
@@ -59,11 +66,11 @@ class Engine
 
 		void setGUI(const GUIPtr& gui);
 		void setActiveScene(const ScenePtr& scene);
-		void setActiveFrame(const FramePtr& frame);
+		void setFrame(const FrameType& type);
 		void setRenderMode(const RenderMode& mode);
+		void setFPSLimit(const size_t& val);
 
-		void enableFPS();
-		void disableFPS();
+		void displayFPS(bool val);
 
 		Keyboard& getKeyboard();
 		Mouse& getMouse();
@@ -87,6 +94,8 @@ class Engine
 		static void _mouseClickFunc(int button, int state, int x, int y);
 		static void _mouseActiveMotionFunc(int x, int y);
 		static void _mousePassiveMotionFunc(int x, int y);
+		static void _updateFrameFunc(int);
+		static void _updateAnimations(int);
 		static void _debugGL();
 
 		static std::string _generateWindowTitle(const Scene& scene);
@@ -107,6 +116,7 @@ class Engine
 		int _validateScene();
 		int _validateFrame();
 		int _validatePrimitives();
+		int _validateLights();
 		int _validateKeyboard();
 		int _validateMouse();
 
@@ -119,6 +129,7 @@ class Engine
 		// Fields.
 		Status _status;
 
+		size_t _redisplayDelay;
 		RenderMode _glRenderMode;
 		std::string _glVersion;
 		std::string _glShaderVersion;
@@ -130,6 +141,8 @@ class Engine
 		ScenePtr _scene;
 		CameraPtr _camera;
 		Primitives _primitives;
+		Lights _lights;
+		FrameGenPtr _frameGenerator;
 		FramePtr _frame;
 
 		Keyboard& _keyboard;

@@ -33,7 +33,7 @@ class Shader : public Component
 				static Subprogram loadFile(const std::string& filename);
 
 				// Constructors / Destructor.
-				Subprogram();
+				Subprogram(const std::string& name);
 				Subprogram(const Subprogram& sp);
 				Subprogram(Subprogram&& sp);
 				~Subprogram();
@@ -43,6 +43,8 @@ class Shader : public Component
 				Subprogram& operator=(Subprogram&& sp);
 
 				// Methods.
+				const std::string& getName() const;
+
 				bool compile();
 				void getTypeFromFilename(const std::string& filename);
 				void link(GLuint& glShader);
@@ -50,12 +52,15 @@ class Shader : public Component
 
 			private:
 				// Fields.
+				std::string name;
 				GLuint id;
 				GLenum type;
 				std::string src;
 				std::string version;
 				bool valid;
 		};
+
+		using Attributes = std::vector<std::string>;
 
 		class Uniforms
 		{
@@ -154,9 +159,12 @@ class Shader : public Component
 		static const std::string DEFAULT_GS_FILE;
 		static const std::string DEFAULT_FS_FILE;
 
+		static const std::string pathTo(const std::__cxx11::string& filename);
+
 		// Constructors / Destructor.
 		Shader(const std::string& name,
-			   const std::vector<std::string>& filenames);
+			   const std::vector<std::string>& filenames,
+			   const Attributes& attribs);
 		Shader(const Shader& sh);
 		Shader(Shader&& sh);
 		virtual ~Shader();
@@ -182,6 +190,9 @@ class Shader : public Component
 			return _uniforms.pass(name, value);
 		}
 
+		void passWorldMatrix(const glm::mat4x4& mw) const;
+		void passViewMatrix(const glm::mat4x4& mv) const;
+		void passProjectionMatrix(const glm::mat4x4& mp) const;
 		void passBasicMatrices(const glm::mat4x4& mw,
 							   const glm::mat4x4& mv,
 							   const glm::mat4x4& mp) const;
@@ -195,6 +206,7 @@ class Shader : public Component
 		Shader(const std::string& name);
 
 		// Methods.
+		void _setAttributes(const Attributes& attribs);
 		void _loadSubprograms(const std::vector<std::string>& filenames);
 
 		// Virtual methods.
@@ -213,6 +225,7 @@ class Shader : public Component
 		// Fields.
 		GLuint _glShader;	// Total shader program.
 		std::vector<Subprogram> _subprograms;
+		Attributes _attribs;
 		Uniforms _uniforms;
 
 };

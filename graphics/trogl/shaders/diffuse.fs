@@ -57,6 +57,11 @@ uniform TextureStruct textures[TEXLIM];
 uniform int texturesLen;
 uniform float texturesMixing;
 
+uniform float shadows;
+uniform sampler2D shadowMap;
+uniform float screenW;
+uniform float screenH;
+
 
 float lampIntensity(
 		in float lpow,
@@ -139,6 +144,12 @@ out vec4 color;
 
 void main()
 {
+    if (material.diffuse == 0.0f)
+	{
+	    color = material.color;
+		return;
+	}
+
     vec4 cameraPos = -MV * camera.position;
 	vec4 lampPos = MV * lamp.position;
 	vec3 lampDir = -normalize(MV * lamp.direction).xyz;
@@ -181,7 +192,7 @@ void main()
 			break;
 	}
 
-    lampInt *= material.diffuse;
+    lampInt *= material.specular;
 	specularInt *= material.specular;
 
     color = mix(material.color, textureColor, texturesMixing) * lamp.color * (lampInt + specularInt);

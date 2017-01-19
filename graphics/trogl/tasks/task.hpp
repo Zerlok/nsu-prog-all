@@ -19,7 +19,7 @@ class Task
 		virtual ~Task();
 
 		ScenePtr& getScene();
-		void run();
+		virtual void run();
 
 	protected:
 		Engine& engine;

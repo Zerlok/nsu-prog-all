@@ -21,15 +21,18 @@ Task07ActionInput::Task07ActionInput()
 	std::ifstream in("/home/zerlok/nsu_prog/graphics/trogl/data/house.obj");
 	Importer mi;
 	scene->addMesh(mi.parse(in));
-	camera->setPosition({0.0f, 2.0f, 5.0f});
 
 	addDefaultSunRotation();
 }
 
 
 CameraController::CameraController(const CameraPtr& camera)
-	: _kb(new KBListener(camera)),
-	  _m(new MListener(camera))
+	: _camera(camera),
+	  _kb(new KBListener(*this)),
+	  _m(new MListener(*this)),
+	  _flyEnabled(false),
+	  _velocity(0.05),
+	  _sensivity(60.0)
 {
 }
 
@@ -46,20 +49,12 @@ CameraController::MListener* CameraController::getMListener()
 }
 
 
-CameraController::KBListener::KBListener(const CameraPtr& cam)
-	: _camera(cam)
+void CameraController::_onKey(const Keyboard::Key& key)
 {
-}
-
-
-void CameraController::KBListener::onKeyPressed(const Keyboard::Key& key)
-{
-	static const float velocity = 0.1;
-
 	const vec3& head = _camera->getHeadDirection();
 	const vec3 direction = _camera->getLookingAtPosition() - _camera->getPosition();
-	const vec3 forward = glm::normalize(direction) * velocity;
-	const vec3 right = glm::normalize(glm::cross(direction, head)) * velocity;
+	const vec3 forward = glm::normalize(direction) * _velocity;
+	const vec3 right = glm::normalize(glm::cross(direction, head)) * _velocity;
 	vec3 pos = _camera->getPosition();
 
 	switch (key)
@@ -76,35 +71,30 @@ void CameraController::KBListener::onKeyPressed(const Keyboard::Key& key)
 		case Keyboard::Key::A:
 			pos -= right;
 			break;
+		case Keyboard::Key::F:
+			_flyEnabled = !_flyEnabled;
 		default:
 			return;
 	}
 
-	_camera->setPosition(pos);
+	if (_flyEnabled)
+		_camera->setPosition(pos);
 }
 
 
-void CameraController::KBListener::onKeyReleased(const Keyboard::Key& key)
+void CameraController::_onMouseMove(const int& x, const int& y)
 {
-}
+	if (!_flyEnabled)
+		return;
 
-
-CameraController::MListener::MListener(const CameraPtr& cam)
-	: _camera(cam)
-{
-}
-
-
-void CameraController::MListener::onPerformed(const Mouse::ClickEvent& click)
-{
 	const vec3& head = _camera->getHeadDirection();
 	const vec3 direction = _camera->getLookingAtPosition() - _camera->getPosition();
 	const vec3 right = glm::normalize(glm::cross(direction, head));
 	const vec3 up = glm::normalize(glm::cross(right, direction));
-	const float len = direction.length() * 60;
+	const float len = direction.length() * _sensivity;
 
-	const float phy = -std::sin((click.x % 60) / len) * ((click.x / 60) + 1);
-	const float thetta = -std::sin((click.y % 60) / len) * ((click.y / 60) + 1);
+	const float phy = -std::sin((x % 60) / len) * ((x / 60) + 1);
+	const float thetta = -std::sin((y % 60) / len) * ((y / 60) + 1);
 
 	const glm::mat3x3 rotX = glm::mat3x3(glm::rotate(matrix::identic::m4x4, phy, head));
 	const glm::mat3x3 rotXY = glm::mat3x3(glm::rotate(matrix::identic::m4x4, thetta, right)) * rotX;
@@ -114,4 +104,33 @@ void CameraController::MListener::onPerformed(const Mouse::ClickEvent& click)
 		_camera->setLookingAtPosition((rotXY * direction) + _camera->getPosition());
 	else
 		_camera->setLookingAtPosition((rotX * direction) + _camera->getPosition());
+}
+
+
+CameraController::KBListener::KBListener(CameraController& cntrl)
+	: _cntrl(cntrl)
+{
+}
+
+
+void CameraController::KBListener::onKeyPressed(const Keyboard::Key& key)
+{
+	_cntrl._onKey(key);
+}
+
+
+void CameraController::KBListener::onKeyReleased(const Keyboard::Key& key)
+{
+}
+
+
+CameraController::MListener::MListener(CameraController& cntrl)
+	: _cntrl(cntrl)
+{
+}
+
+
+void CameraController::MListener::onPerformed(const Mouse::ClickEvent& click)
+{
+	_cntrl._onMouseMove(click.x, click.y);
 }

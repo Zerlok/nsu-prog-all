@@ -7,6 +7,9 @@
 logger_t moduleLogger = loggerModule(loggerLWarning, loggerDFull);
 
 
+int Texture::_activeId = 0;
+
+
 Texture::Texture(const std::string& name)
 	: Animatable("TEXTURE", name),
 	  _id(0),
@@ -256,7 +259,10 @@ void Texture::_create()
 {
 	static int textureID;
 	if (_glTexture != 0)
+	{
+		bind();
 		return;
+	}
 
 	_id = textureID++;
 	glGenTextures(1, &_glTexture);

@@ -16,6 +16,12 @@ const std::string Shader::DEFAULT_GS_FILE = path::join(Shader::SRC_DIR, "default
 const std::string Shader::DEFAULT_FS_FILE = path::join(Shader::SRC_DIR, "default.fs");
 
 
+const std::string Shader::pathTo(const std::string& filename)
+{
+	return path::join(SRC_DIR, filename);
+}
+
+
 Shader::Shader(const std::string& name)
 	: Component("SHADER", name),
 	  _status(Status::NOT_COMPILED),
@@ -26,13 +32,14 @@ Shader::Shader(const std::string& name)
 	logDebug << "Shader " << getName() << " created (inherited)." << logEndl;
 }
 
-
 Shader::Shader(const std::string& name,
-			   const std::vector<std::string>& filenames)
+			   const std::vector<std::string>& filenames,
+			   const Attributes& attribs)
 	: Component("SHADER", name),
 	  _status(Status::NOT_COMPILED),
 	  _glShader(0),
 	  _subprograms({}),
+	  _attribs(attribs),
 	  _uniforms()
 {
 	_loadSubprograms(filenames);
@@ -47,6 +54,7 @@ Shader::Shader(const Shader& sh)
 	  _status(Status::NOT_COMPILED),
 	  _glShader(0),
 	  _subprograms(sh._subprograms),
+	  _attribs(sh._attribs),
 	  _uniforms()
 {
 	logDebug << "Shader " << getName()
@@ -60,6 +68,7 @@ Shader::Shader(Shader&& sh)
 	  _status(std::move(sh._status)),
 	  _glShader(std::move(sh._glShader)),
 	  _subprograms(std::move(sh._subprograms)),
+	  _attribs(std::move(sh._attribs)),
 	  _uniforms(std::move(sh._uniforms))
 {
 	sh._status = Status::NOT_COMPILED;
@@ -86,6 +95,7 @@ Shader& Shader::operator=(const Shader& sh)
 	_status = Status::NOT_COMPILED;
 	_glShader = 0;
 	_subprograms = sh._subprograms;
+	_attribs = sh._attribs;
 	_uniforms.clear();
 
 	logDebug << "Shader " << getName() << " copied from " << sh.getName() << logEndl;
@@ -98,6 +108,7 @@ Shader& Shader::operator=(Shader&& sh)
 	_status = std::move(sh._status);
 	_glShader = std::move(sh._glShader);
 	_subprograms = std::move(sh._subprograms);
+	_attribs = std::move(sh._attribs);
 	_uniforms = std::move(sh._uniforms);
 
 	sh._status = Status::NOT_COMPILED;
@@ -204,13 +215,31 @@ void Shader::unbind()
 }
 
 
+void Shader::passWorldMatrix(const glm::mat4x4& mw) const
+{
+	_uniforms.pass("MW", mw);
+}
+
+
+void Shader::passViewMatrix(const glm::mat4x4& mv) const
+{
+	_uniforms.pass("MV", mv);
+}
+
+
+void Shader::passProjectionMatrix(const glm::mat4x4& mp) const
+{
+	_uniforms.pass("MP", mp);
+}
+
+
 void Shader::passBasicMatrices(const glm::mat4x4& mw,
 							   const glm::mat4x4& mv,
 							   const glm::mat4x4& mp) const
 {
-	_uniforms.pass("MW", mw);
-	_uniforms.pass("MV", mv);
-	_uniforms.pass("MP", mp);
+	passWorldMatrix(mw);
+	passViewMatrix(mv);
+	passProjectionMatrix(mp);
 }
 
 
@@ -218,6 +247,12 @@ void Shader::_loadSubprograms(const std::vector<std::string>& filenames)
 {
 	for (const std::string& filename : filenames)
 		_subprograms.push_back(Subprogram::loadFile(filename));
+}
+
+
+void Shader::_setAttributes(const Shader::Attributes& attribs)
+{
+	_attribs = attribs;
 }
 
 
@@ -231,9 +266,8 @@ bool Shader::_linkShaderProgram()
 	for (Subprogram& prog : _subprograms)
 		prog.link(_glShader);
 
-	glBindAttribLocation(_glShader, 0, "position");
-	glBindAttribLocation(_glShader, 1, "normal");
-	glBindAttribLocation(_glShader, 2, "uvMap");
+	for (size_t i = 0; i < _attribs.size(); ++i)
+		glBindAttribLocation(_glShader, i, _attribs[i].c_str());
 
 	glLinkProgram(_glShader);
 	glGetProgramiv(_glShader, GL_LINK_STATUS, &success);
@@ -294,7 +328,7 @@ std::ostream& operator<<(std::ostream& out, const Shader::Status& st)
 
 Shader::Subprogram Shader::Subprogram::loadFile(const std::string& filename)
 {
-	Subprogram subprog;
+	Subprogram subprog(path::basename(filename));
 	std::stringstream ss;
 	std::ifstream in(filename);
 
@@ -332,8 +366,9 @@ Shader::Subprogram Shader::Subprogram::loadFile(const std::string& filename)
 }
 
 
-Shader::Subprogram::Subprogram()
-	: id(0),
+Shader::Subprogram::Subprogram(const std::string& name)
+	: name(name),
+	  id(0),
 	  type(0),
 	  src(),
 	  version(),
@@ -343,7 +378,8 @@ Shader::Subprogram::Subprogram()
 
 
 Shader::Subprogram::Subprogram(const Shader::Subprogram& sp)
-	: id(0),
+	: name(sp.name),
+	  id(0),
 	  type(sp.type),
 	  src(sp.src),
 	  version(sp.version),
@@ -353,7 +389,8 @@ Shader::Subprogram::Subprogram(const Shader::Subprogram& sp)
 
 
 Shader::Subprogram::Subprogram(Shader::Subprogram&& sp)
-	: id(std::move(sp.id)),
+	: name(std::move(sp.name)),
+	  id(std::move(sp.id)),
 	  type(std::move(sp.type)),
 	  src(std::move(sp.src)),
 	  version(std::move(sp.version)),
@@ -395,6 +432,12 @@ Shader::Subprogram& Shader::Subprogram::operator=(Shader::Subprogram&& sp)
 }
 
 
+const std::string& Shader::Subprogram::getName() const
+{
+	return name;
+}
+
+
 bool Shader::Subprogram::compile()
 {
 	int success = 0;
@@ -411,7 +454,7 @@ bool Shader::Subprogram::compile()
 	if (!success)
 	{
 		glGetShaderInfoLog(id, MAX_INFO_LOG_SIZE, NULL, infoLog);
-		logError << "Error in " << type << " subprogram compilation:" << std::endl
+		logError << "Error in " << name << " subprogram compilation:" << std::endl
 				 << infoLog << logEndl;
 		return false;
 	}

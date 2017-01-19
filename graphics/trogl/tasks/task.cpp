@@ -47,7 +47,7 @@ ScenePtr& Task::getScene()
 
 void Task::run()
 {
-	engine.enableFPS();
+	engine.displayFPS(true);
 	engine.setActiveScene(getScene());
 	engine.showActiveScene();
 }

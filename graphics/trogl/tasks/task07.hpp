@@ -12,24 +12,22 @@ class CameraController
 		class KBListener : public Keyboard::KeyListener
 		{
 			public:
-				KBListener(const CameraPtr& cam);
-
+				KBListener(CameraController& cntrl);
 				void onKeyPressed(const Keyboard::Key& key);
 				void onKeyReleased(const Keyboard::Key& key);
 
 			private:
-				CameraPtr _camera;
+				CameraController& _cntrl;
 		};
 
 		class MListener : public Mouse::Listener
 		{
 			public:
-				MListener(const CameraPtr& cam);
-
+				MListener(CameraController& cntrl);
 				void onPerformed(const Mouse::ClickEvent& click) override;
 
 			private:
-				CameraPtr _camera;
+				CameraController& _cntrl;
 		};
 
 		CameraController(const CameraPtr& camera);
@@ -39,8 +37,16 @@ class CameraController
 		MListener* getMListener();
 
 	private:
+		CameraPtr _camera;
 		KBListener* _kb;
 		MListener* _m;
+
+		bool _flyEnabled;
+		float _velocity;
+		float _sensivity;
+
+		void _onKey(const Keyboard::Key& key);
+		void _onMouseMove(const int& x, const int& y);
 };
 
 

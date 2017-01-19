@@ -6,6 +6,7 @@
 #include "tasks/task05.hpp"
 #include "tasks/task06.hpp"
 #include "tasks/task07.hpp"
+#include "tasks/projectshadows.hpp"
 
 
 //logger_t globalLogging = loggerGlobal(loggerLDebug, loggerDFull);
@@ -25,7 +26,9 @@ int main(int argc, char *argv[])
 
 //	task = new Task06ObjFileImportExport();
 
-	task = new Task07ActionInput();
+//	task = new Task07ActionInput();
+
+	task = new ShadowsTesting();
 
 	task->run();
 

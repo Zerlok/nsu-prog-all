@@ -13,8 +13,10 @@ const std::string MetamorphoseShader::VS_FILE = path::join(Shader::SRC_DIR, "met
 
 
 MetamorphoseShader::MetamorphoseShader()
-	: Shader("Metamorph Shader", {VS_FILE, DEFAULT_FS_FILE})
+	: Shader("Metamorph Shader")
 {
+	_setAttributes({"position", "normal", "uvMap"});
+	_loadSubprograms({VS_FILE, DEFAULT_FS_FILE});
 	logDebug << "Metamorph Shader created" << std::endl;
 }
 

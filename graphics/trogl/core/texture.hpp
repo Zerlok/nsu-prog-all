@@ -75,6 +75,9 @@ class Texture : public Animatable
 
 		void _create();
 		void _regProperties() override;
+
+	private:
+		static int _activeId;
 };
 
 

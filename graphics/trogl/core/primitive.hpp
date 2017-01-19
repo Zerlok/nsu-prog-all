@@ -21,13 +21,14 @@ class Primitive
 
 		// Methods.
 		bool isValid() const;
+		const MaterialPtr& getMaterial() const;
+		const ShaderPtr& getShader() const;
+		const MeshPtr& getMesh() const;
+
 		void compileGLShaders();
 		void initGLGeometry(const MeshPtr& mesh);
 
-		void draw(const LightPtr& light,
-				  const CameraPtr& camera,
-				  const glm::mat4x4& mv,
-				  const glm::mat4x4& mp);
+		void draw() const;
 
 	private:
 		// Static fields.
@@ -44,7 +45,6 @@ class Primitive
 		GLuint _glIBO;	// Index Buffer Object
 
 		size_t _indicesSize;
-		vec3 _position;
 		MaterialPtr _material;
 		ShaderPtr _shader;
 

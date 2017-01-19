@@ -9,8 +9,10 @@ const std::string ScrewShader::VS_FILE = path::join(Shader::SRC_DIR, "screw.vs")
 
 
 ScrewShader::ScrewShader()
-		: Shader("Screw Shader", {VS_FILE, DEFAULT_FS_FILE})
+		: Shader("Screw Shader")
 {
+	_setAttributes({"position", "normal", "uvMap"});
+	_loadSubprograms({VS_FILE, DEFAULT_FS_FILE});
 }
 
 

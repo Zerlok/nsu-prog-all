@@ -8,23 +8,11 @@
 logger_t moduleLogger = loggerModule(loggerLWarning, loggerDFull);
 
 
-std::string DiffuseShader::VS_FILE()
-{
-	static std::string vs_file = path::join(Shader::SRC_DIR, "diffuse.vs");
-	return vs_file;
-}
-
-
-std::string DiffuseShader::FS_FILE()
-{
-	static std::string fs_file = path::join(Shader::SRC_DIR, "diffuse.fs");
-	return fs_file;
-}
-
-
 DiffuseShader::DiffuseShader()
-	: Shader("Diffuse Shader", {VS_FILE(), FS_FILE()})
+	: Shader("Diffuse Shader")
 {
+	_setAttributes({"position", "normal", "uvMap"});
+	_loadSubprograms({Shader::pathTo("diffuse.vs"), Shader::pathTo("diffuse.fs")});
 	logDebug << getName() << " created." << logEndl;
 }
 
@@ -39,9 +27,7 @@ void DiffuseShader::passObject(const Object* obj) const
 {
 	const Object::Type& type = obj->getType();
 
-	if (type == "MESH")
-		passMesh((Mesh*)obj);
-	else if (type == "LIGHT")
+	if (type == "LIGHT")
 		passLight((Light*)obj);
 	else if (type == "CAMERA")
 		passCamera((Camera*)obj);
@@ -73,21 +59,11 @@ void DiffuseShader::passLight(const Light* light) const
 }
 
 
-void DiffuseShader::passMesh(const Mesh* mesh) const
-{
-	const glm::vec3& pos = mesh->getPosition();
-
-	_uniforms.pass("meshPosition", pos.x, pos.y, pos.z, 1.0f);
-}
-
-
 void DiffuseShader::passComponent(const Component* comp) const
 {
 	const Object::Type& type = comp->getType();
 
-	if (type == "MESH")
-		passMesh((Mesh*)comp);
-	else if (type == "LIGHT")
+	if (type == "LIGHT")
 		passLight((Light*)comp);
 	else if (type == "CAMERA")
 		passCamera((Camera*)comp);
@@ -114,7 +90,8 @@ void DiffuseShader::passTextures(const Textures& textures) const
 
 void DiffuseShader::_registerUniforms()
 {
-	// External.
+	logDebug << "Registering " << getName() << " uniforms..." << logEndl;
+
 	_uniforms.registerate("camera.position");
 	_uniforms.registerate("camera.direction");
 
@@ -134,15 +111,16 @@ void DiffuseShader::_registerUniforms()
 	_uniforms.registerateArray("textures[].normal", maxTexturesLen);
 	_uniforms.registerate("texturesLen");
 
-	_uniforms.registerate("meshPosition");
-
 	_uniforms.registerate("material.color");
 	_uniforms.registerate("material.diffuse");
 	_uniforms.registerate("material.specular");
 	_uniforms.registerate("material.hardness");
 	_uniforms.registerate("texturesMixing");
 
-	logDebug << getName() << " external attributes registered." << logEndl;
+	_uniforms.registerate("shadows");
+	_uniforms.registerate("shadowMap");
+	_uniforms.registerate("screenW");
+	_uniforms.registerate("screenH");
 }
 
 

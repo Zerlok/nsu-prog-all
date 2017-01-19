@@ -22,7 +22,6 @@ class DiffuseShader : public Shader
 		void passObject(const Object* obj) const;
 		void passCamera(const Camera* camera) const;
 		void passLight(const Light* light) const;
-		void passMesh(const Mesh* mesh) const;
 
 		// Overriden methods.
 		void passComponent(const Component* comp) const override;
@@ -31,11 +30,6 @@ class DiffuseShader : public Shader
 	protected:
 		void _registerUniforms() override;
 		void _passInternalUniforms() override;
-
-	private:
-		// Static fields.
-		static std::string VS_FILE();
-		static std::string FS_FILE();
 };
 
 

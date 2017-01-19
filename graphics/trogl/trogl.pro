@@ -40,13 +40,16 @@ HEADERS += core/opengls.hpp \
 # Textures.
 HEADERS += core/texture.hpp \
     textures/squaredwbtexture.hpp \
-    textures/imagetexture.hpp
+    textures/imagetexture.hpp \
+    textures/frametexture.hpp
 
 # Shaders.
 HEADERS += core/shader.hpp \
     shaders/diffuseshader.hpp \
     shaders/metamorphoseshader.hpp \
-    shaders/screwshader.hpp
+    shaders/screwshader.hpp \
+    shaders/lightshader.hpp \
+    shaders/ttsshader.hpp
 
 # Materials.
 HEADERS += core/material.hpp \
@@ -87,7 +90,8 @@ HEADERS += tasks/task.hpp \
     tasks/task04.hpp \
     tasks/task05.hpp \
     tasks/task06.hpp \
-    tasks/task07.hpp
+    tasks/task07.hpp \
+    tasks/projectshadows.hpp
 
 
 # Main sources of modules.
@@ -95,7 +99,7 @@ HEADERS += tasks/task.hpp \
 SOURCES += \
     common/color.cpp \
     common/utils.cpp \
-    common/peripherals.cpp \
+    common/peripherals.cpp
 
 # Base engine classes.
 SOURCES += core/opengls.cpp \
@@ -106,13 +110,16 @@ SOURCES += core/opengls.cpp \
 # Textures.
 SOURCES += core/texture.cpp \
     textures/squaredwbtexture.cpp \
-    textures/imagetexture.cpp
+    textures/imagetexture.cpp \
+    textures/frametexture.cpp
 
 # Shaders.
 SOURCES += core/shader.cpp \
     shaders/metamorphoseshader.cpp \
     shaders/screwshader.cpp \
-    shaders/diffuseshader.cpp
+    shaders/diffuseshader.cpp \
+    shaders/lightshader.cpp \
+    shaders/ttsshader.cpp
 
 # Materials.
 SOURCES += core/material.cpp \
@@ -151,7 +158,8 @@ SOURCES += tasks/task.cpp \
     tasks/task04.cpp \
     tasks/task05.cpp \
     tasks/task06.cpp \
-    tasks/task07.cpp
+    tasks/task07.cpp \
+    tasks/projectshadows.cpp
 
 # Main
 SOURCES += main.cpp
@@ -165,4 +173,8 @@ DISTFILES += \
     shaders/metamorph.vs \
     shaders/screw.vs \
     shaders/diffuse.vs \
-    shaders/diffuse.fs
+    shaders/diffuse.fs \
+    shaders/tts.fs \
+    shaders/tts.vs \
+    shaders/light.fs \
+    shaders/light.vs

@@ -7,16 +7,13 @@
 #include "common/utils.hpp"
 
 
-//#define TROGL_FRAME_TYPE SingleFrame
-#define TROGL_FRAME_TYPE DoubleBufferFrame
-//#define TROGL_FRAME_TYPE RTRFrame
-
-
 logger_t moduleLogger = loggerModule(loggerLDebug, (loggerDLevel | loggerDTime));
 
 
 static const int WINDOW_POS_X = 2000;
 static const int WINDOW_POS_Y = 100;
+static const int ANIMATIONS_UPDATE_PERIOD = 50/3; // ms.
+static const Engine::FrameType DEFAULT_FRAME_TYPE = Engine::FrameType::DOUBLE;
 
 
 Engine& Engine::instance()
@@ -30,14 +27,16 @@ Engine::Engine()
 	: _status(),
 	  _glRenderMode(RenderMode::POLYGONS),
 	  _gui(nullptr),
-	  _guiFPS(),
+	  _guiFPS(nullptr),
 	  _scene(nullptr),
 	  _camera(nullptr),
 	  _primitives(),
+	  _frameGenerator(nullptr),
 	  _frame(nullptr),
 	  _keyboard(Keyboard::instance()),
 	  _mouse(Mouse::instance())
 {
+	setFrame(DEFAULT_FRAME_TYPE);
 	logDebug << "Engine created." << logEndl;
 }
 
@@ -158,12 +157,21 @@ int Engine::_validateScene()
 
 int Engine::_validateFrame()
 {
-	bool result = _frame->validate();
+	_frame = _frameGenerator->create(
+			_scene->getName(),
+			WINDOW_POS_X,
+			WINDOW_POS_Y,
+			_camera->getWidth(),
+			_camera->getHeight());
 
 	_glVersion = _toString(GL_VERSION);
 	_glShaderVersion = _toString(GL_SHADING_LANGUAGE_VERSION);
 
-	return (result) ? 1 : 0;
+	if (!_frame->validate())
+		return false;
+
+	_frame->use();
+	return true;
 }
 
 
@@ -171,7 +179,7 @@ int Engine::_validatePrimitives()
 {
 	for (const MeshPtr& mesh : _scene->getMeshes())
 	{
-		Primitive obj {mesh};
+		Primitive obj(mesh);
 
 		if (obj.isValid())
 			_primitives.push_back(std::move(obj));
@@ -184,6 +192,28 @@ int Engine::_validatePrimitives()
 	{
 		logError << "None valid mesh found in scene " << _scene->getName() << logEndl;
 		return 0;
+	}
+
+	return 1;
+}
+
+
+int Engine::_validateLights()
+{
+	_lights = _scene->getLights();
+	for (LightPtr& light : _lights)
+	{
+		ShaderPtr sh = light->getShader();
+		if (sh.is_null())
+			continue;
+
+		sh->compile();
+		if (!sh->isCompiledSuccessfully())
+		{
+			logError << "Invalid shader " << sh->getName() << " for light "
+					 << light->getName() << logEndl;
+			sh.release();
+		}
 	}
 
 	return 1;
@@ -251,6 +281,8 @@ void Engine::_glUpdateMatrices()
 							 _camera->getWHRatio(),
 							 _camera->getNearDistance(),
 							 _camera->getFarDistance());
+//	const float a = 5.0f;
+//	_glMP = glm::ortho(-a, a, -a, a, _camera->getNearDistance(), _camera->getFarDistance());
 }
 
 
@@ -332,18 +364,13 @@ const Engine::Status& Engine::getStatus() const
 }
 
 
-void Engine::enableFPS()
+void Engine::displayFPS(bool val)
 {
-	if (!_guiFPS.is_null())
-		return;
+	if (val && _guiFPS.is_null())
+		_guiFPS = new GUIfps(10, 15, 20, 20);
 
-	_guiFPS = new GUIfps(10, 15, 20, 20);
-}
-
-
-void Engine::disableFPS()
-{
-	_guiFPS.release();
+	else if (!val)
+		_guiFPS.release();
 }
 
 
@@ -370,15 +397,27 @@ void Engine::setActiveScene(const ScenePtr& scene)
 {
 	_status = Status::DIRTY;
 	_scene = scene;
-	setActiveFrame(_scene->getFrameOfView<TROGL_FRAME_TYPE>());
 }
 
 
-void Engine::setActiveFrame(const FramePtr& frame)
+void Engine::setFrame(const FrameType& type)
 {
 	_status = Status::DIRTY;
-	_frame = frame;
-	_frame->setPos(WINDOW_POS_X, WINDOW_POS_Y);
+	switch (type)
+	{
+		case FrameType::DOUBLE:
+			_frameGenerator = new FrameGen<DoubleBufferFrame>();
+			break;
+
+		case FrameType::RTT:
+			_frameGenerator = new FrameGen<RTTFrame>();
+			break;
+
+		default:
+		case FrameType::SINGLE:
+			_frameGenerator = new FrameGen<SingleBufferFrame>();
+			break;
+	}
 }
 
 
@@ -389,16 +428,23 @@ void Engine::setRenderMode(const Engine::RenderMode& mode)
 }
 
 
+void Engine::setFPSLimit(const size_t& val)
+{
+	_redisplayDelay = 1000 / val;
+}
+
+
 bool Engine::validate()
 {
 	int result = 0;
 	result += _validateScene();
 	result += _validateFrame();
 	result += _validatePrimitives();
+	result += _validateLights();
 	result += _validateKeyboard();
 	result += _validateMouse();
 
-	_status = (result == 5)
+	_status = (result == 6)
 			? Status::VALIDATION_SUCCESSFUL
 			: Status::VALIDATION_FAILED;
 
@@ -419,7 +465,6 @@ void Engine::showActiveScene()
 	_logSceneStatistics();
 
 	_glEnableOptions();
-	_glUpdateMatrices();
 
 	glutDisplayFunc(_displayFunc);
 	glutReshapeFunc(_reshapeFunc);
@@ -433,6 +478,11 @@ void Engine::showActiveScene()
 	glutMouseFunc(_mouseClickFunc);
 	glutMotionFunc(_mouseActiveMotionFunc);
 	glutPassiveMotionFunc(_mousePassiveMotionFunc);
+
+	if (_redisplayDelay > 0)
+		glutTimerFunc(_redisplayDelay, _updateFrameFunc, 0);
+
+	glutTimerFunc(ANIMATIONS_UPDATE_PERIOD, _updateAnimations, 0);
 
 	glutMainLoop();
 
@@ -453,6 +503,7 @@ void Engine::_viewGUI()
 	glMatrixMode(GL_MODELVIEW);
 	glPushMatrix();
 	glLoadIdentity();
+
 	glDisable(GL_DEPTH_TEST); // also disable the depth test so renders on top
 
 	const size_t& width = _frame->getWidth();
@@ -479,18 +530,36 @@ void Engine::_viewGUI()
 	glPopMatrix();
 }
 
+//	RTTFrame& f = (RTTFrame&)_frame.get_reference();
+//	LightPtr light = _scene->getLights().front();
+//	Primitive& cube = _primitives.front();
+//	Primitive& house = _primitives.back();
+
+	// Render house into FBO.
+//	glBindFramebuffer(GL_FRAMEBUFFER, f->getFBO());
+//	house.draw(light, _camera, _glMV, _glMP);
+
+//	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+//	cube.draw(light, _camera, _glMV, _glMP);
 
 void Engine::_viewFrame()
 {
 	_frame->clear(_scene->getBgColor());
 
 	_glUpdateMatrices();
+	_frame->setViewMatrix(_glMV);
+	_frame->setProjectionMatrix(_glMP);
 
 	for (Primitive& obj : _primitives)
-		for (const LightPtr& light : _scene->getLights())
-			obj.draw(light, _camera, _glMV, _glMP);
+	{
+		for (const LightPtr& light : _lights)
+		{
+			_frame->draw(obj, light, _camera);
+		}
+	}
 
 	_viewGUI();
+
 	_frame->flush();
 }
 
@@ -508,10 +577,8 @@ void Engine::_idleFunc()
 	e._keyboard.getHandler().handleEvents();
 	e._mouse.getHandler().handleEvents();
 
-	for (AnimationPtr& anim : e._animations)
-		anim->nextFrame();
-
-	glutPostRedisplay();
+	if (e._redisplayDelay == 0)
+		glutPostRedisplay();
 }
 
 
@@ -562,6 +629,22 @@ void Engine::_mouseActiveMotionFunc(int x, int y)
 void Engine::_mousePassiveMotionFunc(int x, int y)
 {
 	instance()._mouse.moveTo(x, y);
+}
+
+
+void Engine::_updateFrameFunc(int)
+{
+	glutTimerFunc(instance()._redisplayDelay, _updateFrameFunc, 0);
+	glutPostRedisplay();
+}
+
+
+void Engine::_updateAnimations(int)
+{
+	for (AnimationPtr& anim : instance()._animations)
+		anim->nextFrame();
+
+	glutTimerFunc(ANIMATIONS_UPDATE_PERIOD, _updateAnimations, 0);
 }
 
 

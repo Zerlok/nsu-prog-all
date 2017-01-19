@@ -19,7 +19,8 @@ Primitive::Primitive(const MeshPtr& mesh)
 	  _glNBO(0),
 	  _glIBO(0),
 	  _indicesSize(0),
-	  _material(mesh->getMaterial())
+	  _material(mesh->getMaterial()),
+	  _shader(_material->getShader())
 {
 	_mesh->recalculateNormals();
 	initGLGeometry(_mesh);
@@ -37,7 +38,8 @@ Primitive::Primitive(Primitive&& obj)
 	  _glNBO(std::move(obj._glNBO)),
 	  _glIBO(std::move(obj._glIBO)),
 	  _indicesSize(std::move(obj._indicesSize)),
-	  _material(std::move(obj._material))
+	  _material(std::move(obj._material)),
+	  _shader(std::move(obj._shader))
 {
 	obj._glVBO = 0;
 	obj._glUVBO = 0;
@@ -70,6 +72,24 @@ bool Primitive::isValid() const
 }
 
 
+const MaterialPtr& Primitive::getMaterial() const
+{
+	return _material;
+}
+
+
+const ShaderPtr& Primitive::getShader() const
+{
+	return _shader;
+}
+
+
+const MeshPtr& Primitive::getMesh() const
+{
+	return _mesh;
+}
+
+
 void Primitive::initGLGeometry(const MeshPtr& mesh)
 {
 	if (_isGLGeometryValid())
@@ -81,16 +101,9 @@ void Primitive::initGLGeometry(const MeshPtr& mesh)
 }
 
 
-void Primitive::draw(const LightPtr& light,
-					 const CameraPtr& camera,
-					 const glm::mat4x4& mv,
-					 const glm::mat4x4& mp)
+void Primitive::draw() const
 {
-	_material->use();
-	const ShaderPtr& sh = _material->getShader();
-	sh->passBasicMatrices(_mesh->calculateWorldMatrix(), mv, mp);
-	sh->passComponent(light);
-	sh->passComponent(camera);
+	_shader->passWorldMatrix(_mesh->calculateWorldMatrix());
 
 	glEnableVertexAttribArray(0);
 	glEnableVertexAttribArray(1);

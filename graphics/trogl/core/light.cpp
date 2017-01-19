@@ -156,6 +156,24 @@ const float& Light::getOutterAngle() const
 }
 
 
+const glm::mat4x4& Light::getOrthoMatrix() const
+{
+	return _orthoMat;
+}
+
+
+ShaderPtr& Light::getShader()
+{
+	return _shader;
+}
+
+
+const ShaderPtr& Light::getShader() const
+{
+	return _shader;
+}
+
+
 void Light::setPower(const float& power)
 {
     _power = power;
@@ -165,7 +183,10 @@ void Light::setPower(const float& power)
 void Light::setDirection(const vec3& direction)
 {
 	if (_hasDirection(_lightType))
+	{
 		_direction = glm::normalize(direction);
+		applyPosition();
+	}
 }
 
 
@@ -189,14 +210,29 @@ void Light::setOutterAngle(const float& outterAngle)
 }
 
 
+void Light::setShader(const ShaderPtr& sh)
+{
+	_shader = sh;
+}
+
+
 void Light::faceDirectionTo(const vec3& position)
 {
 	setDirection(position - _position);
 }
 
 
+void Light::setPosition(const vec3& position)
+{
+	Object::setPosition(position);
+	applyPosition();
+}
+
+
 void Light::applyPosition()
 {
+	_orthoMat = glm::lookAt(_position, _direction, space::xyz::y)
+			* glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, 0.0f, glm::length(_direction));
 }
 
 

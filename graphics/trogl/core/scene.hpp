@@ -40,13 +40,6 @@ class Scene : public Component
 		void setBgColor(const Color& color);
 		void setAmbient(const float& power);
 
-		template<class FrameCls = Frame>
-		FramePtr getFrameOfView() const
-		{
-			FramePtr frame = new FrameCls(getName(), 0, 0, _camera->getWidth(), _camera->getHeight());
-			return std::move(frame);
-		}
-
 	private:
 		// Static fields.
 		static const std::string DEFAULT_NAME;

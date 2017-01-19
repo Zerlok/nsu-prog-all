@@ -50,16 +50,23 @@ class Light : public Object
 		const Color& getColor() const;
 		const float& getInnerAngle() const;
 		const float& getOutterAngle() const;
+		const glm::mat4x4& getOrthoMatrix() const;
+
+		ShaderPtr& getShader();
+		const ShaderPtr& getShader() const;
 
 		void setPower(const float& power);
 		void setDirection(const vec3& direction);
 		void setColor(const Color& color);
 		void setInnerAngle(const float& innerAngle);
 		void setOutterAngle(const float& outterAngle);
+		void setShader(const ShaderPtr& sh);
 
 		void faceDirectionTo(const vec3& position);
 
 		// Overriden methods.
+		void setPosition(const vec3 &position) override;
+
 		void applyPosition() override;
 		void applyRotation() override;
 		void applyScale() override;
@@ -79,6 +86,9 @@ class Light : public Object
 		Color _color;
 		float _innerAngle;
 		float _outterAngle;
+		glm::mat4x4 _orthoMat;
+
+		ShaderPtr _shader;
 };
 
 std::ostream& operator<<(std::ostream& out, const Light::Type& type);
