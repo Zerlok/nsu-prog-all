@@ -274,11 +274,9 @@ void Mesh::recalculateNormals()
 {
 	// TODO: update normal recalculation algorithm.
 	/*
-	 * Choice 1: Find a good polygon (or polygon at center), then start to compare
+	 * Idea 1: Find a good polygon (or polygon at center), then start to compare
 	 * angle between current polygon and adjacent with angle between therirs normals.
 	 * It will be easy to see then, which normal is good and which is bad.
-	 *
-	 * Choice 2: Find out is face normal directed as total normal of its verticecs.
 	 */
 	vec3 vn;
 	vec3 pn;

@@ -97,7 +97,15 @@ class Property : public AbstractProperty
 							const size_t& prev,
 							const size_t& next)
 		{
-			_ref = (_states[next]*alpha + _states[prev]*(1.0 - alpha));
+			/*
+			 * Interpolation between two key frames.
+			 * Formula: result = next * alpha + prev * (1.0-alpha);
+			 */
+			T tmp = _states[next];
+			tmp *= alpha;
+			_ref = _states[prev];
+			_ref *= (1.0 - alpha);
+			_ref += tmp;
 		}
 
 	private:

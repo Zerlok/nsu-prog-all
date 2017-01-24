@@ -24,6 +24,7 @@ Light Light::createSun()
 {
 	Light lamp(Light::Type::SUN, "Sun");
 	lamp.setPower(1.0);
+	lamp.setPosition({0.0f, 10.0f, 0.0f});
 	lamp.setDirection(-space::xyz::y);
 	lamp.setPosition(defaultLampPosition);
 
@@ -162,9 +163,9 @@ const glm::mat4x4& Light::getViewMatrix() const
 }
 
 
-const glm::mat4x4& Light::getOrthoMatrix() const
+const glm::mat4x4& Light::getProjMatrix() const
 {
-	return _orthoMat;
+	return _projMat;
 }
 
 
@@ -237,8 +238,8 @@ void Light::setPosition(const vec3& position)
 
 void Light::applyPosition()
 {
-	_viewMat = glm::lookAt(_position, _direction, space::xyz::y);
-	_orthoMat = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, -10.0f, 100.0f);
+	_viewMat = glm::lookAt(_position, _position + _direction, space::xyz::y);
+	_projMat = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, -10.0f, 100.0f);
 }
 
 
@@ -260,8 +261,9 @@ void Light::_regProperties()
 	_regProperty(_color);
 	_regProperty(_innerAngle);
 	_regProperty(_outterAngle);
+
 	_regProperty(_viewMat);
-	_regProperty(_orthoMat);
+	_regProperty(_projMat);
 }
 
 

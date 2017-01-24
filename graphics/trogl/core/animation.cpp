@@ -41,52 +41,6 @@ Animatable::~Animatable()
 }
 
 
-//Animatable& Animatable::operator=(const Animatable& anim)
-//{
-//	if (!sameType(anim))
-//		return (*this);
-
-//	_keyframes = anim._keyframes;
-
-//	Properties::const_iterator animIt = anim._properties.cbegin();
-//	for (Properties::iterator it = _properties.begin();
-//		 it != _properties.end();
-//		 ++it, ++animIt)
-//		it->copy(*animIt);
-
-//	Inners::const_iterator animInIt = anim._inners.cbegin();
-//	for (Properties::iterator it = _properties.begin();
-//		 it != _properties.end();
-//		 ++it, ++animInIt)
-//		it->operator=(*(*animIt));
-
-//	return (*this);
-//}
-
-
-//Animatable& Animatable::operator=(Animatable&& anim)
-//{
-//	if (!sameType(anim))
-//		return (*this);
-
-//	_keyframes = std::move(anim._keyframes);
-
-//	Properties::const_iterator animIt = anim._properties.cbegin();
-//	for (Properties::iterator it = _properties.begin();
-//		 it != _properties.end();
-//		 ++it, ++animIt)
-//		it->copy(*animIt);
-
-//	Inners::const_iterator animInIt = anim._inners.cbegin();
-//	for (Properties::iterator it = _properties.begin();
-//		 it != _properties.end();
-//		 ++it, ++animInIt)
-//		it->operator=(*(*animIt));
-
-//	return (*this);
-//}
-
-
 void Animatable::addKeyframe(const size_t& frameNum)
 {
 	Keyframes::iterator it;

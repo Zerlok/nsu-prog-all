@@ -81,16 +81,17 @@ void Task::addDefaultCameraRotation()
 
 void Task::addDefaultSunRotation()
 {
-	size_t T = 400;
+	size_t T = 600;
 	float h = -1.0;
 	float a = 1.0;
 
 	if (scene->getLights().empty())
 	{
-		scene->addLight(new Light(Light::createSun()));
+		LightPtr sun = new Light(Light::createSun());
+		scene->addLight(sun);
 	}
 
-	LightPtr sun = scene->getLights().front();
+	LightPtr sun = scene->getLights().back();
 
 	sun->setDirection({a, h, 0.0});
 	sun->addKeyframe(T);

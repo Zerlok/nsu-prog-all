@@ -287,18 +287,13 @@ void RTTFrame::init()
 	glGenFramebuffers(1, &_fboId);
 	glBindFramebuffer(GL_FRAMEBUFFER, _fboId);
 
-	_colorTexture.setFiltering(Texture::Filtering::BILINEAR);
+	_colorTexture.setFiltering(Texture::Filtering::NONE);
 	_colorTexture.generate();
 	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, _colorTexture.getBuffId(), 0);
 
 	_depthTexture.setFiltering(Texture::Filtering::BILINEAR);
 	_depthTexture.generate();
 	glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, _depthTexture.getBuffId(), 0);
-
-//	glGenRenderbuffers(1, &_depthRboId);
-//	glBindRenderbuffer(GL_RENDERBUFFER, _depthRboId);
-//	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, _width, _height);
-//	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, _depthRboId);
 
 	MeshPtr plane = new Plane();
 	plane->setScale(2.0, 1.0, 2.0);
@@ -344,7 +339,7 @@ void RTTFrame::draw(const Primitives& primitives,
 	const LightPtr& light = lights.front();
 	ShaderPtr lsh = light->getShader();
 	const glm::mat4x4 lightView = light->getViewMatrix();
-	const glm::mat4x4 lightOrtho = light->getOrthoMatrix();
+	const glm::mat4x4 lightProj = light->getProjMatrix();
 
 	if (!lsh.is_null())
 	{
@@ -354,7 +349,7 @@ void RTTFrame::draw(const Primitives& primitives,
 		{
 			lsh->passWorldMatrix(primitive.calculateWorldMatrix());
 			lsh->passViewMatrix(light->getViewMatrix());
-			lsh->passProjectionMatrix(light->getOrthoMatrix());
+			lsh->passProjectionMatrix(light->getProjMatrix());
 			lsh->passComponent(light);
 			primitive.draw();
 		}
@@ -377,7 +372,7 @@ void RTTFrame::draw(const Primitives& primitives,
 		if (!lsh.is_null())
 		{
 			sh->passUniform("shadowMV", lightView);
-			sh->passUniform("shadowMP", lightOrtho);
+			sh->passUniform("shadowMP", lightProj);
 
 			_colorTexture.bind();
 			_depthTexture.bind();

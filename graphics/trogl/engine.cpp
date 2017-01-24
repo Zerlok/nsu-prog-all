@@ -13,6 +13,7 @@ logger_t moduleLogger = loggerModule(loggerLDebug, (loggerDLevel | loggerDTime))
 static const int WINDOW_POS_X = 2000;
 static const int WINDOW_POS_Y = 100;
 static const int ANIMATIONS_UPDATE_PERIOD = 50/3; // ms.
+static const int SPECIALS_KEY_OFFSET = 255;
 static const Engine::FrameType DEFAULT_FRAME_TYPE = Engine::FrameType::DOUBLE;
 
 
@@ -65,7 +66,7 @@ void Engine::_logEngineOptions() const
 		<< std::endl << "   GLSL max locations amount: " << glslLocationsCount
 		<< std::endl;
 
-	// FIXME: unknown fails, when trying to run this code on HP-book.
+	// FIXME: sometimes GL crushes with unknown fail, when trying to run this code on laptop.
 	/* glslVersionsNum is strange.
 	GLint glslVersionsNum;
 	glGetIntegerv(GL_NUM_SHADING_LANGUAGE_VERSIONS, &glslVersionsNum);
@@ -222,19 +223,21 @@ int Engine::_validateLights()
 
 int Engine::_validateKeyboard()
 {
-	Keyboard::Code2KeyMap table;
 	const int alphaLen = 'Z' - 'A' + 1;
 	const int keyA = int(Keyboard::Key::A);
+
+	Keyboard::Code2KeyMap table;
 	for (int i = 0; i < alphaLen; ++i)
 	{
 		table['A' + i] = Keyboard::Key(keyA + i);
 		table['a' + i] = Keyboard::Key(keyA + i);
 	}
 
-	table[GLUT_KEY_UP + 255] = Keyboard::Key::ARROW_UP;
-	table[GLUT_KEY_DOWN + 255] = Keyboard::Key::ARROW_DOWN;
-	table[GLUT_KEY_LEFT + 255] = Keyboard::Key::ARROW_LEFT;
-	table[GLUT_KEY_RIGHT + 255] = Keyboard::Key::ARROW_RIGHT;
+	table[GLUT_KEY_UP + SPECIALS_KEY_OFFSET] = Keyboard::Key::ARROW_UP;
+	table[GLUT_KEY_DOWN + SPECIALS_KEY_OFFSET] = Keyboard::Key::ARROW_DOWN;
+	table[GLUT_KEY_LEFT + SPECIALS_KEY_OFFSET] = Keyboard::Key::ARROW_LEFT;
+	table[GLUT_KEY_RIGHT + SPECIALS_KEY_OFFSET] = Keyboard::Key::ARROW_RIGHT;
+	// TODO: insert shift, alt, ctrl, etc.
 
 	_keyboard.setTranslationTable(table);
 	return 1;
@@ -281,8 +284,6 @@ void Engine::_glUpdateMatrices()
 							 _camera->getWHRatio(),
 							 _camera->getNearDistance(),
 							 _camera->getFarDistance());
-//	const float a = 5.0f;
-//	_glMP = glm::ortho(-a, a, -a, a, _camera->getNearDistance(), _camera->getFarDistance());
 }
 
 
@@ -498,13 +499,13 @@ void Engine::_viewGUI()
 
 	// TODO: add comment description: what does each line do with GL.
 	glMatrixMode(GL_PROJECTION);
-	glPushMatrix(); // save
-	glLoadIdentity();// and clear
+	glPushMatrix();
+	glLoadIdentity();
 	glMatrixMode(GL_MODELVIEW);
 	glPushMatrix();
 	glLoadIdentity();
 
-	glDisable(GL_DEPTH_TEST); // also disable the depth test so renders on top
+	glDisable(GL_DEPTH_TEST);
 
 	const size_t& width = _frame->getWidth();
 	const size_t& height = _frame->getHeight();
@@ -521,11 +522,11 @@ void Engine::_viewGUI()
 			comp->draw(width, height);
 	}
 
-	glEnable(GL_DEPTH_TEST); // Turn depth testing back on
+	glEnable(GL_DEPTH_TEST);
 
 	// What does it do?
 	glMatrixMode(GL_PROJECTION);
-	glPopMatrix(); // revert back to the matrix I had before.
+	glPopMatrix();
 	glMatrixMode(GL_MODELVIEW);
 	glPopMatrix();
 }
@@ -584,14 +585,14 @@ void Engine::_kbLetterUpFunc(unsigned char key, int, int)
 
 void Engine::_kbSpecialDownFunc(int key, int, int)
 {
-	key += 255;
+	key += SPECIALS_KEY_OFFSET;
 	instance()._keyboard.setKeyPressed(key);
 }
 
 
 void Engine::_kbSpecialUpFunc(int key, int, int)
 {
-	key += 255;
+	key += SPECIALS_KEY_OFFSET;
 	instance()._keyboard.setKeyReleased(key);
 }
 

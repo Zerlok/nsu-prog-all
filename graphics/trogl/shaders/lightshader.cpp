@@ -49,19 +49,6 @@ void LightShader::passComponent(const Component* comp) const
 
 void LightShader::passTextures(const Textures& textures) const
 {
-//	size_t idx = 0;
-//	for (const TexturePtr& texture : textures)
-//	{
-//		_uniforms.passEl("samples[]", idx, texture->getSamplerId());
-//		_uniforms.passEl("textures[].offset", idx, texture->getUVOffset());
-//		_uniforms.passEl("textures[].scale", idx, texture->getUVScale());
-//		_uniforms.passEl("textures[].color", idx, texture->getColorMix());
-//		_uniforms.passEl("textures[].normal", idx, texture->getNormal());
-
-//		++idx;
-//	}
-
-//	_uniforms.pass("texturesLen", int(textures.size()));
 }
 
 
@@ -76,16 +63,6 @@ void LightShader::_registerUniforms()
 	_uniforms.registerate("lamp.direction");
 	_uniforms.registerate("lamp.ia");
 	_uniforms.registerate("lamp.oa");
-
-//	static const size_t maxTexturesLen = 16; // TODO: get this const from shader source code.
-//	_uniforms.registerateArray("samples[]", maxTexturesLen);
-//	_uniforms.registerateArray("textures[].offset", maxTexturesLen);
-//	_uniforms.registerateArray("textures[].scale", maxTexturesLen);
-//	_uniforms.registerateArray("textures[].color", maxTexturesLen);
-//	_uniforms.registerateArray("textures[].normal", maxTexturesLen);
-//	_uniforms.registerate("texturesLen");
-
-//	_uniforms.registerate("texturesMixing");
 }
 
 

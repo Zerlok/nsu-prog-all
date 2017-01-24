@@ -115,9 +115,26 @@ glm::mat4x4 glm::rotationMatrix(const glm::vec3& angles)
 }
 
 
-glm::mat4x4 glm::operator*(const glm::mat4x4& mat, const float& val)
+std::ostream& glm::operator<<(std::ostream& out, const glm::mat4x4& mat)
 {
-	glm::mat4x4 tmp(mat);
-	tmp *= val;
-	return std::move(mat);
+	static const int p = precPoint;
+	static const int w = p+5;
+
+	out << "mat4x4(";
+	for (size_t i = 0; i < mat.length(); ++i)
+	{
+		out  << std::endl
+			 << std::setw(w)
+			 << std::setprecision(p)
+			 << mat[i][0];
+
+		for (size_t j = 1; j < mat[i].length(); ++j)
+			out << ", "
+				<< std::setw(w)
+				<< std::setprecision(p)
+				<< mat[i][j];
+	}
+	out << ')';
+
+	return out;
 }

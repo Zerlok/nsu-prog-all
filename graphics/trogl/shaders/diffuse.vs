@@ -34,5 +34,5 @@ void main()
 	vertexUV = uvMap;
 
     gl_Position = MP * MV * MW * position;
-	shadowCoord = biasM * shadowMP * shadowMV * position;
+	shadowCoord = biasM * shadowMP * shadowMV * MW * position;
 }

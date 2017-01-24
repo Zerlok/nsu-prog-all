@@ -8,6 +8,9 @@
 #include "tasks/task07.hpp"
 #include "tasks/projectshadows.hpp"
 
+#include "core/opengls.hpp"
+#include "core/animation.hpp"
+
 
 //logger_t globalLogging = loggerGlobal(loggerLDebug, loggerDFull);
 logger_t globalLogger = loggerInit(std::cout, loggerLDebug, loggerDFull);

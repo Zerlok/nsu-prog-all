@@ -197,10 +197,10 @@ void main()
     lampInt *= material.specular;
 	specularInt *= material.specular;
 
-    if (texture2D(shadowMap, shadowCoord.xy).z < shadowCoord.z - 0.005)
+    if (shadowCoord.z - texture2D(shadowMap, shadowCoord.xy).z > 0.00005)
 	{
-	    lampInt *= 0.5;
-		specularInt *= 0.5;
+	    lampInt = 0.0;
+		specularInt = 0.0;
 	}
 
     color = mix(material.color, textureColor, texturesMixing) * lamp.color * (lampInt + specularInt);

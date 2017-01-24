@@ -32,11 +32,10 @@ namespace glm
 
 	std::ostream& operator<<(std::ostream& out, const glm::vec2& v);
 	std::ostream& operator<<(std::ostream& out, const glm::vec3& v);
+	std::ostream& operator<<(std::ostream& out, const glm::mat4x4& mat);
 
 	float angle(const float& acos, const float& asin);
 	glm::vec3 angles(const glm::vec3& v);
-
-	glm::mat4x4 operator*(const glm::mat4x4& vec, const float& val);
 
 	glm::mat4x4 rotationMatrix(const glm::vec3& angles);
 }
@@ -69,16 +68,16 @@ namespace matrix
 {
 	namespace zero
 	{
-		static const glm::mat2x2 m2x2(0);
-		static const glm::mat4x4 m3x3(0);
-		static const glm::mat4x4 m4x4(0);
+		static const glm::mat2x2 m2x2(0.0f);
+		static const glm::mat4x4 m3x3(0.0f);
+		static const glm::mat4x4 m4x4(0.0f);
 	}
 
 	namespace identic
 	{
-		static const glm::mat2x2 m2x2(1);
-		static const glm::mat4x4 m3x3(1);
-		static const glm::mat4x4 m4x4(1);
+		static const glm::mat2x2 m2x2(1.0f);
+		static const glm::mat4x4 m3x3(1.0f);
+		static const glm::mat4x4 m4x4(1.0f);
 	}
 }
 
