@@ -184,8 +184,6 @@ class RTTFrame : public Frame
 		FrameTexture _colorTexture;
 		FrameTexture _depthTexture;
 		GLuint _depthRboId;
-		Primitive* _screenPlane;
-		ShaderPtr _ttsShader;
 };
 
 

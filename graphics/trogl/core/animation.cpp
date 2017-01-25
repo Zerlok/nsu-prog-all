@@ -128,7 +128,8 @@ Animation::Animation(const std::string& name)
 	  _components(),
 	  _transformation(new LinearTransformation()),
 	  _cntr(0),
-	  _length(0)
+	  _length(0),
+	  _isPaused(false)
 {
 	logDebug << "Animation created."
 			 << logEndl;
@@ -145,6 +146,12 @@ Animation::~Animation()
 size_t Animation::getFrame() const
 {
 	return _cntr;
+}
+
+
+bool Animation::isPaused() const
+{
+	return _isPaused;
 }
 
 
@@ -175,7 +182,22 @@ void Animation::setLength(const size_t& len)
 
 void Animation::nextFrame()
 {
+	if (_isPaused)
+		return;
+
 	applyFrame(++_cntr);
+}
+
+
+void Animation::resume()
+{
+	_isPaused = false;
+}
+
+
+void Animation::pause()
+{
+	_isPaused = true;
 }
 
 

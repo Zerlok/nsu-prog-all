@@ -70,6 +70,7 @@ void CameraController::_onKey(const Keyboard::Key& key)
 			break;
 		case Keyboard::Key::F:
 			_flyEnabled = !_flyEnabled;
+			break;
 		default:
 			return;
 	}

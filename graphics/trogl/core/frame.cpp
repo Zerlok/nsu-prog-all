@@ -276,7 +276,6 @@ RTTFrame::RTTFrame(const std::string& title,
 
 RTTFrame::~RTTFrame()
 {
-	delete _screenPlane;
 }
 
 
@@ -294,16 +293,6 @@ void RTTFrame::init()
 	_depthTexture.setFiltering(Texture::Filtering::BILINEAR);
 	_depthTexture.generate();
 	glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, _depthTexture.getBuffId(), 0);
-
-	MeshPtr plane = new Plane();
-	plane->setScale(2.0, 1.0, 2.0);
-	plane->applyScale();
-	plane->setRotation(M_PI_2, 0.0, 0.0);
-	plane->applyRotation();
-	_screenPlane = new Primitive(plane);
-
-	_ttsShader = new TTSShader();
-	_ttsShader->compile();
 }
 
 
@@ -334,7 +323,6 @@ void RTTFrame::draw(const Primitives& primitives,
 					const CameraPtr& camera)
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, _fboId);
-//	glCullFace(GL_BACK);
 
 	const LightPtr& light = lights.front();
 	ShaderPtr lsh = light->getShader();
@@ -358,7 +346,6 @@ void RTTFrame::draw(const Primitives& primitives,
 	}
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-//	glCullFace(GL_FRONT);
 	for (const Primitive& primitive : primitives)
 	{
 		MaterialPtr mat = primitive.getMaterial();
@@ -374,10 +361,8 @@ void RTTFrame::draw(const Primitives& primitives,
 			sh->passUniform("shadowMV", lightView);
 			sh->passUniform("shadowMP", lightProj);
 
-			_colorTexture.bind();
 			_depthTexture.bind();
 			sh->passUniform("shadows", 1.0f);
-			sh->passUniform("intensityMap", _colorTexture.getSamplerId());
 			sh->passUniform("shadowMap", _depthTexture.getSamplerId());
 		}
 		else
@@ -385,13 +370,6 @@ void RTTFrame::draw(const Primitives& primitives,
 
 		primitive.draw();
 	}
-
-//	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-//	_ttsShader->bind();
-////	glBindTexture(GL_TEXTURE_2D, _colorTexture.getBuffId());
-//	glBindTexture(GL_TEXTURE_2D, _depthTexture.getBuffId());
-//	_ttsShader->passUniform("text", 1);
-//	_screenPlane->draw();
 }
 
 

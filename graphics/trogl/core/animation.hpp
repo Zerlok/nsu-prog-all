@@ -202,6 +202,7 @@ class Animation : public Component
 		virtual ~Animation();
 
 		size_t getFrame() const;
+		bool isPaused() const;
 
 		void add(Animatable* anim);
 		template<class T>
@@ -217,11 +218,15 @@ class Animation : public Component
 
 		void nextFrame();
 
+		void resume();
+		void pause();
+
 	private:
 		Components _components;
 		AnimationTransformation* _transformation;
 		size_t _cntr;
 		size_t _length;
+		bool _isPaused;
 };
 
 using AnimationPtr = SharedPointer<Animation, Component>;
