@@ -1,6 +1,5 @@
 syntax: glob
 *.o
-*.sh
 *.out
 *.orig
 *.gch
@@ -15,6 +14,11 @@ syntax: glob
 *.pro
 *.pro.user
 *.pro.autosave
+*.project
+*.mk
+*Debug*
+*.codelite*
+*.workspace
 *.ods
 *.cvn
 *.textile
@@ -22,8 +26,13 @@ syntax: glob
 *.jar
 *target/classes*
 *target/test*
-*oop/build*
+*/build/*
+*/build-*
+include/*
+libs/*
 *.metadata
 *.settings
 *.pyc
 *_samples*
+oop/task3/argvparser.h
+

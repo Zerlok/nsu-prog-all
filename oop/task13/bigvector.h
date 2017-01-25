@@ -27,6 +27,10 @@ class BigVector
 				const std::string& dump_filename	= DEFAULT_DUMP_FILENAME,
 				const size_t& window_width			= DEFAULT_WINDOW_SIZE
 		);
+		BigVector(
+				std::iostream& dump_stream,
+				const size_t& window_width			= DEFAULT_WINDOW_SIZE
+		);
 		BigVector(const BigVector&) = delete;
 		BigVector(BigVector&& vector);
 		~BigVector();
@@ -64,7 +68,7 @@ class BigVector
 
 	private:
 		// Fields.
-		mutable std::fstream _dump_stream;
+		mutable std::iostream _dump_stream;
 		mutable size_t _dump_size;
 
 		size_t _total_size;
@@ -94,7 +98,6 @@ BigVector<T>::BigVector(const std::string& dump_filename, const size_t& window_w
 	  _data_window(0),
 	  _is_dirty_window(false)
 {
-	// TODO: fix this stupid reopening.
 	if (!_dump_stream.is_open())
 	{
 		// close current stream.
@@ -109,6 +112,30 @@ BigVector<T>::BigVector(const std::string& dump_filename, const size_t& window_w
 
 	/*
 	 * IF file is not empty
+	 * THAN read the amount of elements in it.
+	 */
+	_dump_stream.seekg(0, std::ios::end);
+	if (_dump_stream.tellg() > 0)
+	{
+		_dump_stream.seekg(0);
+		deserialize(_dump_stream, _total_size);
+		_dump_size = _total_size;
+	}
+}
+
+
+template<class T>
+BigVector<T>::BigVector(std::iostream& dump_stream, const size_t& window_width)
+	: _dump_stream(dump_stream),
+	  _dump_size(0),
+	  _total_size(0),
+	  _window_offset(0),
+	  _window_width(window_width),
+	  _data_window(0),
+	  _is_dirty_window(false)
+{
+	/*
+	 * IF stream is not empty
 	 * THAN read the amount of elements in it.
 	 */
 	_dump_stream.seekg(0, std::ios::end);

@@ -4,62 +4,25 @@
 
 #include <string>
 #include <vector>
-using Arguments = std::vector<std::string>;
-
-
-#include <sstream>
-#include <stdexcept>
 #include <unordered_map>
-
-
-static const std::string ERR_KEY_NOT_FOUND = "The key is not registered: ";
-
-
-template<class BaseCls>
-class AbstractClassCreator
-{
-	public:
-		AbstractClassCreator() {}
-		virtual ~AbstractClassCreator() {}
-		virtual BaseCls* create() = 0;
-		virtual BaseCls* create(const Arguments& args) = 0;
-};
-
-
-template<class BaseCls, class DerivedCls>
-class DerivedClassCreator : public AbstractClassCreator<BaseCls>
-{
-	public:
-		DerivedClassCreator() {}
-		virtual ~DerivedClassCreator() {}
-
-		BaseCls* create()
-		{
-			return new DerivedCls();
-		}
-
-		BaseCls* create(const Arguments& args)
-		{
-			return new DerivedCls(args);
-		}
-};
+using Strings = std::vector<std::string>;
 
 
 template<class K, class B>
-class Factory
+class PrototypeFactory
 {
 	public:
 		using Key = K;
 		using BaseCls = B;
-		using BaseCreator = AbstractClassCreator<BaseCls>;
+		using BaseCreator = typename BaseCls::AbstractPrototype;
 		using CreatorsMap = std::unordered_map<Key, BaseCreator*>;
 
-		Factory() {}
-		Factory(const Factory<Key, BaseCls>& factory) = delete;
-		~Factory()
+		PrototypeFactory() {}
+		PrototypeFactory(const PrototypeFactory<Key, BaseCls>&) = delete;
+		~PrototypeFactory()
 		{
-			for (std::pair<Key, BaseCreator*> p : _creators)
-				delete p.second;
+			for (const std::pair<Key, BaseCreator*>& kv_pair : _creators)
+				delete kv_pair.second;
 		}
 
 		template<class DerivedCls>
@@ -68,40 +31,26 @@ class Factory
 			if (_creators.find(key) != _creators.end())
 				return false;
 
-			_creators.insert({key, new DerivedClassCreator<BaseCls, DerivedCls>()});
+			using DerivedPrototype = typename DerivedCls::Prototype;
+			_creators.insert({key, new DerivedPrototype() });
 			return true;
 		}
 
-		BaseCls* create(const Key& key)
+		BaseCreator* get(const Key& key)
 		{
 			typename CreatorsMap::iterator it = _creators.find(key);
-
-			if (it == _creators.end())
-			{
-				std::stringstream ss;
-				ss << ERR_KEY_NOT_FOUND << key;
-				throw std::invalid_argument(ss.str());
-			}
-
-			return ((it->second)->create());
+			return ((it != _creators.end())
+					? (it->second)
+					: nullptr);
 		}
 
-		BaseCls* create(const Key &key, const Arguments& args)
+		std::vector<Key> get_registred() const
 		{
-			typename CreatorsMap::iterator it = _creators.find(key);
+			std::vector<Key> keys;
+			for (const std::pair<Key, BaseCreator*>& kv_pair : _creators)
+				keys.push_back(kv_pair.first);
 
-			if (it == _creators.end())
-			{
-				std::stringstream ss;
-				ss << ERR_KEY_NOT_FOUND << key;
-				throw std::invalid_argument(ss.str());
-			}
-
-			if (args.empty())
-				return ((it->second)->create());
-
-			else
-				return ((it->second)->create(args));
+			return std::move(keys);
 		}
 
 	private:

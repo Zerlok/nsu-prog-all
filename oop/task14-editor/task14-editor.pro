@@ -12,15 +12,11 @@ INCLUDEPATH += /usr/include/gtest
 
 
 SOURCES += main.cpp \
-    command.cpp \
-    copycommand.cpp \
-    insertcommand.cpp \
-    searchreplacecommand.cpp \
-    undocommand.cpp \
-    redocommand.cpp \
     editor.cpp \
     commandparser.cpp \
-    helpcommand.cpp
+	history.cpp \
+    editorerrors.cpp \
+    stringutils.cpp
 
 HEADERS += \
 	bigvector.h \
@@ -34,4 +30,10 @@ HEADERS += \
     editor.h \
     commandparser.h \
     factory.h \
-    helpcommand.h
+    helpcommand.h \
+    setcommand.h \
+    history.h \
+    editorerrors.h \
+    stringutils.h
+
+OTHER_FILES += gtest.cpp

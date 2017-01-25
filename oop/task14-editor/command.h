@@ -2,76 +2,125 @@
 #define __COMMAND_H__
 
 
+#include <iostream>
 #include <string>
 #include <vector>
-#include <iostream>
 #include "factory.h"
-
-
-using CommandFactory = Factory<std::string, Command>;
+#include "history.h"
+#include "editorerrors.h"
 
 
 class Command
 {
 	public:
-		class Type;
+		// Commands types.
+		enum class Type
+		{
+			data_manipulation = 0,
+			history_manipulation,
+			help,
+		};
 
-		Command(const Type& type, bool is_modif)
-			: _type(type),
-			  _is_modifying(is_modif) { }
-		virtual ~Command() { }
+		// Inner classes.
+		class AbstractPrototype;
+		struct Result
+		{
+			// Constructors / Destructor.
+			Result(const std::string& s = "", const Errors& e = Errors())
+				: data(s), errors(e) {}
+			Result(const Result&) = default;
+			Result(Result&&) = default;
 
+			// Operators.
+			Result& operator=(const Result&) = default;
+			Result& operator=(Result&&) = default;
+
+			bool is_valid() const { return errors.empty(); }
+			operator bool() const { return is_valid(); }
+			bool operator!() const { return !(this->operator bool()); }
+
+			// Fields.
+			std::string data;
+			Errors errors;
+		};
+
+		// Constructors / Destructor.
+		Command(const Type& type)
+			: _type(type) {}
+		Command(const Command&) = default;
+		Command(Command&&) = default;
+		virtual ~Command() {}
+
+		// Operators.
+		Command& operator=(const Command&) = default;
+		Command& operator=(Command&&) = default;
+
+		// Getters.
 		const Type& get_type() const { return _type; }
-		bool is_modifying() const { return _is_modifying; }
 
-		virtual std::string execute(const std::string& data) = 0;
+		// Virtual methods.
+		// For data manipulation commands.
+		virtual Errors validate(const std::string&, const std::string&) const { return std::move(Errors()); }
+		virtual Result execute(const std::string&, std::string&) { return std::move(Result()); }
+
+		// For history manipulation commands.
+		virtual Errors validate(const History&) const { return std::move(Errors()); }
+		virtual Result execute(History&) { return std::move(Result()); }
 
 	protected:
 		Type _type;
-		bool _is_modifying;
 };
 
 
-class Command::Type
+using CommandsBuilders = PrototypeFactory<std::string, Command>;
+
+
+class Command::AbstractPrototype
 {
 	public:
-		using Names = std::vector<std::string>;
-		using Types = std::vector<Type>;
+		struct Result
+		{
+			// Constructors / Destructor.
+			Result(Command* p = nullptr, const Errors& e = Errors())
+				: ptr(p), errors(e) {}
+			Result(const Result&) = delete;
+			Result(Result&& r)
+				: ptr(r.ptr), errors(std::move(r.errors))
+			{
+				r.ptr = nullptr;
+			}
+			~Result()
+			{
+				delete ptr;
+			}
 
-		static const Names& get_types_names();
-		static const Types& get_types();
+			// Operators.
+			Result& operator=(const Result&) = default;
+			Result& operator=(Result&&) = default;
 
-		static size_t index_of(const std::string& name);
-		static size_t index_of(const Type& type);
+			bool is_valid() const { return errors.empty(); }
+			operator bool() const { return is_valid(); }
+			bool operator!() const { return !(this->operator bool()); }
 
-		static const Type& registrate(const std::string& name);
+			Command *ptr = nullptr;
+			Errors errors;
+		};
 
-		static const Type& get(const std::string& name);
-		static const Type& get(const size_t& idx);
+		AbstractPrototype()
+			: arguments() {}
+		AbstractPrototype(const Strings& args)
+			: arguments(args) {}
+		virtual ~AbstractPrototype() = default;
+		virtual Result construct() const = 0;
 
-		Type(const Type& type);
-		Type& operator=(const Type& type);
-		~Type() {}
+		void set_arguments(const Strings& args)
+		{
+			arguments = args;
+		}
 
-		const std::string& get_name() const;
-		size_t get_index() const;
-
-		friend std::ostream operator<<(std::ostream& out, const Type& type);
-		friend std::istream operator>>(std::istream& in, Type& type);
-
-	private:
-		static Names _names;
-		static Types _types;
-		static Type registrate(const size_t& idx, const std::string& name);
-
-		Type(const std::string& name);
-
-		std::string _name;
+	protected:
+		Strings arguments;
 };
-
-
-std::ostream operator<<(std::ostream& out, const Command::Type& type);
-std::istream operator>>(std::istream& in, Command::Type& type);
 
 
 // __COMMAND_H__

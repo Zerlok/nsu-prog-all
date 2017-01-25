@@ -26,6 +26,26 @@ class Checker
 };
 
 
+class A
+{
+	public:
+		A() {}
+		virtual ~A() {}
+
+		virtual std::string name() { return "A"; }
+};
+
+
+class AA : public A
+{
+	public:
+		AA() : A() {}
+		~AA() {}
+
+		std::string name() override { return "AA"; }
+};
+
+
 TEST(SharedPointer, InitRelease)
 {
 	Boolean is_created = Boolean::FALSE;
@@ -133,6 +153,7 @@ TEST(SharedPointer, Move)
 }
 
 
+/*
 TEST(SharedPointer, CopyOnWrite)
 {
 	SharedPointer<Empty, true> p1, p2;
@@ -146,6 +167,43 @@ TEST(SharedPointer, CopyOnWrite)
 	*(p1); // calls nonconst operator!
 	EXPECT_EQ(1, p1.get_shares_num());
 	EXPECT_EQ(2, p2.get_shares_num());
+}
+*/
+
+
+std::string lsp_function_base_ptr(A* ptr)
+{
+	return ptr->name();
+}
+
+
+std::string lsp_function_base_ref(A& obj)
+{
+	return obj.name();
+}
+
+
+std::string lsp_function_shared_ptr(SharedPointer<A>& ptr)
+{
+	return ptr->name();
+}
+
+
+TEST(SharedPointer, Inheritance)
+{
+	SharedPointer<A> ptr1 = new AA();
+	SharedPointer<AA, A> ptr2 = new AA();
+//	SharedPointer<A> base = ptr2;
+	const std::string name = ptr1->name();
+	EXPECT_EQ("AA", name);
+	EXPECT_EQ(ptr2->name(), name);
+
+	EXPECT_EQ(name, lsp_function_base_ptr(ptr1));
+	EXPECT_EQ(name, lsp_function_base_ref(ptr1));
+	EXPECT_EQ(name, lsp_function_shared_ptr(ptr1));
+	EXPECT_EQ(name, lsp_function_base_ptr(ptr2));
+	EXPECT_EQ(name, lsp_function_base_ref(ptr2));
+//	EXPECT_EQ(name, lsp_function_shared_ptr(ptr2));
 }
 
 
