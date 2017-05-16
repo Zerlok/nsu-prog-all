@@ -9,8 +9,9 @@
 class Cylinder : public Mesh
 {
 	public:
-		Cylinder();
-		~Cylinder();
+		Cylinder(const size_t& segments = 16,
+				 const size_t& rows = 0);
+		~Cylinder() {}
 };
 
 

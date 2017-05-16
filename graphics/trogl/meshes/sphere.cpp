@@ -74,6 +74,7 @@ Sphere::Sphere(const float& radius,
 			nextOffset = currOffset + rows;
 		}
 
+		// Joint
 		for (size_t rowNum = 1; rowNum < rows-1; ++rowNum)
 		{
 			addPolygon(rowNum + 1,

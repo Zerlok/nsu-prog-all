@@ -29,7 +29,8 @@ HEADERS += \
     common/color.hpp \
     common/utils.hpp \
     common/event.hpp \
-    common/peripherals.hpp
+    common/peripherals.hpp \
+    tasks/magnetics.hpp
 
 # Base engine classes.
 HEADERS += core/opengls.hpp \
@@ -99,7 +100,8 @@ HEADERS += tasks/task.hpp \
 SOURCES += \
     common/color.cpp \
     common/utils.cpp \
-    common/peripherals.cpp
+    common/peripherals.cpp \
+    tasks/magnetics.cpp
 
 # Base engine classes.
 SOURCES += core/opengls.cpp \
