@@ -5,8 +5,8 @@ from numpy import pi
 
 
 # Paths.
-SRC_DIR = dirname(__file__)
-PROJ_DIR = dirname(SRC_DIR)
+PROJ_DIR = dirname(__file__)
+# PROJ_DIR = dirname(SRC_DIR)
 DATA_DIR = join(PROJ_DIR, "data")
 
 
@@ -29,7 +29,6 @@ NA = 0.08
 
 
 # LED grid defaults
-
 # 15x15 LEDs shape
 LEDS_WIDTH = 15
 # 4mm between LEDs

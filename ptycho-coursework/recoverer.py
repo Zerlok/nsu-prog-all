@@ -7,7 +7,7 @@ from argparse import ArgumentParser
 from time import time
 
 from optics import load_image, pack_image, Objective
-from fp import RecoveryMethods, LEDGrid
+from fp import RecoveryMethods, LEDSystem
 from settings import *
 import generator as gen
 from numpy import array, load as np_load
@@ -15,6 +15,7 @@ from numpy import array, load as np_load
 
 # Objects factories
 METHODS = RecoveryMethods()
+LED_SYSTEMS = LEDSystem()
 
 ERR_OUTPUT = """\
 Max error: {max:.2%}
@@ -32,12 +33,15 @@ def check_lowres(leds, low_data):
 
 def load_low_resolution_images(leds, dirname):
 	filename = join(dirname, DEFAULT_LOWRES_FORMAT)
-	return [load_image(filename.format(id=led['id']), 'A') for led in leds.items()]
+	return [load_image(filename.format(id=led.id), 'A') for led in leds.items()]
 
 
 def main(args):
-	args.leds_attrs.append(K)
-	leds = LEDGrid(*args.leds_attrs)
+	args.led_attrs.append(K)
+	leds = LED_SYSTEMS.create(
+			args.led_system,
+			*args.led_attrs
+	)
 	recoverer = METHODS.create(
 			name = args.recovery_method,
 			leds = leds,
@@ -109,12 +113,20 @@ def build_parser():
 			default = None,
 			help = "a path to image file to be shown as a target object",
 	)
-
 	parser.add_argument(
-			"--leds",
-			dest = "leds_attrs",
+			"--led-system",
+			dest = "led_system",
+			metavar = "NAME",
+			choices = LED_SYSTEMS.keys(),
+			default = 'grid',
+			help = "choose LED system for lighting the target: [%(choices)s], (default: %(default)s)",
+	)
+	parser.add_argument(
+			"--led-attrs",
+			dest = "led_attrs",
 			metavar = "ARG",
 			nargs = '*',
+			type = int,
 			default = [LEDS_WIDTH, LEDS_GAP, LEDS_HEIGHT],
 			help = "setup LEDs by size, gap between each LED and distance between LED matrix and target plate",
 	)

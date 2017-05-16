@@ -6,8 +6,8 @@ from sys import argv
 from argparse import ArgumentParser
 from time import time
 
-from optics import load_image, pack_image, get_amplitude, Objectives, get_intensity
-from fp import Generators, LEDGrid
+from optics import load_image, pack_image, Objectives
+from fp import Generators, LEDSystem
 from settings import *
 from numpy import arange, array, meshgrid, mean, save as np_save, load as np_load, any as np_any
 
@@ -15,6 +15,7 @@ from numpy import arange, array, meshgrid, mean, save as np_save, load as np_loa
 # Objects factories
 OBJECTIVES = Objectives()
 GENERATORS = Generators()
+LED_SYSTEMS = LEDSystem()
 
 
 def check_with_file(leds, ampls, filename):
@@ -27,9 +28,11 @@ def check_with_file(leds, ampls, filename):
 
 
 def main(args):
-	args.leds_attrs.append(K)
-
-	leds = LEDGrid(*args.leds_attrs)
+	args.led_attrs.append(K)
+	leds = LED_SYSTEMS.create(
+			args.led_system,
+			*args.led_attrs
+	)
 	leds_images_generator = GENERATORS.create(
 			name = args.generator_name,
 			leds = leds,
@@ -40,6 +43,8 @@ def main(args):
 			NA = NA,
 	)
 
+	# for led in leds.items():
+	# 	print(led)
 
 	# Add phase to objective if 'no-phase' flag was not specified.
 	phase = load_image(args.phase_src, 'A') if not args.no_phase else None
@@ -51,10 +56,12 @@ def main(args):
 	leds_images_generator.print_run_duration()
 	# leds_images_generator.run.print_last_duration()
 	print("{} low resolution images were generated.".format(low_ampls.shape[0]))
+	print(leds_images_generator.k)
+	# print("Shapes:\n[{}]".format("\n".join("{}: {}".format(led, data.shape) for (led, data) in zip(leds.items(), low_ampls))))
 
 	if not args.destination_name:
 		# low_images = [pack_image(get_intensity(data), low_size) for data in low_ampls]
-		low_images = [pack_image(normalize(data), low_size) for data in low_ampls]
+		low_images = [pack_image(data, low_size, norm=True) for data in low_ampls]
 		filename = join(args.destination_dir, DEFAULT_LOWRES_FORMAT)
 		for (i, img) in enumerate(low_images):
 			img.save(filename.format(id=i))
@@ -67,6 +74,7 @@ def main(args):
 
 	if args.show_low_img is not None:		
 		img_id = args.show_low_img
+		# img = pack_image(low_ampls[img_id], low_size, norm=True)
 		img = pack_image(low_ampls[img_id], low_size, norm=True)
 		img.show()
 
@@ -123,7 +131,7 @@ def build_parser(add_help=True):
 			dest = "generator_name",
 			metavar = "NAME",
 			choices = GENERATORS.keys(),
-			default = 'simple-led-generator',
+			default = 'simple-lowres-generator',
 			help = "choose the transfer function for pupil: [%(choices)s], (default: %(default)s)",
 	)
 	parser.add_argument(
@@ -143,12 +151,21 @@ def build_parser(add_help=True):
 			help = "show generated low resolution images according to LEDs' id.",
 	)
 	parser.add_argument(
-			"--leds",
-			dest = "leds_attrs",
+			"--led-system",
+			dest = "led_system",
+			metavar = "NAME",
+			choices = LED_SYSTEMS.keys(),
+			default = 'grid',
+			help = "choose LED system for lighting the target: [%(choices)s], (default: %(default)s)",
+	)
+	parser.add_argument(
+			"--led-attrs",
+			dest = "led_attrs",
 			metavar = "ARG",
 			nargs = '*',
+			type = int,
 			default = [LEDS_WIDTH, LEDS_GAP, LEDS_HEIGHT],
-			help = "setup LEDs by width, gap between each LED and distance between LED matrix and target plate",
+			help = "customize LED system",
 	)
 
 	return parser
