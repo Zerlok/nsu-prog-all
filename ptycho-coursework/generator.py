@@ -43,9 +43,6 @@ def main(args):
 			NA = NA,
 	)
 
-	# for led in leds.items():
-	# 	print(led)
-
 	# Add phase to objective if 'no-phase' flag was not specified.
 	phase = load_image(args.phase_src, 'A') if not args.no_phase else None
 	src_ampl = load_image(args.target_src, 'A')
@@ -54,10 +51,10 @@ def main(args):
 	print("Generation process started ...")
 	low_ampls = leds_images_generator.run(src_ampl, phase)
 	leds_images_generator.print_run_duration()
-	# leds_images_generator.run.print_last_duration()
 	print("{} low resolution images were generated.".format(low_ampls.shape[0]))
-	print(leds_images_generator.k)
-	# print("Shapes:\n[{}]".format("\n".join("{}: {}".format(led, data.shape) for (led, data) in zip(leds.items(), low_ampls))))
+	
+	# print(leds_images_generator.k)
+	# print("Shapes:\n[{}]".format("\n".join("{}: {}".format(led, data.shape) for (led, data) in zip(leds, low_ampls))))
 
 	if not args.destination_name:
 		# low_images = [pack_image(get_intensity(data), low_size) for data in low_ampls]
@@ -74,14 +71,13 @@ def main(args):
 
 	if args.show_low_img is not None:		
 		img_id = args.show_low_img
-		# img = pack_image(low_ampls[img_id], low_size, norm=True)
 		img = pack_image(low_ampls[img_id], low_size, norm=True)
 		img.show()
 
 
 
-def build_parser(add_help=True):
-	parser = ArgumentParser(description=__doc__, add_help=add_help)
+def build_parser():
+	parser = ArgumentParser(description=__doc__)
 	parser.add_argument(
 			dest = "target_src",
 			metavar = "FILENAME",
@@ -131,7 +127,7 @@ def build_parser(add_help=True):
 			dest = "generator_name",
 			metavar = "NAME",
 			choices = GENERATORS.keys(),
-			default = 'simple-lowres-generator',
+			default = GENERATORS.default_key(),
 			help = "choose the transfer function for pupil: [%(choices)s], (default: %(default)s)",
 	)
 	parser.add_argument(
@@ -139,7 +135,7 @@ def build_parser(add_help=True):
 			dest = "objective",
 			metavar = "NAME",
 			choices = OBJECTIVES.keys(),
-			default = 'simple',
+			default = OBJECTIVES.default_key(),
 			help = "choose the transfer function for pupil: [%(choices)s], (default: %(default)s)",
 	)
 	parser.add_argument(
@@ -155,7 +151,7 @@ def build_parser(add_help=True):
 			dest = "led_system",
 			metavar = "NAME",
 			choices = LED_SYSTEMS.keys(),
-			default = 'grid',
+			default = LED_SYSTEMS.default_key(),
 			help = "choose LED system for lighting the target: [%(choices)s], (default: %(default)s)",
 	)
 	parser.add_argument(

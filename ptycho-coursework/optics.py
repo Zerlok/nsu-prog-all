@@ -82,7 +82,7 @@ class Objectives:
 	pass
 
 
-@Objectives.product('simple')
+@Objectives.product('simple', default=True)
 class Objective:
 	def __init__(self, k, k_lim, NA):
 		self.k = k

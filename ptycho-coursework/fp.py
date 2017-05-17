@@ -17,10 +17,10 @@ class LED:
 		self.k = k
 
 	def __str__(self):
-		return "<LED#{:03}: {} {}>".format(
+		return "<LED#{:03}: {} ({:.2f}, {:.2f})>".format(
 				self.id,
 				self.pos,
-				self.k,
+				*self.k,
 		)
 
 	def get_wavevec_slice(self, sizes, steps, lims):
@@ -28,8 +28,7 @@ class LED:
 		# Center wavevecs.
 		kxc = lims[0]/2.0 + self.k[0]/steps[0]
 		kyc = lims[1]/2.0 + self.k[1]/steps[1]
-		print(self, kxc, kyc)
-		# Slices for x and y (lowest wavevec, highest wavevec, step)
+		# Safe slices for x and y (lowest wavevec, highest wavevec, step)
 		return (
 				slice(
 					max(int(round(kxc - sizes[0]/2.0)), 0),
@@ -42,6 +41,19 @@ class LED:
 					1
 				)
 		)
+		# Unsafe slices (no limits used).
+		# (
+		# 		slice(
+		# 			int(round(kxc - sizes[0]/2.0)),
+		# 			int(round(kxc + sizes[0]/2.0)),
+		# 			1
+		# 		),
+		# 		slice(
+		# 			int(round(kyc - sizes[1]/2.0)),
+		# 			int(round(kyc + sizes[1]/2.0)),
+		# 			1
+		# 		)
+		# )
 
 
 @Factory
@@ -49,7 +61,7 @@ class LEDSystem:
 	pass
 
 
-@LEDSystem.product('grid')
+@LEDSystem.product('grid', default=True)
 class LEDGrid:
 	'''A lighting LED grid for Fourier Ptychography purposes.'''
 	def __init__(self, num, gap, height, wavevec):
@@ -74,7 +86,7 @@ class LEDGrid:
 	def __len__(self):
 		return self.num * self.num
 
-	def items(self):
+	def __iter__(self):
 		return (led for row in self.mtrx for led in row)
 
 	def walk(self):
@@ -130,12 +142,12 @@ class LEDSphere:
 	def __len__(self):
 		return len(sphere) * self.ring_len
 
-	def items(self):
+	def __iter__(self):
 		return (led for ring in self.sphere for led in ring)
 
 	def walk(self):
 		'''Walk through leds in spin.'''
-		return self.items()
+		return iter(self)
 
 	def at(self, ring, hr):
 		'''Returns LED at specified ring (from central to border) and hour ().'''
@@ -153,7 +165,7 @@ class Generators:
 	pass
 
 
-@Generators.product('simple-lowres-generator')
+@Generators.product('simple-lowres-generator', default=True)
 class LEDGenerator(FourierPtychographySystem):
 	def run(self, ampl, phase=None):
 		'''Creates a bundle of low resolution images data for each LED on grid.
@@ -170,7 +182,7 @@ class LEDGenerator(FourierPtychographySystem):
 					steps = wavevec_steps,
 					lims = ampl.shape
 				)
-				for led in self.leds.items()
+				for led in self.leds
 		)
 		pupil = self.objective.generate_pass_mtrx(x_step, y_step)
 		seq = array([
@@ -188,7 +200,7 @@ class RecoveryMethods:
 	pass
 
 
-@RecoveryMethods.product('fp')
+@RecoveryMethods.product('fp', default=True)
 class FPRecovery(FourierPtychographySystem):
 	'''A simple Fourier Ptychography high resolution image recovery.'''
 	def __init__(self, *args, **kwargs):

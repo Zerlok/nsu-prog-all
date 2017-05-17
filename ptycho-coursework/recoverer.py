@@ -33,7 +33,7 @@ def check_lowres(leds, low_data):
 
 def load_low_resolution_images(leds, dirname):
 	filename = join(dirname, DEFAULT_LOWRES_FORMAT)
-	return [load_image(filename.format(id=led.id), 'A') for led in leds.items()]
+	return [load_image(filename.format(id=led.id), 'A') for led in leds]
 
 
 def main(args):
@@ -118,7 +118,7 @@ def build_parser():
 			dest = "led_system",
 			metavar = "NAME",
 			choices = LED_SYSTEMS.keys(),
-			default = 'grid',
+			default = LED_SYSTEMS.default_key(),
 			help = "choose LED system for lighting the target: [%(choices)s], (default: %(default)s)",
 	)
 	parser.add_argument(
@@ -135,7 +135,7 @@ def build_parser():
 			dest = "recovery_method",
 			metavar = "NAME",
 			choices = METHODS.keys(),
-			default = 'fp',
+			default = METHODS.default_key(),
 			help = "choose the FP recover method: [%(choices)s], (default: %(default)s)",
 	)
 	parser.add_argument(

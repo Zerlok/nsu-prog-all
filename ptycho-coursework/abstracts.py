@@ -21,6 +21,7 @@ class Factory:
 			'''A subclass of user's factory class. It will hold all registered products.'''
 			# Dict of registered products classes.
 			__products__ = {}
+			__default_product_name__ = None
 
 			class Product:
 				'''A product class of user's product.'''
@@ -30,15 +31,18 @@ class Factory:
 				'''Get all registered products.'''
 				return self.__products__.keys()
 
+			def default_key(self):
+				return self.__default_product_name__
+
 			def has(self, name):
 				'''Check if class was registered.'''
 				return name in self.__products__
 
-			def get(self, name):
+			def get(self, name=None):
 				'''Return the product class if registered, otherwise throw an exception.'''
-				if self.has(name):
-					return self.__products__[name]
-				else:
+				try:
+					return self.__products__[name or self.__default_product_name__]
+				except KeyError:
 					raise Factory.UnregisteredProduct(self.__class__.__base__, name)
 
 			def create(self, name, *args, **kwargs):
@@ -53,10 +57,14 @@ class Factory:
 		'''Create a ConcreteFactory instance.'''
 		return self.cls(*args, **kwargs)
 
-	def product(self, name=None):
+	def product(self, name=None, default=False):
 		'''Registrate the product into ConcreteFactory class.'''
 		def inner(cls):
-			self.cls.__products__[name] = cls
+			prod_name = name or cls.__name__
+			self.cls.__products__[prod_name] = cls
+			if not self.cls.__default_product_name__:
+				self.cls.__default_product_name__ = prod_name
+			
 			return cls
 
 		return inner
