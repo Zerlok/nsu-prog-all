@@ -4,6 +4,7 @@ from numpy import (
 	pi,
 	sin, cos, radians, arctan, exp, angle, conjugate, sqrt,
 	array, zeros, ones,
+	mean,
 	fft
 )
 import optics as o
@@ -159,6 +160,11 @@ class FourierPtychographySystem(o.System):
 		super(FourierPtychographySystem, self).__init__(*args, **kwargs)
 		self.leds = leds
 
+	@classmethod
+	def count_RMSE(cls, ampl1, ampl2):
+		diff = abs(ampl1 - ampl2)
+		return sqrt(mean(diff * diff))
+
 
 @Factory
 class Generators:
@@ -238,10 +244,10 @@ class FPRecovery(FourierPtychographySystem):
 	def update_for_led(self, led, total_params):
 		'''Step by step FP recovery flow for single led.'''
 		led_params = self.build_led_params(led, total_params)
-		led_params['old_lowres_ft'] = self.get_lowres_ft(led_params, total_params)
-		led_params['lowres'] = self.get_lowres_ampl(led_params, total_params)
-		led_params['measured_ft'] = self.get_measured_ft(led_params, total_params)
-		led_params['new_highres_ft_part'] = self.get_enhanced_highres_ft_part(led_params, total_params)
+		self.get_lowres_ft(led_params, total_params)
+		self.get_lowres_ampl(led_params, total_params)
+		self.get_measured_ft(led_params, total_params)
+		self.get_enhanced_highres_ft_part(led_params, total_params)
 		self.update_total_params(led_params, total_params)
 
 	def exclude_highres_data(self, params):
@@ -269,22 +275,23 @@ class FPRecovery(FourierPtychographySystem):
 		'''Get highres FT part for current led.'''
 		x_slice, y_slice = led_params['slice']
 		led_params['old_highres_ft_part'] = total_params['highres_ft'][y_slice, x_slice]
-		return self.q2 * led_params['old_highres_ft_part'] * total_params['ctf']
+		led_params['old_lowres_ft'] = self.q2 * led_params['old_highres_ft_part'] * total_params['ctf']
 
 	def get_lowres_ampl(self, led_params, total_params):
 		'''Build the I_li (low-res amplitude).'''
-		return fft.ifft2(fft.ifftshift(led_params['old_lowres_ft']))
+		led_params['lowres'] = fft.ifft2(fft.ifftshift(led_params['old_lowres_ft']))
 
 	def get_measured_ft(self, led_params, total_params):
 		'''Build the FT of I_mi with the known phase of I_li.'''
 		lowres_phase = exp(1j * angle(led_params['lowres']))
 		led_id = led_params['led'].id
 		measured_ampl = total_params['measured'][led_id]
-		return fft.fftshift(fft.fft2(self.q_2 * measured_ampl * lowres_phase))
+		led_params['measured_ft'] = fft.fftshift(fft.fft2(self.q_2 * measured_ampl * lowres_phase))
 
 	def get_enhanced_highres_ft_part(self, led_params, total_params):
 		'''Add new FT of I_hi to the old one.'''
-		return total_params['ictf'] * led_params['old_highres_ft_part'] \
+		led_params['new_highres_ft_part'] = \
+				total_params['ictf'] * led_params['old_highres_ft_part'] \
 				+ total_params['ctf'] * led_params['measured_ft']
 
 	def update_total_params(self, led_params, total_params):
@@ -302,26 +309,33 @@ class EPRYRecovery(FPRecovery):
 		return params
 
 	def get_lowres_ft(self, led_params, total_params):
-		lowres_ft = super(EPRYRecovery, self).get_lowres_ft(led_params, total_params)
-		return lowres_ft * total_params['pupil']
+		super(EPRYRecovery, self).get_lowres_ft(led_params, total_params)
+		led_params['old_lowres_ft'] *= total_params['pupil']
 
-	def get_measured_ft(self, led_params, total_params):
-		measured_ft = super(EPRYRecovery, self).get_measured_ft(led_params, total_params)
-		return measured_ft * toal_params['ctf'] / total_params['pupil']
+	# def get_measured_ft(self, led_params, total_params):
+	# 	measured_ft = super(EPRYRecovery, self).get_measured_ft(led_params, total_params)
+	# 	return measured_ft * toal_params['ctf'] / total_params['pupil']
 
 	def get_enhanced_highres_ft_part(self, led_params, total_params):
-		mx_sq_pupil = (abs(toal_params['pupil'])**2).max()
-		led_params['ft_difference'] = led_params['measured_ft'] - led_params['old_highres_ft_part']
-		return led_params['old_highres_ft_part'] \
-				+ conjugate(total_params['pupil']) / mx_sq_pupil * led_params['ft_difference']
+		pupil = total_params['ctf'] * toal_params['pupil']
+		mx_sq_pupil = (abs(pupil)**2).max()
+		led_params['ft_difference'] = led_params['measured_ft'] - led_params['old_lowres_ft']
+		led_params['new_highres_ft_part'] = \
+				led_params['old_highres_ft_part'] \
+				+ conjugate(pupil) / mx_sq_pupil * led_params['ft_difference']
 
 	def update_total_params(self, led_params, total_params):
 		super(EPRYRecovery, self).update_total_params(led_params, total_params)
+		self.update_pupil(led_params, total_params)
+
+	def update_pupil(self, led_params, total_params):
 		new_ampl_ft = led_params['new_highres_ft_part']
 		mx_sq_new_highres = (abs(new_ampl_ft)**2).max()
 		total_params['pupil'] += conjugate(new_ampl_ft) / mx_sq_new_highres * led_params['ft_difference']
 
 	def exclude_highres_data(self, params):
 		data = super(EPRYRecovery, self).exclude_highres_data(params)
-		data['pupil'] = total_params['pupil']
+		data.update({
+				'pupil': total_params['pupil'],
+		})
 		return data

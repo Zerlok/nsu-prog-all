@@ -6,8 +6,8 @@ from sys import argv
 from argparse import ArgumentParser
 from time import time
 
-from optics import load_image, pack_image, Objective
-from fp import RecoveryMethods, LEDSystem
+from optics import load_image, pack_image, Objective, get_intensity
+from fp import RecoveryMethods, LEDSystem, FourierPtychographySystem as FP
 from settings import *
 import generator as gen
 from numpy import array, load as np_load
@@ -33,7 +33,7 @@ def check_lowres(leds, low_data):
 
 def load_low_resolution_images(leds, dirname):
 	filename = join(dirname, DEFAULT_LOWRES_FORMAT)
-	return [load_image(filename.format(id=led.id), 'A') for led in leds]
+	return [load_image(filename.format(id=led.id), 'I') for led in leds]
 
 
 def main(args):
@@ -68,14 +68,14 @@ def main(args):
 
 	if args.show_images:
 		img.show()
-		pack_image(data['phase'], img_size, 'I', norm=True).show()
+		pack_image(data['phase'], img_size, norm=True).show()
 		recoverer.objective.show(*img_size)
 
 	if args.real_name:
-		real_img = load_image(args.real_name, 'A')
-		diff = real_img - array(img)
-		print("Max error: {}".format(diff.max()))
-		diff_img = pack_image(diff, real_img.shape, norm=True)
+		real_inten = load_image(args.real_name, 'I')
+		result_inen = get_intensity(data['amplitude'])
+		print("RMSE: {}".format(FP.count_RMSE(real_inten, result_inen)))
+		diff_img = pack_image(abs(real_inten - result_inen), real_inten.shape, norm=True)
 		diff_img.show()
 
 	# if args.print_error:
@@ -151,12 +151,12 @@ def build_parser():
 			dest = "show_images",
 			action = "store_true",
 			default = False,
-			help = "show images for instant debug",
+			help = "show images for debug",
 	)
 
 	check_grp = parser.add_argument_group(
-			title = "extra",
-			description = "extratata",
+			title = "Quick check arguments",
+			description = "Arguments to check the result with real data",
 	)
 	check_grp.add_argument(
 			"--real-img",

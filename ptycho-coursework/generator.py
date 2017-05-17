@@ -57,6 +57,7 @@ def main(args):
 	# print("Shapes:\n[{}]".format("\n".join("{}: {}".format(led, data.shape) for (led, data) in zip(leds, low_ampls))))
 
 	if not args.destination_name:
+		print("WARNING: generated amplitudes will be saved into image files and will loose some quality!")
 		# low_images = [pack_image(get_intensity(data), low_size) for data in low_ampls]
 		low_images = [pack_image(data, low_size, norm=True) for data in low_ampls]
 		filename = join(args.destination_dir, DEFAULT_LOWRES_FORMAT)
@@ -73,7 +74,6 @@ def main(args):
 		img_id = args.show_low_img
 		img = pack_image(low_ampls[img_id], low_size, norm=True)
 		img.show()
-
 
 
 def build_parser():
