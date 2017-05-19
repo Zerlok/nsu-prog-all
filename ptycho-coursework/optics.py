@@ -8,6 +8,7 @@ from numpy import (
 	array, arange, random,
 	meshgrid,
 	fft,
+	save as np_save
 )
 from time import time
 from abstracts import Factory
@@ -84,6 +85,7 @@ class Objectives:
 
 @Objectives.product('simple', default=True)
 class Objective:
+	'''A simple basic objective.'''
 	def __init__(self, k, k_lim, NA):
 		self.k = k
 		self.k_lim = k_lim
@@ -98,6 +100,12 @@ class Objective:
 		ky = arange(-self.k_lim, self.k_lim, y_step)
 		return meshgrid(kx, ky)
 
+	def generate_wavevec_steps(self, x_size, y_size):
+		return (
+				2.0 * self.k_lim / x_size,
+				2.0 * self.k_lim / y_size,
+		)
+
 	def generate_pass_mtrx(self, x_step, y_step):
 		'''The simple objective (just CTF).'''
 		return self.generate_ctf(x_step, y_step)
@@ -110,8 +118,7 @@ class Objective:
 	def simulate(self, ampl):
 		x_size, y_size = ampl.shape
 		mtrx = self.generate_pass_mtrx(
-				x_step = 2*self.k_lim/x_size,
-				y_step = 2*self.k_lim/y_size,
+				*self.generate_wavevec_steps(x_size, y_size)
 		)
 		ampl_ft = fft.fftshift(fft.fft2(ampl))
 		out_ampl_ft = mtrx * ampl_ft
@@ -120,21 +127,25 @@ class Objective:
 	def show(self, x_size, y_size):
 		img = pack_image(
 				data = self.generate_pass_mtrx(
-					x_step = 2*self.k_lim/x_size,
-					y_step = 2*self.k_lim/y_size,
+					*self.generate_wavevec_steps(x_size, y_size)
 				),
 				size = (x_size, y_size),
 				norm = True,
 		)
 		img.show()
 
+	def save(self, filename, x_size, y_size):
+		np_save(filename, self.generate_pass_mtrx(
+				*self.generate_wavevec_steps(x_size, y_size)
+		))
 
-@Objectives.product('complex')
+
+@Objectives.product('complex', kwargs_types={'z': float})
 class PupilObjective(Objective):
 	'''A fading out pupil.'''
-	def __init__(self, *args, **kwargs):
-		self.z = kwargs.pop('z')
-		super(Objective, self).__init__(*args, **kwargs)
+	def __init__(self, z, *args, **kwargs):
+		super(PupilObjective, self).__init__(*args, **kwargs)
+		self.z = z
 
 	def generate_pass_mtrx(self, x_step, y_step):
 		kx_array, ky_array = self.generate_wavevec_array(x_step, y_step)
@@ -172,8 +183,8 @@ class System:
 	def get_wavevec_steps(self, img_x_size, img_y_size):
 		'''Returns wavevec x and y steps for specified image size.'''
 		return (
-				2 * pi / (self.pixel_size * img_x_size),
-				2 * pi / (self.pixel_size * img_y_size)
+				2.0 * pi / (self.pixel_size * img_x_size),
+				2.0 * pi / (self.pixel_size * img_y_size)
 		)
 
 	def set_objective(self, ObjCls, *args, **kwargs):

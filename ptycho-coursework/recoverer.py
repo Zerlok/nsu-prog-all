@@ -62,18 +62,37 @@ def main(args):
 	print("Result image was saved into {} file.".format(args.destination_real))
 
 	if args.show_images:
+		print("Showing recovered object and phase")
 		img.show()
 		pack_image(data['phase'], img_size, norm=True).show()
-		recoverer.objective.show(*img_size)
 
-	if args.real_name:
-		real_inten = load_image(args.real_name, 'I')
+	if args.real_object_filename:
+		real_inten = load_image(args.real_object_filename, 'I')
 		result_inten = get_intensity(data['amplitude'])
-		print("RMSE: {:.3f}".format(FP.count_RMSE(real_inten, result_inten)))
+		print("Object RMSE: {:.3f}".format(FP.count_RMSE(real_inten, result_inten)))
 
 		if args.show_images:
 			diff_img = pack_image(abs(real_inten - result_inten), real_inten.shape, norm=True)
 			diff_img.show()
+
+	if args.real_phase_filename:
+		real_inten = load_image(args.real_phase_filename, 'I')
+		result_inten = get_intensity(data['phase'])
+		print("Phase RMSE: {:.3f}".format(FP.count_RMSE(real_inten, result_inten)))
+
+		if args.show_images:
+			diff_img = pack_image(abs(real_inten - result_inten), real_inten.shape, norm=True)
+			diff_img.show()
+
+	if args.real_pupil_filename and 'pupil' in data:
+		real_inten = np_load(args.real_pupil_filename)
+		print("Pupil RMSE: {:.3f}".format(FP.count_RMSE(real_inten, data['pupil'])))
+		if args.show_images:
+			diff_img = pack_image(abs(real_inten - data['pupil']), real_inten.shape, norm=True)
+			diff_img.show()
+
+	elif args.real_pupil_filename and 'pupil' not in data:
+		print("Use another method to recover pupil.")
 
 	# if args.print_error:
 	# 	target_errors = ArrayErrors(o.get_amplitude(target))
@@ -155,10 +174,24 @@ def build_parser():
 	)
 	check_grp.add_argument(
 			"--real-img",
-			dest = "real_name",
+			dest = "real_object_filename",
 			metavar = "FILENAME",
 			default = None,
-			help = "check recovery result with real image",
+			help = "check recovery result with real object image",
+	)
+	check_grp.add_argument(
+			"--real-phase",
+			dest = "real_phase_filename",
+			metavar = "FILENAME",
+			default = None,
+			help = "check recovery result with real phase image",
+	)
+	check_grp.add_argument(
+			"--real-pupil",
+			dest = "real_pupil_filename",
+			metavar = "FILENAME",
+			default = None,
+			help = "check recovery result with real pupil",
 	)
 	check_grp.add_argument(
 			"--show-images",

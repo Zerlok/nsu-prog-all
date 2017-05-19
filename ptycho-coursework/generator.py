@@ -48,8 +48,8 @@ def main(args):
 	)
 
 	# Add phase to objective if 'no-phase' flag was not specified.
-	phase = load_image(args.phase_src, 'A') if not args.no_phase else None
-	src_ampl = load_image(args.target_src, 'A')
+	phase = load_image(args.phase_filename, 'A') if not args.no_phase else None
+	src_ampl = load_image(args.target_filename, 'A')
 	low_size = tuple(int(i * QUALITY) for i in src_ampl.shape)
 	
 	print("Generation process started ...")
@@ -60,7 +60,7 @@ def main(args):
 	# print(leds_images_generator.k)
 	# print("Shapes:\n[{}]".format("\n".join("{}: {}".format(led, data.shape) for (led, data) in zip(leds, low_ampls))))
 
-	if not args.destination_name:
+	if not args.destination_filename:
 		print("WARNING: generated amplitudes will be saved into image files and will loose some quality!")
 		# low_images = [pack_image(get_intensity(data), low_size) for data in low_ampls]
 		low_images = [pack_image(data, low_size, norm=True) for data in low_ampls]
@@ -70,20 +70,26 @@ def main(args):
 		print("Generated pictures were saved into {} directory by LED id.".format(args.destination_dir))
 
 	else:
-		filename = args.destination_name
-		np_save(filename, low_ampls)
-		print("Generated amplitudes were saved into {} file.".format(args.destination_name))
+		np_save(args.destination_filename, low_ampls)
+		print("Generated amplitudes were saved into {} file.".format(args.destination_filename))
 
 	if args.show_low_img is not None:		
 		img_id = args.show_low_img
 		img = pack_image(low_ampls[img_id], low_size, norm=True)
 		img.show()
 
+	if args.objective_filename:
+		leds_images_generator.objective.save(args.objective_filename, *low_size)
+		print("Generated pupil was save into {} file.".format(args.objective_filename))
+
+	if args.show_pupil:
+		leds_images_generator.objective.show(*low_size)
+
 
 def build_parser():
 	parser = ArgumentParser(description=__doc__)
 	parser.add_argument(
-			dest = "target_src",
+			dest = "target_filename",
 			metavar = "FILENAME",
 			type = str,
 			help = "a path to image file to be shown as a target object",
@@ -100,7 +106,7 @@ def build_parser():
 	)
 	dest_grp.add_argument(
 			"--output-file",
-			dest = "destination_name",
+			dest = "destination_filename",
 			metavar = "FILENAME",
 			type = str,
 			default = None,
@@ -110,11 +116,10 @@ def build_parser():
 	phase_grp = parser.add_mutually_exclusive_group()
 	phase_grp.add_argument(
 			"--phase",
-			dest = "phase_src",
+			dest = "phase_filename",
 			metavar = "FILENAME",
-			type = str,
 			default = DEFAULT_PHASE_PATH,
-			required = False,
+			type = str,
 			help = "a path to image file to be added as a phase object (default: %(default)s)",
 	)
 	phase_grp.add_argument(
@@ -122,7 +127,6 @@ def build_parser():
 			dest = "no_phase",
 			action = "store_true",
 			default = False,
-			required = False,
 			help = "don't add phase object to the target object image",
 	)
 
@@ -132,14 +136,16 @@ def build_parser():
 			metavar = "NAME",
 			choices = GENERATORS.names(),
 			default = GENERATORS.default_name(),
+			type = str,
 			help = "choose the transfer function for pupil: [%(choices)s], (default: %(default)s)",
 	)
 	parser.add_argument(
 			"--objective",
 			dest = "objective_name",
-			metavar = "ARG",
+			metavar = "NAME",
 			choices = OBJECTIVES.names(),
 			default = OBJECTIVES.default_name(),
+			type = str,
 			help = "choose the objective for optical system: [%(choices)s], (default: %(default)s)",
 	)
 	parser.add_argument(
@@ -150,6 +156,14 @@ def build_parser():
 			nargs = '*',
 			default = {},
 			help = "extra settings of the objectives: {}".format(OBJECTIVES.describe_all()),
+	)
+	parser.add_argument(
+			"--objective-save",
+			dest = "objective_filename",
+			metavar = "FILENAME",
+			type = str,
+			default = None,
+			help = "save the generated objective into numpy file.",
 	)
 
 	led_grp = parser.add_argument_group(
@@ -162,6 +176,7 @@ def build_parser():
 			metavar = "NAME",
 			choices = LED_SYSTEMS.names(),
 			default = LED_SYSTEMS.default_name(),
+			type = str,
 			help = "choose LED system for lighting the target: [%(choices)s], (default: %(default)s)",
 	)
 	led_grp.add_argument(
@@ -185,6 +200,13 @@ def build_parser():
 			type = int,
 			default = None,
 			help = "show generated low resolution images according to LEDs' id.",
+	)
+	check_grp.add_argument(
+			"--show-pupil",
+			dest = "show_pupil",
+			action = "store_true",
+			default = False,
+			help = "show generated pupil.",
 	)
 
 	return parser

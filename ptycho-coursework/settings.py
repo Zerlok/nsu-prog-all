@@ -40,3 +40,6 @@ DEFAULT_LEDS_ATTRS = {
 	'gap': LEDS_GAP,
 	'height': LEDS_HEIGHT,
 }
+
+
+# DEFAULT_PUPIL_SIZE = (128, 128)

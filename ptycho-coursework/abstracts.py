@@ -28,16 +28,15 @@ class Factory:
 
 	def __init__(self, factory_cls):
 		'''Make 'factory_cls' a factory using the ConcreteFactory class.'''
-		# Create a new ConcreteFactory class definition at each __init__.
-		class ConcreteFactory(factory_cls):
+		class ConcreteFactory(factory_cls): # Create a new ConcreteFactory class definition at each __init__.
 			'''A subclass of user's factory class. It will hold all registered products.'''
-			# Dict of registered products classes.
-			__products__ = {}
+			__products__ = {} # Dict of registered products classes.
 			__default_product_name__ = None
 
 			class Product:
 				'''A product class of user's product.'''
 				def __init__(self, cls, description=None, args_types=None, kwargs_types=None):
+					# print("Registering: {} {} {}".format(cls.__name__, args_types, kwargs_types))
 					self.cls = cls
 					self.args_types = args_types or []
 					self.kwargs_types = kwargs_types or {}
@@ -72,6 +71,7 @@ class Factory:
 
 				def build(self, *args, **kwargs):
 					'''Call __init__ of product's class with given arguments.'''
+					# print("Building the {} with {} {}".format(self.cls.__name__, args, kwargs))
 					return self.cls(*self.validate_args(args), **self.validate_kwargs(kwargs))
 
 			@classmethod
@@ -145,9 +145,6 @@ class Factory:
 					name = name or prod_cls.__name__,
 					prod = prod_cls,
 					**kwargs
-					# desciption = description,
-					# args_types = args_types,
-					# kwargs_types = kwargs_types,
 			)
 			if default:
 				self.cls.set_default(name)

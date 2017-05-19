@@ -307,19 +307,15 @@ class EPRYRecovery(FPRecovery):
 	'''Embded pupil function recovery.'''
 	def get_iteration_params(self, *args, **kwargs):
 		params = super(EPRYRecovery, self).get_iteration_params(*args, **kwargs)
-		params['pupil'] = ones(params['highres_size'], dtype=complex)
+		params['pupil'] = ones(params['lowres_size'], dtype=complex)
 		return params
 
 	def get_lowres_ft(self, led_params, total_params):
 		super(EPRYRecovery, self).get_lowres_ft(led_params, total_params)
 		led_params['old_lowres_ft'] *= total_params['pupil']
 
-	# def get_measured_ft(self, led_params, total_params):
-	# 	measured_ft = super(EPRYRecovery, self).get_measured_ft(led_params, total_params)
-	# 	return measured_ft * toal_params['ctf'] / total_params['pupil']
-
 	def get_enhanced_highres_ft_part(self, led_params, total_params):
-		pupil = total_params['ctf'] * toal_params['pupil']
+		pupil = total_params['ctf'] * total_params['pupil']
 		mx_sq_pupil = (abs(pupil)**2).max()
 		led_params['ft_difference'] = led_params['measured_ft'] - led_params['old_lowres_ft']
 		led_params['new_highres_ft_part'] = \
@@ -338,6 +334,6 @@ class EPRYRecovery(FPRecovery):
 	def exclude_highres_data(self, params):
 		data = super(EPRYRecovery, self).exclude_highres_data(params)
 		data.update({
-				'pupil': total_params['pupil'],
+				'pupil': params['pupil'],
 		})
 		return data
