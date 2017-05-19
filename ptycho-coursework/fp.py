@@ -229,6 +229,7 @@ class FPRecovery(FourierPtychographySystem):
 		return result
 
 	def get_iteration_params(self, ampls_sequence):
+		'''Initial method to build FP data before process started.'''
 		lowres_size = ampls_sequence[0].shape
 		highres_size = tuple(int(i / self.quality) for i in lowres_size)
 		steps = self.get_wavevec_steps(*highres_size)
@@ -245,14 +246,23 @@ class FPRecovery(FourierPtychographySystem):
 
 	def update_for_led(self, led, total_params):
 		'''Step by step FP recovery flow for single led.'''
+		# Initial step, build iteration data for specified led.
 		led_params = self.build_led_params(led, total_params)
+		
+		# 1st - 
 		self.get_lowres_ft(led_params, total_params)
+		# 2nd - 
 		self.get_lowres_ampl(led_params, total_params)
+		# 3rd - 
 		self.get_measured_ft(led_params, total_params)
+		# 4th - 
 		self.get_enhanced_highres_ft_part(led_params, total_params)
+		
+		# Update the data according to the led.
 		self.update_total_params(led_params, total_params)
 
 	def exclude_highres_data(self, params):
+		'''Last method of the FP recovery to build final data.'''
 		highres_data = fft.ifft2(fft.ifftshift(params['highres_ft']))
 		return {
 				'amplitude': abs(highres_data),
@@ -302,16 +312,16 @@ class FPRecovery(FourierPtychographySystem):
 		total_params['highres_ft'][y_slice, x_slice] = led_params['new_highres_ft_part']
 
 
-@RecoveryMethods.product('epry-fp')
-class EPRYRecovery(FPRecovery):
-	'''Embded pupil function recovery.'''
+@RecoveryMethods.product('epry-fp-corrected')
+class EPRYCorrectedRecovery(FPRecovery):
+	'''Embded pupil function recovery, taken from matlab example code.'''
 	def get_iteration_params(self, *args, **kwargs):
-		params = super(EPRYRecovery, self).get_iteration_params(*args, **kwargs)
+		params = super(EPRYCorrectedRecovery, self).get_iteration_params(*args, **kwargs)
 		params['pupil'] = ones(params['lowres_size'], dtype=complex)
 		return params
 
 	def get_lowres_ft(self, led_params, total_params):
-		super(EPRYRecovery, self).get_lowres_ft(led_params, total_params)
+		super(EPRYCorrectedRecovery, self).get_lowres_ft(led_params, total_params)
 		led_params['old_lowres_ft'] *= total_params['pupil']
 
 	def get_enhanced_highres_ft_part(self, led_params, total_params):
@@ -323,16 +333,57 @@ class EPRYRecovery(FPRecovery):
 				+ conjugate(pupil) / mx_sq_pupil * led_params['ft_difference']
 
 	def update_total_params(self, led_params, total_params):
-		super(EPRYRecovery, self).update_total_params(led_params, total_params)
+		super(EPRYCorrectedRecovery, self).update_total_params(led_params, total_params)
 		self.update_pupil(led_params, total_params)
 
 	def update_pupil(self, led_params, total_params):
-		new_ampl_ft = led_params['new_highres_ft_part']
-		mx_sq_new_highres = (abs(new_ampl_ft)**2).max()
-		total_params['pupil'] += conjugate(new_ampl_ft) / mx_sq_new_highres * led_params['ft_difference']
+		new_highres_ft = led_params['new_highres_ft_part']
+		mx_sq_new_highres = (abs(new_highres_ft)**2).max()
+		total_params['pupil'] += conjugate(new_highres_ft) / mx_sq_new_highres * led_params['ft_difference']
 
 	def exclude_highres_data(self, params):
-		data = super(EPRYRecovery, self).exclude_highres_data(params)
+		data = super(EPRYCorrectedRecovery, self).exclude_highres_data(params)
+		data.update({
+				'pupil': params['pupil'],
+		})
+		return data
+
+
+@RecoveryMethods.product('epry-fp-matlab')
+class EPRYMatlabRecovery(FPRecovery):
+	'''Embded pupil function recovery, corrected according to artical "code_correction"'''
+	def get_iteration_params(self, *args, **kwargs):
+		params = super(EPRYMatlabRecovery, self).get_iteration_params(*args, **kwargs)
+		params['pupil'] = ones(params['lowres_size'], dtype=complex)
+		return params
+
+	def get_lowres_ft(self, led_params, total_params):
+		super(EPRYMatlabRecovery, self).get_lowres_ft(led_params, total_params)
+		led_params['old_lowres_ft'] *= total_params['pupil']
+
+	def get_measured_ft(self, led_params, total_params):
+		super(EPRYMatlabRecovery, self).get_measured_ft(led_params, total_params)
+		led_params['measured_ft'] *= (total_params['ctf'] / total_params['pupil'])
+
+	def get_enhanced_highres_ft_part(self, led_params, total_params):
+		pupil = total_params['pupil']
+		mx_sq_pupil = (abs(pupil)**2).max()
+		led_params['ft_difference'] = led_params['measured_ft'] - led_params['old_lowres_ft']
+		led_params['new_highres_ft_part'] = \
+				led_params['old_highres_ft_part'] \
+				+ conjugate(pupil) / mx_sq_pupil * led_params['ft_difference']
+
+	def update_total_params(self, led_params, total_params):
+		super(EPRYMatlabRecovery, self).update_total_params(led_params, total_params)
+		self.update_pupil(led_params, total_params)
+
+	def update_pupil(self, led_params, total_params):
+		new_highres_ft = led_params['new_highres_ft_part']
+		mx_sq_new_highres = (abs(new_highres_ft)**2).max()
+		total_params['pupil'] += conjugate(new_highres_ft) / mx_sq_new_highres * led_params['ft_difference']
+
+	def exclude_highres_data(self, params):
+		data = super(EPRYMatlabRecovery, self).exclude_highres_data(params)
 		data.update({
 				'pupil': params['pupil'],
 		})
