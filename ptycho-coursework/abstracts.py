@@ -14,10 +14,22 @@ class Factory:
 			self.factory = factory
 			self.product = product
 
-	def __init__(self, fact_cls):
-		'''Make 'fact_cls' a factory using the ConcreteFactory class.'''
+	class RepeatingRegistration(Exception):
+		'''Exception for secondary try to register the product with the existing name.'''
+		def __init__(self, factory, product):
+			super(Factory.RepeatingRegistration, self).__init__(
+					"'{}' factory has '{}' registered product already.".format(
+						factory.__name__,
+						product,
+					)
+			)
+			self.factory = factory
+			self.product = product
+
+	def __init__(self, factory_cls):
+		'''Make 'factory_cls' a factory using the ConcreteFactory class.'''
 		# Create a new ConcreteFactory class definition at each __init__.
-		class ConcreteFactory(fact_cls):
+		class ConcreteFactory(factory_cls):
 			'''A subclass of user's factory class. It will hold all registered products.'''
 			# Dict of registered products classes.
 			__products__ = {}
@@ -25,13 +37,62 @@ class Factory:
 
 			class Product:
 				'''A product class of user's product.'''
-				pass
+				def __init__(self, cls, description=None, args_types=None, kwargs_types=None):
+					self.cls = cls
+					self.args_types = args_types or []
+					self.kwargs_types = kwargs_types or {}
+					self.description = description or "{c} requires: ({sign})".format(
+							c = cls.__doc__ or "<class {}>".format(cls.__name__),
+							sign = ", ".join([
+								*[a.__name__ for a in self.args_types],
+								*["({}){}".format(val.__name__, key) for (key, val) in self.kwargs_types.items()],
+							]) if self.args_types or self.kwargs_types else "nothing"
+					)
 
-			def keys(self):
+				def validate_args(self, args):
+					if not self.args_types:
+						return args
+
+					lim = len(self.args_types)
+					return [
+							self.args_types[i](arg) if i < lim else arg
+							for (i, arg) in enumerate(args)
+					]
+
+				def validate_kwargs(self, kwargs):
+					if not self.kwargs_types:
+						return kwargs
+
+					return {
+							key: self.kwargs_types[key](value) \
+								if key in self.kwargs_types else \
+								value
+							for (key, value) in kwargs.items()
+					}
+
+				def build(self, *args, **kwargs):
+					'''Call __init__ of product's class with given arguments.'''
+					return self.cls(*self.validate_args(args), **self.validate_kwargs(kwargs))
+
+			@classmethod
+			def registrate(cls, name, prod, **kwargs):
+				'''Places prod class into the factory.'''
+				if name not in cls.__products__:
+					cls.__products__[name] = cls.Product(prod, **kwargs)
+				else:
+					raise Factory.RepeatingRegistration(self.__class__.__base__, name)
+
+			@classmethod
+			def set_default(cls, name):
+				if not cls.__default_product_name__ and name in cls.__products__:
+					cls.__default_product_name__ = name
+
+			def names(self):
 				'''Get all registered products.'''
 				return self.__products__.keys()
 
-			def default_key(self):
+			def default_name(self):
+				'''Returns the default factory's product name.'''
 				return self.__default_product_name__
 
 			def has(self, name):
@@ -45,11 +106,31 @@ class Factory:
 				except KeyError:
 					raise Factory.UnregisteredProduct(self.__class__.__base__, name)
 
-			def create(self, name, *args, **kwargs):
-				return self.get(name)(*args, **kwargs)
+			def get_creator(self, name, **current_kwargs):
+				'''Return the product creator with extra arguments.'''
+				product = self.get(name)
+				def inner(*args, **kwargs):
+					kwargs.update(current_kwargs)
+					return product.build(*args, **kwargs)
+				return inner
 
-			def describe(self, name=None):
-				return self.get(name).__doc__ if name else self.__class__.__doc__
+			def create(self, name, *args, **kwargs):
+				'''Create a product object from factory.'''
+				return self.get(name).build(*args, **kwargs)
+
+			def describe(self, name):
+				'''Get description of product.'''
+				return self.get(name).description
+
+			def describe_all(self, separator=" "):
+				'''Get the desciptions of each product.'''
+				return separator.join(
+						"'{}' - {}".format(
+							name,
+							self.get(name).description,
+						)
+						for name in self.__products__
+				)
 
 		self.cls = ConcreteFactory
 
@@ -57,14 +138,19 @@ class Factory:
 		'''Create a ConcreteFactory instance.'''
 		return self.cls(*args, **kwargs)
 
-	def product(self, name=None, default=False):
+	def product(self, name=None, default=False, **kwargs):
 		'''Registrate the product into ConcreteFactory class.'''
-		def inner(cls):
-			prod_name = name or cls.__name__
-			self.cls.__products__[prod_name] = cls
-			if not self.cls.__default_product_name__:
-				self.cls.__default_product_name__ = prod_name
-			
-			return cls
+		def inner(prod_cls):
+			self.cls.registrate(
+					name = name or prod_cls.__name__,
+					prod = prod_cls,
+					**kwargs
+					# desciption = description,
+					# args_types = args_types,
+					# kwargs_types = kwargs_types,
+			)
+			if default:
+				self.cls.set_default(name)
+			return prod_cls
 
 		return inner

@@ -30,8 +30,13 @@ NA = 0.08
 
 # LED grid defaults
 # 15x15 LEDs shape
-LEDS_WIDTH = 15
+LEDS_NUM = 15
 # 4mm between LEDs
 LEDS_GAP = 4
 # 90mm between LEDs and sample plate.
 LEDS_HEIGHT = 90
+DEFAULT_LEDS_ATTRS = {
+	'num': LEDS_NUM,
+	'gap': LEDS_GAP,
+	'height': LEDS_HEIGHT,
+}

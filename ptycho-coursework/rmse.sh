@@ -19,7 +19,7 @@ phaseRec="${baseRec} ${lowWithPhase} --loops"
 recovery=("${noPhaseRec}" "${phaseRec}")
 
 start=2
-end=32
+end=2
 step=2
 valueGrep="grep -oE [0-9]+[.]?[0-9]+"
 cmdInputTypeGrep="grep -oE (no[-_]?phase|with[-_]?phase)"

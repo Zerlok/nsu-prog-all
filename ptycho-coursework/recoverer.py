@@ -7,15 +7,15 @@ from argparse import ArgumentParser
 from time import time
 
 from optics import load_image, pack_image, Objective, get_intensity
-from fp import RecoveryMethods, LEDSystem, FourierPtychographySystem as FP
+from fp import RecoveryMethods, LEDSystems, FourierPtychographySystem as FP
 from settings import *
-import generator as gen
+from common import InnerArgumentsParsing
 from numpy import array, load as np_load
 
 
-# Objects factories
+# Factories.
 METHODS = RecoveryMethods()
-LED_SYSTEMS = LEDSystem()
+LED_SYSTEMS = LEDSystems()
 
 ERR_OUTPUT = """\
 Max error: {max:.2%}
@@ -31,16 +31,11 @@ def check_lowres(leds, low_data):
 	limg.show()
 
 
-def load_low_resolution_images(leds, dirname):
-	filename = join(dirname, DEFAULT_LOWRES_FORMAT)
-	return [load_image(filename.format(id=led.id), 'I') for led in leds]
-
-
 def main(args):
-	args.led_attrs.append(K)
 	leds = LED_SYSTEMS.create(
-			args.led_system,
-			*args.led_attrs
+			name = args.led_system,
+			wavevec = K,
+			**args.led_attrs
 	)
 	recoverer = METHODS.create(
 			name = args.recovery_method,
@@ -73,11 +68,11 @@ def main(args):
 
 	if args.real_name:
 		real_inten = load_image(args.real_name, 'I')
-		result_inen = get_intensity(data['amplitude'])
-		print("RMSE: {:.3f}".format(FP.count_RMSE(real_inten, result_inen)))
+		result_inten = get_intensity(data['amplitude'])
+		print("RMSE: {:.3f}".format(FP.count_RMSE(real_inten, result_inten)))
 
 		if args.show_images:
-			diff_img = pack_image(abs(real_inten - result_inen), real_inten.shape, norm=True)
+			diff_img = pack_image(abs(real_inten - result_inten), real_inten.shape, norm=True)
 			diff_img.show()
 
 	# if args.print_error:
@@ -97,6 +92,22 @@ def build_parser():
 			default = None,
 			help = "a path to file where numpy arrays data (low resolution images of target) will be saved",
 	)
+	parser.add_argument(
+			"--loops",
+			dest = "recover_loops",
+			metavar = "N",
+			type = int,
+			default = 3,
+			help = "set loops value for recovering (default: %(default)s)",
+	)
+	parser.add_argument(
+			"--method",
+			dest = "recovery_method",
+			metavar = "NAME",
+			choices = METHODS.names(),
+			default = METHODS.default_name(),
+			help = "choose the FP recover method: [%(choices)s], (default: %(default)s)",
+	)
 	
 	src_grp = parser.add_mutually_exclusive_group()
 	src_grp.add_argument(
@@ -115,50 +126,32 @@ def build_parser():
 			default = None,
 			help = "a path to image file to be shown as a target object",
 	)
-	parser.add_argument(
+
+	led_grp = parser.add_argument_group(
+			title = "LED arguments",
+			description = "Arguments to customize the LED lighting system.",
+	)
+	led_grp.add_argument(
 			"--led-system",
 			dest = "led_system",
 			metavar = "NAME",
-			choices = LED_SYSTEMS.keys(),
-			default = LED_SYSTEMS.default_key(),
+			choices = LED_SYSTEMS.names(),
+			default = LED_SYSTEMS.default_name(),
 			help = "choose LED system for lighting the target: [%(choices)s], (default: %(default)s)",
 	)
-	parser.add_argument(
+	led_grp.add_argument(
 			"--led-attrs",
 			dest = "led_attrs",
+			action = InnerArgumentsParsing,
 			metavar = "ARG",
 			nargs = '*',
-			type = int,
-			default = [LEDS_WIDTH, LEDS_GAP, LEDS_HEIGHT],
-			help = "setup LEDs by size, gap between each LED and distance between LED matrix and target plate",
-	)
-	parser.add_argument(
-			"--method",
-			dest = "recovery_method",
-			metavar = "NAME",
-			choices = METHODS.keys(),
-			default = METHODS.default_key(),
-			help = "choose the FP recover method: [%(choices)s], (default: %(default)s)",
-	)
-	parser.add_argument(
-			"--loops",
-			dest = "recover_loops",
-			metavar = "N",
-			type = int,
-			default = 3,
-			help = "set loops value for recovering (default: %(default)s)",
-	)
-	parser.add_argument(
-			"--show-images",
-			dest = "show_images",
-			action = "store_true",
-			default = False,
-			help = "show images for debug",
+			default = DEFAULT_LEDS_ATTRS,
+			help = "setup LED system:\n{}".format(LED_SYSTEMS.describe_all()),
 	)
 
 	check_grp = parser.add_argument_group(
 			title = "Quick check arguments",
-			description = "Arguments to check the result with real data",
+			description = "Arguments to check the result with real data.",
 	)
 	check_grp.add_argument(
 			"--real-img",
@@ -166,6 +159,13 @@ def build_parser():
 			metavar = "FILENAME",
 			default = None,
 			help = "check recovery result with real image",
+	)
+	check_grp.add_argument(
+			"--show-images",
+			dest = "show_images",
+			action = "store_true",
+			default = False,
+			help = "show images for debug",
 	)
 
 	return parser

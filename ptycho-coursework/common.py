@@ -3,6 +3,15 @@
 
 from PIL import Image
 from numpy import array, sqrt, ceil
+from argparse import Action as ParseAction
+
+
+class InnerArgumentsParsing(ParseAction):
+	def __init__(self, option_strings, dest, nargs=None, **kwargs):
+		super(InnerArgumentsParsing, self).__init__(option_strings, dest, nargs, **kwargs)
+
+	def __call__(self, parser, namespace, values, option_string=None, first=[True]):
+		setattr(namespace, self.dest, dict(value.split('=')[:2] for value in values))
 
 
 def count(func, iterable):

@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 
+from argparse import Action
 from numpy import (
 	pi,
 	sin, cos, radians, arctan, exp, angle, conjugate, sqrt,
@@ -58,11 +59,12 @@ class LED:
 
 
 @Factory
-class LEDSystem:
+class LEDSystems:
+	'''LEDs systems....'''
 	pass
 
 
-@LEDSystem.product('grid', default=True)
+@LEDSystems.product('grid', default=True, kwargs_types={'num': int, 'gap': int, 'height': int})
 class LEDGrid:
 	'''A lighting LED grid for Fourier Ptychography purposes.'''
 	def __init__(self, num, gap, height, wavevec):
@@ -123,7 +125,7 @@ class LEDGrid:
 		return self.mtrx[column][row]
 
 
-@LEDSystem.product('sphere')
+@LEDSystems.product('sphere', args_types=[int, int, int])
 class LEDSphere:
 	'''A lighting LED sphere for Reflective Fourier Ptychography.'''
 	def __init__(self, start, end, step, wavevec):

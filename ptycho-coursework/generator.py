@@ -7,15 +7,16 @@ from argparse import ArgumentParser
 from time import time
 
 from optics import load_image, pack_image, Objectives
-from fp import Generators, LEDSystem
+from fp import Generators, LEDSystems
 from settings import *
-from numpy import arange, array, meshgrid, mean, save as np_save, load as np_load, any as np_any
+from common import InnerArgumentsParsing
+from numpy import save as np_save
 
 
 # Objects factories
 OBJECTIVES = Objectives()
 GENERATORS = Generators()
-LED_SYSTEMS = LEDSystem()
+LED_SYSTEMS = LEDSystems()
 
 
 def check_with_file(leds, ampls, filename):
@@ -28,10 +29,10 @@ def check_with_file(leds, ampls, filename):
 
 
 def main(args):
-	args.led_attrs.append(K)
 	leds = LED_SYSTEMS.create(
-			args.led_system,
-			*args.led_attrs
+			name = args.led_system,
+			wavevec = K,
+			**args.led_attrs
 	)
 	leds_images_generator = GENERATORS.create(
 			name = args.generator_name,
@@ -39,7 +40,10 @@ def main(args):
 			wavelen = WAVELEN,
 			sample_size = SAMPSIZE,
 			quality = QUALITY,
-			objective = OBJECTIVES.get(args.objective),
+			objective = OBJECTIVES.get_creator(
+				name = args.objective_name,
+				**args.objective_attrs,
+			),
 			NA = NA,
 	)
 
@@ -126,42 +130,61 @@ def build_parser():
 			"--method",
 			dest = "generator_name",
 			metavar = "NAME",
-			choices = GENERATORS.keys(),
-			default = GENERATORS.default_key(),
+			choices = GENERATORS.names(),
+			default = GENERATORS.default_name(),
 			help = "choose the transfer function for pupil: [%(choices)s], (default: %(default)s)",
 	)
 	parser.add_argument(
 			"--objective",
-			dest = "objective",
-			metavar = "NAME",
-			choices = OBJECTIVES.keys(),
-			default = OBJECTIVES.default_key(),
-			help = "choose the transfer function for pupil: [%(choices)s], (default: %(default)s)",
+			dest = "objective_name",
+			metavar = "ARG",
+			choices = OBJECTIVES.names(),
+			default = OBJECTIVES.default_name(),
+			help = "choose the objective for optical system: [%(choices)s], (default: %(default)s)",
 	)
 	parser.add_argument(
+			"--objective-attrs",
+			dest = "objective_attrs",
+			action = InnerArgumentsParsing,
+			metavar = "VAL",
+			nargs = '*',
+			default = {},
+			help = "extra settings of the objectives: {}".format(OBJECTIVES.describe_all()),
+	)
+
+	led_grp = parser.add_argument_group(
+			title = "LED arguments",
+			description = "Arguments to customize the LED lighting system.",
+	)
+	led_grp.add_argument(
+			"--led-system",
+			dest = "led_system",
+			metavar = "NAME",
+			choices = LED_SYSTEMS.names(),
+			default = LED_SYSTEMS.default_name(),
+			help = "choose LED system for lighting the target: [%(choices)s], (default: %(default)s)",
+	)
+	led_grp.add_argument(
+			"--led-attrs",
+			dest = "led_attrs",
+			action = InnerArgumentsParsing,
+			metavar = "VAL",
+			nargs = '*',
+			default = DEFAULT_LEDS_ATTRS,
+			help = "setup LED system:\n{}".format(LED_SYSTEMS.describe_all()),
+	)
+	
+	check_grp = parser.add_argument_group(
+			title = "Quick check arguments",
+			description = "Arguments to check the result with real data.",
+	)
+	check_grp.add_argument(
 			"--show-low-img",
 			dest = "show_low_img",
 			metavar = "N",
 			type = int,
 			default = None,
 			help = "show generated low resolution images according to LEDs' id.",
-	)
-	parser.add_argument(
-			"--led-system",
-			dest = "led_system",
-			metavar = "NAME",
-			choices = LED_SYSTEMS.keys(),
-			default = LED_SYSTEMS.default_key(),
-			help = "choose LED system for lighting the target: [%(choices)s], (default: %(default)s)",
-	)
-	parser.add_argument(
-			"--led-attrs",
-			dest = "led_attrs",
-			metavar = "ARG",
-			nargs = '*',
-			type = int,
-			default = [LEDS_WIDTH, LEDS_GAP, LEDS_HEIGHT],
-			help = "customize LED system",
 	)
 
 	return parser
