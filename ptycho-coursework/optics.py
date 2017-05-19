@@ -167,7 +167,7 @@ class System:
 		self._finished_at = time()
 
 	def print_run_duration(self):
-		print("Duration is: {:.3f}us".format((self._finished_at - self._started_at) * 1000))
+		print("Duration is: {:.3f}ms".format((self._finished_at - self._started_at) * 1000))
 
 	def get_wavevec_steps(self, img_x_size, img_y_size):
 		'''Returns wavevec x and y steps for specified image size.'''

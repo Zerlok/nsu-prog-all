@@ -74,9 +74,11 @@ def main(args):
 	if args.real_name:
 		real_inten = load_image(args.real_name, 'I')
 		result_inen = get_intensity(data['amplitude'])
-		print("RMSE: {}".format(FP.count_RMSE(real_inten, result_inen)))
-		diff_img = pack_image(abs(real_inten - result_inen), real_inten.shape, norm=True)
-		diff_img.show()
+		print("RMSE: {:.3f}".format(FP.count_RMSE(real_inten, result_inen)))
+
+		if args.show_images:
+			diff_img = pack_image(abs(real_inten - result_inen), real_inten.shape, norm=True)
+			diff_img.show()
 
 	# if args.print_error:
 	# 	target_errors = ArrayErrors(o.get_amplitude(target))
