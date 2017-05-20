@@ -150,9 +150,9 @@ class PupilObjective(Objective):
 	def generate_pass_mtrx(self, x_step, y_step):
 		kx_array, ky_array = self.generate_wavevec_array(x_step, y_step)
 		kz_squared = (kx_array*kx_array + ky_array*ky_array)
-		kz_diff_array = sqrt(1j * self.k*self.k - kz_squared)
-		v1 = exp(self.z * real(kz_diff_array))
-		v2 = exp(-self.z * abs(imag(kz_diff_array)))
+		kz_diff_array = sqrt(complex(self.k*self.k) - kz_squared)
+		v1 = exp(1j * self.z * real(kz_diff_array))
+		v2 = exp(-abs(self.z) * abs(imag(kz_diff_array)))
 		return v1 * v2 * (kz_squared < self.cutoff_freq*self.cutoff_freq)
 
 

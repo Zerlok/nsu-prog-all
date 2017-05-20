@@ -5,12 +5,12 @@ phaseObj="data/westconcordorthphoto.bmp"
 pupil="data/complex-pupil.npy"
 genOutput="data/lowres-complex.npy"
 
-# phaseOption="--phase ${phaseObj}"
-phaseOption="--no-phase"
+phaseOption="--phase ${phaseObj}"
+# phaseOption="--no-phase"
 
 loops=25
 resultOutput="tmp.png"
-method="epry-fp-corrected"
+method="epry-fp"
 
 
 case $1 in

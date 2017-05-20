@@ -6,7 +6,7 @@ from sys import argv
 from argparse import ArgumentParser
 from time import time
 
-from optics import load_image, pack_image, Objective, get_intensity
+from optics import load_image, pack_image, Objective, get_intensity, normalize
 from fp import RecoveryMethods, LEDSystems, FourierPtychographySystem as FP
 from settings import *
 from common import InnerArgumentsParsing
@@ -57,29 +57,30 @@ def main(args):
 	data = recoverer.run(low_data, args.recover_loops)
 	recoverer.print_run_duration()
 	
-	img = pack_image(data['amplitude'], img_size, 'I')
+	# print(data['amplitude'].max())
+	img = pack_image(data['amplitude'], img_size, 'I', norm=True)
 	img.save(args.destination_real)
 	print("Result image was saved into {} file.".format(args.destination_real))
 
 	if args.show_images:
 		print("Showing recovered object and phase")
 		img.show()
-		pack_image(data['phase'], img_size, norm=True).show()
+		# pack_image(data['phase'], img_size, norm=True).show()
 
 	if args.real_object_filename:
 		real_inten = load_image(args.real_object_filename, 'I')
-		result_inten = get_intensity(data['amplitude'])
+		result_inten = array(img)
+		# result_inten = get_intensity(data['amplitude'])
+		# print(data['amplitude'], data['amplitude'].min(), data['amplitude'].max())
 		print("Object RMSE: {:.3f}".format(FP.count_RMSE(real_inten, result_inten)))
-
 		if args.show_images:
 			diff_img = pack_image(abs(real_inten - result_inten), real_inten.shape, norm=True)
 			diff_img.show()
 
 	if args.real_phase_filename:
 		real_inten = load_image(args.real_phase_filename, 'I')
-		result_inten = get_intensity(data['phase'])
+		result_inten = data['phase']
 		print("Phase RMSE: {:.3f}".format(FP.count_RMSE(real_inten, result_inten)))
-
 		if args.show_images:
 			diff_img = pack_image(abs(real_inten - result_inten), real_inten.shape, norm=True)
 			diff_img.show()
@@ -90,7 +91,6 @@ def main(args):
 		if args.show_images:
 			diff_img = pack_image(abs(real_inten - data['pupil']), real_inten.shape, norm=True)
 			diff_img.show()
-
 	elif args.real_pupil_filename and 'pupil' not in data:
 		print("Use another method to recover pupil.")
 

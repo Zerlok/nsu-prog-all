@@ -3,7 +3,7 @@
 from argparse import Action
 from numpy import (
 	pi,
-	sin, cos, radians, arctan, exp, angle, conjugate, sqrt,
+	sin, cos, radians, arctan, exp, angle, conjugate, sqrt, conj,
 	array, zeros, ones,
 	mean,
 	fft
@@ -312,6 +312,40 @@ class FPRecovery(FourierPtychographySystem):
 		total_params['highres_ft'][y_slice, x_slice] = led_params['new_highres_ft_part']
 
 
+@RecoveryMethods.product('epry-fp')
+class EPRYRec(FPRecovery):
+	def update_for_led(self, led, total_params):
+		x_slice, y_slice = led.get_wavevec_slice(
+				sizes = total_params['lowres_size'],
+				steps = total_params['steps'],
+				lims = total_params['highres_size'],
+		)
+		ctf = total_params['ctf']
+		pupil = total_params.get('pupil', ones(total_params['lowres_size'], dtype=complex))
+
+		oldHighResFT = total_params['highres_ft'][y_slice, x_slice]
+		lowResFT_1 = oldHighResFT * ctf * pupil;
+		im_lowRes = fft.ifft2(fft.ifftshift(lowResFT_1));
+		im_lowRes = self.q_2 * total_params['measured'][led.id] * exp(1j * angle(im_lowRes));
+		lowResFT_2 = fft.fftshift(fft.fft2(im_lowRes));
+		
+		lowResFTdiff = (lowResFT_2 - lowResFT_1)
+		highResFT = oldHighResFT + (conj(ctf * pupil) / (abs(ctf * pupil)**2).max()) * lowResFTdiff;
+		pupil = pupil + (conj(highResFT) / (abs(highResFT)**2).max()) * lowResFTdiff;
+
+		total_params['highres_ft'][y_slice, x_slice] = highResFT
+		total_params['pupil'] = pupil
+
+	def exclude_highres_data(self, params):
+		'''Last method of the FP recovery to build final data.'''
+		highres_data = fft.ifft2(fft.ifftshift(params['highres_ft']))
+		return {
+				'amplitude': abs(highres_data),
+				'phase': angle(highres_data),
+				'pupil': params['pupil'],
+		}
+
+
 @RecoveryMethods.product('epry-fp-corrected')
 class EPRYCorrectedRecovery(FPRecovery):
 	'''Embded pupil function recovery, taken from matlab example code.'''
@@ -321,8 +355,23 @@ class EPRYCorrectedRecovery(FPRecovery):
 		return params
 
 	def get_lowres_ft(self, led_params, total_params):
+		'''Get highres FT part for current led.'''
 		super(EPRYCorrectedRecovery, self).get_lowres_ft(led_params, total_params)
+		# x_slice, y_slice = led_params['slice']
+		# led_params['old_highres_ft_part'] = total_params['highres_ft'][y_slice, x_slice]
+		# led_params['old_lowres_ft'] = led_params['old_highres_ft_part'] * total_params['ctf'] * total_params['pupil']
 		led_params['old_lowres_ft'] *= total_params['pupil']
+
+	def get_lowres_ampl(self, led_params, total_params):
+		'''Build the I_li (low-res amplitude).'''
+		led_params['lowres'] = fft.ifft2(fft.ifftshift(led_params['old_lowres_ft']))
+
+	def get_measured_ft(self, led_params, total_params):
+		'''Build the FT of I_mi with the known phase of I_li.'''
+		lowres_phase = exp(1j * angle(led_params['lowres']))
+		led_id = led_params['led'].id
+		measured_ampl = total_params['measured'][led_id]
+		led_params['measured_ft'] = fft.fftshift(fft.fft2(self.q_2 * measured_ampl * lowres_phase))
 
 	def get_enhanced_highres_ft_part(self, led_params, total_params):
 		pupil = total_params['ctf'] * total_params['pupil']
