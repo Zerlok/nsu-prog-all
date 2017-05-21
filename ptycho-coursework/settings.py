@@ -17,6 +17,9 @@ DEFAULT_RESULT_PATH = join(DATA_DIR, "result.png")
 DEFAULT_LOWRES_DIR = join(DATA_DIR, "lowres")
 DEFAULT_LOWRES_FORMAT = "led-{id:03}.bmp"
 
+# Formats.
+DURATION_FORMAT = "Duration is: {:.3f} ms"
+
 
 # Optics constants.
 WAVELEN = 0.63e-6

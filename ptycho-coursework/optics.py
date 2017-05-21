@@ -42,8 +42,8 @@ def normalize(data, val):
 
 def load_image(filename, dtype=None):
 	'''Returns the image data of specified type.
-	* 'amplitude' - image amplitude data matrix
-	* 'intensity' - image intensity data matrix
+	* 'A' or 'amplitude' - image amplitude data matrix
+	* 'I' or 'intensity' - image intensity data matrix
 	* otherwise, 'None' by default - image object'''
 
 	img = PILImage.open(filename).convert(mode=IMG_MODE)
@@ -150,13 +150,20 @@ class PupilObjective(Objective):
 	def generate_pass_mtrx(self, x_step, y_step):
 		kx_array, ky_array = self.generate_wavevec_array(x_step, y_step)
 		kz_squared = (kx_array*kx_array + ky_array*ky_array)
-		kz_diff_array = sqrt(complex(self.k*self.k) - kz_squared)
+		kz_diff_array = sqrt(self.k*self.k - kz_squared)
 		v1 = exp(1j * self.z * real(kz_diff_array))
-		v2 = exp(-abs(self.z) * abs(imag(kz_diff_array)))
+		v2 = exp(-self.z * abs(imag(kz_diff_array)))
 		return v1 * v2 * (kz_squared < self.cutoff_freq*self.cutoff_freq)
+		# return v1 * v2 * self.generate_ctf(x_step, y_step)
+		# return v1 * v2
 
 
 class System:
+	@classmethod
+	def count_RMSE(cls, ampl1, ampl2):
+		diff = abs(ampl1 - ampl2)
+		return sqrt(mean(diff * diff))
+
 	def __init__(self, wavelen, sample_size, quality, objective, NA):
 		self.wavelen = wavelen
 		self.k = 2 * pi / self.wavelen
@@ -171,15 +178,6 @@ class System:
 	def __str__(self):
 		return "<OpticSystem with {} objective>".format(self.objective)
 
-	def _start(self):
-		self._started_at = time()
-
-	def _finish(self):
-		self._finished_at = time()
-
-	def print_run_duration(self):
-		print("Duration is: {:.3f}ms".format((self._finished_at - self._started_at) * 1000))
-
 	def get_wavevec_steps(self, img_x_size, img_y_size):
 		'''Returns wavevec x and y steps for specified image size.'''
 		return (
@@ -187,12 +185,12 @@ class System:
 				2.0 * pi / (self.pixel_size * img_y_size)
 		)
 
-	def set_objective(self, ObjCls, *args, **kwargs):
+	def set_objective(self, cls, *args, **kwargs):
 		kwargs.update({
 				'k': self.k,
 				'k_lim': pi / self.sample_size,
 		})
-		self.objective = ObjCls(*args, **kwargs)
+		self.objective = cls(*args, **kwargs)
 
 	def get_phase(self, ampl=None):
 		if ampl is None:
@@ -202,9 +200,13 @@ class System:
 		return exp(1j * pi * ampl / mx)
 
 	def run(self, ampl, phase=None):
-		self._start()
-		result = self.objective.simulate(ampl * self.get_phase(phase))
-		self._finish()
+		ampl = ampl * self.get_phase(phase)
+		start = time()
+		result = self._inner_run(ampl)
+		self.duration = (time() - start) * 1000 # ms
+		return result
+
+	def _inner_run(self, ampl):
 		return {
-				'amplitude': result,
+				'amplitude': self.objective.simulate(ampl)
 		}

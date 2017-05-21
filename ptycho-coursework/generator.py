@@ -54,7 +54,7 @@ def main(args):
 	
 	print("Generation process started ...")
 	low_ampls = leds_images_generator.run(src_ampl, phase)
-	leds_images_generator.print_run_duration()
+	print(DURATION_FORMAT.format(leds_images_generator.duration))
 	print("{} low resolution images were generated.".format(low_ampls.shape[0]))
 	
 	# print(leds_images_generator.k)

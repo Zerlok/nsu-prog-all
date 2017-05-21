@@ -40,6 +40,7 @@ def main(args):
 	recoverer = METHODS.create(
 			name = args.recovery_method,
 			leds = leds,
+			loops = args.recover_loops,
 			wavelen = WAVELEN,
 			sample_size = SAMPSIZE,
 			quality = QUALITY,
@@ -54,11 +55,11 @@ def main(args):
 
 	img_size = tuple(int(i / QUALITY) for i in low_data[0].shape)
 	print("Recovery process started ...")
-	data = recoverer.run(low_data, args.recover_loops)
-	recoverer.print_run_duration()
+	data = recoverer.run(low_data)
+	print(DURATION_FORMAT.format(recoverer.duration))
 	
 	# print(data['amplitude'].max())
-	img = pack_image(data['amplitude'], img_size, 'I', norm=True)
+	img = pack_image(data['amplitude'], img_size, 'I', norm=False)
 	img.save(args.destination_real)
 	print("Result image was saved into {} file.".format(args.destination_real))
 
@@ -69,12 +70,12 @@ def main(args):
 
 	if args.real_object_filename:
 		real_inten = load_image(args.real_object_filename, 'I')
-		result_inten = array(img)
-		# result_inten = get_intensity(data['amplitude'])
+		result_inten = get_intensity(data['amplitude'])
+		# result_inten = array(img)
 		# print(data['amplitude'], data['amplitude'].min(), data['amplitude'].max())
 		print("Object RMSE: {:.3f}".format(FP.count_RMSE(real_inten, result_inten)))
 		if args.show_images:
-			diff_img = pack_image(abs(real_inten - result_inten), real_inten.shape, norm=True)
+			diff_img = pack_image(abs(real_inten - result_inten), real_inten.shape, norm=False)
 			diff_img.show()
 
 	if args.real_phase_filename:
@@ -93,13 +94,6 @@ def main(args):
 			diff_img.show()
 	elif args.real_pupil_filename and 'pupil' not in data:
 		print("Use another method to recover pupil.")
-
-	# if args.print_error:
-	# 	target_errors = ArrayErrors(o.get_amplitude(target))
-	# 	errs = target_errors.get_errors(abs(recoveried_data))
-	# 	for key in target_errors.SINGLE_VALUE_KEYS:
-	#		errs[key] /= 255.0
-	# 	print(ERR_OUTPUT.format(lp=30, hp=5, **errs))
 
 
 def build_parser():

@@ -5,7 +5,7 @@ from numpy import (
 	pi,
 	sin, cos, radians, arctan, exp, angle, conjugate, sqrt, conj,
 	array, zeros, ones,
-	mean,
+	mean, sum as np_sum,
 	fft
 )
 import optics as o
@@ -162,11 +162,6 @@ class FourierPtychographySystem(o.System):
 		super(FourierPtychographySystem, self).__init__(*args, **kwargs)
 		self.leds = leds
 
-	@classmethod
-	def count_RMSE(cls, ampl1, ampl2):
-		diff = abs(ampl1 - ampl2)
-		return sqrt(mean(diff * diff))
-
 
 @Factory
 class Generators:
@@ -175,15 +170,14 @@ class Generators:
 
 @Generators.product('simple-lowres-generator', default=True)
 class LEDGenerator(FourierPtychographySystem):
-	def run(self, ampl, phase=None):
+	def _inner_run(self, ampl):
 		'''Creates a bundle of low resolution images data for each LED on grid.
 		Returns an array with matrices (amplitude values).'''
 		q2 = self.quality*self.quality
 		x_step, y_step = wavevec_steps = self.get_wavevec_steps(*ampl.shape)
 		low_size = tuple(int(self.quality * i) for i in ampl.shape)
 		
-		self._start()
-		ampl_ft = fft.fftshift(fft.fft2(ampl * self.get_phase(phase)))
+		ampl_ft = fft.fftshift(fft.fft2(ampl))
 		ampl_slices = (
 				led.get_wavevec_slice(
 					sizes = low_size,
@@ -198,7 +192,6 @@ class LEDGenerator(FourierPtychographySystem):
 				# abs(ampl_ft[y_slice, x_slice])
 				for (x_slice, y_slice) in ampl_slices
 		])
-		self._finish()
 
 		return seq
 
@@ -208,232 +201,160 @@ class RecoveryMethods:
 	pass
 
 
-@RecoveryMethods.product('fp', default=True)
+@RecoveryMethods.product('fp', default=True, kwargs_types={'loops': int})
 class FPRecovery(FourierPtychographySystem):
 	'''A simple Fourier Ptychography high resolution image recovery.'''
-	def __init__(self, *args, **kwargs):
+	def __init__(self, loops, *args, **kwargs):
 		super(FPRecovery, self).__init__(*args, **kwargs)
+		self.loops = loops
 		self.q2 = self.quality * self.quality
 		self.q_2 = 1.0 / self.q2
 
-	def run(self, ampls, loops):
-		self._start()
-		params = self.get_iteration_params(ampls)
-		for i in range(loops):
+	def _inner_run(self, ampls):
+		self._init_recovery(ampls)
+		for i in range(self.loops):
+			self._init_recovery_iteration(i)
 			for led in self.leds.walk():
-				self.update_for_led(led, params)
-		
-		result = self.exclude_highres_data(params)
-		self._finish()
+				self._recover_for_led(led)
+			self._finish_recovery_iteration(i)
 
-		return result
+		return self._finish_recovery()
 
-	def get_iteration_params(self, ampls_sequence):
+	def _init_recovery(self, ampls):
 		'''Initial method to build FP data before process started.'''
-		lowres_size = ampls_sequence[0].shape
+		lowres_size = ampls[0].shape
 		highres_size = tuple(int(i / self.quality) for i in lowres_size)
 		steps = self.get_wavevec_steps(*highres_size)
 		ctf = self.objective.generate_ctf(*steps)
-		return {
+		self._params = {
 				'lowres_size': lowres_size,
 				'steps': steps,
 				'ctf': ctf,
 				'ictf': 1.0 - ctf,
-				'measured': ampls_sequence,
+				'measured': ampls,
 				'highres_ft': fft.fftshift(fft.fft2(ones(highres_size))),
 				'highres_size': highres_size,
+				'slices': [
+					led.get_wavevec_slice(
+						sizes = lowres_size,
+						steps = steps,
+						lims = highres_size,
+					)
+					for led in self.leds
+				]
 		}
 
-	def update_for_led(self, led, total_params):
-		'''Step by step FP recovery flow for single led.'''
-		# Initial step, build iteration data for specified led.
-		led_params = self.build_led_params(led, total_params)
-		
-		# 1st - 
-		self.get_lowres_ft(led_params, total_params)
-		# 2nd - 
-		self.get_lowres_ampl(led_params, total_params)
-		# 3rd - 
-		self.get_measured_ft(led_params, total_params)
-		# 4th - 
-		self.get_enhanced_highres_ft_part(led_params, total_params)
-		
-		# Update the data according to the led.
-		self.update_total_params(led_params, total_params)
+	def _init_recovery_iteration(self, iter_num):
+		'''Initial method to build FP iteration data (for every loop).'''
+		pass
 
-	def exclude_highres_data(self, params):
+	def _recover_for_led(self, led):
+		'''4 steps of FP recovery flow for single led.'''
+		# 1st - Get highres FT part for current led.
+		x_slice, y_slice = self._params['slices'][led.id]
+		old_highres_ft_part = self._params['highres_ft'][y_slice, x_slice]
+		old_lowres_ft = self.q2 * old_highres_ft_part * self._params['ctf']
+
+		# 2nd - Build the I_li (low-res amplitude).
+		old_lowres_ampl = fft.ifft2(fft.ifftshift(old_lowres_ft))
+		
+		# 3rd - Build the FT of I_mi with the known phase of I_li.
+		new_lowres_ampl = self.q_2 * self._params['measured'][led.id] * exp(1j * angle(old_lowres_ampl))
+		new_lowres_ft = fft.fftshift(fft.fft2(new_lowres_ampl))
+
+		# 4th - Add new FT of I_hi to the old one.
+		self._params['highres_ft'][y_slice, x_slice] = \
+				self._params['ictf'] * old_highres_ft_part \
+				+ self._params['ctf'] * new_lowres_ft
+
+	def _finish_recovery_iteration(self, iter_num):
+		'''Finish FP recovery iteration.'''
+		pass
+
+	def _finish_recovery(self):
 		'''Last method of the FP recovery to build final data.'''
-		highres_data = fft.ifft2(fft.ifftshift(params['highres_ft']))
+		highres_data = fft.ifft2(fft.ifftshift(self._params['highres_ft']))
 		return {
 				'amplitude': abs(highres_data),
 				'phase': angle(highres_data),
 		}
-
-	def build_led_params(self, led, total_params):
-		return {
-				'led': led,
-				'old_highres_ft_part': None,
-				'lowres': None,
-				'measured_ft': None,
-				'new_highres_ft_part': None,
-				'slice': led.get_wavevec_slice(
-					sizes = total_params['lowres_size'],
-					steps = total_params['steps'],
-					lims = total_params['highres_size'],
-				),
-		}
-
-	def get_lowres_ft(self, led_params, total_params):
-		'''Get highres FT part for current led.'''
-		x_slice, y_slice = led_params['slice']
-		led_params['old_highres_ft_part'] = total_params['highres_ft'][y_slice, x_slice]
-		led_params['old_lowres_ft'] = self.q2 * led_params['old_highres_ft_part'] * total_params['ctf']
-
-	def get_lowres_ampl(self, led_params, total_params):
-		'''Build the I_li (low-res amplitude).'''
-		led_params['lowres'] = fft.ifft2(fft.ifftshift(led_params['old_lowres_ft']))
-
-	def get_measured_ft(self, led_params, total_params):
-		'''Build the FT of I_mi with the known phase of I_li.'''
-		lowres_phase = exp(1j * angle(led_params['lowres']))
-		led_id = led_params['led'].id
-		measured_ampl = total_params['measured'][led_id]
-		led_params['measured_ft'] = fft.fftshift(fft.fft2(self.q_2 * measured_ampl * lowres_phase))
-
-	def get_enhanced_highres_ft_part(self, led_params, total_params):
-		'''Add new FT of I_hi to the old one.'''
-		led_params['new_highres_ft_part'] = \
-				total_params['ictf'] * led_params['old_highres_ft_part'] \
-				+ total_params['ctf'] * led_params['measured_ft']
-
-	def update_total_params(self, led_params, total_params):
-		'''Update highres FT part with measures of current led.'''
-		x_slice, y_slice = led_params['slice']
-		total_params['highres_ft'][y_slice, x_slice] = led_params['new_highres_ft_part']
 
 
 @RecoveryMethods.product('epry-fp')
 class EPRYRec(FPRecovery):
-	def update_for_led(self, led, total_params):
-		x_slice, y_slice = led.get_wavevec_slice(
-				sizes = total_params['lowres_size'],
-				steps = total_params['steps'],
-				lims = total_params['highres_size'],
-		)
-		ctf = total_params['ctf']
-		pupil = total_params.get('pupil', ones(total_params['lowres_size'], dtype=complex))
+	def __init__(self, *args, **kwargs):
+		super(EPRYRec, self).__init__(*args, **kwargs)
+		self.alpha = 1.0
+		# self.alpha = 2.25 # TODO: find out how to count it
+		self.beta = 1.0
 
-		oldHighResFT = total_params['highres_ft'][y_slice, x_slice]
-		lowResFT_1 = oldHighResFT * ctf * pupil;
-		im_lowRes = fft.ifft2(fft.ifftshift(lowResFT_1));
-		im_lowRes = self.q_2 * total_params['measured'][led.id] * exp(1j * angle(im_lowRes));
-		lowResFT_2 = fft.fftshift(fft.fft2(im_lowRes));
+	def _init_recovery(self, ampls):
+		super(EPRYRec, self)._init_recovery(ampls)
+		self._params['pupil'] = ones(self._params['lowres_size'], dtype=complex)
+
+	def _recover_for_led(self, led):
+		transfer = self._params['ctf'] * self._params['pupil']
+
+		x_slice, y_slice = self._params['slices'][led.id]
+		old_highres_ft_part = self._params['highres_ft'][y_slice, x_slice]
+		old_lowres_ft = old_highres_ft_part * transfer;
+		old_lowres_ampl = fft.ifft2(fft.ifftshift(old_lowres_ft));
 		
-		lowResFTdiff = (lowResFT_2 - lowResFT_1)
-		highResFT = oldHighResFT + (conj(ctf * pupil) / (abs(ctf * pupil)**2).max()) * lowResFTdiff;
-		pupil = pupil + (conj(highResFT) / (abs(highResFT)**2).max()) * lowResFTdiff;
+		new_lowres_ampl = self.q_2 * self._params['measured'][led.id] * exp(1j * angle(old_lowres_ampl));
+		new_lowres_ft = fft.fftshift(fft.fft2(new_lowres_ampl));
+		
+		ft_diff = (new_lowres_ft - old_lowres_ft)
+		new_highres_ft_part = old_highres_ft_part \
+				+ self.alpha * (conj(transfer) / (abs(transfer)**2).max()) * ft_diff;
+		self._params['highres_ft'][y_slice, x_slice] = new_highres_ft_part
+		self._params['pupil'] \
+				+= self.beta * (conj(new_highres_ft_part) / (abs(new_highres_ft_part)**2).max()) * ft_diff;
 
-		total_params['highres_ft'][y_slice, x_slice] = highResFT
-		total_params['pupil'] = pupil
-
-	def exclude_highres_data(self, params):
-		'''Last method of the FP recovery to build final data.'''
-		highres_data = fft.ifft2(fft.ifftshift(params['highres_ft']))
+	def _finish_recovery(self):
+		'''Last method of the FP recovery to build the final data.'''
+		highres_data = fft.ifft2(fft.ifftshift(self._params['highres_ft']))
 		return {
-				'amplitude': abs(highres_data),
-				'phase': angle(highres_data),
-				'pupil': params['pupil'],
+				'amplitude': o.normalize(abs(highres_data), 16),
+				'phase': o.normalize(angle(highres_data), 16),
+				'pupil': o.normalize(self._params['pupil'], 1),
 		}
 
 
-@RecoveryMethods.product('epry-fp-corrected')
-class EPRYCorrectedRecovery(FPRecovery):
-	'''Embded pupil function recovery, taken from matlab example code.'''
-	def get_iteration_params(self, *args, **kwargs):
-		params = super(EPRYCorrectedRecovery, self).get_iteration_params(*args, **kwargs)
-		params['pupil'] = ones(params['lowres_size'], dtype=complex)
-		return params
+@RecoveryMethods.product('adaptive-fp')
+class AdaptiveFPRecovery(FPRecovery):
 
-	def get_lowres_ft(self, led_params, total_params):
-		'''Get highres FT part for current led.'''
-		super(EPRYCorrectedRecovery, self).get_lowres_ft(led_params, total_params)
-		# x_slice, y_slice = led_params['slice']
-		# led_params['old_highres_ft_part'] = total_params['highres_ft'][y_slice, x_slice]
-		# led_params['old_lowres_ft'] = led_params['old_highres_ft_part'] * total_params['ctf'] * total_params['pupil']
-		led_params['old_lowres_ft'] *= total_params['pupil']
+	def _init_recovery_iteration(self, iter_num):
+		self._params['i'] = iter_num
 
-	def get_lowres_ampl(self, led_params, total_params):
-		'''Build the I_li (low-res amplitude).'''
-		led_params['lowres'] = fft.ifft2(fft.ifftshift(led_params['old_lowres_ft']))
+	def _recover_for_led(self, led):
+		x_slice, y_slice = self._params['slices'][led.id]
+		old_highres_ft_part = self._params['highres_ft'][y_slice, x_slice]
+		old_lowres_ft = self.q2 * old_highres_ft_part * self._params['ctf']
+		old_lowres_ampl = fft.ifft2(fft.ifftshift(old_lowres_ft))
+		
+		# Measured I correction.
+		measured_ampl = self._params['measured'][led.id]
+		if self._params['i']:
+			measured_ampl *= np_sum(abs(old_lowres_ampl)) / np_sum(measured_ampl)
+		
+		new_lowres_ampl = self.q_2 * measured_ampl * exp(1j * angle(old_lowres_ampl))
+		new_lowres_ft = fft.fftshift(fft.fft2(new_lowres_ampl))
 
-	def get_measured_ft(self, led_params, total_params):
-		'''Build the FT of I_mi with the known phase of I_li.'''
-		lowres_phase = exp(1j * angle(led_params['lowres']))
-		led_id = led_params['led'].id
-		measured_ampl = total_params['measured'][led_id]
-		led_params['measured_ft'] = fft.fftshift(fft.fft2(self.q_2 * measured_ampl * lowres_phase))
+		self._params['highres_ft'][y_slice, x_slice] = \
+				self._params['ictf'] * old_highres_ft_part \
+				+ self._params['ctf'] * new_lowres_ft
 
-	def get_enhanced_highres_ft_part(self, led_params, total_params):
-		pupil = total_params['ctf'] * total_params['pupil']
-		mx_sq_pupil = (abs(pupil)**2).max()
-		led_params['ft_difference'] = led_params['measured_ft'] - led_params['old_lowres_ft']
-		led_params['new_highres_ft_part'] = \
-				led_params['old_highres_ft_part'] \
-				+ conjugate(pupil) / mx_sq_pupil * led_params['ft_difference']
+	def _finish_recovery_iteration(self, iter_num):
+		print("CI = {} at {} step.".format(self.count_convergence(), iter_num))
+		pass
 
-	def update_total_params(self, led_params, total_params):
-		super(EPRYCorrectedRecovery, self).update_total_params(led_params, total_params)
-		self.update_pupil(led_params, total_params)
+	def count_convergence(self):
+		'''Count convergence index (measure the recovery goodness).'''
+		conv = 0.0
+		for led in self.leds:
+			x_slice, y_slice = self._params['slices'][led.id]
+			lowres_ampl = self._params['highres_ft'][y_slice, x_slice]
+			measured_ampl = self._params['measured'][led.id]
+			conv += mean(measured_ampl) / np_sum(abs(lowres_ampl - measured_ampl))
 
-	def update_pupil(self, led_params, total_params):
-		new_highres_ft = led_params['new_highres_ft_part']
-		mx_sq_new_highres = (abs(new_highres_ft)**2).max()
-		total_params['pupil'] += conjugate(new_highres_ft) / mx_sq_new_highres * led_params['ft_difference']
-
-	def exclude_highres_data(self, params):
-		data = super(EPRYCorrectedRecovery, self).exclude_highres_data(params)
-		data.update({
-				'pupil': params['pupil'],
-		})
-		return data
-
-
-@RecoveryMethods.product('epry-fp-matlab')
-class EPRYMatlabRecovery(FPRecovery):
-	'''Embded pupil function recovery, corrected according to artical "code_correction"'''
-	def get_iteration_params(self, *args, **kwargs):
-		params = super(EPRYMatlabRecovery, self).get_iteration_params(*args, **kwargs)
-		params['pupil'] = ones(params['lowres_size'], dtype=complex)
-		return params
-
-	def get_lowres_ft(self, led_params, total_params):
-		super(EPRYMatlabRecovery, self).get_lowres_ft(led_params, total_params)
-		led_params['old_lowres_ft'] *= total_params['pupil']
-
-	def get_measured_ft(self, led_params, total_params):
-		super(EPRYMatlabRecovery, self).get_measured_ft(led_params, total_params)
-		led_params['measured_ft'] *= (total_params['ctf'] / total_params['pupil'])
-
-	def get_enhanced_highres_ft_part(self, led_params, total_params):
-		pupil = total_params['pupil']
-		mx_sq_pupil = (abs(pupil)**2).max()
-		led_params['ft_difference'] = led_params['measured_ft'] - led_params['old_lowres_ft']
-		led_params['new_highres_ft_part'] = \
-				led_params['old_highres_ft_part'] \
-				+ conjugate(pupil) / mx_sq_pupil * led_params['ft_difference']
-
-	def update_total_params(self, led_params, total_params):
-		super(EPRYMatlabRecovery, self).update_total_params(led_params, total_params)
-		self.update_pupil(led_params, total_params)
-
-	def update_pupil(self, led_params, total_params):
-		new_highres_ft = led_params['new_highres_ft_part']
-		mx_sq_new_highres = (abs(new_highres_ft)**2).max()
-		total_params['pupil'] += conjugate(new_highres_ft) / mx_sq_new_highres * led_params['ft_difference']
-
-	def exclude_highres_data(self, params):
-		data = super(EPRYMatlabRecovery, self).exclude_highres_data(params)
-		data.update({
-				'pupil': params['pupil'],
-		})
-		return data
+		return conv
