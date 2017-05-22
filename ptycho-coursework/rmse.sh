@@ -4,10 +4,13 @@
 log="logs/methods.log"
 target="data/cameraman.tif"
 phase="data/westconcordorthphoto.bmp"
+pupil="data/rmse/pupil-epry-fp.npy"
+outTmp="data/rmse/tmp.png"
 ledsAttrs="height=90 num=15 gap=4"
 
 noPhaseMethod="clean"
 methods=($noPhaseMethod "fp" "epry-fp" "adaptive-fp")
+# methods=("adaptive-fp")
 
 start=5
 end=100
@@ -17,7 +20,7 @@ valueGrep="grep -oE [0-9]+[.]?[0-9]+"
 
 
 function getLowresFile() {
-	echo "data/low-${1}.npy"
+	echo "data/rmse/low-${1}.npy"
 }
 
 
@@ -29,11 +32,11 @@ function getGenForMethod() {
 		$noPhaseMethod)
 			cmd="${base} ${lows} --no-phase"
 			;;
-		"fp" | "adaptive-fp")
+		"fp")
 			cmd="${base} ${lows} --phase ${phase}"
 			;;
-		"epry-fp")
-			cmd="${base} ${lows} --phase ${phase} --objective complex --objective-attrs z=100e-6"
+		"adaptive-fp" | "epry-fp")
+			cmd="${base} ${lows} --phase ${phase} --objective complex --objective-attrs z=100e-6 --objective-save ${pupil}"
 			;;
 	esac
 
@@ -42,12 +45,19 @@ function getGenForMethod() {
 
 
 function getRecForMethod() {
-	local base="./recoverer.py tmp.png --led-attrs ${ledsAttrs} --real-img ${target} --lowres-file"
+	local base="./recoverer.py ${outTmp} --led-attrs ${ledsAttrs} --real-img ${target} --lowres-file"
 	local lows=$(getLowresFile $1)
 	local m=$1
-	[[ "${1}" == "${noPhaseMethod}" ]] && m="fp"
+	[[ "${m}" == "${noPhaseMethod}" ]] && m="fp"
 
-	echo "${base} ${lows} --method ${m} --loops ${2}"
+	case $m in
+		"epry-fp")
+			echo "${base} ${lows} --method ${m} --loops ${2} --real-pupil ${pupil}"
+			;;
+		*)
+			echo "${base} ${lows} --method ${m} --loops ${2}"
+			;;
+	esac
 }
 
 
@@ -55,6 +65,8 @@ for method in "${methods[@]}"; do
 	cmd=$(getGenForMethod $method)
 	echo $cmd
 	$cmd
+	echo "done."
+	echo
 done
 
 
@@ -69,11 +81,21 @@ for (( i = $start; i <= $end; i += $step )); do
 
 	for method in "${methods[@]}"; do
 		cmd=$(getRecForMethod $method $i)
-		echo "Iteration: ${i} ${method} recovery ..."
+		echo -n "Iteration: ${i} ${method} recovery ... "
 
 		res=$($cmd)
-		durs+=($(echo -e "${res}" | grep "Duration" | $valueGrep))
-		errs+=($(echo -e "${res}" | grep "RMSE" | $valueGrep))
+		dur=$(echo -e "${res}" | grep "Duration" | $valueGrep)
+		err=$(echo -e "${res}" | grep "Object RMSE" | $valueGrep)
+
+		pupErr=$(echo -e "${res}" | grep "Pupil RMSE" | $valueGrep)
+		if [[ ! -z $pupErr ]]; then
+			err="${err}+${pupErr}"
+		fi
+
+		durs+=($dur)
+		errs+=($err)
+
+		echo "${dur} ms, ${err}"
 	done
 	
 	errs=$(printf "|%s" "${errs[@]}")

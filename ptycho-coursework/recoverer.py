@@ -83,7 +83,7 @@ def main(args):
 
 	if args.real_pupil_filename and 'pupil' in data:
 		real_inten = np_load(args.real_pupil_filename)
-		print("Object RMSE: {:.3f}".format(
+		print("Pupil RMSE: {:.3f}".format(
 				FP.count_RMSE(real_inten, data['pupil']),
 		))
 		if args.show_images:

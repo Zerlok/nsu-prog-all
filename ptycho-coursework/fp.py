@@ -169,7 +169,7 @@ class FourierPtychographySystem(o.System):
 		r_1 = 1.0 / r
 		r2_1 = 0.5 * r_1
 		r2_2 = r2_1 * r2_1
-		print("R_led={:.3f}, NA={:.3f}".format(r, self.objective.na))
+		# print("R_led={:.3f}, NA={:.3f}".format(r, self.objective.na))
 		return (2*arccos(r2_1) - r_1 * sqrt(1 - r2_2)) / pi
 
 	def check_fourier_space_borders(self, low_size, high_size):
