@@ -3,9 +3,9 @@
 from argparse import Action
 from numpy import (
 	pi,
-	sin, cos, radians, arctan, exp, angle, conjugate, sqrt, conj,
+	sin, cos, radians, arctan, arccos, exp, angle, conjugate, sqrt, conj,
 	array, zeros, ones,
-	mean, sum as np_sum,
+	mean, sum as np_sum, std,
 	fft
 )
 import optics as o
@@ -64,7 +64,7 @@ class LEDSystems:
 	pass
 
 
-@LEDSystems.product('grid', default=True, kwargs_types={'num': int, 'gap': int, 'height': int})
+@LEDSystems.product('grid', default=True, kwargs_types={'num': int, 'gap': float, 'height': float})
 class LEDGrid:
 	'''A lighting LED grid for Fourier Ptychography purposes.'''
 	def __init__(self, num, gap, height, wavevec):
@@ -161,6 +161,18 @@ class FourierPtychographySystem(o.System):
 	def __init__(self, leds, *args, **kwargs):
 		super(FourierPtychographySystem, self).__init__(*args, **kwargs)
 		self.leds = leds
+
+	def count_leds_overlap(self):
+		r = self.objective.na * sqrt(self.leds.gap**2 + self.leds.height**2) / self.leds.gap
+		r_1 = 1.0 / r
+		r2_1 = 0.5 * r_1
+		r2_2 = r2_1 * r2_1
+		print("R_led={:.3f}, NA={:.3f}".format(r, self.objective.na))
+		return (2*arccos(r2_1) - r_1 * sqrt(1 - r2_2)) / pi
+
+	@classmethod
+	def nomalize(cls, inten):
+		return 
 
 
 @Factory

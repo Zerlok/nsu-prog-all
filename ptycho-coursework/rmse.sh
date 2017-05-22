@@ -10,7 +10,7 @@ baseGen="./generator.py ${target} --output-file"
 baseRec="./recoverer.py tmp.png --real-img ${target} --lowres-file"
 
 start=5
-end=10
+end=100
 step=5
 valueGrep="grep -oE [0-9]+[.]?[0-9]+"
 cmdInputTypeGrep="grep -oE (no[-_]?phase|with[-_]?phase)"

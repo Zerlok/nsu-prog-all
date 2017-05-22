@@ -46,6 +46,7 @@ def main(args):
 			),
 			NA = NA,
 	)
+	print("LED system overlap: {:.3f}".format(leds_images_generator.count_leds_overlap()))
 
 	# Add phase to objective if 'no-phase' flag was not specified.
 	phase = load_image(args.phase_filename, 'A') if not args.no_phase else None

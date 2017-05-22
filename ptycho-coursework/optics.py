@@ -3,7 +3,7 @@
 from PIL import Image as PILImage
 from numpy import (
 	pi,
-	sqrt, sin, arctan, ceil, mean,
+	sqrt, sin, arctan, ceil, mean, std,
 	exp, log, real, imag, angle,
 	array, arange, random,
 	meshgrid,
@@ -160,8 +160,16 @@ class PupilObjective(Objective):
 
 class System:
 	@classmethod
-	def count_RMSE(cls, ampl1, ampl2):
-		diff = abs(ampl1 - ampl2)
+	def standardize(cls, data):
+		return (data - mean(data)) / std(data)
+
+	@classmethod
+	def count_RMSE(cls, data1, data2, do_std=True):
+		if do_std:
+			data1 = cls.standardize(data1)
+			data2 = cls.standardize(data2)
+
+		diff = abs(data1 - data2)
 		return sqrt(mean(diff * diff))
 
 	def __init__(self, wavelen, sample_size, quality, objective, NA):
