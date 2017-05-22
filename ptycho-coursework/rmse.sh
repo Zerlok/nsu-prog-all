@@ -1,57 +1,85 @@
 #!/bin/bash
 
-log="logs/rmse.log"
+methods=("fp" "epry-fp" "adaptive-fp")
+
+log="logs/methods.log"
 target="data/cameraman.tif"
 phase="data/westconcordorthphoto.bmp"
-lowNoPhase="data/low-simple-no-phase.npy"
-lowWithPhase="data/low-simple-with-phase.npy"
 
 baseGen="./generator.py ${target} --output-file"
-noPhaseGen="${baseGen} ${lowNoPhase} --no-phase"
-phaseGen="${baseGen} ${lowWithPhase}"
-generation=("${noPhaseGen}" "${phaseGen}")
+baseRec="./recoverer.py tmp.png --real-img ${target} --lowres-file"
 
-tmpImg="tmp.png"
-[[ -f $tmpImg ]] && echo "${tmpImg} already exists!" && exit 1
-
-method="fp"
-prog="./recoverer.py"
-baseRec="--real-img ${target} --method ${method} --lowres-file"
-noPhaseRec="${baseRec} ${lowNoPhase} --loops"
-phaseRec="${baseRec} ${lowWithPhase} --loops"
-recovery=("${noPhaseRec}" "${phaseRec}")
-
-start=10
+start=5
 end=10
 step=5
 valueGrep="grep -oE [0-9]+[.]?[0-9]+"
 cmdInputTypeGrep="grep -oE (no[-_]?phase|with[-_]?phase)"
 
 
-# Gen images.
-# durations=()
-for cmd in "${generation[@]}"; do
+function getLowresFile() {
+	local p="no-phase"
+	if $2; then
+		p="with-phase"
+	fi
+
+	echo "data/low-${1}-${p}.npy"
+}
+
+
+function getGenForMethod() {
+	local lows=$(getLowresFile $1 $2)
+
+	local phaseOption="--no-phase"
+	if $2; then
+		phaseOption="--phase ${phase}"
+	fi
+	
+	case $1 in
+		"fp" | "adaptive-fp")
+			cmd="${baseGen} ${lows} ${phaseOption}"
+			;;
+		"epry-fp")
+			cmd="${baseGen} ${lows} ${phaseOption} --objective complex --objective-attrs z=100e-6"
+			;;
+	esac
+	echo $cmd
+}
+
+
+function getRecForMethod() {
+	local lows=$(getLowresFile $1 $2)
+	echo "${baseRec} ${lows} --method ${1} --loops ${3}"
+}
+
+
+generators=()
+for method in "${methods[@]}"; do
+	generators+=("$(getGenForMethod $method false)" "$(getGenForMethod $method true)")
+done
+
+
+for cmd in "${generators[@]}"; do
+	echo $cmd
 	$cmd
-	echo
 done
 
 
 # Recover images.
 # currDate=$(date +'%T %d.%m.%Y')
 
-echo "Recovery (${method}) range(${start},${end},${step}), logging into ${log} ..."
-echo "Recovery (${method}) range(${start},${end},${step})" > $log
+echo "Recovery (${methods[@]}) range(${start},${end},${step}), logging into ${log} ..."
+echo "Recovery (${methods[@]}) range(${start},${end},${step})" > $log
 for (( i = $start; i <= $end; i += $step )); do
-	for cmd in "${recovery[@]}"; do
-		inputType=$(echo "${cmd}" | $cmdInputTypeGrep )
-		echo "Iteration: ${i} ${inputType} recovery (${cmd}) ..."
+	for method in "${methods[@]}"; do
+		recoveries=("$(getRecForMethod $method false $i)" "$(getRecForMethod $method true $i)")
+		for cmd in "${recoveries[@]}"; do
+			inputType=$(echo "${cmd}" | $cmdInputTypeGrep )
+			echo "Iteration: ${i} ${method} ${inputType} recovery ..."
 
-		dooo="${prog} data/highres/hr-${method}-${i}-${inputType}.png ${cmd} ${i}"
-		res=$($dooo)
-		dur=$(echo -e "${res}" | grep "Duration" | $valueGrep)
-		rmse=$(echo -e "${res}" | grep "RMSE" | $valueGrep)
-		echo "${i}|${dur}|${rmse}|${inputType}" >> $log
+			res=$($cmd)
+			dur=$(echo -e "${res}" | grep "Duration" | $valueGrep)
+			rmse=$(echo -e "${res}" | grep "RMSE" | $valueGrep)
+			echo "${i}|${method}|${inputType}|${dur}|${rmse}" >> $log
+		done
 	done
 done
-
-# [[ -f $tmpImg ]] && rm $tmpImg

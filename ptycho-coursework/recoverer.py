@@ -53,6 +53,7 @@ def main(args):
 	
 	# check_lowres(leds, low_data)
 
+	low_size = low_data[0].shape
 	img_size = tuple(int(i / QUALITY) for i in low_data[0].shape)
 	print("Recovery process started ...")
 	data = recoverer.run(low_data)
@@ -66,7 +67,9 @@ def main(args):
 	if args.show_images:
 		print("Showing recovered object and phase")
 		img.show()
-		# pack_image(data['phase'], img_size, norm=True).show()
+		pack_image(data['phase'], img_size, 'I', norm=True).show()
+		if 'pupil' in data:
+			pack_image(data['pupil'], low).show()
 
 	if args.real_object_filename:
 		real_inten = load_image(args.real_object_filename, 'I')
@@ -80,7 +83,7 @@ def main(args):
 
 	if args.real_phase_filename:
 		real_inten = load_image(args.real_phase_filename, 'I')
-		result_inten = data['phase']
+		result_inten = get_intensity(data['phase'])
 		print("Phase RMSE: {:.3f}".format(FP.count_RMSE(real_inten, result_inten)))
 		if args.show_images:
 			diff_img = pack_image(abs(real_inten - result_inten), real_inten.shape, norm=True)

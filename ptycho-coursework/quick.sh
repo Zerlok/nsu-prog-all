@@ -8,7 +8,7 @@ genOutput="data/lowres.npy"
 phaseOption="--phase ${phaseObj}"
 # phaseOption="--no-phase"
 
-loops=15
+loops=30
 resultOutput="tmp.png"
 
 method=$2
@@ -18,7 +18,7 @@ method=$2
 case $method in
 	"fp" | "adaptive-fp")
 		cmdGen="./generator.py ${targetObj} ${phaseOption} --output-file ${genOutput} --objective-save ${pupil} --show-low-img 112"
-		cmdRec="./recoverer.py ${resultOutput} --lowres-file ${genOutput} --real-img ${targetObj} --show-images --method=${method} --loops ${loops}"
+		cmdRec="./recoverer.py ${resultOutput} --lowres-file ${genOutput} --real-img ${targetObj} --real-phase ${phaseObj} --show-images --method=${method} --loops ${loops}"
 		;;
 	"epry-fp")
 		cmdGen="./generator.py ${targetObj} ${phaseOption} --objective=complex --objective-attrs z=100e-6 --output-file ${genOutput} --objective-save ${pupil} --show-pupil --show-low-img 112"

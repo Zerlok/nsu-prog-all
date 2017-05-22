@@ -284,8 +284,8 @@ class FPRecovery(FourierPtychographySystem):
 class EPRYRec(FPRecovery):
 	def __init__(self, *args, **kwargs):
 		super(EPRYRec, self).__init__(*args, **kwargs)
-		self.alpha = 1.0
 		# self.alpha = 2.25 # TODO: find out how to count it
+		self.alpha = 1.0
 		self.beta = 1.0
 
 	def _init_recovery(self, ampls):
