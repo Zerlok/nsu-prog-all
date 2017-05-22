@@ -172,6 +172,12 @@ class System:
 		diff = abs(data1 - data2)
 		return sqrt(mean(diff * diff))
 
+	@classmethod
+	def count_NRMSE(cls, data1, data2):
+		diff = abs(data1 - data2)
+		mn, mx = diff.min(), diff.max()
+		return sqrt(mean(diff * diff)) / (mx - mn)
+
 	def __init__(self, wavelen, sample_size, quality, objective, NA):
 		self.wavelen = wavelen
 		self.k = 2 * pi / self.wavelen

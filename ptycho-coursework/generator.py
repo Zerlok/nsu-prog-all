@@ -46,13 +46,20 @@ def main(args):
 			),
 			NA = NA,
 	)
-	print("LED system overlap: {:.3f}".format(leds_images_generator.count_leds_overlap()))
 
 	# Add phase to objective if 'no-phase' flag was not specified.
 	phase = load_image(args.phase_filename, 'A') if not args.no_phase else None
 	src_ampl = load_image(args.target_filename, 'A')
 	low_size = tuple(int(i * QUALITY) for i in src_ampl.shape)
+
+	# Checks...
+	print("LED system overlap: {:.2%}".format(leds_images_generator.count_leds_overlap()))
+	ft_borders_ok = leds_images_generator.check_fourier_space_borders(low_size, src_ampl.shape)
+	if not ft_borders_ok:
+		print("Invalid leds setup, exiting!")
+		return
 	
+	# Start to generate the low resolution images.
 	print("Generation process started ...")
 	low_ampls = leds_images_generator.run(src_ampl, phase)
 	print(DURATION_FORMAT.format(leds_images_generator.duration))

@@ -1,64 +1,58 @@
 #!/bin/bash
 
-methods=("fp" "epry-fp" "adaptive-fp")
 
 log="logs/methods.log"
 target="data/cameraman.tif"
 phase="data/westconcordorthphoto.bmp"
+ledsAttrs="height=90 num=15 gap=4"
 
-baseGen="./generator.py ${target} --output-file"
-baseRec="./recoverer.py tmp.png --real-img ${target} --lowres-file"
+noPhaseMethod="clean"
+methods=($noPhaseMethod "fp" "epry-fp" "adaptive-fp")
 
 start=5
 end=100
 step=5
+
 valueGrep="grep -oE [0-9]+[.]?[0-9]+"
-cmdInputTypeGrep="grep -oE (no[-_]?phase|with[-_]?phase)"
 
 
 function getLowresFile() {
-	local p="no-phase"
-	if $2; then
-		p="with-phase"
-	fi
-
-	echo "data/low-${1}-${p}.npy"
+	echo "data/low-${1}.npy"
 }
 
 
 function getGenForMethod() {
-	local lows=$(getLowresFile $1 $2)
-
-	local phaseOption="--no-phase"
-	if $2; then
-		phaseOption="--phase ${phase}"
-	fi
+	local base="./generator.py ${target} --led-attrs ${ledsAttrs} --output-file"
+	local lows=$(getLowresFile $1)
 	
 	case $1 in
+		$noPhaseMethod)
+			cmd="${base} ${lows} --no-phase"
+			;;
 		"fp" | "adaptive-fp")
-			cmd="${baseGen} ${lows} ${phaseOption}"
+			cmd="${base} ${lows} --phase ${phase}"
 			;;
 		"epry-fp")
-			cmd="${baseGen} ${lows} ${phaseOption} --objective complex --objective-attrs z=100e-6"
+			cmd="${base} ${lows} --phase ${phase} --objective complex --objective-attrs z=100e-6"
 			;;
 	esac
+
 	echo $cmd
 }
 
 
 function getRecForMethod() {
-	local lows=$(getLowresFile $1 $2)
-	echo "${baseRec} ${lows} --method ${1} --loops ${3}"
+	local base="./recoverer.py tmp.png --led-attrs ${ledsAttrs} --real-img ${target} --lowres-file"
+	local lows=$(getLowresFile $1)
+	local m=$1
+	[[ "${1}" == "${noPhaseMethod}" ]] && m="fp"
+
+	echo "${base} ${lows} --method ${m} --loops ${2}"
 }
 
 
-generators=()
 for method in "${methods[@]}"; do
-	generators+=("$(getGenForMethod $method false)" "$(getGenForMethod $method true)")
-done
-
-
-for cmd in "${generators[@]}"; do
+	cmd=$(getGenForMethod $method)
 	echo $cmd
 	$cmd
 done
@@ -70,16 +64,19 @@ done
 echo "Recovery (${methods[@]}) range(${start},${end},${step}), logging into ${log} ..."
 echo "Recovery (${methods[@]}) range(${start},${end},${step})" > $log
 for (( i = $start; i <= $end; i += $step )); do
-	for method in "${methods[@]}"; do
-		recoveries=("$(getRecForMethod $method false $i)" "$(getRecForMethod $method true $i)")
-		for cmd in "${recoveries[@]}"; do
-			inputType=$(echo "${cmd}" | $cmdInputTypeGrep )
-			echo "Iteration: ${i} ${method} ${inputType} recovery ..."
+	errs=()
+	durs=()
 
-			res=$($cmd)
-			dur=$(echo -e "${res}" | grep "Duration" | $valueGrep)
-			rmse=$(echo -e "${res}" | grep "RMSE" | $valueGrep)
-			echo "${i}|${method}|${inputType}|${dur}|${rmse}" >> $log
-		done
+	for method in "${methods[@]}"; do
+		cmd=$(getRecForMethod $method $i)
+		echo "Iteration: ${i} ${method} recovery ..."
+
+		res=$($cmd)
+		durs+=($(echo -e "${res}" | grep "Duration" | $valueGrep))
+		errs+=($(echo -e "${res}" | grep "RMSE" | $valueGrep))
 	done
+	
+	errs=$(printf "|%s" "${errs[@]}")
+	durs=$(printf "|%s" "${durs[@]}")
+	echo "${i}|${errs:1}|${durs:1}" >> $log
 done

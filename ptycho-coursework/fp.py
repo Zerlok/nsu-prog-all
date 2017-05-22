@@ -19,7 +19,7 @@ class LED:
 		self.k = k
 
 	def __str__(self):
-		return "<LED#{:03}: {} ({:.2f}, {:.2f})>".format(
+		return "<LED#{:03}: pos={} k=({:.2f}, {:.2f})>".format(
 				self.id,
 				self.pos,
 				*self.k,
@@ -77,13 +77,13 @@ class LEDGrid:
 		self.mtrx = [
 				[LED(
 					lid = col + row * num,
-					pos = (x, y),
+					pos = (col, row),
 					k = (
-						-wavevec*sin(arctan((x*gap - hw) / height)),
-						-wavevec*sin(arctan((y*gap - hw) / height))
-					)) for (col, x) in enumerate(range(num))
+						-wavevec * sin(arctan((col*gap - hw) / height)),
+						-wavevec * sin(arctan((row*gap - hw) / height))
+					)) for col in range(num)
 				]
-				for (row, y) in enumerate(range(num))
+				for row in range(num)
 		]
 
 	def __len__(self):
@@ -136,10 +136,12 @@ class LEDSphere:
 					lid = (i + j * self.ring_len),
 					pos = (psy, phi),
 					k = (
-						-wavevec*sin(radians(phi))*cos(radians(psy)),
-						-wavevec*sin(radians(phi))*sin(radians(psy))
-					)) for (i, psy) in enumerate(range(360, 0, -psy_step)) # ClockWise
-				] for (j, phi) in enumerate(range(start, end+step, step))
+						-wavevec * sin(radians(phi)) * cos(radians(psy)),
+						-wavevec * sin(radians(phi)) * sin(radians(psy))
+					))
+					for (i, psy) in enumerate(range(360, 0, -psy_step)) # ClockWise
+				]
+				for (j, phi) in enumerate(range(start, end+step, step))
 		]
 
 	def __len__(self):
@@ -170,9 +172,25 @@ class FourierPtychographySystem(o.System):
 		print("R_led={:.3f}, NA={:.3f}".format(r, self.objective.na))
 		return (2*arccos(r2_1) - r_1 * sqrt(1 - r2_2)) / pi
 
-	@classmethod
-	def nomalize(cls, inten):
-		return 
+	def check_fourier_space_borders(self, low_size, high_size):
+		steps = self.get_wavevec_steps(*high_size)
+		for led in self.leds.walk():
+			sl = led.get_wavevec_slice(
+					sizes = low_size,
+					steps = steps,
+					lims = high_size,
+			)
+			sl = tuple(int(round(s.stop - s.start) / s.step) for s in sl)
+			if sl != low_size:
+				print("Failed to get FT slice for led: {}, images: low {}, high {}, slice {}".format(
+						led,
+						low_size,
+						high_size,
+						sl,
+				))
+				return False
+
+		return True
 
 
 @Factory
@@ -187,7 +205,7 @@ class LEDGenerator(FourierPtychographySystem):
 		Returns an array with matrices (amplitude values).'''
 		q2 = self.quality*self.quality
 		x_step, y_step = wavevec_steps = self.get_wavevec_steps(*ampl.shape)
-		low_size = tuple(int(self.quality * i) for i in ampl.shape)
+		low_size = tuple(int(i * self.quality) for i in ampl.shape)
 		
 		ampl_ft = fft.fftshift(fft.fft2(ampl))
 		ampl_slices = (
@@ -296,7 +314,6 @@ class FPRecovery(FourierPtychographySystem):
 class EPRYRec(FPRecovery):
 	def __init__(self, *args, **kwargs):
 		super(EPRYRec, self).__init__(*args, **kwargs)
-		# self.alpha = 2.25 # TODO: find out how to count it
 		self.alpha = 1.0
 		self.beta = 1.0
 
@@ -326,9 +343,9 @@ class EPRYRec(FPRecovery):
 		'''Last method of the FP recovery to build the final data.'''
 		highres_data = fft.ifft2(fft.ifftshift(self._params['highres_ft']))
 		return {
-				'amplitude': o.normalize(abs(highres_data), 16),
-				'phase': o.normalize(angle(highres_data), 16),
-				'pupil': o.normalize(self._params['pupil'], 1),
+				'amplitude': abs(highres_data),
+				'phase': angle(highres_data),
+				'pupil': self._params['pupil'],
 		}
 
 

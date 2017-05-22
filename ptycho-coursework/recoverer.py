@@ -60,38 +60,32 @@ def main(args):
 	print(DURATION_FORMAT.format(recoverer.duration))
 	
 	# print(data['amplitude'].max())
-	img = pack_image(data['amplitude'], img_size, 'I', norm=False)
+	img = pack_image(data['amplitude'], img_size, 'I', norm=True)
 	img.save(args.destination_real)
 	print("Result image was saved into {} file.".format(args.destination_real))
 
 	if args.show_images:
 		print("Showing recovered object and phase")
 		img.show()
-		pack_image(data['phase'], img_size, 'I', norm=True).show()
 		if 'pupil' in data:
-			pack_image(data['pupil'], low).show()
+			pack_image(data['pupil'], low_size, norm=True).show()
 
 	if args.real_object_filename:
 		real_inten = load_image(args.real_object_filename, 'I')
-		result_inten = get_intensity(data['amplitude'])
-		# result_inten = array(img)
-		# print(data['amplitude'], data['amplitude'].min(), data['amplitude'].max())
-		print("Object RMSE: {:.3f}".format(FP.count_RMSE(real_inten, result_inten)))
-		if args.show_images:
-			diff_img = pack_image(abs(real_inten - result_inten), real_inten.shape, norm=False)
-			diff_img.show()
-
-	if args.real_phase_filename:
-		real_inten = load_image(args.real_phase_filename, 'I')
-		result_inten = get_intensity(data['phase'])
-		print("Phase RMSE: {:.3f}".format(FP.count_RMSE(real_inten, result_inten)))
+		# result_inten = get_intensity(data['amplitude'])
+		result_inten = array(img)
+		print("Object RMSE: {:.3f}".format(
+				FP.count_RMSE(real_inten, result_inten),
+		))
 		if args.show_images:
 			diff_img = pack_image(abs(real_inten - result_inten), real_inten.shape, norm=True)
 			diff_img.show()
 
 	if args.real_pupil_filename and 'pupil' in data:
 		real_inten = np_load(args.real_pupil_filename)
-		print("Pupil RMSE: {:.3f}".format(FP.count_RMSE(real_inten, data['pupil'])))
+		print("Object RMSE: {:.3f}".format(
+				FP.count_RMSE(real_inten, data['pupil']),
+		))
 		if args.show_images:
 			diff_img = pack_image(abs(real_inten - data['pupil']), real_inten.shape, norm=True)
 			diff_img.show()
