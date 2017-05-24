@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 
+
 class Factory:
 	'''The abstract factory class. Can be used as a decorator, to define the new factory class.'''
 	class UnregisteredProduct(Exception):
@@ -36,7 +37,6 @@ class Factory:
 			class Product:
 				'''A product class of user's product.'''
 				def __init__(self, cls, description=None, args_types=None, kwargs_types=None):
-					# print("Registering: {} {} {}".format(cls.__name__, args_types, kwargs_types))
 					self.cls = cls
 					self.args_types = args_types or []
 					self.kwargs_types = kwargs_types or {}
@@ -78,9 +78,10 @@ class Factory:
 			def registrate(cls, name, prod, **kwargs):
 				'''Places prod class into the factory.'''
 				if name not in cls.__products__:
+					print("Registering: {} {} {}".format(prod.__name__, cls.__base__.__name__, cls))
 					cls.__products__[name] = cls.Product(prod, **kwargs)
 				else:
-					raise Factory.RepeatingRegistration(self.__class__.__base__, name)
+					raise Factory.RepeatingRegistration(cls.__base__, name)
 
 			@classmethod
 			def set_default(cls, name):

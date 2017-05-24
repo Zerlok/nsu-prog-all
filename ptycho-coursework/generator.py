@@ -7,7 +7,7 @@ from argparse import ArgumentParser
 from time import time
 
 from optics import load_image, pack_image, Objectives
-from fp import Generators, LEDSystems
+from fptycho import Generators, LEDSystems
 from settings import *
 from common import InnerArgumentsParsing
 from numpy import save as np_save

@@ -7,7 +7,7 @@ from argparse import ArgumentParser
 from time import time
 
 from optics import load_image, pack_image, Objective, get_intensity, normalize
-from fp import RecoveryMethods, LEDSystems, FourierPtychographySystem as FP
+from fptycho import RecoveryMethods, LEDSystems, FourierPtychographySystem as FP
 from settings import *
 from common import InnerArgumentsParsing
 from numpy import array, load as np_load
