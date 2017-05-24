@@ -8,7 +8,7 @@ resultOutput="tmp.png"
 
 # phaseOption="--no-phase"
 phaseOption="--phase ${phaseObj}"
-ledsAttrs="height=90 num=20 gap=3"
+ledsAttrs="height=90 num=15 gap=4"
 
 
 method=$2
