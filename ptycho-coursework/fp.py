@@ -351,7 +351,6 @@ class EPRYRec(FPRecovery):
 
 @RecoveryMethods.product('adaptive-fp')
 class AdaptiveFPRecovery(FPRecovery):
-
 	def _init_recovery_iteration(self, iter_num):
 		self._params['i'] = iter_num
 

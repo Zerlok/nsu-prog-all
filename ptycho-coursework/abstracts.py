@@ -78,7 +78,7 @@ class Factory:
 			def registrate(cls, name, prod, **kwargs):
 				'''Places prod class into the factory.'''
 				if name not in cls.__products__:
-					print("Registering: {} {} {}".format(prod.__name__, cls.__base__.__name__, cls))
+					# print("Registering: {} {} {}".format(prod.__name__, cls.__base__.__name__, cls))
 					cls.__products__[name] = cls.Product(prod, **kwargs)
 				else:
 					raise Factory.RepeatingRegistration(cls.__base__, name)
