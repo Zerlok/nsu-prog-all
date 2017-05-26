@@ -4,8 +4,8 @@ from argparse import Action
 from numpy import (
 	pi,
 	sin, cos, radians, arctan, arccos, exp, angle, conjugate, sqrt, conj,
-	array, zeros, ones,
-	mean, sum as np_sum, std,
+	array, zeros, ones, meshgrid, arange,
+	mean, any as np_any, sum as np_sum, std,
 	fft
 )
 import optics as o
@@ -25,11 +25,21 @@ class LED:
 				*self.k,
 		)
 
+	def draw(self, data, steps, radius):
+		pos = tuple(int(p) for p in self.get_center_wavevec(steps, data.shape))
+		hw = radius.shape[0]//2
+		data[pos[1]-hw : pos[1]+hw, pos[0]-hw : pos[0]+hw] += radius
+
+	def get_center_wavevec(self, steps, lims):
+		# Center wavevecs.
+		return (
+				lims[0]/2.0 + self.k[0]/steps[0],
+				lims[1]/2.0 + self.k[1]/steps[1]
+		)
+
 	def get_wavevec_slice(self, sizes, steps, lims):
 		'''Returns slice of amplitude FT frequency range for specified led.'''
-		# Center wavevecs.
-		kxc = lims[0]/2.0 + self.k[0]/steps[0]
-		kyc = lims[1]/2.0 + self.k[1]/steps[1]
+		kxc, kyc = self.get_center_wavevec(steps, lims)
 		# Safe slices for x and y (lowest wavevec, highest wavevec, step)
 		return (
 				slice(
@@ -92,6 +102,9 @@ class LEDGrid:
 	def __iter__(self):
 		return (led for row in self.mtrx for led in row)
 
+	def get_radius(self, na):
+		return na * sqrt(self.gap**2 + self.height**2) / self.gap
+
 	def walk(self):
 		'''Walk through leds from central to border in spin'''
 		hn = self.num // 2
@@ -125,23 +138,24 @@ class LEDGrid:
 		return self.mtrx[column][row]
 
 
-@LEDSystems.product('sphere', args_types=[int, int, int])
+@LEDSystems.product('sphere', kwargs_types={'start': int, 'end': int, 'step': int, 'radius': float})
 class LEDSphere:
 	'''A lighting LED sphere for Reflective Fourier Ptychography.'''
 	def __init__(self, start, end, step, wavevec):
-		psy_step = step
-		self.ring_len = int(360 / psy_step)
+		self.step = step
+		self.ring_len = int(360 / self.step)
+
 		self.sphere = [
 				[LED(
-					lid = (i + j * self.ring_len),
+					lid = i + j * self.ring_len,
 					pos = (psy, phi),
 					k = (
 						-wavevec * sin(radians(phi)) * cos(radians(psy)),
 						-wavevec * sin(radians(phi)) * sin(radians(psy))
 					))
-					for (i, psy) in enumerate(range(360, 0, -psy_step)) # ClockWise
+					for (i, psy) in enumerate(range(360, 0, -self.step)) # ClockWise
 				]
-				for (j, phi) in enumerate(range(start, end+step, step))
+				for (j, phi) in enumerate(range(start, end+step, self.step))
 		]
 
 	def __len__(self):
@@ -149,6 +163,9 @@ class LEDSphere:
 
 	def __iter__(self):
 		return (led for ring in self.sphere for led in ring)
+
+	def get_radius(self, na):
+		return na * sqrt(self.gap**2 + self.height**2) / self.gap
 
 	def walk(self):
 		'''Walk through leds in spin.'''
@@ -165,12 +182,8 @@ class FourierPtychographySystem(o.System):
 		self.leds = leds
 
 	def count_leds_overlap(self):
-		r = self.objective.na * sqrt(self.leds.gap**2 + self.leds.height**2) / self.leds.gap
-		r_1 = 1.0 / r
-		r2_1 = 0.5 * r_1
-		r2_2 = r2_1 * r2_1
-		# print("R_led={:.3f}, NA={:.3f}".format(r, self.objective.na))
-		return (2*arccos(r2_1) - r_1 * sqrt(1 - r2_2)) / pi
+		r = self.leds.get_radius(self.objective.na)
+		return (2.0*arccos(1.0/(2.0*r)) - sqrt(1.0 - (1.0/(2.0*r))**2) / r) / pi
 
 	def check_fourier_space_borders(self, low_size, high_size):
 		steps = self.get_wavevec_steps(*high_size)
@@ -200,6 +213,22 @@ class Generators:
 
 @Generators.product('simple-lowres-generator', default=True)
 class LEDGenerator(FourierPtychographySystem):
+	def get_leds_look(self, size, brightfield=True, darkfield=True):
+		wavevec_steps = self.get_wavevec_steps(*size)
+		radius = self.objective.generate_ctf(*wavevec_steps)
+		data = zeros(size, dtype=int)
+		for led in self.leds:
+			led.draw(data, wavevec_steps, radius)
+
+		cut = zeros(size, dtype=float)
+		steps = self.objective.generate_wavevec_steps(*size)
+		if brightfield:
+			cut += self.objective.generate_ctf(*steps)
+		if darkfield:
+			cut += (1 - self.objective.generate_ctf(*steps)) * 0.5
+
+		return o.pack_image(data*cut, size)
+
 	def _inner_run(self, ampl):
 		'''Creates a bundle of low resolution images data for each LED on grid.
 		Returns an array with matrices (amplitude values).'''
@@ -207,23 +236,33 @@ class LEDGenerator(FourierPtychographySystem):
 		x_step, y_step = wavevec_steps = self.get_wavevec_steps(*ampl.shape)
 		low_size = tuple(int(i * self.quality) for i in ampl.shape)
 		
+		# pupil = self.objective.generate_pass_mtrx(*self.objective.generate_wavevec_steps(*ampl.shape))
+		pupil = self.objective.generate_pass_mtrx(x_step, y_step)
 		ampl_ft = fft.fftshift(fft.fft2(ampl))
-		ampl_slices = (
+		slices = [
 				led.get_wavevec_slice(
 					sizes = low_size,
 					steps = wavevec_steps,
 					lims = ampl.shape
 				)
 				for led in self.leds
-		)
-		pupil = self.objective.generate_pass_mtrx(x_step, y_step)
-		seq = array([
-				abs(fft.ifft2(fft.ifftshift(q2 * ampl_ft[y_slice, x_slice] * pupil)))
+		]
+		lows_ft = array([
+				q2 * ampl_ft[y_slice, x_slice] * pupil
+				for (x_slice, y_slice) in slices
+		])
+		ampls = array([
+				abs(fft.ifft2(fft.ifftshift(low)))
 				# abs(ampl_ft[y_slice, x_slice])
-				for (x_slice, y_slice) in ampl_slices
+				for low in lows_ft
 		])
 
-		return seq
+		return {
+				'ft': ampl_ft,
+				'slices': slices,
+				'lows_ft': lows_ft,
+				'amplitudes': ampls,
+		}
 
 
 @Factory

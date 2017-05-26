@@ -47,23 +47,31 @@ def main(args):
 			NA = NA,
 	)
 
+
 	# Add phase to objective if 'no-phase' flag was not specified.
 	phase = load_image(args.phase_filename, 'A') if not args.no_phase else None
 	src_ampl = load_image(args.target_filename, 'A')
-	low_size = tuple(int(i * QUALITY) for i in src_ampl.shape)
+	src_size = src_ampl.shape
+	low_size = tuple(int(i * QUALITY) for i in src_size)
 
 	# Checks...
 	print("LED system overlap: {:.2%}".format(leds_images_generator.count_leds_overlap()))
-	ft_borders_ok = leds_images_generator.check_fourier_space_borders(low_size, src_ampl.shape)
+	ft_borders_ok = leds_images_generator.check_fourier_space_borders(low_size, src_size)
 	if not ft_borders_ok:
 		print("Invalid leds setup, exiting!")
 		return
 	
 	# Start to generate the low resolution images.
 	print("Generation process started ...")
-	low_ampls = leds_images_generator.run(src_ampl, phase)
+	result = leds_images_generator.run(src_ampl, phase)
+	low_ampls = result['amplitudes']
 	print(DURATION_FORMAT.format(leds_images_generator.duration))
 	print("{} low resolution images were generated.".format(low_ampls.shape[0]))
+
+	if args.show_fourier:
+		leds_images_generator.get_leds_look(src_size, brightfield=True, darkfield=False).show()
+		img = pack_image(result['lows_ft'][100], low_size, norm=True)
+		img.show()
 	
 	# print(leds_images_generator.k)
 	# print("Shapes:\n[{}]".format("\n".join("{}: {}".format(led, data.shape) for (led, data) in zip(leds, low_ampls))))
@@ -109,16 +117,16 @@ def build_parser():
 			dest = "destination_dir",
 			metavar = "DIRNAME",
 			type = str,
-			default = DEFAULT_LOWRES_DIR,
-			help = "a path to image file to be shown as a target object (default: %(default)s)",
+			default = None,
+			help = "a path to image file to be shown as a target object",
 	)
 	dest_grp.add_argument(
 			"--output-file",
 			dest = "destination_filename",
 			metavar = "FILENAME",
 			type = str,
-			default = None,
-			help = "a path to file where numpy arrays data (low resolution images of target) will be saved",
+			default = DEFAULT_LOWRES_FILE,
+			help = "a path to file where numpy arrays data (low resolution images of target) will be saved (default: %(default)s)",
 	)
 
 	phase_grp = parser.add_mutually_exclusive_group()
@@ -215,6 +223,13 @@ def build_parser():
 			action = "store_true",
 			default = False,
 			help = "show generated pupil.",
+	)
+	check_grp.add_argument(
+			"--show-fourier",
+			dest = "show_fourier",
+			action = "store_true",
+			default = False,
+			help = "show generated image in Fourier space.",
 	)
 
 	return parser

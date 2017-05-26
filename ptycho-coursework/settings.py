@@ -10,12 +10,15 @@ PROJ_DIR = dirname(__file__)
 DATA_DIR = join(PROJ_DIR, "data")
 
 
+DEFAULT_IMG_SIZE = 256
+
+
 # Default paths.
-DEFAULT_TARGET_PATH = join(DATA_DIR, "cameraman.tif")
-DEFAULT_PHASE_PATH = join(DATA_DIR, "westconcordorthphoto.bmp")
-DEFAULT_RESULT_PATH = join(DATA_DIR, "result.png")
-DEFAULT_LOWRES_DIR = join(DATA_DIR, "lowres")
-DEFAULT_LOWRES_FORMAT = "led-{id:03}.bmp"
+DEFAULT_TARGET_PATH = join(DATA_DIR, "cameraman{}.png".format(DEFAULT_IMG_SIZE))
+DEFAULT_PHASE_PATH = join(DATA_DIR, "concord{}.png".format(DEFAULT_IMG_SIZE))
+DEFAULT_LOWRES_FILE = join(DATA_DIR, "lowres.npy")
+DEFAULT_LOWRES_FORMAT = "led-{id:03}.png"
+DEFAULT_HIGHRES_FILE = join(DATA_DIR, "result.png")
 
 # Formats.
 DURATION_FORMAT = "Duration is: {:.3f} ms"
@@ -43,6 +46,3 @@ DEFAULT_LEDS_ATTRS = {
 	'gap': LEDS_GAP,
 	'height': LEDS_HEIGHT,
 }
-
-
-# DEFAULT_PUPIL_SIZE = (128, 128)

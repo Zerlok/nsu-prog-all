@@ -1,7 +1,8 @@
 #!/bin/bash
 
-targetObj="data/cameraman.tif"
-phaseObj="data/westconcordorthphoto.bmp"
+size=256
+targetObj="data/cameraman${size}.png"
+phaseObj="data/concord${size}.png"
 pupil="data/complex-pupil.npy"
 genOutput="data/lowres.npy"
 resultOutput="tmp.png"
@@ -34,6 +35,7 @@ case $method in
 esac
 
 
+echo "Method: ${method}, Loops: ${loops}"
 case $1 in
 	"gen")
 		$cmdGen
