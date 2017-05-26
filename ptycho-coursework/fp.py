@@ -6,11 +6,14 @@ from numpy import (
 	sin, cos, radians, arctan, arccos, exp, angle, conjugate, sqrt, conj,
 	array, zeros, ones, meshgrid, arange,
 	mean, any as np_any, sum as np_sum, std,
-	fft
+	fft,
+	save as np_save,
 )
 import optics as o
 from abstracts import Factory
-
+from os.path import join as path_join
+from settings import DEFAULT_LOWRES_FORMAT
+		
 
 class LED:
 	def __init__(self, lid, pos, k):
@@ -182,10 +185,21 @@ class FourierPtychographySystem(o.System):
 		self.leds = leds
 
 	def count_leds_overlap(self):
+		'''Returns the LEDs overlaping factor in Fourier space.'''
 		r = self.leds.get_radius(self.objective.na)
 		return (2.0*arccos(1.0/(2.0*r)) - sqrt(1.0 - (1.0/(2.0*r))**2) / r) / pi
 
+	def count_total_coverage(self, size=(256, 256)):
+		wavevec_steps = self.get_wavevec_steps(*size)
+		radius = self.objective.generate_ctf(*wavevec_steps)
+		data = zeros(size, dtype=bool)
+		for led in self.leds:
+			led.draw(data, wavevec_steps, radius)
+
+		return np_sum(data) / (size[0] * size[1])
+
 	def check_fourier_space_borders(self, low_size, high_size):
+		'''Checks if all wavevector slices are inside the image size in the Fourier space.'''
 		steps = self.get_wavevec_steps(*high_size)
 		for led in self.leds.walk():
 			sl = led.get_wavevec_slice(
@@ -205,30 +219,69 @@ class FourierPtychographySystem(o.System):
 
 		return True
 
-
-@Factory
-class Generators:
-	pass
-
-
-@Generators.product('simple-lowres-generator', default=True)
-class LEDGenerator(FourierPtychographySystem):
-	def get_leds_look(self, size, brightfield=True, darkfield=True):
+	def get_leds_look(self, size, brightfield=False, darkfield=False, overlaps=False):
+		'''Returns the image of LEDs look as from microscope.'''
 		wavevec_steps = self.get_wavevec_steps(*size)
-		radius = self.objective.generate_ctf(*wavevec_steps)
+		radius = array([[1, 1], [1, 1]]) \
+				if not overlaps else \
+				self.objective.generate_ctf(*wavevec_steps) * 1
+		
 		data = zeros(size, dtype=int)
 		for led in self.leds:
 			led.draw(data, wavevec_steps, radius)
 
 		cut = zeros(size, dtype=float)
 		steps = self.objective.generate_wavevec_steps(*size)
-		if brightfield:
-			cut += self.objective.generate_ctf(*steps)
-		if darkfield:
+		if brightfield or overlaps:
+			cut += self.objective.generate_ctf(*steps) * 1.0
+		if darkfield or overlaps:
 			cut += (1 - self.objective.generate_ctf(*steps)) * 0.5
 
-		return o.pack_image(data*cut, size)
+		return o.pack_image(data*cut*255, size)
 
+
+@Factory
+class Generators:
+	'''Simulators of low resolution images obtaining as from optical microscope system.'''
+	pass
+
+
+class ImageGenerator(FourierPtychographySystem):
+	def save_into_dir(self, result, dirname):
+		print("WARNING: amplitudes will be saved into image files and will loose some quality!")
+		low_images = [o.pack_image(data, result['size'], norm=True) for data in result['amplitudes']]
+		filename = path_join(dirname, DEFAULT_LOWRES_FORMAT)
+		for (i, img) in enumerate(low_images):
+			img.save(filename.format(id=i))
+
+	def save_into_npy(self, result, filename):
+		np_save(filename, result['amplitudes'])
+
+
+@Generators.product('simple')
+class SimpleObjectiveView(ImageGenerator):
+	'''Simple objective view generator.'''
+	def __init__(self, *args, **kwargs):
+		super(SimpleObjectiveView, self).__init__(*args, **kwargs)
+
+	def _inner_run(self, ampl):
+		result = super(SimpleObjectiveView, self)._inner_run(ampl)
+		return {
+				'ft': fft.fftshift(fft.fft2(ampl)),
+				'slices': None,
+				'lows_ft': None,
+				'amplitudes': result['amplitude'],
+				'size': result['amplitude'].shape,
+				'len': 1,
+		}
+
+	def save_into_dir(self, result, dirname):
+		img = o.pack_image(result['amplitudes'], result['size'], norm=True)
+		img.save(path_join(dirname, "result.png"))
+
+
+@Generators.product('lowres-generator', default=True)
+class LEDGenerator(ImageGenerator):
 	def _inner_run(self, ampl):
 		'''Creates a bundle of low resolution images data for each LED on grid.
 		Returns an array with matrices (amplitude values).'''
@@ -262,11 +315,14 @@ class LEDGenerator(FourierPtychographySystem):
 				'slices': slices,
 				'lows_ft': lows_ft,
 				'amplitudes': ampls,
+				'size': low_size,
+				'len': ampls.shape[0],
 		}
 
 
 @Factory
 class RecoveryMethods:
+	'''Fourier-Ptychography high resolution images recovery methods.'''
 	pass
 
 

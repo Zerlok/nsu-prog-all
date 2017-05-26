@@ -10,7 +10,6 @@ from optics import load_image, pack_image, Objectives
 from fp import Generators, LEDSystems
 from settings import *
 from common import InnerArgumentsParsing
-from numpy import save as np_save
 
 
 # Objects factories
@@ -56,6 +55,7 @@ def main(args):
 
 	# Checks...
 	print("LED system overlap: {:.2%}".format(leds_images_generator.count_leds_overlap()))
+	print("LED system Fourier space coverage: {:.2%}".format(leds_images_generator.count_total_coverage()))
 	ft_borders_ok = leds_images_generator.check_fourier_space_borders(low_size, src_size)
 	if not ft_borders_ok:
 		print("Invalid leds setup, exiting!")
@@ -66,27 +66,17 @@ def main(args):
 	result = leds_images_generator.run(src_ampl, phase)
 	low_ampls = result['amplitudes']
 	print(DURATION_FORMAT.format(leds_images_generator.duration))
-	print("{} low resolution images were generated.".format(low_ampls.shape[0]))
+	print("{} low resolution images were generated.".format(result['len']))
 
-	if args.show_fourier:
-		leds_images_generator.get_leds_look(src_size, brightfield=True, darkfield=False).show()
-		img = pack_image(result['lows_ft'][100], low_size, norm=True)
-		img.show()
-	
 	# print(leds_images_generator.k)
 	# print("Shapes:\n[{}]".format("\n".join("{}: {}".format(led, data.shape) for (led, data) in zip(leds, low_ampls))))
 
-	if not args.destination_filename:
-		print("WARNING: generated amplitudes will be saved into image files and will loose some quality!")
-		# low_images = [pack_image(get_intensity(data), low_size) for data in low_ampls]
-		low_images = [pack_image(data, low_size, norm=True) for data in low_ampls]
-		filename = join(args.destination_dir, DEFAULT_LOWRES_FORMAT)
-		for (i, img) in enumerate(low_images):
-			img.save(filename.format(id=i))
+	if args.destination_dir:
+		leds_images_generator.save_into_dir(result, args.destination_dir)
 		print("Generated pictures were saved into {} directory by LED id.".format(args.destination_dir))
 
 	else:
-		np_save(args.destination_filename, low_ampls)
+		leds_images_generator.save_into_npy(result, args.destination_filename)
 		print("Generated amplitudes were saved into {} file.".format(args.destination_filename))
 
 	if args.show_low_img is not None:		
@@ -100,6 +90,14 @@ def main(args):
 
 	if args.show_pupil:
 		leds_images_generator.objective.show(*low_size)
+
+	if args.show_fourier:
+		img = pack_image(result['ft'], src_size, norm=True)
+		img.show()
+
+	if args.show_leds:
+		dct = {key: True for key in args.show_leds}
+		leds_images_generator.get_leds_look(src_size, **dct).show()
 
 
 def build_parser():
@@ -230,6 +228,15 @@ def build_parser():
 			action = "store_true",
 			default = False,
 			help = "show generated image in Fourier space.",
+	)
+	check_grp.add_argument(
+			"--show-leds",
+			dest = "show_leds",
+			metavar = "ARG",
+			nargs = '*',
+			choices = ('brightfield', 'darkfield', 'overlaps'),
+			default = None,
+			help = "show leds view in Fourier space %(choices)s.",
 	)
 
 	return parser
