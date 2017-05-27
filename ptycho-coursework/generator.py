@@ -46,7 +46,6 @@ def main(args):
 			NA = NA,
 	)
 
-
 	# Add phase to objective if 'no-phase' flag was not specified.
 	phase = load_image(args.phase_filename, 'A') if not args.no_phase else None
 	src_ampl = load_image(args.target_filename, 'A')
@@ -54,12 +53,11 @@ def main(args):
 	low_size = tuple(int(i * QUALITY) for i in src_size)
 
 	# Checks...
+	if not leds_images_generator.check_fourier_space_borders(low_size, src_size):
+		print("Invalid leds setup, exiting!")
+		exit(1)
 	print("LED system overlap: {:.2%}".format(leds_images_generator.count_leds_overlap()))
 	print("LED system Fourier space coverage: {:.2%}".format(leds_images_generator.count_total_coverage()))
-	ft_borders_ok = leds_images_generator.check_fourier_space_borders(low_size, src_size)
-	if not ft_borders_ok:
-		print("Invalid leds setup, exiting!")
-		return
 	
 	# Start to generate the low resolution images.
 	print("Generation process started ...")
@@ -95,9 +93,8 @@ def main(args):
 		img = pack_image(result['ft'], src_size, norm=True)
 		img.show()
 
-	if args.show_leds:
-		dct = {key: True for key in args.show_leds}
-		leds_images_generator.get_leds_look(src_size, **dct).show()
+	if args.show_leds or args.save_leds:
+		leds_images_generator.get_leds_look(src_size, **{key: True for key in args.show_leds}).show()
 
 
 def build_parser():

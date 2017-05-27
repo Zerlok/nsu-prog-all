@@ -31,6 +31,7 @@ class LED:
 	def draw(self, data, steps, radius):
 		pos = tuple(int(p) for p in self.get_center_wavevec(steps, data.shape))
 		hw = radius.shape[0]//2
+		# print(pos, hw, radius.shape)
 		data[pos[1]-hw : pos[1]+hw, pos[0]-hw : pos[0]+hw] += radius
 
 	def get_center_wavevec(self, steps, lims):
@@ -88,22 +89,31 @@ class LEDGrid:
 		hw = self.width / 2.0
 
 		self.mtrx = [
-				[LED(
+				LED(
 					lid = col + row * num,
 					pos = (col, row),
 					k = (
 						-wavevec * sin(arctan((col*gap - hw) / height)),
 						-wavevec * sin(arctan((row*gap - hw) / height))
-					)) for col in range(num)
-				]
+					)
+				)
 				for row in range(num)
+				for col in range(num)
 		]
 
 	def __len__(self):
 		return self.num * self.num
 
+	def __str__(self):
+		return "<LED matrix {}x{}, gap {}, height {}>".format(
+				self.num,
+				self.num,
+				self.gap,
+				self.height,
+		)
+
 	def __iter__(self):
-		return (led for row in self.mtrx for led in row)
+		return iter(self.mtrx)
 
 	def get_radius(self, na):
 		return na * sqrt(self.gap**2 + self.height**2) / self.gap
@@ -138,37 +148,45 @@ class LEDGrid:
 
 	def at(self, column, row):
 		'''Returns LED at specified grid location.'''
-		return self.mtrx[column][row]
+		return self.mtrx[row * self.num + column]
 
 
-@LEDSystems.product('sphere', kwargs_types={'start': int, 'end': int, 'step': int, 'radius': float})
+@LEDSystems.product('sphere', kwargs_types={'start': int, 'end': int, 'step': int})
 class LEDSphere:
 	'''A lighting LED sphere for Reflective Fourier Ptychography.'''
 	def __init__(self, start, end, step, wavevec):
 		self.step = step
-		self.ring_len = int(360 / self.step)
+		self.ring_len = 360 // step
 
 		self.sphere = [
-				[LED(
+				LED(
 					lid = i + j * self.ring_len,
 					pos = (psy, phi),
 					k = (
 						-wavevec * sin(radians(phi)) * cos(radians(psy)),
 						-wavevec * sin(radians(phi)) * sin(radians(psy))
-					))
-					for (i, psy) in enumerate(range(360, 0, -self.step)) # ClockWise
-				]
-				for (j, phi) in enumerate(range(start, end+step, self.step))
+					)
+				)
+				for (j, phi) in enumerate(range(start, end+step, step))
+				for (i, psy) in enumerate(range(360, 0, -step)) # ClockWise
 		]
 
 	def __len__(self):
-		return len(sphere) * self.ring_len
+		return len(self.sphere) * self.ring_len
+
+	def __str__(self):
+		return "<LED sphere (reflection) phi: {} -> {} by {}, total {}>".format(
+				self.sphere[0].pos[1],
+				self.sphere[-1].pos[1],
+				self.step,
+				len(self),
+		)
 
 	def __iter__(self):
-		return (led for ring in self.sphere for led in ring)
+		return iter(self.sphere)
 
 	def get_radius(self, na):
-		return na * sqrt(self.gap**2 + self.height**2) / self.gap
+		return na / sin(radians(self.step))
 
 	def walk(self):
 		'''Walk through leds in spin.'''
@@ -176,7 +194,7 @@ class LEDSphere:
 
 	def at(self, ring, hr):
 		'''Returns LED at specified ring (from central to border) and hour ().'''
-		return self.sphere[ring][hr]
+		return self.sphere[ring *self.ring_len + hr]
 
 
 class FourierPtychographySystem(o.System):
@@ -219,7 +237,7 @@ class FourierPtychographySystem(o.System):
 
 		return True
 
-	def get_leds_look(self, size, brightfield=False, darkfield=False, overlaps=False):
+	def get_leds_look(self, size, brightfield=False, darkfield=False, overlaps=False, factor=255):
 		'''Returns the image of LEDs look as from microscope.'''
 		wavevec_steps = self.get_wavevec_steps(*size)
 		radius = array([[1, 1], [1, 1]]) \
@@ -237,7 +255,7 @@ class FourierPtychographySystem(o.System):
 		if darkfield or overlaps:
 			cut += (1 - self.objective.generate_ctf(*steps)) * 0.5
 
-		return o.pack_image(data*cut*255, size)
+		return o.pack_image(data*cut*factor, size)
 
 
 @Factory
