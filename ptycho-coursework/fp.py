@@ -349,6 +349,7 @@ class FPRecovery(FourierPtychographySystem):
 		'''Initial method to build FP data before process started.'''
 		lowres_size = ampls[0].shape
 		highres_size = tuple(int(i / self.quality) for i in lowres_size)
+		print(highres_size)
 		steps = self.get_wavevec_steps(*highres_size)
 		ctf = self.objective.generate_ctf(*steps)
 		self._params = {

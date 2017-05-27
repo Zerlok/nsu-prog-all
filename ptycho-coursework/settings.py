@@ -27,7 +27,8 @@ DURATION_FORMAT = "Duration is: {:.3f} ms"
 # Optics constants.
 WAVELEN = 0.63e-6
 K = 2 * pi / WAVELEN
-SAMPSIZE = 2.75e-6
+# SAMPSIZE = 2.75e-6
+SAMPSIZE = 1.4783e-6
 QUALITY = 0.25
 PXSIZE = SAMPSIZE * QUALITY
 KLIM = pi / SAMPSIZE

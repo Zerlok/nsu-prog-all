@@ -121,20 +121,20 @@ def build_parser():
 	
 	src_grp = parser.add_mutually_exclusive_group()
 	src_grp.add_argument(
-			"--lowres-dir",
-			dest = "sources_dir",
-			metavar = "DIRNAME",
-			type = str,
-			default = DEFAULT_LOWRES_DIR,
-			help = "a path to dir with low resolution images",
-	)
-	src_grp.add_argument(
 			"--lowres-file",
 			dest = "source_name",
 			metavar = "FILENAME",
 			type = str,
-			default = None,
+			default = DEFAULT_LOWRES_FILE,
 			help = "a path to image file to be shown as a target object",
+	)
+	src_grp.add_argument(
+			"--lowres-dir",
+			dest = "sources_dir",
+			metavar = "DIRNAME",
+			type = str,
+			default = None,
+			help = "a path to dir with low resolution images",
 	)
 
 	led_grp = parser.add_argument_group(
