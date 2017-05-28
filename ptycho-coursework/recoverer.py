@@ -25,12 +25,6 @@ Lowest {lp:%} errors mean: {low_rmsd:.2%}
 Highest {hp:%} errors mean: {high_rmsd:.2%}"""
 
 
-def check_lowres(leds, low_data):
-	ldat = low_data[len(leds) // 2]
-	limg = pack_image(ldat, ldat.shape, 'I')
-	limg.show()
-
-
 def main(args):
 	leds = LED_SYSTEMS.create(
 			name = args.led_system,
@@ -50,8 +44,6 @@ def main(args):
 	
 	low_data = load_low_resolution_images(leds, args.sources_dir) \
 			if not args.source_name else np_load(args.source_name)
-	
-	# check_lowres(leds, low_data)
 
 	low_size = low_data[0].shape
 	img_size = tuple(int(i / QUALITY) for i in low_data[0].shape)
@@ -59,7 +51,6 @@ def main(args):
 	data = recoverer.run(low_data)
 	print(DURATION_FORMAT.format(recoverer.duration))
 	
-	# print(data['amplitude'].max())
 	img = pack_image(data['amplitude'], img_size, 'I', norm=True)
 	img.save(args.destination_real)
 	print("Result image was saved into {} file.".format(args.destination_real))
@@ -91,6 +82,9 @@ def main(args):
 			diff_img.show()
 	elif args.real_pupil_filename and 'pupil' not in data:
 		print("Use another method to recover pupil.")
+
+	if args.show_fourier:
+		pack_image(data['ft'], img_size, norm=True).show()
 
 
 def build_parser():
@@ -190,6 +184,13 @@ def build_parser():
 			action = "store_true",
 			default = False,
 			help = "show images for debug",
+	)
+	check_grp.add_argument(
+			"--show-fourier",
+			dest = "show_fourier",
+			action = "store_true",
+			default = False,
+			help = "show resulting highres object in Fourier space",
 	)
 
 	return parser

@@ -93,7 +93,7 @@ def main(args):
 		img = pack_image(result['ft'], src_size, norm=True)
 		img.show()
 
-	if args.show_leds or args.save_leds:
+	if args.show_leds:
 		leds_images_generator.get_leds_look(src_size, **{key: True for key in args.show_leds}).show()
 
 

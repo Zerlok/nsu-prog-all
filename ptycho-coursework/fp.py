@@ -31,7 +31,6 @@ class LED:
 	def draw(self, data, steps, radius):
 		pos = tuple(int(p) for p in self.get_center_wavevec(steps, data.shape))
 		hw = radius.shape[0]//2
-		# print(pos, hw, radius.shape)
 		data[pos[1]-hw : pos[1]+hw, pos[0]-hw : pos[0]+hw] += radius
 
 	def get_center_wavevec(self, steps, lims):
@@ -367,7 +366,6 @@ class FPRecovery(FourierPtychographySystem):
 		'''Initial method to build FP data before process started.'''
 		lowres_size = ampls[0].shape
 		highres_size = tuple(int(i / self.quality) for i in lowres_size)
-		print(highres_size)
 		steps = self.get_wavevec_steps(*highres_size)
 		ctf = self.objective.generate_ctf(*steps)
 		self._params = {
@@ -419,6 +417,7 @@ class FPRecovery(FourierPtychographySystem):
 		'''Last method of the FP recovery to build final data.'''
 		highres_data = fft.ifft2(fft.ifftshift(self._params['highres_ft']))
 		return {
+				'ft': self._params['highres_ft'],
 				'amplitude': abs(highres_data),
 				'phase': angle(highres_data),
 		}
@@ -457,6 +456,7 @@ class EPRYRec(FPRecovery):
 		'''Last method of the FP recovery to build the final data.'''
 		highres_data = fft.ifft2(fft.ifftshift(self._params['highres_ft']))
 		return {
+				'ft': self._params['highres_ft'],
 				'amplitude': abs(highres_data),
 				'phase': angle(highres_data),
 				'pupil': self._params['pupil'],

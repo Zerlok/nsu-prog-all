@@ -9,10 +9,11 @@ resultOutput="tmp.png"
 
 # phaseOption="--no-phase"
 phaseOption="--phase ${phaseObj}"
-# ledsSystem="grid"
-# ledsAttrs="height=90 num=15 gap=4"
-ledsSystem="sphere"
-ledsAttrs="start=33 end=75 step=3 radius=1"
+ledsSystem="grid"
+ledsAttrs="height=90 num=15 gap=4"
+# ledsSystem="sphere"
+# ledsAttrs="start=33 end=75 step=3"
+lowImgId=111
 
 
 method=$2
@@ -24,11 +25,11 @@ loops=$3
 
 case $method in
 	"fp" | "adaptive-fp")
-		cmdGen="./generator.py ${targetObj} ${phaseOption} --output-file ${genOutput} --led-system ${ledsSystem} --led-attrs ${ledsAttrs} --objective-save ${pupil} --show-low-img 112"
+		cmdGen="./generator.py ${targetObj} ${phaseOption} --output-file ${genOutput} --led-system ${ledsSystem} --led-attrs ${ledsAttrs} --objective-save ${pupil} --show-low-img ${lowImgId}"
 		cmdRec="./recoverer.py ${resultOutput} --lowres-file ${genOutput} --led-system ${ledsSystem} --led-attrs ${ledsAttrs} --real-img ${targetObj} --show-images --method=${method} --loops ${loops}"
 		;;
 	"epry-fp")
-		cmdGen="./generator.py ${targetObj} ${phaseOption} --objective=complex --objective-attrs z=100e-6 --output-file ${genOutput} --objective-save ${pupil} --led-system ${ledsSystem} --led-attrs ${ledsAttrs} --show-pupil --show-low-img 112"
+		cmdGen="./generator.py ${targetObj} ${phaseOption} --objective=complex --objective-attrs z=100e-6 --output-file ${genOutput} --objective-save ${pupil} --led-system ${ledsSystem} --led-attrs ${ledsAttrs} --show-pupil --show-low-img ${lowImgId}"
 		cmdRec="./recoverer.py ${resultOutput} --lowres-file ${genOutput} --led-system ${ledsSystem} --led-attrs ${ledsAttrs} --real-img ${targetObj} --real-pupil ${pupil} --show-images --method=${method} --loops ${loops}"
 		;;
 	*)
