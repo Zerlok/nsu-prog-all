@@ -13,7 +13,7 @@ ledsSystem="grid"
 ledsAttrs="height=90 num=15 gap=4"
 # ledsSystem="sphere"
 # ledsAttrs="start=33 end=75 step=3"
-lowImgId=111
+lowImgId=0
 
 
 method=$2

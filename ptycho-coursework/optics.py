@@ -190,7 +190,7 @@ class System:
 		)
 
 	def __str__(self):
-		return "<OpticSystem with {} objective>".format(self.objective)
+		return "<OpticalSystem with {} objective>".format(self.objective)
 
 	def get_wavevec_steps(self, img_x_size, img_y_size):
 		'''Returns wavevec x and y steps for specified image size.'''
@@ -222,5 +222,6 @@ class System:
 
 	def _inner_run(self, ampl):
 		return {
-				'amplitude': self.objective.simulate(ampl)
+				'amplitude': self.objective.simulate(ampl),
+				'size': ampl.shape,
 		}

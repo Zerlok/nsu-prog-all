@@ -18,15 +18,6 @@ GENERATORS = Generators()
 LED_SYSTEMS = LEDSystems()
 
 
-def check_with_file(leds, ampls, filename):
-	i = len(leds) // 2
-	ampl1 = low_ampls[i]
-	ampl2 = load_image(filename.format(id=i), 'A')
-	diff = abs(ampl2 - ampl1)
-	print(ampl1.max(), ampl1.min(), ampl2.max(), ampl2.min())
-	print(diff.max(), diff.min())
-
-
 def main(args):
 	leds = LED_SYSTEMS.create(
 			name = args.led_system,
@@ -53,6 +44,13 @@ def main(args):
 	low_size = tuple(int(i * QUALITY) for i in src_size)
 
 	# Checks...
+	REQUIRED_MEMORY = low_size[0]*low_size[1] * 256 * len(leds)
+	if REQUIRED_MEMORY > MAX_AVAILABLE_MEMORY:
+		print("Memory limit was reached (max: {}, required: {}) exiting!".format(
+				MAX_AVAILABLE_MEMORY,
+				REQUIRED_MEMORY,
+		))
+		exit(1)
 	if not leds_images_generator.check_fourier_space_borders(low_size, src_size):
 		print("Invalid leds setup, exiting!")
 		exit(1)

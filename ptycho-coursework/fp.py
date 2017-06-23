@@ -77,8 +77,16 @@ class LEDSystems:
 	pass
 
 
+class LEDSystem:
+	def walk(self):
+		raise NotImplementedError
+
+	def at(self, i, j):
+		raise NotImplementedError
+
+
 @LEDSystems.product('grid', default=True, kwargs_types={'num': int, 'gap': float, 'height': float})
-class LEDGrid:
+class LEDGrid(LEDSystem):
 	'''A lighting LED grid for Fourier Ptychography purposes.'''
 	def __init__(self, num, gap, height, wavevec):
 		self.num = num
@@ -151,7 +159,7 @@ class LEDGrid:
 
 
 @LEDSystems.product('sphere', kwargs_types={'start': int, 'end': int, 'step': int})
-class LEDSphere:
+class LEDSphere(LEDSystem):
 	'''A lighting LED sphere for Reflective Fourier Ptychography.'''
 	def __init__(self, start, end, step, wavevec):
 		self.step = step
@@ -263,7 +271,7 @@ class Generators:
 	pass
 
 
-class ImageGenerator(FourierPtychographySystem):
+class LowresGenerator(FourierPtychographySystem):
 	def save_into_dir(self, result, dirname):
 		print("WARNING: amplitudes will be saved into image files and will loose some quality!")
 		low_images = [o.pack_image(data, result['size'], norm=True) for data in result['amplitudes']]
@@ -276,7 +284,7 @@ class ImageGenerator(FourierPtychographySystem):
 
 
 @Generators.product('simple')
-class SimpleObjectiveView(ImageGenerator):
+class SimpleObjectiveView(LowresGenerator):
 	'''Simple objective view generator.'''
 	def __init__(self, *args, **kwargs):
 		super(SimpleObjectiveView, self).__init__(*args, **kwargs)
@@ -298,7 +306,7 @@ class SimpleObjectiveView(ImageGenerator):
 
 
 @Generators.product('lowres-generator', default=True)
-class LEDGenerator(ImageGenerator):
+class LEDGenerator(LowresGenerator):
 	def _inner_run(self, ampl):
 		'''Creates a bundle of low resolution images data for each LED on grid.
 		Returns an array with matrices (amplitude values).'''
