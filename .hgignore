@@ -34,5 +34,8 @@ libs/*
 *.settings
 *.pyc
 *_samples*
+*__pycache__/*
+*/data/*
+*/logs/*
 oop/task3/argvparser.h
 
