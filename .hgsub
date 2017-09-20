@@ -1,1 +1,1 @@
-calculations = calculations
+calculations = [hg]ssh://hg@bitbucket.org/Zerlok/nsu_prog-calculations
